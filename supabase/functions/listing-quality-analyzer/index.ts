@@ -6,11 +6,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 interface ListingData {
   id: string;
@@ -225,7 +222,7 @@ async function enhanceWithAI(
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   
   if (!LOVABLE_API_KEY) {
-    console.log("[LISTING-QUALITY] No Lovable API key, skipping AI enhancement");
+    console.info("[LISTING-QUALITY] No Lovable API key, skipping AI enhancement");
     return { explanation: "", confidence: 0.5 };
   }
 
@@ -292,6 +289,7 @@ Respond in JSON format: { "explanation": "...", "confidence": 0.0-1.0 }`;
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -351,7 +349,7 @@ Deno.serve(async (req) => {
       data = fetchedData as ListingData;
     }
 
-    console.log(`[LISTING-QUALITY] Analyzing ${entityType}/${entityId}, correlation: ${correlationId}`);
+    console.info(`[LISTING-QUALITY] Analyzing ${entityType}/${entityId}, correlation: ${correlationId}`);
 
     // Run rule-based analysis
     const ruleBasedReport = analyzeQualityRuleBased(data);
@@ -424,7 +422,7 @@ Deno.serve(async (req) => {
       if (error) console.error("[LISTING-QUALITY] Failed to log:", error);
     });
 
-    console.log(`[LISTING-QUALITY] Analysis complete. Score: ${report.overall_score}, Verdict: ${verdict}`);
+    console.info(`[LISTING-QUALITY] Analysis complete. Score: ${report.overall_score}, Verdict: ${verdict}`);
 
     return new Response(
       JSON.stringify({

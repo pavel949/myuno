@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 export const STORAGE_KEYS = {
   CART: 'uno-cart',
   LANGUAGE: 'myuno-language',
+  LANGUAGE_EXPLICIT: 'myuno-language-explicit',
   CURRENCY: 'uno-currency',
   THEME: 'uno-theme',
   VIEW_HISTORY: 'uno-view-history',
@@ -182,10 +183,3 @@ export const OWNER_COMMISSION = {
     premium: 10,
   },
 } as const;
-
-/**
- * @deprecated Use OrderStatus from src/types/orders.ts instead
- * This constant is kept for backward compatibility during migration.
- * New code should use OrderStatus and ORDER_STATUS_CONFIG.
- */
-export const LEGACY_BOOKING_STATUS = BOOKING_STATUS;

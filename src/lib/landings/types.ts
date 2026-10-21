@@ -59,10 +59,14 @@ export function isLandingClusterCode(value: string | null | undefined): value is
 export interface BilingualString {
   ru: string;
   en: string;
+  th?: string;
 }
 
 /** Статус публикации лендинга. `draft` → 404 на роуте (трек B.4/B.5). */
 export type LandingStatus = 'live' | 'draft';
+
+/** Editorial destination review; this never grants access or asserts provider availability. */
+export type LandingLinkAvailability = 'unavailable' | 'entity-unverified';
 
 /**
  * Ссылка на услугу из канонического каталога §02. `slug` — стабильный
@@ -70,6 +74,7 @@ export type LandingStatus = 'live' | 'draft';
  * необязательный квалификатор (например, 'rent' vs 'sale').
  */
 export interface LandingServiceRef {
+  availability?: LandingLinkAvailability;
   slug: string;
   /** Локализованное название карточки услуги. */
   label: BilingualString;
@@ -101,6 +106,7 @@ export interface LandingFaqEntry {
  * Если процесс платный — рекомендация §7 CONTENT_STYLE: показать сумму.
  */
 export interface LandingCta {
+  availability?: LandingLinkAvailability;
   label: BilingualString;
   /** Куда ведёт (внутренний роут или абсолютный URL). */
   href: string;
@@ -118,8 +124,8 @@ export interface LandingSeo {
   ogImage: string;
   /** Канонический URL без trailing slash. Используется hreflang. */
   canonicalPath: string;
-  /** Ссылки на альтернативные языки. RU↔EN обязательно. */
-  hreflangAlternates: { lang: 'ru' | 'en'; href: string }[];
+  /** Ссылки на альтернативные языки. RU↔EN обязательно; TH/zh-CN — для мультиязычной SEO-разметки. */
+  hreflangAlternates: { lang: 'ru' | 'en' | 'th' | 'zh-CN'; href: string }[];
 }
 
 /* ------------------------------------------------------------------ */

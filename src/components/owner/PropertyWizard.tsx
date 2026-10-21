@@ -13,6 +13,7 @@ interface PropertyWizardProps {
   validateStep?: (stepId: string) => boolean;
   onSaveDraft?: () => void;
   lastSaved?: Date | null;
+  submitLabel?: string;
   saveState?: 'idle' | 'saving' | 'saved' | 'unsaved' | 'error';
 }
 
@@ -24,6 +25,7 @@ function PropertyWizardInner({
   onSaveDraft,
   lastSaved,
   saveState = 'idle',
+  submitLabel,
 }: PropertyWizardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -163,6 +165,7 @@ function PropertyWizardInner({
             size="icon"
             onClick={onSaveDraft}
             disabled={isSubmitting}
+            aria-label={isRu ? 'Сохранить черновик' : 'Save draft'}
             title={isRu ? 'Сохранить черновик' : 'Save draft'}
           >
             <Save className="h-4 w-4" />
@@ -182,7 +185,7 @@ function PropertyWizardInner({
             </>
           ) : isLastStep ? (
             <>
-              {isRu ? 'Добавить объект' : 'Add Property'}
+              {submitLabel || (isRu ? 'Добавить объект' : 'Add Property')}
               <Check className="h-4 w-4 ml-1" />
             </>
           ) : (

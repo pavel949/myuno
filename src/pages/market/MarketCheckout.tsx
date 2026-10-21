@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Truck, ShoppingBag, Package, Sparkles, Plane, AlertTriangle, User } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -41,7 +41,8 @@ import {
 import { InternationalAddressForm } from '@/components/market/InternationalAddressForm';
 import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
 import { getCurrencySymbol } from '@/lib/config/currencies';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 // Order Item Card Component
 interface OrderItemProps {
@@ -201,6 +202,8 @@ const MarketCheckout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+  // Guards against double-submit before the disabled button re-renders.
+  const isSubmittingRef = useRef(false);
 
   // Auto-fill from profile on mount
   useEffect(() => {
@@ -276,7 +279,7 @@ const MarketCheckout = () => {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: '/market/checkout' } });
+    redirectToAuth(navigate, { from: '/market/checkout' });
     return null;
   }
 
@@ -300,7 +303,10 @@ const MarketCheckout = () => {
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
+    try {
     const formData = deliveryType === 'local' ? localFormData : intlFormData;
     const fullAddress = deliveryType === 'local' 
       ? localFormData.address 
@@ -354,9 +360,8 @@ const MarketCheckout = () => {
       });
     }
 
-    // Determine status based on payment method
-    const bookingStatus = paymentMethod === 'concierge_advance' ? 'pending' : 'pending';
-
+    // Concierge-advance orders are escalated to 'pending_advance' by
+    // createAdvanceRequest below; all others stay at the default 'pending'.
     const result = await createBooking({
       booking_type: 'product',
       scheduled_at: new Date(),
@@ -381,6 +386,8 @@ const MarketCheckout = () => {
       payment: {
         amount: total,
         payment_method: paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod,
+        // Wallet is debited immediately; cash/concierge settle later (pending).
+        status: paymentMethod === 'wallet' ? 'paid' : 'pending',
       },
     });
 
@@ -435,6 +442,9 @@ const MarketCheckout = () => {
         clearByType('product');
       }
       setBookingResult({ success: true, bookingId: result.booking_id });
+    }
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 
@@ -737,9 +747,9 @@ const MarketCheckout = () => {
           submitLabel={language === 'ru' ? 'Оформить заказ' : 'Place Order'}
         />
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default MarketCheckout;
+const AvailableMarketCheckout = withMarketAvailability(MarketCheckout);
+export default AvailableMarketCheckout;

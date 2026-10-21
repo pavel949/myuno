@@ -208,10 +208,10 @@ export function TranslationsTable({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={saveEditing}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label="Save" onClick={saveEditing}>
                           <Check className="h-4 w-4 text-success" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={cancelEditing}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label="Cancel" onClick={cancelEditing}>
                           <X className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -232,18 +232,20 @@ export function TranslationsTable({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8"
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 min-h-[44px] min-w-[44px]"
+                          aria-label="Edit"
                           onClick={() => startEditing(t)}
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8 text-destructive"
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive"
+                          aria-label="Delete"
                           onClick={() => handleDelete(t.id)}
                         >
                           <Trash2 className="h-4 w-4" />

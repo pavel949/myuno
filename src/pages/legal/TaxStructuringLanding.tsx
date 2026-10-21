@@ -6,6 +6,7 @@
  * are routed to the booking flow for paid consultation.
  */
 import { useNavigate } from 'react-router-dom';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 import {
   Calculator,
   Building2,
@@ -109,8 +110,8 @@ export default function TaxStructuringLanding() {
         en: 'Tax & Structuring in Phuket — myUNO advisory',
       }}
       seoDescription={{
-        ru: 'Налоги, тайская компания, структура владения и международный контекст. Лицензированные юристы myUNO на русском и английском.',
-        en: 'Tax, Thai company, ownership structure and cross-border setup. Licensed myUNO lawyers in English and Russian.',
+        ru: 'Налоги, тайская компания, структура владения и международный контекст. Лицензированные юристы myUNO на нескольких языках (EN/RU/TH).',
+        en: 'Tax, Thai company, ownership structure and cross-border setup. Licensed myUNO lawyers — multilingual support (EN/RU/TH).',
       }}
     >
       <div className="rounded-none border border-border bg-card p-6">
@@ -135,6 +136,10 @@ export default function TaxStructuringLanding() {
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.TAX_NAV)}>
             {t({ ru: 'Пройти tax quiz', en: 'Take the tax quiz' })}
           </Button>
+        </div>
+
+        <div className="mt-8">
+          <ConciergeHelpCTA topic="business" variant="card" />
         </div>
       </div>
     </LandingShell>

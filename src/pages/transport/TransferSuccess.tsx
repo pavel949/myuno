@@ -67,8 +67,16 @@ export default function TransferSuccess() {
   const dropoffAddress = order?.order_addresses?.find(a => a.address_type === 'dropoff')?.address_text;
   const flightNumber = metadata.flight_number as string | undefined;
   const meetingSignName = metadata.meeting_sign_name as string | undefined;
-  const scheduledDate = order?.start_at ? new Date(order.start_at).toLocaleDateString() : '';
-  const scheduledTime = order?.start_at ? new Date(order.start_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+  // All transfers happen in Phuket — always display Asia/Bangkok local time,
+  // regardless of the customer's device timezone.
+  const TZ = 'Asia/Bangkok';
+  const localeTag = isRu ? 'ru-RU' : 'en-GB';
+  const scheduledDate = order?.start_at
+    ? new Date(order.start_at).toLocaleDateString(localeTag, { timeZone: TZ, day: '2-digit', month: 'short', year: 'numeric' })
+    : '';
+  const scheduledTime = order?.start_at
+    ? new Date(order.start_at).toLocaleTimeString(localeTag, { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }) + ' (Phuket)'
+    : '';
 
   const details = order ? (
     <div className="space-y-3 text-left">
@@ -126,6 +134,19 @@ export default function TransferSuccess() {
     </div>
   ) : null;
 
+  const routeStr = [pickupAddress, dropoffAddress].filter(Boolean).join(' → ');
+  const whenStr = [scheduledDate, scheduledTime].filter(Boolean).join(' ');
+  const summaryRu = [
+    flightNumber && `Рейс ${flightNumber}`,
+    whenStr && `Когда: ${whenStr}`,
+    routeStr && `Маршрут: ${routeStr}`,
+  ].filter(Boolean).join('\n');
+  const summaryEn = [
+    flightNumber && `Flight ${flightNumber}`,
+    whenStr && `When: ${whenStr}`,
+    routeStr && `Route: ${routeStr}`,
+  ].filter(Boolean).join('\n');
+
   return (
     <UnifiedSuccessLayout
       isLoading={isLoading}
@@ -138,6 +159,9 @@ export default function TransferSuccess() {
       extras={<CrossSellRecommendations orderType="transport" />}
       primaryHref={APP_ROUTES.BOOKINGS}
       secondaryHref={APP_ROUTES.TRANSPORT}
+      totalAmount={order?.total_amount}
+      currency={order?.currency}
+      whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}
     />
   );
 }

@@ -111,7 +111,7 @@ export default function InvestmentCalculatorPage() {
         })}
       />
 
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border/50 bg-background">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -305,8 +305,8 @@ export default function InvestmentCalculatorPage() {
                 </Button>
                 <p className="text-[11px] text-muted-foreground text-center">
                   {t({
-                    ru: 'Только историческая статистика и сопоставимые объекты. Это не финансовый совет и не обещание будущих результатов. myUNO — площадка по недвижимости, а не инвестиционный консультант.',
-                    en: 'Historical and comparable data only. Not financial advice and not a guarantee of future performance. myUNO is a real-estate marketplace, not an investment adviser.',
+                    ru: 'Расчёт зависит от введённых данных и допущений. Он не подтверждает фактическую доходность и не гарантирует будущие результаты.',
+                    en: 'Calculations depend on the supplied inputs and assumptions. They do not establish actual returns or guarantee future results.',
                   })}
                 </p>
               </CardContent>

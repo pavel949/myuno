@@ -32,9 +32,12 @@ import {
   Sparkles,
   User,
   ShieldCheck,
+  Wrench,
+  Calculator,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { HubTrustStrip, ClearViewCallout } from '@/components/property/hub';
 
 interface ZoneCardProps {
   icon: React.ElementType;
@@ -108,9 +111,16 @@ function ZoneCard({
 
 export default function InvestmentHubLanding() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+
+  const investTrustItems = [
+    { icon: ShieldCheck, label: t('investHub.trust.verified') },
+    { icon: TrendingUp, label: t('investHub.trust.score') },
+    { icon: FileText, label: t('investHub.trust.dueDiligence') },
+    { icon: Handshake, label: t('investHub.trust.advisory') },
+  ];
 
   const { data: featured, isLoading: loadingFeatured } = useFeaturedInvestments();
   const { data: allProjects, isLoading: loadingAll } = useInvestmentProjects();
@@ -200,7 +210,7 @@ export default function InvestmentHubLanding() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary" className="text-[10px]">
-                <Shield className="h-3 w-3 mr-1" /> muUNO Score
+                <Shield className="h-3 w-3 mr-1" /> myUNO Score
               </Badge>
               <Badge variant="secondary" className="text-[10px]">
                 <FileText className="h-3 w-3 mr-1" /> Due Diligence
@@ -209,63 +219,50 @@ export default function InvestmentHubLanding() {
                 <Handshake className="h-3 w-3 mr-1" /> Advisory
               </Badge>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(APP_ROUTES.INVEST_TOOLS)}
+                className="gap-1"
+              >
+                <Calculator className="h-3.5 w-3.5" />
+                {isRu ? 'Инструменты' : 'Tools'}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
               >
-                {isRu ? 'Список сделок' : 'Deal list'}
+                {isRu ? 'Сделки' : 'Deals'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
               >
-                {isRu ? 'Подача проекта' : 'Project submission'}
+                {isRu ? 'Подать' : 'Submit'}
               </Button>
             </div>
           </div>
 
-          {/* Capital marketplace — neutral surface */}
-          <Card>
-            <CardContent className="p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm">
-                    {isRu ? 'Капитал-маркетплейс' : 'Capital marketplace'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isRu
-                      ? 'Недвижимость, бизнес, стартапы, франшизы. Все проекты анонимизированы.'
-                      : 'Real estate, business, startups, franchises. All projects anonymized.'}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
-                >
-                  {isRu ? 'Список сделок' : 'Deal list'}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-                >
-                  {isRu ? 'Подача проекта' : 'Project submission'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Wave 1: removed duplicate "Capital marketplace" card.
+              Hero CTAs above (Deal list / Raise) cover the same action. */}
+
+          {/* Trust band + ClearView — shared with the property hub */}
+          <HubTrustStrip items={investTrustItems} ariaLabel={t('investHub.trust.clearview')} />
+          <ClearViewCallout
+            title={t('investHub.clearview.title')}
+            desc={t('investHub.clearview.desc')}
+            ctaLabel={t('investHub.clearview.cta')}
+            ctaTo={APP_ROUTES.CLEARVIEW}
+            secondaryLabel={t('investHub.clearview.secondary')}
+            secondaryTo={APP_ROUTES.CAPITAL_ADVISORY}
+          />
 
           {/* 5 Zones */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold px-1">{isRu ? '5 направлений хаба' : 'Hub Zones'}</h2>
+            <h2 className="text-lg font-bold px-1">{isRu ? 'Направления хаба' : 'Hub Zones'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ZoneCard
                 icon={Building2}
@@ -332,6 +329,23 @@ export default function InvestmentHubLanding() {
                 iconBgClass="bg-primary/10 text-primary dark:text-primary"
               />
               <ZoneCard
+                icon={Wrench}
+                titleRu="Инструменты инвестора"
+                titleEn="Investor tools"
+                descRu="ClearView рейтинг, калькулятор, advisory, DD-пакеты"
+                descEn="ClearView rating, calculator, advisory, DD packs"
+                bullets={[
+                  { ru: 'ClearView™ — рейтинг AAA–CCC', en: 'ClearView™ — AAA–CCC rating' },
+                  { ru: 'Калькулятор ROI и yield', en: 'ROI & yield calculator' },
+                  { ru: 'Due diligence отчёты', en: 'Due diligence reports' },
+                ]}
+                ctaPath={APP_ROUTES.INVEST_TOOLS}
+                accentClass="hover:bg-primary/5"
+                iconBgClass="bg-primary/10 text-primary dark:text-primary"
+                badgeRu="Moat"
+                badgeEn="Moat"
+              />
+              <ZoneCard
                 icon={Megaphone}
                 titleRu="Привлечь капитал"
                 titleEn="Raise Capital"
@@ -346,6 +360,7 @@ export default function InvestmentHubLanding() {
                 accentClass="hover:bg-accent/5 sm:col-span-2"
                 iconBgClass="bg-accent/10 text-accent dark:text-accent"
               />
+
             </div>
           </section>
 
@@ -486,32 +501,10 @@ export default function InvestmentHubLanding() {
             </CardContent>
           </Card>
 
-          {/* Raise CTA */}
-          <section className="rounded-none border border-border bg-card p-5 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-none bg-muted">
-                <Megaphone className="h-5 w-5 text-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">
-                  {isRu ? 'Подача проекта' : 'Project submission'}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isRu
-                    ? 'Размещение проекта недвижимости, действующего бизнеса или стартапа в каталоге.'
-                    : 'List a property project, operating business or startup in the catalog.'}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-              className="w-full gap-2"
-            >
-              {isRu ? 'Подача проекта' : 'Project submission'}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </section>
+          {/* Wave 1: removed duplicate "Project submission" CTA block.
+              Hero already exposes Raise as primary action and the Raise zone tile
+              above covers the same flow. */}
+
         </div>
       </MiniAppLayout>
     </>

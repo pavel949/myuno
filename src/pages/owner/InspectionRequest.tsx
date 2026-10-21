@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCreateInspection } from '@/hooks/usePropertyCare';
@@ -21,11 +21,14 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { propertyRequestReturnPath } from '@/lib/owner/propertyNavigation';
+import { usePropertyRequestReturn } from '@/hooks/usePropertyRequestReturn';
 
 export default function InspectionRequest() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
 
   const { allProperties: properties, isLoading: propertiesLoading } = useMyProperties();
@@ -38,6 +41,17 @@ export default function InspectionRequest() {
     scheduled_time: '10:00',
     notes: '',
   });
+
+  const backPath = propertyRequestReturnPath(formData.property_id, properties, propertiesLoading);
+  const beginReturn = usePropertyRequestReturn(formData.property_id, properties, propertiesLoading);
+  const requestedPropertyId = searchParams.get('property');
+  useEffect(() => {
+    // URL context is a convenience, never a source of property access.
+    if (propertiesLoading || !requestedPropertyId ||
+        !properties.some(property => property.property_id === requestedPropertyId)) return;
+    // A refetch or URL update must not overwrite the user's selection.
+    setFormData(current => current.property_id ? current : { ...current, property_id: requestedPropertyId });
+  }, [requestedPropertyId, propertiesLoading, properties]);
 
   const inspectionTypes = [
     { 
@@ -90,6 +104,7 @@ export default function InspectionRequest() {
     const [hours, minutes] = formData.scheduled_time.split(':');
     scheduledAt.setHours(Number(hours), Number(minutes));
 
+    const returnAfterSuccess = beginReturn();
     await createInspection.mutateAsync({
       property_id: formData.property_id,
       inspection_type: formData.inspection_type,
@@ -97,7 +112,7 @@ export default function InspectionRequest() {
       notes: formData.notes || undefined,
     });
 
-    navigate('/owner');
+    returnAfterSuccess();
   };
 
   if (propertiesLoading) {
@@ -113,7 +128,7 @@ export default function InspectionRequest() {
   if (!properties?.length) {
     return (
       <PageContainer>
-        <BackButton />
+        <BackButton fallbackPath={backPath} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Home className="h-16 w-16 text-muted-foreground mb-4" />
           <h1 className="text-xl font-bold mb-2">
@@ -134,7 +149,7 @@ export default function InspectionRequest() {
 
   return (
     <PageContainer>
-      <BackButton />
+      <BackButton fallbackPath={backPath} />
       <PageHeader 
         title={isRu ? 'Заказать инспекцию' : 'Order Inspection'}
         subtitle={isRu ? 'Проверка состояния объекта' : 'Property condition check'}

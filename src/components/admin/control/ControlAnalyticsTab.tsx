@@ -6,8 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export function ControlAnalyticsTab() {
-  const { language } = useLanguage();
-  const isRussian = language === 'ru';
+  const { t } = useLanguage();
 
   const { data: stats } = useQuery({
     queryKey: ['admin-analytics-overview'],
@@ -18,7 +17,7 @@ export function ControlAnalyticsTab() {
         supabase.from('orders').select('id', { count: 'exact', head: true }),
         supabase.from('bookings').select('id', { count: 'exact', head: true }),
       ]);
-      
+
       return {
         users: profilesRes.count || 0,
         providers: providersRes.count || 0,
@@ -29,10 +28,10 @@ export function ControlAnalyticsTab() {
   });
 
   const kpis = [
-    { label: isRussian ? 'Пользователи' : 'Users', value: stats?.users || 0, icon: Users, color: 'text-info' },
-    { label: isRussian ? 'Провайдеры' : 'Providers', value: stats?.providers || 0, icon: TrendingUp, color: 'text-success' },
-    { label: isRussian ? 'Заказы' : 'Orders', value: stats?.orders || 0, icon: Calendar, color: 'text-accent-purple' },
-    { label: isRussian ? 'Бронирования' : 'Bookings', value: stats?.bookings || 0, icon: BarChart3, color: 'text-warning' },
+    { label: t('admin.finance.analytics.users'), value: stats?.users || 0, icon: Users, color: 'text-info' },
+    { label: t('admin.finance.analytics.providers'), value: stats?.providers || 0, icon: TrendingUp, color: 'text-success' },
+    { label: t('admin.finance.analytics.orders'), value: stats?.orders || 0, icon: Calendar, color: 'text-accent-purple' },
+    { label: t('admin.finance.analytics.bookings'), value: stats?.bookings || 0, icon: BarChart3, color: 'text-warning' },
   ];
 
   return (
@@ -59,14 +58,12 @@ export function ControlAnalyticsTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            {isRussian ? 'Аналитика' : 'Analytics'}
+            {t('admin.finance.analytics.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            {isRussian 
-              ? 'Подробные графики доступны в разделе Analytics' 
-              : 'Detailed charts available in Analytics section'}
+            {t('admin.finance.analytics.detailed')}
           </div>
         </CardContent>
       </Card>

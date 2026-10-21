@@ -39,7 +39,7 @@ export function LanguageSwitcher({
             type="button"
             data-testid="language-switch"
             className={cn(
-              "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
+              "inline-flex shrink-0 min-w-[44px] items-center gap-1 whitespace-nowrap px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",
               "text-xs font-medium transition-colors",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
@@ -47,8 +47,8 @@ export function LanguageSwitcher({
               className
             )}
           >
-            <span className="text-sm">{currentLang.flag}</span>
-            <ChevronDown className="w-3 h-3 opacity-60" />
+            <span className="shrink-0 whitespace-nowrap text-xs font-semibold tracking-wide">{currentLang.shortName}</span>
+            <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
@@ -62,7 +62,7 @@ export function LanguageSwitcher({
               className="flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <span className="text-base">{lang.flag}</span>
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground w-6">{lang.shortName}</span>
                 <span className="text-sm font-medium">{lang.name}</span>
               </div>
               {language === lang.code && (

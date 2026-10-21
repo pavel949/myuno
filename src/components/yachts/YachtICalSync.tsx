@@ -163,10 +163,11 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
                   placeholder={isRu ? 'Загрузка...' : 'Loading...'}
                 />
                 <Button 
-                  variant="outline" 
+                  variant="outline"
                   size="icon"
                   onClick={handleCopyExportUrl}
                   disabled={!exportUrl}
+                  aria-label={isRu ? 'Копировать ссылку' : 'Copy link'}
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
@@ -238,20 +239,22 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
                       </div>
                       <div className="flex items-center gap-1">
                         <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 min-h-[44px] min-w-[44px]"
                           onClick={() => handleSyncCalendar(calendar.id)}
                           disabled={isSyncing}
+                          aria-label={isRu ? 'Синхронизировать' : 'Sync'}
                         >
                           <RefreshCw className={cn("h-3 w-3", isSyncing && "animate-spin")} />
                         </Button>
                         <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
                           onClick={() => handleDeleteCalendar(calendar.id)}
                           disabled={isDeleting}
+                          aria-label={isRu ? 'Удалить' : 'Delete'}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

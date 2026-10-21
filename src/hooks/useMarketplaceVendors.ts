@@ -23,7 +23,9 @@ export function useVendor(slug: string | undefined) {
           .select('*')
           .eq('slug', slug)
           .eq('is_active', true)
+          .eq('approval_status', 'approved')
           .single();
+
 
         if (queryError) throw queryError;
         setVendor(data as MarketplaceVendor);

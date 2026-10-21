@@ -81,7 +81,7 @@ export default function ChannelManager() {
       <PageContainer>
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Link2 className="h-16 w-16 text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Channel Manager</h1>
+          <h1 className="text-2xl font-bold mb-2">{isRu ? 'Менеджер каналов' : 'Channel Manager'}</h1>
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для управления каналами' : 'Sign in to manage channels'}
           </p>
@@ -93,7 +93,7 @@ export default function ChannelManager() {
 
   return (
     <PageContainer>
-      <PageHeader title="Channel Manager" showBack fallbackPath={APP_ROUTES.MC} />
+      <PageHeader title={isRu ? 'Менеджер каналов' : 'Channel Manager'} showBack fallbackPath={APP_ROUTES.MC} />
 
       <div className="mt-4 space-y-6">
         {/* Conflict alert banner */}
@@ -104,7 +104,7 @@ export default function ChannelManager() {
           <ChannelStatsCard icon={<Link2 className="h-5 w-5" />} label={isRu ? 'Подключено' : 'Connected'} value={totalChannels} color="bg-primary/10 text-primary" />
           <ChannelStatsCard icon={<CheckCircle2 className="h-5 w-5" />} label={isRu ? 'Активных' : 'Active'} value={activeChannels} color="bg-success/10 text-success" />
           <ChannelStatsCard icon={<Calendar className="h-5 w-5" />} label={isRu ? 'OTA-брони' : 'OTA Bookings'} value={totalOtaBookings} color="bg-info/10 text-info" />
-          <ChannelStatsCard icon={<AlertCircle className="h-5 w-5" />} label={isRu ? 'Ошибки' : 'Errors'} value={errorChannels} color={errorChannels > 0 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"} />
+          <ChannelStatsCard icon={<AlertCircle className="h-5 w-5" />} label={isRu ? 'Ошибки' : 'Errors'} value={errorChannels} color={errorChannels > 0 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"} onClick={errorChannels > 0 ? () => setActiveTab('sync-health') : undefined} />
         </div>
 
         {/* Actions */}

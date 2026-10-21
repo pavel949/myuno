@@ -7,11 +7,7 @@
 
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient, createServiceClient } from '../_shared/supabase.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface Payload {
   request_id: string;
@@ -21,6 +17,9 @@ interface Payload {
 }
 
 Deno.serve(async (req) => {
+  // Restrict CORS to allow-listed origins — this endpoint confirms money
+  // movements (manual RUB payments → order confirmed + ledger entries).
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -129,6 +128,17 @@ Deno.serve(async (req) => {
         metadata: orderMetaUpd,
       })
       .eq('id', orderId);
+
+    // 2b. Record double-entry ledger so this manual (RUB) payment produces the
+    // same audit trail / platform-fee + vendor-payout entries as Stripe orders.
+    // Without this the order shows up as a discrepancy in reconciliation_alerts
+    // and no vendor payout is ever owed. RPC is idempotent (skips if exists).
+    try {
+      const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
+      if (ledgerErr) console.error('[confirm-manual-payment] record_ledger_entries failed (non-fatal):', ledgerErr);
+    } catch (e) {
+      console.error('[confirm-manual-payment] record_ledger_entries threw (non-fatal):', e);
+    }
 
     // 3. Notify guest in-app
     await sb.from('notifications').insert({

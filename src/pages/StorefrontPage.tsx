@@ -51,9 +51,9 @@ export default function StorefrontPage() {
         return;
       }
 
-      // Fetch company info
+      // Fetch company info (public-safe view — excludes bank/Stripe/legal fields)
       const { data: mc } = await supabase
-        .from('management_companies')
+        .from('management_companies_public')
         .select('id, name_en, name_ru, logo, description_en, description_ru, phone, email, whatsapp')
         .eq('id', sf.company_id)
         .single();
@@ -77,7 +77,7 @@ export default function StorefrontPage() {
 
       // Fetch properties for this MC
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id, title_en, title_ru, cover_image, address, district, bedrooms, bathrooms, price_per_night, currency, property_type, rating, review_count, is_active')
         .eq('is_active', true)
         .order('is_featured', { ascending: false })

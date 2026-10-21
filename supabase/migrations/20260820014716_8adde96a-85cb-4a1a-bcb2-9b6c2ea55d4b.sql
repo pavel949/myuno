@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sync_property_project_from_unit() FROM PUBLIC, anon, authenticated;

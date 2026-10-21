@@ -3,14 +3,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, BarChart3 } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Wallet, BarChart3 } from 'lucide-react';
 import { useAdminFinance, getVerticalLabel } from '@/hooks/useAdminFinance';
 import { cn } from '@/lib/utils';
 
 export function ControlFinanceTab() {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const isRu = language === 'ru';
   const { summary, byVertical, isLoading } = useAdminFinance(30);
 
   if (isLoading) {
@@ -26,60 +25,77 @@ export function ControlFinanceTab() {
     );
   }
 
+  if (!summary) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground" role="status">
+          {t('admin.finance.evidence.unavailable')}
+        </CardContent>
+      </Card>
+    );
+  }
+
   const gmv = summary?.totalGmv || 0;
   const platformRev = summary?.platformRevenue || 0;
   const vendorPay = summary?.vendorPayouts || 0;
   const pendingPay = summary?.pendingPayouts || 0;
   const takeRate = summary?.averageTakeRate || 0;
   const orderCount = summary?.orderCount || 0;
-  const netIncome = platformRev + (summary?.subscriptionRevenue || 0);
+  const feesAndSubscriptions = platformRev + (summary?.subscriptionRevenue || 0);
 
   const metrics = [
     {
-      label: isRu ? 'Оборот (GMV)' : 'GMV',
+      label: t('admin.finance.evidence.orderTotal'),
       value: formatPrice(gmv),
       icon: DollarSign,
       color: 'text-foreground',
-      sub: `${orderCount} ${isRu ? 'заказов' : 'orders'}`,
+      sub: `${orderCount} ${t('admin.finance.kpi.orders')}`,
     },
     {
-      label: isRu ? 'Доход платформы' : 'Platform Revenue',
+      label: t('admin.finance.evidence.orderFees'),
       value: formatPrice(platformRev),
       icon: TrendingUp,
-      color: 'text-success',
-      sub: `${takeRate.toFixed(1)}% ${isRu ? 'комиссия' : 'take rate'}`,
+      color: 'text-foreground',
+      sub: `${takeRate.toFixed(1)}% ${t('admin.finance.kpi.takeRate')}`,
     },
     {
-      label: isRu ? 'Выплаты вендорам' : 'Vendor Payouts',
+      label: t('admin.finance.evidence.vendorShare'),
       value: formatPrice(vendorPay),
       icon: CreditCard,
       color: 'text-info',
-      sub: pendingPay > 0
-        ? `${formatPrice(pendingPay)} ${isRu ? 'ожидает' : 'pending'}`
-        : (isRu ? 'Всё выплачено' : 'All paid'),
+      sub: `${t('admin.finance.evidence.pendingBalance')}: ${formatPrice(pendingPay)}`,
     },
     {
-      label: isRu ? 'Чистый доход' : 'Net Income',
-      value: formatPrice(netIncome),
+      label: t('admin.finance.evidence.feesAndSubscriptions'),
+      value: summary.subscriptionRevenueUnavailable
+        ? t('admin.finance.evidence.unavailable')
+        : formatPrice(feesAndSubscriptions),
       icon: Wallet,
-      color: netIncome >= 0 ? 'text-success' : 'text-destructive',
-      sub: isRu ? 'за 30 дней' : 'last 30 days',
+      color: 'text-foreground',
+      sub: t(summary.subscriptionRevenueUnavailable
+        ? 'admin.finance.evidence.subscriptionsUnavailable'
+        : 'admin.finance.evidence.beforeExpenses'),
     },
   ];
 
   return (
     <div className="space-y-4">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="rounded-none border bg-muted/30 p-4 space-y-1 text-sm" role="note">
+        <p className="font-medium">{t('admin.finance.evidence.provisional30Days')}</p>
+        <p className="text-muted-foreground">{t('admin.finance.evidence.orderSource')}</p>
+        <p className="text-muted-foreground">{t('admin.finance.evidence.subscriptionSource')}</p>
+        <p className="text-muted-foreground">{t('admin.finance.evidence.pendingSource')}</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-none bg-muted flex items-center justify-center">
+                <div className="h-10 w-10 shrink-0 rounded-none bg-muted flex items-center justify-center">
                   <metric.icon className={cn("h-5 w-5", metric.color)} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold truncate">{metric.value}</p>
+                  <p className="text-lg font-bold break-words">{metric.value}</p>
                   <p className="text-xs text-muted-foreground">{metric.label}</p>
                   <p className="text-[10px] text-muted-foreground/70">{metric.sub}</p>
                 </div>
@@ -89,13 +105,12 @@ export function ControlFinanceTab() {
         ))}
       </div>
 
-      {/* Revenue by Vertical */}
       {byVertical.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <BarChart3 className="h-4 w-4" />
-              {isRu ? 'Доход по вертикалям' : 'Revenue by Vertical'}
+              {t('admin.finance.evidence.ordersByVertical')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -120,10 +135,10 @@ export function ControlFinanceTab() {
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
                       <span className="text-[10px] text-muted-foreground">
-                        {v.orderCount} {isRu ? 'заказов' : 'orders'}
+                        {v.orderCount} {t('admin.finance.kpi.orders')}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
-                        {isRu ? 'Комиссия' : 'Fee'}: {formatPrice(v.platformRevenue)} ({v.takeRate.toFixed(1)}%)
+                        {t('admin.finance.feeShort')}: {formatPrice(v.platformRevenue)} ({v.takeRate.toFixed(1)}%)
                       </span>
                     </div>
                   </div>
@@ -134,13 +149,10 @@ export function ControlFinanceTab() {
         </Card>
       )}
 
-      {/* Empty state */}
       {byVertical.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {isRu
-              ? 'Нет подтверждённых заказов за последние 30 дней'
-              : 'No confirmed orders in the last 30 days'}
+            {t('admin.finance.evidence.noBreakdown')}
           </CardContent>
         </Card>
       )}

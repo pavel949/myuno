@@ -129,6 +129,8 @@ export function useCrmContacts(
     hnwTier?: string;
     /** Segment filter */
     segment?: string;
+    /** A/B/C engagement tier (independent from HNW wealth tier) */
+    relationshipTier?: 'A' | 'B' | 'C' | 'all';
   }
 ) {
   return useQuery({
@@ -203,6 +205,10 @@ export function useCrmContacts(
         q = q.contains('segment', [filters.segment]);
       }
 
+      if (filters?.relationshipTier && filters.relationshipTier !== 'all') {
+        q = q.eq('relationship_tier', filters.relationshipTier);
+      }
+
       const { data, error, count } = await (q as unknown as Promise<{ data: unknown[] | null; error: { message: string } | null; count: number | null }>);
       if (error) throw error;
       const rows = (data || []) as Record<string, unknown>[];
@@ -240,13 +246,11 @@ export function useCreateContact() {
     mutationFn: async (contact: CrmContactInsert) => {
       // Strip legacy/virtual fields that exist in the TS type but not in the DB schema
       const { crm_role: _crm_role, key_dates: _key_dates, ...cleanContact } = contact as CrmContactInsert & Record<string, unknown>;
-      const { data, error } = await (supabase.from('crm_contacts') as unknown as {
-        insert: (v: unknown) => { select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } }
-      })
-        .insert(cleanContact)
-        .select()
-        .single();
-      if (error) throw error;
+      const { getOrCreateContactByEmail } = await import('@/lib/crm/getOrCreateContact');
+      const { contact: data, existed } = await getOrCreateContactByEmail(cleanContact as Record<string, unknown>);
+      if (existed) {
+        toast.info('Контакт с таким email уже существует — открыт существующий');
+      }
       return data;
     },
     onSuccess: (data) => {
@@ -381,7 +385,7 @@ export function useContactDeals(contactId: string | undefined) {
         .eq('contact_id', contactId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as import('@/hooks/useAgentDeals').AgentDeal[];
+      return (data || []) as unknown as import('@/hooks/useAgentDeals').AgentDeal[];
     },
     enabled: !!contactId,
   });

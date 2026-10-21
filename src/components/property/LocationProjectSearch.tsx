@@ -15,6 +15,7 @@ interface LocationProjectSearchProps {
   selectedProject: PropertyProject | null;
   setSelectedProject: (p: PropertyProject | null) => void;
   className?: string;
+  lockedProjectId?: string;
 }
 
 export function LocationProjectSearch({
@@ -23,6 +24,7 @@ export function LocationProjectSearch({
   selectedProject,
   setSelectedProject,
   className,
+  lockedProjectId,
 }: LocationProjectSearchProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -41,6 +43,7 @@ export function LocationProjectSearch({
     const q = query.toLowerCase();
     return projects.filter(
       (p) =>
+        (!lockedProjectId || p.id === lockedProjectId) &&
         (p.name_en?.toLowerCase().includes(q) ||
           p.name_ru?.toLowerCase().includes(q) ||
           p.address?.toLowerCase().includes(q) ||
@@ -48,7 +51,7 @@ export function LocationProjectSearch({
         p.lat != null &&
         p.lng != null
     );
-  }, [projects, query]);
+  }, [projects, query, lockedProjectId]);
 
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
@@ -76,6 +79,7 @@ export function LocationProjectSearch({
   const showDropdown = focused && query.length >= 2;
 
   const selectProject = (p: PropertyProject) => {
+    if (lockedProjectId && lockedProjectId !== p.id) return;
     setSelectedProject(p);
     updateFormData({
       project_id: p.id,
@@ -91,7 +95,7 @@ export function LocationProjectSearch({
   const selectAddress = (r: { address: string; lat: number; lng: number }) => {
     setSelectedProject(null);
     updateFormData({
-      project_id: undefined,
+      project_id: lockedProjectId || undefined,
       address: r.address,
       lat: r.lat,
       lng: r.lng,
@@ -101,6 +105,7 @@ export function LocationProjectSearch({
   };
 
   const clearSelection = () => {
+    if (lockedProjectId) return;
     setSelectedProject(null);
     updateFormData({ project_id: undefined });
     setQuery('');
@@ -134,7 +139,7 @@ export function LocationProjectSearch({
             placeholder={isRu ? 'Адрес или название проекта...' : 'Address or project name...'}
             className="pl-10 pr-10 h-11 text-base"
           />
-          {(selectedProject || (formData.address && formData.lat && formData.lng)) && !focused && (
+          {!lockedProjectId && (selectedProject || (formData.address && formData.lat && formData.lng)) && !focused && (
             <button
               type="button"
               onClick={clearSelection}

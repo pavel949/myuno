@@ -5,6 +5,56 @@
 
 ---
 
+## [1.25.0] — 2026-06-24
+
+### Added (No-Budget Growth Playbook + referral-aware sharing)
+
+**`docs/canonical/research/no-budget-growth-playbook.md` → v1.0 (new)**
+- Операционный плейбук органического роста (без бюджета): карта уже-built активов роста (referral / share / SEO / lead-магниты / WhatsApp-Telegram / flags), barbell-таргетинг 4 аудиторий (туристы·номады / инвесторы·HNW / релокант-семьи / девелоперы·провайдеры) с вирусными free-tool точками входа, no-budget каналы по приоритету, 90-дневный спринт + связка с `PROJECT.md` §19 (путь к Y1 $800K–1M). §7 — build-later gap-фичи.
+
+**`src/components/share/ShareCTA.tsx` (new)**
+- Переиспользуемый мультиканальный share-компонент (copy / WhatsApp / Telegram / Email), добавляющий к ссылке реферальный код (`?ref=`) + UTM-атрибуцию. Обобщает UI из `PropertyShareSheet` для любого контента (статьи, free-tools, лендинги). Gated за флагом `SHARE_CTA`; при выключенном флаге деградирует до copy-link.
+- Вшит в `src/components/uno/ReferralCard.tsx`: реферальная программа получила one-tap шеринг в WhatsApp/Telegram/Email (раньше — только copy-link), что активирует виральную петлю для русскоязычной аудитории Пхукета.
+
+**`src/lib/featureFlags.ts`**
+- Добавлены growth-флаги `REFERRAL_PROGRAM` и `SHARE_CTA` (оба `enabled: true` — бэкенд-петля готова).
+
+### Rationale
+Разведка кодовой базы показала, что реферальная петля и инфраструктура роста уже построены и работают; узкое место — активация и виральные каналы шеринга, а не отсутствие кода. Плейбук фиксирует операционку, ShareCTA закрывает единственный реальный пробел в петле (мультиканальный реферальный шер). Цифры выручки сверены с `PROJECT.md` §19 — новых метрик не вводилось.
+
+### Files
+- created: `docs/canonical/research/no-budget-growth-playbook.md`, `src/components/share/ShareCTA.tsx`
+- edited: `docs/canonical/README.md`, `docs/canonical/CHANGELOG.md`, `src/lib/featureFlags.ts`, `src/components/uno/ReferralCard.tsx`
+
+---
+
+## [1.24.0] — 2026-05-15
+
+### Changed (typography canon sync with Design Bible v2)
+
+**05-visual-design-system.md → v1.1**
+- Display / headings: `Unbounded` (RU) + `Noto Serif` (EN) → **`Source Serif 4`** (оба языка, primary).
+- Body / UI: `Golos Text` (RU) + `Noto Sans` (EN) → **`Geist`** (оба языка, primary).
+- Mono / numerics: `JetBrains Mono` → **`IBM Plex Mono`**.
+- Luxury (`/newbuilds`): добавлен **`Cormorant Garamond`** italic.
+- Старые имена сохранены как fallback в font-family stack и как `--font-heading-ru` / `--font-body-ru` / etc. для обратной совместимости.
+
+**PROJECT.md**
+- §«Визуальный язык» и §«Stack» приведены к канону Bible.
+
+**DESIGN.md**
+- §Typography полностью обновлена, type-scale расширен до Bible §05.2 (display-xl, mono-lg/md/sm и т.д.).
+- Decision log: добавлена запись 2026-05-14 (Source Serif 4 / Geist / IBM Plex Mono) и 2026-05-15 (синхронизация DESIGN.md).
+
+### Rationale
+Источник истины — `src/styles/tokens.css` (runtime) и `docs/DESIGN_BIBLE.md` v2 §05.2. CLAUDE.md §6 уже фиксировал канон с предыдущей итерации и помечал старые шрифты как stale. Эта синхронизация устраняет расхождение.
+
+### Files
+- edited: `DESIGN.md`, `PROJECT.md`, `docs/canonical/05-visual-design-system.md`, `docs/canonical/CHANGELOG.md`
+- previously committed (cherry-picked from `claude/design-system-docs-4m70i`): `docs/DESIGN_BIBLE.md`, `docs/design-bible.html`, `public/design-bible.html`, `scripts/validate-fonts.mjs` (font validator ignore)
+
+---
+
 ## [1.23.0] — 2026-04-23
 
 ### Added (M13.A — Pro-shell + Reference-Screens polish from design package v5)

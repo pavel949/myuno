@@ -1,9 +1,18 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 // Generate unique session ID
-const generateSessionId = () => crypto.randomUUID();
+const generateSessionId = () => {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  // randomUUID requires HTTPS; local HTTP previews still have getRandomValues.
+  // This identifier groups analytics only and never authorizes a user.
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
 
 // Get or create session ID from sessionStorage
 const getSessionId = () => {
@@ -20,24 +29,28 @@ export function useUserTracking() {
   const sessionIdRef = useRef<string>(getSessionId());
   const lastPageRef = useRef<string | null>(null);
   const pageEntryTimeRef = useRef<Date>(new Date());
-  const userIdRef = useRef<string | null>(null);
+  // Reactive user id so tracking effects (re)run once auth resolves after mount.
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Get current user
   useEffect(() => {
+    let active = true;
     supabase.auth.getUser().then(({ data }) => {
-      userIdRef.current = data.user?.id || null;
-    });
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      userIdRef.current = session?.user?.id || null;
+      if (active) setUserId(data.user?.id || null);
     });
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Track session start/update
+  // Track session start/update — runs once the user becomes available.
   useEffect(() => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     const sessionId = sessionIdRef.current;
@@ -130,11 +143,10 @@ export function useUserTracking() {
       clearInterval(interval);
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, []);
+  }, [userId]);
 
   // Track page views
   useEffect(() => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     const currentPage = location.pathname;
@@ -162,7 +174,7 @@ export function useUserTracking() {
 
     lastPageRef.current = currentPage;
     pageEntryTimeRef.current = now;
-  }, [location.pathname]);
+  }, [location.pathname, userId]);
 
   // Track custom events
   const trackEvent = useCallback(async (
@@ -171,7 +183,6 @@ export function useUserTracking() {
     eventData?: Record<string, unknown>,
     eventCategory?: string
   ) => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     try {
@@ -189,7 +200,7 @@ export function useUserTracking() {
     } catch {
       // Silent fail for tracking
     }
-  }, [location.pathname]);
+  }, [location.pathname, userId]);
 
   return { trackEvent, sessionId: sessionIdRef.current };
 }

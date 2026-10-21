@@ -6,11 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 type AnalysisMode = 
   | "scenario_gaps"      // Detect missing/weak coverage per situation
@@ -48,6 +44,7 @@ interface AnalysisResult {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -171,7 +168,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[LIFEOS-AI-ANALYST] Mode: ${mode}, Processing...`);
+    console.info(`[LIFEOS-AI-ANALYST] Mode: ${mode}, Processing...`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -276,7 +273,7 @@ Deno.serve(async (req) => {
         : "AI provides recommendations only. Human review required.",
     };
 
-    console.log(`[LIFEOS-AI-ANALYST] Completed in ${Date.now() - startTime}ms, ${suggestions.length} suggestions`);
+    console.info(`[LIFEOS-AI-ANALYST] Completed in ${Date.now() - startTime}ms, ${suggestions.length} suggestions`);
 
     return new Response(
       JSON.stringify(result),

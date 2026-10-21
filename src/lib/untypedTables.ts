@@ -19,13 +19,15 @@ import { supabase } from '@/integrations/supabase/client';
 // ============= Generic typed accessor =============
 
 /**
- * Type-safe query builder for tables missing from auto-generated types.
- * Casts once here so consumers get proper intellisense for Row type.
- * 
- * The return type is intentionally broad to avoid coupling to
- * internal PostgREST generics that change between SDK versions.
- * Consumers cast the result via `as T[]` after `.select()`.
- * 
+ * Canonical escape hatch for tables missing from the auto-generated Supabase
+ * Database type. Returns `any` deliberately — deep PostgREST generics blow
+ * up tsc when a table is unknown, and per-call casting balloons the diff.
+ *
+ * Use this anywhere you need to query a table that hasn't been re-typed
+ * yet; do not roll a local `function from(table): any` clone. Cast the
+ * result of `.select()` via `as T[]` (or via one of the Row interfaces
+ * exported below) at the call site so consumers stay typed.
+ *
  * @example
  *   const { data } = await typedFrom('my_table').select('*');
  */
@@ -33,6 +35,22 @@ import { supabase } from '@/integrations/supabase/client';
 export function typedFrom(table: string): any {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (supabase as any).from(table);
+}
+
+/**
+ * Escape hatch for RPCs missing from the auto-generated Database type (e.g. a
+ * function added in a migration that hasn't been re-typed yet). Mirrors
+ * {@link typedFrom}. Cast the awaited `.data` at the call site.
+ *
+ * @example
+ *   const { data, error } = await untypedRpc('my_fn', { p_id: id });
+ */
+export function untypedRpc(
+  fn: string,
+  args?: Record<string, unknown>,
+): Promise<{ data: unknown; error: { message: string } | null }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase as any).rpc(fn, args);
 }
 
 // ============= Pre-defined table accessors =============
@@ -255,6 +273,6 @@ export const untypedTables = {
   crmCompanies: () => supabase.from('crm_companies'),
   crmAssignmentRules: () => supabase.from('crm_assignment_rules'),
   crmActivities: () => supabase.from('crm_activities'),
-  mccLeads: () => supabase.from('mcc_leads'),
+  // mccLeads removed — table dropped 2026-06-06
   vendorOutreachLog: () => supabase.from('vendor_outreach_log'),
 } as const;

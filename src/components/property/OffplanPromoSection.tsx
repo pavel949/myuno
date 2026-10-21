@@ -1,6 +1,6 @@
 /**
  * OffplanPromoSection - Premium carousel for Phuket off-plan projects
- * Shows on main screen with developer info, progress, muUNO scores
+ * Shows on main screen with developer info, progress, myUNO scores
  */
 
 import React from 'react';

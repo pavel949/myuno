@@ -145,7 +145,7 @@ export function ListingWizard() {
       <header className="sticky top-0 z-50 bg-background/95 border-b">
         <div className="flex items-center justify-between px-4 h-14">
           {currentStep > 0 ? (
-            <Button variant="ghost" size="icon" onClick={prevStep}>
+            <Button variant="ghost" size="icon" onClick={prevStep} aria-label={isRu ? 'Назад' : 'Back'}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
@@ -156,7 +156,7 @@ export function ListingWizard() {
             {currentStep + 1} / {STEPS.length}
           </span>
           
-          <Button variant="ghost" size="icon" onClick={handleClose}>
+          <Button variant="ghost" size="icon" onClick={handleClose} aria-label={isRu ? 'Закрыть' : 'Close'}>
             <X className="h-5 w-5" />
           </Button>
         </div>

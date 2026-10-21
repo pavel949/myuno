@@ -1,7 +1,18 @@
 
 -- Add category_group for food/non-food separation
-ALTER TABLE marketplace_categories 
+ALTER TABLE marketplace_categories
 ADD COLUMN IF NOT EXISTS category_group text DEFAULT 'food';
+
+-- Ensure the 'drinks' and 'thai-fashion' categories exist before they are
+-- referenced below (and by marketplace_products in later migrations). They were
+-- updated/referenced but never inserted, so a fresh database (preview branch /
+-- local reset) failed the marketplace_products_category_slug_fkey constraint.
+-- Idempotent: a no-op on environments that already have these rows.
+INSERT INTO marketplace_categories (slug, name_en, name_ru, description_en, description_ru, icon, gradient, sort_order, is_active)
+VALUES
+  ('drinks', 'Drinks & Beverages', 'Напитки', 'Water, juice, coffee, tea, soda and energy drinks', 'Вода, соки, кофе, чай, газировка и энергетики', '🥤', 'from-cyan-400 to-blue-500', 5, true),
+  ('thai-fashion', 'Thai Fashion', 'Тайская мода', 'Local clothing, accessories and Thai-made apparel', 'Местная одежда, аксессуары и тайские бренды', '👗', 'from-pink-400 to-rose-500', 10, true)
+ON CONFLICT (slug) DO NOTHING;
 
 -- Update categories with proper groups and sort order
 -- FOOD GROUP (продовольственные)

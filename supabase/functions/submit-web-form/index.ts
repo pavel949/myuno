@@ -1,19 +1,39 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_STRING = 500;
+function clean(v: unknown, max = MAX_STRING): string | null {
+  if (typeof v !== 'string') return null;
+  const trimmed = v.trim();
+  if (!trimmed) return null;
+  return trimmed.slice(0, max);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limit by IP — this endpoint is unauthenticated by design (embeddable forms).
+  const rateLimited = await withRateLimit(req, 'submit-web-form', { maxRequests: 10, windowSeconds: 60 }, corsHeaders);
+  if (rateLimited) return rateLimited;
+
   try {
     const { form_id, data, source_url } = await req.json();
-    if (!form_id || !data) {
+    if (!form_id || typeof form_id !== 'string' || !data || typeof data !== 'object') {
       return new Response(JSON.stringify({ error: 'form_id and data required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // UUID v4-ish sanity check to block trivial fuzzing
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(form_id)) {
+      return new Response(JSON.stringify({ error: 'Invalid form_id' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -36,13 +56,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create contact from form data
+    // Create contact from form data — sanitize lengths to prevent abuse
+    const email = clean(data.email, 254);
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(JSON.stringify({ error: 'Invalid email' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const contactPayload: any = {
       company_id: form.company_id,
-      first_name: data.first_name || data.name || 'Web Lead',
-      last_name: data.last_name || '',
-      email: data.email || null,
-      phone: data.phone || null,
+      first_name: clean(data.first_name, 100) || clean(data.name, 100) || 'Web Lead',
+      last_name: clean(data.last_name, 100) || '',
+      email,
+      phone: clean(data.phone, 32),
       source: 'web_form',
       lifecycle_stage: 'lead',
       lead_score: 10,

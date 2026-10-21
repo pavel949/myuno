@@ -124,7 +124,7 @@ export function useProfileDetails() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .update(mapped)
+        .update(mapped as never)
         .eq('id', user.id)
         .select()
         .single();

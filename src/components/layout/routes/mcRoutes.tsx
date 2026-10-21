@@ -18,6 +18,13 @@ const LazyPage = ({ children }: { children: React.ReactNode }) => (
 export const mcRoutes = (
   <>
     <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
+    {/* Waves 0-2 — universal vertical-spec onboarding + editor + catalog */}
+    <Route path="listings/new" element={<LazyPage><Pages.VerticalPickerPage /></LazyPage>} />
+    <Route path="listings/new/:vertical" element={<LazyPage><Pages.VerticalOnboardingPage /></LazyPage>} />
+    <Route path="listings/:id/edit" element={<LazyPage><Pages.ListingEditorPage /></LazyPage>} />
+    <Route path="catalog" element={<LazyPage><Pages.VerticalCatalogPage /></LazyPage>} />
+    <Route path="catalog/:vertical" element={<LazyPage><Pages.VerticalCatalogPage /></LazyPage>} />
+    <Route path="catalog/:vertical/:id" element={<LazyPage><Pages.VerticalCatalogDetailPage /></LazyPage>} />
     <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
     <Route path="properties" element={<LazyPage><Pages.OwnerProperties /></LazyPage>} />
     <Route path="complexes" element={<LazyPage><Pages.ComplexesPage /></LazyPage>} />
@@ -29,10 +36,15 @@ export const mcRoutes = (
     <Route path="properties/:id/setup" element={<LazyPage><Pages.PropertyQuickSetup /></LazyPage>} />
     <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
     <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
-    <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />
+    {/* PropertyManage (sectioned hub) consolidated into PropertyEditor — the
+        canonical editor (shared CanonicalPropertyForm, MCLayout shell). The hub
+        spawned its own shell and its dashboard deep-links used a ?tab= scheme it
+        never read. Redirect keeps every existing /manage link working. */}
+    <Route path="properties/:id/manage" element={<Navigate to="../editor" replace />} />
     <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
     <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
     <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
+    <Route path="today" element={<LazyPage><Pages.PmsTodayPage /></LazyPage>} />
     <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
     <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
     <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
@@ -52,6 +64,7 @@ export const mcRoutes = (
     <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
     <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
     <Route path="team" element={<Navigate to="/mc/staff" replace />} />
+    <Route path="analytics" element={<LazyPage><Pages.AnalyticsPage /></LazyPage>} />
     <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
     <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
     <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
@@ -73,11 +86,11 @@ export const mcRoutes = (
     <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
     <Route path="finance/owner-payouts" element={<LazyPage><Pages.OwnerPayoutsPage /></LazyPage>} />
     <Route path="finance/ar-aging" element={<LazyPage><Pages.ArAgingPage /></LazyPage>} />
-    <Route path="finance/trust-accounts" element={<LazyPage><Pages.TrustAccountsPage /></LazyPage>} />
+    {/* finance/trust-accounts removed 2026-06-05 (Y1 scope cut) */}
     <Route path="finance/tax-center" element={<LazyPage><Pages.TaxCenterPage /></LazyPage>} />
     <Route path="finance/statement-approvals" element={<LazyPage><Pages.StatementApprovalsPage /></LazyPage>} />
     <Route path="documents/signatures" element={<LazyPage><Pages.SignatureRequestsPage /></LazyPage>} />
-    <Route path="approvals" element={<LazyPage><Pages.ApprovalsPage /></LazyPage>} />
+    {/* approvals removed 2026-06-05 (Y1 scope cut) */}
     <Route path="team/shifts" element={<LazyPage><Pages.TeamShiftsPage /></LazyPage>} />
     <Route path="procurement" element={<LazyPage><Pages.ProcurementPage /></LazyPage>} />
     <Route path="insights/owner-analytics" element={<LazyPage><Pages.OwnerAnalyticsPage /></LazyPage>} />
@@ -90,6 +103,7 @@ export const mcRoutes = (
     <Route path="quotes" element={<LazyPage><Pages.CrmQuotesPage /></LazyPage>} />
     <Route path="meetings" element={<LazyPage><Pages.CrmMeetingsPage /></LazyPage>} />
     <Route path="crm-emails" element={<LazyPage><Pages.CrmEmailsPage /></LazyPage>} />
+    <Route path="crm-emails/settings" element={<LazyPage><Pages.CrmEmailSettingsPage /></LazyPage>} />
     <Route path="automations" element={<LazyPage><Pages.CrmWorkflowsPage /></LazyPage>} />
     <Route path="crm-templates" element={<LazyPage><Pages.CrmTemplatesPage /></LazyPage>} />
     <Route path="duplicates" element={<LazyPage><Pages.CrmDuplicatesPage /></LazyPage>} />
@@ -103,6 +117,7 @@ export const mcRoutes = (
     <Route path="vendor-acquisition" element={<LazyPage><Pages.AdminVendorProspects /></LazyPage>} />
     <Route path="vault" element={<LazyPage><Pages.OwnerVaultPage /></LazyPage>} />
     <Route path="rates" element={<LazyPage><Pages.RateManagementPage /></LazyPage>} />
+    <Route path="structure" element={<LazyPage><Pages.PropertyStructurePage /></LazyPage>} />
     <Route path="reviews-management" element={<LazyPage><Pages.ReviewsManagementPage /></LazyPage>} />
     <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
     <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />

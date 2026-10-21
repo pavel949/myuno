@@ -220,7 +220,7 @@ export function useJuristicRequests(propertyId?: string) {
     mutationFn: async ({ id, ...updates }: Partial<JuristicRequest> & { id: string }) => {
       const { data, error } = await supabase
         .from('juristic_requests')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();

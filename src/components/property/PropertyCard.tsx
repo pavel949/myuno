@@ -445,11 +445,12 @@ function ListVariant({
           <div className="p-2 flex items-start flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             {mode === 'owner' && onEdit && onView && (
               <div className="flex flex-col gap-1">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   className="h-7 text-xs px-2 whitespace-nowrap"
                   onClick={() => onEdit(property.id)}
+                  aria-label={isRu ? 'Редактировать' : 'Edit'}
                 >
                   <Pencil className="h-3 w-3" />
                   <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : 'Edit'}</span>
@@ -469,7 +470,7 @@ function ListVariant({
             {(mode === 'admin' || (mode === 'owner' && (onDuplicate || onToggleActive || onDelete))) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Действия' : 'Actions'}>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>

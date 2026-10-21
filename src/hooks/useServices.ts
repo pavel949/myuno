@@ -52,11 +52,11 @@ interface UseServicesOptions {
 
 function buildQuery(options: UseServicesOptions) {
   let query = supabase
-    .from('services')
+    .from('public_service_catalog')
     .select(`
       *,
-      provider:providers(name, logo_url, is_verified, has_machine_translation),
-      category:categories(name_en, name_ru, slug)
+      provider,
+      category
     `)
     .eq('is_active', true);
 
@@ -97,7 +97,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
     try {
       const { data, error: queryError } = await buildQuery(options);
       if (queryError) throw queryError;
-      setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
+      setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as unknown as Service[]);
     } catch (err) {
       console.error('Error loading services:', err);
       setError(err as Error);
@@ -116,7 +116,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
         const { data, error: queryError } = await buildQuery(options);
         if (queryError) throw queryError;
         if (!isMounted) return;
-        setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
+        setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as unknown as Service[]);
       } catch (err) {
         console.error('Error loading services:', err);
         if (isMounted) { setError(err as Error); setServices([]); }
@@ -142,7 +142,7 @@ export const useCategories = () => {
     const loadCategories = async () => {
       try {
         const { data: serviceCategories } = await supabase
-          .from('services')
+          .from('public_service_catalog')
           .select('category_id')
           .eq('is_active', true);
         

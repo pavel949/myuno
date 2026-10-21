@@ -480,8 +480,8 @@ function MessagingStep({ isRu, onSetup }: {
         <CardContent className="pt-3 pb-3">
           <p className="text-xs text-muted-foreground">
             💡 {isRu
-              ? 'Совет: AI поможет сгенерировать тексты на русском и английском'
-              : 'Tip: AI will help generate messages in Russian and English'}
+              ? 'Совет: AI поможет сгенерировать тексты сразу на нескольких языках (EN / RU / TH)'
+              : 'Tip: AI will help generate messages in multiple languages (EN / RU / TH)'}
           </p>
         </CardContent>
       </Card>

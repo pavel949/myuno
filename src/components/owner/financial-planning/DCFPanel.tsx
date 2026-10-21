@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -43,12 +43,16 @@ export function DCFPanel({ year0NOI, year0NetIncome, defaultPropertyValue, defau
   });
 
   // Sync inputs when computed model changes
-  useMemo(() => {
+  useEffect(() => {
     setInput(prev => ({ ...prev, year0NOI: year0NOI || 0, year0NetIncome: year0NetIncome || 0 }));
   }, [year0NOI, year0NetIncome]);
 
   const result = useMemo(() => computeDCF(input), [input]);
-  useMemo(() => { onResultChange?.(result); }, [result, onResultChange]);
+
+  // Bubble the computed result up after render, not during it.
+  useEffect(() => {
+    onResultChange?.(result);
+  }, [result, onResultChange]);
 
   const sensitivity: SensitivityRow[] = useMemo(() => computeSensitivity(input, 0.2), [input]);
 

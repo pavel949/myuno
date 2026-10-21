@@ -134,7 +134,8 @@ export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-6 w-6 text-success hover:text-success"
+                        aria-label={isRu ? 'Одобрить' : 'Approve'}
+                        className="min-h-[44px] min-w-[44px] text-success hover:text-success"
                         onClick={() => handleApproval(f.id, 'approved')}
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -142,7 +143,8 @@ export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-6 w-6 text-destructive hover:text-destructive"
+                        aria-label={isRu ? 'Отклонить' : 'Reject'}
+                        className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
                         onClick={() => handleApproval(f.id, 'rejected')}
                       >
                         <X className="w-3.5 h-3.5" />

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface Store {
   id: string;
+  provider_id: string | null;
   name_en: string;
   name_ru: string;
   description_en: string | null;

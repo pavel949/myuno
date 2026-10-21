@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface UnderlineInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -11,12 +11,15 @@ interface UnderlineInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
 }
 
 export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputProps>(
-  ({ label, error, maxLengthDisplay, value, onChange, icon, className, readOnly, type = 'text', ...props }, ref) => {
+  ({ label, error, maxLengthDisplay, value, onChange, icon, className, readOnly, type = 'text', id, 'aria-describedby': describedBy, 'aria-invalid': invalid, ...props }, ref) => {
     const [focused, setFocused] = useState(false);
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className={cn("space-y-1", className)}>
-        <label className="block text-sm text-muted-foreground">{label}</label>
+        <label htmlFor={inputId} className="block text-sm text-muted-foreground">{label}</label>
         <div className="relative">
           {icon && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -25,6 +28,9 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
           )}
           <input
             ref={ref}
+            id={inputId}
+            aria-invalid={error ? true : invalid}
+            aria-describedby={[describedBy, error ? errorId : undefined].filter(Boolean).join(' ') || undefined}
             type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -47,7 +53,7 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
         </div>
         <div className="flex items-center justify-between min-h-[1.25rem]">
           {error ? (
-            <p className="text-xs text-destructive">{error}</p>
+            <p id={errorId} className="text-xs text-destructive">{error}</p>
           ) : (
             <span />
           )}

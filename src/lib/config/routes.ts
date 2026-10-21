@@ -16,6 +16,12 @@ export const APP_ROUTES = {
 
   // ── Discovery & Navigation ──
   DISCOVER: '/discover',
+  DISCOVER_SITUATIONS: '/discover/situations',
+  /** Goal-first entry pages (Phuket One-Stop IA). Mounted under /discover. */
+  GOAL_STAY: '/discover/stay',
+  GOAL_LIVE: '/discover/live',
+  GOAL_BUY: '/discover/buy',
+  GOAL_SERVICES: '/discover/services',
   NAVIGATOR: '/navigator',
   MAP: '/map',
   SEARCH: '/search',
@@ -64,11 +70,17 @@ export const APP_ROUTES = {
   // ── List With Us ──
   LIST_WITH_US: '/list-with-us',
   BECOME_PARTNER: '/become-partner',
+  PARTNER_STATUS: '/partner/status',
+
+  // ── Ecosystem (breadth catalogue, secondary entry from Landing) ──
+  ECOSYSTEM: '/ecosystem',
 
   // ── B2B landing pages (public marketing) ──
+  FOR_OWNERS: '/for-owners',
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
+  FOR_BUSINESS: '/for-business',
 
   // ── Beauty & Spa ──
   BEAUTY: '/beauty',
@@ -92,9 +104,11 @@ export const APP_ROUTES = {
   PROPERTY_MAP: '/property/map',
   PROPERTY_CONSULTATION: '/property/consultation',
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
+  COMPLEX_DETAIL: (id: string) => `/property/complex/${id}`,
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
+  PROPERTY_COMPANIES: '/property/companies',
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',
@@ -140,7 +154,6 @@ export const APP_ROUTES = {
   DEVELOPER_PORTAL_PROJECT_NEW: '/developer-portal/projects/new',
   DEVELOPER_PORTAL_PROJECT_EDIT: (id: string) => `/developer-portal/projects/${id}`,
   CAPITAL_DEVELOPERS: '/capital/developers',
-  CAPITAL_DEVELOPERS_PENDING: '/capital/developers/pending',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
   // ── Investment Hub (top-level — multi-asset capital + business) ──
@@ -166,6 +179,7 @@ export const APP_ROUTES = {
   INVEST_DEALS: '/invest/ops/deals',
   INVEST_NETWORK: '/invest/ops/network',
   INVEST_EXECUTION: '/invest/ops/execution',
+  INVEST_TOOLS: '/invest/tools',
 
   // ── STAYS (guest short-term search, Russian UI) ──
   STAYS_SEARCH: '/stays/search',
@@ -269,6 +283,16 @@ export const APP_ROUTES = {
   ARRIVE_CLUSTER: '/arrive',
   SIM_START: '/sim',
   EXCHANGE: '/exchange',
+  OFFICIAL_NEWS: '/arrive/news',
+
+  // ── Generic cluster overviews (SSOT-driven; see ClusterOverviewPage) ──
+  LIVE_CLUSTER: '/live',
+  MANAGE_CLUSTER: '/manage',
+  BUILD_CLUSTER: '/build',
+
+  // ── Communities (churches, temples, clubs, consulates) — LIVE cluster ──
+  COMMUNITIES: '/communities',
+  COMMUNITY_DETAIL: '/communities/:slug',
 
   // ── Utility Micro-apps ──
   VISA_QUIZ: '/visa/quiz',
@@ -279,6 +303,13 @@ export const APP_ROUTES = {
   LEGAL_CLUSTER: '/stay-legal',
   TAX_NAV: '/tax',
   CONTRACT_ANALYSIS: '/legal/contract-analysis',
+  FET_CHECK: '/services/finance/fet',
+  // Trust Stack §3 A-3
+  DEPOSIT_VAULT: '/legal/deposit-vault',
+  DEPOSIT_DISPUTE_NEW: '/legal/deposit-vault/dispute/new',
+  DEPOSIT_DISPUTE_DETAIL: (packId: string) => `/legal/deposit-vault/dispute/${packId}`,
+  DEPOSIT_RISK_QUIZ: '/tools/deposit-risk',
+
 
   // ── INVEST Cluster (legacy alias → INVEST) ──
   INVEST_CLUSTER: '/invest',
@@ -316,6 +347,19 @@ export const APP_ROUTES = {
   // ── Delivery ──
   DELIVERY: '/delivery',
 
+  // ── Thai Business / Local Services (feature_flag:thai_business_layer) ──
+  /** Public B2B acquisition landing — invites Thai businesses to partner. */
+  THAI_BUSINESS_PARTNER: '/thai-business',
+  THAI_SERVICES: '/thai-services',
+  THAI_SERVICES_DETAIL: (id: string) => `/thai-services/${id}`,
+  THAI_MY_BOOKINGS: '/thai-services/my-bookings',
+  /** B2B owner dashboard (inside VendorLayout). */
+  VENDOR_THAI_BUSINESS: '/vendor/thai-business',
+  /** Admin moderation queue. */
+  ADMIN_THAI_BUSINESS: '/admin/thai-business',
+  /** Public Russian landing per business (standalone, custom SEO). */
+  THAI_LANDING: (slug: string) => `/ts/${slug}`,
+
   // ── Market ──
   MARKET: '/market',
   MARKET_CATEGORIES: '/market/categories',
@@ -345,9 +389,14 @@ export const APP_ROUTES = {
   RELOCATION_GUIDE: (slug: string) => `/relocate/guides/${slug}`,
   RELOCATION_MY_PLAN: '/relocate/my-plan',
   RELOCATION_AREAS: '/relocate/areas',
+  RELOCATION_MOVERS: '/relocate/movers',
   WEDDING: '/wedding',
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
+  /** Halal traveller persona hub (faith & customs guides, hospitality matches). */
+  HALAL_PERSONA: '/for/halal',
+  /** Halal-friendly accommodation index. */
+  HALAL_STAY: '/property/for/halal',
 
   // ── Area landings (public, indexable) ──
   AREA_INDEX: '/area',
@@ -399,7 +448,8 @@ export const APP_ROUTES = {
   MC_PROPERTIES: '/mc/properties',
   MC_PROPERTY_DETAIL: (id: string) => `/mc/properties/${id}`,
   MC_PROPERTY_EDIT: (id: string) => `/mc/properties/${id}/editor`,
-  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/manage`,
+  /** @deprecated PropertyManage was consolidated into PropertyEditor — alias kept for back-compat. */
+  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/editor`,
   MC_PROPERTY_SETUP: (id: string) => `/mc/properties/${id}/setup`,
   MC_PROPERTY_GUIDEBOOK: (id: string) => `/mc/properties/${id}/guidebook`,
   MC_PROPERTY_PORTAL: (id: string) => `/mc/properties/${id}/portal-settings`,
@@ -407,6 +457,7 @@ export const APP_ROUTES = {
   MC_COMPLEXES: '/mc/complexes',
   MC_PROJECTS: '/mc/projects',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
+  MC_TODAY: '/mc/today',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
   MC_CONTACT_DETAIL: (id: string) => `/mc/contacts/${id}`,
@@ -421,17 +472,18 @@ export const APP_ROUTES = {
   MC_FINANCE: '/mc/finance',
   MC_FINANCIALS: '/mc/financials',
   MC_STAFF: '/mc/staff',
+  MC_ANALYTICS: '/mc/analytics',
   MC_REPORTS: '/mc/reports',
   MC_BUDGET: '/mc/budget',
   MC_FINANCE_PLANNING: '/mc/finance/planning',
   MC_INVOICES: '/mc/invoices',
   MC_OWNER_PAYOUTS: '/mc/finance/owner-payouts',
   MC_AR_AGING: '/mc/finance/ar-aging',
-  MC_TRUST_ACCOUNTS: '/mc/finance/trust-accounts',
+  // MC_TRUST_ACCOUNTS removed Wave 3 (route unmounted 2026-06-05, Y1 scope cut).
   MC_TAX_CENTER: '/mc/finance/tax-center',
   MC_STATEMENT_APPROVALS: '/mc/finance/statement-approvals',
   MC_SIGNATURES: '/mc/documents/signatures',
-  MC_APPROVALS: '/mc/approvals',
+  // MC_APPROVALS removed Wave 3 (constant existed but route never mounted).
   MC_TEAM_SHIFTS: '/mc/team/shifts',
   MC_PROCUREMENT: '/mc/procurement',
   MC_OWNER_ANALYTICS: '/mc/insights/owner-analytics',
@@ -499,7 +551,6 @@ export const APP_ROUTES = {
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
-  OWNER_LANDING: '/owner',
   OWNER_GUIDE: '/owner/guide',
 
   // ── Provider Onboarding ──
@@ -519,6 +570,7 @@ export const APP_ROUTES = {
 
   // ── Admin ──
   ADMIN: '/admin',
+  ADMIN_INBOX: '/admin/inbox',
   ADMIN_CATALOG: '/admin/catalog',
   ADMIN_FINANCE: '/admin/finance',
   ADMIN_OPERATIONS: '/admin/operations',
@@ -530,6 +582,7 @@ export const APP_ROUTES = {
   ADMIN_LEADS: '/admin/leads',
   ADMIN_ANALYTICS: '/admin/analytics',
   ADMIN_AI_AGENTS: '/admin/ai-agents',
+  ADMIN_OFFICIAL_NEWS: '/admin/official-news',
   ADMIN_INTAKE_CONFIGS: '/admin/intake-configs',
   ADMIN_LEAD_CONFIGS: '/admin/lead-configs',
   ADMIN_CONSULTATIONS: '/admin/consultations',
@@ -537,6 +590,7 @@ export const APP_ROUTES = {
   ADMIN_TRANSFERS: '/admin/transfers',
   ADMIN_CRM: '/admin/crm',
   ADMIN_TICKETS: '/admin/tickets',
+  /** Semantic alias for moderation entry-point; shares the Operations screen until a dedicated page exists. */
   ADMIN_MODERATION: '/admin/operations',
   VENDOR_PAYOUTS: '/vendor/payouts',
   TEAM_CONTENT: '/team/content',
@@ -547,7 +601,7 @@ export const APP_ROUTES = {
  * Maps old paths to new paths for backward compatibility
  */
 export const LEGACY_REDIRECTS: Record<string, string> = {
-  '/provider/onboarding': APP_ROUTES.VENDOR_ONBOARDING,
+  '/provider/onboarding': APP_ROUTES.BECOME_PARTNER,
   '/provider/dashboard': APP_ROUTES.VENDOR,
   '/become-provider': APP_ROUTES.BECOME_PARTNER,
   '/tours': `${APP_ROUTES.EXPERIENCES}?type=tour`,
@@ -599,7 +653,7 @@ export const ROUTE_OWNERSHIP = {
     '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
-    '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
+    '/list-with-us', '/for-business', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
     '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa',
     '/visa/quiz', '/school-finder', '/cost-of-living',
     '/newbuilds', '/relocate', '/wedding', '/kids', '/nomad-guide'],

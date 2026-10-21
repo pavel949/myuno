@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,6 +7,8 @@ import { useTeamMember, SPECIALIZATION_LABELS, type TeamSpecialization } from '@
 import { useMyGamification } from '@/hooks/useTeamGamification';
 import { useTeamLeads } from '@/hooks/useTeamLeads';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
+import { useAdminCheck } from '@/hooks/useAdmin';
+import { DashboardCount } from '@/components/admin/dashboard/DashboardCount';
 import { TeamLayout } from '@/components/team/TeamLayout';
 import { PointsDisplay } from '@/components/team/gamification/PointsDisplay';
 import { Leaderboard } from '@/components/team/gamification/Leaderboard';
@@ -36,7 +39,7 @@ const PLATFORM_VERTICALS = [
   { key: 'yachts', icon: Ship, labelEn: 'Yachts', labelRu: 'Яхты' },
   { key: 'tours', icon: MapPin, labelEn: 'Tours', labelRu: 'Туры' },
   { key: 'restaurants', icon: Utensils, labelEn: 'Restaurants', labelRu: 'Рестораны' },
-];
+] as const;
 
 export default function TeamDashboard() {
   const { language } = useLanguage();
@@ -47,7 +50,9 @@ export default function TeamDashboard() {
   const { member, hasSpecialization, isTeamLead, isLoading: memberLoading } = useTeamMember();
   const { stats: gamificationStats } = useMyGamification();
   const { stats: leadStats } = useTeamLeads({});
-  const { data: platformStats, isLoading: platformLoading } = useAdminDashboardStats();
+  const { data: cachedPlatformStats, isLoading: platformLoading, isError: platformError } = useAdminDashboardStats();
+  const { isAdmin, isLoading: adminChecking } = useAdminCheck();
+  const platformStats = !isAdmin || adminChecking || platformError ? undefined : cachedPlatformStats;
 
   // Filter quick actions based on user specialization
   const filteredActions = QUICK_ACTIONS.filter(action => {
@@ -55,11 +60,6 @@ export default function TeamDashboard() {
     if (isTeamLead) return true;
     return hasSpecialization(action.spec as TeamSpecialization);
   });
-
-  const getVerticalCount = (key: string): number => {
-    if (!platformStats) return 0;
-    return (platformStats as any)[key] || 0;
-  };
 
   if (memberLoading) {
     return (
@@ -164,25 +164,25 @@ export default function TeamDashboard() {
           <Leaderboard compact maxItems={5} />
 
           {/* Platform Stats */}
-          <Card>
+          <Card data-testid="team-platform-stats">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center justify-between">
                 <span>{isRu ? 'Платформа' : 'Platform Stats'}</span>
-                <Button variant="ghost" size="sm" className="text-xs gap-1 h-7">
-                  {isRu ? 'Подробнее' : 'Details'}
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-4 gap-3">
+              {!platformLoading && !platformStats && <p role="status" className="mb-3 text-sm text-muted-foreground">{pickLang(language, {
+                en: 'Platform totals are unavailable for this account. Your team work remains available above.',
+                ru: 'Итоги платформы недоступны для этой учётной записи. Рабочие данные команды доступны выше.',
+                th: 'บัญชีนี้ไม่สามารถดูยอดรวมแพลตฟอร์มได้ งานของทีมยังคงอยู่ด้านบน',
+              })}</p>}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {PLATFORM_VERTICALS.map(vertical => {
                   const Icon = vertical.icon;
-                  const count = getVerticalCount(vertical.key);
                   return (
                     <div key={vertical.key} className="text-center p-3 rounded-none bg-muted/50">
                       <Icon className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
-                      <p className="text-lg font-bold">{platformLoading ? '-' : count}</p>
+                      <p className="break-words text-lg font-bold"><DashboardCount data={platformStats} countKey={vertical.key} loading={platformLoading} /></p>
                       <p className="text-[10px] text-muted-foreground truncate">
                         {isRu ? vertical.labelRu : vertical.labelEn}
                       </p>
@@ -193,16 +193,16 @@ export default function TeamDashboard() {
               {platformStats && (
                 <div className="mt-4 pt-3 border-t grid grid-cols-3 gap-2 text-xs text-muted-foreground">
                   <div className="text-center">
-                    <p className="font-medium text-foreground">{platformStats.totalUsers}</p>
+                    <p className="font-medium text-foreground"><DashboardCount data={platformStats} countKey="totalUsers" /></p>
                     <p>{isRu ? 'Пользователей' : 'Users'}</p>
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-foreground">{platformStats.providers}</p>
+                    <p className="font-medium text-foreground"><DashboardCount data={platformStats} countKey="providers" /></p>
                     <p>{isRu ? 'Провайдеров' : 'Providers'}</p>
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-foreground">{platformStats.pendingContent}</p>
-                    <p>{isRu ? 'На модерации' : 'Pending'}</p>
+                    <p className="font-medium text-foreground"><DashboardCount data={platformStats} countKey="pendingContent" /></p>
+                    <p>{pickLang(language, { en: "Pending", ru: "На модерации", th: "รออนุมัติ" })}</p>
                   </div>
                 </div>
               )}

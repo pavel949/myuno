@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const vehicleTypes = [
   { value: 'sedan', label: 'Sedan', labelRu: 'Седан' },
@@ -119,7 +120,7 @@ const VendorTransport = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -375,7 +376,7 @@ const VendorTransport = () => {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

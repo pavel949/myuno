@@ -16,28 +16,24 @@ export function DrawerFooter() {
         {/* Language Toggle */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 bg-background rounded-none p-1 border border-border">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "h-7 px-3 text-xs font-medium rounded-none transition-colors",
-                language === 'ru' && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-              )}
-              onClick={() => setLanguage('ru')}
-            >
-              🇷🇺 RU
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "h-7 px-3 text-xs font-medium rounded-none transition-colors",
-                language === 'en' && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-              )}
-              onClick={() => setLanguage('en')}
-            >
-              🇬🇧 EN
-            </Button>
+            {([
+              { code: 'ru', flag: '🇷🇺', label: 'RU' },
+              { code: 'en', flag: '🇬🇧', label: 'EN' },
+              { code: 'th', flag: '🇹🇭', label: 'TH' },
+            ] as const).map((lang) => (
+              <Button
+                key={lang.code}
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-7 px-3 text-xs font-medium rounded-none transition-colors",
+                  language === lang.code && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                )}
+                onClick={() => setLanguage(lang.code)}
+              >
+                {lang.flag} {lang.label}
+              </Button>
+            ))}
           </div>
           
           {/* Version + Edition */}

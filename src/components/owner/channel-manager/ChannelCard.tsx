@@ -85,7 +85,7 @@ export function ChannelCard({ calendar, channel, propertyName, bookingsCount, is
             )}
           </div>
 
-          <Button variant="ghost" size="icon" className="shrink-0" asChild>
+          <Button variant="ghost" size="icon" className="shrink-0" aria-label={isRu ? 'Открыть' : 'Open'} asChild>
             <a href={calendar.ical_url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4" />
             </a>

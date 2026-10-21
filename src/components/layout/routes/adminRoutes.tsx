@@ -10,17 +10,21 @@ import * as Pages from '../pageRegistry';
 export const adminRoutes = (
   <>
     <Route path="/admin" element={<Pages.AdminDashboard />} />
+    <Route path="/admin/inbox" element={<Pages.AdminInbox />} />
+    <Route path="/admin/review" element={<Pages.AdminReview />} />
     <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
     <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
     <Route path="/admin/master-catalog" element={<Pages.AdminMasterCatalog />} />
     <Route path="/admin/trash" element={<Pages.AdminTrash />} />
     <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
     <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
-    <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
+    <Route path="/admin/analytics" element={<Pages.AdminAnalyticsDashboard />} />
+    <Route path="/admin/analytics/events" element={<Pages.AdminAnalyticsDashboard />} />
     <Route path="/admin/providers" element={<Pages.AdminProviders />} />
     <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
     <Route path="/admin/services" element={<Pages.AdminServices />} />
     <Route path="/admin/partner-applications" element={<Pages.PartnerApplicationsAdmin />} />
+    <Route path="/admin/claims" element={<Pages.AdminPoiClaims />} />
     <Route path="/admin/pitch-deck" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/investor-demo" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/operations" element={<Pages.AdminOperations />} />
@@ -43,11 +47,14 @@ export const adminRoutes = (
     <Route path="/admin/gyms" element={<Pages.AdminGyms />} />
     <Route path="/admin/vehicles" element={<Pages.AdminVehicles />} />
     <Route path="/admin/transfers" element={<Pages.AdminTransfers />} />
+    <Route path="/admin/transfers/sla" element={<Pages.AdminTransferSLA />} />
+    <Route path="/admin/transfer-operators" element={<Pages.AdminTransferOperators />} />
     <Route path="/admin/events" element={<Pages.AdminEvents />} />
     <Route path="/admin/education" element={<Pages.AdminEducation />} />
     <Route path="/admin/legal" element={<Pages.AdminLegal />} />
     <Route path="/admin/pets" element={<Pages.AdminPets />} />
     <Route path="/admin/cleaning" element={<Pages.AdminCleaning />} />
+    <Route path="/admin/thai-business" element={<Pages.AdminThaiBusiness />} />
     <Route path="/admin/babysitters" element={<Pages.AdminBabysitters />} />
     <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
     <Route path="/admin/relocation-articles" element={<Pages.AdminRelocationArticles />} />
@@ -64,7 +71,10 @@ export const adminRoutes = (
     <Route path="/admin/water-activities" element={<Pages.AdminWaterActivities />} />
     <Route path="/admin/experiences" element={<Pages.AdminExperiences />} />
     <Route path="/admin/moderation" element={<Navigate to="/admin/operations?tab=moderation" replace />} />
+    <Route path="/admin/bulk-publish" element={<Pages.AdminBulkPublish />} />
     <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
+    <Route path="/admin/nb-leads" element={<Pages.AdminNbLeads />} />
+
     <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
     <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
     <Route path="/admin/finance" element={<Pages.AdminFinance />} />
@@ -82,6 +92,7 @@ export const adminRoutes = (
     <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
     <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
     <Route path="/admin/ai-ops" element={<Pages.AdminAIOps />} />
+    <Route path="/admin/ai-knowledge" element={<Pages.AdminAIKnowledge />} />
     <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
     <Route path="/admin/add" element={<Pages.AdminAddHub />} />
     <Route path="/admin/intake" element={<Pages.AdminIntake />} />
@@ -97,5 +108,8 @@ export const adminRoutes = (
     <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
     <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
     <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
+    <Route path="/admin/diagnostics/google-maps" element={<Pages.AdminGoogleMapsDiagnostics />} />
+    <Route path="/admin/settings/google-maps" element={<Pages.AdminGoogleMapsSettings />} />
+    <Route path="/admin/official-news" element={<Pages.AdminOfficialNews />} />
   </>
 );

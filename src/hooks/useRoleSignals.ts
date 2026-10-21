@@ -5,8 +5,8 @@
  * the real DB (orders, property_bookings, visa_records, agent_deals, …) and
  * derive a single "what matters right now" signal: lead, value, tail, state.
  *
- * If a persona has no live data, the SIGNAL_SEED demo card from `roleBlend.ts`
- * is used as fallback so the UI never collapses.
+ * Missing or failed sources never become synthetic bookings. The caller gets
+ * separate loading, empty and partial-error state alongside verified records.
  *
  * Cached for 60s via React Query — cheap to mount on every Home render.
  */
@@ -14,41 +14,47 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { SIGNAL_SEED } from '@/lib/roleBlend';
+import { bangkokTodayISO, bangkokTodayDate, parseCivilDate } from '@/lib/hotelDates';
+import { differenceInCalendarDays } from 'date-fns';
+import { PROPERTY_BOOKING_RELEASE_FILTER, propertyBookingHoldsInventory } from '@/lib/propertyInventory';
 import { logger } from '@/lib/logger';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export interface RoleSignal {
   lead: string;
   leadRu: string;
+  leadTh?: string;
   value: string;
+  valueRu?: string;
+  valueTh?: string;
   tail: string;
   tailRu: string;
+  tailTh?: string;
   state: 'live' | 'warn' | 'active';
-  /** true → real data, false → seed fallback */
+  /** Signals are always backed by a successfully read account record. */
   isLive: boolean;
+  /** An existing detail route, only when the source supplies the record ID. */
+  href?: string;
 }
 
 type SignalMap = Partial<Record<UserPersona, RoleSignal>>;
 
-const fmtDate = (iso: string, locale: 'ru' | 'en') =>
-  new Date(iso).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
-    day: 'numeric',
-    month: 'short',
-  });
-
-const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-const daysUntil = (iso: string) => {
-  const ms = new Date(iso).getTime() - Date.now();
-  return Math.ceil(ms / (24 * 3600 * 1000));
+/** Civil dates stay calendar dates; timestamp events display in Phuket time. */
+export const formatSignalDate = (iso: string, locale: 'ru' | 'en' | 'th') => {
+  const civil = /^\d{4}-\d{2}-\d{2}$/.test(iso);
+  return new Intl.DateTimeFormat(locale === 'ru' ? 'ru-RU' : locale === 'th' ? 'th-TH' : 'en-GB', {
+    day: 'numeric', month: 'short',
+    ...(civil ? {} : { timeZone: 'Asia/Bangkok' }),
+  }).format(civil ? parseCivilDate(iso) : new Date(iso));
 };
 
-const fmtTHB = (n: number) => {
-  if (n >= 1_000_000) return `฿ ${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `฿ ${(n / 1_000).toFixed(1)}K`;
-  return `฿ ${Math.round(n)}`;
-};
+export const formatSignalTime = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(new Date(iso));
+
+export const signalDaysUntil = (iso: string) =>
+  differenceInCalendarDays(parseCivilDate(iso.slice(0, 10)), bangkokTodayDate());
 
 // ─────────────────────────────────────────────────────────────
 // Per-persona resolvers — each returns a RoleSignal or null.
@@ -56,26 +62,29 @@ const fmtTHB = (n: number) => {
 
 async function resolveTourist(userId: string): Promise<RoleSignal | null> {
   // Next upcoming airport transfer
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('airport_bookings')
     .select('flight_date, flight_time, direction, flight_number, status')
     .eq('user_id', userId)
-    .gte('flight_date', new Date().toISOString().slice(0, 10))
+    .gte('flight_date', bangkokTodayISO())
     .not('status', 'in', '("cancelled","refunded")')
     .order('flight_date', { ascending: true })
     .order('flight_time', { ascending: true })
     .limit(1);
 
+  if (error) throw error;
   const b = data?.[0];
   if (!b) return null;
   const dirEn = b.direction === 'arrival' ? 'HKT → hotel' : 'hotel → HKT';
   const dirRu = b.direction === 'arrival' ? 'HKT → отель' : 'отель → HKT';
   return {
-    lead: `Transfer ${fmtDate(b.flight_date, 'en')}`,
-    leadRu: `Трансфер ${fmtDate(b.flight_date, 'ru')}`,
+    lead: `Transfer ${formatSignalDate(b.flight_date, 'en')}`,
+    leadRu: `Трансфер ${formatSignalDate(b.flight_date, 'ru')}`,
+    leadTh: `รถรับส่ง ${formatSignalDate(b.flight_date, 'th')}`,
     value: b.flight_time?.slice(0, 5) ?? '—',
     tail: `${dirEn} · ${b.flight_number}`,
     tailRu: `${dirRu} · ${b.flight_number}`,
+    tailTh: `${b.direction === 'arrival' ? 'HKT → โรงแรม' : 'โรงแรม → HKT'} · ${b.flight_number}`,
     state: 'live',
     isLive: true,
   };
@@ -83,23 +92,28 @@ async function resolveTourist(userId: string): Promise<RoleSignal | null> {
 
 async function resolveResident(userId: string): Promise<RoleSignal | null> {
   // Visa with the soonest expiry
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('visa_records')
     .select('visa_type, expiry_date, status')
     .eq('user_id', userId)
-    .gte('expiry_date', new Date().toISOString().slice(0, 10))
+    .gte('expiry_date', bangkokTodayISO())
     .order('expiry_date', { ascending: true })
     .limit(1);
 
+  if (error) throw error;
   const v = data?.[0];
   if (!v) return null;
-  const days = daysUntil(v.expiry_date);
+  const days = signalDaysUntil(v.expiry_date);
   return {
     lead: 'Visa',
     leadRu: 'Виза',
+    leadTh: 'วีซ่า',
     value: `${days} ${days === 1 ? 'day' : 'days'} left`,
-    tail: `${v.visa_type} · ${v.status ?? 'active'}`,
-    tailRu: `${v.visa_type} · ${v.status === 'active' ? 'активна' : v.status ?? 'активна'}`,
+    valueRu: `Осталось ${days} дн.`,
+    valueTh: `เหลือ ${days} วัน`,
+    tail: `${v.visa_type} · ${v.status ?? 'status unavailable'}`,
+    tailRu: `${v.visa_type} · ${v.status === 'active' ? 'активна' : v.status ?? 'не указан'}`,
+    tailTh: `${v.visa_type} · ${v.status ?? 'ไม่ระบุสถานะ'}`,
     state: days <= 30 ? 'warn' : 'active',
     isLive: true,
   };
@@ -112,69 +126,83 @@ async function resolveRelocation(userId: string): Promise<RoleSignal | null> {
 
 async function resolveOwner(userId: string): Promise<RoleSignal | null> {
   // Next booking on owner's properties
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const { data: current } = await supabase
+  const todayIso = bangkokTodayISO();
+  const { data: current, error: currentError } = await supabase
     .from('property_bookings')
     .select('check_in, check_out, guest_name, status')
     .eq('owner_id', userId)
     .lte('check_in', todayIso)
-    .gte('check_out', todayIso)
-    .not('status', 'in', '("cancelled","refunded")')
+    .gt('check_out', todayIso)
+    .not('status', 'in', PROPERTY_BOOKING_RELEASE_FILTER)
     .order('check_out', { ascending: true })
     .limit(1);
 
-  if (current?.[0]) {
+  if (currentError) throw currentError;
+  if (current?.[0] && propertyBookingHoldsInventory(current[0].status)) {
     const c = current[0];
     return {
-      lead: 'Your property',
-      leadRu: 'Ваш объект',
-      value: 'Occupied',
-      tail: `Check-out ${fmtDate(c.check_out, 'en')}`,
-      tailRu: `Выезд ${fmtDate(c.check_out, 'ru')}`,
+      lead: 'Current booking',
+      leadRu: 'Текущее бронирование',
+      leadTh: 'การจองปัจจุบัน',
+      value: `${formatSignalDate(c.check_in, 'en')} – ${formatSignalDate(c.check_out, 'en')}`,
+      valueRu: `${formatSignalDate(c.check_in, 'ru')} – ${formatSignalDate(c.check_out, 'ru')}`,
+      valueTh: `${formatSignalDate(c.check_in, 'th')} – ${formatSignalDate(c.check_out, 'th')}`,
+      tail: `Status: ${c.status}`,
+      tailRu: `Статус: ${c.status}`,
+      tailTh: `สถานะ: ${c.status}`,
       state: 'live',
       isLive: true,
     };
   }
 
-  const { data: upcoming } = await supabase
+  const { data: upcoming, error: upcomingError } = await supabase
     .from('property_bookings')
     .select('check_in, check_out, guest_name, status')
     .eq('owner_id', userId)
     .gt('check_in', todayIso)
-    .not('status', 'in', '("cancelled","refunded")')
+    .not('status', 'in', PROPERTY_BOOKING_RELEASE_FILTER)
     .order('check_in', { ascending: true })
     .limit(1);
 
+  if (upcomingError) throw upcomingError;
   const u = upcoming?.[0];
-  if (!u) return null;
+  if (!u || !propertyBookingHoldsInventory(u.status)) return null;
   return {
     lead: 'Next booking',
     leadRu: 'Следующая бронь',
-    value: fmtDate(u.check_in, 'en'),
+    leadTh: 'การจองครั้งถัดไป',
+    value: formatSignalDate(u.check_in, 'en'),
+    valueRu: formatSignalDate(u.check_in, 'ru'),
+    valueTh: formatSignalDate(u.check_in, 'th'),
     tail: `${u.guest_name ?? 'Guest'} · ${u.status}`,
     tailRu: `${u.guest_name ?? 'Гость'} · ${u.status}`,
+    tailTh: `${u.guest_name ?? 'ผู้เข้าพัก'} · ${u.status}`,
     state: 'active',
     isLive: true,
   };
 }
 
 async function resolveInvestor(userId: string): Promise<RoleSignal | null> {
-  // Sum of active deal values where user is the agent
-  const { data } = await supabase
+  // Count active agent deals; do not mix currencies or imply realized portfolio value.
+  const { data, error } = await supabase
     .from('agent_deals')
-    .select('deal_value, currency, stage, deal_status')
+    .select('stage, deal_status')
     .eq('agent_id', userId)
     .eq('deal_status', 'active');
 
+  if (error) throw error;
   if (!data || data.length === 0) return null;
-  const total = data.reduce((s, d) => s + Number(d.deal_value ?? 0), 0);
   const pending = data.filter(d => ['proposal', 'negotiation', 'pending'].includes(d.stage)).length;
   return {
-    lead: 'Portfolio',
-    leadRu: 'Портфель',
-    value: total > 0 ? fmtTHB(total) : `${data.length} deals`,
+    lead: 'Active deals',
+    leadRu: 'Активные сделки',
+    leadTh: 'ดีลที่กำลังดำเนินการ',
+    value: `${data.length} deals`,
+    valueRu: `${data.length} сделок`,
+    valueTh: `${data.length} ดีล`,
     tail: `${data.length} active · ${pending} pending`,
     tailRu: `${data.length} активных · ${pending} в ожидании`,
+    tailTh: `กำลังดำเนินการ ${data.length} · รอดำเนินการ ${pending}`,
     state: 'active',
     isLive: true,
   };
@@ -182,7 +210,7 @@ async function resolveInvestor(userId: string): Promise<RoleSignal | null> {
 
 async function resolveDeveloper(userId: string): Promise<RoleSignal | null> {
   // Closest project completion (developer_id may be a user id or org id)
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('property_projects')
     .select('name_en, name_ru, completion_date, total_units, units_sold, project_status')
     .eq('developer_id', userId)
@@ -190,45 +218,22 @@ async function resolveDeveloper(userId: string): Promise<RoleSignal | null> {
     .order('completion_date', { ascending: true })
     .limit(1);
 
+  if (error) throw error;
   const p = data?.[0];
   if (!p) return null;
-  const days = p.completion_date ? daysUntil(p.completion_date) : null;
+  const days = p.completion_date ? signalDaysUntil(p.completion_date) : null;
   const nameEn = (p.name_en ?? p.name_ru ?? 'Project').slice(0, 24);
   const nameRu = (p.name_ru ?? p.name_en ?? 'Проект').slice(0, 24);
   return {
     lead: nameEn,
     leadRu: nameRu,
-    value: p.total_units ? `${p.units_sold ?? 0} / ${p.total_units}` : (p.project_status ?? 'active'),
+    value: p.total_units ? `${p.units_sold ?? '—'} / ${p.total_units}` : (p.project_status ?? 'Status unavailable'),
+    valueRu: p.total_units ? `${p.units_sold ?? '—'} / ${p.total_units}` : (p.project_status ?? 'Статус не указан'),
+    valueTh: p.total_units ? `${p.units_sold ?? '—'} / ${p.total_units}` : (p.project_status ?? 'ไม่ระบุสถานะ'),
     tail: days !== null ? `Handover in ${days} days` : (p.project_status ?? ''),
     tailRu: days !== null ? `Сдача через ${days} дн.` : (p.project_status ?? ''),
+    tailTh: days !== null ? `กำหนดส่งมอบใน ${days} วัน` : (p.project_status ?? ''),
     state: days !== null && days <= 90 ? 'warn' : 'active',
-    isLive: true,
-  };
-}
-
-async function resolveProvider(userId: string): Promise<RoleSignal | null> {
-  // Today's vendor bookings count + revenue
-  const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date();   endOfDay.setHours(23, 59, 59, 999);
-
-  const { data } = await supabase
-    .from('orders')
-    .select('id, total_amount, status, vendor_payout_amount')
-    .eq('provider_org_id', userId) // best-effort; org membership lookup is heavier
-    .gte('created_at', startOfDay.toISOString())
-    .lte('created_at', endOfDay.toISOString())
-    .is('deleted_at', null);
-
-  if (!data || data.length === 0) return null;
-  const revenue = data.reduce((s, o) => s + Number(o.vendor_payout_amount ?? o.total_amount ?? 0), 0);
-  const pending = data.filter(o => ['pending', 'awaiting_payment'].includes(String(o.status))).length;
-  return {
-    lead: 'Today',
-    leadRu: 'Сегодня',
-    value: `${data.length} bookings`,
-    tail: `${fmtTHB(revenue)} · ${pending} pending`,
-    tailRu: `${fmtTHB(revenue)} · ${pending} ожидают`,
-    state: 'active',
     isLive: true,
   };
 }
@@ -247,18 +252,33 @@ async function resolveNextOrder(userId: string, vertical?: string[]): Promise<Ro
 
   if (vertical?.length) q = q.in('vertical', vertical);
 
-  const { data } = await q;
+  const { data, error } = await q;
+  if (error) throw error;
   const o = data?.[0];
   if (!o || !o.start_at) return null;
   return {
     lead: o.vertical ?? o.order_type ?? 'Booking',
     leadRu: o.vertical ?? o.order_type ?? 'Бронь',
-    value: fmtTime(o.start_at),
-    tail: `${fmtDate(o.start_at, 'en')} · ${o.status}`,
-    tailRu: `${fmtDate(o.start_at, 'ru')} · ${o.status}`,
+    value: formatSignalTime(o.start_at),
+    tail: `${formatSignalDate(o.start_at, 'en')} · ${o.status}`,
+    tailRu: `${formatSignalDate(o.start_at, 'ru')} · ${o.status}`,
+    tailTh: `${formatSignalDate(o.start_at, 'th')} · ${o.status}`,
+    href: APP_ROUTES.ORDER_TRACKING(o.id),
     state: 'live',
     isLive: true,
   };
+}
+
+async function resolvePetOrder(userId: string): Promise<RoleSignal | null> {
+  // Pet services use their own vertical, including veterinary care. Human
+  // medical orders are not pet updates. This is not a service_orders summary.
+  const signal = await resolveNextOrder(userId, ['pet_service']);
+  return signal ? {
+    ...signal,
+    lead: 'Pet-service order',
+    leadRu: 'Заказ для питомца',
+    leadTh: 'คำสั่งซื้อบริการสัตว์เลี้ยง',
+  } : null;
 }
 
 // Resolver dispatch table
@@ -269,65 +289,53 @@ const RESOLVERS: Partial<Record<UserPersona, (uid: string) => Promise<RoleSignal
   property_owner: resolveOwner,
   investor: resolveInvestor,
   real_estate_developer: resolveDeveloper,
-  local_services_provider: resolveProvider,
   family: (uid) => resolveNextOrder(uid),
   couple: (uid) => resolveNextOrder(uid),
   nightlife: (uid) => resolveNextOrder(uid),
   active: (uid) => resolveNextOrder(uid),
   business: (uid) => resolveNextOrder(uid, ['legal', 'medical']),
   nomad: (uid) => resolveNextOrder(uid),
-  pet_owner: (uid) => resolveNextOrder(uid, ['pet_service', 'medical']),
+  pet_owner: resolvePetOrder,
 };
 
-/**
- * Returns a SignalMap covering the requested personas. For each persona we run
- * its resolver in parallel; failures and empty results fall back to SIGNAL_SEED.
- */
+/** Read real signals without conflating empty, failed and loading sources. */
 export function useRoleSignals(personas: UserPersona[]) {
   const { user } = useAuth();
   const userId = user?.id;
   const personaKey = personas.join(',');
+  // Auth user IDs are not provider org IDs. Use the verified vendor workspace
+  // until this surface can reuse its canonical organization scope.
+  const unavailablePersonas = personas.filter(p => p === 'local_services_provider');
 
   const query = useQuery({
-    queryKey: ['role-signals', userId, personaKey],
-    queryFn: async (): Promise<SignalMap> => {
-      if (!userId) return {};
-      const entries = await Promise.all(
-        personas.map(async (p) => {
-          const fn = RESOLVERS[p];
-          if (!fn) return [p, null] as const;
-          try {
-            const sig = await fn(userId);
-            return [p, sig] as const;
-          } catch (err) {
-            logger.warn('[useRoleSignals] resolver failed for', p, err);
-            return [p, null] as const;
-          }
-        }),
-      );
-      const out: SignalMap = {};
-      for (const [p, sig] of entries) if (sig) out[p] = sig;
-      return out;
+    queryKey: ['role-signals', 'real-only-v3', userId, personaKey],
+    queryFn: async () => {
+      const signals: SignalMap = {};
+      const failedPersonas: UserPersona[] = [];
+      if (!userId) return { signals, failedPersonas };
+      await Promise.all(personas.map(async (p) => {
+        const resolver = RESOLVERS[p];
+        if (!resolver) return;
+        try {
+          const signal = await resolver(userId);
+          if (signal) signals[p] = signal;
+        } catch (error) {
+          logger.warn('[useRoleSignals] resolver failed for', p, error);
+          failedPersonas.push(p);
+        }
+      }));
+      return { signals, failedPersonas };
     },
     enabled: !!userId && personas.length > 0,
     staleTime: 60_000,
   });
 
-  // Merge live data with seed fallback so every persona always has a signal.
-  const signals: SignalMap = {};
-  for (const p of personas) {
-    const live = query.data?.[p];
-    if (live) {
-      signals[p] = live;
-    } else {
-      const seed = SIGNAL_SEED[p];
-      if (seed) signals[p] = { ...seed, isLive: false };
-    }
-  }
-
   return {
-    signals,
+    signals: query.data?.signals ?? {},
     isLoading: query.isLoading,
+    unavailablePersonas,
+    hasError: query.isError || (query.data?.failedPersonas?.length ?? 0) > 0,
+    retry: () => { void query.refetch(); },
     isAuthenticated: !!userId,
   };
 }

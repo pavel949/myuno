@@ -46,6 +46,7 @@ import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -75,7 +76,7 @@ const VendorDashboard = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -333,10 +334,11 @@ const VendorDashboard = () => {
                   {/* Inline Actions */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={isRu ? 'Действия' : 'Actions'}
+                        className="min-h-[44px] min-w-[44px] md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>

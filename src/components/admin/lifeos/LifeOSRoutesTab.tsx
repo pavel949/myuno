@@ -248,7 +248,7 @@ export function LifeOSRoutesTab() {
                     {editingRoute.what_matters_en.map((item, i) => (
                       <div key={i} className="flex gap-1.5 mt-1">
                         <Input value={item} onChange={e => updateWhatMatters(i, e.target.value, 'en')} className="text-xs h-7" />
-                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeWhatMatters(i, 'en')}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px] shrink-0" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => removeWhatMatters(i, 'en')}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -262,7 +262,7 @@ export function LifeOSRoutesTab() {
                     {editingRoute.what_matters_ru.map((item, i) => (
                       <div key={i} className="flex gap-1.5 mt-1">
                         <Input value={item} onChange={e => updateWhatMatters(i, e.target.value, 'ru')} className="text-xs h-7" />
-                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeWhatMatters(i, 'ru')}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px] shrink-0" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => removeWhatMatters(i, 'ru')}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>

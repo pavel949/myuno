@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CommandDialog,
@@ -66,6 +66,7 @@ const navigationItems: CmdItem[] = [
   { id: 'data-import', titleEn: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database, group: 'tools', keywords: ['csv', 'upload'] },
   { id: 'ai-ops', titleEn: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain, group: 'tools', keywords: ['automation'] },
   { id: 'ai-agents', titleEn: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot, group: 'tools', keywords: ['chatbot'] },
+  { id: 'official-news', titleEn: 'Official News Monitor', titleRu: 'Офиц. новости (монитор)', path: '/admin/official-news', icon: Bot, group: 'tools', keywords: ['news', 'firecrawl', 'aggregator', 'sync'] },
   { id: 'uno-team', titleEn: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users, group: 'tools', keywords: ['staff'] },
   { id: 'qa', titleEn: 'QA Tests', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube, group: 'tools', keywords: ['test', 'quality'] },
   { id: 'operations', titleEn: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: ShoppingCart, group: 'tools', keywords: ['orders', 'tickets'] },
@@ -174,19 +175,29 @@ export function AdminCommandPalette({ open, onOpenChange }: AdminCommandPaletteP
 
 // Hook for managing command palette state with keyboard shortcut
 export function useAdminCommandPalette() {
-  const [open, setOpen] = useState(false);
+  const [open, updateOpen] = useState(false);
+  const origin = useRef<HTMLElement | null>(null);
+  const setOpen = useCallback((next: boolean) => {
+    updateOpen(next);
+    if (!next) requestAnimationFrame(() => {
+      if (origin.current?.isConnected) origin.current.focus({preventScroll: true});
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        // Do not stack the palette over another modal (e.g. global search).
+        if (!open && document.querySelector('[role="dialog"]')) return;
+        if (!open) origin.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setOpen(!open);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [open, setOpen]);
 
   return { open, setOpen };
 }

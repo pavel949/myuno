@@ -1,0 +1,24 @@
+{
+  "rows": [
+    {
+      "assignments": 0,
+      "booking_total": "1559500.00",
+      "bookings": 82,
+      "enforced": 0,
+      "item_total": "3221830.00",
+      "items": 100,
+      "ledger": 136,
+      "ledger_total": "20505150.00",
+      "members": 0,
+      "order_total": "7558520.00",
+      "orders": 416,
+      "payment_total": "253630.00",
+      "payments": 7,
+      "snapshot_at": "2026-10-17 07:00:49.87996+00",
+      "spaces": 0,
+      "wallet_balance": "0",
+      "wallet_transactions": 12,
+      "wallets": 19
+    }
+  ]
+}

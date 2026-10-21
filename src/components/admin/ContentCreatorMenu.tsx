@@ -260,7 +260,7 @@ export function ContentCreatorMenu({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         {variant === 'icon' ? (
-          <Button size="icon" className={className}>
+          <Button size="icon" className={className} aria-label={isRu ? 'Добавить листинг' : 'Add Listing'}>
             <Plus className="h-4 w-4" />
           </Button>
         ) : (

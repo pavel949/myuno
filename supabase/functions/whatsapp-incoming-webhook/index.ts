@@ -10,14 +10,11 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -27,11 +24,41 @@ Deno.serve(async (req) => {
     return new Response("OK", { status: 200, headers: corsHeaders });
   }
 
+  // Webhook signature/token verification — protects against spoofed callbacks.
+  // Configure ULTRAMSG_WEBHOOK_TOKEN in Supabase Edge Function secrets and set the
+  // same token in the UltraMSG dashboard.
+  const expectedToken = Deno.env.get("ULTRAMSG_WEBHOOK_TOKEN");
+  if (!expectedToken) {
+    // Fail closed: if the verification secret is not configured we must NOT
+    // accept unauthenticated callbacks. An open webhook lets anyone forge
+    // WhatsApp payloads to create leads, inject CRM activity, and trigger
+    // outbound messages on the platform's UltraMSG account.
+    console.error("[WhatsApp Incoming] ULTRAMSG_WEBHOOK_TOKEN not set — rejecting request");
+    return new Response(
+      JSON.stringify({ error: "Webhook not configured" }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+  const provided =
+    req.headers.get("x-ultramsg-token") ??
+    req.headers.get("x-webhook-token") ??
+    new URL(req.url).searchParams.get("token") ??
+    "";
+  if (provided !== expectedToken) {
+    console.warn("[WhatsApp Incoming] Rejected request with invalid/missing token");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const ADMIN_PHONE = await getAdminWhatsApp();
 
   try {
     const body = await req.json();
-    console.log("[WhatsApp Incoming] Payload:", JSON.stringify(body));
+    // Do not log the full payload — it contains the sender's phone number,
+    // push name and message body (customer PII). Log only routing metadata.
+    console.info("[WhatsApp Incoming] event:", body?.event_type ?? "direct");
 
     // UltraMSG sends: { event_type, data: { from, pushName, body, ... } }
     // Or direct: { from, body, pushName, ... }
@@ -49,9 +76,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Clean phone number (remove @c.us suffix from UltraMSG)
-    const phone = from.replace("@c.us", "").replace("@s.whatsapp.net", "");
+    // Clean phone number (remove @c.us suffix from UltraMSG) and sanitize to
+    // digits only. `from` is attacker-controlled and later interpolated into a
+    // PostgREST `.or()` filter string, so stripping every non-digit character
+    // closes that injection vector while keeping the phone usable for lookups.
+    const phone = (from.split("@")[0] || "").replace(/\D/g, "");
     const name = pushName || `WhatsApp ${phone}`;
+
+    if (!phone) {
+      return new Response(
+        JSON.stringify({ ok: true, skipped: true, reason: "no_phone" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabase = createServiceClient();
 
@@ -68,7 +105,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingLead) {
-      console.log(`[WhatsApp Incoming] Duplicate within 24h for ${phone}, skipping lead creation`);
+      console.info(`[WhatsApp Incoming] Duplicate within 24h for ${phone}, skipping lead creation`);
       // Still notify admin about the follow-up message
       await sendWhatsApp({
         to: ADMIN_PHONE,
@@ -114,7 +151,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
+    console.info(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
 
     // Notify Pavel immediately
     const adminMessage = `📩 *НОВЫЙ ЛИД ИЗ WHATSAPP*
@@ -139,7 +176,7 @@ ${messageBody.slice(0, 500)}
       .maybeSingle();
 
     if (existingContact) {
-      console.log(`[WhatsApp Incoming] Matched existing CRM contact: ${existingContact.id}`);
+      console.info(`[WhatsApp Incoming] Matched existing CRM contact: ${existingContact.id}`);
       // Add activity to existing contact
       try {
         await supabase.from("crm_activities").insert({
@@ -151,6 +188,36 @@ ${messageBody.slice(0, 500)}
         });
       } catch { /* ignore */ }
     }
+
+    // Best-effort: route the message through concierge-intent so the
+    // customer receives a deep-link to the right product (Trust Stack §A5).
+    let deepLink: { route: string; label: string } | null = null;
+    try {
+      const intentUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/concierge-intent`;
+      const intentRes = await fetch(intentUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}`,
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: messageBody.slice(0, 2000) }],
+          language: "ru",
+        }),
+      });
+      if (intentRes.ok) {
+        const intent = await intentRes.json();
+        if (intent?.route && intent?.route_label) {
+          deepLink = { route: intent.route, label: String(intent.route_label) };
+        }
+      }
+    } catch (e) {
+      console.warn("[WhatsApp Incoming] concierge-intent failed:", e);
+    }
+
+    const deepLinkBlock = deepLink
+      ? `\n\n👉 ${deepLink.label}: https://myuno.app${deepLink.route}\n👉 ${deepLink.label}: https://myuno.app${deepLink.route}`
+      : "";
 
     // Send auto-reply to the customer
     const autoReply = `Hello ${pushName || ""}! 👋
@@ -168,7 +235,7 @@ For urgent matters, feel free to call: +66 92 240 7355
 
 Наша команда получила ваше сообщение и скоро ответит.
 
-По срочным вопросам: +66 92 240 7355`;
+По срочным вопросам: +66 92 240 7355${deepLinkBlock}`;
 
     await sendWhatsApp({ to: phone, body: autoReply });
 

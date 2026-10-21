@@ -62,14 +62,14 @@ export const FORBIDDEN_SYNONYMS: readonly ForbiddenSynonym[] = [
   { forbidden: 'guaranteed return', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
   { forbidden: 'guaranteed returns', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
   { forbidden: 'guaranteed yield', canonical: '(never used)', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
-  { forbidden: 'expected returns', canonical: 'historical comparable yield', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
+  { forbidden: 'expected returns', canonical: 'clearly labelled estimate, with its source and assumptions', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
   { forbidden: 'Raise Funding', canonical: 'Submit your project', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
   { forbidden: 'Pitch your project', canonical: 'Submit your project', contexts: ['commercial', 'en'], source: 'business/regulatory-language §3' },
   { forbidden: 'Привлечь инвестиции', canonical: 'Подать проект', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
   { forbidden: 'Привлечь финансирование', canonical: 'Подать проект', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
   { forbidden: 'инвестиционная возможность', canonical: 'объект каталога / профиль проекта', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
   { forbidden: 'гарантированная доходность', canonical: '(никогда не используем)', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
-  { forbidden: 'ожидаемая доходность', canonical: 'историческая доходность сопоставимых объектов', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
+  { forbidden: 'ожидаемая доходность', canonical: 'расчётная оценка с источником и допущениями', contexts: ['commercial', 'ru'], source: 'business/regulatory-language §4' },
 ];
 
 /** Regex-friendly flat list (helper for tooling that doesn't import full objects). */

@@ -16,7 +16,7 @@ import { MarketplaceProduct, MarketplaceSubcategory } from '@/types/marketplace'
 import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
@@ -197,7 +197,7 @@ const MarketCategoryPage = () => {
           showBack
           badge={!isLoading ? filteredProducts.length : undefined}
           actions={
-            <Button variant="ghost" size="icon" onClick={() => navigate('/cart')} className="relative">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/cart')} className="relative" aria-label={language === 'ru' ? 'Корзина' : 'Cart'}>
               <ShoppingBag className="w-5 h-5" />
               {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
@@ -266,16 +266,16 @@ const MarketCategoryPage = () => {
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="icon"
-              className="h-8 w-8"
               onClick={() => setViewMode('grid')}
+              aria-label={language === 'ru' ? 'Сетка' : 'Grid view'}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === 'horizontal' ? 'default' : 'ghost'}
               size="icon"
-              className="h-8 w-8"
               onClick={() => setViewMode('horizontal')}
+              aria-label={language === 'ru' ? 'Список' : 'List view'}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -329,9 +329,9 @@ const MarketCategoryPage = () => {
           checkoutPath="/market/checkout" 
         />
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default MarketCategoryPage;
+const AvailableMarketCategoryPage = withMarketAvailability(MarketCategoryPage);
+export default AvailableMarketCategoryPage;

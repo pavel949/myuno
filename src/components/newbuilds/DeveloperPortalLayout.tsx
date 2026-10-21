@@ -11,7 +11,7 @@ import { LayoutDashboard, FolderKanban, Users, BarChart3, Building2, ArrowLeft, 
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { Button } from '@/components/ui/button';
+
 import { PROPERTY_VERTICAL_MUTED_LINK } from '@/design-system/propertyVertical';
 
 const navItems = [
@@ -23,34 +23,6 @@ const navItems = [
   { label: 'Команда', path: APP_ROUTES.DEVELOPER_PORTAL_TEAM, icon: UserCog },
 ];
 
-function DeveloperPortalGate({ isRu }: { isRu: boolean }) {
-  return (
-    <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-12 text-center sm:py-16">
-      <h1 className="nb-display text-2xl font-bold text-[hsl(var(--nb-gold))] sm:text-3xl">
-        {isRu ? 'Портал застройщика' : 'Developer portal'}
-      </h1>
-      <p className="mt-4 text-balance text-[hsl(var(--nb-text-secondary))]">
-        {isRu
-          ? 'Кабинет доступен после регистрации компании в myUNO. Начните онбординг или вернитесь к каталогу новостроек.'
-          : 'The developer dashboard is available after you register your company on myUNO. Start onboarding or browse new developments.'}
-      </p>
-      <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button asChild className="rounded-none font-semibold">
-          <Link to={APP_ROUTES.DEVELOPER_PORTAL_ONBOARDING}>
-            {isRu ? 'Начать регистрацию' : 'Start registration'}
-          </Link>
-        </Button>
-        <Button variant="outline" asChild className="rounded-none border-[hsl(var(--nb-glass-border))] bg-[hsl(var(--nb-glass-bg))]">
-          <Link to={APP_ROUTES.DEVELOPER_PORTAL_APPLY}>{isRu ? 'Краткая заявка' : 'Short application'}</Link>
-        </Button>
-        <Button variant="ghost" asChild className="rounded-none text-[hsl(var(--nb-muted))]">
-          <Link to={APP_ROUTES.NEWBUILDS}>{isRu ? 'Новостройки' : 'New developments'}</Link>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export default function DeveloperPortalLayout() {
   const { user, isLoading: authLoading } = useAuth();
   const { language, t } = useLanguage();
@@ -60,12 +32,13 @@ export default function DeveloperPortalLayout() {
 
   if (authLoading || devLoading) return <NewbuildsLayout><LoadingState /></NewbuildsLayout>;
   if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  // Single gate: users without a developer profile go to the marketing landing
+  // (`/for-developers`) — from there they can apply / register. After registration
+  // (developer profile exists) the portal opens normally. This makes every entry
+  // point ("Портал застройщика" в UserAvatarMenu, SIGNAL_ROUTE на Home,
+  // прямые ссылки) сходиться на одной странице-лендинге для незарегистрированных.
   if (!developer) {
-    return (
-      <NewbuildsLayout>
-        <DeveloperPortalGate isRu={isRu} />
-      </NewbuildsLayout>
-    );
+    return <Navigate to={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} replace />;
   }
   if ((developer as unknown as Record<string, unknown>).devmod_status === 'pending') {
     return <Navigate to={APP_ROUTES.DEVELOPER_PORTAL_PENDING} replace />;

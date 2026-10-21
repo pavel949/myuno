@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import {
@@ -40,6 +42,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function BudgetPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const { user } = useAuth();
   const isRu = language === 'ru';
 
@@ -112,7 +116,7 @@ export default function BudgetPage() {
   };
 
   const formatAmount = (n: number) =>
-    new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', { style: 'currency', currency: 'THB', minimumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', { style: 'currency', currency: cityCurrencyCode, minimumFractionDigits: 0 }).format(n);
 
   const getCatLabel = (cat: string, type: string) => {
     const list = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;

@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     if (guardResponse) return guardResponse;
     
     const supabase = createServiceClient();
-    console.log('[update-user-segments] Starting segment calculation...');
+    console.info('[update-user-segments] Starting segment calculation...');
 
     // Get all users from profiles
     const { data: profiles, error: profilesError } = await supabase
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`[update-user-segments] Processing ${profiles.length} users...`);
+    console.info(`[update-user-segments] Processing ${profiles.length} users...`);
 
     let processed = 0;
     let errors = 0;
@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`[update-user-segments] Done. Processed: ${processed}, Errors: ${errors}`);
+    console.info(`[update-user-segments] Done. Processed: ${processed}, Errors: ${errors}`);
 
     return new Response(
       JSON.stringify({ success: true, processed, errors, total: profiles.length }),

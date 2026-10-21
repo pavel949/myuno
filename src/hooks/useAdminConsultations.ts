@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { getLeadSourceFilterValues, getLeadVerticalFilterValues } from '@/lib/leadVerticalConfig';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from './useConsultationRequests';
 
 export interface ConsultationFilters {
@@ -34,11 +35,11 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       }
 
       if (filters?.verticalId && filters.verticalId !== 'all') {
-        query = query.eq('vertical_id', filters.verticalId);
+        query = query.in('vertical_id', getLeadVerticalFilterValues(filters.verticalId));
       }
 
       if (filters?.leadSource && filters.leadSource !== 'all') {
-        query = query.eq('lead_source', filters.leadSource);
+        query = query.in('lead_source', getLeadSourceFilterValues(filters.leadSource));
       }
 
       if (filters?.search) {
@@ -63,7 +64,7 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
 
       const { data, error } = await supabase
         .from('consultation_requests')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', id)
         .select()
         .single();

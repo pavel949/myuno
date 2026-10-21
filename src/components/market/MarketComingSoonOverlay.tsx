@@ -1,70 +1,58 @@
+import '@/styles/public-commerce.css';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ShoppingBag, ArrowRight, Home } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 
-/** Set to true when the marketplace is ready to launch */
+/** Set to true only after the marketplace launch has been verified. */
 export const MARKET_ENABLED = false;
 
+const copy = {
+  en: {
+    title: 'Market is not available yet',
+    description: 'Product browsing and ordering are not available yet. You can browse services or return to the home page.',
+    services: 'Browse services',
+    home: 'Go home',
+  },
+  ru: {
+    title: 'Маркет пока недоступен',
+    description: 'Просмотр и заказ товаров пока недоступны. Вы можете перейти к услугам или вернуться на главную.',
+    services: 'Перейти к услугам',
+    home: 'На главную',
+  },
+  th: {
+    title: 'ตลาดยังไม่เปิดให้บริการ',
+    description: 'ยังไม่สามารถดูหรือสั่งซื้อสินค้าได้ในขณะนี้ คุณสามารถดูบริการหรือกลับไปหน้าหลัก',
+    services: 'ดูบริการ',
+    home: 'กลับหน้าหลัก',
+  },
+};
+
+/** Legacy export name retained for compatibility; this is now an ordinary page section. */
 export const MarketComingSoonOverlay: React.FC = () => {
   const { language } = useLanguage();
-  const navigate = useNavigate();
-  const isRu = language === 'ru';
+  const text = copy[language as keyof typeof copy] || copy.en;
 
   if (MARKET_ENABLED) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[100] bg-background/80 flex flex-col items-center justify-center px-6 py-10"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ delay: 0.15, duration: 0.4, ease: 'easeOut' }}
-        className="max-w-sm w-full text-center space-y-6"
-      >
-        {/* Icon */}
-        <div className="mx-auto w-20 h-20 rounded-none bg-primary/10 flex items-center justify-center">
-          <ShoppingBag className="w-10 h-10 text-primary" />
-        </div>
-
-        {/* Text */}
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">
-            {isRu ? 'Маркет скоро откроется' : 'Market Coming Soon'}
-          </h2>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {isRu
-              ? 'Готовим подборку товаров от проверенных продавцов. Скоро откроем доступ.'
-              : 'We are curating products from verified sellers. Access opens soon.'}
-          </p>
-        </div>
-
-        {/* CTAs */}
-        <div className="flex flex-col gap-3">
-          <Button
-            size="lg"
-            className="w-full gap-2 rounded-none"
-            onClick={() => navigate('/services')}
-          >
-            {isRu ? 'Перейти к услугам' : 'Browse Services'}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full gap-2 rounded-none"
-            onClick={() => navigate('/')}
-          >
-            <Home className="w-4 h-4" />
-            {isRu ? 'На главную' : 'Go Home'}
-          </Button>
-        </div>
-      </motion.div>
-    </motion.div>
+    <section aria-labelledby="market-unavailable-title" className="public-commerce public-commerce--market mx-auto flex min-h-[55vh] w-full max-w-lg flex-col items-center justify-center px-4 py-12 text-center sm:px-6">
+      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-none bg-primary/10">
+        <ShoppingBag className="h-10 w-10 text-primary" aria-hidden="true" />
+      </div>
+      <h1 id="market-unavailable-title" className="public-commerce-title text-foreground">
+        {text.title}
+      </h1>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">{text.description}</p>
+      <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
+        <Button asChild size="lg" className="min-h-11 flex-1 gap-2">
+          <Link to="/services">{text.services}<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        </Button>
+        <Button asChild variant="outline" size="lg" className="min-h-11 flex-1 gap-2">
+          <Link to="/"><Home className="h-4 w-4" aria-hidden="true" />{text.home}</Link>
+        </Button>
+      </div>
+    </section>
   );
 };

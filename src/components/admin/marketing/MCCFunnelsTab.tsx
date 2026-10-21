@@ -1,161 +1,89 @@
-import React from 'react';
+/**
+ * MCCFunnelsTab — placeholder for the future Funnel Builder.
+ *
+ * Previously displayed 3 hardcoded "funnels" with fake numbers
+ * (45 000 impressions, 6.5% CVR) and inert «Create / Edit / A/B Test»
+ * buttons. The admin treated those numbers as real platform metrics,
+ * which was actively misleading.
+ *
+ * Until a real funnels backend ships (events pipeline →
+ * `marketing_funnels` + `marketing_funnel_steps` tables → analytics
+ * RPCs), this tab renders an honest «not yet implemented» state so
+ * nothing in the panel claims to know what it doesn't.
+ */
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, GitBranch, ArrowRight, Users, TrendingUp, Clock } from 'lucide-react';
+import { GitBranch, Sparkles, ArrowRight } from 'lucide-react';
 
 export function MCCFunnelsTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  // Mock funnels
-  const funnels = [
-    {
-      id: '1',
-      name: isRu ? 'Привлечение новых пользователей' : 'New User Acquisition',
-      type: 'acquisition',
-      isActive: true,
-      stages: [
-        { name: isRu ? 'Показы' : 'Impressions', count: 45000, rate: 100 },
-        { name: isRu ? 'Клики' : 'Clicks', count: 3200, rate: 7.1 },
-        { name: isRu ? 'Лендинг' : 'Landing', count: 2800, rate: 87.5 },
-        { name: isRu ? 'Регистрация' : 'Signup', count: 892, rate: 31.8 },
-        { name: isRu ? 'Активация' : 'Activation', count: 654, rate: 73.3 },
-      ],
-      conversionRate: 1.45,
-      avgTime: '2.3 days',
-    },
-    {
-      id: '2',
-      name: isRu ? 'Воронка бронирования' : 'Booking Funnel',
-      type: 'activation',
-      isActive: true,
-      stages: [
-        { name: isRu ? 'Просмотр' : 'View', count: 12000, rate: 100 },
-        { name: isRu ? 'Детали' : 'Details', count: 4500, rate: 37.5 },
-        { name: isRu ? 'Корзина' : 'Cart', count: 1200, rate: 26.7 },
-        { name: isRu ? 'Оплата' : 'Payment', count: 890, rate: 74.2 },
-        { name: isRu ? 'Подтверждение' : 'Confirmed', count: 780, rate: 87.6 },
-      ],
-      conversionRate: 6.5,
-      avgTime: '45 min',
-    },
-    {
-      id: '3',
-      name: isRu ? 'Реактивация' : 'Reactivation',
-      type: 'retention',
-      isActive: false,
-      stages: [
-        { name: isRu ? 'Неактивные' : 'Dormant', count: 2500, rate: 100 },
-        { name: isRu ? 'Email отправлен' : 'Email Sent', count: 2500, rate: 100 },
-        { name: isRu ? 'Открыто' : 'Opened', count: 625, rate: 25 },
-        { name: isRu ? 'Возврат' : 'Returned', count: 187, rate: 30 },
-      ],
-      conversionRate: 7.5,
-      avgTime: '5 days',
-    },
-  ];
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="space-y-4">
+      <div>
+        <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">
             {isRu ? 'Воронки конверсии' : 'Conversion Funnels'}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {isRu ? 'Визуализируйте и оптимизируйте путь пользователя' : 'Visualize and optimize user journeys'}
-          </p>
+          <Badge variant="outline" className="uppercase tracking-wide text-[10.5px]">
+            {isRu ? 'В разработке' : 'In progress'}
+          </Badge>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          {isRu ? 'Создать воронку' : 'Create Funnel'}
-        </Button>
+        <p className="text-sm text-muted-foreground">
+          {isRu
+            ? 'Визуализация и оптимизация пути пользователя по платформе.'
+            : 'Visualize and optimize the user journey across the platform.'}
+        </p>
       </div>
 
-      {/* Funnels */}
-      <div className="space-y-6">
-        {funnels.map((funnel) => (
-          <Card key={funnel.id}>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-none bg-primary/10">
-                    <GitBranch className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">{funnel.name}</CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={funnel.isActive ? 'default' : 'secondary'}>
-                        {funnel.isActive ? (isRu ? 'Активна' : 'Active') : (isRu ? 'Черновик' : 'Draft')}
-                      </Badge>
-                      <Badge variant="outline">{funnel.type}</Badge>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 text-sm">
-                  <div className="text-center">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <TrendingUp className="h-4 w-4" />
-                      <span>{isRu ? 'Конверсия' : 'CVR'}</span>
-                    </div>
-                    <p className="font-bold text-lg">{funnel.conversionRate}%</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      <span>{isRu ? 'Время' : 'Avg Time'}</span>
-                    </div>
-                    <p className="font-bold text-lg">{funnel.avgTime}</p>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* Funnel Visualization */}
-              <div className="flex items-center gap-2 overflow-x-auto py-4">
-                {funnel.stages.map((stage, idx) => (
-                  <React.Fragment key={idx}>
-                    <div 
-                      className="flex-shrink-0 p-4 rounded-none bg-gradient-to-b from-primary/10 to-primary/5 border border-primary/20 text-center min-w-[120px]"
-                      style={{ 
-                        opacity: 0.5 + (stage.rate / 200),
-                      }}
-                    >
-                      <p className="text-xs text-muted-foreground mb-1">{stage.name}</p>
-                      <p className="text-xl font-bold">{stage.count.toLocaleString()}</p>
-                      <p className="text-xs text-primary font-medium">{stage.rate}%</p>
-                    </div>
-                    {idx < funnel.stages.length - 1 && (
-                      <div className="flex-shrink-0 flex flex-col items-center">
-                        <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          {((funnel.stages[idx + 1].count / stage.count) * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center text-center py-14 px-6 gap-4">
+          <div className="p-3 rounded-none bg-primary/10">
+            <GitBranch className="h-7 w-7 text-primary" />
+          </div>
+          <div className="space-y-1.5 max-w-md">
+            <h3 className="font-semibold">
+              {isRu ? 'Конструктор воронок ещё не готов' : 'Funnel builder is not ready yet'}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {isRu
+                ? 'Чтобы здесь появились настоящие воронки, нужен events-pipeline (impressions/clicks/conversions) и таблицы marketing_funnels/marketing_funnel_steps. До тех пор лучше показать честное «пока пусто», чем выдуманные цифры.'
+                : 'Real funnels need an events pipeline (impressions/clicks/conversions) plus marketing_funnels / marketing_funnel_steps tables. Until then, an honest empty state beats fabricated numbers.'}
+            </p>
+          </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 pt-4 border-t">
-                <Button variant="outline" size="sm">
-                  {isRu ? 'Редактировать' : 'Edit'}
-                </Button>
-                <Button variant="outline" size="sm">
-                  {isRu ? 'Аналитика' : 'Analytics'}
-                </Button>
-                <Button variant="outline" size="sm">
-                  {isRu ? 'A/B Тест' : 'A/B Test'}
-                </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full max-w-xl mt-2">
+            {[
+              { en: 'New User Acquisition', ru: 'Привлечение пользователей' },
+              { en: 'Booking Funnel', ru: 'Воронка бронирования' },
+              { en: 'Reactivation', ru: 'Реактивация' },
+            ].map((f) => (
+              <div
+                key={f.en}
+                className="p-3 border border-dashed border-border/60 rounded-none text-xs text-muted-foreground"
+              >
+                <div className="font-medium text-foreground/80">{isRu ? f.ru : f.en}</div>
+                <div className="mt-1 opacity-70">{isRu ? 'Ждёт events-pipeline' : 'Awaiting events pipeline'}</div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+
+          <Button asChild variant="outline" size="sm" className="gap-1.5 mt-2">
+            <a
+              href="https://github.com/pavel949/myuno/issues?q=label%3Amarketing-funnels"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {isRu ? 'Следить за прогрессом' : 'Track progress'}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

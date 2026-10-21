@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
+import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
+import { version } from "./package.json";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Lucide icon strategy:
 // We tried tiered chunking (core/extended/rare) — it didn't reduce the entry
@@ -14,8 +18,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
-  const buildTimestamp = new Date().toISOString();
-
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
   // Hardcoded fallback ensures the app boots on every host (myuno.app,
   // Capacitor native shells, custom deployments) even when build-time env
@@ -30,9 +32,14 @@ export default defineConfig(({ mode, command }) => {
 
   return {
     server: {
+      allowedHosts: ["terminal.local"],
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
+      // When 8080 is taken Vite picks the next free port. Embedded previews (Cursor / Lovable)
+      // often probe :8080 first — if something else is bound there you get a blank iframe while
+      // Vite is actually on :8081+. Free 8080 or stop the other process.
+      //
       // Avoid timing-out clients while Vite is still pre-bundling on first hit.
       // The Lovable iframe preview and Playwright otherwise see HTTP 504 from
       // the dev server middleware on cold start with our large module graph.
@@ -59,7 +66,6 @@ export default defineConfig(({ mode, command }) => {
       port: 8080,
     },
     define: {
-      __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
@@ -69,6 +75,7 @@ export default defineConfig(({ mode, command }) => {
     esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
+      deploymentMetadataPlugin(version),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
       // Applies to `vite` and `vite preview` (both command === "serve"), not to `vite build`
@@ -76,77 +83,64 @@ export default defineConfig(({ mode, command }) => {
       command === "serve" && {
         name: "csp-allow-embedded-dev-preview",
         transformIndexHtml(html: string) {
-          let out = html.replace(/frame-ancestors 'none';/g, "frame-ancestors *;");
-          // Vite HMR uses ws: to the dev server; strict connect-src can block it in embedded previews.
-          out = out.replace(
-            /connect-src 'self'/,
-            "connect-src 'self' ws://127.0.0.1:* ws://localhost:* wss://127.0.0.1:* wss://localhost:*"
+          // Replace the whole CSP for dev/preview: partial connect-src patches miss
+          // `host: true` (LAN IP) + alternate ports, which leaves Simple Browser / iframes blank.
+          return html.replace(
+            /<meta\s+http-equiv="Content-Security-Policy"\s+content="[^"]*"\s*\/>/i,
+            '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://maps.googleapis.com https://maps.gstatic.com; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; img-src \'self\' data: https: blob:; font-src \'self\' https://fonts.gstatic.com; connect-src * blob: data:; worker-src \'self\' blob:; frame-ancestors *; base-uri \'self\'; form-action \'self\';" />',
           );
-          return out;
         },
       },
       mode === "development" && componentTagger(),
+      mcpPlugin(),
       VitePWA({
-        // Temporary kill-switch worker: clears stale production caches that kept
-        // serving old split chunks, then unregisters itself.
-        strategies: 'injectManifest',
-        srcDir: 'src',
-        filename: 'sw.ts',
+        // Auto-updating Workbox service worker. Two jobs:
+        //  1. Installability — a SW with a fetch handler + the manifest below
+        //     satisfies Chrome/Edge install criteria so `beforeinstallprompt`
+        //     fires and the in-app "Install" button is a genuine one-tap install.
+        //  2. Auto-update without reinstall — each deploy ships a new precache
+        //     revision; the SW installs it in the background, `skipWaiting` +
+        //     `clientsClaim` activate it immediately, and `cleanupOutdatedCaches`
+        //     evicts the old shell. The next reload (driven by VersionWatcher /
+        //     PWAUpdatePrompt) serves the fresh build — no app-store reinstall,
+        //     and the same flow updates the Capacitor WebView shells.
+        // Registered manually in src/main.tsx (production host only).
         registerType: 'autoUpdate',
         injectRegister: false,
-        
+
         manifest: {
-          name: 'myUNO - All Services in One',
+          name: 'myUNO — Phuket Super-App for Foreigners',
           short_name: 'myUNO',
-          description: 'Все услуги в одном приложении',
+          description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
           // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
           // requires literal CSS color strings; CSS variables are not resolved at
-          // install time. Leaving as hex; if the canonical brand palette changes,
-          // update these to match tokens.css --brand-navy / --brand-cream.
+          // install time. Synced 2026-06-18 with DS 2.1 navy palette.
           // eslint-disable-next-line no-restricted-syntax
-          theme_color: '#00D68F',
+          theme_color: '#0A2240',
           // eslint-disable-next-line no-restricted-syntax
-          background_color: '#08101E',
+          background_color: '#0A2240',
           display: 'standalone',
-          orientation: 'portrait-primary',
-          start_url: '/',
+          orientation: 'portrait',
+          start_url: '/?source=pwa',
+          // IMPORTANT: keep id stable — changing it makes browsers treat the PWA as a new app,
+          // breaking updates for users who already installed myUNO.
           id: '/myuno-pwa-2025',
           scope: '/',
-          // Tells Android to prefer opening the installed PWA over the browser
+          lang: 'ru',
+          dir: 'ltr',
+          categories: ['lifestyle', 'travel', 'productivity'],
           prefer_related_applications: false,
           icons: [
-            {
-              src: '/icons/icon-72x72.png',
-              sizes: '72x72',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/icon-192x192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/icon-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
+            { src: '/icons/icon-72x72.png',      sizes: '72x72',   type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-120x120.png',    sizes: '120x120', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-152x152.png',    sizes: '152x152', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-180x180.png',    sizes: '180x180', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-192x192.png',    sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-512x512.png',    sizes: '512x512', type: 'image/png', purpose: 'any' },
             // Maskable variants — drawn with safe zone so Android launchers
             // don't crop the logo when applying their adaptive icon mask.
-            {
-              src: '/icons/icon-maskable-192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'maskable'
-            },
-            {
-              src: '/icons/icon-maskable-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
-            }
+            { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
           // Screenshots trigger Chrome's richer install UI (looks like Play Store)
           screenshots: [
@@ -155,15 +149,15 @@ export default defineConfig(({ mode, command }) => {
               sizes: '1080x1920',
               type: 'image/png',
               form_factor: 'narrow',
-              label: 'myUNO Home Screen'
+              label: 'myUNO — главный экран',
             },
             {
               src: '/screenshots/mobile-services.png',
               sizes: '1080x1920',
               type: 'image/png',
               form_factor: 'narrow',
-              label: 'All Services in One App'
-            }
+              label: 'Все сервисы в одном приложении',
+            },
           ],
           // Quick actions from long-press on app icon
           shortcuts: [
@@ -171,31 +165,87 @@ export default defineConfig(({ mode, command }) => {
               name: 'Property Search',
               short_name: 'Property',
               url: '/property',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
             },
             {
-              name: 'Restaurants',
-              short_name: 'Food',
-              url: '/restaurants',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+              name: 'Newbuilds',
+              short_name: 'Newbuilds',
+              url: '/newbuilds',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
             },
             {
-              name: 'Transport',
-              short_name: 'Transport',
-              url: '/transport',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
-            }
-          ]
+              name: 'Discover',
+              short_name: 'Discover',
+              url: '/discover',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
+            },
+          ],
         },
         
         includeAssets: ['favicon.ico', 'icons/*.png'],
-        
-        injectManifest: {
-          injectionPoint: undefined,
-          globPatterns: [],
-          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+
+        workbox: {
+          // Precache only the app shell (HTML/CSS/icons/manifest) so install
+          // stays light — the 557-route JS graph is cached at runtime on demand
+          // (see runtimeCaching) instead of force-downloading every chunk up front.
+          globPatterns: ['**/*.{css,html,ico,svg,webmanifest}', 'icons/**/*.png'],
+          // Old precache revisions are content-hashed; remove them on activate so
+          // a stale shell can never be served after a deploy.
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+          // SPA: serve the cached index.html for navigations (incl. offline launch),
+          // which is also what makes the app installable.
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [
+            /^\/api\//,
+            /^\/auth\//,
+            /^\/functions\//,
+            // OAuth broker paths must always hit the network — Lovable's proxy
+            // worker intercepts these on the edge. If the SW returns the SPA
+            // shell instead, Google sign-in dies with a client-side 404.
+            /^\/~oauth(\/|$)/,
+            /\/version\.json$/,
+          ],
+
+          runtimeCaching: [
+            {
+              // Hashed JS/CSS/worker chunks — safe to cache, revalidate in the
+              // background so a new deploy's chunks are picked up without a wipe.
+              urlPattern: ({ request }) =>
+                request.destination === 'script' ||
+                request.destination === 'style' ||
+                request.destination === 'worker',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-assets',
+                plugins: [{ cacheWillUpdate: assetCacheWillUpdate }],
+                expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ request }) => request.destination === 'image',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-images',
+                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ url }) =>
+                url.origin === 'https://fonts.googleapis.com' ||
+                url.origin === 'https://fonts.gstatic.com',
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts',
+                cacheableResponse: { statuses: [0, 200] },
+                expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              },
+            },
+          ],
         },
-        
+
         devOptions: {
           enabled: false,
         },
@@ -269,6 +319,26 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     build: {
+      // Terser produces ~25-30% smaller output than esbuild on barrel re-exporting
+      // libraries like lucide-react (vendor-icons chunk was flagged by Lighthouse
+      // `unminified-javascript` at 30% wasted bytes with esbuild). 2026-06-18.
+      minify: 'terser',
+      terserOptions: {
+        compress: { drop_console: true, drop_debugger: true, passes: 2 },
+        format: { comments: false },
+      },
+      // Selective modulePreload: by default Vite injects <link rel="modulepreload">
+      // for ALL dynamic-import dependencies discovered in the graph, which means
+      // the home page eagerly downloads vendor-pdf/charts/map/excel even though
+      // they're only needed on lazy routes. Strip those preload hints so the
+      // chunks are fetched only when the user navigates to the consuming route.
+      // (Lighthouse `unused-javascript` dropped from ~600KB to expected ~50KB.)
+      modulePreload: {
+        resolveDependencies: (_filename, deps) => {
+          const skip = /(vendor-(pdf|charts|html2canvas|excel|map|sentry|sanitize)|MapView|Calendar|DeveloperAnalytics|OwnerRevenueDashboard)/i;
+          return deps.filter((d) => !skip.test(d));
+        },
+      },
       rollupOptions: {
         output: {
           /**
@@ -369,6 +439,11 @@ export default defineConfig(({ mode, command }) => {
           },
         },
       },
+      // Hidden sourcemaps: generated to dist/ so Sentry & error-reporters can
+      // de-minify stacks, but no //# sourceMappingURL comment — files are not
+      // linked from public JS, so casual visitors don't see them. (Lighthouse
+      // best-practices `valid-source-maps` now passes.)
+      sourcemap: 'hidden',
       // Real warning limit — chunks above 800KB deserve attention
       chunkSizeWarningLimit: 800,
     },

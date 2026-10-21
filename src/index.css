@@ -9,6 +9,7 @@
 /* Onboarding flow (friction-removal animation + 4 screens). Scoped under
    `.onboarding-scope` so it never leaks into other surfaces. */
 @import './styles/onboarding.css';
+@import './styles/consumer-system.css';
 
 /* Fonts loaded via index.html for better performance */
 
@@ -58,14 +59,16 @@ html {
 
 body {
   overscroll-behavior-x: none;
-  overflow-x: hidden;
+  /* Clip horizontally without creating a non-scrolling sticky ancestor. */
+  overflow-x: clip;
   width: 100%;
   max-width: 100vw;
 }
 
 #root {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* hidden computes overflow-y:auto and traps the consumer sticky header. */
+  overflow-x: clip;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -168,7 +171,7 @@ body {
     }
   }
 
-  /* Typography — Golos Text (display), Golos Text (body) — myuno-design-preview */
+  /* Typography — Source Serif 4 (display), Geist (body) — DS 2.1 */
   h1 {
     @apply font-display font-bold tracking-tight leading-[1.15];
     font-size: 1.75rem;
@@ -220,6 +223,16 @@ body {
       font-size: 16px !important;
     }
   }
+
+  /* PWA standalone — hide the marketing footer so the installed app feels
+   * native (no "About / FAQ / Cookies" link strip + copyright row).
+   * Page-level navigation is still reachable via the side drawer + bottom nav.
+   */
+  @media (display-mode: standalone) {
+    body > #root footer {
+      display: none !important;
+    }
+  }
 }
 
 @layer components {
@@ -246,11 +259,6 @@ body {
     hyphens: auto;
   }
   
-  /* Premium gradient backgrounds */
-  .gradient-gold {
-    background: linear-gradient(135deg, hsl(157 100% 42%) 0%, hsl(157 80% 30%) 100%);
-  }
-
   .gradient-dark {
     background: linear-gradient(180deg, hsl(216 60% 7%) 0%, hsl(216 60% 5%) 100%);
   }
@@ -317,26 +325,6 @@ body {
 
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
-  }
-
-  /* Text gradients */
-  .text-gradient-gold {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(157 100% 42%) 0%, hsl(157 80% 55%) 100%);
-  }
-
-  /* Animations */
-  .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
-  }
-
-  @keyframes glow {
-    from {
-      box-shadow: 0 0 10px -5px hsl(157 100% 42% / 0.3);
-    }
-    to {
-      box-shadow: 0 0 20px -5px hsl(157 100% 42% / 0.6);
-    }
   }
 
   @keyframes ripple-animation {
@@ -471,18 +459,18 @@ body {
   /* Card press effect */
   .card-interactive:active,
   .card-content:active {
-    transform: scale(0.97) !important;
+    transform: none;
     box-shadow: none !important;
   }
   
   /* Button press */
   button:active, a:active, [role="button"]:active {
-    transform: scale(0.96);
+    transform: none;
   }
   
   /* Button hover brightness */
   button:hover, [role="button"]:hover {
-    filter: brightness(1.05);
+    filter: none;
   }
 
   /* Touch webkit scrolling for carousels */

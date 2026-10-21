@@ -33,7 +33,7 @@ interface FastTrackBookingPayload {
   addon_ids: string[];
 }
 
-async function sendWhatsAppNotification(payload: FastTrackBookingPayload, bookingId: string): Promise<void> {
+async function sendWhatsAppNotification(payload: FastTrackBookingPayload, bookingId: string, adminWhatsApp: string): Promise<void> {
   try {
     const dirLabel = payload.direction === 'arrival' ? '✈️ Прилёт' : '🛫 Вылет';
     const passengerNames = payload.passengers.map(p => `${p.first_name} ${p.last_name}`).join(', ');
@@ -57,8 +57,8 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
 
 🔗 ID: ${bookingId}`;
 
-    console.log('[WhatsApp] Fast Track notification for:', ADMIN_WHATSAPP);
-    console.log('[WhatsApp] Message:', message);
+    console.info('[WhatsApp] Fast Track notification for:', adminWhatsApp);
+    console.info('[WhatsApp] Message:', message);
 
     // Try UltraMsg if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -70,14 +70,14 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           token: ultraMsgToken,
-          to: `+${ADMIN_WHATSAPP}`,
+          to: `+${adminWhatsApp}`,
           body: message,
         }),
       });
       const result = await response.json();
-      console.log('[WhatsApp] UltraMsg response:', result);
+      console.info('[WhatsApp] UltraMsg response:', result);
     } else {
-      console.log('[WhatsApp] No API configured, logged message only');
+      console.info('[WhatsApp] No API configured, logged message only');
     }
   } catch (error) {
     console.error('[WhatsApp] Error:', error);
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     const supabase = createServiceClient();
     const payload: FastTrackBookingPayload = await req.json();
 
-    console.log('[FastTrack] Creating booking for flight:', payload.flight_number);
+    console.info('[FastTrack] Creating booking for flight:', payload.flight_number);
 
     // 1. Insert airport_bookings
     const { data: booking, error: bookingError } = await supabase
@@ -120,7 +120,11 @@ Deno.serve(async (req) => {
         total_price: payload.total_price,
         currency: payload.currency,
         airport_code: 'HKT',
-        status: 'pending',
+        // 'draft' is the table's canonical initial state — the status CHECK
+        // constraint (draft|paid|confirmed|assigned|in_progress|completed|
+        // cancelled|no_show) does NOT allow 'pending', so inserting it threw a
+        // check_violation and silently broke every fast-track booking.
+        status: 'draft',
       })
       .select('id')
       .single();
@@ -131,7 +135,7 @@ Deno.serve(async (req) => {
     }
 
     const bookingId = booking.id;
-    console.log('[FastTrack] Booking created:', bookingId);
+    console.info('[FastTrack] Booking created:', bookingId);
 
     // 2. Insert passengers
     const passengersToInsert = payload.passengers.map((p, i) => ({
@@ -172,8 +176,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 4. Send WhatsApp (non-blocking)
-    sendWhatsAppNotification(payload, bookingId).catch(err =>
+    // 4. Send WhatsApp (non-blocking). ADMIN_WHATSAPP is handler-scoped, so it
+    // must be passed in — referencing it from the module-level helper threw a
+    // ReferenceError that silently swallowed every admin WhatsApp alert.
+    sendWhatsAppNotification(payload, bookingId, ADMIN_WHATSAPP).catch(err =>
       console.error('[WhatsApp] Failed:', err)
     );
 
@@ -248,12 +254,12 @@ Deno.serve(async (req) => {
           html: emailHtml,
         });
 
-        console.log('[Email] Sent to', ADMIN_EMAIL);
+        console.info('[Email] Sent to', ADMIN_EMAIL);
       } catch (emailErr) {
         console.error('[Email] Error:', emailErr);
       }
     } else {
-      console.log('[Email] RESEND_API_KEY not configured');
+      console.info('[Email] RESEND_API_KEY not configured');
     }
 
     return new Response(

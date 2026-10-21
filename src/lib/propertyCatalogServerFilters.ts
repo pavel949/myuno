@@ -174,7 +174,9 @@ export function filterValuesToPropertyFilters(
   const guestsAtLeast = filterValues.guestsAtLeast as string | null | undefined;
   const areaBucket = (filterValues.areaAtLeast as string | undefined) || '';
 
-  const priceRange = priceLevelToPriceRange(priceLevel ?? null, priceMode);
+  const priceRange = priceMode === 'rent' && options.rentTenancy && options.rentTenancy !== 'short'
+    ? null
+    : priceLevelToPriceRange(priceLevel ?? null, priceMode);
 
   const bedPick = bedroomsFromFilterValues(filterValues.bedrooms);
 

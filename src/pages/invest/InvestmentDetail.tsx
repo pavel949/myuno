@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentProject } from '@/hooks/useInvestmentProjects';
 import { 
-  MuunoScoreWidget, 
+  MyunoScoreWidget, 
   FundingProgress, 
   ScoreBreakdown,
   InterestForm 
@@ -93,11 +93,12 @@ export default function InvestmentDetail() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={isRu ? 'Назад' : 'Back'}
               onClick={() => navigate(APP_ROUTES.INVEST)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'}>
               <Share2 className="h-5 w-5" />
             </Button>
           </div>
@@ -159,9 +160,9 @@ export default function InvestmentDetail() {
               </div>
             )}
 
-            {/* muUNO Score */}
+            {/* myUNO Score */}
             <div className="pt-2 border-t border-border/50">
-              <MuunoScoreWidget
+              <MyunoScoreWidget
                 score={project.muuno_score}
                 size="md"
                 showRisk={false}

@@ -263,9 +263,10 @@ export function PropertyTeamTab({ propertyId }: PropertyTeamTabProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusBadge(delegate.status)}
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
+                    aria-label={isRu ? 'Отозвать приглашение' : 'Revoke invitation'}
                     onClick={() => setRevokeId(delegate.id)}
                   >
                     <X className="h-4 w-4" />
@@ -341,7 +342,7 @@ export function PropertyTeamTab({ propertyId }: PropertyTeamTabProps) {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label={isRu ? 'Ещё' : 'More'}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

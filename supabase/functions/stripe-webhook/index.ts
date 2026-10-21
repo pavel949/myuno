@@ -1,11 +1,9 @@
 // Deno.serve used (native edge runtime)
 import { createStripeClient, Stripe } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { PAYABLE_ORDER_STATUSES, validateCheckoutPayment } from "../_shared/checkout-payment-guard.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
-};
 
 /**
  * Redacted logger — logs event flow without sensitive data (PCI/GDPR).
@@ -19,12 +17,12 @@ const redactId = (id?: string | null): string => {
 
 const logStep = (step: string, details?: string | Record<string, unknown>) => {
   if (!details) {
-    console.log(`[STRIPE-WEBHOOK] ${step}`);
+    console.info(`[STRIPE-WEBHOOK] ${step}`);
     return;
   }
   if (typeof details === 'string') {
     // Error messages — no sensitive data redaction needed, they're internal
-    console.log(`[STRIPE-WEBHOOK] ${step}`, details);
+    console.info(`[STRIPE-WEBHOOK] ${step}`, details);
     return;
   }
   // Redact sensitive keys from structured logs
@@ -37,10 +35,11 @@ const logStep = (step: string, details?: string | Record<string, unknown>) => {
       safe[k] = v;
     }
   }
-  console.log(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
+  console.info(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
 };
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -88,47 +87,23 @@ Deno.serve(async (req) => {
     // =====================================================
     // HANDLE: checkout.session.completed
     // =====================================================
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Processing checkout.session.completed", { sessionId: redactId(session.id) });
 
-      // ===== CLEARVIEW REPORT PURCHASE =====
-      if (session.metadata?.order_type === "clearview_report") {
-        const userId = session.metadata.user_id;
-        const projectId = session.metadata.project_id;
-        const tier = session.metadata.tier ?? "single";
-        if (!userId || !projectId) {
-          logStep("ERROR", "ClearView purchase missing user_id or project_id metadata");
-          return new Response(JSON.stringify({ received: true, skipped: "missing_meta" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        }
-        const months = tier === "bundle3" ? 12 : 12;
-        const validUntil = new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString();
-        const { error: cvErr } = await supabaseAdmin
-          .from("clearview_purchases")
-          .upsert({
-            user_id: userId,
-            project_id: projectId,
-            stripe_session_id: session.id,
-            amount_paid_cents: session.amount_total ?? null,
-            currency: (session.currency ?? "thb").toLowerCase(),
-            valid_until: validUntil,
-          }, { onConflict: "user_id,project_id,stripe_session_id" });
-        if (cvErr) {
-          logStep("ERROR", `ClearView purchase insert failed: ${cvErr.message}`);
-          return new Response(JSON.stringify({ error: cvErr.message }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        logStep("ClearView access granted", { userId: redactId(userId), projectId: redactId(projectId) });
-        return new Response(JSON.stringify({ received: true, type: "clearview_report" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
+      // Delayed methods complete checkout before money arrives. The async success
+      // event will re-enter this handler after settlement.
+      if (session.payment_status === 'unpaid') {
+        return new Response(JSON.stringify({ received: true, skipped: 'awaiting_payment' }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
         });
       }
+
+      // NOTE: ClearView paid-report access is provisioned inside the canonical
+      // order-payment path below (keyed on checkout_type === "clearview_report"),
+      // because create-clearview-checkout routes through the shared checkout
+      // handler and always carries order_id. The previous stand-alone branch
+      // here keyed on a never-set `order_type` metadata field and was dead code.
 
       // ===== CANONICAL ORDER PAYMENT =====
       if (session.metadata?.order_id) {
@@ -148,6 +123,25 @@ Deno.serve(async (req) => {
           throw new Error(`Order not found: ${orderId}`);
         }
 
+        // Resolve exactly one persisted Stripe payment for this order. Deposits
+        // must match the payment amount, not the full rental amount. Missing or
+        // ambiguous linkage is retried instead of confirming an unverified order.
+        let paymentQuery = supabaseAdmin.from('payment_intents')
+          .select('id, amount, currency, provider_ref, status')
+          .eq('order_id', orderId).eq('method', 'stripe');
+        if (paymentIntentId) paymentQuery = paymentQuery.eq('id', paymentIntentId);
+        const { data: expectedPayment, error: expectedPaymentError } = await paymentQuery.single();
+        if (expectedPaymentError || !expectedPayment) throw new Error('Payment linkage missing or ambiguous');
+        const paymentMismatch = validateCheckoutPayment(session, expectedPayment);
+        if (paymentMismatch) throw new Error(`Checkout validation failed: ${paymentMismatch}`);
+
+        if (order.status !== 'confirmed' && !PAYABLE_ORDER_STATUSES.includes(order.status)) {
+          // Never resurrect cancelled/refunded/completed orders on a late event.
+          // Funds received after cancellation require operator reconciliation.
+          logStep('Payment received for non-payable order', { orderId: redactId(orderId), status: order.status });
+          throw new Error('Paid checkout requires reconciliation: order is not payable');
+        }
+
         // ===== IDEMPOTENCY CHECK: Skip if order already confirmed =====
         if (order.status === 'confirmed') {
           logStep("IDEMPOTENCY: Order already confirmed, skipping duplicate processing", { orderId });
@@ -157,15 +151,36 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Update order status to confirmed + set paid_at
-        const { error: orderUpdateError } = await supabaseAdmin
+        // Atomically claim the confirmation: conditional UPDATE that only matches
+        // rows still awaiting payment. Two concurrent duplicate deliveries race here,
+        // but only ONE gets a row back (`.select()` returns the affected rows) —
+        // the loser sees zero rows and bails before running side-effects. This
+        // closes the TOCTOU gap between the status SELECT above and this UPDATE.
+        const { data: confirmedRows, error: orderUpdateError } = await supabaseAdmin
           .from('orders')
           .update({ status: 'confirmed', paid_at: new Date().toISOString() })
-          .eq('id', orderId);
+          .eq('id', orderId)
+          .in('status', [...PAYABLE_ORDER_STATUSES])
+          .select('id');
 
         if (orderUpdateError) {
           logStep("ERROR", `Failed to update order: ${orderUpdateError.message}`);
           throw orderUpdateError;
+        }
+
+        if (!confirmedRows || confirmedRows.length === 0) {
+          // The conditional update may have lost to cancellation as well as to
+          // another payment. Only the confirmed case is a duplicate success.
+          const { data: latestOrder, error: latestOrderError } = await supabaseAdmin
+            .from('orders').select('status').eq('id', orderId).single();
+          if (latestOrderError || latestOrder?.status !== 'confirmed') {
+            throw new Error('Paid checkout lost confirmation race; reconciliation required');
+          }
+          logStep("IDEMPOTENCY: Order confirmed by concurrent delivery, skipping side-effects", { orderId });
+          return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
         }
 
         // Update payment_intent status
@@ -173,10 +188,9 @@ Deno.serve(async (req) => {
           .from('payment_intents')
           .update({ 
             status: 'succeeded',
-            provider_ref: session.payment_intent as string,
+            provider_ref: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id,
           })
-          .eq('order_id', orderId)
-          .eq('method', 'stripe');
+          .eq('id', expectedPayment.id);
 
         if (paymentUpdateError) {
           logStep("WARN", `Failed to update payment intent: ${paymentUpdateError.message}`);
@@ -290,7 +304,123 @@ Deno.serve(async (req) => {
           logStep("WARN", `Vendor notification failed (non-fatal): ${vendorNotifyError}`);
         }
 
+        // ===== TRANSFER NOTIFY (race-fix): for airport transfers paid via Stripe =====
+        // Frontend fires notify-transfer-booking as fire-and-forget before redirect;
+        // if user closed the tab early, the operator never got pinged. Re-trigger here
+        // (notify function is idempotent via booking_notifications_log + transfer-op-${id}
+        // idempotency keys in send-transactional-email).
+        try {
+          if (order.order_type === 'vehicle') {
+            const { data: fullOrder } = await supabaseAdmin
+              .from('orders')
+              .select('id, order_number, total_amount, currency, start_at, notes, metadata, order_participants(name, email, phone, role)')
+              .eq('id', orderId)
+              .single();
+            const om = (fullOrder?.metadata || {}) as Record<string, unknown>;
+            if (fullOrder && om.transfer_type === 'airport') {
+              const participants = (fullOrder.order_participants || []) as Array<{ name?: string; email?: string; phone?: string; role?: string }>;
+              const primary = participants.find((p) => p.role === 'primary') || participants[0] || {};
+              const { data: existing } = await supabaseAdmin
+                .from('booking_notifications_log')
+                .select('id')
+                .in('notification_type', ['transfer_new_booking', 'transfer_new_booking_no_operator'])
+                .filter('metadata->>order_id', 'eq', orderId)
+                .limit(1);
+              if (!existing || existing.length === 0) {
+                await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-transfer-booking`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                  },
+                  body: JSON.stringify({
+                    order_id: orderId,
+                    order_number: fullOrder.order_number,
+                    direction: om.direction,
+                    terminal: om.terminal,
+                    flight_number: om.flight_number,
+                    vehicle_name: om.vehicle_name,
+                    meeting_sign_name: om.meeting_sign_name || primary.name,
+                    passengers: Number(om.passengers) || 1,
+                    luggage: Number(om.luggage) || 0,
+                    pickup_address: om.direction === 'from-airport'
+                      ? `Phuket Airport (${om.terminal || 'international'})`
+                      : (om.destination_address || ''),
+                    dropoff_address: om.direction === 'from-airport'
+                      ? (om.destination_address || '')
+                      : `Phuket Airport (${om.terminal || 'international'})`,
+                    scheduled_at: fullOrder.start_at,
+                    total_amount: Number(fullOrder.total_amount),
+                    currency: fullOrder.currency,
+                    payment_method: 'stripe',
+                    customer_name: primary.name || '',
+                    customer_phone: primary.phone || '',
+                    customer_email: primary.email || '',
+                    customer_language: om.language || 'ru',
+                    notes: fullOrder.notes || undefined,
+                  }),
+                });
+                logStep("Transfer notify (race-fix) triggered", { orderId: redactId(orderId) });
+              }
+            }
+          }
+        } catch (transferNotifyError) {
+          logStep("WARN", `Transfer notify race-fix failed (non-fatal): ${transferNotifyError}`);
+        }
+
         logStep("Order payment completed", { orderId });
+
+        // ===== TRUST STACK: flip downstream artefact statuses =====
+        // dispute_packs (A-3) and contract_analyses (A-2) live in their own
+        // tables; the canonical order path only updates `orders`. Flip status
+        // here so the success page can render the paid artefact.
+        try {
+          const ctype = session.metadata?.checkout_type;
+          const paidAt = new Date().toISOString();
+          if (ctype === "dispute_pack" && session.metadata?.dispute_pack_id) {
+            await supabaseAdmin
+              .from("dispute_packs")
+              .update({ status: "paid", paid_at: paidAt, order_id: orderId })
+              .eq("id", session.metadata.dispute_pack_id);
+            logStep("Dispute pack flipped to paid", { id: redactId(session.metadata.dispute_pack_id) });
+          }
+          if (ctype === "contract_analysis" && session.metadata?.contract_analysis_id) {
+            await supabaseAdmin
+              .from("contract_analyses")
+              .update({ status: "paid", paid_at: paidAt, order_id: orderId })
+              .eq("id", session.metadata.contract_analysis_id);
+            logStep("Contract analysis flipped to paid", { id: redactId(session.metadata.contract_analysis_id) });
+          }
+          // ClearView paid report → materialise access into clearview_purchases.
+          // create-clearview-checkout sets checkout_type + clearview_project_id
+          // (NOT order_type/project_id), and always carries order_id via the
+          // shared checkout handler, so provisioning must happen HERE inside the
+          // confirmed-order path — not the (dead) top-level order_type branch.
+          if (ctype === "clearview_report" && session.metadata?.clearview_project_id) {
+            const validUntil = new Date(paidAt);
+            validUntil.setMonth(validUntil.getMonth() + 12);
+            const { error: cvErr } = await supabaseAdmin
+              .from("clearview_purchases")
+              .upsert({
+                user_id: order.customer_user_id,
+                project_id: session.metadata.clearview_project_id,
+                stripe_session_id: session.id,
+                amount_paid_cents: session.amount_total ?? null,
+                currency: (session.currency ?? "thb").toLowerCase(),
+                valid_until: validUntil.toISOString(),
+              }, { onConflict: "user_id,project_id,stripe_session_id" });
+            if (cvErr) {
+              logStep("ERROR", `ClearView purchase upsert failed: ${cvErr.message}`);
+            } else {
+              logStep("ClearView access granted", {
+                orderId: redactId(orderId),
+                projectId: redactId(session.metadata.clearview_project_id),
+              });
+            }
+          }
+        } catch (artefactError) {
+          logStep("WARN", `Trust Stack artefact flip failed (non-fatal): ${artefactError}`);
+        }
       }
 
       // ===== LEGACY BOOKING PAYMENT (backward compatibility) =====
@@ -981,7 +1111,7 @@ Deno.serve(async (req) => {
     // =====================================================
     // HANDLE: checkout.session.completed for MC subscription (set subscription_id)
     // =====================================================
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.metadata?.type === "mc_subscription" && session.subscription) {
         const companyId = session.metadata.company_id;

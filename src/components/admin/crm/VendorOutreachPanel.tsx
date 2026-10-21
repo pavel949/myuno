@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { typedFrom } from '@/lib/untypedTables';
+import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,13 +38,17 @@ interface OutreachLogEntry {
   } | null;
 }
 
-function useOutreachStats() {
+function useOutreachStats(companyId: string | undefined) {
   return useQuery({
-    queryKey: ['vendor-outreach-stats'],
+    queryKey: ['vendor-outreach-stats', companyId],
+    enabled: !!companyId,
     queryFn: async (): Promise<OutreachStats> => {
+      // Scope vendor contacts to the active (house) company — crm_contacts is
+      // shared with every MC's private book, so never read it unscoped.
       const { data, error } = await supabase
         .from('crm_contacts')
         .select('outreach_status')
+        .eq('company_id', companyId!)
         .eq('contact_type', 'vendor');
 
       if (error) throw error;
@@ -121,7 +126,8 @@ const statusColors: Record<string, string> = {
 export function VendorOutreachPanel() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: stats, isLoading: statsLoading } = useOutreachStats();
+  const { data: company } = useMyCompanyId();
+  const { data: stats, isLoading: statsLoading } = useOutreachStats(company?.company_id);
   const { data: log, isLoading: logLoading } = useOutreachLog();
   const runOutreach = useRunOutreach();
 

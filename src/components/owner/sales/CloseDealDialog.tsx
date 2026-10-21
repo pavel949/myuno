@@ -75,8 +75,8 @@ const updateDeal = useUpdateDeal();
           stage: 'closed_won',
           closed_at: new Date().toISOString(),
           deal_value: dealValue ? Number(dealValue) : null,
-          commission_percent: commissionPercent ? Number(commissionPercent) : null,
-          commission_amount: dealValue && commissionPercent ? Number(dealValue) * Number(commissionPercent) / 100 : null,
+          commission_percent: commissionPercent !== '' ? Number(commissionPercent) : null,
+          commission_amount: dealValue && commissionPercent !== '' ? Number(dealValue) * Number(commissionPercent) / 100 : null,
           won_reason: finalWinReason.trim() || null,
           lost_reason: null,
         });

@@ -33,7 +33,7 @@ export interface DealIntentOption {
 export const DEAL_INTENTS: DealIntentOption[] = [
   { key: 'raise_capital',  icon: '💰', labelEn: 'List a developer project', labelRu: 'Разместить проект девелопера', descriptionEn: 'Developer project profile for buyer club introductions', descriptionRu: 'Профиль проекта девелопера для представлений buyer club' },
   { key: 'find_buyer',     icon: '🤝', labelEn: 'Find a buyer / exit',         labelRu: 'Найти покупателя / выход',  descriptionEn: 'Selling a business or asset',           descriptionRu: 'Продаю бизнес или актив' },
-  { key: 'find_partner',   icon: '🧩', labelEn: 'Find a partner / co-buyer',   labelRu: 'Найти партнёра / соинвестора', descriptionEn: 'Looking for an operating or capital partner', descriptionRu: 'Ищу операционного или финансового партнёра' },
+  { key: 'find_partner',   icon: '🧩', labelEn: 'Find a partner',   labelRu: 'Найти партнёра / соинвестора', descriptionEn: 'Looking for an operating or capital partner', descriptionRu: 'Ищу операционного или финансового партнёра' },
   { key: 'pitch_idea',     icon: '💡', labelEn: 'Submit an idea / startup',    labelRu: 'Подать идею / стартап',     descriptionEn: 'Early-stage concept project profile',   descriptionRu: 'Профиль проекта на ранней стадии' },
   { key: 'business_sale',  icon: '🏪', labelEn: 'List a business for sale',    labelRu: 'Выставить бизнес на продажу', descriptionEn: 'Operating business for sale',         descriptionRu: 'Действующий бизнес на продажу' },
   { key: 'other',          icon: '⚙️', labelEn: 'Other',                       labelRu: 'Другое',                    descriptionEn: 'Custom deal type',                      descriptionRu: 'Другой тип сделки' },

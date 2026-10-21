@@ -6,6 +6,7 @@ import { typedFrom } from '@/lib/untypedTables';
 import { SectionHeader } from '@/components/ds';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, DollarSign, BarChart3, Activity, ShoppingCart } from 'lucide-react';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
@@ -122,6 +123,7 @@ function MetricCard({ title, value, subtitle, icon: Icon }: {
 
 export default function AdminInvestorMetrics() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
   const { data: m, isLoading } = useInvestorMetrics();
 
@@ -146,13 +148,13 @@ export default function AdminInvestorMetrics() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <MetricCard
           title="GMV (Total)"
-          value={`฿${m.gmvTotal.toLocaleString()}`}
+          value={`${curSym}${m.gmvTotal.toLocaleString()}`}
           subtitle={isRu ? 'Все время' : 'All time'}
           icon={DollarSign}
         />
         <MetricCard
           title="GMV (30d)"
-          value={`฿${m.gmvLast30.toLocaleString()}`}
+          value={`${curSym}${m.gmvLast30.toLocaleString()}`}
           subtitle={isRu ? 'Последние 30 дней' : 'Last 30 days'}
           icon={TrendingUp}
         />
@@ -170,7 +172,7 @@ export default function AdminInvestorMetrics() {
         />
         <MetricCard
           title={isRu ? 'Средний чек' : 'Avg Order'}
-          value={`฿${Math.round(m.avgOrderValue).toLocaleString()}`}
+          value={`${curSym}${Math.round(m.avgOrderValue).toLocaleString()}`}
           icon={BarChart3}
         />
         <MetricCard

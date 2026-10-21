@@ -44,7 +44,7 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       slug: 'clearview-catalog',
       label: { ru: 'Каталог с ClearView™ рейтингом', en: 'Catalogue with ClearView™ rating' },
-      oneLiner: { ru: 'AAA–BB шкала, 8 категорий, отчёты застройщика.', en: 'AAA–BB scale, 8 categories, developer reports.' },
+      oneLiner: { ru: 'AAA–CCC шкала, 8 категорий, отчёты застройщика.', en: 'AAA–CCC scale, 8 categories, developer reports.' },
       href: '/property/offplan',
     },
     {
@@ -90,8 +90,8 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       q: { ru: 'Можно ли купить удалённо?', en: 'Can I buy remotely?' },
       a: {
-        ru: 'Да. Видеотур объекта, юридические документы через DocuSign, FET через банк-партнёр, передача собственности — по доверенности. Поддержка по-русски на каждом этапе.',
-        en: 'Yes. Video tour, legal docs via DocuSign, FET through partner bank, ownership transfer via Power of Attorney. Russian-speaking support at every step.',
+        ru: 'Да. Видеотур объекта, юридические документы через DocuSign, FET через банк-партнёр, передача собственности — по доверенности. Многоязычная поддержка (EN/RU/TH) на каждом этапе.',
+        en: 'Yes. Video tour, legal docs via DocuSign, FET through partner bank, ownership transfer via Power of Attorney. Multilingual support (EN/RU/TH) at every step.',
       },
     },
     {
@@ -137,8 +137,10 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/passive-investors',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/passive-investors?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/passive-investors?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/passive-investors?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/passive-investors?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/passive-investors?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/passive-investors?lang=zh-CN' },
     ],
   },
 };

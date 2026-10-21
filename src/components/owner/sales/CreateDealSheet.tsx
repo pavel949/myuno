@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { normalizePhone, isLikelyPhone } from '@/lib/phone';
+import { isValidEmail } from '@/lib/crm/validation';
 
 import { toast } from 'sonner';
 interface Props {
@@ -25,6 +26,12 @@ interface Props {
   companyId: string;
   prefilledContact?: CrmContact | null;
   prefilledStage?: string;
+  /**
+   * If set, the new deal is created in this pipeline. Pass the currently
+   * selected pipeline from the CRM dashboard so buy/sell-side flows route
+   * the deal into the right stage set.
+   */
+  pipelineId?: string | null;
 }
 
 const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
@@ -38,7 +45,7 @@ const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
   offplan: 'buyer',
 };
 
-export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new' }: Props) {
+export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new', pipelineId = null }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -129,7 +136,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     if (!selectedContact && !form.client_name.trim()) {
       nextErrors.client_name = isRu ? 'Введите имя клиента или выберите контакт' : 'Enter client name or select a contact';
     }
-    if (!selectedContact && form.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.client_email.trim())) {
+    if (!selectedContact && form.client_email && !isValidEmail(form.client_email)) {
       nextErrors.client_email = isRu ? 'Неверный формат email' : 'Invalid email format';
     }
     if (!selectedContact && form.client_phone && !isLikelyPhone(form.client_phone)) {
@@ -235,6 +242,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         client_email: normalizedEmail,
         client_source: form.client_source,
         stage: prefilledStage as any,
+        pipeline_id: pipelineId,
         deal_type: form.deal_type,
         deal_status: 'active',
         budget_min: form.budget_min ? Number(form.budget_min) : null,

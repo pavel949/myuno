@@ -612,9 +612,10 @@ const VendorLocations = () => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8"
+                        className="min-h-[44px] min-w-[44px]"
                         onClick={() => handleResubmit(location.id)}
                         title={isRu ? 'Отправить повторно' : 'Resubmit'}
+                        aria-label={isRu ? 'Отправить повторно' : 'Resubmit'}
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -622,15 +623,16 @@ const VendorLocations = () => {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8"
+                      className="min-h-[44px] min-w-[44px]"
                       onClick={() => handleOpenDialog(location)}
+                      aria-label={isRu ? 'Редактировать' : 'Edit'}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive">
+                        <Button size="icon" variant="ghost" className="min-h-[44px] min-w-[44px] text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>

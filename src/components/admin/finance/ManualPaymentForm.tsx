@@ -12,28 +12,23 @@ import { Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VERTICALS = [
-  { value: 'property', en: 'Property Rental', ru: 'Аренда недвижимости' },
-  { value: 'property_sale', en: 'Property Sale', ru: 'Продажа недвижимости' },
-  { value: 'yacht', en: 'Yachts', ru: 'Яхты' },
-  { value: 'tour', en: 'Tours', ru: 'Туры' },
-  { value: 'transport', en: 'Transport', ru: 'Транспорт' },
-  { value: 'restaurant', en: 'Restaurants', ru: 'Рестораны' },
-  { value: 'flower', en: 'Flowers', ru: 'Цветы' },
-  { value: 'spa', en: 'Spa & Wellness', ru: 'Спа' },
-  { value: 'cleaning', en: 'Cleaning', ru: 'Клининг' },
-  { value: 'event', en: 'Events', ru: 'Мероприятия' },
-  { value: 'legal', en: 'Legal', ru: 'Юридические' },
+  'property',
+  'property_sale',
+  'yacht',
+  'tour',
+  'transport',
+  'restaurant',
+  'flower',
+  'spa',
+  'cleaning',
+  'event',
+  'legal',
 ] as const;
 
-const PAYMENT_METHODS = [
-  { value: 'cash', en: 'Cash', ru: 'Наличные' },
-  { value: 'bank_transfer', en: 'Bank Transfer', ru: 'Банковский перевод' },
-  { value: 'promptpay', en: 'PromptPay', ru: 'PromptPay' },
-] as const;
+const PAYMENT_METHODS = ['cash', 'bank_transfer', 'promptpay'] as const;
 
 export function ManualPaymentForm() {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -84,7 +79,7 @@ export function ManualPaymentForm() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(isRu ? 'Платёж записан' : 'Payment recorded');
+      toast.success(t('admin.finance.toast.recorded'));
       queryClient.invalidateQueries({ queryKey: ['admin-finance-summary'] });
       queryClient.invalidateQueries({ queryKey: ['admin-finance-by-vertical'] });
       queryClient.invalidateQueries({ queryKey: ['ledger-reconciliation'] });
@@ -101,25 +96,25 @@ export function ManualPaymentForm() {
       <SheetTrigger asChild>
         <Button size="sm" className="gap-1.5">
           <Plus className="h-4 w-4" />
-          {isRu ? 'Записать платёж' : 'Record Payment'}
+          {t('admin.finance.recordPayment')}
         </Button>
       </SheetTrigger>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{isRu ? 'Записать платёж' : 'Record Manual Payment'}</SheetTitle>
+          <SheetTitle>{t('admin.finance.recordPaymentTitle')}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label>{isRu ? 'Вертикаль' : 'Vertical'}</Label>
+            <Label>{t('admin.finance.form.vertical')}</Label>
             <Select value={vertical} onValueChange={setVertical}>
               <SelectTrigger>
-                <SelectValue placeholder={isRu ? 'Выберите...' : 'Select...'} />
+                <SelectValue placeholder={t('admin.finance.form.verticalPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {VERTICALS.map(v => (
-                  <SelectItem key={v.value} value={v.value}>
-                    {isRu ? v.ru : v.en}
+                  <SelectItem key={v} value={v}>
+                    {t(`admin.finance.vertical.${v}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -127,7 +122,7 @@ export function ManualPaymentForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>{isRu ? 'Сумма (THB)' : 'Amount (THB)'}</Label>
+            <Label>{t('admin.finance.form.amount')}</Label>
             <Input
               type="number"
               min="0"
@@ -139,15 +134,15 @@ export function ManualPaymentForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>{isRu ? 'Способ оплаты' : 'Payment Method'}</Label>
+            <Label>{t('admin.finance.form.paymentMethod')}</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_METHODS.map(m => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {isRu ? m.ru : m.en}
+                  <SelectItem key={m} value={m}>
+                    {t(`admin.finance.method.${m}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -155,7 +150,7 @@ export function ManualPaymentForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>{isRu ? 'Комиссия платформы (%)' : 'Platform Commission (%)'}</Label>
+            <Label>{t('admin.finance.form.commission')}</Label>
             <Input
               type="number"
               min="0"
@@ -166,28 +161,28 @@ export function ManualPaymentForm() {
             />
             {amount && (
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'Комиссия' : 'Fee'}: ฿{Math.round(parseFloat(amount || '0') * (parseFloat(commissionRate || '0') / 100)).toLocaleString()}
+                {t('admin.finance.form.fee')}: ฿{Math.round(parseFloat(amount || '0') * (parseFloat(commissionRate || '0') / 100)).toLocaleString()}
                 {' → '}
-                {isRu ? 'Вендору' : 'Vendor'}: ฿{Math.round(parseFloat(amount || '0') * (1 - parseFloat(commissionRate || '0') / 100)).toLocaleString()}
+                {t('admin.finance.form.vendor')}: ฿{Math.round(parseFloat(amount || '0') * (1 - parseFloat(commissionRate || '0') / 100)).toLocaleString()}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>{isRu ? 'Референс / номер' : 'Reference / receipt #'}</Label>
+            <Label>{t('admin.finance.form.reference')}</Label>
             <Input
               value={reference}
               onChange={e => setReference(e.target.value)}
-              placeholder={isRu ? 'Необязательно' : 'Optional'}
+              placeholder={t('admin.finance.form.referencePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
+            <Label>{t('admin.finance.form.notes')}</Label>
             <Textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder={isRu ? 'Описание платежа...' : 'Payment description...'}
+              placeholder={t('admin.finance.form.notesPlaceholder')}
               rows={3}
             />
           </div>
@@ -198,7 +193,7 @@ export function ManualPaymentForm() {
             className="w-full"
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {isRu ? 'Сохранить' : 'Save Payment'}
+            {t('admin.finance.form.save')}
           </Button>
         </div>
       </SheetContent>

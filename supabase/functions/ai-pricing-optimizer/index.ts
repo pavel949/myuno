@@ -1,13 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalOrUser, requireActorRpc } from "../_shared/authz.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Dual-mode: internal secret (cron) OR authenticated property owner / staff
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const authedUserId = gate.mode === "user" ? gate.userId : null;
 
   try {
     const { property_id } = await req.json();
@@ -17,12 +22,16 @@ serve(async (req) => {
       });
     }
 
+    if (authedUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, "actor_can_analyze_property", { p_property_id: property_id });
+      if (denied) return denied;
+    }
     const supabase = createServiceClient();
 
     // Fetch property
     const { data: property, error: pErr } = await supabase
       .from("properties")
-      .select("id, title, district, property_type, bedrooms, price_per_night, currency")
+      .select("id, title, district, property_type, bedrooms, price_per_night, currency, owner_id")
       .eq("id", property_id)
       .single();
 
@@ -42,7 +51,7 @@ serve(async (req) => {
       .select("check_in, check_out, total_amount, status")
       .eq("property_id", property_id)
       .gte("check_in", d90ago.toISOString().split("T")[0])
-      .not("status", "eq", "cancelled");
+      .not("status", "in", PROPERTY_BOOKING_RELEASE_FILTER);
 
     // Calculate occupancy
     const totalDays = 90;

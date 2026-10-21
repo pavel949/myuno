@@ -53,7 +53,7 @@ export function VendorDetailSheet({ vendor, open, onOpenChange, onEdit, onToggle
               )}
             </div>
           </div>
-          <Button size="icon" variant="ghost" onClick={onToggleFavorite}>
+          <Button size="icon" variant="ghost" aria-label={vendor.is_favorite ? (isRu ? 'Убрать из избранного' : 'Remove from favorites') : (isRu ? 'В избранное' : 'Add to favorites')} onClick={onToggleFavorite}>
             {vendor.is_favorite ? <Heart className="h-5 w-5 text-destructive fill-destructive" /> : <HeartOff className="h-5 w-5 text-muted-foreground" />}
           </Button>
         </div>

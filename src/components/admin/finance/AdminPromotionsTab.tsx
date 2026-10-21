@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminPromotions, type PromotedListing } from '@/hooks/usePromotedListings';
+import { useAdminPromotions } from '@/hooks/usePromotedListings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Rocket, Clock } from 'lucide-react';
@@ -12,19 +12,18 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function AdminPromotionsTab() {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
   const { data: promotions, isLoading } = useAdminPromotions();
 
   if (isLoading) {
-    return <p className="text-center text-muted-foreground py-8">{isRu ? 'Загрузка...' : 'Loading...'}</p>;
+    return <p className="text-center text-muted-foreground py-8">{t('admin.finance.promotions.loading')}</p>;
   }
 
   if (!promotions?.length) {
     return (
       <div className="text-center py-12 space-y-2">
         <Rocket className="h-8 w-8 text-muted-foreground mx-auto" />
-        <p className="text-muted-foreground">{isRu ? 'Нет активных промо' : 'No promotions yet'}</p>
+        <p className="text-muted-foreground">{t('admin.finance.promotions.empty')}</p>
       </div>
     );
   }
@@ -34,29 +33,27 @@ export function AdminPromotionsTab() {
 
   return (
     <div className="space-y-4">
-      {/* Summary */}
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{active.length}</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Активных' : 'Active'}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.finance.promotions.active')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{promotions.length}</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.finance.promotions.total')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">฿{totalRevenue.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Доход' : 'Revenue'}</p>
+            <p className="text-xs text-muted-foreground">{t('admin.finance.promotions.revenue')}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* List */}
       <div className="space-y-2">
         {promotions.map((p) => (
           <Card key={p.id}>

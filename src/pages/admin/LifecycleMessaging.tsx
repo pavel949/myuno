@@ -220,7 +220,7 @@ export default function LifecycleMessaging() {
                       checked={tmpl.is_active}
                       onCheckedChange={(checked) => toggleMutation.mutate({ id: tmpl.id, is_active: checked })}
                     />
-                    <Button size="icon" variant="ghost" onClick={() => setEditTemplate(tmpl)}>
+                    <Button size="icon" variant="ghost" onClick={() => setEditTemplate(tmpl)} aria-label={isRu ? 'Редактировать' : 'Edit'}>
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </div>

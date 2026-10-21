@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useConsultationRequests } from "@/hooks/useConsultationRequests";
+
 import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -21,10 +23,12 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { VoiceInputButton, appendTranscript } from "@/components/ui/voice-input-button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Video, CheckCircle2 } from "lucide-react";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function LegalBooking() {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +38,9 @@ export default function LegalBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createConsultation } = useConsultationRequests();
   const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
+
 
   // Form state
   const [step, setStep] = useState(1);
@@ -67,7 +73,7 @@ export default function LegalBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/legal/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/legal/booking/${id}` });
     return null;
   }
 
@@ -118,43 +124,59 @@ export default function LegalBooking() {
       return;
     }
 
-    // Cash/wallet flow
-    const result = await createBooking({
-      booking_type: 'service',
-      scheduled_at: scheduledAt,
-      total_amount: consultationPrice,
-      currency: 'THB',
-      notes: JSON.stringify({
-        provider_id: id,
-        service: selectedService,
-        consultation_type: consultationType,
-        description,
-        company,
-      }),
-      items: [{
-        item_type: 'legal_consultation',
-        item_id: id || 'consultation',
-        item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
-        quantity: 1,
-        unit_price: consultationPrice,
-        subtotal: consultationPrice,
-      }],
-      participants: [{
+    // Cash / wallet flow — write to consultation_requests so admin & vendor inbox see it (C11)
+    try {
+      const consult = await createConsultation.mutateAsync({
+        request_type: 'general_legal',
         name: contactData.name,
-        phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
-      }],
-      payment: {
-        amount: consultationPrice,
-        payment_method: paymentMethod,
-      },
-    });
+        phone: contactData.phone,
+        preferred_language: language,
+        notes: description,
+        preferred_dates: [{ date: format(scheduledAt, 'yyyy-MM-dd'), time }],
+        vertical_metadata: {
+          provider_id: id,
+          service: selectedService,
+          consultation_type: consultationType,
+          company,
+          consultation_price: consultationPrice,
+          currency: 'THB',
+          payment_method: paymentMethod,
+        },
+        entry_point: 'legal_booking',
+        lead_source: 'legal',
+      });
 
-    if (result.success) {
-      setBookingResult({ success: true, bookingId: result.booking_id });
+      // Mirror to bookings table (for /account/orders timeline) — non-blocking
+      void createBooking({
+        booking_type: 'service',
+        scheduled_at: scheduledAt,
+        total_amount: consultationPrice,
+        currency: 'THB',
+        notes: JSON.stringify({ consultation_request_id: consult.id, service: selectedService }),
+        items: [{
+          item_type: 'legal_consultation',
+          item_id: id || 'consultation',
+          item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
+          quantity: 1,
+          unit_price: consultationPrice,
+          subtotal: consultationPrice,
+        }],
+        participants: [{
+          name: contactData.name,
+          phone: contactData.phone,
+          email: contactData.email,
+          is_primary: true,
+        }],
+        payment: { amount: consultationPrice, payment_method: paymentMethod },
+      });
+
+      setBookingResult({ success: true, bookingId: consult.id });
+    } catch {
+      // toast handled by hook
     }
   };
+
 
   return (
     <AppLayout>
@@ -280,15 +302,21 @@ export default function LegalBooking() {
               <Label className="font-semibold mb-4 block">
                 {language === 'ru' ? 'Опишите ваш вопрос' : 'Describe Your Question'}
               </Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={language === 'ru' 
-                  ? 'Кратко опишите, с чем вам нужна помощь...'
-                  : 'Briefly describe what you need help with...'}
-                rows={4}
-                className="mt-2"
-              />
+              <div className="relative mt-2">
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={language === 'ru' 
+                    ? 'Кратко опишите, с чем вам нужна помощь...'
+                    : 'Briefly describe what you need help with...'}
+                  rows={4}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setDescription((prev) => appendTranscript(prev, t))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">

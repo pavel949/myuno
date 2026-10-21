@@ -2,7 +2,8 @@
  * PropertyDetailDateSheet — Mobile bottom sheet for date range + guest count selection.
  */
 import { Minus, Plus } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays, startOfDay } from 'date-fns';
+import { AvailabilityStatus } from '../AvailabilityStatus';
 import { ru } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -25,6 +26,9 @@ interface PropertyDetailDateSheetProps {
   maxGuests?: number;
   minStayNights?: number | null;
   availability: AvailabilityEntry[];
+  availabilityReady: boolean;
+  availabilityError: boolean;
+  onRetryAvailability: () => void;
   unavailableDates: Set<string>;
   onConfirm: () => void;
 }
@@ -39,6 +43,9 @@ export function PropertyDetailDateSheet({
   maxGuests = 10,
   minStayNights,
   availability,
+  availabilityReady,
+  availabilityError,
+  onRetryAvailability,
   unavailableDates,
   onConfirm,
 }: PropertyDetailDateSheetProps) {
@@ -47,7 +54,7 @@ export function PropertyDetailDateSheet({
 
   const nights =
     dateRange?.from && dateRange?.to
-      ? Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))
+      ? differenceInCalendarDays(dateRange.to, dateRange.from)
       : 0;
 
   return (
@@ -58,14 +65,16 @@ export function PropertyDetailDateSheet({
         </SheetHeader>
 
         <div className="space-y-4">
+          <AvailabilityStatus loading={!availabilityReady && !availabilityError} error={availabilityError} onRetry={onRetryAvailability} />
           <div className="flex justify-center">
             <Calendar
               mode="range"
               selected={dateRange}
-              onSelect={onDateRangeChange}
+              onSelect={(range) => { if (availabilityReady) onDateRangeChange(range); }}
               numberOfMonths={1}
               disabled={(date) => {
-                if (date < new Date()) return true;
+                if (!availabilityReady || date < startOfDay(new Date())) return true;
+                if (dateRange?.from && !dateRange.to && availability.some(a => a.status === 'checkout_only' && format(a.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))) return true;
                 const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
                 return unavailableDates.has(key);
               }}
@@ -108,9 +117,10 @@ export function PropertyDetailDateSheet({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
                 disabled={guestCount <= 1}
+                aria-label={isRu ? 'Меньше гостей' : 'Decrease guests'}
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -118,9 +128,10 @@ export function PropertyDetailDateSheet({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.min(maxGuests, guestCount + 1))}
                 disabled={guestCount >= maxGuests}
+                aria-label={isRu ? 'Больше гостей' : 'Increase guests'}
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -138,8 +149,8 @@ export function PropertyDetailDateSheet({
           <Button
             className="w-full"
             size="lg"
-            disabled={!dateRange?.from || !dateRange?.to}
-            onClick={onConfirm}
+            disabled={!availabilityReady || !dateRange?.from || !dateRange?.to || nights <= 0 || !!(minStayNights && nights < minStayNights)}
+            onClick={() => { if (availabilityReady) onConfirm(); }}
           >
             {dateRange?.from && dateRange?.to
               ? (isRu ? 'Перейти к бронированию' : 'Continue to booking')

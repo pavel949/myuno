@@ -75,13 +75,15 @@ export default function ClassifiedDetailPage() {
             <>
               <button
                 onClick={() => setCurrentImageIndex(i => (i > 0 ? i - 1 : allImages.length - 1))}
-                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 flex items-center justify-center"
+                aria-label={isRu ? 'Назад' : 'Previous'}
+                className="absolute left-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] rounded-full bg-background/70 flex items-center justify-center"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setCurrentImageIndex(i => (i < allImages.length - 1 ? i + 1 : 0))}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 flex items-center justify-center"
+                aria-label={isRu ? 'Далее' : 'Next'}
+                className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] rounded-full bg-background/70 flex items-center justify-center"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>

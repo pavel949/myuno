@@ -28,7 +28,7 @@ const AreaIndexPage = () => {
         <html lang={language} />
         <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href="https://myuno.app/area" />
+        <link rel="canonical" href="https://www.myuno.app/area" />
       </Helmet>
 
       <PageShell width="wide">

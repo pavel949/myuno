@@ -295,7 +295,7 @@ export function useApplySyncedData() {
       // Update the property
       const { error: updateError } = await supabase
         .from('properties')
-        .update(updates)
+        .update(updates as never)
         .eq('id', propertyId);
       
       if (updateError) throw updateError;

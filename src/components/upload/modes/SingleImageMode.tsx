@@ -188,7 +188,8 @@ export function SingleImageMode({
                 size="icon"
                 onClick={() => setShowEditor(true)}
                 disabled={disabled}
-                className="h-10 w-10"
+                className="h-11 w-11"
+                aria-label="Редактировать"
               >
                 <Pencil className="h-5 w-5" />
               </Button>
@@ -199,7 +200,8 @@ export function SingleImageMode({
               size="icon"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
-              className="h-10 w-10"
+              className="h-11 w-11"
+              aria-label="Заменить"
             >
               <Upload className="h-5 w-5" />
             </Button>
@@ -209,7 +211,8 @@ export function SingleImageMode({
               size="icon"
               onClick={handleRemove}
               disabled={disabled}
-              className="h-10 w-10"
+              className="h-11 w-11"
+              aria-label="Удалить"
             >
               <X className="h-5 w-5" />
             </Button>

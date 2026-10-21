@@ -30,7 +30,7 @@ import { pickTriplet } from '@/lib/ecosystemGlossary';
 // Types — kept identical to legacy shape for back-compat
 // ─────────────────────────────────────────────────────────────
 
-export type ClusterServiceStatus = 'available' | 'soon' | 'pro';
+export type ClusterServiceStatus = 'available' | 'soon' | 'pro' | 'info';
 
 export interface ClusterService {
   /** Stable service id (matches ServiceEntry.id and categories.slug) */

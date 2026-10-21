@@ -5,6 +5,11 @@ import { DynamicPipelineResult } from '@/hooks/useDynamicPipelineStages';
 import { DollarSign, TrendingUp, Trophy, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/** Resolve the side of a deal — null pipelines fall through to 'buy' so legacy single-pipeline data still bucketizes. */
+function dealSide(d: AgentDeal): 'buy' | 'sell' {
+  return d.pipeline_side === 'sell' ? 'sell' : 'buy';
+}
+
 interface CommissionForecastProps {
   deals: AgentDeal[];
   pipelineData: DynamicPipelineResult;
@@ -19,31 +24,38 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
     const activeDeals = deals.filter(d => !wonLostKeys.closed.includes(d.stage));
     const wonDeals = deals.filter(d => wonLostKeys.won.includes(d.stage));
 
-    // Won commission (actual)
-    const wonCommission = wonDeals.reduce((s, d) => {
-      if (d.commission_amount) return s + Number(d.commission_amount);
-      if (d.deal_value && d.commission_percent) return s + (Number(d.deal_value) * Number(d.commission_percent) / 100);
-      return s;
-    }, 0);
+    const gross = (d: AgentDeal) => {
+      if (d.commission_amount) return Number(d.commission_amount);
+      const val = Number(d.deal_value ?? d.budget_max ?? 0);
+      const pct = Number(d.commission_percent ?? 3) / 100;
+      return val * pct;
+    };
 
-    // Weighted pipeline commission forecast
-    const forecastCommission = activeDeals.reduce((s, d) => {
-      const val = Number(d.deal_value || d.budget_max || 0);
-      const pct = Number(d.commission_percent || 3) / 100; // default 3%
+    // Won commission (actual), split by side
+    let wonBuy = 0, wonSell = 0;
+    for (const d of wonDeals) {
+      const v = gross(d);
+      if (dealSide(d) === 'sell') wonSell += v; else wonBuy += v;
+    }
+
+    // Weighted pipeline commission forecast, split by side
+    let weightedBuy = 0, weightedSell = 0;
+    for (const d of activeDeals) {
       const probability = pipelineData.getProbability(d.stage);
-      return s + (val * pct * probability);
-    }, 0);
+      const v = gross(d) * probability;
+      if (dealSide(d) === 'sell') weightedSell += v; else weightedBuy += v;
+    }
 
-    // Expected commission next 30 days (deals with expected_close_date)
+    // Expected commission next 30 days, split by side
     const now = new Date();
     const in30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const expected30d = activeDeals
-      .filter(d => d.expected_close_date && new Date(d.expected_close_date) <= in30)
-      .reduce((s, d) => {
-        const val = Number(d.deal_value || d.budget_max || 0);
-        const pct = Number(d.commission_percent || 3) / 100;
-        return s + (val * pct);
-      }, 0);
+    let exp30Buy = 0, exp30Sell = 0;
+    for (const d of activeDeals) {
+      if (!d.expected_close_date) continue;
+      if (new Date(d.expected_close_date) > in30) continue;
+      const v = gross(d);
+      if (dealSide(d) === 'sell') exp30Sell += v; else exp30Buy += v;
+    }
 
     // At-risk deals (high value, stale > 14 days)
     const staleThreshold = 14;
@@ -52,16 +64,34 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
       return daysSinceUpdate > staleThreshold && Number(d.deal_value || 0) > 0;
     }).length;
 
-    return { wonCommission, forecastCommission, expected30d, atRisk };
+    return {
+      wonCommission: wonBuy + wonSell,
+      wonBuy, wonSell,
+      forecastCommission: weightedBuy + weightedSell,
+      weightedBuy, weightedSell,
+      expected30d: exp30Buy + exp30Sell,
+      exp30Buy, exp30Sell,
+      atRisk,
+    };
   }, [deals, wonLostKeys, pipelineData]);
 
-  const cards = [
+  const cards: Array<{
+    label: string;
+    value: string;
+    icon: typeof Trophy;
+    color: string;
+    bg: string;
+    buy?: number;
+    sell?: number;
+  }> = [
     {
       label: isRu ? 'Заработано' : 'Earned',
       value: formatValue(metrics.wonCommission),
       icon: Trophy,
       color: 'text-success',
       bg: 'bg-success/10',
+      buy: metrics.wonBuy,
+      sell: metrics.wonSell,
     },
     {
       label: isRu ? 'Прогноз (взвеш.)' : 'Forecast (wtd)',
@@ -69,6 +99,8 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
       icon: TrendingUp,
       color: 'text-primary',
       bg: 'bg-primary/10',
+      buy: metrics.weightedBuy,
+      sell: metrics.weightedSell,
     },
     {
       label: isRu ? 'Ожидание 30д' : 'Expected 30d',
@@ -76,6 +108,8 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
       icon: DollarSign,
       color: 'text-warning',
       bg: 'bg-warning/10',
+      buy: metrics.exp30Buy,
+      sell: metrics.exp30Sell,
     },
     ...(metrics.atRisk > 0 ? [{
       label: isRu ? 'Под угрозой' : 'At Risk',
@@ -93,9 +127,16 @@ export function CommissionForecast({ deals, pipelineData, wonLostKeys }: Commiss
           <div className={cn('w-8 h-8 rounded-none flex items-center justify-center shrink-0', c.bg)}>
             <c.icon className={cn('h-4 w-4', c.color)} />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] text-muted-foreground truncate">{c.label}</p>
-            <p className="text-sm font-bold leading-tight">{c.value}</p>
+            <p className="text-sm font-bold leading-tight tabular-nums">{c.value}</p>
+            {(c.buy != null || c.sell != null) && (c.buy! + c.sell! > 0) && (
+              <p className="mt-0.5 font-mono text-[10px] text-muted-foreground tabular-nums truncate">
+                <span className="text-primary">B</span> {formatValue(c.buy ?? 0)}
+                <span className="mx-1 text-border">·</span>
+                <span className="text-accent">S</span> {formatValue(c.sell ?? 0)}
+              </p>
+            )}
           </div>
         </div>
       ))}

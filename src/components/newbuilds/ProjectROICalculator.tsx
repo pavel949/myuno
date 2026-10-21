@@ -157,13 +157,13 @@ export function ProjectROICalculator({
               <Row label="Рост стоимости" value={`+${formatThb(calc.capitalGain, currencySymbol)}`} accent="emerald" />
               <div className="flex justify-between text-white/60 border-t border-white/10 pt-2">
                 <span className="font-semibold text-white">Общий доход</span>
-                <span className="font-bold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                <span className="font-mono font-bold text-accent">
                   +{formatThb(calc.totalReturn, currencySymbol)}
                 </span>
               </div>
               <div className="flex justify-between text-white/40 text-xs">
                 <span>Стоимость через {holdYears} лет</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{formatThb(calc.futureValue, currencySymbol)}</span>
+                <span className="font-mono">{formatThb(calc.futureValue, currencySymbol)}</span>
               </div>
             </div>
 
@@ -189,7 +189,7 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
     <div>
       <label className="text-xs text-white/40 flex justify-between">
         <span>{label}</span>
-        <span className="text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>{display}</span>
+        <span className="font-mono text-accent">{display}</span>
       </label>
       <input
         type="range" min={min} max={max} step={step} value={value}
@@ -205,7 +205,7 @@ function Metric({ label, value, tone }: { label: string; value: string; tone: 'w
   return (
     <div className="p-3 rounded-none bg-white/5">
       <div className="text-xs text-white/40">{label}</div>
-      <div className={`text-xl font-bold ${toneClass}`} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      <div className={`font-mono text-xl font-bold ${toneClass}`}>
         {value}
       </div>
     </div>
@@ -216,7 +216,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent: '
   return (
     <div className="flex justify-between text-white/60">
       <span>{label}</span>
-      <span className={accent === 'emerald' ? 'text-success' : ''} style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      <span className={`font-mono ${accent === 'emerald' ? 'text-success' : ''}`}>
         {value}
       </span>
     </div>

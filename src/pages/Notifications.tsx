@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { NotificationInbox } from '@/components/notifications/NotificationInbox';
 import { NotificationItemData } from '@/components/notifications/NotificationItem';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function Notifications() {
               ? 'Войдите, чтобы управлять уведомлениями' 
               : 'Sign in to manage notifications'}
             action={
-              <Button onClick={() => navigate('/auth')}>
+              <Button onClick={() => redirectToAuth(navigate)}>
                 {t('auth.login')}
               </Button>
             }
@@ -72,10 +73,11 @@ export default function Notifications() {
           showBack
           badge={unreadCount}
           actions={
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => navigate('/profile/notifications')}
+              aria-label={isRu ? 'Настройки уведомлений' : 'Notification settings'}
             >
               <Settings className="w-5 h-5" />
             </Button>

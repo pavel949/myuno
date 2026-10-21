@@ -160,7 +160,7 @@ export function VerticalInsightPanel({ verticalId, className }: VerticalInsightP
         className="w-full flex items-center justify-center gap-2 py-3 rounded-none border border-border/50 bg-card/50 text-sm text-muted-foreground hover:text-foreground hover:border-border hover:bg-muted/30 transition-colors"
       >
         <MessageCircle className="w-4 h-4 text-primary" />
-        {isRu ? 'Нужна помощь? Свяжитесь с VIP Консьержем' : 'Need help? Contact VIP Concierge'}
+        {isRu ? 'Нужна помощь? Свяжитесь с myUNO VIP' : 'Need help? Contact myUNO VIP'}
       </button>
     </div>
   );

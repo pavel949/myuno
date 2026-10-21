@@ -62,9 +62,10 @@ export function PaymentMethodCard({ method, onSetDefault, onDelete }: PaymentMet
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 min-h-[44px] min-w-[44px] text-muted-foreground hover:text-primary"
             onClick={() => onSetDefault(method.id)}
             title={isRu ? 'Сделать основной' : 'Set as default'}
+            aria-label={isRu ? 'Сделать основной' : 'Set as default'}
           >
             <Star className="w-4 h-4" />
           </Button>
@@ -72,9 +73,10 @@ export function PaymentMethodCard({ method, onSetDefault, onDelete }: PaymentMet
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
           onClick={() => onDelete(method.id)}
           title={isRu ? 'Удалить' : 'Delete'}
+          aria-label={isRu ? 'Удалить' : 'Delete'}
         >
           <Trash2 className="w-4 h-4" />
         </Button>

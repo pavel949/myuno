@@ -32,12 +32,12 @@ export const P2_CN_INVESTORS: PersonaLanding = {
   secondaryCta: { label: { ru: 'Каталог кондо', en: 'Condo catalogue' }, href: '/property/offplan' },
   seo: {
     metaTitle: { ru: 'Пхукет для китайских инвесторов: scout-trip, USDT — myUNO', en: 'Phuket for Chinese investors: scout trip, USDT — myUNO' },
-    metaDescription: { ru: 'Кондо и виллы на Пхукете для гостей из Китая. Mandarin-консьерж, оплата USDT/CNY, проверенный foreign quota и ROI.', en: 'Condos and villas on Phuket for Chinese guests. Mandarin concierge, USDT/CNY payment, verified foreign quota and ROI.' },
+    metaDescription: { ru: 'Кондо и виллы на Пхукете для гостей из Китая. Mandarin-консьерж, оплата USDT/CNY, проверенный foreign quota и ROI.', en: 'Condos and villas in Phuket for Chinese guests. Mandarin concierge, USDT/CNY payment, verified foreign quota and ROI.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/cn-investors',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/cn-investors?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/cn-investors?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/cn-investors?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/cn-investors?lang=en' },
     ],
   },
 };

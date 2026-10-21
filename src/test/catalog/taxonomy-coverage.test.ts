@@ -47,12 +47,12 @@ describe('catalog SSOT — clusters', () => {
   });
 
   it('wedding lives in the LIVE cluster (lifestyle), not MANAGE (workspace)', () => {
-    // Regression guard for 2026-04-26 fix: cat-wedding-events used to sit
-    // under `manage`, which made Weddings appear in the public "Operations"
-    // block on Home. Wedding is a lifestyle/family event — it belongs in
-    // `live`. Persona system + appRegistry mirror this assignment.
-    const wedding = CATEGORIES.find((c) => c.id === 'cat-wedding-events');
-    expect(wedding?.clusterId).toBe('live');
+    // Regression guard for 2026-04-26 fix: wedding used to sit under `manage`.
+    // 2026-06-16: cat-wedding-events was consolidated into cat-leisure
+    // (still inside the `live` cluster). Invariant unchanged.
+    const leisure = CATEGORIES.find((c) => c.id === 'cat-leisure');
+    expect(leisure?.clusterId).toBe('live');
+    expect(leisure?.services.some((s) => /wedding|свадь/i.test(`${s.labelEn} ${s.labelRu}`))).toBe(true);
   });
 });
 
@@ -69,8 +69,8 @@ describe('catalog SSOT — categories', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('expects 18 canonical categories (3 Arrive + 10 Live + 1 Invest + 3 Legal + 1 Build)', () => {
-    expect(CATEGORIES).toHaveLength(18);
+  it('runtime SSOT has 14 categories (canonical 16 target tracked in docs/canonical/02)', () => {
+    expect(CATEGORIES).toHaveLength(14);
   });
 });
 

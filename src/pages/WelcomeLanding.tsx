@@ -1,39 +1,86 @@
 /**
- * WelcomeLanding — first touchpoint for guest users.
- * Single narrative: «один аккаунт — вся жизнь за границей».
+ * WelcomeLanding — главный лендинг myUNO («/»).
  *
- * Layout (top → bottom):
- *  1. Hero  — title + two CTAs (signup, «Я инвестор» → Navigator /invest cluster) + live stats.
- *  2. Persona router — three meaningful entry paths (arrive · live · invest).
- *  3. Clusters — simplified grid (no 01→06, no service counts).
- *  4. Benefits — «Почему один аккаунт удобнее».
- *  5. Trust strip.
- *  6. Closing CTA + footer (Privacy · Terms · Support · Contact).
- *  7. Sticky signup bar on mobile.
+ * Тон: гражданская инфраструктура (GOV.UK, e-Estonia). Без продающей лексики.
+ * Две конверсии равного веса:
+ *   1) частный пользователь → «Создать аккаунт»
+ *   2) местный бизнес     → «Стать партнёром» (/vendor/join)
+ *
+ * Структура (top → bottom):
+ *   1.  Hero с двумя CTA и реальными счётчиками из useCatalogFromDB
+ *   2.  Развилка «Я пришёл за…» (якорная навигация)
+ *   3.  Для кого экосистема — 6 аудиторий
+ *   4.  Что входит в экосистему — 6 кластеров Master Taxonomy v1.0
+ *   5.  Как это работает — 3 пункта
+ *   6.  Доверие и данные
+ *   7.  Помощь в экстренной ситуации (ConciergeHelpSheet, без логина)
+ *   8.  Для местных бизнесов
+ *   9.  Для застройщиков
+ *   10. Финальный двойной CTA + footer
+ *   11. Sticky mobile bar — переключается между signup и partner по скроллу
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Shield, Globe, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Plane,
+  Home,
+  TrendingUp,
+  KeyRound,
+  Building2,
+  Briefcase,
+  ShieldCheck,
+  Languages,
+  Wallet,
+  FileCheck2,
+  ClipboardCheck,
+  Headphones,
+  Database,
+  LifeBuoy,
+  CircleDot,
+  HeartPulse,
+  CarFront,
+  FileWarning,
+  Gavel,
+  Compass,
+  type LucideIcon,
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { buildCatalogAudienceMetrics } from '@/lib/catalog/catalogMetrics';
 import { APP_ROUTES } from '@/lib/config/routes';
-import {
-  LandingChrome,
-  WelcomePersonaRouter,
-  WelcomeBenefitsSection,
-  buildWelcomeNavigatorHref,
-} from '@/components/landings';
+import { LandingChrome } from '@/components/landings';
 import {
   LandingContainer,
   LandingHero,
   LandingSection,
-  LandingTrustRow,
 } from '@/components/landings/LandingPrimitives';
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
+import { GoalStrip } from '@/components/landings/GoalStrip';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
-function useWelcomeCatalogMetrics() {
+type Bi = { ru: string; en: string; th?: string };
+type Lang = 'ru' | 'en' | 'th';
+/** Pick localized string. Fallback chain: requested → en → ru. */
+const tx = (lang: Lang, v: Bi): string => {
+  if (lang === 'th' && v.th) return v.th;
+  if (lang === 'en') return v.en;
+  if (lang === 'ru') return v.ru;
+  return v.en || v.ru;
+};
+
+/** Russian plural for «N сервис(а/ов)». */
+function pluralRu(n: number, forms: [string, string, string]): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return `${n} ${forms[0]}`;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return `${n} ${forms[1]}`;
+  return `${n} ${forms[2]}`;
+}
+
+function useWelcomeMetrics() {
   const { clusters, categories } = useCatalogFromDB();
   return useMemo(
     () => buildCatalogAudienceMetrics(clusters, categories, { personas: [], role: null }),
@@ -41,38 +88,238 @@ function useWelcomeCatalogMetrics() {
   );
 }
 
-/** Russian plural for «N раздел(а/ов) платформы» */
-function platformSectionsTitleRu(n: number): string {
-  const m10 = n % 10;
-  const m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return `${n} раздел платформы`;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return `${n} раздела платформы`;
-  return `${n} разделов платформы`;
-}
+/* ------------------------------------------------------------------ */
+/*  Контент: 6 аудиторий                                              */
+/* ------------------------------------------------------------------ */
 
-const TRUST = [
-  { icon: Shield, en: 'Bank-grade KYC', ru: 'KYC банковского уровня' },
-  { icon: Globe, en: 'EN · RU · TH', ru: 'EN · RU · TH' },
-  { icon: Sparkles, en: 'AI concierge', ru: 'AI-консьерж' },
+const AUDIENCES: Array<{
+  id: string;
+  icon: LucideIcon;
+  title: Bi;
+  lead: Bi;
+  tasks: Bi[];
+  href: string;
+}> = [
+  {
+    id: 'tourist',
+    icon: Plane,
+    title: { ru: 'Турист и гость', en: 'Tourist & guest' },
+    lead: {
+      ru: 'Поездка на Пхукет: всё, что нужно от прилёта до возвращения.',
+      en: 'A trip to Phuket: everything from arrival to departure.',
+    },
+    tasks: [
+      { ru: 'Трансфер из аэропорта и аренда транспорта', en: 'Airport transfer and vehicle rental' },
+      { ru: 'SIM-карта, обмен валюты, страховка', en: 'SIM card, currency exchange, insurance' },
+      { ru: 'Экскурсии, яхты, рестораны, бьюти', en: 'Tours, yachts, restaurants, beauty' },
+      { ru: 'Врач и помощь 24/7 на родном языке', en: 'Doctor and 24/7 help in your language' },
+    ],
+    href: APP_ROUTES.ARRIVE_CLUSTER,
+  },
+  {
+    id: 'resident',
+    icon: Home,
+    title: { ru: 'Резидент', en: 'Resident' },
+    lead: {
+      ru: 'Жизнь на острове: жильё, дети, медицина, быт и сопровождение.',
+      en: 'Life on the island: housing, children, medicine, daily routines.',
+    },
+    tasks: [
+      { ru: 'Долгосрочная аренда и покупка жилья', en: 'Long-term rental and home purchase' },
+      { ru: 'Школа, детский сад, врач, аптека', en: 'School, kindergarten, doctor, pharmacy' },
+      { ru: 'Транспорт, банк, коммунальные платежи', en: 'Transport, bank, utility payments' },
+      { ru: 'Бытовые услуги: уборка, ремонт, доставка', en: 'Daily services: cleaning, repairs, delivery' },
+    ],
+    href: APP_ROUTES.LIVE_CLUSTER,
+  },
+  {
+    id: 'investor',
+    icon: TrendingUp,
+    title: { ru: 'Инвестор', en: 'Investor' },
+    lead: {
+      ru: 'Подбор и сопровождение сделок с проверкой и независимым рейтингом.',
+      en: 'Deal sourcing and end-to-end support with independent ratings.',
+    },
+    tasks: [
+      { ru: 'Подбор объектов под цель и бюджет', en: 'Property selection by goal and budget' },
+      { ru: 'Независимый рейтинг ClearView для off-plan', en: 'ClearView independent rating for off-plan' },
+      { ru: 'Юридическая и налоговая проверка', en: 'Legal and tax due diligence' },
+      { ru: 'Сопровождение сделки и стратегия выхода', en: 'Deal execution and exit strategy' },
+    ],
+    href: APP_ROUTES.INVEST_CLUSTER,
+  },
+  {
+    id: 'owner',
+    icon: KeyRound,
+    title: { ru: 'Собственник жилья', en: 'Property owner' },
+    lead: {
+      ru: 'Управление объектом из любой страны: бронирования, отчёты, обслуживание.',
+      en: 'Manage your property from anywhere: bookings, reports, maintenance.',
+    },
+    tasks: [
+      { ru: 'Управление арендой и каналами бронирования', en: 'Rental management and channel sync' },
+      { ru: 'Уборка, ремонт, плановое обслуживание', en: 'Cleaning, repairs, scheduled maintenance' },
+      { ru: 'P&L, отчёты владельцу, налоговые документы', en: 'P&L, owner statements, tax documents' },
+      { ru: 'Доступ команды и владельца из-за рубежа', en: 'Team and owner access from abroad' },
+    ],
+    href: APP_ROUTES.MANAGE_CLUSTER,
+  },
+  {
+    id: 'developer',
+    icon: Building2,
+    title: { ru: 'Застройщик', en: 'Developer' },
+    lead: {
+      ru: 'Витрина проекта, проверка и поток заявок от целевой аудитории.',
+      en: 'Project showcase, independent review and qualified inbound leads.',
+    },
+    tasks: [
+      { ru: 'Профиль проекта и портал застройщика', en: 'Project profile and developer portal' },
+      { ru: 'Сертификация по методологии ClearView', en: 'ClearView certification methodology' },
+      { ru: 'Маркетинг для иностранной аудитории', en: 'Marketing for international audience' },
+      { ru: 'Прозрачные правила работы и отчётность', en: 'Transparent rules of engagement and reporting' },
+    ],
+    href: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,
+  },
+  {
+    id: 'business',
+    icon: Briefcase,
+    title: { ru: 'Бизнес и предприниматель', en: 'Business & entrepreneur' },
+    lead: {
+      ru: 'Регистрация, бухгалтерия, визы команды, помещение и сопровождение.',
+      en: 'Registration, accounting, team visas, premises and ongoing support.',
+    },
+    tasks: [
+      { ru: 'Регистрация компании и бухгалтерия', en: 'Company registration and accounting' },
+      { ru: 'Визы для основателя и сотрудников', en: 'Visas for founder and employees' },
+      { ru: 'Поиск помещения и юридическое сопровождение', en: 'Premises search and legal support' },
+      { ru: 'Выход на иностранную аудиторию', en: 'Reach an international customer base' },
+    ],
+    href: APP_ROUTES.LEGAL_CLUSTER,
+  },
 ];
 
+/* ------------------------------------------------------------------ */
+
+const HOW_IT_WORKS: Bi[] = [
+  {
+    ru: 'Один аккаунт и один профиль для всех сервисов экосистемы.',
+    en: 'One account and one profile across every service in the ecosystem.',
+  },
+  {
+    ru: 'Исполнители проходят KYC и проверку документов. Оплата защищена до получения услуги; спор решает платформа.',
+    en: 'Providers pass KYC and document checks. Payments are held until delivery; disputes are resolved by the platform.',
+  },
+  {
+    ru: 'Запрос идёт через myUNO — координацию, перевод и контроль ведёт консьерж. Прямые контакты исполнителей не показываются.',
+    en: 'Requests go through myUNO — the concierge handles coordination, translation and oversight. Provider contacts are not exposed.',
+  },
+];
+
+const TRUST_FACTS: { icon: React.ComponentType<{ className?: string }>; text: Bi }[] = [
+  { icon: ShieldCheck, text: { ru: 'KYC уровня банка', en: 'Bank-grade KYC' } },
+  { icon: FileCheck2, text: { ru: 'Юридическое лицо в Таиланде', en: 'Registered entity in Thailand' } },
+  { icon: Database, text: { ru: 'Хранение данных по PDPA', en: 'Data stored in line with PDPA' } },
+  { icon: Headphones, text: { ru: 'Поддержка 24/7 — RU · EN · TH', en: '24/7 support — RU · EN · TH' } },
+  { icon: Wallet, text: { ru: 'Открытые цены в ฿, $, ₽, €', en: 'Transparent prices in ฿, $, ₽, €' } },
+  { icon: ClipboardCheck, text: { ru: 'Аудит-метка на каждой транзакции', en: 'Audit marker on every transaction' } },
+];
+
+const EMERGENCY_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: Bi }[] = [
+  { icon: HeartPulse, text: { ru: 'Медицинская помощь и госпитализация', en: 'Medical assistance and hospitalisation' } },
+  { icon: CarFront, text: { ru: 'ДТП и оформление страхового случая', en: 'Road accident and insurance claim' } },
+  { icon: FileWarning, text: { ru: 'Потеря документов и связь с консульством', en: 'Lost documents and consulate liaison' } },
+  { icon: Gavel, text: { ru: 'Правовая защита и срочный юрист', en: 'Legal protection and urgent lawyer' } },
+  { icon: LifeBuoy, text: { ru: 'Эвакуация и сопровождение в больнице', en: 'Evacuation and in-hospital support' } },
+];
+
+const PARTNER_BENEFITS: { title: Bi; body: Bi }[] = [
+  {
+    title: { ru: 'Поток заявок от верифицированных клиентов', en: 'Inbound from verified customers' },
+    body: {
+      ru: 'Запросы приходят от пользователей экосистемы, прошедших KYC, с понятным контекстом и историей.',
+      en: 'Requests come from KYC-verified ecosystem users with full context and history.',
+    },
+  },
+  {
+    title: { ru: 'Прозрачные комиссии и защищённая оплата', en: 'Transparent fees and protected payments' },
+    body: {
+      ru: 'Условия фиксируются заранее. Оплата клиента удерживается до подтверждения исполнения.',
+      en: 'Terms are agreed upfront. Customer payment is held until the service is confirmed.',
+    },
+  },
+  {
+    title: { ru: 'Единая репутация на платформе', en: 'A single platform-wide reputation' },
+    body: {
+      ru: 'Профиль, отзывы и история сделок видны клиенту. Репутация накапливается и работает на вас.',
+      en: 'Profile, reviews and deal history are visible to the customer. Reputation compounds.',
+    },
+  },
+];
+
+const PARTNER_CATEGORIES: Bi = {
+  ru: 'Услуги для жилья, перевозки и логистика, медицина, юристы, бухгалтерия, ремонт, транспорт, экскурсии, образование, бьюти, IT и другие категории.',
+  en: 'Home services, moving and logistics, medical, legal, accounting, repairs, transport, tours, education, beauty, IT and more.',
+};
+
+/* ------------------------------------------------------------------ */
+
 export default function WelcomeLanding() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const {
-    byCluster,
-    totalEligibleServices,
-    clustersCount,
-    totalActiveLifeSituations,
-  } = useWelcomeCatalogMetrics();
+
+  const { byCluster, totalEligibleServices, clustersCount: _allClusters, totalActiveLifeSituations } =
+    useWelcomeMetrics();
+  // Гость видит только accessible-кластеры (manage/workspace скрыт). Считаем по факту,
+  // чтобы цифра в hero совпадала с тем, что реально отрендерено в секции «Что входит».
+  const visibleClusters = useMemo(
+    () => byCluster.filter((c) => c.isAccessibleToViewer && c.servicesCount > 0),
+    [byCluster],
+  );
+  const clustersCount = visibleClusters.length;
+  void _allClusters;
+
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  /* Sticky bar: переключаемся на partner CTA, когда виден блок «Для бизнесов». */
+  const partnerRef = useRef<HTMLDivElement | null>(null);
+  const [stickyMode, setStickyMode] = useState<'signup' | 'partner'>('signup');
+  useEffect(() => {
+    const el = partnerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setStickyMode(entry.isIntersecting ? 'partner' : 'signup'),
+      { rootMargin: '-30% 0px -30% 0px', threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const statLabel = (ru: string, en: string, th: string) =>
+    language === 'ru' ? ru : language === 'th' ? th : en;
 
   const heroStats = [
-    { num: String(totalEligibleServices), label: t('welcome.hero.statServices') },
-    { num: String(clustersCount), label: t('welcome.hero.statSections') },
-    { num: String(totalActiveLifeSituations), label: t('welcome.hero.statSituations') },
-    { num: '24/7', label: t('welcome.hero.statSupport') },
+    { num: String(totalEligibleServices), label: statLabel('сервисов', 'services', 'บริการ') },
+    { num: String(clustersCount), label: statLabel('разделов', 'sections', 'หมวด') },
+    { num: String(totalActiveLifeSituations), label: statLabel('жизненных ситуаций', 'life situations', 'สถานการณ์ชีวิต') },
+    { num: '24/7', label: statLabel('поддержка', 'support', 'ตลอด 24 ชม.') },
   ];
+
+  const ecosystemHeading =
+    language === 'ru'
+      ? `${pluralRu(clustersCount, ['раздел', 'раздела', 'разделов'])}, ${pluralRu(
+          totalEligibleServices,
+          ['сервис', 'сервиса', 'сервисов'],
+        )} — один аккаунт`
+      : language === 'th'
+        ? `${clustersCount} หมวด, ${totalEligibleServices} บริการ — บัญชีเดียว`
+        : `${clustersCount} sections, ${totalEligibleServices} services — one account`;
+
+  const heroSubtitle: Bi = {
+    ru: `Экосистема myUNO объединяет ${totalEligibleServices} проверенных сервисов для иностранцев и местных бизнесов, готовых их обслуживать — в одном аккаунте, на русском, английском и тайском.`,
+    en: `The myUNO ecosystem brings together ${totalEligibleServices} vetted services for foreigners and the local businesses that serve them — in one account, in Russian, English and Thai.`,
+    th: `ระบบนิเวศ myUNO รวบรวม ${totalEligibleServices} บริการที่ได้รับการตรวจสอบสำหรับชาวต่างชาติ และธุรกิจท้องถิ่นที่พร้อมให้บริการ — ในบัญชีเดียว ทั้งภาษารัสเซีย อังกฤษ และไทย`,
+  };
 
   return (
     <div
@@ -81,6 +328,7 @@ export default function WelcomeLanding() {
     >
       <LandingChrome isRu={isRu} />
 
+      {/* ============================ 1. HERO ============================ */}
       <LandingSection className="relative overflow-hidden">
         <div
           aria-hidden
@@ -97,11 +345,11 @@ export default function WelcomeLanding() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-sans text-caption font-medium uppercase tracking-[0.12em] text-foreground"
+            className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-3 py-1 font-sans text-caption font-medium uppercase tracking-[0.12em] text-muted-foreground"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="font-semibold text-primary">{t('welcome.hero.kickerAccent')}</span>
-            <span className="text-muted-foreground">{t('welcome.hero.kickerRest')}</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span className="font-semibold text-foreground">myUNO</span>
+            <span>{tx(language, { ru: 'инфраструктура для жизни', en: 'infrastructure for living' })}</span>
           </motion.div>
 
           <motion.h1
@@ -110,9 +358,9 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="font-display mt-5 max-w-3xl text-h1 font-normal leading-[1.05] tracking-tight sm:text-display"
           >
-            {t('welcome.hero.titleLine1')}
+            {tx(language, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living', th: 'โครงสร้างพื้นฐานสำหรับการใช้ชีวิต' })}
             <br />
-            {t('welcome.hero.titleLine2')}
+            {tx(language, { ru: 'на Пхукете', en: 'in Phuket', th: 'บนเกาะภูเก็ต' })}
           </motion.h1>
 
           <motion.p
@@ -121,7 +369,7 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-4 max-w-2xl font-sans text-body-lg font-normal leading-relaxed text-muted-foreground"
           >
-            {t('welcome.hero.subtitle')}
+            {tx(language, heroSubtitle)}
           </motion.p>
 
           <motion.div
@@ -132,29 +380,38 @@ export default function WelcomeLanding() {
           >
             <Link
               to={`${APP_ROUTES.AUTH}?mode=signup`}
+              data-testid="welcome-cta-signup"
               className={cn(
-                'group inline-flex h-11 items-center gap-2 rounded-none px-5 font-sans text-body font-semibold',
-                'bg-foreground text-background hover:bg-foreground/90 transition-all',
-                'shadow-[0_1px_0_0_hsl(var(--background))_inset,0_0_0_1px_hsl(var(--foreground))]',
+                'group inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none px-5 font-sans text-body font-semibold',
+                'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {t('welcome.hero.ctaSignup')}
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
-            <button
-              type="button"
-              onClick={() =>
-                navigate(
-                  buildWelcomeNavigatorHref(`${APP_ROUTES.DISCOVER}?cluster=invest`, 'invest'),
-                )
-              }
-              data-testid="welcome-cta-investor"
-              className="inline-flex h-11 items-center rounded-none border border-border bg-card/40 px-5 font-sans text-body font-medium text-foreground hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            <Link
+              to={APP_ROUTES.VENDOR_JOIN}
+              data-testid="welcome-cta-partner"
+              className={cn(
+                'inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground',
+                'hover:bg-foreground hover:text-background transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              )}
             >
-              {t('welcome.hero.ctaInvestor')}
-            </button>
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
+            </Link>
           </motion.div>
+
+          <p className="mt-3 font-sans text-caption text-muted-foreground">
+            {tx(language, { ru: 'Уже есть аккаунт — ', en: 'Already registered — ', th: 'มีบัญชีอยู่แล้ว — ' })}
+            <Link
+              to={APP_ROUTES.AUTH}
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              {tx(language, { ru: 'войти', en: 'sign in', th: 'เข้าสู่ระบบ' })}
+            </Link>
+          </p>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -176,107 +433,427 @@ export default function WelcomeLanding() {
         </LandingHero>
       </LandingSection>
 
+      {/* ============ 1b. GOAL-FIRST ENTRY (One-Stop IA) ============ */}
       <LandingSection>
-        <LandingContainer className="py-10 sm:py-14">
-          <div className="mb-6 space-y-2">
-            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {t('welcome.persona.sectionTitle')}
-            </h2>
-            <p className="max-w-2xl font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
-              {t('welcome.persona.sectionLead')}
-            </p>
-          </div>
-          <WelcomePersonaRouter />
+        <LandingContainer className="py-8 sm:py-10">
+          <GoalStrip />
         </LandingContainer>
       </LandingSection>
 
+      {/* ============================ 2. РАЗВИЛКА ============================ */}
       <LandingSection>
-        <LandingContainer className="py-14 sm:py-20">
-          <div className="mb-3">
-            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {isRu
-                ? platformSectionsTitleRu(clustersCount)
-                : `${clustersCount} platform section${clustersCount === 1 ? '' : 's'}`}
-            </h2>
-          </div>
-          <p className="mb-8 max-w-2xl font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
-            {t('welcome.clusters.lead')}
+        <LandingContainer className="py-8 sm:py-10">
+          <p className="mb-4 font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
+            {tx(language, { ru: 'Я пришёл за…', en: 'I am here to…', th: 'ฉันมาเพื่อ…' })}
           </p>
+          <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
+            <a
+              href="#for-audiences"
+              className="group flex items-start gap-4 bg-background p-5 transition-colors hover:bg-card/50"
+            >
+              <Compass className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
+              <div className="min-w-0 flex-1">
+                <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
+                  {tx(language, { ru: 'Решить свой вопрос', en: 'Resolve my own matter', th: 'แก้ไขเรื่องของฉัน' })}
+                </div>
+                <div className="mt-1 font-sans text-body-sm text-muted-foreground">
+                  {tx(language, {
+                    ru: 'Найти нужный сервис, получить сопровождение, оформить заявку.',
+                    en: 'Find the right service, get support, submit a request.',
+                  })}
+                </div>
+              </div>
+              <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
+            </a>
+            <a
+              href="#for-partners"
+              className="group flex items-start gap-4 bg-background p-5 transition-colors hover:bg-card/50"
+            >
+              <Briefcase className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
+              <div className="min-w-0 flex-1">
+                <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
+                  {tx(language, { ru: 'Предложить свои услуги', en: 'Offer my services', th: 'เสนอบริการของฉัน' })}
+                </div>
+                <div className="mt-1 font-sans text-body-sm text-muted-foreground">
+                  {tx(language, {
+                    ru: 'Подключиться к экосистеме как проверенный исполнитель.',
+                    en: 'Join the ecosystem as a verified provider.',
+                  })}
+                </div>
+              </div>
+              <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
+            </a>
+          </div>
+        </LandingContainer>
+      </LandingSection>
 
-          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
-            {byCluster.map((c, i) => {
-              const Icon = c.icon;
-              const label = isRu ? c.labelRu : c.labelEn;
-              const hint = isRu ? c.hintsRu : c.hintsEn;
+      {/* ============================ 3. АУДИТОРИИ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20 scroll-mt-20">
+          <span id="for-audiences" className="block -mt-20 pt-20" aria-hidden />
+          <div className="mb-8 max-w-2xl space-y-3">
+            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+              {tx(language, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for', th: 'ระบบนิเวศนี้สำหรับใคร' })}
+            </h2>
+            <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
+              {tx(language, {
+                ru: 'Каждая из аудиторий получает свой набор сервисов и сопровождение. Один аккаунт — для всех ролей в одной жизни.',
+                en: 'Each audience gets a tailored set of services and support. One account covers every role in one life.',
+              })}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
+            {AUDIENCES.map((a) => {
+              const Icon = a.icon;
               return (
-                <motion.button
-                  key={c.id}
-                  type="button"
-                  aria-label={isRu ? `${label}. Перейти в раздел.` : `${label}. Open section.`}
-                  data-testid="welcome-cluster-card"
-                  data-cluster-id={c.id}
-                  onClick={() => navigate(c.homeRoute)}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.35, delay: i * 0.04 }}
-                  className="group relative bg-background p-5 text-left transition-colors hover:bg-card/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-6"
+                <Link
+                  key={a.id}
+                  to={a.href}
+                  data-testid={`welcome-audience-${a.id}`}
+                  className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
                 >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border bg-card transition-colors group-hover:border-primary/40"
-                      style={{ color: c.color }}
-                    >
-                      <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate font-sans text-h4 font-medium tracking-tight">
-                        {label}
-                      </h3>
-                      <p className="mt-1 font-sans text-body-sm leading-relaxed text-muted-foreground line-clamp-2">
-                        {hint}
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-border bg-card text-foreground">
+                      <Icon className="h-5 w-5" strokeWidth={1.75} />
+                    </span>
+                    <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">
+                      {tx(language, a.title)}
+                    </h3>
                   </div>
-                </motion.button>
+                  <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
+                    {tx(language, a.lead)}
+                  </p>
+                  <ul className="mt-1 space-y-1.5 font-sans text-body-sm text-foreground/85">
+                    {a.tasks.map((task, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CircleDot className="mt-1 h-3 w-3 shrink-0 text-muted-foreground" strokeWidth={2} />
+                        <span>{tx(language, task)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="mt-auto inline-flex items-center gap-1 pt-3 font-sans text-caption font-medium uppercase tracking-[0.12em] text-foreground transition-transform group-hover:translate-x-0.5">
+                    {tx(language, { ru: 'Перейти в раздел', en: 'Open section' })}
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  </span>
+                </Link>
               );
             })}
           </div>
         </LandingContainer>
       </LandingSection>
 
+      {/* ============================ 3.5 СООБЩЕСТВА ============================ */}
       <LandingSection>
-        <WelcomeBenefitsSection />
-      </LandingSection>
+        <LandingContainer className="py-10 sm:py-14">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto] md:items-end">
+            <div className="space-y-3">
+              <span className="inline-flex items-center gap-2 border border-border bg-card px-3 py-1 font-sans text-caption uppercase tracking-[0.12em] text-foreground">
+                {tx(language, { ru: 'Новое', en: 'New', th: 'ใหม่' })}
+              </span>
+              <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+                {tx(language, { ru: 'Найти своих', en: 'Find your community', th: 'หาชุมชนของคุณ' })}
+              </h2>
+              <p className="max-w-2xl font-sans text-body-sm leading-relaxed text-muted-foreground">
+                {tx(language, {
+                  ru: 'Церкви, храмы и мечети, экспат-клубы по интересам и языкам, дипломатические миссии и почётные консулы — всё в одном справочнике с контактами и маршрутами.',
+                  en: 'Churches, temples and mosques, expat clubs by language and interest, diplomatic missions and honorary consuls — all in one directory with contacts and directions.',
+                  th: 'โบสถ์ วัด มัสยิด ชมรมชาวต่างชาติตามภาษาและความสนใจ คณะผู้แทนทางการทูตและสถานกงสุล — รวมไว้ในที่เดียวพร้อมข้อมูลติดต่อและเส้นทาง',
+                })}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-2 font-sans text-caption text-muted-foreground">
+                {[
+                  { ru: '80+ посольств', en: '80+ embassies', th: 'สถานทูต 80+ แห่ง' },
+                  { ru: '4 консульства на Пхукете', en: '4 consulates in Phuket', th: 'สถานกงสุล 4 แห่งในภูเก็ต' },
+                  { ru: 'Храмы, церкви, мечети', en: 'Temples · churches · mosques', th: 'วัด · โบสถ์ · มัสยิด' },
+                  { ru: 'Экспат-клубы', en: 'Expat clubs', th: 'ชมรมชาวต่างชาติ' },
+                ].map((chip, i) => (
+                  <li key={i} className="border border-border bg-card px-2 py-1">
+                    {tx(language, chip)}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-      <LandingSection>
-        <LandingContainer className="py-10">
-          <LandingTrustRow items={TRUST} isRu={isRu} />
-        </LandingContainer>
-      </LandingSection>
-
-      <LandingSection border={false}>
-        <LandingContainer className="mx-auto max-w-3xl py-16 text-center sm:py-24">
-          <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
-            {t('welcome.closing.title.line1')}
-            <br />
-            {t('welcome.closing.title.line2')}
-          </h2>
-          <p className="mt-4 font-sans text-body-sm text-muted-foreground sm:text-body">
-            {t('welcome.closing.subtitle')}
-          </p>
-          <div className="mt-7 flex justify-center">
             <Link
-              to={`${APP_ROUTES.AUTH}?mode=signup`}
+              to={APP_ROUTES.COMMUNITIES}
+              data-testid="welcome-cta-communities"
               className={cn(
-                'group inline-flex h-12 items-center gap-2 rounded-none px-6 font-sans text-body font-semibold',
-                'bg-primary text-primary-foreground hover:bg-primary/90 transition-all',
-                'shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)]',
+                'inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground',
+                'hover:bg-foreground hover:text-background transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {t('welcome.closing.cta')}
+              {tx(language, { ru: 'Открыть справочник', en: 'Open directory', th: 'เปิดสารบัญ' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+          </div>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 4. КЛАСТЕРЫ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
+          <div className="mb-8 max-w-2xl space-y-3">
+            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+              {tx(language, { ru: 'Что входит в экосистему', en: 'What the ecosystem includes', th: 'สิ่งที่อยู่ในระบบนิเวศ' })}
+            </h2>
+            <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
+              {ecosystemHeading}.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
+            {byCluster.map((c) => {
+              const Icon = c.icon;
+              const label = isRu ? c.labelRu : c.labelEn;
+              const hint = isRu ? c.hintsRu : c.hintsEn;
+              if (!c.servicesCount) return null;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  data-testid="welcome-cluster-card"
+                  data-cluster-id={c.id}
+                  onClick={() => navigate(c.homeRoute)}
+                  className="group flex flex-col gap-3 bg-background p-6 text-left transition-colors hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center border border-border bg-card text-foreground">
+                      <Icon className="h-5 w-5" strokeWidth={1.75} />
+                    </span>
+                    <span className="font-mono text-caption tabular-nums text-muted-foreground">
+                      {isRu
+                        ? pluralRu(c.servicesCount, ['сервис', 'сервиса', 'сервисов'])
+                        : `${c.servicesCount} ${c.servicesCount === 1 ? 'service' : 'services'}`}
+                    </span>
+                  </div>
+                  <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">
+                    {label}
+                  </h3>
+                  <p className="font-sans text-body-sm leading-relaxed text-muted-foreground line-clamp-3">
+                    {hint}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 5. КАК РАБОТАЕТ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
+          <div className="mb-8 max-w-2xl">
+            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+              {tx(language, { ru: 'Как это работает', en: 'How it works', th: 'ทำงานอย่างไร' })}
+            </h2>
+          </div>
+          <ol className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-3">
+            {HOW_IT_WORKS.map((step, i) => (
+              <li key={i} className="flex flex-col gap-3 bg-background p-6">
+                <span className="font-mono text-caption font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <p className="font-sans text-body leading-relaxed text-foreground">
+                  {tx(language, step)}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 6. ДОВЕРИЕ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
+          <div className="mb-8 max-w-2xl">
+            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+              {tx(language, { ru: 'Доверие и данные', en: 'Trust & data', th: 'ความน่าเชื่อถือและข้อมูล' })}
+            </h2>
+            <p className="mt-3 font-sans text-body-sm leading-relaxed text-muted-foreground">
+              {tx(language, {
+                ru: 'Сухие факты, без обещаний. Подробнее — в разделах «Конфиденциальность» и «Условия».',
+                en: 'Facts, not promises. See Privacy and Terms for details.',
+              })}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
+            {TRUST_FACTS.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} className="flex items-center gap-3 bg-background p-5">
+                  <Icon className="h-5 w-5 shrink-0 text-foreground" />
+                  <span className="font-sans text-body-sm text-foreground">{tx(language, f.text)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 7. ЭКСТРЕННАЯ ПОМОЩЬ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
+            <div className="space-y-3">
+              <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+                {tx(language, { ru: 'Помощь в экстренной ситуации', en: 'Help in an emergency', th: 'ความช่วยเหลือฉุกเฉิน' })}
+              </h2>
+              <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
+                {tx(language, {
+                  ru: 'Доступно гостю без аккаунта. Запрос принимает дежурный консьерж — на русском, английском или тайском.',
+                  en: 'Available without an account. A duty concierge receives the request — in Russian, English or Thai.',
+                })}
+              </p>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(true)}
+                data-testid="welcome-cta-emergency"
+                className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <LifeBuoy className="h-4 w-4" strokeWidth={2} />
+                {tx(language, { ru: 'Запросить помощь', en: 'Request help', th: 'ขอความช่วยเหลือ' })}
+              </button>
+            </div>
+            <ul className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
+              {EMERGENCY_ITEMS.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <li key={i} className="flex items-center gap-3 bg-background p-4">
+                    <Icon className="h-4 w-4 shrink-0 text-foreground" />
+                    <span className="font-sans text-body-sm text-foreground">{tx(language, item.text)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 8. ДЛЯ БИЗНЕСОВ ============================ */}
+      <div ref={partnerRef}>
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20 scroll-mt-20">
+          <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
+          <div className="mb-8 max-w-3xl space-y-3">
+            <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
+              {tx(language, { ru: 'Для местных бизнесов', en: 'For local businesses', th: 'สำหรับธุรกิจท้องถิ่น' })}
+            </p>
+            <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+              {tx(language, {
+                ru: 'Работайте с иностранной аудиторией по прозрачным правилам',
+                en: 'Work with an international audience by transparent rules',
+              })}
+            </h2>
+            <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
+              {tx(language, {
+                ru: 'Экосистема myUNO открыта для проверенных исполнителей: подключение к потоку заявок, прозрачные комиссии, единая репутация.',
+                en: 'The myUNO ecosystem is open to verified providers: access to inbound, transparent fees, a single reputation across the platform.',
+              })}
+            </p>
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 lg:grid-cols-3">
+            {PARTNER_BENEFITS.map((b, i) => (
+              <div key={i} className="bg-background p-6">
+                <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">
+                  {tx(language, b.title)}
+                </h3>
+                <p className="mt-2 font-sans text-body-sm leading-relaxed text-muted-foreground">
+                  {tx(language, b.body)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-6 border-l-2 border-border pl-4 font-sans text-body-sm leading-relaxed text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {tx(language, { ru: 'Кому подходит: ', en: 'Who can join: ' })}
+            </span>
+            {tx(language, PARTNER_CATEGORIES)}
+          </div>
+
+          <Link
+            to={APP_ROUTES.VENDOR_JOIN}
+            data-testid="welcome-cta-partner-bottom"
+            className="inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          </Link>
+        </LandingContainer>
+      </LandingSection>
+
+      {/* ============================ 9. ДЛЯ ЗАСТРОЙЩИКОВ ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-14 sm:py-20">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-2xl space-y-3">
+              <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
+                {tx(language, { ru: 'Для застройщиков', en: 'For developers', th: 'สำหรับผู้พัฒนาโครงการ' })}
+              </p>
+              <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+                {tx(language, {
+                  ru: 'Прозрачная витрина и независимая проверка проекта',
+                  en: 'A transparent showcase and independent project review',
+                })}
+              </h2>
+              <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
+                {tx(language, {
+                  ru: 'Профиль проекта, методология ClearView и поток квалифицированных заявок от иностранной аудитории. Регистрация — через лендинг для застройщиков.',
+                  en: 'Project profile, ClearView methodology and qualified inbound from international buyers. Registration via the developer landing.',
+                })}
+              </p>
+            </div>
+            <Link
+              to={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS}
+              data-testid="welcome-cta-developers"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              {tx(language, { ru: 'Портал застройщика', en: 'Developer portal' })}
+              <ArrowRight className="h-4 w-4" strokeWidth={2} />
+            </Link>
+          </div>
+        </LandingContainer>
+      </LandingSection>
+      </div>
+
+      {/* ============================ 10. ФИНАЛЬНЫЙ CTA + FOOTER ============================ */}
+      <LandingSection border={false}>
+        <LandingContainer className="mx-auto max-w-3xl py-16 text-center sm:py-24">
+          <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
+            {tx(language, { ru: 'Один аккаунт —', en: 'One account —', th: 'บัญชีเดียว —' })}
+            <br />
+            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life in Phuket', th: 'ชีวิตทั้งหมดบนภูเก็ต' })}
+          </h2>
+          <p className="mt-4 font-sans text-body-sm text-muted-foreground sm:text-body">
+            {tx(language, {
+              ru: 'Создайте аккаунт за минуту или подайте заявку на подключение бизнеса. Без обязательств.',
+              en: 'Create an account in a minute, or apply to join as a business. No commitments.',
+            })}
+          </p>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <Link
+              to={`${APP_ROUTES.AUTH}?mode=signup`}
+              className={cn(
+                'group inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none px-6 font-sans text-body font-semibold',
+                'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              )}
+            >
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
+              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+            <Link
+              to={APP_ROUTES.VENDOR_JOIN}
+              className={cn(
+                'inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground',
+                'hover:bg-foreground hover:text-background transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              )}
+            >
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             </Link>
           </div>
 
@@ -284,50 +861,60 @@ export default function WelcomeLanding() {
             aria-label={isRu ? 'Юридическая информация и поддержка' : 'Legal and support'}
             className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-sans text-caption text-muted-foreground"
           >
-            <Link
-              to={APP_ROUTES.PRIVACY}
-              className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:underline"
-            >
-              {t('welcome.footer.linkPrivacy')}
+            <Link to={APP_ROUTES.PRIVACY} className="hover:text-foreground transition-colors">
+              {tx(language, { ru: 'Конфиденциальность', en: 'Privacy' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link
-              to={APP_ROUTES.TERMS}
-              className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:underline"
-            >
-              {t('welcome.footer.linkTerms')}
+            <Link to={APP_ROUTES.TERMS} className="hover:text-foreground transition-colors">
+              {tx(language, { ru: 'Условия', en: 'Terms' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link
-              to={APP_ROUTES.SUPPORT}
-              className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:underline"
-            >
-              {t('welcome.footer.linkSupport')}
+            <Link to={APP_ROUTES.SUPPORT} className="hover:text-foreground transition-colors">
+              {tx(language, { ru: 'Поддержка', en: 'Support' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
-            <Link
-              to={APP_ROUTES.CONTACT}
-              className="hover:text-foreground transition-colors focus-visible:outline-none focus-visible:underline"
-            >
-              {t('welcome.footer.linkContact')}
+            <Link to={APP_ROUTES.CONTACT} className="hover:text-foreground transition-colors">
+              {tx(language, { ru: 'Контакты', en: 'Contact' })}
             </Link>
           </nav>
 
-          <p className="mt-6 font-sans text-caption tracking-[0.08em] text-muted-foreground/60">
-            {t('welcome.footer.copyright')}
+          <p className="mt-6 inline-flex items-center gap-1.5 font-sans text-caption tracking-[0.08em] text-muted-foreground/60">
+            <Languages className="h-3 w-3" />
+            RU · EN · TH · <LegalCopyright />
           </p>
         </LandingContainer>
       </LandingSection>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:hidden">
-        <Link
-          to={`${APP_ROUTES.AUTH}?mode=signup`}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
-        >
-          {t('welcome.hero.ctaSignup')}
-          <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-        </Link>
+      {/* ============================ 11. STICKY MOBILE ============================ */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-4 py-3 sm:hidden">
+        {stickyMode === 'partner' ? (
+          <Link
+            to={APP_ROUTES.VENDOR_JOIN}
+            data-testid="welcome-sticky-partner"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none border border-foreground bg-foreground font-sans text-body font-semibold text-background"
+          >
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          </Link>
+        ) : (
+          <Link
+            to={`${APP_ROUTES.AUTH}?mode=signup`}
+            data-testid="welcome-sticky-signup"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
+          >
+            {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          </Link>
+        )}
       </div>
+
+      <ConciergeHelpSheet
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        topic="general"
+        initialSubject={language === 'ru' ? 'Экстренная помощь' : language === 'th' ? 'ความช่วยเหลือฉุกเฉิน' : 'Emergency assistance'}
+        sourceData={{ source_page: 'welcome_landing', emergency: true }}
+      />
     </div>
   );
 }

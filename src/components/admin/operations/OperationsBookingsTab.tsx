@@ -13,16 +13,31 @@ import { format } from 'date-fns';
 import { ORDER_STATUS_CONFIG } from '@/types/orders';
 import type { OrderStatus } from '@/types/orders';
 import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
+import { useSearchParams } from 'react-router-dom';
+import { applyOrderQueue, parseOrderQueue, parseQueuePage } from '@/lib/adminDashboardQueues';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export function OperationsBookingsTab() {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { t, language } = useLanguage();
+  const [params, setParams] = useSearchParams();
+  const queue = parseOrderQueue(params);
+  const page = parseQueuePage(params, 'order_page');
+  const pageSize = 100;
+
+
+
+  const searchQuery = queue.search;
+  const statusFilter = queue.status;
+  const updateFilter = (key: string, value: string) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (!value || value === 'all') next.delete(key); else next.set(key, value);
+    if (key !== 'order_page') next.delete('order_page');
+    return next;
+  });
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { data: orders, isLoading, refetch } = useQuery({
-    queryKey: ['admin-orders', statusFilter],
+  const { data: result, isLoading, error, isFetching, refetch } = useQuery({
+    queryKey: ['admin-orders', statusFilter, queue.createdBefore, page],
     queryFn: async () => {
       let query = supabase
         .from('orders')
@@ -31,20 +46,18 @@ export function OperationsBookingsTab() {
           order_items (id, item_name, item_type, qty, unit_price, amount),
           order_participants (id, name, phone, email, role),
           order_addresses (id, address_type, address_text, notes)
-        `)
-        .is('deleted_at', null)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(200);
+        .order('id', { ascending: false })
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+      query = applyOrderQueue(query, queue);
 
-      if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as any);
-      }
-
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { rows: data, count };
     },
   });
+  const orders = result?.rows;
 
   // Fetch profiles for customer names
   const customerIds = [...new Set(orders?.map((o) => o.customer_user_id) || [])];
@@ -89,19 +102,25 @@ export function OperationsBookingsTab() {
     const primary = order.order_participants?.find((p: any) => p.role === 'primary');
     if (primary) return { name: primary.name, phone: primary.phone };
     const profile = profileMap.get(order.customer_user_id);
-    return { name: profile?.full_name || '—', phone: profile?.phone || null };
+    return { name: profile?.full_name || t('admin.orders.noCustomer'), phone: profile?.phone || null };
   };
 
   return (
     <div className="space-y-4">
+      {error && <div role="alert" className="border border-destructive p-4">
+        {pickLang(language, { en: 'Could not load orders. Counts and results are unavailable.', ru: 'Не удалось загрузить заказы. Счётчики и результаты недоступны.', th: 'โหลดคำสั่งซื้อไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน' })}
+        <Button variant="outline" disabled={isFetching} onClick={() => refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+      </div>}
+      {queue.createdBefore && <p className="text-sm text-muted-foreground">{pickLang(language, { en: 'Created before', ru: 'Созданы до', th: 'สร้างก่อน' })}: <time>{queue.createdBefore}</time></p>}
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {!error && !isLoading && <p className="text-xs text-muted-foreground">{pickLang(language,{en:'Status counts below describe the loaded page, not the entire queue.',ru:'Счётчики статусов ниже относятся к загруженной странице, а не ко всей очереди.',th:'จำนวนตามสถานะด้านล่างเป็นของหน้าที่โหลด ไม่ใช่ทั้งคิว'})}</p>}
+      {!error && !isLoading && <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <AlertCircle className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.pending')}</p>
             </div>
           </CardContent>
         </Card>
@@ -110,7 +129,7 @@ export function OperationsBookingsTab() {
             <Clock className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Подтверждено' : 'Confirmed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.confirmed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -119,7 +138,7 @@ export function OperationsBookingsTab() {
             <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.completed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -128,18 +147,19 @@ export function OperationsBookingsTab() {
             <XCircle className="h-8 w-8 text-destructive" />
             <div>
               <p className="text-2xl font-bold">{stats.cancelled}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Отменено' : 'Cancelled'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.cancelled')}</p>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div>}
 
       {/* Filters */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            {isRu ? 'Все заказы' : 'All Orders'}
+            {t('admin.orders.title')}
+
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -147,43 +167,52 @@ export function OperationsBookingsTab() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isRu ? 'Поиск по имени, номеру...' : 'Search by name, number...'}
+                placeholder={t('admin.orders.searchPlaceholder')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => updateFilter('q', e.target.value)}
                 className="pl-9"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={value => updateFilter('status', value)}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={isRu ? 'Статус' : 'Status'} />
+                <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRu ? 'Все' : 'All'}</SelectItem>
-                <SelectItem value="pending">{isRu ? 'Ожидают' : 'Pending'}</SelectItem>
-                <SelectItem value="confirmed">{isRu ? 'Подтверждённые' : 'Confirmed'}</SelectItem>
-                <SelectItem value="in_progress">{isRu ? 'В работе' : 'In Progress'}</SelectItem>
-                <SelectItem value="completed">{isRu ? 'Завершённые' : 'Completed'}</SelectItem>
-                <SelectItem value="cancelled">{isRu ? 'Отменённые' : 'Cancelled'}</SelectItem>
+                <SelectItem value="all">{t('admin.orders.filter.all')}</SelectItem>
+                <SelectItem value="pending">{t('admin.orders.filter.pending')}</SelectItem>
+                <SelectItem value="confirmed">{t('admin.orders.filter.confirmed')}</SelectItem>
+                <SelectItem value="in_progress">{t('admin.orders.filter.inProgress')}</SelectItem>
+                <SelectItem value="completed">{t('admin.orders.filter.completed')}</SelectItem>
+                <SelectItem value="cancelled">{t('admin.orders.filter.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={() => setParams(previous => { const next = new URLSearchParams(previous); ['q', 'status', 'created_before', 'order_page'].forEach(key => next.delete(key)); return next; })}>{pickLang(language, { en: 'Reset filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })}</Button>
           </div>
+          <p className="text-xs text-muted-foreground">{pickLang(language, {en:'Text search applies to this page; status and date filters apply to all orders.',ru:'Текстовый поиск — на текущей странице; статус и дата — по всем заказам.',th:'ค้นหาข้อความในหน้านี้ ตัวกรองสถานะและวันที่ใช้กับทุกคำสั่งซื้อ'})}</p>
+          {!error && !isLoading && <div className="flex flex-wrap items-center gap-3 py-3">
+            <p role="status" className="text-sm">{pickLang(language, {en:'Matching orders',ru:'Подходящие заказы',th:'คำสั่งซื้อที่ตรงกัน'})}: {result?.count ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+            <Button variant="outline" disabled={page===0||isFetching} onClick={()=>updateFilter('order_page',String(page-1))}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+            <Button variant="outline" disabled={isFetching||result?.count==null||(page+1)*pageSize>=result.count} onClick={()=>updateFilter('order_page',String(page+1))}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+          </div>}
 
-          {isLoading ? (
+          {error ? null : isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
-              {isRu ? 'Загрузка...' : 'Loading...'}
+              {t('admin.orders.loading')}
             </div>
+
           ) : (
             <div className="rounded-none border overflow-x-auto">
-              <Table>
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isRu ? '№ Заказа' : 'Order #'}</TableHead>
-                    <TableHead>{isRu ? 'Тип' : 'Type'}</TableHead>
-                    <TableHead>{isRu ? 'Клиент' : 'Customer'}</TableHead>
-                    <TableHead>{isRu ? 'Дата' : 'Date'}</TableHead>
-                    <TableHead>{isRu ? 'Сумма' : 'Amount'}</TableHead>
-                    <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
+                    <TableHead>{t('admin.orders.col.orderNumber')}</TableHead>
+                    <TableHead>{t('admin.orders.col.type')}</TableHead>
+                    <TableHead>{t('admin.orders.col.customer')}</TableHead>
+                    <TableHead>{t('admin.orders.col.date')}</TableHead>
+                    <TableHead>{t('admin.orders.col.amount')}</TableHead>
+                    <TableHead>{t('admin.orders.col.status')}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
+
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -215,21 +244,23 @@ export function OperationsBookingsTab() {
                             ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')
                             : order.created_at
                             ? format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')
-                            : '—'}
+                            : t('admin.orders.noDate')}
                         </TableCell>
                         <TableCell className="font-medium">
                           {order.total_amount?.toLocaleString()} {order.currency || 'THB'}
                         </TableCell>
                         <TableCell>
                           <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
-                            {isRu ? statusCfg.labelRu : statusCfg.labelEn}
+                            {t(`admin.orders.statusLabel.${status}`)}
                           </Badge>
+
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 min-h-[44px] min-w-[44px]"
+                            aria-label="View"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedOrderId(order.id);
@@ -244,13 +275,18 @@ export function OperationsBookingsTab() {
                   {(!filteredOrders || filteredOrders.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        {isRu ? 'Заказы не найдены' : 'No orders found'}
+                        {t('admin.orders.empty')}
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
             </div>
+          )}
+          {orders && orders.length >= 1000 && (
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              {t('admin.orders.limitNotice')}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -264,3 +300,4 @@ export function OperationsBookingsTab() {
     </div>
   );
 }
+

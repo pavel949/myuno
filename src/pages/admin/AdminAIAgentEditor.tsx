@@ -181,7 +181,7 @@ export default function AdminAIAgentEditor() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/ai-agents')}>
+          <Button variant="ghost" size="icon" aria-label={isRussian ? 'Назад' : 'Back'} onClick={() => navigate('/admin/ai-agents')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>

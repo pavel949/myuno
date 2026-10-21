@@ -9,7 +9,7 @@
  * Always returns absolute URLs (canonical origin) so that they work in OG
  * cards regardless of the runtime host (preview, custom domain, etc).
  */
-const ORIGIN = 'https://myuno.app';
+const ORIGIN = 'https://www.myuno.app';
 
 export type OgLang = 'ru' | 'en';
 

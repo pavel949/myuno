@@ -132,14 +132,19 @@ export function VoiceInput({ onTranscript, className, disabled }: VoiceInputProp
       variant={isListening ? 'destructive' : 'ghost'}
       size="icon"
       className={cn(
-        'h-10 w-10 shrink-0 transition-all',
+        'h-11 w-11 shrink-0 transition-all',
         isListening && 'animate-pulse',
         className
       )}
       onClick={handleClick}
       disabled={disabled}
-      title={isListening 
-        ? (isRu ? 'Остановить запись' : 'Stop recording') 
+      aria-label={isListening
+        ? (isRu ? 'Остановить запись' : 'Stop recording')
+        : (isRu ? 'Голосовой ввод' : 'Voice input')
+      }
+      aria-pressed={isListening}
+      title={isListening
+        ? (isRu ? 'Остановить запись' : 'Stop recording')
         : (isRu ? 'Голосовой ввод' : 'Voice input')
       }
     >

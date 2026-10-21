@@ -18,6 +18,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Scale, Plus, MoreVertical, Edit, Trash2, Loader2, Star } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLegalInbox } from '@/components/vendor/VendorLegalInbox';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+
 
 const serviceTypes = [
   { value: 'law_firm', label: 'Law Firm', labelRu: 'Юридическая фирма' },
@@ -49,7 +52,7 @@ const VendorLegal = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
@@ -141,9 +144,12 @@ const VendorLegal = () => {
   return (
     <PageContainer>
 
+        <VendorLegalInbox providerId={profile?.id} />
+
         <Button className="w-full mb-4" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />{isRussian ? 'Добавить' : 'Add'}
         </Button>
+
 
         {isLoading ? (
           <div className="space-y-4">{[1, 2].map(i => <Skeleton key={i} className="h-24" />)}</div>
@@ -183,7 +189,7 @@ const VendorLegal = () => {
                           </div>
                         </div>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}><Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}</DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>

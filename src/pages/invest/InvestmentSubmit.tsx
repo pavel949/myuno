@@ -209,9 +209,9 @@ export default function InvestmentSubmit() {
                   <Input type="number" value={form.target_timeline_months} onChange={(e) => set('target_timeline_months', e.target.value)} placeholder="6" />
                 </div>
                 <div>
-                  <Label>Historical comparable IRR (%) — для внутреннего ревью</Label>
+                  <Label>Submitted IRR estimate (%)</Label>
                   <Input type="number" step="0.1" value={form.expected_irr} onChange={(e) => set('expected_irr', e.target.value)} placeholder="15" />
-                  <p className="text-[11px] text-muted-foreground mt-1">Based on comparable units. Not shown publicly as a forecast.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Your estimate is subject to review. It is not verified historical performance.</p>
                 </div>
               </div>
             </div>

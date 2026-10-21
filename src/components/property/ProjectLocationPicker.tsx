@@ -193,6 +193,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
       setAddressResults([]);
+      setSearching(false);
       return;
     }
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
@@ -326,9 +327,10 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 min-h-[44px] min-w-[44px]"
                   onClick={getCurrentLocation}
                   disabled={isGettingLocation}
+                  aria-label={isRu ? 'Моё местоположение' : 'Use my location'}
                 >
                   {isGettingLocation ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { createManagedPropertyDraft, saveManagedPropertyDraft, propertyAuthoringPatch, isIndependentPropertyProvider, readManagedPropertyDraft, readIndependentPropertyForAuthoring } from '@/lib/propertyAuthoring';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('usePropertyCare');
@@ -90,15 +92,22 @@ export function useOwnerProperties() {
 /**
  * Fetch a single property — accessible by owner OR assigned manager.
  */
-export function useOwnerProperty(id: string | undefined) {
+export function useOwnerProperty(id: string | undefined, options?: { authoring?: boolean }) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id || null;
 
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   return useQuery({
-    queryKey: ['owner-property', id, activeCompanyId],
+    queryKey: ['owner-property', id, user?.id, activeCompanyId, options?.authoring ? 'authoring' : 'operational'],
     queryFn: async () => {
       if (!id || !user) return null;
+
+      if (options?.authoring) {
+        const independent = await readIndependentPropertyForAuthoring(id, user.id, isAdmin);
+        if (independent) return independent;
+        return readManagedPropertyDraft(id, activeCompanyId || undefined);
+      }
 
       // Fire all access checks in parallel instead of waterfall
       const [ownerRes, assignmentRes, companyRes, membershipsRes] = await Promise.all([
@@ -134,103 +143,52 @@ export function useOwnerProperty(id: string | undefined) {
         }
       }
 
+      // Preserve independent provider ownership even outside an MC workspace.
+      const providerProperty = await supabase.from('properties').select('*').eq('id', id).maybeSingle();
+      if (providerProperty.error) throw providerProperty.error;
+      if (providerProperty.data && await isIndependentPropertyProvider(providerProperty.data.provider_id, user.id)) return providerProperty.data as unknown as OwnerProperty;
       return null;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!user && (!options?.authoring || !adminLoading),
   });
 }
 
 export function useCreateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { activeCompany } = useActiveCompany();
-  const activeCompanyId = activeCompany?.company_id || null;
-
+  const { activeCompany, isLoading: companyLoading, error: companyError } = useActiveCompany();
   return useMutation({
-    mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string; _silent?: boolean }) => {
+    mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string; _operatingSpaceId?: string | null; _silent?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
-      
-      // Priority: explicit data > active company context > DB fallback
-      const dataExt = data as Partial<OwnerProperty> & {
-        _companyId?: string;
-        _silent?: boolean;
-        management_company_id?: string | null;
-        description?: string;
-        description_en?: string;
-        description_ru?: string;
-        title?: string;
-        title_ru?: string;
+      if (companyLoading || companyError) throw new Error('Company workspace could not be verified. Retry before creating a property.');
+      const companyId = data.management_company_id || data._companyId || activeCompany?.company_id || null;
+      const payload = {
+        ...propertyAuthoringPatch(data as Record<string, unknown>),
+        title_en: data.title || data.title_en || data.address || 'New Property',
+        title_ru: data.title_ru || data.title || data.title_en || 'Новый объект',
+        description_en: (data as Record<string, unknown>).description || data.description_en || '',
+        listing_type: data.listing_type || 'rent',
       };
-      const companyIdFromData = dataExt.management_company_id || data._companyId || activeCompanyId || null;
-      const [profileRes, membershipRes] = await Promise.all([
-        supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
-        !companyIdFromData
-          ? supabase.from('management_company_members').select('company_id').eq('user_id', user.id).eq('is_active', true).limit(1).maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
-      
-      const profile = profileRes.data;
-      const managementCompanyId = companyIdFromData || membershipRes.data?.company_id || null;
-
-      const { _companyId, _silent, title, title_ru, description, description_ru, ...restData } = dataExt;
-      
-      // Clean undefined values to prevent potential DB column mismatch
-      const cleanRest: Record<string, unknown> = {};
-      for (const [key, val] of Object.entries(restData)) {
-        if (val !== undefined) cleanRest[key] = val;
+      if (companyId) {
+        return createManagedPropertyDraft({ companyId, operatingSpaceId: data._operatingSpaceId, patch: payload });
       }
-      
-      const insertData = { 
-        ...cleanRest, 
-        owner_id: user.id,
-        approval_status: data.approval_status || 'pending',
-        is_active: data.approval_status === 'draft' ? false : true,
-        title_en: title || data.address || 'New Property',
-        title_ru: title_ru || title || 'Новый объект',
-        description_en: description || dataExt.description_en || '',
-        description_ru: description_ru || '',
-        listing_type: 'rent',
-        listing_modes: data.listing_modes || ['rent'],
-        ...(managementCompanyId ? { management_company_id: managementCompanyId } : {}),
-      };
-      
-      const { data: result, error } = await supabase
-        .from('properties')
-        .insert(insertData as never)
-        .select()
-        .single();
-      
-      if (error) {
-        errorLog.silent(error, 'create_owner_property');
-        throw error;
-      }
-      
-      // Trigger email notification to admins (fire and forget)
-      if (!_silent && data.approval_status !== 'draft') {
-        supabase.functions.invoke('notify-admin-property-submission', {
-          body: {
-            property_id: result.id,
-            property_title: result.title || result.title_en || result.title_ru || 'Без названия',
-            owner_id: user.id,
-            owner_name: profile?.full_name || undefined,
-            owner_email: profile?.email || user.email || undefined,
-          },
-        }).catch(err => errorLog.silent(err, 'notify_admin'));
-      }
-      
+      // Independently authorized owner path stays separate from MC employment.
+      const { data: result, error } = await supabase.from('properties').insert({
+        ...Object.fromEntries(Object.entries(data).filter(([key, value]) => !key.startsWith('_') && value !== undefined)),
+        title_en: payload.title_en, title_ru: payload.title_ru, description_en: payload.description_en, owner_id: user.id,
+        approval_status: data.approval_status || 'draft', is_active: false,
+      } as never).select().single();
+      if (error) throw error;
       return result as unknown as OwnerProperty;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });
-      if (!(variables as any)?._silent) {
-        toast.success('Объект добавлен!');
-      }
+      queryClient.invalidateQueries({ queryKey: ['managed-property-drafts'] });
+      if (!variables._silent) toast.success('Объект добавлен!');
     },
     onError: (error, variables) => {
-      if (!(variables as any)?._silent) {
-        toast.error('Ошибка: ' + error.message);
-      }
+      if (!variables._silent) toast.error('Ошибка: ' + error.message);
     },
   });
 }
@@ -242,11 +200,29 @@ export function useUpdateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
+  const { isAdmin } = useIsAdmin();
 
   return useMutation({
-    mutationFn: async ({ id, _silent, ...data }: Partial<OwnerProperty> & { id: string; _silent?: boolean }) => {
+    mutationFn: async ({ id, _silent, _authoring, _expectedUpdatedAt, _submitForReview, ...data }: Partial<OwnerProperty> & { id: string; _silent?: boolean; _authoring?: boolean; _expectedUpdatedAt?: string; _submitForReview?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
       
+      if (_authoring) {
+        const independent = await readIndependentPropertyForAuthoring(id, user.id, isAdmin);
+        if (independent) {
+          let update = supabase.from('properties').update(data as never).eq('id', id);
+          if (!isAdmin) update = independent.owner_id === user.id ? update.eq('owner_id', user.id) : update.eq('provider_id', independent.provider_id!);
+          const result = await update.select().single();
+          if (result.error) throw result.error;
+          return result.data;
+        }
+        if (!_expectedUpdatedAt) throw new Error('Reload the draft before saving; its version is unknown.');
+        const current = await readManagedPropertyDraft(id, activeCompany?.company_id);
+        return saveManagedPropertyDraft({
+          propertyId: id, companyId: current.management_company_id!,
+          expectedUpdatedAt: _expectedUpdatedAt,
+          patch: propertyAuthoringPatch(data as Record<string, unknown>), submit: _submitForReview,
+        });
+      }
       // Try update as owner first
       const { data: result } = await supabase
         .from('properties')
@@ -280,11 +256,19 @@ export function useUpdateOwnerProperty() {
       if (managedError) throw managedError;
       return managedResult;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (saved, variables) => {
+      if (variables._submitForReview && saved?.approval_status === 'pending') {
+        void supabase.functions.invoke('notify-admin-property-submission', { body: { propertyId: saved.id } })
+          .then(({ error }) => { if (error) errorLog.silent(error, 'notify_property_review'); })
+          .catch(error => errorLog.silent(error, 'notify_property_review'));
+      }
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['company-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['managed-property-drafts'] });
+      queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
       if (!(variables as any)?._silent) {
         toast.success('Объект обновлён!');
       }
@@ -350,7 +334,7 @@ export function usePublishToMarketplace() {
 
       const { data: result, error: updateError } = await supabase
         .from('properties')
-        .update(updateData)
+        .update(updateData as never)
         .eq('id', data.ownerPropertyId)
         .select()
         .single();

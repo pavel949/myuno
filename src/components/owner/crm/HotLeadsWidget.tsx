@@ -56,7 +56,7 @@ export function HotLeadsWidget() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  aria-label={isRu ? 'Написать в WhatsApp' : 'Message on WhatsApp'}
                   asChild
                 >
                   <a href={`https://wa.me/${lead.guest_phone?.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
@@ -68,7 +68,7 @@ export function HotLeadsWidget() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  aria-label={isRu ? 'Позвонить' : 'Call'}
                   asChild
                 >
                   <a href={`tel:${lead.guest_phone}`}>

@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Processing business card image...');
+    console.info('Processing business card image...');
 
     let pureBase64 = imageBase64;
     let mimeType = 'image/jpeg';
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Image mime type:', mimeType, 'Base64 length:', pureBase64.length);
+    console.info('Image mime type:', mimeType, 'Base64 length:', pureBase64.length);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -190,7 +190,7 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
       extracted_at: new Date().toISOString(),
     };
 
-    console.log('Extraction complete:', { 
+    console.info('Extraction complete:', { 
       company: result.company_name, 
       vertical: result.vertical,
       confidence: result.confidence 

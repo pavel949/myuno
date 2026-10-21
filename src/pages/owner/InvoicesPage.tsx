@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useOwnerInvoices, useCreateInvoice, useUpdateInvoiceStatus, useDeleteInvoice, InvoiceItem } from '@/hooks/useOwnerInvoices';
@@ -27,6 +29,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function InvoicesPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const [filter, setFilter] = useState('all');
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -42,7 +46,7 @@ export default function InvoicesPage() {
   const [recipientName, setRecipientName] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [invoiceType, setInvoiceType] = useState<string>('tenant_billing');
-  const [currency, setCurrency] = useState('THB');
+  const [currency, setCurrency] = useState(cityCurrencyCode);
   const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([
@@ -105,7 +109,7 @@ export default function InvoicesPage() {
     setRecipientName('');
     setRecipientEmail('');
     setInvoiceType('tenant_billing');
-    setCurrency('THB');
+    setCurrency(cityCurrencyCode);
     setDueDate('');
     setNotes('');
     setItems([{ description: '', quantity: 1, unit_price: 0, amount: 0 }]);
@@ -254,7 +258,7 @@ export default function InvoicesPage() {
                         {item.amount.toLocaleString()}
                       </div>
                       {items.length > 1 && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)}>
+                        <Button variant="ghost" size="icon" onClick={() => removeItem(idx)} aria-label={isRu ? 'Удалить позицию' : 'Remove item'}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       )}
@@ -346,10 +350,10 @@ export default function InvoicesPage() {
                     <Send className="h-3 w-3 mr-1" />
                     {isRu ? 'Отправить' : 'Send'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(inv.id)}>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(inv.id)} aria-label={isRu ? 'Удалить' : 'Delete'}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
@@ -361,10 +365,10 @@ export default function InvoicesPage() {
                     <Check className="h-3 w-3 mr-1" />
                     {isRu ? 'Оплачен' : 'Paid'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleCancel(inv.id)}>
+                  <Button size="sm" variant="ghost" onClick={() => handleCancel(inv.id)} aria-label={isRu ? 'Отменить' : 'Cancel'}>
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
@@ -376,7 +380,7 @@ export default function InvoicesPage() {
                     <Check className="h-3 w-3 mr-1" />
                     {isRu ? 'Отметить оплату' : 'Mark Paid'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
                 </div>

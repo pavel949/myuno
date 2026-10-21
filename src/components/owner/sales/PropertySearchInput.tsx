@@ -126,7 +126,7 @@ export function PropertySearchInput({ companyId, onSelect, onClear, selectedProp
             {selectedProperty.price && <span>฿{formatPrice(selectedProperty.price)}</span>}
           </div>
         </div>
-        <button onClick={onClear} className="p-0.5 rounded-none hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
+        <button onClick={onClear} aria-label={isRu ? 'Очистить' : 'Clear'} className="p-0.5 rounded-none hover:bg-muted"><X className="h-3.5 w-3.5" /></button>
       </div>
     );
   }

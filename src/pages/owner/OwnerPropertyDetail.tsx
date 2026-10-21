@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
@@ -51,6 +53,8 @@ type PropertyExt = {
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
@@ -111,7 +115,7 @@ export default function OwnerPropertyDetail() {
     house: { en: 'House', ru: 'Дом' },
   };
 
-  const listingCurrency = (property.currency?.trim() || 'THB');
+  const listingCurrency = (property.currency?.trim() || cityCurrencyCode);
   const depositCurrency = (property.deposit_currency?.trim() || listingCurrency);
 
   return (

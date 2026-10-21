@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Sparkles, Plus, MoreVertical, Edit, Trash2, Loader2, Star, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const serviceTypes = [
   { value: 'regular', label: 'Regular Cleaning', labelRu: 'Обычная уборка' },
@@ -49,7 +50,7 @@ const VendorCleaning = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
@@ -186,7 +187,7 @@ const VendorCleaning = () => {
                           </div>
                         </div>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}><Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}</DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>

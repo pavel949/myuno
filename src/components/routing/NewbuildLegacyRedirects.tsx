@@ -19,11 +19,11 @@ function isUuid(value: string | undefined): value is string {
 export function NewbuildProjectToOffplanRedirect() {
   const { slug } = useParams<{ slug: string }>();
 
+  const { data, isLoading, isError } = useNewbuildProject(slug);
+
   if (isUuid(slug)) {
     return <Navigate to={APP_ROUTES.OFFPLAN_DETAIL(slug)} replace />;
   }
-
-  const { data, isLoading, isError } = useNewbuildProject(slug);
 
   if (isLoading) {
     return <LoadingState />;
@@ -39,11 +39,11 @@ export function NewbuildProjectToOffplanRedirect() {
 export function NewbuildDeveloperToHubRedirect() {
   const { slug } = useParams<{ slug: string }>();
 
+  const { data, isLoading, isError } = useDeveloperSlugOrId(slug);
+
   if (isUuid(slug)) {
     return <Navigate to={APP_ROUTES.DEVELOPER_DETAIL(slug)} replace />;
   }
-
-  const { data, isLoading, isError } = useDeveloperSlugOrId(slug);
 
   if (isLoading) {
     return <LoadingState />;

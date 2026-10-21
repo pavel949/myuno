@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
+import { useQuery } from '@tanstack/react-query';
+import {
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
   Share2, CheckCircle, AlertCircle, Building2, ChevronRight,
-  ExternalLink, ShieldCheck, Tag
+  ExternalLink, ShieldCheck, Tag, MessageCircle, Phone, Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { supabase } from '@/integrations/supabase/client';
 
 const AGE_POLICY_LABELS: Record<string, { en: string; ru: string }> = {
   'all_ages': { en: 'All Ages', ru: 'Все возрасты' },
@@ -40,6 +42,22 @@ const EventDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [tickets, setTickets] = useState(1);
   const { trackView } = useViewHistory();
+
+  // Organizer / creator (vendor) — surfaced as a contact card.
+  const { data: organizer } = useQuery({
+    queryKey: ['event-organizer', event?.provider_id],
+    enabled: !!event?.provider_id,
+    queryFn: async () => {
+      if (!event?.provider_id) return null;
+      const { data, error } = await supabase
+        .from('public_provider_catalog')
+        .select('id, name, email, phone, logo_url')
+        .eq('id', event.provider_id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (event) {
@@ -104,7 +122,7 @@ const EventDetail = () => {
         
         {/* Top Actions */}
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" onClick={() => navigate('/events')}>
+          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/events')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
@@ -120,7 +138,7 @@ const EventDetail = () => {
               }}
               variant="secondary"
             />
-            <Button variant="secondary" size="icon">
+            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
@@ -143,7 +161,8 @@ const EventDetail = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`w-10 h-10 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
+                aria-label={language === 'ru' ? `Фото ${idx + 1}` : `Photo ${idx + 1}`}
+                className={`w-11 h-11 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
@@ -214,7 +233,14 @@ const EventDetail = () => {
 
         {/* Venue Card */}
         {venue ? (
-          <Card className="mb-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/venues/${venue.id}`)}>
+          <Card
+            className="mb-6 cursor-pointer hover:shadow-md transition-shadow"
+            role="button"
+            tabIndex={0}
+            aria-label={language === 'ru' ? `Открыть площадку: ${venue.name_ru}` : `Open venue: ${venue.name_en}`}
+            onClick={() => navigate(`/venues/${venue.id}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/venues/${venue.id}`); } }}
+          >
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-16 h-16 rounded-none overflow-hidden flex-shrink-0">
                 <img src={venue.cover_image || '/placeholder.svg'} alt={language === 'ru' ? venue.name_ru : venue.name_en} className="w-full h-full object-cover" />
@@ -236,6 +262,44 @@ const EventDetail = () => {
             <MapPin className="w-4 h-4" />
             <span>{language === 'ru' ? event.location_ru : event.location_name}</span>
           </div>
+        )}
+
+        {/* Organizer / creator */}
+        {organizer && (
+          <Card className="mb-6">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0 flex items-center justify-center">
+                {organizer.logo_url ? (
+                  <img src={organizer.logo_url} alt={organizer.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Users className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Организатор' : 'Organizer'}</p>
+                <p className="font-medium truncate">{organizer.name}</p>
+              </div>
+              <div className="flex gap-2">
+                {organizer.phone && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`https://wa.me/${organizer.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in your event "${event.title_en}".`)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
+                  </Button>
+                )}
+                {organizer.phone && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`tel:${organizer.phone}`} aria-label="Phone"><Phone className="w-4 h-4" /></a>
+                  </Button>
+                )}
+                {organizer.email && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`mailto:${organizer.email}?subject=${encodeURIComponent(`Inquiry: ${event.title_en}`)}`} aria-label="Email"><Mail className="w-4 h-4" /></a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Description */}

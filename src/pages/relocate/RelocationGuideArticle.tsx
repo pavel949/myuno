@@ -25,7 +25,7 @@ export default function RelocationGuideArticle() {
         title={title}
         description={summary}
         type="article"
-        url={slug ? `https://myuno.app${APP_ROUTES.RELOCATION_GUIDE(slug)}` : undefined}
+        url={slug ? `https://www.myuno.app${APP_ROUTES.RELOCATION_GUIDE(slug)}` : undefined}
       />
       <div className="px-4 pb-28 pt-4 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">

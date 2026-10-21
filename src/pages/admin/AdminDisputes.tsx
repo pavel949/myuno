@@ -65,7 +65,7 @@ export default function AdminDisputes() {
           icon={AlertTriangle}
           size="lg"
         />
-        <Button variant="ghost" size="icon" onClick={() => refetch()}>
+        <Button variant="ghost" size="icon" aria-label={isRu ? 'Обновить' : 'Refresh'} onClick={() => refetch()}>
           <RefreshCw className="h-4 w-4" />
         </Button>
       </div>

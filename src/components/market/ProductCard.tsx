@@ -6,8 +6,14 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
-import { BADGE_STYLES } from '@/lib/designTokens';
 import { cn } from '@/lib/utils';
+
+// Badge variant classes (inlined from DS tokens — bg-semantic + rounded-none)
+const BADGE_CLS = {
+  new: 'bg-primary text-primary-foreground font-medium rounded-none',
+  discount: 'bg-destructive text-destructive-foreground font-medium rounded-none',
+  hot: 'bg-foreground text-background font-medium rounded-none',
+} as const;
 
 interface ProductCardProps {
   product: MarketplaceProduct;
@@ -52,12 +58,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 "
           />
           {product.is_new && (
-            <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
+            <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_CLS.new)}>
               NEW
             </Badge>
           )}
           {discount > 0 && (
-            <Badge className={cn("absolute top-1 right-1 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
+            <Badge className={cn("absolute top-1 right-1 text-[10px] px-1.5 py-0", BADGE_CLS.discount)}>
               -{discount}%
             </Badge>
           )}
@@ -88,28 +94,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             
             {/* Cart Controls */}
             {quantity === 0 ? (
-              <Button 
-                size="sm" 
-                className="h-8 px-3 rounded-full"
+              <Button
+                size="sm"
+                className="h-8 px-3 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
               >
                 <Plus className="h-4 w-4" />
               </Button>
             ) : (
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onRemove}
+                  aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
                 >
                   <Minus className="h-3 w-3" />
                 </Button>
                 <span className="text-sm font-medium w-4 text-center">{quantity}</span>
-                <Button 
-                  size="icon" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onAdd}
+                  aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
@@ -139,19 +148,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.is_new && (
-            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_CLS.new)}>
               NEW
             </Badge>
           )}
           {product.is_popular && !product.is_new && (
-            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.hot)}>
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_CLS.hot)}>
               🔥 HIT
             </Badge>
           )}
         </div>
         
         {discount > 0 && (
-          <Badge className={cn("absolute top-2 right-2 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
+          <Badge className={cn("absolute top-2 right-2 text-[10px] px-1.5 py-0", BADGE_CLS.discount)}>
             -{discount}%
           </Badge>
         )}
@@ -190,28 +199,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           
           {/* Cart Controls */}
           {quantity === 0 ? (
-            <Button 
-              size="icon" 
-              className="h-8 w-8 rounded-full shrink-0"
+            <Button
+              size="icon"
+              className="h-8 w-8 rounded-full shrink-0 min-h-[44px] min-w-[44px]"
               onClick={(e) => { e.stopPropagation(); onAdd(); }}
+              aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
             >
               <Plus className="h-4 w-4" />
             </Button>
           ) : (
             <div className="flex items-center gap-1.5">
-              <Button 
-                size="icon" 
-                variant="outline" 
-                className="h-7 w-7 rounded-full"
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
               >
                 <Minus className="h-3 w-3" />
               </Button>
               <span className="text-sm font-medium w-4 text-center">{quantity}</span>
-              <Button 
-                size="icon" 
-                className="h-7 w-7 rounded-full"
+              <Button
+                size="icon"
+                className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
               >
                 <Plus className="h-3 w-3" />
               </Button>

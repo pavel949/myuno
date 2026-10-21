@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MapPin, TrendingUp, Clock, Flame, Star, BadgeCheck } from 'lucide-react';
-import { MuunoScoreWidget } from './MuunoScoreWidget';
+import { MyunoScoreWidget } from './MyunoScoreWidget';
 import { FundingProgress } from './FundingProgress';
 import { Badge } from '@/components/ui/badge';
 import { INVESTMENT_CATEGORIES } from '@/hooks/useInvestmentProjects';
@@ -107,7 +107,7 @@ export function InvestmentCard({
             </div>
             
             {/* Score */}
-            <MuunoScoreWidget
+            <MyunoScoreWidget
               score={project.muuno_score}
               size="sm"
               showLabel={false}
@@ -206,7 +206,7 @@ export function InvestmentCard({
         {/* Score widget */}
         <div className="absolute top-3 right-3">
           <div className="bg-background/90 rounded-none p-2">
-            <MuunoScoreWidget
+            <MyunoScoreWidget
               score={project.muuno_score}
               size="sm"
               showRisk={false}

@@ -102,6 +102,7 @@ function SortableRow({
         <button
           {...attributes}
           {...listeners}
+          aria-label={language === 'ru' ? 'Перетащить для сортировки' : 'Drag to reorder'}
           className="cursor-grab hover:text-primary"
         >
           <GripVertical className="h-4 w-4" />
@@ -124,10 +125,21 @@ function SortableRow({
       </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button size="icon" variant="ghost" onClick={onEdit}>
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label={language === 'ru' ? 'Редактировать' : 'Edit'}
+            onClick={onEdit}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" className="text-destructive" onClick={onDelete}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="text-destructive"
+            aria-label={language === 'ru' ? 'Удалить' : 'Delete'}
+            onClick={onDelete}
+          >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>

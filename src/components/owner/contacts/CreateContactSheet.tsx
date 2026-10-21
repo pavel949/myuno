@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateContact } from '@/hooks/useCrmContacts';
+import { useCreateContact, type CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { CRM_ROLES, CRM_ROLE_LABELS, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier, KYC_STATUSES, KYC_STATUS_LABELS, type KycStatus, CONTACT_CATEGORIES, CONTACT_CATEGORY_LABELS, type ContactCategory } from '@/types/contact';
@@ -31,6 +31,17 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
+  /**
+   * Called with the freshly created contact after a successful save.
+   * Lets callers (e.g. the deal/opportunity contact picker) link the new
+   * contact immediately instead of having to search for it.
+   */
+  onCreated?: (contact: CrmContact) => void;
+  /**
+   * Optional name to pre-fill into the first/last name fields when the sheet
+   * opens — handy when the user already typed a name into a search box.
+   */
+  prefillName?: string;
 }
 
 const initialForm = () => ({
@@ -70,7 +81,7 @@ const initialForm = () => ({
   sanctions_flag: false,
 });
 
-export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
+export function CreateContactSheet({ open, onOpenChange, companyId, onCreated, prefillName }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -81,6 +92,14 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
 
   const [form, setForm] = useState(initialForm);
   const [customInterest, setCustomInterest] = useState('');
+
+  // Pre-fill the name fields when the sheet is opened with a name hint (e.g.
+  // the user typed a name in the contact search before choosing "create new").
+  useEffect(() => {
+    if (!open || !prefillName?.trim()) return;
+    const parts = prefillName.trim().split(/\s+/);
+    setForm((f) => ({ ...f, first_name: parts[0] || '', last_name: parts.slice(1).join(' ') }));
+  }, [open, prefillName]);
 
   useEffect(() => {
     if (contactTypes.length === 0 && leadSources.length === 0) return;
@@ -111,7 +130,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
     const langDb = languageForDb(form.langPreset, form.langCustom);
     const tags = syncVipTag(form.tags, form.is_vip);
     try {
-      await createContact.mutateAsync({
+      const created = await createContact.mutateAsync({
         company_id: companyId,
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
@@ -155,6 +174,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         sanctions_flag: form.sanctions_flag,
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
+      if (created) onCreated?.(created as unknown as CrmContact);
       onOpenChange(false);
       setForm(initialForm());
       setCustomInterest('');

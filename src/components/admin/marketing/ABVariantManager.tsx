@@ -132,17 +132,17 @@ export function ABVariantManager({ landingId, landingName }: ABVariantManagerPro
                 </CardTitle>
                 <div className="flex items-center gap-1">
                   {!test.winner && (
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleToggle(test)} disabled={toggleMut.isPending}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={test.is_active ? (isRu ? 'Пауза' : 'Pause') : (isRu ? 'Запустить' : 'Start')} onClick={() => handleToggle(test)} disabled={toggleMut.isPending}>
                       {test.is_active ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingTest(test); setEditorOpen(true); }}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Редактировать' : 'Edit'} onClick={() => { setEditingTest(test); setEditorOpen(true); }}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => dupMut.mutate(test, { onSuccess: () => toast.success(isRu ? 'Дублировано' : 'Duplicated') })} disabled={dupMut.isPending}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Дублировать' : 'Duplicate'} onClick={() => dupMut.mutate(test, { onSuccess: () => toast.success(isRu ? 'Дублировано' : 'Duplicated') })} disabled={dupMut.isPending}>
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeleteConfirm(test.id)} disabled={!!test.is_active}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px] text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => setDeleteConfirm(test.id)} disabled={!!test.is_active}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>

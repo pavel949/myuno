@@ -4,7 +4,8 @@
  *
  * Hierarchy:
  *
- *   Cluster (6)  →  Category (16)  →  Service / App (~80 active in code)
+ *   Cluster (6)  →  Category (18)  →  Service / App (68 total · 67 available)
+ *   Categories per cluster: arrive=3 · live=10 · manage=0 (workspace) · invest=1 · legal=3 · build=1
  *        │
  *        └────────►  LifeSituation[] (M:N via DB table `cluster_life_situations`)
  *
@@ -22,17 +23,29 @@
  * Older modules (`verticalGroups.ts`, `nav/clusterCatalog.ts`,
  * `appRegistry.ts`) are now thin adapters that re-derive their shape
  * from this SSOT.
+ *
+ * **Drift note (2026-05-21):** the live `category_groups` / `categories`
+ * tables on the production Supabase project diverge from this static SSOT.
+ * Drawer currently shows `Arrive=14 · Live=27 · Invest=7 · Legal=7 · Build=4`
+ * (DB) vs `13 / 31 / 9 / 11 / 4` here (static service counts per cluster,
+ * recounted 2026-06-15). DB reconciliation deferred until a
+ * live-data audit can run (writing a blind UPSERT migration risks
+ * overwriting curated DB rows). Sports & Athletic Training (spec §15,
+ * 14 services) is fully absent in both — see canonical doc §15 for the
+ * tracked gap. Hardcoded paths for `kids`, `wedding`, `halal-persona`,
+ * `halal-stay` were migrated to `APP_ROUTES` constants in the same pass.
  */
 import {
-  Plane, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
-  Smartphone, ArrowLeftRight, Car, Landmark, Zap,
+  Plane, PlaneLanding, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
+  Smartphone, ArrowLeftRight, Car, Landmark, Zap, Plug,
   Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
-  FileSearch, Calculator, Shield, AlertTriangle,
+  FileSearch, Calculator, Shield, ShieldCheck, AlertTriangle, LifeBuoy,
   Calendar, BarChart3, Wrench, PenTool, DollarSign,
-  Building, Search, LineChart, Palette,
+  Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
-  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage,
-  Briefcase, Globe, BookOpen,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Route, Waves, Pill, Flower2, Truck,
+  Briefcase, Globe, BookOpen, HeartHandshake, Heart as HeartIcon,
+  Stethoscope as VetIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -46,17 +59,13 @@ export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'bui
 export type CategoryId =
   // Arrive (3)
   | 'cat-emergency' | 'cat-transport' | 'cat-tourism'
-  // Live (10) — повседневная жизнь, разбитая на узкие подгруппы вместо «свалки»
-  | 'cat-home-cleaning'      // Уборка и быт
-  | 'cat-home-repair'        // Ремонт и техника
-  | 'cat-home-outdoor'       // Двор, сад, цветы
-  | 'cat-home-logistics'     // Логистика и хранение
+  // Live (6) — повседневная жизнь, одна зонтик-категория для дома
+  | 'cat-home-services'      // Услуги для дома (cleaning + repair + outdoor + storage)
   | 'cat-food-delivery'      // Еда и доставка
   | 'cat-health-wellness'    // Здоровье и велнес
   | 'cat-family-kids'        // Семья и дети
-  | 'cat-pet-services'       // Питомцы
-  | 'cat-leisure'            // Досуг, события, спорт, сообщество
-  | 'cat-wedding-events'     // Свадьбы и премиум-события
+  | 'cat-pet-services'       // Уход за питомцами
+  | 'cat-leisure'            // Досуг, события, подарки, сообщество (вкл. wedding + flowers)
   // Manage (0 public — workspace-only cluster, see /mc/* routes)
   // Invest (1)
   | 'cat-real-estate'
@@ -65,9 +74,47 @@ export type CategoryId =
   // Build (1)
   | 'cat-partner-portal';
 
-export type ServiceStatus = 'available' | 'soon' | 'pro';
+/**
+ * Service availability state.
+ *  - `available` — fully wired: dedicated page + booking form.
+ *  - `soon`      — visible in catalog, "Coming soon" badge, click goes nowhere meaningful.
+ *  - `pro`       — gated to professional / workspace users.
+ *  - `info`      — informational entry that maps to a generic `/services?category=X` hub
+ *                   (or a coordinator WhatsApp link) rather than a per-service booking page.
+ *                   Used for trades like laundry/plumbing/handyman where the path is the
+ *                   coordinator-route, not a self-service form. UI hides booking CTA for these.
+ */
+export type ServiceStatus = 'available' | 'soon' | 'pro' | 'info';
 
 export type Audience = 'public' | 'workspace';
+
+/**
+ * Lifecycle stages — when in the user's journey this service is relevant.
+ * Codes from `docs/canonical/02-service-catalogue-v2.md §0 Легенда`.
+ */
+export type LifecycleStage =
+  | 'scout'      // researching Phuket from abroad, has not arrived
+  | 'tourist'    // here for ≤ 30 days
+  | 'snowbird'   // seasonal 2–6 months
+  | 'nomad'      // remote workers, rolling stays
+  | 'settler'    // moved within the last 12 months, still setting up
+  | 'resident'   // > 12 months, established
+  | 'absentee'   // owns assets, lives abroad
+  | 'returnee'   // came back after extended absence
+  | 'all';
+
+/**
+ * Functional role tags — what the user is _doing_ when they pick the service.
+ * Codes from `docs/canonical/02-service-catalogue-v2.md §0 Легенда`.
+ */
+export type RoleTag =
+  | 'consumer'         // buying a one-off service for themselves
+  | 'resident-user'    // recurring user (vs one-off tourist)
+  | 'investor-passive' // capital deployment, hands-off
+  | 'investor-active'  // active investor / deal flow
+  | 'operator'         // operating an asset or business
+  | 'provider'         // selling services on the platform
+  | 'all';
 
 export interface ServiceEntry {
   /** Stable id (used as react key, analytics tag) */
@@ -84,10 +131,26 @@ export interface ServiceEntry {
   status: ServiceStatus;
   /** Optional vertical id (links to VERTICALS for bookings/orders) */
   verticalId?: string;
-  /** Personas that should see this in personalized feeds (P01..P25 codes) */
+  /** Personas that should see this in personalized feeds — runtime UserPersona ids. */
   personaTags?: string[];
-  /** JTBD cluster codes (A..J) from Master Taxonomy v1.0 */
+  /** JTBD cluster codes (A..J) from Master Taxonomy v1.0. */
   jtbdClusters?: string[];
+  /** Lifecycle stages this service serves. Required for AI routing per canon §22. */
+  lifecycleStages?: LifecycleStage[];
+  /** Functional role tags. Required for AI routing per canon §22. */
+  roleTags?: RoleTag[];
+  /**
+   * Life-situation codes this service maps to (codes from LIFE_SITUATIONS).
+   *
+   * This is the SSOT for the `entity_type='service'` rows in `catalog_life_map`.
+   * When non-empty, the validate-catalog-life-map script enforces:
+   *   - every code in this list exists in LIFE_SITUATIONS,
+   *   - every (service.id, code) pair has a matching DB row after sync.
+   *
+   * Vertical entities (property/yacht/transfer/etc.) are seeded separately by
+   * `seed_catalog_life_map_full_coverage.sql` and do not need entries here.
+   */
+  situationCodes?: string[];
 }
 
 export interface CategoryEntry {
@@ -116,7 +179,11 @@ export interface ClusterEntry {
   valueRu: string;
   valueEn: string;
   icon: LucideIcon;
-  /** Hex accent color (matches DS cluster palette) */
+  /**
+   * CSS color for inline `style` use. Resolves to `hsl(var(--cluster-X))`
+   * tokens defined in `src/styles/tokens.css` §11 so theme switching
+   * follows DS 2.1 (no DS 2.0 mint/blue/cyan rainbow).
+   */
   color: string;
   /** Display order in nav */
   sortOrder: number;
@@ -182,39 +249,39 @@ export interface ClusterLifeSituationLink {
 export const CLUSTERS: ClusterEntry[] = [
   {
     id: 'arrive',
-    labelRu: 'Планирование и прибытие',
+    labelRu: 'Подготовка к приезду',
     labelEn: 'Planning & arrival',
     labelTh: 'การเดินทาง',
-    valueRu: 'Дорога из аэропорта, связь, деньги и первые шаги — до того, как жизнь уляжется в быт.',
+    valueRu: 'Трансфер из аэропорта, мобильная связь, обмен валюты и оформление первых документов.',
     valueEn: 'Airport logistics, connectivity, money, and first steps before everyday life settles in.',
     icon: Plane,
-    color: '#00D68F',
+    color: 'hsl(var(--cluster-arrive))',
     sortOrder: 1,
     audience: 'public',
     homeRoute: APP_ROUTES.ARRIVE_CLUSTER,
   },
   {
     id: 'live',
-    labelRu: 'Жизнь',
+    labelRu: 'Проживание',
     labelEn: 'Live',
     labelTh: 'ใช้ชีวิต',
-    valueRu: 'Дом, здоровье, еда, семья, питомцы — повседневность без хаоса.',
+    valueRu: 'Бытовые услуги, медицинская помощь, питание, услуги для семьи и домашних животных.',
     valueEn: 'Home, health, food, family, pets — everyday life sorted.',
     icon: HomeIcon,
-    color: '#4E7BFF',
+    color: 'hsl(var(--cluster-live))',
     sortOrder: 2,
     audience: 'public',
     homeRoute: APP_ROUTES.DISCOVER,
   },
   {
     id: 'manage',
-    labelRu: 'Управление',
+    labelRu: 'Управление недвижимостью',
     labelEn: 'Manage',
     labelTh: 'การจัดการ',
-    valueRu: 'Собственники и управляющие: брони, финансы, операции, события — один кабинет.',
+    valueRu: 'Кабинет собственника и управляющей компании: бронирования, финансовый отчёт, обслуживание объектов.',
     valueEn: 'Hosts & managers: bookings, money, operations, events — one workspace.',
     icon: Building2,
-    color: '#06B6D4',
+    color: 'hsl(var(--cluster-manage))',
     sortOrder: 3,
     audience: 'workspace',
     personas: ['property_owner', 'local_services_provider'],
@@ -223,39 +290,39 @@ export const CLUSTERS: ClusterEntry[] = [
   },
   {
     id: 'invest',
-    labelRu: 'Инвестиции',
+    labelRu: 'Покупка и инвестиции',
     labelEn: 'Invest',
     labelTh: 'การลงทุน',
-    valueRu: 'Недвижимость и капитал: поиск, новостройки, бизнес-вложения, ROI, база знаний.',
+    valueRu: 'Покупка готового жилья и новостроек, оценка доходности, сведения о застройщиках.',
     valueEn: 'Property and capital: search, off-plan, business deals, ROI, knowledge base.',
     icon: TrendingUp,
-    color: '#A855F7',
+    color: 'hsl(var(--cluster-invest))',
     sortOrder: 4,
     audience: 'public',
     homeRoute: APP_ROUTES.INVEST,
   },
   {
     id: 'legal',
-    labelRu: 'Право и визы',
+    labelRu: 'Визы и правовая помощь',
     labelEn: 'Legal & Visa',
     labelTh: 'กฎหมายและวีซ่า',
-    valueRu: 'Визы, налоги, договоры, страховки, банк, образование, релокация.',
+    valueRu: 'Оформление виз, налоги, проверка договоров, страхование, открытие банковского счёта.',
     valueEn: 'Visa, taxes, contracts, insurance, banking, education, relocation.',
     icon: Scale,
-    color: '#F59E0B',
+    color: 'hsl(var(--cluster-legal))',
     sortOrder: 5,
     audience: 'public',
     homeRoute: APP_ROUTES.LEGAL_CLUSTER,
   },
   {
     id: 'build',
-    labelRu: 'Застройщикам',
+    labelRu: 'Для застройщиков',
     labelEn: 'Build',
     labelTh: 'ผู้พัฒนา',
-    valueRu: 'B2B: портал застройщика, лиды, витрина проектов, консультации.',
+    valueRu: 'Кабинет застройщика, обращения покупателей, размещение проектов, консультации.',
     valueEn: 'B2B: developer portal, leads, project showcase, advisory.',
     icon: HardHat,
-    color: '#F43F5E',
+    color: 'hsl(var(--cluster-build))',
     sortOrder: 6,
     audience: 'public',
     homeRoute: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS,
@@ -263,7 +330,7 @@ export const CLUSTERS: ClusterEntry[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────
-// Categories with Services (18 categories, ~80 active services)
+// Categories with Services (18 categories, 68 services · 67 available)
 // ─────────────────────────────────────────────────────────────────────────
 
 const SERVICES_URL = APP_ROUTES.SERVICES;
@@ -274,176 +341,158 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-transport',
     clusterId: 'arrive',
-    labelRu: 'Транспорт',
+    labelRu: 'Транспортные услуги',
     labelEn: 'Transport',
-    valueRu: 'Трансферы, аренда авто и байков, fast-track в аэропорту.',
+    valueRu: 'Трансфер, аренда автомобиля и мотоцикла, ускоренное прохождение контроля в аэропорту.',
     valueEn: 'Transfers, car & bike rental, airport fast-track.',
     icon: Car,
     color: '#3B82F6',
     services: [
-      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: Car,         status: 'available', verticalId: 'transfer', personaTags: ['tourist'], jtbdClusters: ['A'] },
-      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist'], jtbdClusters: ['A'] },
-      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', jtbdClusters: ['A'] },
-      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', jtbdClusters: ['A'] },
-      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available', jtbdClusters: ['A'] },
+      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансфер',  labelEn: 'Transfers',  icon: PlaneLanding, status: 'available', verticalId: 'transfer', personaTags: ['tourist','relocation','family','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler','returnee'], roleTags: ['consumer'], situationCodes: ['arrival','first_time','transit','tourist','emergency'] },
+      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Ускоренный проход в аэропорту',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist','business','relocation'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','transit'] },
+      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Аренда автомобиля и мотоцикла',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', personaTags: ['tourist','resident','nomad','active','family'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','living','resident','leisure'] },
+      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'Оформление SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', personaTags: ['tourist','relocation','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','first_time','transit'] },
+      
     ],
   },
   {
     id: 'cat-tourism',
     clusterId: 'arrive',
-    labelRu: 'Туризм и активности',
+    labelRu: 'Отдых и экскурсии',
     labelEn: 'Tourism & Activities',
-    valueRu: 'Впечатления, туры, яхты, события, водный спорт.',
+    valueRu: 'Экскурсии, аренда яхт, мероприятия и водные виды отдыха.',
     valueEn: 'Experiences, tours, yachts, events, water sports.',
     icon: Compass,
     color: '#06B6D4',
     services: [
-      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Впечатления',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience', jtbdClusters: ['A', 'I'] },
-      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Туры',          labelEn: 'Tours',         icon: Route,        status: 'available', jtbdClusters: ['A', 'I'] },
-      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity', jtbdClusters: ['A', 'I'] },
-      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht', jtbdClusters: ['A', 'I'] },
-      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'События',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event', jtbdClusters: ['A', 'I'] },
+      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Экскурсии и отдых',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['tourist','active','couple','family','nightlife'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','first_time','transit'] },
+      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Экскурсионные туры',          labelEn: 'Tours',         icon: Route,        status: 'available', personaTags: ['tourist','family','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','first_time'] },
+      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Водные виды отдыха', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity', personaTags: ['tourist','active','family'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure'] },
+      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Аренда яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht', personaTags: ['tourist','couple','nightlife','business','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident','absentee'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','nightlife'] },
+      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'Мероприятия',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['tourist','nightlife','couple','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','nightlife'] },
     ],
   },
   {
     id: 'cat-emergency',
     clusterId: 'arrive',
-    labelRu: 'Экстренные случаи',
+    labelRu: 'Экстренная помощь',
     labelEn: 'Emergency',
-    valueRu: 'SOS-кнопка и протоколы для нестандартных ситуаций.',
+    valueRu: 'Экстренный вызов помощи и порядок действий в чрезвычайных ситуациях.',
     valueEn: 'SOS button and protocols when something goes wrong.',
     icon: AlertTriangle,
     color: '#EF4444',
     services: [
-      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Sparkles,      status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: ClipboardList, status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'Экстренный вызов',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['emergency'] },
+      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'Персональное сопровождение',   labelEn: 'myUNO VIP', icon: Crown,         status: 'available', personaTags: ['tourist','couple','business','nightlife','family','investor'], jtbdClusters: ['H','I'], lifecycleStages: ['tourist','snowbird','nomad','absentee'], roleTags: ['consumer','investor-active'], situationCodes: ['emergency','arrival','tourist'] },
+      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Служба поддержки',      labelEn: 'Support',       icon: LifeBuoy,      status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','business','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['emergency','arrival','living','resident'] },
     ],
   },
 
-  // ============== LIVE — повседневность, разбитая на узкие категории ==============
-  // Дом и быт раньше был одной свалкой из 12 сервисов в одну ленту.
-  // Теперь — 4 отдельные категории: Уборка / Ремонт / Двор / Логистика.
+  // ============== LIVE — повседневность ==============
+  // 2026-06-16 consolidation: 4 home-* categories (cleaning / repair / outdoor /
+  // logistics) collapsed into one "Услуги для дома" umbrella. Before, the Live
+  // cluster carried 10 categories, 4 of them about the home with overlapping
+  // semantics and a 1-service `cat-home-logistics` orphan. Users couldn't tell
+  // why "уборка" and "ремонт" were separate top-level rubrics when the deeper
+  // taxonomy on /services already covers everything. `flowers` was the one
+  // member of the old `cat-home-outdoor` that isn't maintenance — it moved
+  // into `cat-leisure` as a gift/lifestyle item.
   {
-    id: 'cat-home-cleaning',
+    id: 'cat-home-services',
     clusterId: 'live',
-    labelRu: 'Уборка и быт',
-    labelEn: 'Cleaning & Household',
-    valueRu: 'Регулярная уборка, прачечная, дезинсекция.',
-    valueEn: 'Regular cleaning, laundry, pest control.',
-    icon: Sparkles,
+    labelRu: 'Бытовые услуги',
+    labelEn: 'Home services',
+    valueRu: 'Уборка, мелкий ремонт, сантехнические и электромонтажные работы, уход за садом, хранение вещей.',
+    valueEn: 'Cleaning, repair, plumbing, electrical, garden, storage — one umbrella.',
+    icon: Wrench,
     color: '#10B981',
     services: [
-      { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning' },
-      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Package,  status: 'available' },
-      { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'available' },
-    ],
-  },
-  {
-    id: 'cat-home-repair',
-    clusterId: 'live',
-    labelRu: 'Ремонт и техника',
-    labelEn: 'Repair & Maintenance',
-    valueRu: 'Мастер на час, сантехник, электрик, кондиционеры, замки.',
-    valueEn: 'Handyman, plumber, electrician, AC, locksmith.',
-    icon: Wrench,
-    color: '#3B82F6',
-    services: [
-      { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'available' },
-      { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'available' },
-      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Zap,      status: 'available' },
-      { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'available' },
-      { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'available' },
-    ],
-  },
-  {
-    id: 'cat-home-outdoor',
-    clusterId: 'live',
-    labelRu: 'Двор и сад',
-    labelEn: 'Garden & Outdoor',
-    valueRu: 'Сад, бассейн, цветы — внешняя территория.',
-    valueEn: 'Garden, pool, flowers — outside the home.',
-    icon: TreePine,
-    color: '#22C55E',
-    services: [
-      { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'available' },
-      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Sparkles, status: 'available', verticalId: 'flower' },
-    ],
-  },
-  {
-    id: 'cat-home-logistics',
-    clusterId: 'live',
-    labelRu: 'Логистика и хранение',
-    labelEn: 'Logistics & Storage',
-    valueRu: 'Хранение вещей, переезды, все домашние услуги одной точкой.',
-    valueEn: 'Storage, moving, all home services in one place.',
-    icon: Truck,
-    color: '#0EA5E9',
-    services: [
-      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse, status: 'available' },
-      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: Wrench,    status: 'available' },
+      // Cleaning trio
+      { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка жилья',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning', personaTags: ['resident','family','property_owner','nomad'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','property_owner','departure'] },
+      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Стирка и глажение',   labelEn: 'Laundry',      icon: Shirt,    status: 'info',      personaTags: ['tourist','resident','nomad','family'], jtbdClusters: ['C'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['living','resident','tourist'] },
+      { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Обработка от насекомых', labelEn: 'Pest control', icon: Bug,      status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      // Repair / trade trades (former cat-home-repair)
+      { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мелкий бытовой ремонт', labelEn: 'Handyman',    icon: Hammer,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехнические работы',    labelEn: 'Plumbing',    icon: Wrench,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электромонтажные работы',     labelEn: 'Electrical',  icon: Plug,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Обслуживание кондиционеров',  labelEn: 'AC repair',   icon: Wind,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Вскрытие и замена замков',         labelEn: 'Locksmith',   icon: KeyRound, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','emergency'] },
+      // Outdoor
+      { id: 'gardening',  path: `${SERVICES_URL}?category=gardening`,  labelRu: 'Уход за садом',           labelEn: 'Gardening',   icon: TreePine, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      // Storage (former cat-home-logistics)
+      { id: 'storage',    path: `${SERVICES_URL}?category=storage`,    labelRu: 'Хранение вещей',      labelEn: 'Storage',     icon: Warehouse,status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
+      // Movers — turnkey relocation (packing, local + international moves, pet relocation).
+      { id: 'movers',     path: APP_ROUTES.RELOCATION_MOVERS,           labelRu: 'Перевозка вещей',       labelEn: 'Movers',      icon: Truck,    status: 'available', personaTags: ['resident','nomad','relocation','family','property_owner'], jtbdClusters: ['B','C'], lifecycleStages: ['scout','settler','resident','nomad','returnee'], roleTags: ['consumer'], situationCodes: ['relocation','settling','departure'] },
+      // Home-services hub: deep catalogue of trades (handyman + plumber + electrician +
+      // AC + cleaning + pool + garden + pest + security + moving) via
+      // src/lib/config/homeServiceFunctions.ts. Keeps the LayoutGrid-of-trades
+      // pattern as an explicit umbrella inside the umbrella category.
+      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Все бытовые услуги', labelEn: 'All home services', icon: Wrench, status: 'info', personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {
     id: 'cat-food-delivery',
     clusterId: 'live',
-    labelRu: 'Еда и доставка',
+    labelRu: 'Питание и доставка',
     labelEn: 'Food & Delivery',
-    valueRu: 'Рестораны, маркет, доставка еды и продуктов.',
+    valueRu: 'Рестораны, доставка готовой еды и продуктов.',
     valueEn: 'Restaurants, market, food & grocery delivery.',
     icon: Utensils,
     color: '#F59E0B',
     services: [
-      { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant' },
-      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Truck,       status: 'available' },
-      { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available' },
+      { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant', personaTags: ['tourist','resident','couple','family','nightlife','business','active'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['food','living','resident','tourist','nightlife','leisure'] },
+      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка еды',  labelEn: 'Delivery',    icon: Bike,        status: 'available', personaTags: ['resident','nomad','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['food','living','resident'] },
+      { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Покупка товаров',    labelEn: 'Market',      icon: ShoppingBag, status: 'available', personaTags: ['resident','family','couple','active','nomad'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'], situationCodes: ['food','living','resident'] },
     ],
   },
   {
     id: 'cat-health-wellness',
     clusterId: 'live',
-    labelRu: 'Здоровье и велнес',
+    labelRu: 'Медицина и здоровье',
     labelEn: 'Health & Wellness',
-    valueRu: 'Медицина, аптеки, красота, фитнес, страховки.',
+    valueRu: 'Медицинская помощь, аптеки, салоны красоты, фитнес, медицинское страхование.',
     valueEn: 'Medical, pharmacy, beauty, fitness, insurance.',
     icon: Stethoscope,
     color: '#EC4899',
     services: [
-      { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical' },
-      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Bandage,     status: 'available', verticalId: 'pharmacy' },
-      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Palette,     status: 'available', verticalId: 'beauty' },
-      { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness' },
-      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: Shield,      status: 'available', verticalId: 'insurance' },
+      { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицинская помощь',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical', personaTags: ['tourist','resident','family','active','pet_owner'], jtbdClusters: ['C','H'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['health','family','emergency','living','resident'] },
+      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Pill,        status: 'available', verticalId: 'pharmacy', personaTags: ['tourist','resident','family','pet_owner'], jtbdClusters: ['C'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['health','family','living','resident','emergency','settling'] },
+      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Салоны красоты',   labelEn: 'Beauty',    icon: Scissors,    status: 'available', verticalId: 'beauty', personaTags: ['tourist','resident','couple','nightlife','family'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['health','leisure','living','resident'] },
+      { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес-клубы',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness', personaTags: ['tourist','resident','active','nomad','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['health','living','resident','leisure'] },
+      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Медицинское страхование', labelEn: 'Insurance', icon: ShieldCheck, status: 'available', verticalId: 'insurance', personaTags: ['resident','family','property_owner','investor','relocation','nomad'], jtbdClusters: ['G','C'], lifecycleStages: ['settler','resident','snowbird','absentee','returnee'], roleTags: ['consumer','investor-passive','operator'], situationCodes: ['health','settling','family','relocation','managing','departure'] },
     ],
   },
   {
     id: 'cat-family-kids',
     clusterId: 'live',
-    labelRu: 'Семья и дети',
+    labelRu: 'Услуги для семьи',
     labelEn: 'Family & Kids',
-    valueRu: 'Школы, няни, образование, детская активность.',
+    valueRu: 'Подбор школы и детского сада, услуги няни, дополнительное образование.',
     valueEn: 'Schools, babysitters, education, kids activities.',
     icon: Baby,
     color: '#F472B6',
     services: [
-      { id: 'babysitter',     path: APP_ROUTES.BABYSITTER,     labelRu: 'Няни',         labelEn: 'Babysitters',  icon: Baby,          status: 'available', verticalId: 'babysitter' },
-      { id: 'school-finder',  path: APP_ROUTES.SCHOOL_FINDER,  labelRu: 'Школы',        labelEn: 'School finder',icon: Search,        status: 'available' },
-      { id: 'education',      path: APP_ROUTES.EDUCATION,      labelRu: 'Образование',  labelEn: 'Education',    icon: GraduationCap, status: 'available', verticalId: 'education' },
-      { id: 'kids',           path: '/kids',                   labelRu: 'Дети',         labelEn: 'Kids',         icon: Baby,          status: 'available' },
+      { id: 'babysitter',     path: APP_ROUTES.BABYSITTER,     labelRu: 'Услуги няни',         labelEn: 'Babysitters',  icon: Baby,          status: 'available', verticalId: 'babysitter', personaTags: ['family','couple','tourist'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','living','resident'] },
+      { id: 'school-finder',  path: APP_ROUTES.SCHOOL_FINDER,  labelRu: 'Подбор школы',        labelEn: 'School finder',icon: Search,        status: 'available', personaTags: ['family','relocation'], jtbdClusters: ['C','B'], lifecycleStages: ['scout','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','relocation','settling'] },
+      { id: 'education',      path: APP_ROUTES.EDUCATION,      labelRu: 'Образовательные организации',  labelEn: 'Education',    icon: GraduationCap, status: 'available', verticalId: 'education', personaTags: ['family','resident','relocation','active'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird'], roleTags: ['consumer'], situationCodes: ['family','living','resident','settling'] },
+      { id: 'kids',           path: APP_ROUTES.KIDS,           labelRu: 'Занятия для детей',         labelEn: 'Kids',         icon: Baby,          status: 'available', personaTags: ['family','tourist'], jtbdClusters: ['I','C'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure','living'] },
     ],
   },
   {
+    // Renamed from "Питомцы" → "Уход за питомцами" so the category header
+    // doesn't echo the flagship "Питомцы" service inside it. Same icon
+    // (PawPrint) is fine — the icon belongs to the topic, not the label.
     id: 'cat-pet-services',
     clusterId: 'live',
-    labelRu: 'Питомцы',
-    labelEn: 'Pets',
-    valueRu: 'Уход, ветеринары, груминг, ввоз/вывоз питомца.',
+    labelRu: 'Домашние животные',
+    labelEn: 'Pet care',
+    valueRu: 'Ветеринарная помощь, уход за животными, ввоз и вывоз животного.',
     valueEn: 'Pet care, veterinary, grooming, import/export.',
     icon: PawPrint,
     color: '#A78BFA',
     services: [
-      { id: 'pets',       path: APP_ROUTES.PETS,       labelRu: 'Питомцы',    labelEn: 'Pets',        icon: PawPrint, status: 'available', verticalId: 'pet_service', personaTags: ['pet_owner'] },
-      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Bandage,  status: 'available', personaTags: ['pet_owner'] },
+      { id: 'pets',       path: APP_ROUTES.PETS,       labelRu: 'Уход за животными',    labelEn: 'Pets',        icon: PawPrint, status: 'available', verticalId: 'pet_service', personaTags: ['pet_owner','family'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident','absentee'], roleTags: ['consumer'], situationCodes: ['pet_owner','living','resident'] },
+      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринарные клиники', labelEn: 'Veterinary',  icon: Stethoscope, status: 'available', personaTags: ['pet_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer'], situationCodes: ['pet_owner','emergency','health'] },
     ],
   },
   // События и досуг — теперь часть повседневной ЖИЗНИ резидента (а не только
@@ -452,36 +501,28 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-leisure',
     clusterId: 'live',
-    labelRu: 'Досуг и события',
+    labelRu: 'Досуг',
     labelEn: 'Leisure & Events',
-    valueRu: 'Что делать вечером и на выходных: события, активности, сообщество.',
-    valueEn: 'What to do tonight or this weekend: events, activities, community.',
+    valueRu: 'Мероприятия, занятия, доставка цветов и сообщества по интересам.',
+    valueEn: 'What to do tonight or this weekend: events, activities, gifts, community.',
     icon: CalendarDays,
     color: '#0EA5E9',
     services: [
-      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'События',      labelEn: 'Events',           icon: CalendarDays, status: 'available', verticalId: 'event' },
-      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Впечатления',  labelEn: 'Experiences',      icon: Compass,      status: 'available', verticalId: 'experience' },
-      { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity' },
-      { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon' },
-    ],
-  },
-
-  // ─── Wedding & Events sits in LIVE (lifestyle / family celebration),
-  //     not MANAGE. The MANAGE cluster is workspace-only (PMS, finance,
-  //     team, bookings) and is exposed via /mc/* routes, not the public
-  //     services catalog. Persona system (detectPersona.ts) and the
-  //     legacy appRegistry adapter mirror this 'live' assignment.
-  {
-    id: 'cat-wedding-events',
-    clusterId: 'live',
-    labelRu: 'Свадьбы и события',
-    labelEn: 'Wedding & Events',
-    valueRu: 'Destination-свадьбы, корпоративы, MICE — координация поставщиков.',
-    valueEn: 'Destination weddings, corporate events, MICE coordination.',
-    icon: CalendarDays,
-    color: '#F43F5E',
-    services: [
-      { id: 'wedding', path: '/wedding', labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available' },
+      // Cat-leisure (Live cluster) versions of event/experience target residents,
+      // not tourists — same listing pages but contextual framing. Labels are
+      // intentionally differentiated from the cat-tourism originals (line ~370)
+      // so /discover-from-Live doesn't show two identically-named cards.
+      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'Мероприятия на Пхукете',     labelEn: 'Local events',      icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['resident','couple','nightlife','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident','nightlife'] },
+      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Местные экскурсии', labelEn: 'Local experiences', icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
+      { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Занятия и отдых',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity', personaTags: ['resident','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
+      { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщества',   labelEn: 'Community',        icon: Users,        status: 'soon', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['I','C'], lifecycleStages: ['settler','resident','nomad','snowbird','returnee'], roleTags: ['consumer','resident-user'], situationCodes: ['living','resident','family'] },
+      // Wedding (moved from former cat-wedding-events, 2026-06-16) — destination
+      // ceremonies and family celebrations fit the lifestyle/leisure umbrella.
+      { id: 'wedding',      path: APP_ROUTES.WEDDING, labelRu: 'Организация свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available', personaTags: ['couple','family','business','tourist'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure'] },
+      // Flowers (moved from former cat-home-outdoor, 2026-06-16) — gift/lifestyle,
+      // not home maintenance. Lives next to wedding and event-live where the
+      // intent is celebration rather than property upkeep.
+      { id: 'flowers',      path: APP_ROUTES.FLOWERS,                   labelRu: 'Доставка цветов',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower', personaTags: ['tourist','resident','couple','family','business'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
     ],
   },
 
@@ -495,20 +536,24 @@ export const CATEGORIES: CategoryEntry[] = [
     clusterId: 'invest',
     labelRu: 'Недвижимость',
     labelEn: 'Real Estate',
-    valueRu: 'Поиск, новостройки, вторичка, застройщики, ROI.',
+    valueRu: 'Поиск жилья, новостройки, вторичное жильё, застройщики, оценка доходности.',
     valueEn: 'Search, off-plan, resale, developers, ROI.',
     icon: Building2,
     color: '#8B5CF6',
     services: [
-      { id: 'property',     path: APP_ROUTES.PROPERTY,    labelRu: 'Поиск',          labelEn: 'Property',     icon: Search,    status: 'available', verticalId: 'property' },
-      { id: 'rent-short',   path: APP_ROUTES.PROPERTY_RENT_SHORT, labelRu: 'Краткосрочная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available' },
-      { id: 'rent-long',    path: APP_ROUTES.PROPERTY_RENT_LONG,  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available' },
-      { id: 'offplan',      path: APP_ROUTES.OFFPLAN,     labelRu: 'Новостройки',    labelEn: 'Off-plan',     icon: Building2, status: 'available' },
-      { id: 'resale',       path: APP_ROUTES.RESALE,      labelRu: 'Вторичка',       labelEn: 'Resale',       icon: Building2, status: 'available' },
-      { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Застройщики',    labelEn: 'Developers',   icon: Users,     status: 'available' },
-      { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Бизнес и франшизы', labelEn: 'Business & franchises', icon: Briefcase, status: 'available' },
-      { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Портфель и ROI', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available' },
-      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'База знаний',    labelEn: 'Knowledge base', icon: BookOpen, status: 'available' },
+      { id: 'property',     path: APP_ROUTES.PROPERTY,    labelRu: 'Поиск недвижимости',          labelEn: 'Property',     icon: Search,    status: 'available', verticalId: 'property', personaTags: ['investor','property_owner','family','relocation','resident'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','settler','resident','absentee','returnee'], roleTags: ['consumer','investor-active','investor-passive','operator'], situationCodes: ['investing','investor','managing','property_owner','relocation','departure'] },
+      { id: 'rent-short',   path: APP_ROUTES.PROPERTY_RENT_SHORT, labelRu: 'Посуточная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available', personaTags: ['tourist','relocation','nomad','family'], jtbdClusters: ['D','A'], lifecycleStages: ['scout','tourist','snowbird','settler'], roleTags: ['consumer'], situationCodes: ['tourist','first_time','transit','relocation'] },
+      { id: 'rent-long',    path: APP_ROUTES.PROPERTY_RENT_LONG,  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['C','D'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'], situationCodes: ['relocation','living','resident','family','settling'] },
+      { id: 'offplan',      path: APP_ROUTES.OFFPLAN,     labelRu: 'Новостройки',    labelEn: 'Off-plan',     icon: Building2, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor','developer'] },
+      { id: 'resale',       path: APP_ROUTES.RESALE,      labelRu: 'Вторичное жильё',       labelEn: 'Resale',       icon: Building2, status: 'available', personaTags: ['investor','property_owner','family','relocation'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','consumer'], situationCodes: ['investing','investor','departure'] },
+      { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Сведения о застройщиках',    labelEn: 'Developers',   icon: Users,     status: 'available', personaTags: ['investor','property_owner','real_estate_developer'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','provider'], situationCodes: ['investing','investor','developer'] },
+      { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Покупка бизнеса', labelEn: 'Business & franchises', icon: Briefcase, status: 'available', personaTags: ['investor','business','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','operator'], situationCodes: ['business','investing','investor'] },
+      { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Доходность объектов', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['F'], lifecycleStages: ['resident','absentee'], roleTags: ['investor-active','investor-passive','operator'], situationCodes: ['investing','investor','property_owner','managing'] },
+      // Renamed from generic "База знаний" (which clashed with the legal
+      // knowledge entry below at line ~606) to "Инвест-база знаний" so
+      // /discover-from-Invest doesn't show two BookOpen cards with identical
+      // labels routing to different content (INVEST_KNOWLEDGE vs KNOWLEDGE).
+      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'Справочные материалы для покупателей', labelEn: 'Investment knowledge', icon: BookOpen, status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','G'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor'] },
     ],
   },
 
@@ -516,32 +561,34 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-business-legal',
     clusterId: 'legal',
-    labelRu: 'Бизнес и право',
+    labelRu: 'Правовая помощь',
     labelEn: 'Business & Legal',
-    valueRu: 'Визы, договоры, регистрация компаний, ContractAI.',
+    valueRu: 'Оформление виз, проверка договоров, регистрация компании.',
     valueEn: 'Visas, contracts, company setup, ContractAI.',
     icon: Scale,
     color: '#6366F1',
     services: [
-      { id: 'visa',        path: APP_ROUTES.VISA_IMMIGRATION,  labelRu: 'Визы',        labelEn: 'Visas',       icon: Globe,      status: 'available' },
-      { id: 'legal',       path: APP_ROUTES.LEGAL,             labelRu: 'Юристы',      labelEn: 'Legal',       icon: Scale,      status: 'available', verticalId: 'legal' },
-      { id: 'contract-ai', path: APP_ROUTES.CONTRACT_ANALYSIS, labelRu: 'ContractAI',   labelEn: 'ContractAI',  icon: FileSearch, status: 'available' },
-      { id: 'relocate',    path: APP_ROUTES.RELOCATE,          labelRu: 'Релокация',   labelEn: 'Relocation',  icon: Briefcase,  status: 'available' },
-      { id: 'knowledge',   path: APP_ROUTES.KNOWLEDGE,         labelRu: 'База знаний', labelEn: 'Knowledge',   icon: BookOpen,   status: 'available' },
+      { id: 'visa',        path: APP_ROUTES.VISA_IMMIGRATION,  labelRu: 'Оформление визы',        labelEn: 'Visas',       icon: Globe,      status: 'available', personaTags: ['tourist','resident','relocation','nomad','family','business'], jtbdClusters: ['G'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['settling','visa_renewal','relocation','departure','arrival'] },
+      { id: 'legal',       path: APP_ROUTES.LEGAL,             labelRu: 'Консультация юриста',      labelEn: 'Legal',       icon: Scale,      status: 'available', verticalId: 'legal', personaTags: ['resident','property_owner','investor','business','family','relocation'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['consumer','operator','investor-active','investor-passive'], situationCodes: ['settling','visa_renewal','investing','departure','managing','business','emergency'] },
+      { id: 'contract-ai', path: APP_ROUTES.CONTRACT_ANALYSIS, labelRu: 'Автоматическая проверка договора',   labelEn: 'ContractAI',  icon: FileSearch, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G','E'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','investor-active','investor-passive','operator'], situationCodes: ['settling','investing','business','managing'] },
+      { id: 'relocate',    path: APP_ROUTES.RELOCATE,          labelRu: 'Сопровождение переезда',   labelEn: 'Relocation',  icon: Briefcase,  status: 'available', personaTags: ['relocation','family','nomad','business'], jtbdClusters: ['B','C'], lifecycleStages: ['scout','settler','returnee'], roleTags: ['consumer'], situationCodes: ['relocation','settling'] },
+      { id: 'knowledge',   path: APP_ROUTES.KNOWLEDGE,         labelRu: 'Справочные материалы', labelEn: 'Knowledge',   icon: BookOpen,   status: 'available', personaTags: ['tourist','resident','property_owner','investor','family','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['settling','visa_renewal','investing','managing'] },
     ],
   },
   {
     id: 'cat-finance',
     clusterId: 'legal',
-    labelRu: 'Финансы',
+    labelRu: 'Финансы и налоги',
     labelEn: 'Finance',
-    valueRu: 'Банки, налоги, переводы, финансовое планирование.',
+    valueRu: 'Открытие банковского счёта, налоги, денежные переводы.',
     valueEn: 'Banking, taxes, transfers, financial planning.',
     icon: DollarSign,
     color: '#14B8A6',
     services: [
-      { id: 'banking', path: APP_ROUTES.BANKING, labelRu: 'Банк',     labelEn: 'Banking', icon: Landmark,   status: 'available', verticalId: 'bank' },
-      { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоги',   labelEn: 'Taxes',   icon: Calculator, status: 'available' },
+      { id: 'banking', path: APP_ROUTES.BANKING, labelRu: 'Открытие банковского счёта',     labelEn: 'Banking', icon: Landmark,   status: 'available', verticalId: 'bank', personaTags: ['resident','property_owner','investor','nomad','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','visa_renewal','investing','investor','business','managing','departure'] },
+      { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоговые консультации',   labelEn: 'Taxes',   icon: Calculator, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','absentee','returnee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','investing','managing','business','property_owner'] },
+      // Currency rates belong to Finance, not Transport (was mis-categorised).
+      { id: 'exchange', path: APP_ROUTES.EXCHANGE, labelRu: 'Курсы валют', labelEn: 'Exchange rates', icon: ArrowLeftRight, status: 'available', personaTags: ['tourist','resident','nomad','investor','business'], jtbdClusters: ['A','G'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident','absentee'], roleTags: ['consumer','investor-passive'], situationCodes: ['arrival','tourist','investing','investor','settling'] },
     ],
   },
   // IA: Halal & Faith stays under the Legal surface (six surfaces / canon 02
@@ -550,48 +597,64 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-halal-faith',
     clusterId: 'legal',
-    labelRu: 'Халяль и вероисповедание',
+    labelRu: 'Вероисповедание и халяль',
     labelEn: 'Halal & Faith',
-    valueRu: 'Халяль-инфраструктура, мечети, церкви, ритуальные услуги.',
+    valueRu: 'Халяльное питание, религиозные организации и обрядовые услуги.',
     valueEn: 'Halal infrastructure, mosques, churches, ritual services.',
     icon: Heart,
     color: '#84CC16',
     services: [
       {
         id: 'halal-persona',
-        path: '/for/halal',
-        labelRu: 'Халяль-путешественник',
+        path: APP_ROUTES.HALAL_PERSONA,
+        labelRu: 'Сведения для мусульман',
         labelEn: 'Halal traveller hub',
         icon: Compass,
         status: 'available',
+        personaTags: ['tourist','resident','family'],
         jtbdClusters: ['I'],
+        lifecycleStages: ['tourist','snowbird','settler','resident'],
+        roleTags: ['consumer'],
+        situationCodes: ['arrival','tourist','first_time','settling'],
       },
       {
         id: 'halal-stay',
-        path: '/property/for/halal',
-        labelRu: 'Жильё с учётом практик',
+        path: APP_ROUTES.HALAL_STAY,
+        labelRu: 'Жильё с учётом религиозных требований',
         labelEn: 'Halal-friendly stay',
         icon: HomeIcon,
         status: 'available',
+        personaTags: ['tourist','resident','family','relocation'],
         jtbdClusters: ['A', 'I'],
+        lifecycleStages: ['tourist','snowbird','settler','resident'],
+        roleTags: ['consumer'],
+        situationCodes: ['arrival','tourist','living','resident'],
       },
       {
         id: 'halal-dining',
         path: APP_ROUTES.RESTAURANTS,
-        labelRu: 'Рестораны (халяль)',
+        labelRu: 'Халяльные рестораны',
         labelEn: 'Halal dining',
         icon: Utensils,
         status: 'available',
+        personaTags: ['tourist','resident','family','couple'],
         jtbdClusters: ['I'],
+        lifecycleStages: ['tourist','snowbird','settler','resident'],
+        roleTags: ['consumer'],
+        situationCodes: ['tourist','living','resident','food'],
       },
       {
         id: 'halal-knowledge',
-        path: APP_ROUTES.KNOWLEDGE,
-        labelRu: 'Вера и обычаи',
+        path: APP_ROUTES.COMMUNITIES,
+        labelRu: 'Религиозные организации',
         labelEn: 'Faith & customs guides',
-        icon: BookOpen,
+        icon: HeartHandshake,
         status: 'available',
-        jtbdClusters: ['I'],
+        personaTags: ['tourist','resident','family','relocation'],
+        jtbdClusters: ['I','G'],
+        lifecycleStages: ['all'],
+        roleTags: ['all'],
+        situationCodes: ['arrival','first_time','settling'],
       },
     ],
   },
@@ -600,17 +663,17 @@ export const CATEGORIES: CategoryEntry[] = [
   {
     id: 'cat-partner-portal',
     clusterId: 'build',
-    labelRu: 'Партнёры и B2B',
+    labelRu: 'Для организаций',
     labelEn: 'Partner Portal',
-    valueRu: 'Портал застройщика, программа, витрина, консультации.',
+    valueRu: 'Кабинет застройщика, партнёрская программа, размещение проектов, консультации.',
     valueEn: 'Developer portal, program, showcase, advisory.',
     icon: Building,
     color: '#F97316',
     services: [
-      { id: 'developer-portal', path: APP_ROUTES.DEVELOPER_PORTAL,           labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,  status: 'available' },
-      { id: 'program',          path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart, status: 'available' },
-      { id: 'newbuilds',        path: APP_ROUTES.NEWBUILDS,                  labelRu: 'Витрина',      labelEn: 'Showcase',  icon: Building2, status: 'available' },
-      { id: 'advisory',         path: APP_ROUTES.PROPERTY_CONSULTATION,      labelRu: 'Консультация', labelEn: 'Advisory',  icon: PenTool,   status: 'available' },
+      { id: 'developer-portal', path: APP_ROUTES.DEVELOPER_PORTAL,           labelRu: 'Кабинет застройщика',       labelEn: 'Portal',    icon: Building,  status: 'available', personaTags: ['real_estate_developer','business'], jtbdClusters: ['F'], lifecycleStages: ['all'], roleTags: ['provider','operator'], situationCodes: ['developer','business'] },
+      { id: 'program',          path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, labelRu: 'Партнёрская программа',    labelEn: 'Program',   icon: LineChart, status: 'available', personaTags: ['real_estate_developer','business','investor'], jtbdClusters: ['D','E'], lifecycleStages: ['all'], roleTags: ['provider','investor-active'], situationCodes: ['developer','business'] },
+      { id: 'newbuilds',        path: APP_ROUTES.NEWBUILDS,                  labelRu: 'Размещение проектов',      labelEn: 'Showcase',  icon: Building2, status: 'available', personaTags: ['investor','property_owner','relocation'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','consumer'], situationCodes: ['investing','investor','developer'] },
+      { id: 'advisory',         path: APP_ROUTES.PROPERTY_CONSULTATION,      labelRu: 'Консультация', labelEn: 'Advisory',  icon: PenTool,   status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor','developer','departure'] },
     ],
   },
 ];
@@ -683,7 +746,9 @@ export interface AudienceContext {
 /**
  * `public` clusters always visible. `workspace` clusters require a matching
  * persona OR role. Empty context hides workspace clusters (safer default —
- * a guest doesn't accidentally see operator surfaces).
+ * a guest doesn't accidentally see operator canvases). "Canvas" is the app
+ * shell (Home/Discover/Operate/Wallet/Me/Admin) — see `src/types/canvas.ts`
+ * — distinct from the content "cluster"/"surface" defined above.
  */
 export function isClusterVisibleToUser(
   cluster: ClusterEntry,
@@ -722,7 +787,9 @@ export const LIFE_SITUATIONS: LifeSituationEntry[] = [
   // Manage
   { code: 'managing',       titleRu: 'Управление объектом',     titleEn: 'Managing property', icon: 'Building2',     color: '#0891B2', priority: 100, isActive: true },
   { code: 'property_owner', titleRu: 'Собственник',             titleEn: 'Property owner',    icon: 'KeyRound',      color: '#0891B2', priority: 95,  isActive: true },
-  { code: 'business',       titleRu: 'Бизнес и операции',       titleEn: 'Business',          icon: 'Briefcase',     color: '#6366F1', priority: 85,  isActive: true },
+  { code: 'business',           titleRu: 'Бизнес и операции',       titleEn: 'Business',           icon: 'Briefcase',     color: '#6366F1', priority: 85,  isActive: true },
+  { code: 'management_company', titleRu: 'Управляющая компания',    titleEn: 'Management Company', icon: 'Building2',     color: '#0A2240', priority: 100, isActive: true },
+  { code: 'vendor_onboarding',  titleRu: 'Поставщик услуг',         titleEn: 'Service Provider',   icon: 'Handshake',     color: '#D96B1A', priority: 80,  isActive: true },
   // Invest
   { code: 'investing',      titleRu: 'Инвестирование',          titleEn: 'Investing',         icon: 'TrendingUp',    color: '#8B5CF6', priority: 100, isActive: true },
   { code: 'investor',       titleRu: 'Инвестор',                titleEn: 'Investor',          icon: 'LineChart',     color: '#A855F7', priority: 95,  isActive: true },
@@ -732,6 +799,11 @@ export const LIFE_SITUATIONS: LifeSituationEntry[] = [
   { code: 'relocation',     titleRu: 'Релокация',               titleEn: 'Relocation',        icon: 'Truck',         color: '#14B8A6', priority: 90,  isActive: true },
   // Build
   { code: 'developer',      titleRu: 'Застройщик',              titleEn: 'Developer',         icon: 'HardHat',       color: '#F97316', priority: 100, isActive: true },
+  // Emergency (JTBD H) — SOS, medical, accident, lost docs. Primary on Arrive cluster
+  // (first-hour-on-island reflex), secondary on Legal (insurance / police follow-up).
+  { code: 'emergency',      titleRu: 'Срочная помощь',          titleEn: 'Emergency',         icon: 'AlertTriangle', color: '#DC2626', priority: 100, isActive: true },
+  // Exit (JTBD J) — leaving Phuket: visa closure, PM hand-off, asset sale, deposit return.
+  { code: 'departure',      titleRu: 'Уезжаю с острова',        titleEn: 'Leaving Phuket',    icon: 'LogOut',        color: '#78716C', priority: 80,  isActive: true },
 ];
 
 /**
@@ -755,9 +827,11 @@ export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
   { clusterId: 'live',   situationCode: 'food',           weight: 70,  isPrimary: false },
   { clusterId: 'live',   situationCode: 'nightlife',      weight: 60,  isPrimary: false },
   // MANAGE
-  { clusterId: 'manage', situationCode: 'managing',       weight: 100, isPrimary: true  },
-  { clusterId: 'manage', situationCode: 'property_owner', weight: 95,  isPrimary: true  },
-  { clusterId: 'manage', situationCode: 'business',       weight: 90,  isPrimary: false },
+  { clusterId: 'manage', situationCode: 'managing',           weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'management_company', weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'property_owner',     weight: 95,  isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'business',           weight: 90,  isPrimary: false },
+  { clusterId: 'manage', situationCode: 'vendor_onboarding',  weight: 80,  isPrimary: false },
   // INVEST
   { clusterId: 'invest', situationCode: 'investing',      weight: 100, isPrimary: true  },
   { clusterId: 'invest', situationCode: 'investor',       weight: 95,  isPrimary: true  },
@@ -770,6 +844,14 @@ export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
   // BUILD
   { clusterId: 'build',  situationCode: 'developer',      weight: 100, isPrimary: true  },
   { clusterId: 'build',  situationCode: 'business',       weight: 60,  isPrimary: false },
+  // EMERGENCY — primary on Arrive (SOS reflex when something goes wrong), secondary on Legal.
+  { clusterId: 'arrive', situationCode: 'emergency',      weight: 100, isPrimary: true  },
+  { clusterId: 'legal',  situationCode: 'emergency',      weight: 70,  isPrimary: false },
+  // DEPARTURE — primary on Legal (visa exit, paperwork), with Manage (PM hand-off)
+  // and Invest (property sale / capital repatriation) as secondary anchors.
+  { clusterId: 'legal',  situationCode: 'departure',      weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'departure',      weight: 80,  isPrimary: false },
+  { clusterId: 'invest', situationCode: 'departure',      weight: 60,  isPrimary: false },
 ];
 
 /**

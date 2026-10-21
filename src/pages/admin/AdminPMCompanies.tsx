@@ -269,7 +269,7 @@ export default function AdminPMCompanies() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" aria-label={isRu ? 'Действия' : 'Actions'} onClick={(e) => e.stopPropagation()}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

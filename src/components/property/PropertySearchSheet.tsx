@@ -644,7 +644,7 @@ function GuestRow({ label, sub, value, onChange, min = 0, max = 16 }: GuestRowPr
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full h-8 w-8 border-muted-foreground/30"
+          className="rounded-full h-8 w-8 min-h-[44px] min-w-[44px] border-muted-foreground/30"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
           aria-label={`Decrease ${label}`}
@@ -655,7 +655,7 @@ function GuestRow({ label, sub, value, onChange, min = 0, max = 16 }: GuestRowPr
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full h-8 w-8 border-muted-foreground/30"
+          className="rounded-full h-8 w-8 min-h-[44px] min-w-[44px] border-muted-foreground/30"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
           aria-label={`Increase ${label}`}

@@ -7,13 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -97,9 +91,14 @@ export function CategorySuggestionDialog({
 
   if (isSuccess) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+      <ResponsiveModal
+        open={open}
+        onOpenChange={onOpenChange}
+        size="md"
+        icon={<CheckCircle2 className="h-5 w-5 text-success" />}
+        title={isRu ? 'Спасибо за предложение!' : 'Thank you for your suggestion!'}
+      >
+        <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="p-4 rounded-full bg-success/10 mb-4">
               <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
@@ -107,31 +106,28 @@ export function CategorySuggestionDialog({
               {isRu ? 'Спасибо за предложение!' : 'Thank you for your suggestion!'}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? 'Мы рассмотрим вашу заявку в течение 48 часов' 
+              {isRu
+                ? 'Мы рассмотрим вашу заявку в течение 48 часов'
                 : 'We will review your request within 48 hours'}
             </p>
           </div>
-        </DialogContent>
-      </Dialog>
+      </ResponsiveModal>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-warning" />
-            {isRu ? 'Предложить категорию' : 'Suggest a Category'}
-          </DialogTitle>
-          <DialogDescription>
-            {isRu 
-              ? 'Не нашли подходящую категорию? Предложите свою, и мы добавим её!'
-              : "Can't find the right category? Suggest one and we'll add it!"}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      icon={<Lightbulb className="h-5 w-5 text-warning" />}
+      title={isRu ? 'Предложить категорию' : 'Suggest a Category'}
+      description={
+        isRu
+          ? 'Не нашли подходящую категорию? Предложите свою, и мы добавим её!'
+          : "Can't find the right category? Suggest one and we'll add it!"
+      }
+    >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="category_name">
@@ -213,11 +209,10 @@ export function CategorySuggestionDialog({
         </form>
 
         <p className="text-xs text-center text-muted-foreground mt-2">
-          {isRu 
+          {isRu
             ? 'Мы уведомим вас, когда категория будет добавлена'
             : "We'll notify you when the category is added"}
         </p>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 }

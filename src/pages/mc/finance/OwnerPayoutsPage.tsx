@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Banknote, CheckCircle2, Clock, XCircle, FileText, ArrowUpRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const STATUS_COLORS: Record<OwnerPayoutStatus, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -27,6 +28,7 @@ const STATUS_LABEL_RU: Record<OwnerPayoutStatus, string> = {
 export default function OwnerPayoutsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { symbol: curSym } = useCityCurrency();
   const [filter, setFilter] = useState<OwnerPayoutStatus | 'all'>('all');
   const { data: payouts, isLoading } = useOwnerPayouts(filter);
   const updateStatus = useUpdatePayoutStatus();
@@ -63,11 +65,11 @@ export default function OwnerPayoutsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><Clock className="w-4 h-4" />{isRu ? 'К выплате' : 'Pending'}</div>
-          <div className="text-2xl font-bold mt-1 tabular-nums">{fmt(totals.pending)} ฿</div>
+          <div className="text-2xl font-bold mt-1 tabular-nums">{fmt(totals.pending)} {curSym}</div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle2 className="w-4 h-4 text-success" />{isRu ? 'Выплачено' : 'Paid'}</div>
-          <div className="text-2xl font-bold mt-1 tabular-nums">{fmt(totals.paid)} ฿</div>
+          <div className="text-2xl font-bold mt-1 tabular-nums">{fmt(totals.paid)} {curSym}</div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><FileText className="w-4 h-4" />{isRu ? 'Всего записей' : 'Records'}</div>

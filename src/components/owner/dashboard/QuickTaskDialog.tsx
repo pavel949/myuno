@@ -81,7 +81,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
           </Button>
           <Button onClick={handleSubmit} disabled={!title.trim() || createTask.isPending}>
             {createTask.isPending
-              ? (isRu ? 'Создание...' : 'Creating...')
+              ? (isRu ? 'Создаётся…' : 'Creating...')
               : (isRu ? 'Создать' : 'Create')}
           </Button>
         </div>
@@ -92,7 +92,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={isRu ? 'Что нужно сделать?' : 'What needs to be done?'}
+          placeholder={isRu ? 'Опишите задачу' : 'What needs to be done?'}
           autoFocus
         />
       </div>
@@ -119,7 +119,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
               <SelectItem value="low">{isRu ? 'Низкий' : 'Low'}</SelectItem>
               <SelectItem value="medium">{isRu ? 'Средний' : 'Medium'}</SelectItem>
               <SelectItem value="high">{isRu ? 'Высокий' : 'High'}</SelectItem>
-              <SelectItem value="urgent">{isRu ? 'Срочный' : 'Urgent'}</SelectItem>
+              <SelectItem value="urgent">{isRu ? 'Срочно' : 'Urgent'}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -154,7 +154,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
       </div>
 
       <div>
-        <Label>{isRu ? 'Дедлайн' : 'Due date'}</Label>
+        <Label>{isRu ? 'Срок выполнения' : 'Due date'}</Label>
         <Input type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
     </ResponsiveModal>

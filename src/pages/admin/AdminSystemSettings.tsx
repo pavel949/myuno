@@ -4,11 +4,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, MapPin, Languages, History, FileText, FolderTree, Database, Bot, Brain, TestTube, Users, Scale, FileEdit, Key, Flag } from 'lucide-react';
+import { Settings, MapPin, Languages, History, FileText, FolderTree, Database, Bot, Brain, TestTube, Users, Scale, FileEdit, Key, Flag, Building2 } from 'lucide-react';
 import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
 import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
+import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface QuickLink {
   icon: React.ElementType;
@@ -44,6 +48,11 @@ export default function AdminSystemSettings() {
         icon={Settings}
         size="lg"
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border p-4">
+        <p className="text-sm">{pickLang(language, { en: 'Site availability controls', ru: 'Управление доступностью сайта', th: 'การควบคุมการเปิดใช้งานเว็บไซต์' })}</p>
+        <LaunchSwitch variant="compact" />
+      </div>
 
       {/* Quick Links Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -83,19 +92,36 @@ export default function AdminSystemSettings() {
             <Flag className="h-4 w-4" />
             {isRu ? 'Флаги' : 'Flags'}
           </TabsTrigger>
+          <TabsTrigger value="org" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {isRu ? 'Организация' : 'Organization'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="system" className="mt-4">
-          <ControlSystemTab />
+          <ErrorBoundary>
+            <ControlSystemTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="audit" className="mt-4">
-          <ControlAuditTab />
+          <ErrorBoundary>
+            <ControlAuditTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="logs" className="mt-4">
-          <ControlLogsTab />
+          <ErrorBoundary>
+            <ControlLogsTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="flags" className="mt-4">
-          <FeatureFlagManager />
+          <ErrorBoundary>
+            <FeatureFlagManager />
+          </ErrorBoundary>
+        </TabsContent>
+        <TabsContent value="org" className="mt-4">
+          <ErrorBoundary>
+            <OrgProfileEditor />
+          </ErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>

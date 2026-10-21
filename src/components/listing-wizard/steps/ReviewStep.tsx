@@ -47,9 +47,9 @@ export function ReviewStep({ draft, onEdit, onSubmit, onBack, isLoading }: Revie
         <CardContent className="p-0">
           {draft.cover_image && (
             <div className="aspect-video relative">
-              <img 
-                src={draft.cover_image} 
-                alt="Cover" 
+              <img
+                src={draft.cover_image}
+                alt={draft.title_en || (isRu ? 'Обложка листинга' : 'Listing cover')}
                 className="w-full h-full object-cover rounded-none"
               />
             </div>
@@ -163,7 +163,7 @@ function ReviewSection({
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="font-medium">{value}</p>
       </div>
-      <Button variant="ghost" size="icon" onClick={onEdit}>
+      <Button variant="ghost" size="icon" onClick={onEdit} aria-label="Edit">
         <Pencil className="h-4 w-4" />
       </Button>
     </div>

@@ -35,7 +35,9 @@ export function GuestPriceProposal({
 
   const originalTotal = pricePerNight * (nights || 1);
   const proposed = Number(proposedPrice) || 0;
-  const discountPercent = proposed > 0 ? Math.round((1 - proposed / originalTotal) * 100) : 0;
+  const discountPercent = proposed > 0 && originalTotal > 0
+    ? Math.round((1 - proposed / originalTotal) * 100)
+    : 0;
 
   const handleSubmit = async () => {
     if (!proposed || proposed <= 0) return;

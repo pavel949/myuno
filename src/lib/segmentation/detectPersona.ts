@@ -97,8 +97,16 @@ const MODIFIER_CLUSTERS: Record<CanonicalModifier, ClusterId[]> = {
 
 /**
  * Persona matrix — covers the most common (lifecycle × role) intersections
- * and falls back to a coarse default for the long tail. Codes are P1..P25
- * per `01-segmentation-framework.md §0.6`.
+ * and falls back to a coarse default for the long tail.
+ *
+ * ⚠️ KNOWN INCONSISTENCY (flagged 2026-06-15): the P-codes emitted here are an
+ * ad-hoc (lifecycle × role) numbering and do NOT match the persona definitions
+ * in `01-segmentation-framework.md §4` (e.g. this maps `resident:provider→P19`,
+ * but the doc's P19 is "accessibility traveller"; `returnee:operator→P21` vs
+ * doc P21 "local provider"). They are also unrelated to the Master Taxonomy
+ * long codes (`P01_*` in `master.ts`). Reconciling the matrix to a single
+ * canonical numbering is a product decision (it changes values written to
+ * `profiles.detected_persona`) — do not silently re-map.
  */
 const PERSONA_MATRIX: Partial<Record<`${LifecycleStage}:${CanonicalRoleAnswer}`, PersonaCode>> = {
   // Scouts

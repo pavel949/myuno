@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Baby, Clock, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const babysitters: Record<string, { nameEn: string; nameRu: string; pricePerHour: number; image: string }> = {
   'bs-1': { nameEn: 'Anna Petrova', nameRu: 'Анна Петрова', pricePerHour: 500, image: PLACEHOLDER_IMAGES.avatar },
@@ -58,7 +59,7 @@ export default function BabysitterBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/babysitter/${id}/book` } });
+    redirectToAuth(navigate, { from: `/babysitter/${id}/book` });
     return null;
   }
 
@@ -186,20 +187,22 @@ export default function BabysitterBooking() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setHours(Math.max(1, hours - 1))}
                 disabled={hours <= 1}
+                aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
               >
                 <Minus className="w-4 h-4" />
               </Button>
               <span className="font-bold text-lg w-12 text-center">{hours}h</span>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="icon"
                 onClick={() => setHours(Math.min(12, hours + 1))}
                 disabled={hours >= 12}
+                aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -217,20 +220,22 @@ export default function BabysitterBooking() {
             <div>
               <Label>{language === 'ru' ? 'Количество детей' : 'Number of children'}</Label>
               <div className="flex items-center gap-3 mt-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => setChildrenCount(Math.max(1, childrenCount - 1))}
                   disabled={childrenCount <= 1}
+                  aria-label={language === 'ru' ? 'Меньше детей' : 'Fewer children'}
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
                 <span className="font-bold text-lg w-8 text-center">{childrenCount}</span>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="icon"
                   onClick={() => setChildrenCount(Math.min(5, childrenCount + 1))}
                   disabled={childrenCount >= 5}
+                  aria-label={language === 'ru' ? 'Больше детей' : 'More children'}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>

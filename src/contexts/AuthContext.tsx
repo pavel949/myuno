@@ -60,6 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
         .forEach((key) => window.sessionStorage.removeItem(key));
+
+      // Clear admin impersonation / "view-as" scopes so they never leak across
+      // an account switch on a shared device (keys mirror the STORAGE_KEY
+      // constants in ImpersonationContext / PlatformViewAsContext).
+      window.sessionStorage.removeItem('myuno:impersonate_dev');
+      window.sessionStorage.removeItem('myuno:platform-view-as');
     }
 
     clearAdminCache();
@@ -127,12 +133,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener before fetching session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         if (isMounted) {
           refreshFailureCountRef.current = 0;
           setSession(session);
           setUser(session?.user ?? null);
           setIsLoading(false);
+        }
+
+        // M5 H.7 — OAuth signups never pass anon_session_id through
+        // raw_user_meta_data, so handle_new_user() can't claim the anon
+        // onboarding data. After SIGNED_IN we call the idempotent RPC.
+        if (event === 'SIGNED_IN' && session?.user) {
+          const anonId = readAnonSessionId();
+          if (anonId) {
+            void supabase.rpc('claim_anon_session', { p_anon_session_id: anonId })
+              .then(({ error }) => {
+                if (!error) clearAnonSessionId();
+              });
+          }
         }
       }
     );
@@ -167,13 +186,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    // If signup successful and we have phone, update profile
-    if (!error && data?.user && phone) {
-      await supabase
-        .from('profiles')
-        .update({ phone })
-        .eq('id', data.user.id);
-    }
+    // NOTE: phone is persisted to profiles by the `handle_new_user` trigger
+    // (it reads NEW.phone OR raw_user_meta_data.phone). Previous client-side
+    // `profiles.update({ phone })` silently failed under RLS when email
+    // confirmation was required (no active session yet) and is now removed.
 
     // Anon id is now claimed by the trigger — clear local copy so future
     // sessions on this device start fresh.
@@ -202,7 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshFailureCountRef.current = 0;
 
     try {
-      await supabase.auth.signOut({ scope: 'local' });
+      // Global scope (default) revokes the refresh token server-side so the
+      // session is invalidated on the backend, not just in this tab. Critical
+      // for a payments app — a local-only signOut leaves the refresh token
+      // live and replayable.
+      await supabase.auth.signOut();
     } finally {
       clearStoredAuthSession();
       // Bible-v2 audit B1: drop every cached query so user A's data

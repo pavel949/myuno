@@ -58,11 +58,11 @@ export function BookingContactForm({
   // Validate fields
   useEffect(() => {
     const newErrors: FormErrors = {};
-    if (touched.name && !data.name.trim()) {
+    if (touched.name && !data.name?.trim()) {
       newErrors.name = language === 'ru' ? 'Введите имя' : 'Name is required';
     }
     if (touched.phone) {
-      if (!data.phone.trim()) {
+      if (!data.phone?.trim()) {
         newErrors.phone = language === 'ru' ? 'Введите телефон' : 'Phone is required';
       } else if (!PHONE_REGEX.test(data.phone.replace(/\s/g, ''))) {
         newErrors.phone = language === 'ru' ? 'Неверный формат телефона' : 'Invalid phone format';
@@ -73,10 +73,10 @@ export function BookingContactForm({
       newErrors.email = language === 'ru' ? 'Неверный формат email' : 'Invalid email format';
     }
     setErrors(newErrors);
-    const isValid = data.name.trim().length > 0 &&
-                    data.phone.trim().length > 0 &&
- 
-                    PHONE_REGEX.test(data.phone.replace(/\s/g, '')) &&
+    const isValid = (data.name?.trim().length ?? 0) > 0 &&
+                    (data.phone?.trim().length ?? 0) > 0 &&
+
+                    PHONE_REGEX.test((data.phone ?? '').replace(/\s/g, '')) &&
                     (!data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email));
     onValidationChange?.(isValid);
   }, [data, touched, language, onValidationChange]);
@@ -115,6 +115,9 @@ export function BookingContactForm({
     const status = getFieldStatus(config.field, value);
     const isFocused = focused === config.field;
     const hasFloatingLabel = isFocused || value.length > 0;
+    const inputId = `booking-${config.field}`;
+    const errorId = `booking-${config.field}-error`;
+    const hasError = status === 'error' && !!errors[config.field as keyof FormErrors];
 
     const borderRadius = {
       top: 'rounded-none rounded-b-none',
@@ -143,6 +146,7 @@ export function BookingContactForm({
 
           {/* Floating label */}
           <label
+            htmlFor={inputId}
             className={cn(
               "absolute left-11 transition-all duration-200 pointer-events-none",
               hasFloatingLabel
@@ -155,11 +159,14 @@ export function BookingContactForm({
           </label>
 
           <input
+            id={inputId}
             type={config.type || 'text'}
             value={value}
             onChange={(e) => handleChange(config.field, e.target.value)}
             onBlur={() => handleBlur(config.field)}
             onFocus={() => handleFocus(config.field)}
+            aria-invalid={hasError || undefined}
+            aria-describedby={hasError ? errorId : undefined}
             className={cn(
               "w-full bg-transparent outline-none text-sm text-foreground pl-11 pr-10",
               hasFloatingLabel ? "pt-5 pb-2" : "py-3.5",
@@ -172,14 +179,14 @@ export function BookingContactForm({
               <Check className="w-4 h-4 text-[hsl(var(--success))]" />
             )}
             {status === 'error' && (
-              <AlertCircle className="w-4 h-4 text-destructive" />
+              <AlertCircle className="w-4 h-4 text-destructive" aria-hidden="true" />
             )}
           </div>
         </div>
 
         {/* Error message */}
-        {status === 'error' && errors[config.field as keyof FormErrors] && (
-          <p className="text-xs text-destructive mt-1 pl-1">
+        {hasError && (
+          <p id={errorId} role="alert" className="text-xs text-destructive mt-1 pl-1">
             {errors[config.field as keyof FormErrors]}
           </p>
         )}
@@ -243,9 +250,10 @@ export function BookingContactForm({
             )}
           >
             <div className="absolute left-3.5 top-3.5 text-muted-foreground pointer-events-none">
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare className="w-4 h-4" aria-hidden="true" />
             </div>
             <label
+              htmlFor="booking-notes"
               className={cn(
                 "absolute left-11 transition-all duration-200 pointer-events-none",
                 (focused === 'notes' || (data.notes && data.notes.length > 0))
@@ -256,6 +264,7 @@ export function BookingContactForm({
               {language === 'ru' ? 'Примечания' : 'Special requests'}
             </label>
             <textarea
+              id="booking-notes"
               value={data.notes || ''}
               onChange={(e) => handleChange('notes', e.target.value)}
               onBlur={() => handleBlur('notes')}

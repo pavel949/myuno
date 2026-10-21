@@ -13,7 +13,7 @@ import type { BilingualString } from '@/lib/landings/types';
 
 export type Lang = 'ru' | 'en';
 
-const ORIGIN = 'https://myuno.app';
+const ORIGIN = 'https://www.myuno.app';
 
 const ORG_PROVIDER = {
   '@type': 'Organization',

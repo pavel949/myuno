@@ -21,7 +21,7 @@ export function PeylaaROICalculator({ onGetConsultation }: Props) {
       presets={PEYLAA_PRESETS}
       camFeePerSqmMonthly={120}
       currencySymbol="฿"
-      disclaimer="Только историческая статистика и сопоставимые объекты. Это не финансовый совет и не обещание будущих результатов. Данные CBRE: средняя доходность branded residences Пхукета — 6–8% gross (2022–2024). myUNO — площадка по недвижимости, а не инвестиционный консультант."
+      disclaimer="Расчёт зависит от введённых данных и допущений. Он не подтверждает фактическую доходность и не гарантирует будущие результаты."
       onGetConsultation={onGetConsultation}
     />
   );

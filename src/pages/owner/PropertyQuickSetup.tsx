@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -44,6 +46,8 @@ export default function PropertyQuickSetup() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
 
   const { data: property, isLoading } = useOwnerProperty(id);
@@ -378,7 +382,7 @@ export default function PropertyQuickSetup() {
                   availability={localAvailability}
                   onChange={setLocalAvailability}
                   basePrice={Number(formData.price_per_night) || 0}
-                  currency="THB"
+                  currency={cityCurrencyCode}
                 />
               )}
             </CardContent>

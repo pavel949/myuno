@@ -108,7 +108,7 @@ export function useUpdateInvoiceStatus() {
       if (paid_date) update.paid_date = paid_date;
       const { error } = await supabase
         .from('owner_invoices')
-        .update(update)
+        .update(update as never)
         .eq('id', id);
       if (error) throw error;
     },

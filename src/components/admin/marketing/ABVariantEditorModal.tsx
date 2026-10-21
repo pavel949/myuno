@@ -242,7 +242,8 @@ export function ABVariantEditorModal({
                   <Button
                     variant={previewDevice === 'desktop' ? 'secondary' : 'ghost'}
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 min-h-[44px] min-w-[44px]"
+                    aria-label={isRu ? 'Десктоп' : 'Desktop'}
                     onClick={() => setPreviewDevice('desktop')}
                   >
                     <Monitor className="h-3.5 w-3.5" />
@@ -250,7 +251,8 @@ export function ABVariantEditorModal({
                   <Button
                     variant={previewDevice === 'mobile' ? 'secondary' : 'ghost'}
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 min-h-[44px] min-w-[44px]"
+                    aria-label={isRu ? 'Мобильный' : 'Mobile'}
                     onClick={() => setPreviewDevice('mobile')}
                   >
                     <Smartphone className="h-3.5 w-3.5" />

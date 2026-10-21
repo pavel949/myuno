@@ -43,6 +43,7 @@ import { VendorFormSection } from '@/components/vendor/VendorFormSection';
 import { FormFieldWithHelp } from '@/components/vendor/FormFieldWithHelp';
 import { DraftRestorationBanner, DraftIndicator } from '@/components/vendor/DraftIndicator';
 import { ServiceBilingualHint } from '@/components/services/ServiceBilingualHint';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const DRAFT_KEY = 'vendor-service-draft';
 
@@ -153,7 +154,7 @@ const VendorServices = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -359,7 +360,7 @@ const VendorServices = () => {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

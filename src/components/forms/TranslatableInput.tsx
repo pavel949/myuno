@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -43,20 +43,12 @@ export function TranslatableInput({
   const [isAutoTranslated, setIsAutoTranslated] = useState(false);
   const [isEditingTranslation, setIsEditingTranslation] = useState(false);
   const [editedTranslation, setEditedTranslation] = useState('');
-  const translatedFromRef = useRef('');
 
   // Source language is the current UI language, target is the other one
   const targetLang = isRu ? 'en' : 'ru';
   const sourceLangLabel = isRu ? 'RU' : 'EN';
   const targetLangLabel = isRu ? 'EN' : 'RU';
   const translateActionLabel = isRu ? `Перевести в ${targetLangLabel}` : `Translate to ${targetLangLabel}`;
-
-  const needsTranslationOffer = useMemo(() => {
-    const trimmedValue = value.trim();
-    if (!trimmedValue) return false;
-
-    return !translatedValue.trim() || translatedFromRef.current !== trimmedValue;
-  }, [translatedValue, value]);
 
   const handleTranslate = useCallback(async () => {
     if (!value.trim()) {
@@ -82,7 +74,6 @@ export function TranslatableInput({
 
       const translated = data?.translated || '';
       onTranslatedChange(translated);
-      translatedFromRef.current = value.trim();
       setIsAutoTranslated(true);
       toast.success(isRu ? 'Перевод выполнен' : 'Translation complete');
     } catch (error) {
@@ -109,9 +100,6 @@ export function TranslatableInput({
     setIsEditingTranslation(false);
   };
 
-  // Track if the auto-translated content is stale (source changed after translation)
-  // This is intentionally a no-op effect kept for potential future enhancement
-
   const InputComponent = multiline ? Textarea : Input;
 
   return (
@@ -136,21 +124,6 @@ export function TranslatableInput({
           disabled={disabled}
           {...(multiline && { rows })}
         />
-        {needsTranslationOffer && (
-          <div className="flex justify-end pt-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleTranslate}
-              disabled={isTranslating || disabled}
-              className="h-7 px-2 text-xs text-primary"
-            >
-              <Sparkles className="h-3 w-3 mr-1" />
-              {translateActionLabel}
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Translation section */}

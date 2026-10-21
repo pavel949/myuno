@@ -1,0 +1,60 @@
+import React from 'react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import Index from '@/pages/Index';
+const state = vi.hoisted(() => ({ flag: false, isAdmin: false, adminLoading: false, language: 'ru' }));
+vi.mock('@/hooks/useFeatureFlag', () => ({ useFeatureFlag: () => state.flag }));
+vi.mock('@/hooks/useIsAdmin', () => ({ useIsAdmin: () => ({ isAdmin: state.isAdmin, isLoading: state.adminLoading }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'test-account' } }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
+vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ personas: ['pet_owner'], effectivePersonas: ['pet_owner'], togglePersona: vi.fn(), setPersonas: vi.fn(), isLoading: false, isToggling: false, isSetting: false, error: null }) }));
+vi.mock('@/hooks/useLifeOS', () => ({ useLifeOSRole: () => 'resident' }));
+vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
+vi.mock('../HeroGreeting', () => ({ HeroGreeting: () => <div data-part="identity">Identity</div> }));
+vi.mock('../WorkspaceHomeBanner', () => ({ WorkspaceHomeBanner: () => <div data-part="workspace">Verified workspace</div> }));
+vi.mock('../PersonalHomeActions', () => ({ PersonalHomeActions: () => <div data-part="personal">Personal actions</div> }));
+vi.mock('../PendingPaymentsChip', () => ({ PendingPaymentsChip: () => <div data-part="pending">Real pending orders</div> }));
+vi.mock('../SignalStack', () => ({ SignalStack: () => <div data-part="signals">Topic updates</div> }));
+vi.mock('../ActiveSituation', () => ({ ActiveSituation: () => <div data-part="signals">Topic updates</div> }));
+vi.mock('../HomePreferencesEntry', () => ({ HomePreferencesEntry: ({ onOpen }: { onOpen: () => void }) => <button data-part="preferences" onClick={onOpen}>Preferences</button> }));
+vi.mock('../NowInPhuket', () => ({ NowInPhuket: () => <div data-part="weather">Weather</div> }));
+vi.mock('../LifecycleSmartTip', () => ({ LifecycleSmartTip: () => <div data-part="lifecycle">Profile tips</div> }));
+vi.mock('../OfficialNews', () => ({ OfficialNews: () => <div>News</div> }));
+vi.mock('../ClusterGridCards', () => ({ ClusterGridCards: () => <div data-part="categories">Categories</div> }));
+vi.mock('@/components/superapp/PersonalGrid', () => ({ PersonalGrid: () => <div data-part="recommendations">Recommendations</div> }));
+vi.mock('@/components/superapp/ClusterRail', () => ({ ClusterRail: () => <div data-part="categories">Categories</div> }));
+vi.mock('@/components/nav/AppDrawer', () => ({ AppDrawer: ({ open }: { open: boolean }) => open ? <div role="dialog">All sections</div> : null }));
+vi.mock('@/components/onboarding/Coachmarks', () => ({ Coachmarks: () => null }));
+vi.mock('../RoleSheet', () => ({ RoleSheet: ({ open, onClose }: { open: boolean; onClose: () => void }) => open ? <div role="dialog"><button onClick={onClose}>Close preferences</button></div> : null }));
+afterEach(cleanup);
+beforeEach(() => { state.flag = false; state.isAdmin = false; state.adminLoading = false; state.language = 'ru'; });
+
+describe('same compact priorities in both home variants', () => {
+  it.each([['resident', false, false], ['admin legacy', false, true], ['admin V2', true, true], ['flag without admin', true, false]] as const)('preserves identity/work/actions before recommendations for %s', (_role, flag, admin) => {
+    state.flag = flag; state.isAdmin = admin;
+    const { container } = render(<Index />);
+    const order = [...container.querySelectorAll('[data-part]')].map(node => node.getAttribute('data-part'));
+    expect(order.slice(0, 7)).toEqual(['identity', 'workspace', 'personal', 'pending', 'signals', 'preferences', 'recommendations']);
+    expect(screen.getAllByText('Verified workspace')).toHaveLength(1);
+    expect(screen.queryByText(/шляп|приоритеты по роли|Лицензировано|SEC Thailand/)).not.toBeInTheDocument();
+    if (flag && admin) expect(order.indexOf('weather')).toBeGreaterThan(order.indexOf('recommendations'));
+    else expect(screen.queryByText('Weather')).not.toBeInTheDocument();
+  });
+  it('keeps the legacy layout while admin access is unresolved', () => {
+    state.flag = true; state.isAdmin = true; state.adminLoading = true;
+    render(<Index />);
+    expect(screen.getByText('Profile tips')).toBeInTheDocument();
+    expect(screen.queryByText('Weather')).not.toBeInTheDocument();
+  });
+  it.each([false, true])('keeps preferences explicit and reopenable (V2=%s)', v2 => {
+    state.flag = v2; state.isAdmin = v2;
+    render(<Index />);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Preferences' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close preferences' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Preferences' }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+});

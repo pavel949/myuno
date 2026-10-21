@@ -7,7 +7,7 @@ import { tokenColor } from '@/lib/utils/hslAlpha';
 const CATEGORIES = [
   { icon: GraduationCap, labelEn: 'International Schools', labelRu: 'Международные школы', descEn: 'British, American, IB curriculum', descRu: 'Британская, американская, IB программа', path: '/education', color: 'accent-amber' },
   { icon: Baby, labelEn: 'Kindergartens', labelRu: 'Детские сады', descEn: 'Bilingual & Montessori', descRu: 'Двуязычные и Монтессори', path: '/education?type=kindergarten', color: 'accent-purple' },
-  { icon: Stethoscope, labelEn: 'Pediatricians', labelRu: 'Педиатры', descEn: 'English & Russian-speaking', descRu: 'Англо- и русскоговорящие', path: '/medical?specialty=pediatric', color: 'destructive' },
+  { icon: Stethoscope, labelEn: 'Pediatricians', labelRu: 'Педиатры', descEn: 'Multilingual (EN/RU/TH)', descRu: 'Многоязычные (EN/RU/TH)', path: '/medical?specialty=pediatric', color: 'destructive' },
   { icon: Users, labelEn: 'Nannies & Babysitters', labelRu: 'Няни и бебиситтеры', descEn: 'Verified & experienced', descRu: 'Проверенные и опытные', path: '/babysitter', color: 'accent-purple' },
   { icon: Compass, labelEn: 'Kids Activities', labelRu: 'Активности для детей', descEn: 'Swimming, art, sports', descRu: 'Плавание, творчество, спорт', path: '/experiences?tag=family', color: 'accent-cyan' },
   { icon: Utensils, labelEn: 'Family Restaurants', labelRu: 'Семейные рестораны', descEn: 'Kids menus & play areas', descRu: 'Детское меню и игровые зоны', path: '/restaurants?tag=family', color: 'cluster-arrive' },

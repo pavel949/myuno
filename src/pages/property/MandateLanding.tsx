@@ -32,11 +32,11 @@ const MandateLanding = () => {
         ru: 'Закрытый канал недвижимости Пхукета для частного капитала: First Look объекты, NDA, юрист и налоговый консультант на одном договоре.',
         en: 'Private Phuket real-estate channel for HNW capital: First Look properties, NDA, lawyer and tax advisor under one engagement.',
       },
-      ogImage: 'https://myuno.app/og/default-og.jpg',
+      ogImage: 'https://www.myuno.app/og/default-og.jpg',
       canonicalPath: '/property/mandate',
       hreflangAlternates: [
-        { lang: 'ru' as const, href: 'https://myuno.app/property/mandate?lang=ru' },
-        { lang: 'en' as const, href: 'https://myuno.app/property/mandate?lang=en' },
+        { lang: 'ru' as const, href: 'https://www.myuno.app/property/mandate?lang=ru' },
+        { lang: 'en' as const, href: 'https://www.myuno.app/property/mandate?lang=en' },
       ],
     },
   };

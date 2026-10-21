@@ -150,8 +150,9 @@ export function ProjectUnitsGrid({ projectId }: Props) {
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Button
-                        variant="ghost" size="icon" className="h-6 w-6"
+                        variant="ghost" size="icon" className="h-6 w-6 min-h-[44px] min-w-[44px]"
                         onClick={() => deleteUnit.mutate({ id: unit.id, projectId })}
+                        aria-label={isRu ? 'Удалить' : 'Delete'}
                       >
                         <Trash2 className="h-3 w-3 text-muted-foreground" />
                       </Button>

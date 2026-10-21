@@ -59,7 +59,7 @@ function RuleCard({ rule, isRu, onToggle, onDelete }: {
             checked={rule.is_active}
             onCheckedChange={(checked) => onToggle(rule.id, checked)}
           />
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(rule.id)}>
+          <Button variant="ghost" size="icon" className="text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => onDelete(rule.id)}>
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
@@ -175,6 +175,7 @@ export default function OwnerAutoMessaging() {
         onClick={() => setSheetOpen(true)}
         className="fixed bottom-[calc(var(--bottom-nav-h)+1rem)] right-4 md:bottom-6 md:right-6 rounded-full h-14 w-14 shadow-lg z-40"
         size="icon"
+        aria-label={isRu ? 'Создать правило' : 'Create rule'}
       >
         <Plus className="h-6 w-6" />
       </Button>

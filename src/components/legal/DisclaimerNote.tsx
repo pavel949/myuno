@@ -18,11 +18,11 @@ interface DisclaimerNoteProps {
 
 export function DisclaimerNote({ variant = 'inline', className }: DisclaimerNoteProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-
-  const body = isRu
-    ? 'Только историческая статистика и сопоставимые объекты. Это не финансовый совет и не обещание будущих результатов. myUNO — площадка по недвижимости, а не инвестиционный консультант.'
-    : 'Historical and comparable data only. Not financial advice and not a guarantee of future performance. myUNO is a real-estate marketplace, not an investment adviser.';
+  const body = language === 'ru'
+    ? 'Расчёт зависит от введённых данных и допущений. Он не подтверждает фактическую доходность и не гарантирует будущие результаты.'
+    : language === 'th'
+      ? 'ผลคำนวณขึ้นอยู่กับข้อมูลและสมมติฐานที่ใช้ ไม่ใช่ผลตอบแทนที่เกิดขึ้นจริงและไม่รับประกันผลลัพธ์ในอนาคต'
+      : 'Calculations depend on the supplied inputs and assumptions. They do not establish actual returns or guarantee future results.';
 
   if (variant === 'card') {
     return (
@@ -33,7 +33,7 @@ export function DisclaimerNote({ variant = 'inline', className }: DisclaimerNote
         )}
         role="note"
       >
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <Info aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <p>{body}</p>
       </div>
     );

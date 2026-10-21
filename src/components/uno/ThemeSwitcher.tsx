@@ -50,6 +50,9 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            type="button"
+            aria-label={language === 'ru' ? `Тема: ${currentTheme.label}` : `Theme: ${currentTheme.label}`}
+            title={language === 'ru' ? 'Оформление' : 'Appearance'}
             className={cn(
               "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",
@@ -94,7 +97,11 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
         {themes.map((t) => (
           <button
             key={t.value}
+            type="button"
             onClick={() => setTheme(t.value)}
+            aria-label={t.label}
+            aria-pressed={theme === t.value}
+            title={t.label}
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1.5 rounded-none text-xs font-medium transition-all",
               theme === t.value 
@@ -102,7 +109,7 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <t.icon className="w-3.5 h-3.5" />
+            <t.icon className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">{t.shortLabel}</span>
           </button>
         ))}

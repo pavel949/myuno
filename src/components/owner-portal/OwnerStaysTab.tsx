@@ -109,7 +109,8 @@ export function OwnerStaysTab({ propertyId }: Props) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-destructive"
+                  className="text-destructive"
+                  aria-label={isRu ? 'Отменить визит' : 'Cancel stay'}
                   onClick={() => cancelStay(stay.id)}
                   disabled={isCancelling}
                 >

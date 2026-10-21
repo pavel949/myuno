@@ -5,12 +5,15 @@
  * pros/cons) and a pre-tagged lead form.
  */
 import { useMemo } from 'react';
+import { LandingActionLink } from '@/components/landings/LandingActionLink';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MapPin, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, MapPin, CheckCircle2, AlertCircle, Sparkles, MessageCircle, Star } from 'lucide-react';
+import { findPersonaAreaOverride } from '@/content/landings/personaAreaOverrides';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { findPersonaAreaLanding } from '@/content/landings/personaAreaLandings';
 import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import { getPersonaTheme } from '@/lib/landings/personaTheme';
@@ -44,7 +47,14 @@ const PersonaAreaLandingPage = () => {
   const a = area.area;
   const theme = getPersonaTheme(persona.slug);
   const Icon = theme.icon;
-  const wp = (href: string) => withPersonaParam(href, persona.slug);
+  const wp = (href: string) => {
+    const url = new URL(href, 'https://www.myuno.app');
+    url.searchParams.set('area', a.slug);
+    const destination = href.startsWith('/') ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+    return withPersonaParam(destination, persona.slug);
+  };
+  const override = findPersonaAreaOverride(persona.slug, a.slug);
+  const waUrl = override ? getWhatsAppUrl(t(override.whatsappMessage)) : null;
 
   const og = buildPersonaOgUrl({
     persona: persona.slug,
@@ -52,7 +62,7 @@ const PersonaAreaLandingPage = () => {
     areaName: isRu ? a.name_ru : a.name_en,
     lang: isRu ? 'ru' : 'en',
   });
-  const canonical = `https://myuno.app/for/${persona.slug}/in/${a.slug}`;
+  const canonical = `https://www.myuno.app/for/${persona.slug}/in/${a.slug}`;
   const titleRu = `${t(persona.h1)} в ${a.name_ru} · myUNO`;
   const titleEn = `${t(persona.h1)} in ${a.name_en} · myUNO`;
   const title = (isRu ? titleRu : titleEn).slice(0, 60);
@@ -107,7 +117,7 @@ const PersonaAreaLandingPage = () => {
       >
         <LandingContainer className="relative max-w-3xl py-12 sm:py-16">
           <div
-            className="mb-5 inline-flex items-center gap-2 border border-border bg-background/60 px-3 py-1.5 backdrop-blur"
+            className="mb-5 inline-flex items-center gap-2 border border-border bg-background px-3 py-1.5"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
           >
             <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
@@ -119,10 +129,10 @@ const PersonaAreaLandingPage = () => {
             {t(persona.h1)} {isRu ? 'в' : 'in'} {isRu ? a.name_ru : a.name_en}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {isRu ? a.description_ru : a.description_en}
+            {override ? t(override.intro) : isRu ? a.description_ru : a.description_en}
           </p>
 
-          <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card/60 p-4 backdrop-blur">
+          <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card p-4">
             <div>
               <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Цена' : 'Price'}</dt>
               <dd className="mt-1 text-lg font-semibold text-foreground">
@@ -143,19 +153,68 @@ const PersonaAreaLandingPage = () => {
             </div>
           </dl>
 
-          <div className="mt-7">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={wp(`${persona.primaryCta.href}${persona.primaryCta.href.includes('?') ? '&' : '?'}area=${a.slug}`)}>
+              <LandingActionLink availability={persona.primaryCta.availability} href={wp(persona.primaryCta.href)}>
                 {t(persona.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
+            {waUrl && override ? (
+              <Button asChild size="lg" variant="outline">
+                <a href={waUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  {t(override.whatsappLabel)}
+                </a>
+              </Button>
+            ) : null}
           </div>
         </LandingContainer>
       </header>
 
       <article>
         <LandingContainer className="max-w-3xl py-10 sm:py-14">
+        {/* PERSONA × AREA OVERRIDE — top reasons + WhatsApp CTA */}
+        {override ? (
+          <section
+            className="mb-10 border border-border bg-card p-6"
+            style={{ borderColor: tokenColor(theme.color, 0.35) }}
+          >
+            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-foreground">
+              <Star className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
+              {isRu
+                ? `3 причины выбрать ${a.name_ru} именно вам`
+                : `3 reasons ${a.name_en} is the right fit for you`}
+            </h2>
+            <ol className="space-y-3">
+              {(isRu ? override.reasons.ru : override.reasons.en).map((r, i) => (
+                <li key={i} className="flex gap-3 text-sm text-foreground/90 sm:text-base">
+                  <span
+                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-xs font-semibold"
+                    style={{
+                      backgroundColor: tokenColor(theme.color, 0.12),
+                      color: tokenColor(theme.color),
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ol>
+            {waUrl ? (
+              <div className="mt-5">
+                <Button asChild size="lg" className="w-full sm:w-auto">
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    {t(override.whatsappLabel)}
+                  </a>
+                </Button>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         {/* PROS / CONS for this area */}
         <section className="mb-12 grid gap-6 sm:grid-cols-2">
           <div className="border border-border bg-card p-5">
@@ -197,18 +256,18 @@ const PersonaAreaLandingPage = () => {
             <ul className="grid gap-3 sm:grid-cols-2">
               {persona.services.slice(0, 6).map((s) => (
                 <li key={s.slug}>
-                  <a
-                    href={wp(`${s.href}${s.href.includes('?') ? '&' : '?'}area=${a.slug}`)}
+                  <LandingActionLink availability={s.availability}
+                    href={wp(s.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60"
                   >
                     <Sparkles className="mt-0.5 h-4 w-4 shrink-0" style={{ color: tokenColor(theme.color) }} />
                     <div className="flex-1">
                       <div className="font-medium text-foreground">{t(s.label)}</div>
-                      {s.oneLiner ? (
+                      {s.oneLiner && !s.availability ? (
                         <div className="mt-1 text-sm text-muted-foreground">{t(s.oneLiner)}</div>
                       ) : null}
                     </div>
-                  </a>
+                  </LandingActionLink>
                 </li>
               ))}
             </ul>
@@ -262,10 +321,19 @@ const PersonaAreaLandingPage = () => {
         </LandingContainer>
       </article>
 
-      <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
-        <Button asChild size="lg" className="w-full">
-          <a href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</a>
-        </Button>
+      <div className="sticky bottom-0 z-30 border-t border-border bg-background p-3 sm:hidden">
+        {waUrl && override ? (
+          <Button asChild size="lg" className="w-full">
+            <a href={waUrl} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              {t(override.whatsappLabel)}
+            </a>
+          </Button>
+        ) : (
+          <Button asChild size="lg" className="w-full">
+            <LandingActionLink availability={persona.primaryCta.availability} href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</LandingActionLink>
+          </Button>
+        )}
       </div>
     </AppLayout>
   );

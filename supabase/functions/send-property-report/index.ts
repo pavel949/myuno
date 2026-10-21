@@ -1,45 +1,42 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { corsHeaders as sdkCorsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'npm:zod@3';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { AccessDenied, authorizeRpc, authorizedService, createActorClient } from '../_shared/operating-space-auth.ts';
+import { assertInternalReportRecipient } from '../_shared/report-access.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-interface SendReportRequest {
-  reportId: string;
-  recipientEmails: string[];
-  language?: 'en' | 'ru';
-}
+const SendReportInput = z.object({ reportId: z.string().uuid(), recipientEmails: z.array(z.string().email().max(254)).min(1).max(20), language: z.enum(['en','ru']).default('ru') }).strict();
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = { ...sdkCorsHeaders, ...getCorsHeaders(req) };
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Auth guard: require authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Internal callers are authenticated by the existing exact secret, not JWT role claims.
+    const internal = requireInternalSecret(req, corsHeaders) === null;
+    if (!internal) {
+      const auth = await requireAuth(req, corsHeaders);
+      if (auth instanceof Response) return auth;
     }
-    
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { reportId, recipientEmails, language = 'ru' }: SendReportRequest = await req.json();
-
-    if (!reportId || !recipientEmails?.length) {
-      throw new Error("Report ID and recipient emails are required");
-    }
+    const parsed = SendReportInput.safeParse(await req.json());
+    if (!parsed.success) return new Response(JSON.stringify({ error: 'Invalid report request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const { reportId, recipientEmails, language } = parsed.data;
+    const supabase = await authorizedService(async () => {
+      if (!internal) await authorizeRpc(createActorClient(req), 'actor_can_send_property_report', { p_report_id: reportId });
+    }, () => {
+      const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if (!url || !key) throw new Error('Report configuration unavailable');
+      return createClient(url, key);
+    });
 
     // Fetch report with property data
     const { data: report, error: reportError } = await supabase
@@ -54,13 +51,18 @@ const handler = async (req: Request): Promise<Response> => {
     if (reportError || !report) {
       throw new Error("Report not found");
     }
+    if (internal) {
+      const { data: owner, error } = await supabase.auth.admin.getUserById(report.owner_id);
+      if (error) throw new Error('Owner recipient unavailable');
+      assertInternalReportRecipient(recipientEmails, owner.user?.email);
+    }
 
     const isRu = language === 'ru';
     const propertyTitle = isRu 
       ? (report.property?.title_ru || report.property?.title) 
       : report.property?.title;
 
-    const reportData = report.data as any;
+    const reportData = report.data as { income?: { total?: number }; expenses?: { total?: number }; net_income?: number; occupancy?: { rate?: number; bookings_count?: number } };
 
     // Generate email HTML
     const { subject, html } = generateReportEmail({
@@ -85,10 +87,10 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Report email sent:", emailResponse);
+    if (emailResponse.error) throw new Error('Report delivery failed');
 
     // Update report status
-    await supabase
+    const { error: updateError } = await supabase
       .from("property_reports")
       .update({
         status: "sent",
@@ -96,16 +98,16 @@ const handler = async (req: Request): Promise<Response> => {
         sent_to: recipientEmails,
       })
       .eq("id", reportId);
+    if (updateError) throw new Error('Report delivery status unavailable');
 
     return new Response(
       JSON.stringify({ success: true, emailId: emailResponse.data?.id }),
       { headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
-  } catch (error: any) {
-    console.error("Error sending report:", error);
+  } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      JSON.stringify({ error: error instanceof AccessDenied ? 'Forbidden' : 'Report delivery unavailable' }),
+      { status: error instanceof AccessDenied ? 403 : 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };

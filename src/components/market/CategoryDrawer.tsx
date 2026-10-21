@@ -33,7 +33,7 @@ export function CategoryDrawer({ trigger }: CategoryDrawerProps) {
   };
 
   const defaultTrigger = (
-    <Button variant="ghost" size="icon" className="shrink-0">
+    <Button variant="ghost" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Меню каталога' : 'Catalog menu'}>
       <Menu className="w-5 h-5" />
     </Button>
   );

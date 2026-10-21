@@ -174,8 +174,8 @@ export default function CapitalTemplates() {
                   )}
                 </div>
                 <div className="flex gap-1 ml-2">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(t)}><Pencil className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => openEdit(t)}><Pencil className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Delete" onClick={() => handleDelete(t.id)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
                 </div>
               </div>
             </div>

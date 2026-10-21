@@ -49,8 +49,11 @@ export const FavoriteButton = forwardRef<HTMLButtonElement, FavoriteButtonProps>
         variant={variant}
         size="icon"
         onClick={handleClick}
+        aria-label={isActive ? 'Remove from favorites' : 'Add to favorites'}
+        aria-pressed={isActive}
         className={cn(
           sizeClasses[size],
+          'min-h-[44px] min-w-[44px]',
           className
         )}
       >

@@ -25,8 +25,8 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
         <Shield className="w-3.5 h-3.5 text-primary flex-shrink-0" />
         <span className="text-muted-foreground">
           {isRu 
-            ? 'Транзакции защищены только при оплате через UNO' 
-            : 'Transactions protected only when paid through UNO'}
+            ? 'Транзакции защищены только при оплате через myUNO' 
+            : 'Transactions protected only when paid through myUNO'}
         </span>
       </div>
     );
@@ -47,8 +47,8 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
             {isRu 
-              ? 'Оплата вне платформы лишает вас гарантий возврата, кэшбека и поддержки. Все сделки должны проходить через UNO.' 
-              : 'Payment outside the platform deprives you of refund guarantees, cashback, and support. All transactions must go through UNO.'}
+              ? 'Оплата вне платформы лишает вас гарантий возврата, кэшбека и поддержки. Все сделки должны проходить через myUNO.' 
+              : 'Payment outside the platform deprives you of refund guarantees, cashback, and support. All transactions must go through myUNO.'}
           </p>
           <Link 
             to="/terms" 

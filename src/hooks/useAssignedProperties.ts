@@ -21,6 +21,8 @@ export interface AssignedProperty {
   bathrooms: number | null;
   price_per_night: number | null;
   currency: string;
+  /** Unmodified listing currency for display; never inferred from a deposit/default. */
+  record_currency?: string | null;
   complex_id: string | null;
   project_id: string | null;
   permissions: {
@@ -152,6 +154,7 @@ export function useAssignedProperties() {
           bathrooms: property.bathrooms,
           price_per_night: property.price_per_night,
           currency: property.currency || 'THB',
+          record_currency: property.currency ?? null,
           permissions: (assignment.permissions as any) || {
             calendar: true,
             pricing: true,

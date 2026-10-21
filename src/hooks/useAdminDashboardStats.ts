@@ -1,151 +1,97 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { pendingModeration } from '@/lib/adminModeration';
+import { applyOrderQueue, applyManualPaymentQueue, applyTicketQueue } from '@/lib/adminDashboardQueues';
 
-export interface DashboardStats {
-  providers: number;
-  services: number;
-  activeProviders: number;
-  pendingProviders: number;
-  // Verticals
-  yachts: number;
-  tours: number;
-  properties: number;
-  restaurants: number;
-  salons: number;
-  clinics: number;
-  gyms: number;
-  vehicles: number;
-  events: number;
-  education: number;
-  pets: number;
-  cleaning: number;
-  babysitters: number;
-  flowers: number;
-  pharmacies: number;
-  stores: number;
-  insurance: number;
-  waterActivities: number;
-  // Users
-  totalUsers: number;
-  unoTeamMembers: number;
-  // Orders/Bookings
-  totalBookings: number;
-  pendingBookings: number;
-  // Moderation
-  pendingProperties: number;
-  pendingContent: number;
-  // Support
-  openTickets: number;
+export const DASHBOARD_COUNT_KEYS = [
+  'providers', 'services', 'activeProviders', 'pendingProviders', 'yachts', 'tours',
+  'properties', 'restaurants', 'salons', 'clinics', 'gyms', 'vehicles', 'events',
+  'education', 'pets', 'cleaning', 'babysitters', 'flowers', 'pharmacies', 'stores',
+  'insurance', 'waterActivities', 'totalUsers', 'unoTeamMembers', 'totalBookings',
+  'pendingBookings', 'pendingProperties', 'pendingListings', 'pendingContent',
+  'openTickets', 'openDisputes', 'pendingPartnerApplications', 'pendingManualPayments',
+  'pendingOrders', 'pendingOrders24h',
+] as const;
+export type DashboardCountKey = typeof DASHBOARD_COUNT_KEYS[number];
+export type DashboardStats = Record<DashboardCountKey, number | null> & {
+  sourceErrors: Partial<Record<DashboardCountKey, string>>;
+  sourceUpdatedAt: Partial<Record<DashboardCountKey, number>>;
+  ordersCreatedBefore: string;
+};
+type CountResult = { count: number | null; error: unknown };
+
+/** Independent exact reads: a failed source never becomes a verified zero. */
+export async function fetchAdminDashboardStats(now = new Date()): Promise<DashboardStats> {
+  const counts = Object.fromEntries(DASHBOARD_COUNT_KEYS.map(key => [key, null])) as Record<DashboardCountKey, number | null>;
+  const sourceErrors: DashboardStats['sourceErrors'] = {};
+  const sourceUpdatedAt: DashboardStats['sourceUpdatedAt'] = {};
+  const options = { count: 'exact' as const, head: true };
+  const ordersCreatedBefore = new Date(now.getTime() - 86400000).toISOString();
+  const read = async (key: DashboardCountKey, run: () => PromiseLike<CountResult>) => {
+    try {
+      const result = await run();
+      if (result.error || result.count === null || !Number.isSafeInteger(result.count) || result.count < 0) {
+        sourceErrors[key] = 'unavailable';
+      } else {
+        counts[key] = result.count;
+        sourceUpdatedAt[key] = Date.now();
+      }
+    } catch { sourceErrors[key] = 'unavailable'; }
+  };
+  const verticals = {
+    yachts: 'yacht', tours: 'experience', restaurants: 'restaurant', clinics: 'clinic',
+    vehicles: 'vehicle', education: 'education', pets: 'pet_service', cleaning: 'cleaning', babysitters: 'babysitter',
+  } as const;
+  await Promise.all([
+    ...Object.entries(verticals).map(([key, vertical]) => read(key as DashboardCountKey,
+      () => supabase.from('listings').select('id', options).eq('vertical', vertical))),
+    read('providers', () => supabase.from('providers').select('id', options)),
+    read('services', () => supabase.from('services').select('id', options)),
+    read('properties', () => supabase.from('properties').select('id', options).is('deleted_at', null)),
+    read('totalUsers', () => supabase.from('profiles').select('id', options)),
+    read('unoTeamMembers', () => supabase.from('user_roles').select('id', options).eq('role', 'uno_team')),
+    read('totalBookings', () => supabase.from('bookings').select('id', options)),
+    // Legacy booking metric remains distinct; never linked to an orders queue.
+    read('pendingBookings', () => supabase.from('bookings').select('id', options).eq('status', 'submitted')),
+    read('salons', () => supabase.from('salons').select('id', options)),
+    read('gyms', () => supabase.from('gyms').select('id', options)),
+    read('events', () => supabase.from('events').select('id', options)),
+    read('pharmacies', () => supabase.from('pharmacies').select('id', options)),
+    read('stores', () => supabase.from('marketplace_products').select('id', options)),
+    read('insurance', () => supabase.from('insurance_plans').select('id', options)),
+    read('waterActivities', () => supabase.from('water_activities').select('id', options)),
+    read('flowers', () => supabase.from('flower_shops').select('id', options)),
+    read('pendingProperties', () => pendingModeration((column, value) => supabase.from('properties').select('id', options).eq(column, value)).is('deleted_at', null)),
+    read('pendingListings', () => pendingModeration((column, value) => supabase.from('listings').select('id', options).eq(column, value))),
+    read('openTickets', () => applyTicketQueue(supabase.from('support_tickets').select('id', options), 'active')),
+    read('openDisputes', () => supabase.from('disputes').select('id', options).eq('status', 'open')),
+    read('pendingPartnerApplications', () => supabase.from('partner_applications').select('id', options).eq('status', 'pending')),
+    read('pendingManualPayments', () => applyManualPaymentQueue(supabase.from('manual_payment_requests').select('id', options), 'review')),
+    read('pendingOrders', () => applyOrderQueue(supabase.from('orders').select('id', options), { status: 'pending', createdBefore: null })),
+    read('pendingOrders24h', () => applyOrderQueue(supabase.from('orders').select('id', options), { status: 'pending', createdBefore: ordersCreatedBefore })),
+    read('activeProviders', () => supabase.from('providers').select('id', options).eq('is_active', true)),
+    read('pendingProviders', () => supabase.from('providers').select('id', options).eq('is_verified', false)),
+  ]);
+  if (counts.pendingProperties !== null && counts.pendingListings !== null) {
+    counts.pendingContent = counts.pendingProperties + counts.pendingListings;
+    sourceUpdatedAt.pendingContent = Math.min(sourceUpdatedAt.pendingProperties!, sourceUpdatedAt.pendingListings!);
+  } else sourceErrors.pendingContent = 'unavailable';
+  return { ...counts, sourceErrors, sourceUpdatedAt, ordersCreatedBefore };
 }
 
 export function useAdminDashboardStats() {
-  return useQuery({
-    queryKey: ['admin-dashboard-stats'],
-    queryFn: async (): Promise<DashboardStats> => {
-      const countOptions = { count: 'exact' as const, head: false };
-      
-      // Verticals: canonical source is listings (see docs/DATA_SOURCE_MAPPING.md)
-      const { data: listingCounts, error: listingsError } = await supabase
-        .from('listings')
-        .select('vertical');
-      
-      // Count by vertical from listings
-      const verticalCounts: Record<string, number> = {};
-      if (!listingsError && listingCounts) {
-        listingCounts.forEach((row) => {
-          const v = row.vertical;
-          verticalCounts[v] = (verticalCounts[v] || 0) + 1;
-        });
-      }
-
-      // Non-listings tables: salons, gyms, events, flower_shops, etc. (see DATA_SOURCE_MAPPING.md)
-      const [
-        providersRes,
-        servicesRes,
-        propertiesRes,
-        profilesRes,
-        unoTeamRes,
-        bookingsRes,
-        salonsRes,
-        gymsRes,
-        eventsRes,
-        pharmaciesRes,
-        storesRes,
-        insuranceRes,
-        waterRes,
-        flowersRes,
-      ] = await Promise.all([
-        supabase.from('providers').select('id', countOptions).limit(1),
-        supabase.from('services').select('id', countOptions).limit(1),
-        supabase.from('properties').select('id', countOptions).limit(1),
-        supabase.from('profiles').select('id', countOptions).limit(1),
-        supabase.from('user_roles').select('id', countOptions).eq('role', 'uno_team').limit(1),
-        supabase.from('bookings').select('id', countOptions).limit(1),
-        supabase.from('salons').select('id', countOptions).limit(1),
-        supabase.from('gyms').select('id', countOptions).limit(1),
-        supabase.from('events').select('id', countOptions).limit(1),
-        supabase.from('pharmacies').select('id', countOptions).limit(1),
-        supabase.from('marketplace_products').select('id', countOptions).limit(1),
-        supabase.from('insurance_plans').select('id', countOptions).limit(1),
-        supabase.from('water_activities').select('id', countOptions).limit(1),
-        supabase.from('flower_shops').select('id', countOptions).limit(1),
-      ]);
-
-      // Pending moderation
-      const [pendingPropertiesRes, pendingListingsRes, openTicketsRes] = await Promise.all([
-        supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('listings').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('support_tickets').select('id', countOptions).in('status', ['open', 'in_progress']).limit(1),
-      ]);
-
-      // Active/pending providers
-      const [activeProvidersRes, pendingProvidersRes, pendingBookingsRes] = await Promise.all([
-        supabase.from('providers').select('id', countOptions).eq('is_active', true).limit(1),
-        supabase.from('providers').select('id', countOptions).eq('is_verified', false).limit(1),
-        supabase.from('bookings').select('id', countOptions).eq('status', 'submitted').limit(1),
-      ]);
-
-      const pendingProperties = pendingPropertiesRes.count || 0;
-      const pendingListings = pendingListingsRes.count || 0;
-      const totalPendingContent = pendingProperties + pendingListings;
-
-      return {
-        providers: providersRes.count || 0,
-        services: servicesRes.count || 0,
-        activeProviders: activeProvidersRes.count || 0,
-        pendingProviders: pendingProvidersRes.count || 0,
-        // Verticals from listings table
-        yachts: verticalCounts['yacht'] || 0,
-        tours: verticalCounts['experience'] || 0,
-        restaurants: verticalCounts['restaurant'] || 0,
-        clinics: verticalCounts['clinic'] || 0,
-        vehicles: verticalCounts['vehicle'] || 0,
-        education: verticalCounts['education'] || 0,
-        pets: verticalCounts['pet_service'] || 0,
-        cleaning: verticalCounts['cleaning'] || 0,
-        babysitters: verticalCounts['babysitter'] || 0,
-        // Non-listings tables
-        properties: propertiesRes.count || 0,
-        salons: salonsRes.count || 0,
-        gyms: gymsRes.count || 0,
-        events: eventsRes.count || 0,
-        flowers: flowersRes.count || 0,
-        pharmacies: pharmaciesRes.count || 0,
-        stores: storesRes.count || 0,
-        insurance: insuranceRes.count || 0,
-        waterActivities: waterRes.count || 0,
-        // Users
-        totalUsers: profilesRes.count || 0,
-        unoTeamMembers: unoTeamRes.count || 0,
-        // Bookings
-        totalBookings: bookingsRes.count || 0,
-        pendingBookings: pendingBookingsRes.count || 0,
-        pendingProperties,
-        pendingContent: totalPendingContent,
-        openTickets: openTicketsRes.count || 0,
-      };
-    },
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const enabled = !!user && isAdmin && !checkingAccess;
+  const query = useQuery({
     ...CACHE_PROFILES.ADMIN,
+    enabled,
+    queryKey: ['admin-dashboard-stats', user?.id],
+    queryFn: () => fetchAdminDashboardStats(),
   });
+  // Disabled queries can retain same-actor cached data after admin role loss.
+  return { ...query, data: enabled ? query.data : undefined, dataUpdatedAt: enabled ? query.dataUpdatedAt : 0 };
 }

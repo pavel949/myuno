@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminCleaning } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const serviceTypes = [
   { value: 'regular', label: 'Regular Cleaning', labelRu: 'Регулярная уборка' },
@@ -12,7 +13,7 @@ const serviceTypes = [
   { value: 'pool', label: 'Pool Cleaning', labelRu: 'Чистка бассейна' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string, code: string): AdminVerticalConfig => ({
   titleEn: 'Cleaning Service Management',
   titleRu: 'Управление клинингом',
   icon: Sparkles,
@@ -29,16 +30,18 @@ const config: AdminVerticalConfig = {
     { key: 'areas_served', type: 'comma-list', labelEn: 'Areas Served', labelRu: 'Обслуживаемые районы' },
     { key: 'cover_image', type: 'image', labelEn: 'Cover Image', labelRu: 'Обложка', colSpan: 12 },
     { key: 'images', type: 'multi-image', labelEn: 'Gallery', labelRu: 'Галерея', colSpan: 12 },
-    { key: 'price_per_hour', type: 'number', labelEn: 'Price/hour ฿', labelRu: 'Цена/час ฿' },
-    { key: 'price_fixed', type: 'number', labelEn: 'Fixed Price ฿', labelRu: 'Фикс. цена ฿' },
+    { key: 'price_per_hour', type: 'number', labelEn: `Price/hour ${sym}`, labelRu: `Цена/час ${sym}` },
+    { key: 'price_fixed', type: 'number', labelEn: `Fixed Price ${sym}`, labelRu: `Фикс. цена ${sym}` },
     { key: 'duration_hours', type: 'number', labelEn: 'Duration (hours)', labelRu: 'Длительность (часов)' },
-    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: 'THB' },
+    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: code },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminCleaning() {
   const hook = useAdminCleaning();
+  const { symbol, code } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol, code), [symbol, code]);
   return <AdminVerticalCRUD config={config} hook={hook} />;
 }

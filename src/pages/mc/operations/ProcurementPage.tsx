@@ -22,6 +22,7 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 export default function ProcurementPage() {
   const { language } = useLanguage();
@@ -210,6 +211,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
 function CreatePOForm({ onClose }: { onClose: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { code: cityCurrencyCode } = useCityCurrency();
   const create = useCreatePurchaseOrder();
   const [vendor, setVendor] = useState('');
   const [expected, setExpected] = useState('');
@@ -256,7 +258,8 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
               onChange={(e) => { const next = [...items]; next[idx].quantity = Number(e.target.value); setItems(next); }} />
             <Input className="col-span-3" type="number" min={0} step={0.01} value={it.unit_price}
               onChange={(e) => { const next = [...items]; next[idx].unit_price = Number(e.target.value); setItems(next); }} />
-            <Button type="button" size="icon" variant="ghost" className="col-span-1 h-8 w-8"
+            <Button type="button" size="icon" variant="ghost" className="col-span-1 min-h-[44px] min-w-[44px]"
+              aria-label={isRu ? 'Удалить позицию' : 'Remove item'}
               onClick={() => setItems(items.filter((_, i) => i !== idx))}>
               <X className="w-3 h-3" />
             </Button>
@@ -269,7 +272,7 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex items-center justify-between p-2 rounded-none bg-muted/40">
         <span className="text-sm font-medium">{isRu ? 'Итого' : 'Total'}</span>
-        <span className="text-base font-bold tabular-nums">{total.toLocaleString()} THB</span>
+        <span className="text-base font-bold tabular-nums">{total.toLocaleString()} {cityCurrencyCode}</span>
       </div>
       <Button type="submit" className="w-full" disabled={create.isPending}>
         <Check className="w-4 h-4 mr-1.5" />

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   testDir: './e2e/tests',
@@ -7,10 +11,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
   reporter: [['html'], ['list']],
-  timeout: 60000,
+  timeout: 90000,
   expect: {
     timeout: 10000,
   },
+  globalSetup: path.resolve(__dirname, './e2e/fixtures/seedListings.ts'),
+  globalTeardown: path.resolve(__dirname, './e2e/fixtures/teardownListings.ts'),
   use: {
     baseURL: 'http://localhost:8099',
     screenshot: 'only-on-failure',

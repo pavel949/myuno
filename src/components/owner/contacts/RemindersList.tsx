@@ -147,7 +147,8 @@ const { user } = useAuth();
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-success hover:text-success"
+                  className="min-h-[44px] min-w-[44px] text-success hover:text-success"
+                  aria-label={isRu ? 'Выполнено' : 'Done'}
                   onClick={() => handleDismiss(r.id)}
                   disabled={dismissMutation.isPending}
                   title={isRu ? 'Выполнено' : 'Done'}
@@ -157,7 +158,8 @@ const { user } = useAuth();
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  className="min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
+                  aria-label={isRu ? 'Удалить' : 'Delete'}
                   onClick={() => handleDelete(r.id)}
                   disabled={deleteMutation.isPending}
                 >

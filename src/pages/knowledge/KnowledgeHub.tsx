@@ -18,20 +18,29 @@ export default function KnowledgeHub() {
   const { data: sections, isLoading } = useKnowledgeSections();
 
   const cityName = getCityName(language as 'en' | 'ru' | 'th');
-  const pageTitle = language === 'ru' 
-    ? `Справочник знаний — ${cityName}` 
+  const pageTitle = language === 'ru'
+    ? `Справочник знаний — ${cityName}`
     : `Knowledge Hub — ${cityName}`;
 
-  // Group sections for display
-  const sectionGroups = KNOWLEDGE_SECTIONS.map(section => {
-    const items = sections?.filter(s => s.section === section.id) || [];
-    return {
-      ...section,
-      label: language === 'ru' ? section.labelRu : section.labelEn,
-      count: items.length,
-      summary: items[0]?.summary || '',
-    };
-  });
+  // These sections have dedicated cards lower on the page (Cultural Etiquette
+  // and Emergency Contacts), so they are excluded from the generic grid to
+  // avoid showing them twice.
+  const HUB_GRID_EXCLUDED = ['emergency', 'dos-donts'];
+
+  // Group sections for display — only those with published content and not
+  // already surfaced by a dedicated card.
+  const sectionGroups = KNOWLEDGE_SECTIONS
+    .filter(section => !HUB_GRID_EXCLUDED.includes(section.id))
+    .map(section => {
+      const items = sections?.filter(s => s.section === section.id) || [];
+      return {
+        ...section,
+        label: language === 'ru' ? section.labelRu : section.labelEn,
+        count: items.length,
+        summary: items[0]?.summary || '',
+      };
+    })
+    .filter(section => section.count > 0);
 
   return (
     <>
@@ -116,32 +125,34 @@ export default function KnowledgeHub() {
         </section>
 
         {/* Knowledge Sections Grid */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold mb-3 text-foreground">
-            {language === 'ru' ? 'Разделы справочника' : 'Knowledge Sections'}
-          </h2>
-          
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map(i => (
-                <Skeleton key={i} className="h-20 w-full rounded-none" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sectionGroups.map(section => (
-                <KnowledgeCard
-                  key={section.id}
-                  section={section.id}
-                  title={section.label}
-                  summary={section.summary}
-                  icon={section.icon}
-                  articleCount={section.count}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+        {(isLoading || sectionGroups.length > 0) && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold mb-3 text-foreground">
+              {language === 'ru' ? 'Разделы справочника' : 'Knowledge Sections'}
+            </h2>
+
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map(i => (
+                  <Skeleton key={i} className="h-20 w-full rounded-none" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sectionGroups.map(section => (
+                  <KnowledgeCard
+                    key={section.id}
+                    section={section.id}
+                    title={section.label}
+                    summary={section.summary}
+                    icon={section.icon}
+                    articleCount={section.count}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Do's & Don'ts Preview */}
         <section className="mb-8">

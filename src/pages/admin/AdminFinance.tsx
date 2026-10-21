@@ -11,14 +11,13 @@ import { PayoutManager } from '@/components/admin/PayoutManager';
 import { PageShell, PageHeader } from '@/components/page';
 
 export default function AdminFinance() {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
 
   return (
     <PageShell width="wide">
       <PageHeader
-        title={isRu ? 'Финансы' : 'Finance'}
-        subtitle={isRu ? 'Транзакции, комиссии и аналитика доходов' : 'Transactions, commissions and revenue analytics'}
+        title={t('admin.finance.title')}
+        subtitle={t('admin.finance.subtitle')}
         actions={
           <div className="flex items-center gap-2">
             <ReconciliationStatus compact />
@@ -31,19 +30,19 @@ export default function AdminFinance() {
         <TabsList>
           <TabsTrigger value="finance" className="gap-1.5">
             <DollarSign className="h-4 w-4" />
-            {isRu ? 'Транзакции' : 'Transactions'}
+            {t('admin.finance.tabs.transactions')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-1.5">
             <BarChart3 className="h-4 w-4" />
-            {isRu ? 'Аналитика' : 'Analytics'}
+            {t('admin.finance.tabs.analytics')}
           </TabsTrigger>
           <TabsTrigger value="promotions" className="gap-1.5">
             <Rocket className="h-4 w-4" />
-            {isRu ? 'Промо' : 'Promotions'}
+            {t('admin.finance.tabs.promotions')}
           </TabsTrigger>
           <TabsTrigger value="payouts" className="gap-1.5">
             <Wallet className="h-4 w-4" />
-            {isRu ? 'Выплаты' : 'Payouts'}
+            {t('admin.finance.tabs.payouts')}
           </TabsTrigger>
         </TabsList>
 

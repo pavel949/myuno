@@ -1,6 +1,6 @@
 /**
  * PropertyMapView — Airbnb-style map with price markers
- * Uses Google Maps (Maps JavaScript API). Requires VITE_GOOGLE_MAPS_API_KEY.
+ * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
  *
  * Marker click opens an InfoWindow mini-card showing photo, title, price and
  * trust signals (TrustStrip) so users can validate listings without leaving
@@ -24,14 +24,27 @@ import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 const DEFAULT_ZOOM = 10.5;
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
+// Google Maps renders markers on a canvas/overlay outside the CSS cascade, so
+// `hsl(var(--token))` does not resolve. Use literal hex values mirroring the
+// design tokens (src/styles/tokens.css): primary navy, cream background, ink.
+const MARKER_COLORS = {
+  primary: '#0A2240',
+  primaryForeground: '#F7F5F1',
+  background: '#F7F5F1',
+  foreground: '#1C1916',
+} as const;
+
 interface PropertyMapViewProps {
   properties: Property[];
   hoveredProperty: string | null;
   onHover: (id: string | null) => void;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
   mode?: 'rent' | 'buy';
   nights?: number;
   className?: string;
 }
+
 
 function shortPrice(price: number): string {
   if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1)}M`;
@@ -54,6 +67,8 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   properties,
   hoveredProperty,
   onHover,
+  selectedId = null,
+  onSelect,
   mode = 'rent',
   className,
 }, ref) {
@@ -63,7 +78,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const isRu = language === 'ru';
-  const [openId, setOpenId] = useState<string | null>(null);
+  // External selection wins; fall back to local state for standalone usage.
+  const [localOpenId, setLocalOpenId] = useState<string | null>(null);
+  const openId = onSelect ? selectedId : localOpenId;
+  const setOpenId = (id: string | null) => (onSelect ? onSelect(id) : setLocalOpenId(id));
+
 
   const validProps = useMemo(() => {
     return properties.filter((p) => {
@@ -87,6 +106,20 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
     validProps.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
     mapRef.current.fitBounds(bounds, 60);
   }, [validProps]);
+
+  // Pan to selected pin (only if it's outside current viewport).
+  React.useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !openId) return;
+    const p = validProps.find((x) => x.id === openId);
+    if (!p || p.lat == null || p.lng == null) return;
+    const bounds = map.getBounds();
+    const pos = new google.maps.LatLng(p.lat, p.lng);
+    if (!bounds || !bounds.contains(pos)) {
+      map.panTo(pos);
+    }
+  }, [openId, validProps]);
+
 
   const noKey = !hasKey || loadError;
   const isLoading = hasKey && !isLoaded;
@@ -149,6 +182,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               ? (ext.sale_price || property.price || 0)
               : property.price || 0;
           const priceLabel = `฿${shortPrice(price)}`;
+          const isActive = openId === property.id;
 
           return (
             <Marker
@@ -156,10 +190,23 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               position={{ lat: property.lat!, lng: property.lng! }}
               label={{
                 text: priceLabel,
-                color: 'hsl(var(--foreground))',
-                fontWeight: '600',
-                fontSize: '12px',
+                color: isActive ? MARKER_COLORS.primaryForeground : MARKER_COLORS.foreground,
+                fontWeight: isActive ? '700' : '600',
+                fontSize: isActive ? '13px' : '12px',
               }}
+              icon={
+                isActive
+                  ? {
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 22,
+                      fillColor: MARKER_COLORS.primary,
+                      fillOpacity: 1,
+                      strokeColor: MARKER_COLORS.background,
+                      strokeWeight: 3,
+                    }
+                  : undefined
+              }
+              zIndex={isActive ? 999 : undefined}
               title={isRu ? property.title_ru : property.title_en}
               onClick={() => {
                 setOpenId(property.id);
@@ -168,6 +215,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
             />
           );
         })}
+
 
         {openProperty && (
           <InfoWindow

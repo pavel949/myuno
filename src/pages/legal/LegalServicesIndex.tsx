@@ -13,6 +13,7 @@ import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 const categories = [
@@ -83,8 +84,8 @@ export default function LegalServicesIndex() {
       onSearchChange={setSearchQuery}
       searchPlaceholder={isRu ? 'Поиск компаний…' : 'Search providers…'}
       showHero={false}
-      showFilter={false}
     >
+
       <VerticalContextBanner verticalId="legal" />
 
       {isLoading ? (
@@ -146,6 +147,7 @@ export default function LegalServicesIndex() {
           )}
 
           <VerticalInsightPanel verticalId="legal" />
+          <ConciergeHelpCTA topic="visa" variant="card" className="my-6" />
           <VerticalCTA vertical="legal" className="my-6" />
         </>
       )}

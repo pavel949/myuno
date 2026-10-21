@@ -14,8 +14,13 @@ export interface UseIsAdminResult {
   isLoading: boolean;
 }
 
-// Cache admin status to avoid repeated DB calls
-const adminCache = new Map<string, boolean>();
+// Cache admin status to avoid repeated DB calls.
+// Entries carry a timestamp and expire after ADMIN_CACHE_TTL_MS so a role
+// granted mid-session (or a has_role RPC that resolved before the role row
+// committed on first login) is re-validated instead of being pinned for the
+// whole tab lifetime.
+const ADMIN_CACHE_TTL_MS = 60_000;
+const adminCache = new Map<string, { value: boolean; ts: number }>();
 
 export function useIsAdmin(): UseIsAdminResult {
   const { user } = useAuth();
@@ -34,10 +39,11 @@ export function useIsAdmin(): UseIsAdminResult {
         return;
       }
 
-      // Check cache first
-      if (adminCache.has(user.id)) {
+      // Check cache first (honour TTL — re-validate expired entries)
+      const cached = adminCache.get(user.id);
+      if (cached && Date.now() - cached.ts < ADMIN_CACHE_TTL_MS) {
         if (isMounted) {
-          setIsAdmin(adminCache.get(user.id)!);
+          setIsAdmin(cached.value);
           setIsLoading(false);
         }
         return;
@@ -48,9 +54,9 @@ export function useIsAdmin(): UseIsAdminResult {
           .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
         if (error) throw error;
-        
+
         const adminStatus = data === true;
-        adminCache.set(user.id, adminStatus);
+        adminCache.set(user.id, { value: adminStatus, ts: Date.now() });
         
         if (isMounted) setIsAdmin(adminStatus);
       } catch {

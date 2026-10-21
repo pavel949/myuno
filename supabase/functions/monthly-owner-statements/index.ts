@@ -4,19 +4,17 @@
  * Runs on the 1st of each month. For every active MC:
  * 1. Aggregates financials per property for the previous month
  * 2. Creates a property_reports row
- * 3. Sends the report via send-property-report function
+ * 3. Creates an owner_statement_approvals row so the MC can track owner sign-off
+ * 4. Sends the report via send-property-report function
  */
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-internal-secret",
-};
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -35,7 +33,7 @@ Deno.serve(async (req: Request) => {
     const periodStartStr = periodStart.toISOString().split("T")[0];
     const periodEndStr = periodEnd.toISOString().split("T")[0];
 
-    console.log(`Generating monthly statements for ${periodStartStr} — ${periodEndStr}`);
+    console.info(`Generating monthly statements for ${periodStartStr} — ${periodEndStr}`);
 
     // Get all active MCs with auto-send enabled properties
     const { data: mcs, error: mcError } = await supabase
@@ -53,7 +51,7 @@ Deno.serve(async (req: Request) => {
         // Get all properties managed by this MC
         const { data: properties } = await supabase
           .from("properties")
-          .select("id, title_en, title_ru")
+          .select("id, title_en, title_ru, currency")
           .eq("management_company_id", mc.id)
           .eq("is_active", true);
 
@@ -154,11 +152,55 @@ Deno.serve(async (req: Request) => {
             continue;
           }
 
+          // Create an owner statement approval so the MC can track owner sign-off.
+          // Without this, /mc/finance/statement-approvals stays empty even though
+          // reports are generated (see MC UX audit). Requires a known owner user.
+          if (ownerProp?.owner_id) {
+            try {
+              const { data: existingApproval } = await supabase
+                .from("owner_statement_approvals")
+                .select("id")
+                .eq("property_id", prop.id)
+                .eq("period_start", periodStartStr)
+                .eq("period_end", periodEndStr)
+                .maybeSingle();
+
+              if (!existingApproval) {
+                const expiresAt = new Date(
+                  Date.now() + 7 * 24 * 60 * 60 * 1000,
+                ).toISOString();
+                const { error: approvalError } = await supabase
+                  .from("owner_statement_approvals")
+                  .insert({
+                    company_id: mc.id,
+                    property_id: prop.id,
+                    owner_user_id: ownerProp.owner_id,
+                    period_start: periodStartStr,
+                    period_end: periodEndStr,
+                    net_amount: reportData.net_income,
+                    currency: (prop as any).currency || "THB",
+                    expires_at: expiresAt,
+                  });
+                if (approvalError) {
+                  console.error(
+                    `Failed to create statement approval for ${prop.id}:`,
+                    approvalError,
+                  );
+                }
+              }
+            } catch (approvalErr) {
+              console.error(
+                `Error creating statement approval for ${prop.id}:`,
+                approvalErr,
+              );
+            }
+          }
+
           // Check if owner has email for auto-send
           if (ownerProp?.owner_id) {
             const { data: profile } = await supabase
               .from("profiles")
-              .select("email")
+              .select("email, preferred_language")
               .eq("id", ownerProp.owner_id)
               .maybeSingle();
 
@@ -177,7 +219,7 @@ Deno.serve(async (req: Request) => {
                   body: JSON.stringify({
                     reportId: report.id,
                     recipientEmails: [profile.email],
-                    language: "ru",
+                    language: profile.preferred_language === "en" ? "en" : "ru",
                   }),
                 });
               } catch (sendErr) {
@@ -194,7 +236,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    console.log(`Monthly statements complete: ${generated} generated, ${errors} errors`);
+    console.info(`Monthly statements complete: ${generated} generated, ${errors} errors`);
 
     return new Response(
       JSON.stringify({

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
@@ -29,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
 import { DealClosingChecklist } from '@/components/owner/sales/DealClosingChecklist';
 import { CommissionSummary } from '@/components/owner/sales/CommissionSummary';
+import { CommissionSplitEditor, type CommissionSplitValue } from '@/components/owner/crm/CommissionSplitEditor';
 import { OfferGeneratorModal } from '@/components/owner/sales/OfferGeneratorModal';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePropertyProject } from '@/hooks/usePropertyProjects';
@@ -55,6 +58,8 @@ export default function SalesDealDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
@@ -224,6 +229,16 @@ export default function SalesDealDetail() {
           <Badge variant="outline" className="text-[10px]">
             {isRu ? DEAL_TYPE_LABELS[dealType as DealType]?.ru : DEAL_TYPE_LABELS[dealType as DealType]?.en}
           </Badge>
+          {deal.pipeline_side === 'buy' && (
+            <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
+              {isRu ? 'Покупка' : 'Buy-Side'}
+            </Badge>
+          )}
+          {deal.pipeline_side === 'sell' && (
+            <Badge variant="outline" className="text-[10px] bg-accent/15 text-accent border-accent/40">
+              {isRu ? 'Продажа' : 'Sell-Side'}
+            </Badge>
+          )}
           {dealStatus !== 'active' && (
             <Badge variant={dealStatus === 'on_hold' ? 'secondary' : 'outline'} className="text-[10px]">
               {isRu ? DEAL_STATUS_LABELS[dealStatus as DealStatus]?.ru : DEAL_STATUS_LABELS[dealStatus as DealStatus]?.en}
@@ -308,8 +323,9 @@ export default function SalesDealDetail() {
           <span className="font-medium text-foreground">{isRu ? 'Контекст:' : 'Context:'}</span> {typeNote}
           {deal.deal_value && (
             <span className="block mt-1 text-success">
-              {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
-              {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
+              {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || cityCurrencyCode}
+              {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || cityCurrencyCode}`}
+
             </span>
           )}
           {(deal.preferred_types?.length || deal.preferred_districts?.length || deal.bedrooms_min) && (
@@ -408,6 +424,23 @@ export default function SalesDealDetail() {
 
       {/* Commission + Checklist */}
       <CommissionSummary deal={deal} />
+      <CommissionSplitEditor
+        gross={(() => {
+          if (deal.commission_amount) return Number(deal.commission_amount);
+          const val = Number(deal.deal_value ?? deal.budget_max ?? 0);
+          const pct = Number(deal.commission_percent ?? 0) / 100;
+          return val * pct;
+        })()}
+        value={{
+          agent_split_percent: deal.agent_split_percent ?? null,
+          firm_split_percent: deal.firm_split_percent ?? null,
+          referral_fee_percent: deal.referral_fee_percent ?? null,
+          referral_contact_id: deal.referral_contact_id ?? null,
+        }}
+        onSave={async (v: CommissionSplitValue) => {
+          await updateDeal.mutateAsync({ id: deal.id, ...v });
+        }}
+      />
       <DealClosingChecklist dealId={deal.id} dealType={dealType} companyId={deal.company_id} />
 
       {/* Activity feed & Change history tabs */}

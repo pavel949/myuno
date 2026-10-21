@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useCallback, useMemo, ReactNode } from 'react';
 
 interface MaintenanceContextType {
   isMaintenanceMode: boolean;
@@ -30,62 +30,39 @@ const isLovablePreview = () => {
 };
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
-  // Always start with maintenance OFF on fresh load; admins toggle it explicitly
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  // Coming Soon / maintenance gate retired 2026-06-18 — site is fully public.
+  // The provider stays mounted so legacy `useMaintenance()` callers keep working,
+  // but the mode is hardcoded OFF and the setter is a no-op. Any stale
+  // localStorage flags from earlier sessions are scrubbed once on mount.
+  useEffect(() => {
+    try {
+      localStorage.removeItem(MAINTENANCE_KEY);
+      localStorage.removeItem(BYPASS_KEY);
+      localStorage.removeItem(SIMULATION_BYPASS_KEY);
+    } catch { /* noop */ }
+  }, []);
 
-  const [canBypass, setCanBypass] = useState(() => {
-    // Check localStorage OR query param for bypass
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasQueryBypass = urlParams.get('admin') === 'true';
-    const hasStoredBypass = localStorage.getItem(BYPASS_KEY) === 'true';
-    const hasSimulationBypass = isSimulationMode();
-    
-    // If query param exists, persist it
-    if (hasQueryBypass && !hasStoredBypass) {
-      localStorage.setItem(BYPASS_KEY, 'true');
-    }
-    
-    // Simulation mode auto-bypasses
-    if (hasSimulationBypass) {
-      localStorage.setItem(SIMULATION_BYPASS_KEY, 'true');
-    }
-    
-    return hasQueryBypass || hasStoredBypass || hasSimulationBypass || isLovablePreview();
-  });
-
-  // Check if current route is an admin route (always bypass)
-  const isAdminRoute = ADMIN_ROUTE_PREFIXES.some(prefix => 
+  const isAdminRoute = ADMIN_ROUTE_PREFIXES.some(prefix =>
     window.location.pathname.startsWith(prefix)
   );
 
-  useEffect(() => {
-    localStorage.setItem(MAINTENANCE_KEY, String(isMaintenanceMode));
-  }, [isMaintenanceMode]);
-
-  // Persist bypass when navigating to admin routes
-  useEffect(() => {
-    if (isAdminRoute) {
-      localStorage.setItem(BYPASS_KEY, 'true');
-      setCanBypass(true);
-    }
-  }, [isAdminRoute]);
-
-  const setMaintenanceMode = useCallback((enabled: boolean) => {
-    setIsMaintenanceMode(enabled);
-    // When enabling maintenance mode, automatically grant bypass to current user
-    if (enabled) {
-      localStorage.setItem(BYPASS_KEY, 'true');
-      setCanBypass(true);
+  const setMaintenanceMode = useCallback((_enabled: boolean) => {
+    // No-op: maintenance gate is permanently disabled.
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.warn('[MaintenanceContext] setMaintenanceMode is a no-op — gate retired.');
     }
   }, []);
 
-  // Effective bypass: can bypass OR is on admin route
-  const effectiveBypass = canBypass || isAdminRoute;
-
   const value = useMemo(() => ({
-    isMaintenanceMode, setMaintenanceMode,
-    canBypass: effectiveBypass, isAdminRoute,
-  }), [isMaintenanceMode, setMaintenanceMode, effectiveBypass, isAdminRoute]);
+    isMaintenanceMode: false,
+    setMaintenanceMode,
+    canBypass: true,
+    isAdminRoute,
+  }), [setMaintenanceMode, isAdminRoute]);
+
+  // Suppress unused-var warnings for legacy helpers kept for reference.
+  void isSimulationMode; void isLovablePreview;
 
   return (
     <MaintenanceContext.Provider value={value}>

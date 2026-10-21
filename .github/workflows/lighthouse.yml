@@ -1,0 +1,73 @@
+name: Lighthouse (prod)
+
+on:
+  schedule:
+    # Каждый день в 03:00 UTC ≈ 10:00 ICT
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      form_factor:
+        description: "mobile | desktop | both"
+        required: false
+        default: "both"
+  push:
+    branches: [main]
+    paths:
+      - "lighthouserc*.json"
+      - "scripts/run-lighthouse.mjs"
+      - ".github/workflows/lighthouse.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    name: Lighthouse — ${{ matrix.form_factor }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        form_factor: [mobile, desktop]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Skip if form_factor filtered out
+        id: gate
+        run: |
+          INPUT="${{ github.event.inputs.form_factor }}"
+          MATRIX="${{ matrix.form_factor }}"
+          if [ -n "$INPUT" ] && [ "$INPUT" != "both" ] && [ "$INPUT" != "$MATRIX" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Lighthouse CI
+        if: steps.gate.outputs.skip != 'true'
+        run: npm install --no-save @lhci/cli@0.14.x
+
+      - name: Run Lighthouse CI
+        if: steps.gate.outputs.skip != 'true'
+        run: npx lhci autorun --config=lighthouserc${{ matrix.form_factor == 'mobile' && '.mobile' || '' }}.json
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ github.ref_name }}
+
+      - name: Upload reports
+        if: always() && steps.gate.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-${{ matrix.form_factor }}-${{ github.run_id }}
+          path: |
+            .lighthouseci/**/*.html
+            .lighthouseci/**/*.json
+            .lighthouseci/lhr-*.json
+            .lighthouseci/links.json
+            .lighthouseci/assertion-results.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Search, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
@@ -86,6 +86,7 @@ const MarketCatalogPage = () => {
               size="icon"
               className="shrink-0 -ml-2"
               onClick={() => navigate('/market')}
+              aria-label={language === 'ru' ? 'Назад' : 'Back'}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -104,7 +105,7 @@ const MarketCatalogPage = () => {
             {/* Drawer Trigger */}
             <CategoryDrawer 
               trigger={
-                <Button variant="outline" size="icon" className="shrink-0">
+                <Button variant="outline" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Каталог' : 'Catalog'}>
                   <Menu className="w-5 h-5" />
                 </Button>
               }
@@ -186,9 +187,9 @@ const MarketCatalogPage = () => {
           )}
         </div>
       </div>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default MarketCatalogPage;
+const AvailableMarketCatalogPage = withMarketAvailability(MarketCatalogPage);
+export default AvailableMarketCatalogPage;

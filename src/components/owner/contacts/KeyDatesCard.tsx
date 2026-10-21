@@ -130,7 +130,8 @@ const updateContact = useUpdateContact();
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                className="min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
+                aria-label={isRu ? 'Удалить' : 'Delete'}
                 onClick={() => handleRemove(i)}
                 disabled={updateContact.isPending}
               >

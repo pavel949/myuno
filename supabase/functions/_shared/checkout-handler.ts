@@ -10,15 +10,24 @@
 import { createStripeClient, Stripe } from "./stripe.ts";
 import { createClient, createServiceClient } from "./supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "./rate-limit.ts";
+import { getCorsHeaders, getAllowedOrigin } from "./cors.ts";
 
 // Re-export for thin wrappers
 export { createServiceClient };
 
-export const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// Extra headers the Supabase JS client may send on these endpoints, merged into
+// the request-scoped allow-list headers from cors.ts so preflight succeeds while
+// the origin stays restricted to the cors.ts allow-list (no wildcard on money moves).
+const EXTRA_ALLOW_HEADERS =
+  "x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version";
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const base = getCorsHeaders(req);
+  return {
+    ...base,
+    "Access-Control-Allow-Headers": `${base["Access-Control-Allow-Headers"]}, ${EXTRA_ALLOW_HEADERS}`,
+  };
+}
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -84,11 +93,24 @@ export interface CheckoutResult {
   rpc?: { name: string; params: Record<string, unknown> };
   /** Called if order creation fails, for cleanup (e.g., releasing reserved spots). */
   onOrderFailure?: () => Promise<void>;
+  /** Called after order + items inserted, for vertical-specific child rows (e.g., order_item_yacht_details). */
+  afterOrderCreated?: (
+    orderId: string,
+    supabaseAdmin: ReturnType<typeof createServiceClient>,
+  ) => Promise<void>;
 }
 
 export interface CheckoutConfig {
   /** Endpoint name for rate limiting + logging. */
   endpoint: string;
+  /**
+   * When true, the persisted order total is forced to equal the sum of the
+   * Stripe line items (anti-tampering). Only enable for verticals where Stripe
+   * charges the FULL order amount up-front — NOT for deposit/partial-payment
+   * verticals (yacht, property-deposit) where the charge is intentionally less
+   * than the order total.
+   */
+  enforceLineItemTotal?: boolean;
   /** Build the checkout result from the parsed request body + authenticated user. */
   build(
     body: unknown,
@@ -102,6 +124,8 @@ export interface CheckoutConfig {
 
 export function createCheckoutHandler(config: CheckoutConfig) {
   return async (req: Request): Promise<Response> => {
+    const CORS_HEADERS = corsHeadersFor(req);
+
     if (req.method === "OPTIONS") {
       return new Response(null, { headers: CORS_HEADERS });
     }
@@ -135,13 +159,39 @@ export function createCheckoutHandler(config: CheckoutConfig) {
       const rlResponse = await withRateLimit(req, config.endpoint, RATE_LIMITS.payment, CORS_HEADERS, user.id);
       if (rlResponse) return rlResponse;
 
-      console.log(`[${config.endpoint}] User authenticated: ${user.id}`);
+      console.info(`[${config.endpoint}] User authenticated: ${user.id}`);
 
       // 3. Parse body & build vertical-specific data
       const body = await req.json();
-      const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+      // The raw `origin` header is attacker-controlled and is used by verticals to
+      // build Stripe success_url/cancel_url. Validate against the allow-list so a
+      // forged origin can't turn the post-payment redirect into an open redirect;
+      // unknown origins fall back to the canonical site URL.
+      const origin = getAllowedOrigin(req.headers.get("origin"));
       const supabaseAdmin = createServiceClient();
       const result = await config.build(body, { id: user.id, email: user.email ?? undefined }, origin, supabaseAdmin);
+
+      // Anti-tampering guard (opt-in via enforceLineItemTotal): for verticals
+      // that charge the FULL amount up-front, Stripe charges the sum of
+      // `lineItems`, so the persisted order total MUST equal that sum — never a
+      // client-supplied `total_amount`. If they diverge we override the order
+      // total with the authoritative line-item sum (and log it) so the order
+      // record and ledger can never disagree with the money actually collected.
+      if (config.enforceLineItemTotal && result.order) {
+        const lineItemsTotal = result.lineItems.reduce(
+          (sum, li) => sum + (li.price_data.unit_amount * li.quantity) / 100,
+          0,
+        );
+        if (Number.isFinite(lineItemsTotal)) {
+          const claimed = Number(result.order.total_amount);
+          if (!Number.isFinite(claimed) || Math.abs(claimed - lineItemsTotal) > 0.01) {
+            console.warn(
+              `[${config.endpoint}] total_amount mismatch: client=${claimed} lineItems=${lineItemsTotal} — using line-item sum`,
+            );
+            result.order.total_amount = lineItemsTotal;
+          }
+        }
+      }
 
       let orderId: string | null = null;
       let orderNumber: string | null = null;
@@ -183,7 +233,7 @@ export function createCheckoutHandler(config: CheckoutConfig) {
 
         orderId = order.id;
         orderNumber = order.order_number;
-        console.log(`[${config.endpoint}] Order created: ${orderId} ${orderNumber}`);
+        console.info(`[${config.endpoint}] Order created: ${orderId} ${orderNumber}`);
 
         // Insert order items
         if (result.items.length > 0) {
@@ -197,31 +247,75 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           }
         }
 
-        // Insert addresses
+        // Insert addresses. Non-fatal (the order + payment still proceed), but a
+        // silent failure leaves delivery/transfer orders with no address, so log
+        // prominently with the order id for reconciliation.
         if (result.addresses && result.addresses.length > 0) {
-          await supabaseAdmin.from("order_addresses").insert(
+          const { error: addrError } = await supabaseAdmin.from("order_addresses").insert(
             result.addresses.map((a) => ({ order_id: orderId!, ...a })),
           );
+          if (addrError) {
+            console.error(`[${config.endpoint}] order_addresses insert failed for order ${orderId}:`, addrError);
+          }
         }
 
         // Insert participants
-        if (result.participants && result.participants.length > 0) {
-          await supabaseAdmin.from("order_participants").insert(
-            result.participants.map((p) => ({ order_id: orderId!, ...p })),
-          );
+        const providedParticipants = result.participants ?? [];
+        const hasPrimary = providedParticipants.some((p) => p.role === 'primary');
+
+        // Auto-backfill primary participant from auth profile if vertical didn't provide one.
+        // This ensures admin order screens always show a customer instead of "Guest".
+        if (!hasPrimary) {
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('full_name, phone')
+            .eq('id', user.id)
+            .maybeSingle();
+          providedParticipants.push({
+            role: 'primary',
+            name: profile?.full_name || user.email?.split('@')[0] || 'Customer',
+            phone: profile?.phone ?? null,
+            email: user.email ?? null,
+          });
         }
 
-        // Status history
-        await supabaseAdmin.from("order_status_history").insert({
+        if (providedParticipants.length > 0) {
+          const { error: partError } = await supabaseAdmin.from("order_participants").insert(
+            providedParticipants.map((p) => ({ order_id: orderId!, ...p })),
+          );
+          if (partError) {
+            console.error(`[${config.endpoint}] order_participants insert failed for order ${orderId}:`, partError);
+          }
+        }
+
+        // Status history (non-fatal, but log so the audit trail gap is visible).
+        const { error: statusError } = await supabaseAdmin.from("order_status_history").insert({
           order_id: orderId,
           from_status: null,
           to_status: "pending",
           actor_user_id: user.id,
           reason: result.statusReason || "Order created",
         });
+        if (statusError) {
+          console.error(`[${config.endpoint}] order_status_history insert failed for order ${orderId}:`, statusError);
+        }
 
-        // Payment intent
-        const { data: pi } = await supabaseAdmin
+        // Vertical-specific child rows (e.g. order_item_yacht_details)
+        if (result.afterOrderCreated) {
+          try {
+            await result.afterOrderCreated(orderId, supabaseAdmin);
+          } catch (hookErr) {
+            console.error(`[${config.endpoint}] afterOrderCreated error:`, hookErr);
+          }
+        }
+
+
+
+        // Payment intent. If this insert fails, the Stripe session metadata gets
+        // no payment_intent_id and the webhook can't transition the intent to
+        // succeeded → reconciliation_alerts will flag the order permanently.
+        // Non-fatal to checkout, but must be logged loudly with the order id.
+        const { data: pi, error: piError } = await supabaseAdmin
           .from("payment_intents")
           .insert({
             order_id: orderId,
@@ -232,6 +326,9 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           })
           .select("id")
           .single();
+        if (piError) {
+          console.error(`[${config.endpoint}] payment_intents insert failed for order ${orderId} — webhook linkage/reconciliation at risk:`, piError);
+        }
         paymentIntentId = pi?.id || null;
       }
 
@@ -272,9 +369,12 @@ export function createCheckoutHandler(config: CheckoutConfig) {
         success_url: result.successUrl,
         cancel_url: result.cancelUrl,
         metadata: sessionMetadata,
+        // Charge/refund webhooks receive PaymentIntent metadata, not Session
+        // metadata. Carry the commercial order linkage into that object too.
+        ...(orderId ? { payment_intent_data: { metadata: { order_id: orderId, type: 'order_payment' } } } : {}),
       });
 
-      console.log(`[${config.endpoint}] Checkout session created: ${session.id}`);
+      console.info(`[${config.endpoint}] Checkout session created: ${session.id}`);
 
       // Update payment intent with Stripe session ref
       if (paymentIntentId) {

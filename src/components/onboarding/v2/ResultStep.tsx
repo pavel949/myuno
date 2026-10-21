@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { CanonicalOnboardingResult } from '@/hooks/useCanonicalOnboarding';
 import { CLUSTER_META, LIFECYCLE_STAGE_LABELS } from '@/types/canonical';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   result: CanonicalOnboardingResult;
@@ -43,7 +44,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
           {COPY.proposalLine[lang]} <strong className="text-foreground">{stageLabel}</strong> · <span data-testid="onboarding-result-persona">{proposal.detected_persona}</span>
         </p>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
-          {proposal.active_clusters.map((c) => (
+          {(proposal.active_clusters ?? []).map((c) => (
             <span
               key={c}
               className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
@@ -87,7 +88,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
             {COPY.openPrefix[lang]} · {primary.title[lang]}
           </Button>
         )}
-        <Button variant="outline" className="flex-1" onClick={() => navigate('/discover')}>
+        <Button variant="outline" className="flex-1" onClick={() => navigate(APP_ROUTES.DISCOVER)}>
           {COPY.exploreLater[lang]}
         </Button>
       </div>

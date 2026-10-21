@@ -1,12 +1,13 @@
-import { useState, lazy, Suspense, useMemo } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
-import { useMemberPermissions, MODULES, useCanManagePermissions } from '@/hooks/useTeamPermissions';
-import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
+import { CompanyAccessPanel } from '@/components/owner/team/CompanyAccessPanel';
+import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 
@@ -62,7 +63,6 @@ import {
   MoreVertical,
   UserCheck,
   Search,
-  History,
   ClipboardList,
 } from 'lucide-react';
 import {
@@ -78,8 +78,6 @@ import {
   useUpdateStaffMember,
   useDeactivateStaffMember,
   useStaffPropertyAssignments,
-  useAssignStaffToProperty,
-  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -89,8 +87,6 @@ import {
 } from '@/hooks/useStaffMembers';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { supabase } from '@/integrations/supabase/client';
-import { toast as toastSonner } from 'sonner';
 import { format } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
 
@@ -142,7 +138,6 @@ interface StaffFormState {
   daily_rate: string;
   is_active: boolean;
   photo_url: string;
-  sendCredentials: boolean;
 }
 
 const DEFAULT_FORM: StaffFormState = {
@@ -158,7 +153,6 @@ const DEFAULT_FORM: StaffFormState = {
   daily_rate: '',
   is_active: true,
   photo_url: '',
-  sendCredentials: false,
 };
 
 function staffToForm(s: StaffMember): StaffFormState {
@@ -175,73 +169,7 @@ function staffToForm(s: StaffMember): StaffFormState {
     daily_rate: s.daily_rate?.toString() ?? '',
     is_active: s.is_active,
     photo_url: (s as any).photo_url ?? '',
-    sendCredentials: false,
   };
-}
-
-/** Compact permission indicators for staff card */
-function StaffPermissionBadges({ userId, isRu, onClick }: { userId: string; isRu: boolean; onClick: () => void }) {
-  const { data: permissions = [] } = useMemberPermissions(userId);
-  const t = (en: string, ru: string) => isRu ? ru : en;
-  
-  if (permissions.length === 0) {
-    return (
-      <button
-        onClick={onClick}
-        className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
-      >
-        <ShieldCheck className="h-3.5 w-3.5" />
-        <span>{t('Set up permissions', 'Настроить права')}</span>
-      </button>
-    );
-  }
-
-  const moduleLabels: Record<string, { short: string; shortRu: string }> = {
-    properties: { short: 'Prop', shortRu: 'Объ' },
-    finance: { short: 'Fin', shortRu: 'Фин' },
-    crm: { short: 'CRM', shortRu: 'CRM' },
-    tasks: { short: 'Tasks', shortRu: 'Зад' },
-    bookings: { short: 'Book', shortRu: 'Бр' },
-    reports: { short: 'Rep', shortRu: 'Отч' },
-    staff: { short: 'Staff', shortRu: 'Ком' },
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className="mt-3 pt-3 border-t border-border/40 w-full group"
-    >
-      <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
-        <ShieldCheck className="h-3 w-3" />
-        {t('Permissions', 'Права доступа')}
-        <Pencil className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {MODULES.map(mod => {
-          const perm = permissions.find(p => p.module === mod.key);
-          const hasView = perm?.can_view ?? false;
-          const hasEdit = perm?.can_edit ?? false;
-          const label = isRu ? (moduleLabels[mod.key]?.shortRu ?? mod.key) : (moduleLabels[mod.key]?.short ?? mod.key);
-          
-          return (
-            <span
-              key={mod.key}
-              className={`text-[10px] px-1.5 py-0.5 rounded-none font-medium ${
-                hasEdit
-                  ? 'bg-primary/10 text-primary'
-                  : hasView
-                    ? 'bg-muted text-muted-foreground'
-                    : 'bg-muted/40 text-muted-foreground/40 line-through'
-              }`}
-              title={`${isRu ? mod.labelRu : mod.labelEn}: ${hasEdit ? (isRu ? 'Редактирование' : 'Edit') : hasView ? (isRu ? 'Просмотр' : 'View') : (isRu ? 'Нет доступа' : 'No access')}`}
-            >
-              {label}
-            </span>
-          );
-        })}
-      </div>
-    </button>
-  );
 }
 
 /** Rich staff card component */
@@ -253,8 +181,6 @@ function StaffCard({
   onReactivate,
   properties,
   onViewTasks,
-  onEditPermissions,
-  onViewActivity,
   canManage,
 }: {
   staff: StaffMember;
@@ -264,20 +190,21 @@ function StaffCard({
   onReactivate: () => void;
   properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
-  onEditPermissions: () => void;
-  onViewActivity: () => void;
   canManage: boolean;
 }) {
-  const t = (en: string, ru: string) => isRu ? ru : en;
+  const { language: staffLanguage } = useLanguage();
+  const t = (en: string, ru: string, th?: string) => staffLanguage === 'th' && th ? th : isRu ? ru : en;
+  const { symbol: curSym } = useCityCurrency();
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
   const colorClass = ROLE_COLORS[staff.role] ?? 'text-muted-foreground bg-muted';
   const { data: assignments } = useStaffPropertyAssignments(staff.id);
   
   const payLabel = (() => {
-    if (staff.monthly_salary) return `฿${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
-    if (staff.daily_rate) return `฿${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
-    if (staff.hourly_rate) return `฿${staff.hourly_rate.toLocaleString()}/${t('hr', 'ч')}`;
+    if (staff.monthly_salary) return `${curSym}${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
+    if (staff.daily_rate) return `${curSym}${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
+    if (staff.hourly_rate) return `${curSym}${staff.hourly_rate.toLocaleString()}/${t('hr', 'ч')}`;
     return null;
+
   })();
 
   const hireDate = format(new Date(staff.created_at), isRu ? 'd MMM yyyy' : 'MMM d, yyyy', {
@@ -364,8 +291,11 @@ function StaffCard({
               </p>
             )}
 
-            {/* Permission badges - clickable */}
-            <StaffPermissionBadges userId={staff.id} isRu={isRu} onClick={onEditPermissions} />
+            <p className="mt-3 text-xs text-muted-foreground">{t(
+              'Login account is not linked to this HR record. Manage verified accounts in Company account access.',
+              'Аккаунт входа не связан с этой записью. Управляйте подтверждёнными аккаунтами в разделе доступа компании.',
+              'บัญชีเข้าสู่ระบบยังไม่ได้เชื่อมกับข้อมูลพนักงานนี้ จัดการบัญชีที่ยืนยันแล้วในส่วนสิทธิ์บัญชีของบริษัท'
+            )}</p>
 
             {/* Footer: hire date */}
             <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
@@ -390,7 +320,7 @@ function StaffCard({
           {/* Actions dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] shrink-0" aria-label={t('More', 'Ещё')}>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -421,14 +351,6 @@ function StaffCard({
                 <ClipboardList className="h-4 w-4 mr-2" />
                 {t('View Tasks', 'Задачи')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEditPermissions}>
-                <ShieldCheck className="h-4 w-4 mr-2" />
-                {t('Permissions', 'Права доступа')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onViewActivity}>
-                <History className="h-4 w-4 mr-2" />
-                {t('Activity Log', 'Лог активности')}
-              </DropdownMenuItem>
               {canManage && (
                 <>
                   <DropdownMenuSeparator />
@@ -455,7 +377,9 @@ function StaffCard({
 
 export default function StaffPage() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
+
 
   const { data: staff, isLoading } = useAllStaffMembers();
   const createMutation = useCreateStaffMember();
@@ -463,8 +387,6 @@ export default function StaffPage() {
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
   const { activeCompany } = useActiveCompany();
-  const assignStaff = useAssignStaffToProperty();
-  const removeAssignment = useRemoveStaffAssignment();
   const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -476,10 +398,8 @@ export default function StaffPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
   // addMemberOpen removed — unified into Sheet form
-  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string; staffId: string; customTitle?: string } | null>(null);
-  const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
 
-  const t = (en: string, ru: string) => isRu ? ru : en;
+  const t = (en: string, ru: string, th?: string) => language === 'th' && th ? th : isRu ? ru : en;
   const navigate = useNavigate();
 
   const shown = (staff ?? [])
@@ -525,34 +445,7 @@ export default function StaffPage() {
       } else {
         await createMutation.mutateAsync(payload);
 
-        // Send login credentials if toggle is on and email is provided
-        if (form.sendCredentials && form.email && activeCompany?.company_id) {
-          try {
-            const { data, error } = await supabase.functions.invoke('invite-team-member', {
-              body: {
-                company_id: activeCompany.company_id,
-                full_name: form.name.trim(),
-                email: form.email.trim().toLowerCase(),
-                phone: form.phone.trim() || undefined,
-                role: form.role === 'admin' ? 'manager' : 'staff',
-              },
-            });
-            if (error) throw error;
-            if (data?.error) throw new Error(data.error);
-            toastSonner.success(
-              isRu 
-                ? `Данные для входа отправлены на ${form.email}` 
-                : `Login credentials sent to ${form.email}`
-            );
-          } catch (inviteErr: any) {
-            console.error('Failed to send credentials:', inviteErr);
-            toastSonner.error(
-              isRu 
-                ? `Сотрудник добавлен, но не удалось отправить данные: ${inviteErr.message}` 
-                : `Staff added, but failed to send credentials: ${inviteErr.message}`
-            );
-          }
-        }
+
       }
       setSheetOpen(false);
     } catch {
@@ -576,6 +469,8 @@ export default function StaffPage() {
         showBack
         fallbackPath="/owner"
       />
+
+      {activeCompany?.company_id && <CompanyAccessPanel key={activeCompany.company_id} />}
 
       {/* Page-level tabs: Staff | Access & Delegation */}
       <Tabs value={pageTab} onValueChange={v => setPageTab(v as 'staff' | 'access')} className="mb-5">
@@ -668,8 +563,8 @@ export default function StaffPage() {
             <p className="font-semibold text-lg mb-1">{t('No staff yet', 'Нет сотрудников')}</p>
             <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
               {t(
-                'Add your cleaners, maintenance staff, managers and other team members to manage assignments and contacts',
-                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
+                'Add your cleaners, maintenance staff, managers and other team members to manage their contacts',
+                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления контактами'
               )}
             </p>
             {canManage && (
@@ -692,8 +587,6 @@ export default function StaffPage() {
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
               onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
-              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
-              onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
               canManage={canManage}
             />
           ))}
@@ -710,7 +603,7 @@ export default function StaffPage() {
             </SheetTitle>
             {!editing && (
               <p className="text-sm text-muted-foreground">
-                {t('Add to your team and optionally send login credentials', 'Добавьте в команду и при необходимости отправьте доступ')}
+                {t('Add an HR directory entry. Invite a login account separately in Company account access.', 'Добавьте запись в справочник. Аккаунт для входа приглашается отдельно в разделе доступа компании.', 'เพิ่มข้อมูลพนักงาน แล้วเชิญบัญชีเข้าสู่ระบบในส่วนสิทธิ์บัญชีของบริษัทแยกต่างหาก')}
               </p>
             )}
           </SheetHeader>
@@ -792,15 +685,7 @@ export default function StaffPage() {
                 </div>
               </div>
 
-              {!editing && form.email.trim() && activeCompany?.company_id && (
-                <div className="flex items-center justify-between rounded-none border p-3 bg-muted/30">
-                  <div className="space-y-0.5 min-w-0 mr-3">
-                    <p className="text-sm font-medium">{t('Send login credentials', 'Отправить данные для входа')}</p>
-                    <p className="text-xs text-muted-foreground">{t('Create account & send password to email', 'Создать аккаунт и отправить пароль')}</p>
-                  </div>
-                  <Switch checked={form.sendCredentials} onCheckedChange={checked => setForm(f => ({ ...f, sendCredentials: checked }))} />
-                </div>
-              )}
+
             </section>
 
             {/* Section: Compensation */}
@@ -818,25 +703,26 @@ export default function StaffPage() {
               </Select>
               {form.pay_type === 'salary' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Monthly Salary (${curSym})`, `Оклад в месяц (${curSym})`)}</Label>
                   <Input type="number" value={form.monthly_salary} onChange={e => setForm(f => ({ ...f, monthly_salary: e.target.value }))} placeholder="15000" />
                 </div>
               )}
               {form.pay_type === 'hourly' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Hourly Rate (${curSym})`, `Ставка в час (${curSym})`)}</Label>
                   <Input type="number" value={form.hourly_rate} onChange={e => setForm(f => ({ ...f, hourly_rate: e.target.value }))} placeholder="200" />
                 </div>
               )}
               {form.pay_type === 'daily' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Daily Rate (${curSym})`, `Дневная ставка (${curSym})`)}</Label>
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="1000" />
                 </div>
               )}
               {form.pay_type === 'per_task' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Rate per Task (${curSym})`, `Ставка за задачу (${curSym})`)}</Label>
+
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="500" />
                 </div>
               )}
@@ -853,17 +739,16 @@ export default function StaffPage() {
               />
             </section>
 
-            {/* Property Assignments (edit mode only) */}
-            {editing && allProperties.length > 0 && (
+            {/* Assignment persistence is unavailable; do not offer no-op controls. */}
+            {editing && (
               <section className="space-y-3">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
-                <StaffPropertyAssignments
-                  staffId={editing.id}
-                  properties={allProperties}
-                  isRu={isRu}
-                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-                />
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    'Assigning employees to properties is currently unavailable. Assignments cannot be saved here.',
+                    'Назначение сотрудников на объекты сейчас недоступно. Сохранить назначения здесь нельзя.'
+                  )}
+                </p>
               </section>
             )}
 
@@ -917,92 +802,6 @@ export default function StaffPage() {
       </>
       )}
 
-      {/* AddTeamMemberDialog removed — consolidated into Sheet form above */}
-
-      {/* Member Permissions Sheet */}
-      <MemberPermissionsSheet
-        open={!!permissionsTarget}
-        onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
-        userId={permissionsTarget?.userId ?? null}
-        userName={permissionsTarget?.name ?? ''}
-        customTitle={permissionsTarget?.customTitle}
-        staffId={permissionsTarget?.staffId}
-      />
-
-      {/* Member Activity Sheet */}
-      <MemberActivitySheet
-        open={!!activityTarget}
-        onOpenChange={(open) => { if (!open) setActivityTarget(null); }}
-        userId={activityTarget?.userId}
-        memberName={activityTarget?.name}
-      />
     </PageContainer>
-  );
-}
-
-/** Inline component for property assignments in the edit form */
-function StaffPropertyAssignments({
-  staffId,
-  properties,
-  isRu,
-  onAssign,
-  onRemove,
-}: {
-  staffId: string;
-  properties: { property_id: string; title: string; title_ru: string }[];
-  isRu: boolean;
-  onAssign: (propertyId: string) => void;
-  onRemove: (assignmentId: string) => void;
-}) {
-  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
-  const assignedIds = new Set((assignments || []).map(a => a.property_id));
-  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
-
-  return (
-    <div className="space-y-2">
-      {isLoading ? (
-        <Skeleton className="h-8 w-full" />
-      ) : (
-        <>
-          {(assignments || []).length > 0 && (
-            <div className="space-y-1.5">
-              {(assignments || []).map(a => {
-                const prop = properties.find(p => p.property_id === a.property_id);
-                return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
-                    <span className="text-sm flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
-                    </span>
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
-                      {isRu ? 'Убрать' : 'Remove'}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {unassigned.length > 0 && (
-            <Select onValueChange={onAssign}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
-              </SelectTrigger>
-              <SelectContent>
-                {unassigned.map(p => (
-                  <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru || p.title : p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {(assignments || []).length === 0 && unassigned.length === 0 && (
-            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
-          )}
-        </>
-      )}
-    </div>
   );
 }

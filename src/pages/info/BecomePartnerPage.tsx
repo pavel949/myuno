@@ -49,6 +49,8 @@ const benefits = [
   { icon: Clock, labelRu: 'Удобное управление заказами', labelEn: 'Easy order management' },
 ];
 
+const DRAFT_STORAGE_KEY = 'become_partner_draft_v1';
+
 export default function BecomePartnerPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
@@ -66,26 +68,95 @@ const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // Restore draft after returning from /auth
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { selectedCategory?: string | null; formData?: typeof formData };
+      if (draft.selectedCategory) setSelectedCategory(draft.selectedCategory);
+      if (draft.formData) setFormData(prev => ({ ...prev, ...draft.formData }));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Persist draft as the user types (so /auth round-trip doesn't lose work)
+  React.useEffect(() => {
+    if (isSubmitted) return;
+    try {
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({ selectedCategory, formData }),
+      );
+    } catch {
+      // ignore quota errors
+    }
+  }, [selectedCategory, formData, isSubmitted]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    const isRu = language === 'ru';
+
     if (!selectedCategory) {
-      toast.error(language === 'ru' ? 'Выберите категорию' : 'Select a category');
+      toast.error(isRu ? 'Выберите категорию' : 'Select a category');
+      return;
+    }
+
+    // BUG-02 (P1): validate email shape before any DB write.
+    const email = formData.email.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error(isRu ? 'Укажите корректный email' : 'Enter a valid email');
+      return;
+    }
+
+    // P0: anonymous insert fails RLS on partner_applications. Send user to auth,
+    // draft is already persisted so they pick up where they left off.
+    if (!user) {
+      toast(isRu ? 'Войдите для отправки' : 'Sign in to submit', {
+        description: isRu
+          ? 'Мы сохранили вашу заявку и вернём вас сюда после входа.'
+          : 'We saved your draft and will bring you back here after sign-in.',
+      });
+      navigate('/auth?redirect=' + encodeURIComponent('/become-partner'));
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // BUG-10 (P2): block obvious duplicates — active application for this user in last 7 days.
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('partner_applications')
+        .select('id')
+        .eq('user_id', user.id)
+        .in('status', ['pending', 'reviewing'])
+        .gte('created_at', sevenDaysAgo)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        toast(isRu ? 'У вас уже есть активная заявка' : 'You already have an active application', {
+          description: isRu
+            ? 'Перейдите в раздел статуса, чтобы посмотреть детали.'
+            : 'Open the status page to see the details.',
+          action: {
+            label: isRu ? 'Открыть' : 'Open',
+            onClick: () => navigate('/partner/status'),
+          },
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data: inserted, error } = await supabase
         .from('partner_applications')
         .insert({
-          user_id: user?.id || null,
+          user_id: user.id,
           business_name: formData.businessName,
           business_category: selectedCategory,
           business_description: formData.description,
           contact_name: formData.contactName,
-          contact_email: formData.email,
+          contact_email: email,
           contact_phone: formData.phone,
           website: formData.website || null,
           status: 'pending',
@@ -101,17 +172,18 @@ const navigate = useNavigate();
         }).catch(() => {});
       }
 
+      try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
       setIsSubmitted(true);
-      toast(language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!', {
-        description: language === 'ru'
-          ? 'Мы свяжемся с вами в ближайшее время'
-          : 'We will contact you soon',
+      toast(isRu ? 'Заявка отправлена!' : 'Application submitted!', {
+        description: isRu
+          ? 'Мы отправили подтверждение на ваш email и ответим в течение 24 часов'
+          : 'Confirmation sent to your email. We will reply within 24 hours',
       });
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-        description: language === 'ru' 
-          ? 'Не удалось отправить заявку. Попробуйте позже.' 
+      toast.error(isRu ? 'Ошибка' : 'Error', {
+        description: isRu
+          ? 'Не удалось отправить заявку. Попробуйте позже.'
           : 'Failed to submit application. Please try again.',
       });
     } finally {
@@ -119,10 +191,11 @@ const navigate = useNavigate();
     }
   };
 
+
   if (isSubmitted) {
     return (
-      <AppLayout showHeader={false}>
-      <PageContainer>
+      <AppLayout showHeader={false} usePageContainer={false}>
+      <PageContainer className="max-w-3xl">
         <div className="min-h-[60vh] flex items-center justify-center">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
@@ -151,10 +224,10 @@ const navigate = useNavigate();
   }
 
   return (
-    <AppLayout showHeader={false}>
-    <PageContainer>
+    <AppLayout showHeader={false} usePageContainer={false}>
+    <PageContainer className="max-w-3xl">
       <PageHeader 
-        title={language === 'ru' ? 'Станьте партнёром UNO' : 'Become a UNO Partner'}
+        title={language === 'ru' ? 'Станьте партнёром myUNO' : 'Become a myUNO Partner'}
         showBack
       />
 
@@ -164,17 +237,17 @@ const navigate = useNavigate();
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-none overflow-hidden mb-8 p-6 sm:p-8"
       >
-        <div className="absolute inset-0 gradient-gold opacity-10" />
+        <div className="absolute inset-0 bg-primary/10" />
         <div className="relative">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">
             {language === 'ru' 
-              ? 'Развивайте бизнес вместе с UNO' 
-              : 'Grow Your Business with UNO'}
+              ? 'Развивайте бизнес вместе с myUNO' 
+              : 'Grow Your Business with myUNO'}
           </h1>
           <p className="text-muted-foreground max-w-2xl mb-6">
             {language === 'ru' 
-              ? 'Присоединяйтесь к экосистеме UNO и получите доступ к миллионам активных пользователей. Мы поможем вам увеличить продажи и расширить клиентскую базу.' 
-              : 'Join the UNO ecosystem and get access to millions of active users. We will help you increase sales and expand your customer base.'}
+              ? 'Присоединяйтесь к экосистеме myUNO и получите доступ к миллионам активных пользователей. Мы поможем вам увеличить продажи и расширить клиентскую базу.' 
+              : 'Join the myUNO ecosystem and get access to millions of active users. We will help you increase sales and expand your customer base.'}
           </p>
 
           {/* Benefits */}

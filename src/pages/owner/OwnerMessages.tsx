@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function OwnerMessages() {
   const { language } = useLanguage();
@@ -66,7 +67,7 @@ export default function OwnerMessages() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите, чтобы просмотреть сообщения' : 'Sign in to view messages'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>
@@ -302,7 +303,7 @@ const ChatCard: React.FC<ChatCardProps> = ({ chat, isRu, onClick }) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                aria-label={isRu ? 'Позвонить' : 'Call'}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(`tel:${chat.guestPhone}`);

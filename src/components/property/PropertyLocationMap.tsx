@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState, useEffect } from 'react';
 import { MapPin, Loader2 } from 'lucide-react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,10 +26,14 @@ export function PropertyLocationMap({
 }: PropertyLocationMapProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const mapUnavailable = isRu ? 'Карта временно недоступна' : language === 'th' ? 'แผนที่ไม่พร้อมใช้งานชั่วคราว' : 'Map temporarily unavailable';
+  const openMapLabel = isRu ? 'Открыть в Google Картах' : language === 'th' ? 'เปิดใน Google Maps' : 'Open in Google Maps';
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [renderError, setRenderError] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
 
-  const hasCoords = lat != null && lng != null && lat !== 0 && lng !== 0;
+  const hasCoords = typeof lat === 'number' && typeof lng === 'number' && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
   const center = useMemo(() => {
     if (hasCoords) return { lat: lat!, lng: lng! };
     return DEFAULT_MAP_CENTER;
@@ -43,8 +47,26 @@ export function PropertyLocationMap({
     mapRef.current = null;
   }, []);
 
-  const noKey = !hasKey || loadError;
-  const isLoading = hasKey && !isLoaded;
+  // Some provider errors appear only inside the rendered map, after script load.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !hasKey || !isLoaded || loadError || renderError) return;
+    const checkError = () => {
+      // Observed production Google warning is an unclassed span inside this
+      // map container. Match its exact provider text, never arbitrary page copy.
+      const providerWarning = [...container.querySelectorAll('span')].some(span =>
+        span.textContent?.replace(/’/g, "'").replace(/\s+/g, ' ').trim() === "This page can't load Google Maps correctly."
+      );
+      if (container.querySelector('.gm-err-container, .gm-err-message') || providerWarning) setRenderError(true);
+    };
+    const observer = new MutationObserver(checkError);
+    observer.observe(container, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+    checkError();
+    return () => observer.disconnect();
+  }, [hasKey, isLoaded, loadError, renderError]);
+
+  const noKey = !hasKey || loadError || renderError;
+  const isLoading = hasKey && !isLoaded && !noKey;
 
   const googleMapsUrl = hasCoords
     ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
@@ -60,25 +82,21 @@ export function PropertyLocationMap({
         </h2>
       )}
 
-      <div className={cn('rounded-none overflow-hidden border border-border h-[300px] relative', showHeading && 'mb-3')}>
+      <div ref={containerRef} className={cn('rounded-none overflow-hidden border border-border h-[300px] relative', showHeading && 'mb-3')}>
         {noKey && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30 gap-3 p-4">
             <MapPin className="w-8 h-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground text-center">
-              {loadError?.message?.includes('auth')
-                ? (isRu
-                  ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа.'
-                  : 'Google Maps auth error. Check API key restrictions.')
-                : (isRu ? 'Карта недоступна' : 'Map unavailable')}
+              {mapUnavailable}
             </p>
             {googleMapsUrl && (
               <a
                 href={googleMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
+                className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
               >
-                {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
+                {openMapLabel}
               </a>
             )}
           </div>
@@ -88,7 +106,7 @@ export function PropertyLocationMap({
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         )}
-        {hasKey && isLoaded && !loadError && (
+        {hasKey && isLoaded && !noKey && (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={center}
@@ -106,7 +124,7 @@ export function PropertyLocationMap({
           </GoogleMap>
         )}
         {/* Fallback when embed shows "didn't load correctly" (e.g. key restrictions or billing) */}
-        {hasKey && isLoaded && !loadError && googleMapsUrl && (
+        {hasKey && isLoaded && !noKey && googleMapsUrl && (
           <div className="absolute bottom-2 right-2 z-10">
             <a
               href={googleMapsUrl}
@@ -114,7 +132,7 @@ export function PropertyLocationMap({
               rel="noopener noreferrer"
               className="text-xs bg-background/95 hover:bg-background border border-border rounded-none px-2 py-1.5 shadow-sm text-primary hover:underline"
             >
-              {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
+              {openMapLabel}
             </a>
           </div>
         )}

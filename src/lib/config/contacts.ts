@@ -24,12 +24,20 @@ export const COMPANY_CONTACTS = {
     // Telegram number link
     number: 'https://t.me/+66922407355',
   },
+  line: {
+    // LINE Official Account id (placeholder until registered).
+    // When the @myuno LINE OA is live, this URL works as a direct chat link.
+    id: '@myuno',
+    link: 'https://line.me/R/ti/p/@myuno',
+    // Toggle to false to hide the Line button across the platform until the OA is live.
+    enabled: true,
+  },
   email: {
-    support: 'support@uno.ae',
-    partners: 'partners@uno.ae',
-    press: 'press@uno.ae',
-    privacy: 'privacy@uno.ae',
-    info: 'info@uno.ae',
+    support: 'support@myuno.app',
+    partners: 'partners@myuno.app',
+    press: 'press@myuno.app',
+    privacy: 'privacy@myuno.app',
+    info: 'info@myuno.app',
   },
   social: {
     instagram: 'https://instagram.com/myuno.app',
@@ -37,14 +45,35 @@ export const COMPANY_CONTACTS = {
     whatsapp: 'https://wa.me/66922407355',
   },
   address: {
-    full: '88/88 Moo 3, Chalong, Muang, Phuket 83130, Thailand',
-    short: 'Chalong, Phuket, Thailand',
-    mapLink: 'https://maps.google.com/?q=7.8432,98.3424',
+    full: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand',
+    short: 'Koh Kaew, Muang Phuket, Phuket',
+    mapLink: 'https://maps.google.com/?q=7.9375,98.3733',
+    lat: 7.9375,
+    lng: 98.3733,
   },
   legal: {
-    companyName: 'UNO Platform Co., Ltd.',
-    taxId: '0835564001234',
+    /** Copyright holder / operating legal entity of the platform */
+    companyName: 'Toplight Asia Pacific Co., Ltd.',
+    companyNameTh: 'บริษัท ท๊อปไลท์ เอเชีย แปซิฟิค จำกัด',
     registrationCountry: 'Thailand',
+    city: 'Phuket',
+    /**
+     * Thai company registration number (เลขทะเบียนนิติบุคคล) and Tax ID.
+     * Required on commercial Thai websites — fill in to display automatically
+     * in every legal block. Left empty until officially confirmed.
+     */
+    registrationNumber: '' as string,
+    taxId: '' as string,
+    addressEn: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand',
+    addressRu: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд',
+    addressTh: 'MC 2, 63/202 หมู่ที่ 2 ถนนเทพกระษัตรี ตำบลเกาะแก้ว อำเภอเมืองภูเก็ต จังหวัดภูเก็ต 83000',
+    coordinates: { lat: 7.9375, lng: 98.3733 },
+    mapLink: 'https://maps.google.com/?q=7.9375,98.3733',
+    contactPerson: 'Pavel Ignatev',
+    contactPersonTh: 'นายพาเวล อิกินาทีฟ',
+    phone: '+66 95 424 3332',
+    phoneRaw: '+66954243332',
+    email: 'pavel@myuno.app',
   },
   workingHours: {
     office: '09:00 - 18:00',
@@ -68,3 +97,7 @@ export const getTelLink = (): string => {
 export const getMailtoLink = (type: keyof typeof COMPANY_CONTACTS.email = 'support'): string => {
   return `mailto:${COMPANY_CONTACTS.email[type]}`;
 };
+
+// Helper for LINE chat link
+export const getLineUrl = (): string => COMPANY_CONTACTS.line.link;
+

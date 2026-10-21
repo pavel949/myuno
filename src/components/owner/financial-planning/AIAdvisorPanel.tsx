@@ -137,8 +137,16 @@ function SimpleMarkdown({ text }: { text: string }) {
   return <>{elements}</>;
 }
 
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (m) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m] || m
+  ));
+}
+
 function renderInline(text: string): string {
-  return text
+  // Escape ALL HTML first to prevent XSS via AI/prompt-injected content,
+  // then apply allowlisted markdown transforms on the escaped string.
+  return escapeHtml(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code class="px-1 bg-muted rounded-none text-[0.85em]">$1</code>');

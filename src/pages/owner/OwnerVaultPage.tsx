@@ -316,13 +316,13 @@ export default function OwnerVaultPage() {
                         {file.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{file.description}</p>}
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownload(file)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Скачать' : 'Download'} onClick={() => handleDownload(file)}>
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleShare(file)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Поделиться' : 'Share'} onClick={() => handleShare(file)}>
                           {copiedToken === file.id ? <Check className="h-4 w-4 text-success" /> : <Share2 className="h-4 w-4" />}
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(file)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => handleDelete(file)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

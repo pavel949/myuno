@@ -1,5 +1,6 @@
 import { createClient } from '../_shared/supabase.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { PROPERTY_BOOKING_RELEASE_FILTER } from '../_shared/property-inventory.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -27,7 +28,7 @@ function escapeICalText(text: string): string {
 }
 
 Deno.serve(async (req) => {
-  console.log('Calendar export request received');
+  console.info('Calendar export request received');
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -57,8 +58,8 @@ Deno.serve(async (req) => {
     }
 
     // Initialize Supabase client with service role for public access
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // P1-2: Validate token WITH expiration check using backend function
@@ -108,14 +109,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Generating iCal for property: ${property.title || property.title_ru}`);
+    console.info(`Generating iCal for property: ${property.title || property.title_ru}`);
 
     // Fetch bookings for this property
     const { data: bookings, error: bookingsError } = await supabase
       .from('property_bookings')
       .select('*')
       .eq('property_id', propertyId)
-      .neq('status', 'cancelled')
+      .not('status', 'in', PROPERTY_BOOKING_RELEASE_FILTER)
       .order('check_in', { ascending: true });
 
     if (bookingsError) {
@@ -271,7 +272,7 @@ Deno.serve(async (req) => {
 
     const icalString = icalContent.join('\r\n');
 
-    console.log(`Generated iCal with ${bookings?.length || 0} events`);
+    console.info(`Generated iCal with ${bookings?.length || 0} events`);
 
     return new Response(icalString, {
       headers: {

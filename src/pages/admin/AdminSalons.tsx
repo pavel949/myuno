@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Scissors } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminSalons } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const salonTypes = [
   { value: 'hair', label: 'Hair Salon', labelRu: 'Парикмахерская' },
@@ -12,7 +13,7 @@ const salonTypes = [
   { value: 'barbershop', label: 'Barbershop', labelRu: 'Барбершоп' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Salon Management',
   titleRu: 'Управление салонами',
   icon: Scissors,
@@ -32,14 +33,16 @@ const config: AdminVerticalConfig = {
     { key: 'district', type: 'text', labelEn: 'District', labelRu: 'Район' },
     { key: 'phone', type: 'text', labelEn: 'Phone', labelRu: 'Телефон' },
     { key: 'email', type: 'text', labelEn: 'Email', labelRu: 'Email' },
-    { key: 'price_from', type: 'number', labelEn: 'Price From ฿', labelRu: 'Цена от ฿' },
+    { key: 'price_from', type: 'number', labelEn: `Price From ${sym}`, labelRu: `Цена от ${sym}` },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminSalons() {
   const hook = useAdminSalons();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   // Adapt hook shape: useAdminSalons returns { salons, createSalon, updateSalon, deleteSalon }
   const adapted = {
     items: (hook as any).salons || (hook as any).items || [],

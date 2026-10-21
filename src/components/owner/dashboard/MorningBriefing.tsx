@@ -45,7 +45,7 @@ export function MorningBriefing() {
         <CardContent className="py-4 text-center">
           <p className="text-sm font-medium flex items-center justify-center gap-2">
             <Sun className="h-4 w-4 text-success" />
-            {t('All clear today! No urgent items.', 'Всё под контролем! Нет срочных задач.', 'ทุกอย่างเรียบร้อย! ไม่มีงานเร่งด่วน')}
+            {t('All clear today! No urgent items.', 'Срочных задач нет.', 'ทุกอย่างเรียบร้อย! ไม่มีงานเร่งด่วน')}
           </p>
         </CardContent>
       </Card>
@@ -56,7 +56,7 @@ export function MorningBriefing() {
     <section className="space-y-2">
       <h3 className="font-semibold text-[15px] flex items-center gap-2 px-1">
         <Sun className="h-4 w-4 text-warning" />
-        {t('Morning Briefing', 'Сводка дня', 'สรุปประจำวัน')}
+        {t('Morning Briefing', 'Сводка на сегодня', 'สรุปประจำวัน')}
       </h3>
       <Card>
         <CardContent className="py-3 px-4">

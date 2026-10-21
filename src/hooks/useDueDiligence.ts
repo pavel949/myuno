@@ -47,16 +47,18 @@ export interface DueDiligenceReport {
   generated_at: string;
 }
 
-export function useDueDiligenceReport(projectId?: string) {
+export function useDueDiligenceReport(projectId?: string, options: { publishedOnly?: boolean } = {}) {
   return useQuery({
-    queryKey: ['dd-report', projectId],
+    queryKey: ['dd-report', projectId, options.publishedOnly ? 'published' : 'accessible'],
     queryFn: async (): Promise<DueDiligenceReport | null> => {
       if (!projectId) return null;
-      const { data, error } = await supabase
+      let query = supabase
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .from('due_diligence_reports' as any)
         .select('*')
-        .eq('project_id', projectId)
+        .eq('project_id', projectId);
+      if (options.publishedOnly) query = query.eq('is_published', true);
+      const { data, error } = await query
         .order('version', { ascending: false })
         .limit(1)
         .maybeSingle();

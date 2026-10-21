@@ -136,6 +136,7 @@ const IGNORE_DIRS = new Set([
 ]);
 const IGNORE_FILES = new Set([
   'src/integrations/supabase/types.ts',
+  'public/design-bible.html',
 ]);
 
 function* walk(dir) {

@@ -136,10 +136,11 @@ export function AIAgentLogsPanel({ agentId, className }: AIAgentLogsPanelProps) 
                 <SelectItem value="7d">{isRu ? '7 дней' : '7 days'}</SelectItem>
               </SelectContent>
             </Select>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 min-h-[44px] min-w-[44px]"
+              aria-label={isRu ? 'Обновить' : 'Refresh'}
               onClick={() => refetch()}
               disabled={isFetching}
             >

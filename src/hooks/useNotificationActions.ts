@@ -46,12 +46,15 @@ export function useNotificationActions() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // Real-time subscription
+  // Real-time subscription. Use a unique channel name per mount to avoid
+  // "cannot add postgres_changes callbacks after subscribe()" when the hook
+  // is mounted from multiple components or remounted under StrictMode/HMR.
   useEffect(() => {
     if (!user) return;
 
+    const channelName = `notifications-${user.id}-${Math.random().toString(36).slice(2, 10)}`;
     const channel = supabase
-      .channel(`notifications-${user.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -70,6 +73,7 @@ export function useNotificationActions() {
       supabase.removeChannel(channel);
     };
   }, [user, fetchNotifications]);
+
 
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {

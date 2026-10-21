@@ -99,8 +99,6 @@ function AudiencePanel({ audience }: { audience: OutreachAudience }) {
     if (!campaigns) return [];
     if (audience === 'investor')
       return campaigns.filter((c) => c.campaign_source === 'capital_campaigns');
-    if (audience === 'mcc_lead')
-      return campaigns.filter((c) => c.campaign_source === 'mcc_campaigns');
     if (audience === 'guest')
       return campaigns.filter((c) => c.campaign_source === 'crm_sequences');
     return [];

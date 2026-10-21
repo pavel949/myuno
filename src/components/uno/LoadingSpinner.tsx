@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -39,14 +40,9 @@ export const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(
     }
 
     return (
-      <div 
-        ref={ref}
-        className={cn(
-          "animate-spin border-2 border-primary border-t-transparent rounded-full",
-          sizeClasses[size],
-          className
-        )} 
-      />
+      <div ref={ref} className={cn("flex items-center justify-center", className)}>
+        <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
+      </div>
     );
   }
 );
@@ -61,10 +57,25 @@ interface LoadingStateProps {
 
 export const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
   ({ message, branded = false }, ref) => {
+    // Render an exact visual match for the index.html `uno-splash` when no message is provided,
+    // ensuring a seamless transition from the hardcoded HTML splash to the React loading state.
+    if (!message && !branded) {
+      return (
+        <div
+          ref={ref}
+          className="uno-splash"
+          style={{ minHeight: '100dvh', width: '100%', margin: 0, padding: 0 }}
+          aria-label="Loading myUNO"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        </div>
+      );
+    }
+
     return (
       <div
         ref={ref}
-        className="min-h-[60vh] bg-background flex flex-col items-center justify-center gap-4 p-8"
+        className="flex-1 min-h-[60vh] bg-background flex flex-col items-center justify-center gap-4 p-8"
       >
         <LoadingSpinner size="lg" variant={branded ? 'logo' : 'default'} />
         {message && (

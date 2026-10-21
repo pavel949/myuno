@@ -13,6 +13,7 @@ import { Calculator, Loader2, ChevronRight, ChevronLeft, FileText, MessageCircle
 import { toast } from 'sonner';
 import { SEOHead } from '@/components/seo';
 import ReactMarkdown from 'react-markdown';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 interface StepConfig {
   id: string;
@@ -171,7 +172,7 @@ export default function TaxNavPage() {
                     <MessageCircle className="w-6 h-6 mx-auto text-primary mb-2" />
                     <p className="text-sm font-medium mb-1">{t ? 'Нужна консультация?' : 'Need expert advice?'}</p>
                     <p className="text-xs text-muted-foreground mb-3">{t ? 'Свяжитесь с налоговым консультантом' : 'Connect with a tax advisor'}</p>
-                    <Button size="sm" onClick={() => window.open('https://wa.me/66612345678?text=Tax consultation request', '_blank')}>
+                    <Button size="sm" onClick={() => window.open(getWhatsAppUrl(t ? 'Здравствуйте! Нужна налоговая консультация' : 'Tax consultation request'), '_blank')}>
                       {t ? 'Связаться' : 'Get in Touch'}
                     </Button>
                   </CardContent>

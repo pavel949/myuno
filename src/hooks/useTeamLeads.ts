@@ -128,7 +128,7 @@ export function useTeamLeads(filters?: LeadFilters) {
 
       const { error } = await supabase
         .from('consultation_requests')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id);
 
       if (error) throw error;

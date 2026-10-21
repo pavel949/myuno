@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -155,7 +157,7 @@ interface FormData {
 
 const DEFAULT_FORM_DATA: FormData = {
   price_per_night: '',
-  deposit_currency: 'THB',
+  deposit_currency: '', // set from current city in component init via useCityCurrency
   weekly_discount: '0',
   monthly_discount: '0',
   deposit_amount: '',
@@ -225,19 +227,21 @@ export default function OwnerRentalTerms() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
 const isRu = language === 'ru';
+
   const errorLog = createErrorHandler('OwnerRentalTerms');
 
   const { data: property, isLoading } = useOwnerProperty(id);
   const updateProperty = useUpdateOwnerProperty();
 
-  const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
+  const [formData, setFormData] = useState<FormData>({ ...DEFAULT_FORM_DATA, deposit_currency: cityCurrencyCode });
 
   useEffect(() => {
     if (property) {
       setFormData({
         price_per_night: property.price_per_night?.toString() || '',
-        deposit_currency: property.deposit_currency || 'THB',
+        deposit_currency: property.deposit_currency || cityCurrencyCode,
         weekly_discount: property.weekly_discount?.toString() || '0',
         monthly_discount: property.monthly_discount?.toString() || '0',
         deposit_amount: property.deposit_amount?.toString() || '',

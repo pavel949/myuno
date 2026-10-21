@@ -27,9 +27,9 @@ export const P17_HALAL: PersonaLanding = {
     { slug: 'halal-villas', label: { ru: 'Halal-friendly виллы', en: 'Halal-friendly villas' }, oneLiner: { ru: 'Privacy, prayer mat, qibla, kitchen для своей готовки.', en: 'Privacy, prayer mat, qibla, kitchen for self-cooking.' }, href: '/property/rent' },
     { slug: 'halal-dining', label: { ru: 'Halal-рестораны', en: 'Halal restaurants' }, oneLiner: { ru: '40+ сертифицированных заведений по районам.', en: '40+ certified venues across districts.' }, href: '/cluster/lifestyle' },
     { slug: 'mosque-map', label: { ru: 'Карта мечетей', en: 'Mosque map' }, oneLiner: { ru: 'Bang Tao, Kamala, Phuket Town — расписание молитв и Jumah.', en: 'Bang Tao, Kamala, Phuket Town — prayer & Jumah schedule.' }, href: '/map' },
-    { slug: 'family-transfer', label: { ru: 'Семейный трансфер', en: 'Family transfer' }, oneLiner: { ru: 'Toyota Commuter / Hiace на 9 пассажиров с детскими креслами.', en: 'Toyota Commuter / Hiace for 9 passengers with child seats.' }, href: '/landing/airport-transfer' },
+    { slug: 'family-transfer', label: { ru: 'Семейный трансфер', en: 'Family transfer' }, oneLiner: { ru: 'Toyota Commuter / Hiace на 9 пассажиров с детскими креслами.', en: 'Toyota Commuter / Hiace for 9 passengers with child seats.' }, href: '/transfer' },
     { slug: 'halal-yacht', label: { ru: 'Halal-yacht charter', en: 'Halal yacht charter' }, oneLiner: { ru: 'Чартер с halal-кейтерингом, prayer space, без алкоголя на борту.', en: 'Charter with halal catering, prayer space, no alcohol on board.' }, href: '/yachts' },
-    { slug: 'halal-grocery', label: { ru: 'Доставка halal-продуктов', en: 'Halal grocery delivery' }, oneLiner: { ru: 'Halal-мясо и продукты к вилле в день заселения.', en: 'Halal meat and groceries delivered on check-in day.' }, href: '/services/concierge' },
+    { slug: 'halal-grocery', label: { ru: 'Доставка halal-продуктов', en: 'Halal grocery delivery' }, oneLiner: { ru: 'Halal-мясо и продукты к вилле в день заселения.', en: 'Halal meat and groceries delivered on check-in day.' }, href: '/services/concierge', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Где больше всего halal-инфраструктуры?', en: 'Where is most halal infrastructure?' }, a: { ru: 'Bang Tao и Surin (мусульманские деревни), Kamala, Phuket Town (Old Town) — мечети, рестораны, мясные лавки. Patong — больше отелей с halal-меню. Karon/Kata — слабее.', en: 'Bang Tao and Surin (Muslim villages), Kamala, Phuket Town Old Town — mosques, restaurants, halal butchers. Patong — more hotels with halal menus. Karon/Kata — weaker.' } },
@@ -43,12 +43,12 @@ export const P17_HALAL: PersonaLanding = {
   secondaryCta: { label: { ru: 'Открыть карту мечетей', en: 'Open mosque map' }, href: '/map' },
   seo: {
     metaTitle: { ru: 'Halal Пхукет: виллы, рестораны, мечети — myUNO', en: 'Halal Phuket: villas, restaurants, mosques — myUNO' },
-    metaDescription: { ru: 'Halal-friendly отдых на Пхукете: 40+ сертифицированных ресторанов, виллы с prayer space, женские spa и семейные трансферы.', en: 'Halal-friendly holidays on Phuket: 40+ certified restaurants, villas with prayer space, women-only spa and family transfers.' },
+    metaDescription: { ru: 'Halal-friendly отдых на Пхукете: 40+ сертифицированных ресторанов, виллы с prayer space, женские spa и семейные трансферы.', en: 'Halal-friendly holidays in Phuket: 40+ certified restaurants, villas with prayer space, women-only spa and family transfers.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/halal',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/halal?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/halal?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/halal?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/halal?lang=en' },
     ],
   },
 };

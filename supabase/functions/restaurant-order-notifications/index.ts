@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       throw new Error('Missing required fields: booking_id and new_status')
     }
 
-    console.log(`Processing order status update: ${booking_id} -> ${new_status}`)
+    console.info(`Processing order status update: ${booking_id} -> ${new_status}`)
 
     // Get booking details
     const { data: booking, error: bookingError } = await supabase
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       .single()
 
     if (preferences && preferences.status_updates === false) {
-      console.log(`User ${booking.user_id} has disabled status updates`)
+      console.info(`User ${booking.user_id} has disabled status updates`)
       return new Response(
         JSON.stringify({ message: 'User has disabled status updates', sent: false }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       throw notifError
     }
 
-    console.log(`Notification sent for booking ${booking_id}`)
+    console.info(`Notification sent for booking ${booking_id}`)
 
     return new Response(
       JSON.stringify({ 

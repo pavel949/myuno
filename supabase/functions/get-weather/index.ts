@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     );
     if (rateLimitResponse) return rateLimitResponse;
 
-    console.log('Fetching weather data for Phuket...');
+    console.info('Fetching weather data for Phuket...');
     
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${PHUKET_LAT}&longitude=${PHUKET_LON}&current=temperature_2m,weather_code&timezone=Asia/Bangkok`;
     
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     
     const data = await response.json();
     
-    console.log('Open-Meteo response:', JSON.stringify(data.current));
+    console.info('Open-Meteo response:', JSON.stringify(data.current));
     
     const temp = Math.round(data.current.temperature_2m);
     const code = data.current.weather_code;
@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log('Returning weather data:', JSON.stringify(result));
+    console.info('Returning weather data:', JSON.stringify(result));
 
     return new Response(JSON.stringify(result), {
       headers: { 

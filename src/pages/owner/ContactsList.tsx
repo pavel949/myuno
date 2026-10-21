@@ -21,6 +21,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
+import { RelationshipTierBadge } from '@/components/owner/crm/RelationshipTierBadge';
 import { cn } from '@/lib/utils';
 import { CRM_ROLES, CRM_ROLE_LABELS, type CrmRole, CONTACT_SEGMENTS, CONTACT_SEGMENT_LABELS, type ContactSegment, HNW_TIERS, HNW_TIER_LABELS, type HnwTier } from '@/types/contact';
 
@@ -94,7 +95,14 @@ function ContactCard({
             {firstName.charAt(0) || '?'}{lastName.charAt(0) || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm leading-tight line-clamp-2">{fullName}</p>
+            <div className="flex items-start gap-1.5">
+              <p className="font-semibold text-sm leading-tight line-clamp-2 flex-1">{fullName}</p>
+              <RelationshipTierBadge
+                tier={(contact as CrmContact & { relationship_tier?: 'A' | 'B' | 'C' | null }).relationship_tier ?? null}
+                size="sm"
+                hideEmpty
+              />
+            </div>
             {contact.company_name && (
               <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
                 <Briefcase className="h-3 w-3 shrink-0" />
@@ -301,6 +309,7 @@ export default function ContactsList() {
   const [leadTempFilter, setLeadTempFilter] = useState<string | null>(null);
   const [crmRoleFilter, setCrmRoleFilter] = useState<string | null>(null);
   const [hnwTierFilter, setHnwTierFilter] = useState<string | null>(null);
+  const [relTierFilter, setRelTierFilter] = useState<'A' | 'B' | 'C' | null>(null);
   const [segmentFilter, setSegmentFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -316,6 +325,7 @@ export default function ContactsList() {
   const handleLeadTempChange = (v: string | null) => { setLeadTempFilter(v); setPage(0); };
   const handleCrmRoleChange = (v: string | null) => { setCrmRoleFilter(v); setPage(0); };
   const handleHnwTierChange = (v: string | null) => { setHnwTierFilter(v); setPage(0); };
+  const handleRelTierChange = (v: 'A' | 'B' | 'C' | null) => { setRelTierFilter(v); setPage(0); };
   const handleSegmentChange = (v: string | null) => { setSegmentFilter(v); setPage(0); };
 
   const { data: contactTypeOptions = [] } = useCrmOptions(companyId, 'contact_type');
@@ -337,6 +347,7 @@ export default function ContactsList() {
     leadTemperature: leadTempFilter || undefined,
     crmRole: crmRoleFilter || undefined,
     hnwTier: hnwTierFilter || undefined,
+    relationshipTier: relTierFilter || undefined,
     segment: segmentFilter || undefined,
   });
   const contacts = result?.data ?? [];
@@ -344,7 +355,7 @@ export default function ContactsList() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const activeFiltersCount =
-    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter, hnwTierFilter, segmentFilter].filter(Boolean).length +
+    [typeFilter, sourceFilter, tagFilter, lifecycleFilter, leadTempFilter, crmRoleFilter, hnwTierFilter, relTierFilter, segmentFilter].filter(Boolean).length +
     (vipFilter !== 'all' ? 1 : 0);
 
   if (!companyId) {
@@ -581,6 +592,36 @@ export default function ContactsList() {
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Engagement tier (A/B/C) */}
+          <div>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Уровень отношений' : 'Relationship tier'}</p>
+            <div className="flex flex-wrap gap-1">
+              <button
+                type="button"
+                onClick={() => handleRelTierChange(null)}
+                className={cn('px-2 py-0.5 text-xs rounded-full border', !relTierFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+              >
+                {isRu ? 'Все' : 'All'}
+              </button>
+              {(['A', 'B', 'C'] as const).map((tier) => (
+                <button
+                  key={tier}
+                  type="button"
+                  onClick={() => handleRelTierChange(relTierFilter === tier ? null : tier)}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border transition-colors',
+                    relTierFilter === tier
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'text-muted-foreground hover:border-primary/40',
+                  )}
+                >
+                  <RelationshipTierBadge tier={tier} size="sm" />
+                  <span>{tier}</span>
+                </button>
+              ))}
             </div>
           </div>
 

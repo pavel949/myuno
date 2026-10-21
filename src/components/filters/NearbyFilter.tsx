@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Navigation, Loader2, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,15 +60,19 @@ export function NearbyFilter({
   };
 
   // Update parent when location changes
-  if (hasLocation && isActive && (latitude !== null && longitude !== null)) {
-    onLocationChange(latitude, longitude);
-  }
+  useEffect(() => {
+    if (hasLocation && isActive && latitude !== null && longitude !== null) {
+      onLocationChange(latitude, longitude);
+    }
+  }, [hasLocation, isActive, latitude, longitude, onLocationChange]);
 
-  // Show error toast
-  if (error && !showError) {
+  // Show error toast (auto-dismiss after 3s, with cleanup)
+  useEffect(() => {
+    if (!error) return;
     setShowError(true);
-    setTimeout(() => setShowError(false), 3000);
-  }
+    const timer = setTimeout(() => setShowError(false), 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
 
   if (!supported) {
     return null;

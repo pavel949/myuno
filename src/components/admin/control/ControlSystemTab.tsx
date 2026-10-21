@@ -46,7 +46,7 @@ export function ControlSystemTab() {
                   <div className="flex-1">
                     <p className="font-medium">{isRussian ? section.labelRu : section.label}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Открыть' : 'Open'}>
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>

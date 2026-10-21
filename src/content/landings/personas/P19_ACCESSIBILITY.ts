@@ -25,11 +25,11 @@ export const P19_ACCESSIBILITY: PersonaLanding = {
   ],
   services: [
     { slug: 'accessible-stays', label: { ru: 'Step-free жильё', en: 'Step-free stays' }, oneLiner: { ru: 'Roll-in shower, поручни, прокат коляски от ฿1 500/день.', en: 'Roll-in shower, grab rails, wheelchair rental from ฿1,500/day.' }, href: '/property/rent' },
-    { slug: 'wheelchair-transfer', label: { ru: 'Трансфер с пандусом', en: 'Wheelchair transfer' }, oneLiner: { ru: 'Toyota Hiace с гидролифтом, водитель обучен. ฿2 800 в одну сторону.', en: 'Toyota Hiace with hydraulic lift, trained driver. ฿2,800 one-way.' }, href: '/landing/airport-transfer' },
+    { slug: 'wheelchair-transfer', label: { ru: 'Трансфер с пандусом', en: 'Wheelchair transfer' }, oneLiner: { ru: 'Toyota Hiace с гидролифтом, водитель обучен. ฿2 800 в одну сторону.', en: 'Toyota Hiace with hydraulic lift, trained driver. ฿2,800 one-way.' }, href: '/transfer' },
     { slug: 'beach-guide', label: { ru: 'Доступные пляжи', en: 'Accessible beaches' }, oneLiner: { ru: 'Surin, Bang Tao, Kata Yai — beach mat, тень, accessible toilet.', en: 'Surin, Bang Tao, Kata Yai — beach mat, shade, accessible toilet.' }, href: '/map' },
-    { slug: 'medical-on-call', label: { ru: 'Врач и сиделка 24/7', en: 'Doctor & carer 24/7' }, oneLiner: { ru: 'Bangkok Hospital home-visit ฿2 500, лицензированные сиделки ฿1 200/8ч.', en: 'Bangkok Hospital home visit ฿2,500, licensed carers ฿1,200/8h.' }, href: '/cluster/health' },
-    { slug: 'accessible-diving', label: { ru: 'Accessible diving', en: 'Accessible diving' }, oneLiner: { ru: 'PADI Adaptive Support diver, hoist на dive boat. От ฿8 500/день.', en: 'PADI Adaptive Support divers, hoist-equipped dive boat. From ฿8,500/day.' }, href: '/water-activities' },
-    { slug: 'medical-evac', label: { ru: 'Medical evacuation', en: 'Medical evacuation' }, oneLiner: { ru: 'AirAmbulance до Бангкока ($18–28K) или домой через Allianz/Cigna.', en: 'Air ambulance to Bangkok ($18–28K) or home via Allianz/Cigna.' }, href: '/services/insurance/liaison' },
+    { slug: 'medical-on-call', label: { ru: 'Врач и сиделка 24/7', en: 'Doctor & carer 24/7' }, oneLiner: { ru: 'Bangkok Hospital home-visit ฿2 500, лицензированные сиделки ฿1 200/8ч.', en: 'Bangkok Hospital home visit ฿2,500, licensed carers ฿1,200/8h.' }, href: '/cluster/health', availability: 'unavailable' },
+    { slug: 'accessible-diving', label: { ru: 'Accessible diving', en: 'Accessible diving' }, oneLiner: { ru: 'PADI Adaptive Support diver, hoist на dive boat. От ฿8 500/день.', en: 'PADI Adaptive Support divers, hoist-equipped dive boat. From ฿8,500/day.' }, href: '/water-activities', availability: 'unavailable' },
+    { slug: 'medical-evac', label: { ru: 'Medical evacuation', en: 'Medical evacuation' }, oneLiner: { ru: 'AirAmbulance до Бангкока ($18–28K) или домой через Allianz/Cigna.', en: 'Air ambulance to Bangkok ($18–28K) or home via Allianz/Cigna.' }, href: '/services/insurance/liaison', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Какой район самый удобный?', en: 'Which area is most convenient?' }, a: { ru: 'Bang Tao, Laguna, Cherngtalay — ровные тротуары и новая застройка с лифтами и широкими дверями. Patong — много step-free отелей, но шумно. Kata/Karon — есть accessible-curated отели (Centara Grand). Old Town — узкие тротуары, не рекомендуем.', en: 'Bang Tao, Laguna, Cherngtalay — flat sidewalks and modern buildings with lifts and wide doors. Patong — many step-free hotels but noisy. Kata/Karon — curated accessible hotels (Centara Grand). Old Town — narrow sidewalks, not recommended.' } },
@@ -40,15 +40,15 @@ export const P19_ACCESSIBILITY: PersonaLanding = {
     { q: { ru: 'Есть ли услуги переводчика жестового языка?', en: 'Is sign language interpreting available?' }, a: { ru: 'ASL и International Sign — по запросу через Phuket Disabled Persons Foundation, ฿2 500–3 500/час, бронь за 7 дней. Тайский жестовый — стандартно в государственных клиниках. Lip-reading consultations в Bangkok Hospital — без доплаты.', en: 'ASL and International Sign — on request via Phuket Disabled Persons Foundation, ฿2,500–3,500/hr, 7-day notice. Thai sign language — standard at public hospitals. Lip-reading consultations at Bangkok Hospital — no surcharge.' } },
   ],
   primaryCta: { label: { ru: 'Подобрать жильё и план', en: 'Find a stay & plan' }, href: '/property/rent', subtitle: { ru: 'Подбор с инспекцией доступности — за 48 часов.', en: 'Shortlist with accessibility inspection — within 48 hours.' } },
-  secondaryCta: { label: { ru: 'Заказать трансфер', en: 'Book a transfer' }, href: '/landing/airport-transfer' },
+  secondaryCta: { label: { ru: 'Заказать трансфер', en: 'Book a transfer' }, href: '/transport/airport-transfer' },
   seo: {
     metaTitle: { ru: 'Доступный Пхукет: жильё, трансфер, врачи — myUNO', en: 'Accessible Phuket: stays, transfer, doctors — myUNO' },
-    metaDescription: { ru: 'Step-free виллы, трансфер с пандусом, прокат электроколяски, accessible diving и медицинская поддержка 24/7 для путешественников с ограниченными возможностями.', en: 'Step-free villas, ramp transfer, power wheelchair rental, accessible diving and 24/7 medical support for accessibility-first travellers on Phuket.' },
+    metaDescription: { ru: 'Step-free виллы, трансфер с пандусом, прокат электроколяски, accessible diving и медицинская поддержка 24/7 для путешественников с ограниченными возможностями.', en: 'Step-free villas, ramp transfer, power wheelchair rental, accessible diving and 24/7 medical support for accessibility-first travellers in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/accessibility',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/accessibility?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/accessibility?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/accessibility?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/accessibility?lang=en' },
     ],
   },
 };

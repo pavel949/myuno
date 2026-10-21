@@ -137,7 +137,7 @@ const queryClient = useQueryClient();
 
       // Call atomic RPC
       const { data: orderResult, error: orderError } = await supabase
-        .rpc('create_order_atomic', {
+        .rpc('create_order_checked', {
           p_order_type: input.order_type,
           p_customer_user_id: user.id,
           p_provider_org_id: input.provider_org_id || null,
@@ -171,16 +171,31 @@ const queryClient = useQueryClient();
       const orderId = result.order_id!;
       const orderNumber = result.order_number!;
 
-      // Create notification for customer
-      await supabase.from('notifications').insert({
+      // create_order_atomic always records the payment_intent as 'pending'.
+      // When the caller already captured the funds (e.g. wallet debit), reflect
+      // that by marking the intent as succeeded so the order is persisted as paid.
+      if (input.payment?.status === 'paid') {
+        const { error: intentError } = await supabase
+          .from('payment_intents')
+          .update({ status: 'succeeded' })
+          .eq('order_id', orderId);
+        if (intentError) errorLog.silent(intentError, 'mark_payment_succeeded');
+      }
+
+      // Create notification for customer. The order is already created at this
+      // point, so a notification failure must NOT bubble up and make the caller
+      // report the order as failed (which would prompt a duplicate retry). Treat
+      // it as non-fatal and log silently.
+      const { error: notifyError } = await supabase.from('notifications').insert({
         user_id: user.id,
         title: language === 'ru' ? 'Заказ создан' : 'Order Created',
-        body: language === 'ru' 
+        body: language === 'ru'
           ? `Ваш заказ ${orderNumber} успешно создан`
           : `Your order ${orderNumber} has been created`,
         type: 'booking',
         data: { order_id: orderId, order_type: input.order_type },
       });
+      if (notifyError) errorLog.silent(notifyError, 'create_order_notification');
 
       // Send customer email notification (non-blocking)
       supabase.functions.invoke('send-order-email', {

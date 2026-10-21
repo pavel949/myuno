@@ -108,13 +108,13 @@
          );
  
          const whatsappResult = await whatsappResponse.json();
-         console.log("WhatsApp API response:", whatsappResult);
+         console.info("WhatsApp API response:", whatsappResult);
        } catch (waError) {
          console.error("WhatsApp API error:", waError);
        }
      } else {
-       console.log("WhatsApp credentials not configured. Message to send:");
-       console.log(message);
+       console.info("WhatsApp credentials not configured. Message to send:");
+       console.info(message);
      }
  
      // Also send email notification via Resend as backup
@@ -150,7 +150,7 @@
          });
  
          const emailResult = await emailResponse.json();
-         console.log("Email sent:", emailResult);
+         console.info("Email sent:", emailResult);
        } catch (emailError) {
          console.error("Email error:", emailError);
        }

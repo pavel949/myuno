@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageShell } from '@/components/page/PageShell';
 import { Badge } from '@/components/ui/badge';
 import { 
   ClipboardList, ShieldCheck, MessageSquare, Users, 
@@ -18,24 +19,22 @@ import { OperationsDisputesTab } from '@/components/admin/operations/OperationsD
 import { OperationsManualPaymentsTab } from '@/components/admin/operations/OperationsManualPaymentsTab';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { applyOrderQueue, applyTicketQueue } from '@/lib/adminDashboardQueues';
 
 function useOperationsOverview() {
   return useQuery({
     queryKey: ['operations-overview'],
     queryFn: async () => {
       const [orders, tickets, prospects] = await Promise.all([
-        supabase.from('orders').select('status', { count: 'exact', head: false })
-          .is('deleted_at', null).limit(500),
-        supabase.from('support_tickets').select('status', { count: 'exact', head: false })
-          .limit(500),
-        supabase.from('vendor_prospects').select('status', { count: 'exact', head: false })
-          .limit(500),
+        applyOrderQueue(supabase.from('orders').select('id', { count: 'exact', head: true }), {status: 'pending', createdBefore: null}),
+        applyTicketQueue(supabase.from('support_tickets').select('id', { count: 'exact', head: true }), 'active'),
+        supabase.from('vendor_prospects').select('id', { count: 'exact', head: true }).or('status.eq.new,status.is.null'),
       ]);
 
       return {
-        pendingOrders: orders.data?.filter(o => o.status === 'pending').length || 0,
-        openTickets: tickets.data?.filter(t => t.status === 'open').length || 0,
-        newLeads: prospects.data?.filter(p => p.status === 'new' || !p.status).length || 0,
+        pendingOrders: orders.error ? null : orders.count,
+        openTickets: tickets.error ? null : tickets.count,
+        newLeads: prospects.error ? null : prospects.count,
       };
     },
     refetchInterval: 30000,
@@ -46,20 +45,12 @@ const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 
 
 export default function AdminOperations() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const tabFromUrl = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<typeof VALID_TABS[number]>(
-    tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number]) ? tabFromUrl as typeof VALID_TABS[number] : 'bookings'
-  );
+  const activeTab = tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number]) ? tabFromUrl as typeof VALID_TABS[number] : 'bookings';
   const { data: overview, refetch: refetchOverview } = useOperationsOverview();
-
-  useEffect(() => {
-    if (tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number])) {
-      setActiveTab(tabFromUrl as typeof VALID_TABS[number]);
-    }
-  }, [tabFromUrl]);
 
   const tabs = [
     { 
@@ -132,7 +123,7 @@ export default function AdminOperations() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-[1536px] mx-auto">
+    <PageShell width="full" className="max-w-[1536px] space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -143,9 +134,10 @@ export default function AdminOperations() {
             {isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
           </p>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={isRu ? 'Обновить' : 'Refresh'}
           onClick={() => refetchOverview()}
           className="text-muted-foreground"
         >
@@ -155,12 +147,11 @@ export default function AdminOperations() {
 
       {/* Quick Actions Bar */}
       <Card className="border-dashed">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
-              {isRu ? 'Быстрые действия' : 'Quick actions'}
-            </span>
-            <div className="h-4 w-px bg-border shrink-0" />
+        <CardContent className="p-3 space-y-2">
+          <span className="text-xs text-muted-foreground font-medium block">
+            {isRu ? 'Быстрые действия' : 'Quick actions'}
+          </span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
             {quickActions.map((action) => (
               <Button
                 key={action.path}
@@ -179,19 +170,19 @@ export default function AdminOperations() {
       </Card>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 w-full">
+      <Tabs value={activeTab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next; })} className="w-full">
+        <TabsList className="flex w-full overflow-x-auto h-auto gap-1 bg-muted/50 p-1 justify-start sm:flex-wrap">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="gap-2 data-[state=active]:bg-background flex-1 sm:flex-none"
+              className="gap-1.5 data-[state=active]:bg-background shrink-0 whitespace-nowrap"
             >
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <tab.icon className="h-4 w-4 shrink-0" />
+              <span>{tab.label}</span>
               {tab.badge != null && tab.badge > 0 && (
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="h-5 min-w-[20px] px-1.5 text-xs font-bold"
                 >
                   {tab.badge}
@@ -225,6 +216,6 @@ export default function AdminOperations() {
           <OperationsManualPaymentsTab />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

@@ -28,7 +28,7 @@ export default function ForgotPassword() {
       emailSchema.parse(email);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        setError(e.errors[0].message);
+        setError(e.issues[0].message);
         return;
       }
     }
@@ -100,7 +100,7 @@ export default function ForgotPassword() {
           ) : (
             <div className="space-y-8">
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-display font-bold text-gradient-gold">
+                <h1 className="text-3xl font-display font-bold text-primary">
                   {language === 'ru' ? 'Забыли пароль?' : 'Forgot password?'}
                 </h1>
                 <p className="text-muted-foreground">

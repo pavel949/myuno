@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════
     // Stage 1: Search for suppliers via Firecrawl
     // ═══════════════════════════════════════
-    console.log(`[Discovery v2] Searching ${vertical} in ${location}...`);
+    console.info(`[Discovery v2] Searching ${vertical} in ${location}...`);
 
     const allResults: any[] = [];
     for (const query of config.searchQueries.slice(0, 2)) {
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
           const searchData = await searchRes.json();
           const results = searchData?.data || [];
           allResults.push(...results);
-          console.log(`[Discovery v2] Query "${query}": ${results.length} results`);
+          console.info(`[Discovery v2] Query "${query}": ${results.length} results`);
         } else {
           const errText = await searchRes.text();
           console.error(`[Discovery v2] Search failed for "${query}":`, searchRes.status, errText);
@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
       r.url && arr.findIndex(x => x.url === r.url) === i
     ).slice(0, limit);
 
-    console.log(`[Discovery v2] ${uniqueResults.length} unique results`);
+    console.info(`[Discovery v2] ${uniqueResults.length} unique results`);
 
     // ═══════════════════════════════════════
     // Stage 2: Deep scrape top results
@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
           deepScrapedContent.push(
             `--- Site ${i + 1}: ${r.url} ---\nTitle: ${r.title || 'N/A'}\nSearch Description: ${r.description || 'N/A'}\nFull Content (first 2000 chars):\n${md.slice(0, 2000)}`
           );
-          console.log(`[Discovery v2] Deep scraped: ${r.url} (${md.length} chars)`);
+          console.info(`[Discovery v2] Deep scraped: ${r.url} (${md.length} chars)`);
         } else {
           // Fallback to search result content
           deepScrapedContent.push(
@@ -339,7 +339,7 @@ IMPORTANT RULES:
       }
     }
 
-    console.log(`[Discovery v2] AI extracted ${suppliers.length} suppliers`);
+    console.info(`[Discovery v2] AI extracted ${suppliers.length} suppliers`);
 
     // ═══════════════════════════════════════
     // Stage 4: Verify & Store
@@ -469,7 +469,7 @@ IMPORTANT RULES:
       });
     }
 
-    console.log(`[Discovery v2] Done: ${inserted} inserted, ${skipped} skipped, ${latency}ms`);
+    console.info(`[Discovery v2] Done: ${inserted} inserted, ${skipped} skipped, ${latency}ms`);
 
     return new Response(
       JSON.stringify({

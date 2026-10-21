@@ -179,7 +179,7 @@ export function PropertyInquiriesWidget() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            aria-label={isRu ? 'Все сообщения' : 'All messages'}
             onClick={() => navigate('/mc/messages')}
           >
             <ChevronRight className="h-4 w-4" />
@@ -255,7 +255,7 @@ export function PropertyInquiriesWidget() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7 text-success hover:bg-success/10"
+                      className="min-h-[44px] min-w-[44px] text-success hover:bg-success/10"
                       disabled={isActing}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -268,7 +268,7 @@ export function PropertyInquiriesWidget() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                      className="min-h-[44px] min-w-[44px] text-destructive hover:bg-destructive/10"
                       disabled={isActing}
                       onClick={(e) => {
                         e.stopPropagation();

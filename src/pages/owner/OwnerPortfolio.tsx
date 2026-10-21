@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { usePropertyFinancialsFull, useFinancialStats, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
@@ -10,6 +12,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
@@ -26,11 +29,15 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import { CHART_THEME } from '@/lib/chartTheme';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
-const CHART_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+const CHART_COLORS = CHART_THEME.palette;
 
 export default function OwnerPortfolio() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -112,6 +119,18 @@ export default function OwnerPortfolio() {
     });
   }, [properties, financials, bookings, isRu]);
 
+  // Sortable property comparison — lets the owner surface under/over-performers
+  const [sortBy, setSortBy] = useState<'net' | 'income' | 'occupancy' | 'rate'>('net');
+  const sortedMetrics = useMemo(() => {
+    const keyFn: Record<typeof sortBy, (p: typeof propertyMetrics[number]) => number> = {
+      net: p => p.netProfit,
+      income: p => p.income,
+      occupancy: p => p.occupancyRate,
+      rate: p => p.avgNightlyRate,
+    };
+    return [...propertyMetrics].sort((a, b) => keyFn[sortBy](b) - keyFn[sortBy](a));
+  }, [propertyMetrics, sortBy]);
+
   // Expense breakdown by category
   const expensesByCategory = useMemo(() => {
     if (!financials) return [];
@@ -155,13 +174,14 @@ export default function OwnerPortfolio() {
   }, [propertyMetrics, properties]);
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value.toFixed(0)}`;
+    if (value >= 1000000) return `${curSym}${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${curSym}${(value / 1000).toFixed(0)}K`;
+    return `${curSym}${value.toFixed(0)}`;
   };
 
+
   if (!user) {
-    navigate('/auth');
+    redirectToAuth(navigate);
     return null;
   }
 
@@ -251,10 +271,32 @@ export default function OwnerPortfolio() {
       {/* Property Comparison Table */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            {isRu ? 'Сравнение объектов' : 'Property Comparison'}
-          </CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              {isRu ? 'Сравнение объектов' : 'Property Comparison'}
+            </CardTitle>
+            {propertyMetrics.length > 1 && (
+              <div className="flex flex-wrap gap-1">
+                {([
+                  { key: 'net', label: isRu ? 'Прибыль' : 'Net' },
+                  { key: 'income', label: isRu ? 'Доход' : 'Income' },
+                  { key: 'occupancy', label: isRu ? 'Загр.' : 'Occ.' },
+                  { key: 'rate', label: isRu ? 'Ночь' : 'Night' },
+                ] as const).map(opt => (
+                  <Button
+                    key={opt.key}
+                    size="sm"
+                    variant={sortBy === opt.key ? 'default' : 'outline'}
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setSortBy(opt.key)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -270,8 +312,8 @@ export default function OwnerPortfolio() {
             </div>
           ) : (
             <div className="space-y-3">
-              {propertyMetrics.map((property, index) => (
-                <div 
+              {sortedMetrics.map((property) => (
+                <div
                   key={property.id}
                   className="p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => navigate(`/mc/properties/${property.id}`)}
@@ -307,7 +349,7 @@ export default function OwnerPortfolio() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">{isRu ? 'Ночь' : 'Night'}</p>
-                          <p className="font-medium">฿{property.avgNightlyRate.toFixed(0)}</p>
+                          <p className="font-medium">{curSym}{property.avgNightlyRate.toFixed(0)}</p>
                         </div>
                       </div>
                       

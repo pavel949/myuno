@@ -26,8 +26,8 @@ export const P10_OPERATORS: PersonaLanding = {
   ],
   services: [
     { slug: 'portfolio-expansion', label: { ru: '«Готов к #2?» analysis', en: '“Ready for #2?” analysis' }, oneLiner: { ru: 'Анализ текущего объекта + рекомендации диверсификации.', en: 'Current-property review + diversification recommendation.' }, href: '/owner' },
-    { slug: 'district-heatmap', label: { ru: 'District Heatmap (Pro)', en: 'District Heatmap (Pro)' }, oneLiner: { ru: 'Yield, occupancy, ADR по 8 районам — реальные PM-данные.', en: 'Yield, occupancy, ADR across 8 districts — real PM data.' }, href: '/property/insights' },
-    { slug: 'urgent-deals', label: { ru: 'Urgent deals под ваши критерии', en: 'Urgent deals matching your criteria' }, oneLiner: { ru: 'Distressed-объекты со скидкой 15–25% к AVM.', en: 'Distressed properties with 15–25% discount to AVM.' }, href: '/property/urgent' },
+    { slug: 'district-heatmap', label: { ru: 'District Heatmap (Pro)', en: 'District Heatmap (Pro)' }, oneLiner: { ru: 'Yield, occupancy, ADR по 8 районам — реальные PM-данные.', en: 'Yield, occupancy, ADR across 8 districts — real PM data.' }, href: '/property/insights', availability: 'unavailable' },
+    { slug: 'urgent-deals', label: { ru: 'Urgent deals под ваши критерии', en: 'Urgent deals matching your criteria' }, oneLiner: { ru: 'Distressed-объекты со скидкой 15–25% к AVM.', en: 'Distressed properties with 15–25% discount to AVM.' }, href: '/property/urgent', availability: 'unavailable' },
     { slug: 'pm-platform', label: { ru: 'Управление портфелем', en: 'Portfolio management' }, oneLiner: { ru: 'Multi-property dashboard, единая отчётность, налоги.', en: 'Multi-property dashboard, unified reporting, taxes.' }, href: '/owner' },
   ],
   faq: [
@@ -43,7 +43,7 @@ export const P10_OPERATORS: PersonaLanding = {
   },
   secondaryCta: {
     label: { ru: 'Посмотреть urgent deals', en: 'Browse urgent deals' },
-    href: '/property/urgent',
+    href: '/property/urgent', availability: 'unavailable',
   },
   seo: {
     metaTitle: { ru: 'Расширение портфеля недвижимости на Пхукете — myUNO', en: 'Phuket property portfolio expansion — myUNO' },
@@ -51,8 +51,8 @@ export const P10_OPERATORS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/operators',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/operators?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/operators?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/operators?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/operators?lang=en' },
     ],
   },
 };

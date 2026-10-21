@@ -17,18 +17,23 @@ import { Button } from '@/components/ui/button';
 import { LandingShell, LandingChecklist } from '@/components/landings/LandingShell';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+
 
 export default function OwnerManagementLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+
 
   return (
     <LandingShell
       eyebrow={{ ru: 'Для собственников', en: 'For property owners' }}
       title={{
-        ru: 'Full Management — ваша вилла или кондо в надёжных руках',
+        ru: 'Полное управление — ваша вилла или квартира в надёжных руках',
         en: 'Full Management — your villa or condo in safe hands',
       }}
       subtitle={{
@@ -53,15 +58,15 @@ export default function OwnerManagementLanding() {
           icon: Users,
           title: { ru: 'Поток гостей', en: 'Guest pipeline' },
           desc: {
-            ru: 'Booking, Airbnb, Agoda, прямые продажи myUNO и русскоязычные каналы.',
-            en: 'Booking, Airbnb, Agoda, direct myUNO sales and Russian-speaking channels.',
+            ru: 'Booking, Airbnb, Agoda, прямые продажи myUNO и международные каналы (RU/EN/TH).',
+            en: 'Booking, Airbnb, Agoda, direct myUNO sales and international channels (EN/RU/TH).',
           },
         },
         {
           icon: Brush,
           title: { ru: 'Эксплуатация', en: 'Operations' },
           desc: {
-            ru: 'Уборка, бельё, мелкий ремонт, чек-ин 24/7, бассейн и сад — всё на нас.',
+            ru: 'Уборка, бельё, мелкий ремонт, заселение 24/7, бассейн и сад — всё на нас.',
             en: 'Cleaning, linen, minor repairs, 24/7 check-in, pool and garden — handled.',
           },
         },
@@ -69,7 +74,7 @@ export default function OwnerManagementLanding() {
           icon: Shield,
           title: { ru: 'Прозрачные финансы', en: 'Transparent finance' },
           desc: {
-            ru: 'Каждое движение — в кабинете собственника. Месячный P&L и выплаты по графику.',
+            ru: 'Каждое движение — в кабинете собственника. Ежемесячный отчёт о доходах и расходах и выплаты по графику.',
             en: 'Every entry visible in the owner portal. Monthly P&L and on-schedule payouts.',
           },
         },
@@ -104,7 +109,7 @@ export default function OwnerManagementLanding() {
         />
       }
       seoTitle={{
-        ru: 'Управление виллами и кондо на Пхукете — Full Management myUNO',
+        ru: 'Полное управление виллами и квартирами на Пхукете — myUNO',
         en: 'Villa and condo management in Phuket — myUNO Full Management',
       }}
       seoDescription={{
@@ -114,29 +119,41 @@ export default function OwnerManagementLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Что входит в Full Management', en: 'What full management includes' })}
+          {t({ ru: 'Что входит в полное управление', en: 'What full management includes' })}
         </h2>
         <LandingChecklist
           items={[
             { ru: 'Поиск и проверка гостей', en: 'Guest sourcing and screening' },
             { ru: 'Каналы: Booking, Airbnb, Agoda, myUNO', en: 'Channels: Booking, Airbnb, Agoda, myUNO' },
-            { ru: 'Чек-ин / чек-аут 24/7', en: '24/7 check-in / check-out' },
+            { ru: 'Заселение и выезд круглосуточно', en: '24/7 check-in / check-out' },
             { ru: 'Уборка и смена белья', en: 'Cleaning and linen' },
             { ru: 'Мелкий ремонт и эксплуатация', en: 'Minor repairs and ops' },
             { ru: 'Динамические цены и каналы продаж', en: 'Dynamic pricing and sales channels' },
             { ru: 'Финансовый отчёт и выплаты', en: 'Financial reporting and payouts' },
-            { ru: 'Поддержка владельца на русском', en: 'Russian-speaking owner support' },
+            { ru: 'Многоязычная поддержка владельца (RU / EN / TH)', en: 'Multilingual owner support (EN / RU / TH)' },
           ]}
         />
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button onClick={() => navigate('/mc/full-management')}>
-            {t({ ru: 'Заполнить детальную заявку', en: 'Submit detailed request' })}
+          <Button
+            onClick={() => {
+              if (user) {
+                navigate(`${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`);
+              } else {
+                navigate(`/auth?redirect=${encodeURIComponent(`${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`)}`);
+              }
+            }}
+          >
+            {t({ ru: 'Стать собственником / УК', en: 'Become owner / MC' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
-          <Button variant="outline" onClick={() => navigate('/pricing')}>
+          <Button variant="outline" onClick={() => navigate('/mc/full-management')}>
+            {t({ ru: 'Заполнить детальную заявку', en: 'Submit detailed request' })}
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/pricing')}>
             {t({ ru: 'Тарифы и подписки', en: 'Pricing & subscriptions' })}
           </Button>
         </div>
+
       </div>
     </LandingShell>
   );

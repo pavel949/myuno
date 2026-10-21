@@ -21,9 +21,10 @@ source of truth at `src/lib/catalog/taxonomy.ts`. Six parallel catalogs
 `life_situations`, canonical doc) were collapsed into:
 
 - **6 canonical clusters** (`arrive`, `live`, `manage`, `invest`, `legal`, `build`)
-- **16 canonical categories** mapped via `categories.slug` → `clusterId`
+- **18 canonical categories** (arrive=3 · live=10 · manage=0 · invest=1 · legal=3 · build=1), mapped via `categories.slug` → `clusterId`. `CategoryId` union ↔ `CATEGORIES[]` align 1-1.
+- **~68 services** total, all `verticalId` refs resolve in `verticals.ts` (20 verticals)
 - **`cluster_life_situations`** bridge table for the 17 life situations
-- `verticalGroups.ts` and `nav/clusterCatalog.ts` are now thin adapters
+- `verticalGroups.ts` and `nav/clusterCatalog.ts` are now thin adapters — never edit data there
 
 Drift between Home grid, Footer, Discover, and Catalog page is fixed:
 they all derive from the SSOT.

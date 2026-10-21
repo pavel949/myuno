@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useCallback, useEffect, useRef } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,16 +47,17 @@ export default function AddProperty() {
   }, [prefillData, wizard.isCloneDataApplied, wizard.applyPrefillData]);
 
   useEffect(() => {
-    if (!ownerContactId || !ownerContact) return;
+    if (!ownerContactId || !ownerContact || wizard.managedCreation) return;
     if (ownerPrefillApplied.current === ownerContactId) return;
     ownerPrefillApplied.current = ownerContactId;
     wizard.updateOwnershipData({
       ownership_type: 'verbal',
+      owner_contact_id: ownerContactId,
       actual_owner_name: `${ownerContact.first_name} ${ownerContact.last_name}`.trim(),
       actual_owner_phone: ownerContact.phone || ownerContact.mobile || ownerContact.whatsapp || '',
       actual_owner_email: ownerContact.email || '',
     });
-  }, [ownerContactId, ownerContact, wizard.updateOwnershipData]);
+  }, [ownerContactId, ownerContact, wizard.managedCreation, wizard.updateOwnershipData]);
 
   const handleNewObject = useCallback(() => {
     wizard.resetForm();
@@ -68,17 +70,19 @@ export default function AddProperty() {
       case 'basic':
         return (
           <BasicInfoStep
+            catalogueOnly={wizard.managedCreation}
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
             selectedProject={wizard.selectedProject}
             setSelectedProject={wizard.setSelectedProject}
-            ownershipData={wizard.ownershipData}
+            ownershipData={wizard.managedCreation ? undefined : wizard.ownershipData}
             updateOwnershipData={wizard.updateOwnershipData}
           />
         );
       case 'location':
         return (
           <LocationStep
+            catalogueOnly={wizard.managedCreation}
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
           />
@@ -93,6 +97,9 @@ export default function AddProperty() {
       case 'pricing':
         return (
           <PricingStep
+            authoringOnly={wizard.managedCreation}
+            canEditPricing={wizard.authoringCapabilities.pricing}
+            canEditBookingTerms={wizard.authoringCapabilities.bookings}
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
             selectedProject={wizard.selectedProject}
@@ -109,13 +116,16 @@ export default function AddProperty() {
       <PropertySubmissionSuccess
         propertyId={wizard.createdPropertyId}
         propertyTitle={wizard.createdPropertyTitle}
+        approvalStatus={wizard.createdApprovalStatus}
         onAddAnother={handleNewObject}
       />
     );
   }
 
+  if (wizard.companyError) return <PageContainer><p role="alert">{pickLang(language, { en: 'Could not verify your company workspace. Retry before creating a property.', ru: 'Не удалось проверить рабочую область компании. Повторите проверку перед созданием объекта.', th: 'ตรวจสอบพื้นที่ทำงานบริษัทไม่สำเร็จ โปรดลองอีกครั้งก่อนสร้างอสังหาริมทรัพย์' })}</p><Button onClick={() => void wizard.retryCompany()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button></PageContainer>;
+
   // Loading state for clone or latest server draft
-  if ((wizard.cloneFromId && wizard.isLoadingSource) || wizard.isLoadingDraft) {
+  if (wizard.companyLoading || (wizard.cloneFromId && wizard.isLoadingSource) || wizard.isLoadingDraft) {
     return (
       <PageContainer>
         <PageHeader 
@@ -136,6 +146,23 @@ export default function AddProperty() {
 
   return (
     <PageContainer>
+      {wizard.managedCreation && (
+        <div className="space-y-3 mb-4 rounded-none border p-4">
+          <p className="text-sm text-muted-foreground">{pickLang(language, { ru: 'Объект создаётся в назначенной компании. Сотрудник не становится собственником. Данные собственника и договоры оформляются отдельно через уполномоченного администратора.', en: 'This property belongs to the assigned company workspace. Creating it does not make you its owner. Owner identity and agreements are handled separately by an authorized administrator.', th: 'สร้างอสังหาริมทรัพย์ในพื้นที่ทำงานของบริษัทที่ได้รับมอบหมาย การสร้างไม่ได้ทำให้คุณเป็นเจ้าของ ผู้ดูแลที่ได้รับอนุญาตจะจัดการข้อมูลเจ้าของและสัญญาแยกต่างหาก' })}</p>
+          {wizard.creationScope.isLoading && <p role="status">{pickLang(language, { ru: 'Проверяем рабочую область…', en: 'Checking Operating Space…', th: 'กำลังตรวจสอบพื้นที่ปฏิบัติงาน…' })}</p>}
+          {wizard.creationScope.error && <p role="alert" className="text-sm text-destructive">{pickLang(language, { ru: 'Не удалось проверить доступ. Сохранение недоступно.', en: 'Could not verify access. Saving is unavailable.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ จึงยังบันทึกไม่ได้' })}</p>}
+          {wizard.creationScope.data && (
+            <label htmlFor="property-operating-space" className="block text-sm space-y-1">
+              <span>{pickLang(language, { ru: 'Рабочая область', en: 'Operating Space', th: 'พื้นที่ปฏิบัติงาน' })}</span>
+              <select id="property-operating-space" className="w-full min-h-11 border bg-background p-2" value={wizard.operatingSpaceId || (wizard.operatingSpaces.length === 1 ? wizard.operatingSpaces[0].id : '')} onChange={event => wizard.setOperatingSpaceId(event.target.value || null)}>
+                <option value="">{pickLang(language, { ru: 'Выберите назначенную область', en: 'Select an assigned Space', th: 'เลือกพื้นที่ที่ได้รับมอบหมาย' })}</option>
+                {wizard.operatingSpaces.map(space => <option key={space.id} value={space.id}>{isRu ? space.name_ru : space.name_en}</option>)}
+              </select>
+            </label>
+          )}
+        </div>
+      )}
+      {wizard.draftLoadError && <Alert variant="destructive"><AlertDescription>{wizard.draftLoadError} <Link to={APP_ROUTES.MC_PROPERTIES}>{pickLang(language, { ru: 'Открыть объекты', en: 'Open properties', th: 'เปิดรายการอสังหาริมทรัพย์' })}</Link></AlertDescription></Alert>}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <PageHeader 
           title={isRu ? 'Добавить объект' : 'Add Property'}
@@ -189,14 +216,14 @@ export default function AddProperty() {
         </Alert>
       )}
 
-      {ownerContactId && (
+      {ownerContactId && !wizard.managedCreation && (
         <Alert className="bg-muted/50 border-border">
           <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
             <span>
               {ownerContact
                 ? (isRu
-                  ? `Владелец предзаполнен из CRM: ${ownerContact.first_name} ${ownerContact.last_name}. После сохранения объекта свяжите его с контактом на карточке.`
-                  : `Owner prefilled from CRM: ${ownerContact.first_name} ${ownerContact.last_name}. After saving, link the property from the contact card.`)
+                  ? `Владелец из CRM: ${ownerContact.first_name} ${ownerContact.last_name}. Объект будет автоматически связан с этим контактом после сохранения.`
+                  : `Owner from CRM: ${ownerContact.first_name} ${ownerContact.last_name}. The property will be linked to this contact automatically on save.`)
                 : (isRu ? 'Загрузка данных контакта…' : 'Loading contact…')}
             </span>
             <Button variant="outline" size="sm" asChild className="shrink-0 w-full sm:w-auto">
@@ -211,6 +238,7 @@ export default function AddProperty() {
       {/* Main Wizard with Live Preview */}
       <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6 mt-6" onBlurCapture={wizard.saveDraftOnBlur}>
         <PropertyWizard
+          submitLabel={wizard.formData.platform_listed ? pickLang(language, { en: 'Save and submit for review', ru: 'Сохранить и отправить на проверку', th: 'บันทึกและส่งตรวจสอบ' }) : pickLang(language, { en: 'Save draft', ru: 'Сохранить черновик', th: 'บันทึกฉบับร่าง' })}
           onSubmit={wizard.handleSubmit}
           isSubmitting={wizard.isSubmitting}
           validateStep={wizard.validateStep}

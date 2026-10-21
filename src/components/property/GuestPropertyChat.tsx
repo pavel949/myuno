@@ -16,6 +16,8 @@ import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { ModerationResult } from '@/lib/chatModerationPatterns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface GuestPropertyChatProps {
   propertyId: string;
@@ -121,7 +123,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
               : 'You need to be logged in to message the host'}
           </p>
         </div>
-        <Button onClick={() => navigate('/auth')} className="gap-2">
+        <Button onClick={() => redirectToAuth(navigate)} className="gap-2">
           <LogIn className="w-4 h-4" />
           {isRu ? 'Войти' : 'Log in'}
         </Button>
@@ -158,7 +160,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
           </div>
         </div>
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label={isRu ? 'Закрыть' : 'Close'}>
             ✕
           </Button>
         )}
@@ -233,18 +235,26 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
             className="flex-1 min-h-[40px] max-h-[100px] resize-none"
             rows={1}
           />
-          <Button 
-            onClick={handleSend} 
-            disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
-            size="icon"
-            className="flex-shrink-0 self-end"
-          >
-            {isSending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
+          <div className="flex flex-col gap-1 self-end">
+            <Button
+              onClick={handleSend}
+              disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
+              size="icon"
+              className="flex-shrink-0"
+              aria-label={isRu ? 'Отправить' : 'Send'}
+            >
+              {isSending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+            <VoiceInputButton
+              variant="outline"
+              onTranscript={(text) => handleMessageChange(appendTranscript(newMessage, text))}
+              disabled={isSending}
+            />
+          </div>
         </div>
       </div>
     </div>

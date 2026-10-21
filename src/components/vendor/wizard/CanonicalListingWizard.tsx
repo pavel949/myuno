@@ -429,7 +429,7 @@ export function CanonicalListingWizard({
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
               {currentStep > 0 && !(currentStep === 1 && categoryLocked) ? (
-                <Button variant="ghost" size="icon" onClick={handleBack}>
+                <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Back'} onClick={handleBack}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
               ) : (
@@ -469,7 +469,7 @@ export function CanonicalListingWizard({
                 </div>
               )}
               
-              <Button variant="ghost" size="icon" onClick={handleClose}>
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Закрыть' : 'Close'} onClick={handleClose}>
                 <X className="h-5 w-5" />
               </Button>
             </div>

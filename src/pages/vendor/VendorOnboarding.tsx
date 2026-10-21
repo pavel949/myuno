@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorServices } from '@/hooks/useVendor';
 import { useUserContext } from '@/hooks/useUserContext';
+import { supabase } from '@/integrations/supabase/client';
 import { OnboardingLayout } from '@/components/layout/OnboardingLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -18,12 +19,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorOnboarding = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
+  const { profile, isLoading: profileLoading } = useVendorProfile();
   const { vendorOrgs, isLoading: contextLoading } = useUserContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,12 +48,23 @@ const VendorOnboarding = () => {
   const { createService } = useVendorServices(createdProviderId || undefined);
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
+  // Only redirect to /vendor if the user already had a vendor org BEFORE starting
+  // the wizard. Once Step 1 creates a provider/org, vendorOrgs populates — we must
+  // NOT bounce the user out mid-wizard (they'd land on /vendor without an approved
+  // vendor role and hit AccessDenied). Guard by createdProviderId + currentStep.
+  const hasCheckedInitialOrgs = React.useRef(false);
   React.useEffect(() => {
-    if (!contextLoading && vendorOrgs.length > 0) navigate('/vendor');
-  }, [vendorOrgs, contextLoading, navigate]);
+    if (contextLoading) return;
+    if (hasCheckedInitialOrgs.current) return;
+    hasCheckedInitialOrgs.current = true;
+    if (vendorOrgs.length > 0 && !createdProviderId && currentStep === 0) {
+      navigate('/vendor');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextLoading]);
 
   const handleStep1Submit = async () => {
     if (!businessName.trim()) {
@@ -63,6 +76,21 @@ const VendorOnboarding = () => {
       return;
     }
 
+    // BUG-01 (P0): partner_applications.contact_email is NOT NULL.
+    // Without a real email we cannot create the application; block before any DB write.
+    const email = user?.email?.trim();
+    if (!email) {
+      toast.error(
+        isRu ? 'Не удалось получить email' : 'Email is missing',
+        {
+          description: isRu
+            ? 'Подтвердите email в профиле и попробуйте снова.'
+            : 'Please confirm your email in your account and try again.',
+        },
+      );
+      return;
+    }
+
     if (createdProviderId) {
       setCurrentStep(1);
       return;
@@ -70,19 +98,46 @@ const VendorOnboarding = () => {
 
     setIsSubmitting(true);
     try {
-      const { data, error } = await createProfile({
-        business_name: businessName.trim(),
-        business_category: category,
-        verticals: [category],
-        phone: phone.trim() || undefined,
-        email: user?.email || undefined,
-        commission_rate: 10,
-        is_verified: false,
-        is_active: true,
+      // BUG-09 (P2): provider + marketplace vendor + org + membership + application
+      // are now created inside ONE database transaction by the edge function, so a
+      // failure at any step can no longer leave orphan rows in the admin queue.
+      const { data, error } = await supabase.functions.invoke('partner-onboarding-create', {
+        body: {
+          business_name: businessName.trim(),
+          business_category: category,
+          verticals: [category],
+          phone: phone.trim() || undefined,
+          language,
+        },
       });
 
       if (error) throw error;
-      setCreatedProviderId(data?.id || null);
+      const result = data as {
+        success?: boolean;
+        provider_id?: string;
+        application_id?: string;
+        duplicate?: boolean;
+        error?: string;
+      } | null;
+
+      if (!result?.success || !result.provider_id) {
+        throw new Error(result?.error || 'creation_failed');
+      }
+
+      setCreatedProviderId(result.provider_id);
+
+      if (result.duplicate) {
+        toast(isRu ? 'У вас уже есть активная заявка' : 'You already have an active application', {
+          description: isRu
+            ? 'Перейдите в раздел статуса, чтобы посмотреть детали.'
+            : 'Open the status page to see the details.',
+          action: {
+            label: isRu ? 'Открыть' : 'Open',
+            onClick: () => navigate('/partner/status'),
+          },
+        });
+      }
+
       setCurrentStep(1);
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -91,6 +146,7 @@ const VendorOnboarding = () => {
       setIsSubmitting(false);
     }
   };
+
 
   const handleStep2Submit = async () => {
     if (!serviceName.trim()) {
@@ -111,7 +167,8 @@ const VendorOnboarding = () => {
         currency: 'THB',
         category: category,
         images: servicePhoto ? [servicePhoto] : [],
-        is_active: true,
+        // P0: listing stays hidden until admin approves the partner_application.
+        is_active: false,
         max_capacity: 1,
       });
 
@@ -140,7 +197,7 @@ const VendorOnboarding = () => {
   const stepTitles = [
     { en: 'About You', ru: 'О вас' },
     { en: 'First Listing', ru: 'Первое объявление' },
-    { en: "You're Live!", ru: 'Вы на связи!' },
+    { en: 'Pending Review', ru: 'На модерации' },
   ];
 
   return (
@@ -434,12 +491,12 @@ const VendorOnboarding = () => {
                   </motion.div>
 
                   <h2 className="text-2xl font-bold mb-2">
-                    {isRu ? '🎉 Вы в деле!' : '🎉 You\'re Live!'}
+                    {isRu ? 'Заявка на модерации' : 'Application pending review'}
                   </h2>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                     {isRu
-                      ? 'Объявление отправлено на модерацию. Завершите профиль, чтобы получить верификацию быстрее.'
-                      : 'Your listing is pending review. Complete your profile to get verified faster.'}
+                      ? 'Спасибо! Команда myUNO проверит заявку и ответит в течение 24 часов. Вы получите email с решением. Профиль и объявление появятся в каталоге после одобрения.'
+                      : 'Thanks! The myUNO team will review your application and reply within 24 hours. You will receive a decision by email. Your profile and listing will appear in the catalog after approval.'}
                   </p>
 
                   {/* Checklist */}
@@ -467,14 +524,24 @@ const VendorOnboarding = () => {
                     ))}
                   </div>
 
-                  <Button
-                    onClick={() => navigate('/vendor')}
-                    className="w-full h-14 text-base font-semibold rounded-none"
-                    size="lg"
-                  >
-                    {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      onClick={() => navigate('/partner/status')}
+                      className="w-full h-14 text-base font-semibold rounded-none"
+                      size="lg"
+                    >
+                      {isRu ? 'Отслеживать статус заявки' : 'Track application status'}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/vendor')}
+                      variant="outline"
+                      className="w-full h-14 text-base font-semibold rounded-none"
+                      size="lg"
+                    >
+                      {isRu ? 'В панель' : 'Dashboard'}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -1,0 +1,41 @@
+{
+  "observed_head": "1c6e85079f2168f5c06c57101f59b6129bcd77f9",
+  "migration": "0032_catalog_notification_private_boundaries.sql",
+  "sql_sha256": "73a71313bb9736f5cf7e41befad577bee250217576467409952ebe4cd0d92d33",
+  "focused_tests": 53,
+  "prior_regressions": 166,
+  "synthetic_handler_cases": [
+    15,
+    45,
+    10
+  ],
+  "read_only_snapshot_utc": "2026-10-17T06:43:19.749477Z",
+  "enforced": 0,
+  "spaces": 0,
+  "assignments": 0,
+  "members": 0,
+  "public_catalog_counts": [
+    23,
+    26,
+    33,
+    1
+  ],
+  "business_counts": {
+    "properties": 33,
+    "property_bookings": 82,
+    "orders": 416,
+    "ledger_entries": 136,
+    "crm_contacts": 384,
+    "company_members": 4
+  },
+  "full_e29": "NO-GO",
+  "e3_started": false,
+  "order_mutation_audit_started": false,
+  "production_business_writes": false,
+  "live_notifications_sent": false,
+  "authenticated_hosted_e2e": "not run; synthetic only",
+  "continuation_tests": 149,
+  "booking_message_handler_cases": 21,
+  "booking_message_deployed_source_sha256": "55c81f11ee907cd902472bed8be66aa58aa1cabcfe544e0f184f81d3a0cd0cfb",
+  "blocker_matrix": "blockers-14.csv"
+}

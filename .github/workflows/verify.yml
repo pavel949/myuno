@@ -1,0 +1,60 @@
+name: verify
+
+# Blocking authored-source quality gate with isolated PostgreSQL fixtures.
+# Production build, browser fixtures and timezone matrix run in connected-system-check.yml.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Superseded commits of the same PR do not consume duplicate runners.
+# Manual runs and different PRs remain independent; no verification is skipped.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: |
+          npm ci
+          if ! ls /usr/lib/postgresql/*/bin/postgres >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          for binary in /usr/lib/postgresql/*/bin/postgres; do
+            dirname "$binary" >> "$GITHUB_PATH"
+            break
+          done
+
+      - name: Typecheck
+        run: npm run typecheck
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+
+      - name: Unit and isolated PostgreSQL tests
+        run: npm test -- --maxWorkers=2
+        env:
+          E28_JIT_PROFILE: "1"
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+
+      - name: Lint
+        run: npm run lint
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs

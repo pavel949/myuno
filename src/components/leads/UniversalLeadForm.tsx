@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { useForm, Controller } from 'react-hook-form';
+import { validateContactIntake } from '@/lib/crm/validation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -103,7 +105,22 @@ export function UniversalLeadForm({
   }
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.phone) return;
+    // Shared CRM intake validation — same rules as deal creation (CreateDealSheet).
+    const { ok, errors } = validateContactIntake({
+      name: formData.name as string,
+      phone: formData.phone as string,
+      email: formData.email as string,
+    });
+    if (!ok) {
+      const codeToMsg: Record<string, string> = {
+        name_required: isRu ? 'Введите имя' : 'Enter your name',
+        phone_invalid: isRu ? 'Телефон должен содержать ≥7 цифр' : 'Phone must contain ≥7 digits',
+        email_invalid: isRu ? 'Неверный формат email' : 'Invalid email format',
+      };
+      const first = Object.values(errors)[0];
+      toast.error(codeToMsg[first] || (isRu ? 'Проверьте поля формы' : 'Please check the form fields'));
+      return;
+    }
 
     try {
       await submitLead.mutateAsync({
@@ -586,9 +603,10 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
+          aria-label="Decrease"
         >
           <Minus className="h-4 w-4" />
         </Button>
@@ -597,9 +615,10 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
+          aria-label="Increase"
         >
           <Plus className="h-4 w-4" />
         </Button>

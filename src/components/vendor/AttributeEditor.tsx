@@ -195,7 +195,8 @@ export function AttributeEditor({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 mt-5"
+                aria-label={isRussian ? 'Удалить' : 'Delete'}
+                className="text-muted-foreground hover:text-destructive shrink-0 mt-5"
                 onClick={() => removeAttribute(index)}
               >
                 <X className="w-4 h-4" />

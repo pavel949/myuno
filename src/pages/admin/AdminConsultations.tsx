@@ -7,6 +7,7 @@ import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
 import { LeadAIInsights } from '@/components/admin/leads/LeadAIInsights';
 import { FollowUpGenerator } from '@/components/admin/leads/FollowUpGenerator';
 import { BatchScoreButton } from '@/components/admin/leads/BatchScoreButton';
+import { ConvertLeadToDealButton } from '@/components/crm/ConvertLeadToDealButton';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +26,7 @@ import {
   BarChart3, Flame, Thermometer, Snowflake, Anchor, Compass, Car, Scale, 
   Stethoscope, Baby, Sparkles, Dumbbell, Waves, UtensilsCrossed
 } from 'lucide-react';
-import { LEAD_VERTICALS } from '@/lib/leadVerticalConfig';
+import { CONSULTATION_VERTICALS, getConsultationVerticalById } from '@/lib/leadVerticalConfig';
 
 const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
   vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отпуск', labelEn: 'Vacation Rental', color: 'bg-success' },
@@ -45,13 +46,15 @@ const STATUS_CONFIG: Record<ConsultationStatus, { labelRu: string; labelEn: stri
   cancelled: { labelRu: 'Отменена', labelEn: 'Cancelled', color: 'bg-destructive', icon: XCircle },
 };
 
-// Extended type to include AI fields
+// Extended type to include AI + lead→deal conversion fields
 interface ExtendedConsultationRequest extends ConsultationRequest {
   ai_score?: number | null;
   ai_priority?: string | null;
   ai_reasoning?: string | null;
   ai_recommended_action?: string | null;
   ai_analysis_at?: string | null;
+  converted_deal_id?: string | null;
+  converted_at?: string | null;
 }
 
 function ConsultationCard({ 
@@ -68,7 +71,13 @@ function ConsultationCard({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [notes, setNotes] = useState(consultation.admin_notes || '');
   
-  const typeConfig = REQUEST_TYPE_CONFIG[consultation.request_type];
+  const typeConfig = REQUEST_TYPE_CONFIG[consultation.request_type] ?? {
+    icon: MessageCircle,
+    labelRu: consultation.request_type || 'Заявка',
+    labelEn: consultation.request_type || 'Request',
+    color: 'bg-muted-foreground',
+  };
+  const verticalConfig = consultation.vertical_id ? getConsultationVerticalById(consultation.vertical_id) : undefined;
   const statusConfig = STATUS_CONFIG[consultation.status];
   const TypeIcon = typeConfig.icon;
   const StatusIcon = statusConfig.icon;
@@ -137,10 +146,10 @@ function ConsultationCard({
               {/* Vertical badge */}
               {consultation.vertical_id && (
                 <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-                  {LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.icon || '📋'}{' '}
+                  {verticalConfig?.icon || '📋'}{' '}
                   {isRu 
-                    ? LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.nameRu || consultation.vertical_id
-                    : LEAD_VERTICALS.find(v => v.id === consultation.vertical_id)?.nameEn || consultation.vertical_id
+                    ? verticalConfig?.nameRu || consultation.vertical_id
+                    : verticalConfig?.nameEn || consultation.vertical_id
                   }
                 </Badge>
               )}
@@ -340,13 +349,19 @@ function ConsultationCard({
 
             {/* Quick status buttons */}
             {consultation.status === 'pending' && (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 onClick={() => onStatusChange(consultation.id, 'contacted')}
               >
                 {isRu ? 'Связался' : 'Contacted'}
               </Button>
             )}
+
+            {/* Lead → deal bridge */}
+            <ConvertLeadToDealButton
+              leadId={consultation.id}
+              convertedDealId={consultation.converted_deal_id}
+            />
           </div>
         </div>
       </CardContent>
@@ -482,7 +497,7 @@ export default function AdminConsultations() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{isRu ? 'Все вертикали' : 'All Verticals'}</SelectItem>
-              {LEAD_VERTICALS.map((v) => (
+              {CONSULTATION_VERTICALS.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
                   {v.icon} {isRu ? v.nameRu : v.nameEn}
                 </SelectItem>
@@ -504,6 +519,10 @@ export default function AdminConsultations() {
               <SelectItem value="organic">🌱 Organic</SelectItem>
               <SelectItem value="chat">💭 Chat</SelectItem>
               <SelectItem value="external">🌐 External</SelectItem>
+              <SelectItem value="website">{isRu ? 'Сайт' : 'Website'}</SelectItem>
+              <SelectItem value="referral">{isRu ? 'Рекомендация' : 'Referral'}</SelectItem>
+              <SelectItem value="risk_assessment">{isRu ? 'Оценка рисков' : 'Risk assessment'}</SelectItem>
+              <SelectItem value="dashboard_recommendation">{isRu ? 'Рекомендация в кабинете' : 'Dashboard recommendation'}</SelectItem>
             </SelectContent>
           </Select>
         </div>

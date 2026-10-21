@@ -10,6 +10,7 @@ import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { Shield, Upload, FileCheck, LogIn, CalendarDays, Hash, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export function InsurancePolicyUpload() {
   const { user } = useAuth();
@@ -64,7 +65,7 @@ export function InsurancePolicyUpload() {
                 : "Sign in to save your policy in myUNO. We'll help you navigate claims."}
             </p>
           </div>
-          <Button size="sm" onClick={() => navigate('/auth')} className="gap-2">
+          <Button size="sm" onClick={() => redirectToAuth(navigate)} className="gap-2">
             <LogIn className="w-4 h-4" />
             {isRu ? 'Войти' : 'Sign In'}
           </Button>

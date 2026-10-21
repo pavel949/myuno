@@ -4,11 +4,7 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/auth-guard.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 interface FixRequest {
   suggestion: {
@@ -27,6 +23,7 @@ interface FixRequest {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -79,7 +76,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[LIFEOS-FIX] Type: ${suggestion.suggestion_type}, Entity: ${suggestion.entity_id || 'N/A'}`);
+    console.info(`[LIFEOS-FIX] Type: ${suggestion.suggestion_type}, Entity: ${suggestion.entity_id || 'N/A'}`);
 
     const actions: string[] = [];
     let success = true;
@@ -283,7 +280,7 @@ Deno.serve(async (req) => {
       new_data: { suggestion, actions, success },
     });
 
-    console.log(`[LIFEOS-FIX] Done. Success: ${success}, Actions: ${actions.length}`);
+    console.info(`[LIFEOS-FIX] Done. Success: ${success}, Actions: ${actions.length}`);
 
     return new Response(
       JSON.stringify({ success, actions }),

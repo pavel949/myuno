@@ -76,7 +76,7 @@ export default function DeveloperAcceptInvite() {
           invite_token: null,
           invite_expires_at: null,
           last_login_at: new Date().toISOString(),
-        } as Record<string, unknown>)
+        } as never)
         .eq('invite_token', token);
       if (error) throw error;
       qc.invalidateQueries({ queryKey: ['developer-profile'] });

@@ -111,7 +111,7 @@ export default function CapitalCampaignLaunch() {
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/capital/campaigns')}>
+        <Button variant="ghost" size="icon" aria-label="Back" onClick={() => navigate('/capital/campaigns')}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <h1 className="text-xl font-bold">Запуск кампании</h1>

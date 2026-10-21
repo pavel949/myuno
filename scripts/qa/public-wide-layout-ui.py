@@ -1,0 +1,126 @@
+"""Remote-CI-only real public layout, default 100% CSS-pixel viewport geometry.
+
+Synthetic reads, map's real no-key fallback, no real transactions or live map.
+"""
+import asyncio
+import json
+import os
+from pathlib import Path
+import sys
+from urllib.parse import urlencode, urlparse
+from playwright.async_api import async_playwright, expect
+
+OUTPUT = Path(sys.argv[1])
+WIDTHS = [320, 360, 768, 1024, 1440, 1920, 2560]
+CASES = [(lang, width, surface, 'normal', 'list') for lang in ['ru', 'en', 'th'] for width in WIDTHS for surface in ['services', 'housing', 'business']]
+CASES += [('en', width, 'housing', state, 'list') for width in [360, 1440, 2560] for state in ['loading', 'error', 'empty']]
+CASES += [('ru', width, 'housing', 'normal', 'map') for width in [360, 1024, 1440, 2560]]
+
+
+async def geometry(locator):
+    return await locator.evaluate("""e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{left:r.left,right:r.right,top:r.top,width:r.width,height:r.height,padding:parseFloat(s.paddingLeft),columns:s.gridTemplateColumns}}""")
+
+
+async def main():
+    if not os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS') != 'true':
+        raise RuntimeError('Browser execution is remote GitHub CI-only')
+    results = []
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        for lang, width, surface, state, view in CASES:
+            context = await browser.new_context(viewport={'width': width, 'height': 1000}, device_scale_factor=1, service_workers='block')
+            blocked, errors = [], []
+            async def route(request):
+                parsed = urlparse(request.request.url)
+                name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
+                types = {'fixture.html': 'text/html', 'fixture.js': 'text/javascript', 'fixture.css': 'text/css'}
+                if parsed.netloc == 'localhost:8080' and request.request.method == 'GET' and name in types:
+                    await request.fulfill(path=str(OUTPUT / name), content_type=types[name])
+                else:
+                    blocked.append(request.request.url)
+                    await request.abort()
+            await context.route('**/*', route)
+            page = await context.new_page()
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            row = {'lang': lang, 'width': width, 'surface': surface, 'state': state, 'view': view, 'outcome': 'FAIL'}
+            try:
+                await page.goto('http://localhost:8080/fixture?' + urlencode({'lang': lang, 'surface': surface, 'state': state, 'view': view}), wait_until='networkidle')
+                await page.evaluate('document.fonts.ready')
+                assert await page.evaluate('innerWidth') == width
+                assert await page.evaluate('devicePixelRatio') == 1
+                assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'document overflow'
+                header = await geometry(page.locator('.consumer-header-inner'))
+                frame_limit = 1536 if surface == 'business' else 1760
+                assert abs(header['width'] - min(width, frame_limit)) <= 1, header
+                row['header'] = header
+                # Bounds of visible rendered primary controls. The pre-existing
+                # mobile amenities strip intentionally scrolls horizontally.
+                bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
+                assert not bad, {'controlBounds': bad}
+                if surface == 'services':
+                    grid = page.get_by_test_id('service-request-grid')
+                    await expect(grid).to_be_visible()
+                    metrics = await geometry(grid)
+                    expected = 4 if width >= 1440 else 3 if width >= 1024 else 2 if width >= 640 else 1
+                    assert len(metrics['columns'].split()) == expected, metrics
+                    parent = await geometry(grid.locator('xpath=../..'))
+                    assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
+                    await expect(grid.locator('[data-service-category]')).to_have_count(8)
+                    await expect(grid.get_by_test_id('service-request-card')).to_have_count(8)
+                    # Actual keyboard category filtering preserves URL context.
+                    category = page.get_by_role('combobox')
+                    await category.press('Enter')
+                    options = page.get_by_role('option')
+                    await expect(options.first).to_be_visible()
+                    await options.nth(1).click()
+                    await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=')
+                    await expect(category).to_be_focused()
+                    row['grid'] = metrics
+                elif surface == 'housing':
+                    root = await geometry(page.locator('.property-discovery'))
+                    assert abs(root['width']-header['width']) <= 1, {'frame': root, 'header': header}
+                    if state in ['normal', 'loading']:
+                        grid = page.get_by_test_id('property-results-skeleton' if state == 'loading' else 'property-results-grid')
+                        metrics = await geometry(grid)
+                        expected = 2 if view == 'map' and width >= 1280 else 4 if width >= 1440 else 3 if width >= 1024 else 2 if width >= 640 else 1
+                        assert len(metrics['columns'].split()) == expected, metrics
+                        row['grid'] = metrics
+                    if view == 'map':
+                        map_rect = await geometry(page.locator('.property-discovery-map'))
+                        list_rect = await geometry(page.locator('.property-discovery-list'))
+                        if width >= 1280:
+                            assert map_rect['left'] >= list_rect['right']-1 or list_rect['left'] >= map_rect['right']-1, {'map': map_rect, 'list': list_rect}
+                        row['map'] = map_rect
+                    # Full search remains operable with no dates; no calendar
+                    # availability proof is claimed by this layout fixture.
+                    search = page.locator('.home-search')
+                    await expect(search.locator('button[type=submit]')).to_be_visible()
+                    if width >= 1280:
+                        submit = await search.locator('button[type=submit]').bounding_box()
+                        controls = await search.locator('.home-search-type,.home-search-location,.home-search-dates,.home-search-bedrooms').evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom}})')
+                        # Labels may make a field taller; controls share the
+                        # bottom baseline of one real criteria row.
+                        assert submit and len(controls) == 4 and all(abs(box['bottom']-submit['y']-submit['height']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
+                    if state == 'error':
+                        await expect(page.get_by_role('alert').filter(has_text='could not be loaded')).to_be_visible()
+                    if state == 'empty':
+                        await expect(page.get_by_role('heading', name='No properties found')).to_be_visible()
+                else:
+                    hero = await geometry(page.locator('section').first.locator('.max-w-3xl'))
+                    form = await geometry(page.locator('#b2b-inquiry-form'))
+                    assert hero['width'] <= 768+1 and form['width'] <= 672+1, {'hero': hero, 'form': form}
+                    row['readableBounds'] = {'hero': hero, 'form': form}
+                assert not blocked and not errors, {'blocked': blocked, 'runtimeErrors': errors}
+                row['outcome'] = 'PASS'
+            except Exception as error:
+                row.update(error=str(error), blocked=blocked, runtimeErrors=errors)
+            results.append(row)
+            (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
+            await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}-{state}-{view}-{row["outcome"]}.png'), full_page=True)
+            await context.close()
+        await browser.close()
+    assert len(results) == len(CASES) and all(row['outcome'] == 'PASS' for row in results), {'cases': len(results), 'failed': sum(row['outcome'] != 'PASS' for row in results)}
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

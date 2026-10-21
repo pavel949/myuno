@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface BookingData {
   id: string;
@@ -149,7 +150,7 @@ export default function BookingDetail() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
+      redirectToAuth(navigate, { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -236,6 +237,7 @@ export default function BookingDetail() {
               size="icon"
               onClick={() => navigate('/bookings')}
               className="shrink-0"
+              aria-label={language === 'ru' ? 'Назад' : 'Back'}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>

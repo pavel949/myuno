@@ -2,15 +2,17 @@
  * PropertyIndex — Airbnb-style Discovery Page
  * Clean search pill + category icons ribbon + card grid
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map, List } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { BackButton } from '@/components/uno/BackButton';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { useMapListSync } from '@/hooks/useMapListSync';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { matchesCategory, type PropertyMode } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
@@ -74,6 +76,16 @@ export default function PropertyIndex() {
   const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
+  const showMap = searchParamsUrl.get('view') === 'map';
+  const { selectedId, hoveredId, select, hover } = useMapListSync();
+  const toggleMap = () => {
+    setSearchParamsUrl((previous) => {
+      const next = new URLSearchParams(previous);
+      if (showMap) next.delete('view');
+      else next.set('view', 'map');
+      return next;
+    });
+  };
 
   // UniversalFilter state
   const { filterConfig } = usePropertyFilterOptions();
@@ -179,11 +191,34 @@ export default function PropertyIndex() {
     [filterValues, propertyMode, rentTenancy, saleIntent, isQuickSale]
   );
 
-  const { data: infiniteData, isLoading } = usePropertiesInfinite(serverFilters);
+  const {
+    data: infiniteData,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePropertiesInfinite(serverFilters);
 
   const allProperties = useMemo(() => {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
+
+  // C9 FIX: actually trigger fetchNextPage via IntersectionObserver sentinel
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage || isFetchingNextPage || isError) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) fetchNextPage();
+      },
+      { rootMargin: '600px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage, allProperties.length]);
 
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
@@ -263,7 +298,7 @@ export default function PropertyIndex() {
       />
       <div className="pb-24">
         {/* Sticky header: tabs + search + categories */}
-        <div className="sticky top-0 z-40 bg-background">
+        <div className="sticky top-[var(--consumer-header-height,0px)] z-40 bg-background">
           {/* Property type tabs (Аренда / Купить / Новостройки …) */}
           <PropertyHubTabs />
           {/* Search pill + mode toggle */}
@@ -337,7 +372,7 @@ export default function PropertyIndex() {
           </div>
           {/* Recently Viewed — only when no category filters */}
           {recentItems.length > 0 && selectedCategories.length === 0 && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6 px-0")}>
+            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6")}>
               <h2 className="text-base font-bold mb-3">
                 {isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
               </h2>
@@ -350,11 +385,11 @@ export default function PropertyIndex() {
           )}
 
           {isLoading && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10">
+            <section className={ECOSYSTEM_PAGE_CONTAINER}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="aspect-[4/5] sm:aspect-square rounded-none sm:rounded-none bg-muted animate-pulse" />
+                    <div className="aspect-[4/3] sm:aspect-square rounded-none sm:rounded-none bg-muted animate-pulse" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-2/3" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-1/2" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-1/3" />
@@ -364,40 +399,107 @@ export default function PropertyIndex() {
             </section>
           )}
 
-          {/* Main grid — Airbnb-style 2-col cards */}
+          {isError && (
+            <div role="alert" className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-8")}>
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Не удалось загрузить объекты. Попробуйте ещё раз.' : 'Could not load listings. Please try again.'}
+              </p>
+              <Button variant="outline" size="sm" className="min-h-[44px]" onClick={() => { void refetch(); }}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
+            </div>
+          )}
+
+          {/* Main grid — readable full-width cards on narrow phones */}
           {!isLoading && filteredProperties.length > 0 && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
+            <section className={ECOSYSTEM_PAGE_CONTAINER}>
               <div className="flex items-center justify-between mb-3">
                 {selectedCategories.length === 0 && (
                   <h2 className="text-base font-bold">
                     {isRu ? 'Все объекты' : 'All listings'}
                   </h2>
                 )}
-                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate(APP_ROUTES.PROPERTY_MAP)}>
-                  <Map className="w-4 h-4" />
-                  {isRu ? 'Карта' : 'Map'}
+                <Button variant="outline" size="sm" className="gap-1.5 ml-auto min-h-[44px]" aria-pressed={showMap} onClick={toggleMap}>
+                  {showMap ? <List className="w-4 h-4" /> : <Map className="w-4 h-4" />}
+                  {showMap ? (isRu ? 'Список' : 'List') : (isRu ? 'Карта' : 'Map')}
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-                {filteredProperties.slice(0, 20).map((property) => (
-                  <PropertyListingCard key={property.id} property={property} mode={propertyMode} />
+              {showMap && !isError && (
+                <PropertyMapView
+                  properties={filteredProperties}
+                  mode={propertyMode}
+                  selectedId={selectedId}
+                  onSelect={select}
+                  hoveredProperty={hoveredId}
+                  onHover={hover}
+                  className="mb-4"
+                />
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
+                {filteredProperties.map((property) => (
+                  <PropertyListingCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                    isSelected={selectedId === property.id}
+                    isHovered={hoveredId === property.id}
+                    onHover={hover}
+                  />
                 ))}
               </div>
-              {filteredProperties.length > 20 && (
-                <div className="mt-6 text-center">
-                  <Button variant="outline" className="gap-2" onClick={() => navigate(APP_ROUTES.PROPERTY_SEARCH)}>
-                    {isRu ? `Показать все ${filteredProperties.length}` : `Show all ${filteredProperties.length}`}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="mt-6 text-center text-sm text-muted-foreground">
+                  {isRu ? 'Загрузка...' : 'Loading...'}
+                </div>
+              )}
+              {!isError && !hasNextPage && filteredProperties.length > 0 && (
+                <div className="mt-6 text-center text-xs text-muted-foreground">
+                  {isRu ? `Всего объектов: ${filteredProperties.length}` : `Total: ${filteredProperties.length}`}
                 </div>
               )}
             </section>
           )}
 
-          {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
+          {!isLoading && !isError && filteredProperties.length === 0 && hasNextPage && (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Среди загруженных объектов пока нет совпадений. Можно проверить следующие.' : 'No matches in loaded listings yet. Check the next listings.'}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px]"
+                disabled={isFetchingNextPage}
+                onClick={() => { if (!isFetchingNextPage) void fetchNextPage(); }}
+              >
+                {isFetchingNextPage ? (isRu ? 'Загрузка...' : 'Loading...') : (isRu ? 'Загрузить ещё' : 'Load more')}
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !isError && !hasNextPage && filteredProperties.length === 0 && allProperties.length > 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
+                {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            </div>
+          )}
+
+          {/* C7 FIX: empty state when DB has no properties at all for selected filters */}
+          {!isLoading && !isError && !hasNextPage && allProperties.length === 0 && (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-20")}>
+              <p className="text-base font-medium mb-2">
+                {isRu ? 'Пока нет объектов' : 'No properties yet'}
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {isRu
+                  ? 'По выбранным параметрам ничего не нашлось. Попробуйте сбросить фильтры.'
+                  : 'Nothing matches your search. Try clearing filters.'}
               </p>
               <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
                 {isRu ? 'Сбросить фильтры' : 'Clear filters'}
@@ -412,3 +514,4 @@ export default function PropertyIndex() {
     </>
   );
 }
+

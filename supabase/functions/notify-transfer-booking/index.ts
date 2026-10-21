@@ -1,17 +1,39 @@
-import { Resend } from 'npm:resend@2.0.0';
+// Trilingual transfer booking notifier (RU/EN/TH)
+// Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
+// Email delivery via Lovable Emails (send-transactional-email) with built-in retry queue + suppression.
+import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
+
+async function sendEmail(
+  templateName: string,
+  recipientEmail: string,
+  idempotencyKey: string,
+  templateData: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { error } = await sb().functions.invoke('send-transactional-email', {
+      body: { templateName, recipientEmail, idempotencyKey, templateData },
+    });
+    if (error) console.error('[email]', templateName, '->', recipientEmail, error);
+  } catch (e) {
+    console.error('[email] invoke failed', templateName, e);
+  }
+}
+
+type Lang = 'ru' | 'en' | 'th';
 
 interface TransferNotifyPayload {
   order_id: string;
   order_number: string;
-  direction: string;
-  terminal: string;
-  flight_number: string;
+  direction: 'from-airport' | 'to-airport';
+  terminal?: string;
+  flight_number?: string;
   vehicle_name: string;
-  meeting_sign_name: string;
+  meeting_sign_name?: string;
   passengers: number;
-  luggage: number;
+  luggage?: number;
   pickup_address: string;
   dropoff_address: string;
   scheduled_at: string;
@@ -21,232 +43,364 @@ interface TransferNotifyPayload {
   customer_name: string;
   customer_phone: string;
   customer_email: string;
+  customer_language?: Lang;
   notes?: string;
+  attachments?: Array<{ url: string; kind: string; filename?: string }>;
 }
 
-async function sendWhatsAppNotification(p: TransferNotifyPayload): Promise<void> {
+const sb = () => createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+);
+
+const LANG_NAME: Record<Lang, string> = { ru: 'Russian', en: 'English', th: 'Thai' };
+
+async function translate(text: string, targetLang: Lang): Promise<string> {
+  if (!text?.trim()) return text;
+  const apiKey = Deno.env.get('LOVABLE_API_KEY');
+  if (!apiKey) return text;
   try {
-    const dirEmoji = p.direction === 'from-airport' ? '✈️→🏠' : '🏠→✈️';
-    const dirLabel = p.direction === 'from-airport' ? 'Из аэропорта' : 'В аэропорт';
-    const payLabel = p.payment_method === 'stripe' ? '💳 Stripe' : '🤝 Консьерж';
-    
-    const date = new Date(p.scheduled_at);
-    const dateStr = date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
-    const message = `🚗 *ТРАНСФЕР — НОВЫЙ ЗАКАЗ*
-
-${dirEmoji} *${dirLabel}*
-📋 Заказ: #${p.order_number}
-
-✈️ *Рейс:* ${p.flight_number}
-🏢 *Терминал:* ${p.terminal === 'international' ? 'Международный' : 'Внутренний'}
-📅 *Дата:* ${dateStr} в ${timeStr}
-
-🚗 *Авто:* ${p.vehicle_name}
-👥 *Пассажиры:* ${p.passengers} | 🧳 *Багаж:* ${p.luggage}
-🪧 *Табличка:* ${p.meeting_sign_name}
-
-📍 *Откуда:* ${p.pickup_address}
-📍 *Куда:* ${p.dropoff_address}
-
-💰 *Итого:* ${p.currency} ${p.total_amount.toLocaleString()}
-${payLabel}
-
-👤 *Клиент:* ${p.customer_name}
-📱 ${p.customer_phone}
-📧 ${p.customer_email}
-${p.notes ? `\n📝 *Заметки:* ${p.notes}` : ''}`;
-
-    console.log('[WhatsApp] Transfer notification for:', ADMIN_WHATSAPP);
-
-    const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
-    const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
-
-    if (ultraMsgInstance && ultraMsgToken) {
-      const response = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          token: ultraMsgToken,
-          to: `+${ADMIN_WHATSAPP}`,
-          body: message,
-        }),
-      });
-      const result = await response.json();
-      console.log('[WhatsApp] UltraMsg response:', result);
-    } else {
-      console.log('[WhatsApp] No API configured, logged message only');
-    }
-  } catch (error) {
-    console.error('[WhatsApp] Error:', error);
+    const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: `Detect the source language and translate the user's text into ${LANG_NAME[targetLang]}. Preserve proper names, addresses, flight numbers. If the text is already in ${LANG_NAME[targetLang]}, return it unchanged. Output ONLY the translation, no quotes, no explanations.` },
+          { role: 'user', content: text },
+        ],
+        temperature: 0.2,
+      }),
+    });
+    if (!res.ok) return text;
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content?.trim() || text;
+  } catch (e) {
+    console.error('[translate] failed', e);
+    return text;
   }
 }
+
+async function sendWhatsApp(to: string, body: string): Promise<void> {
+  const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
+  const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
+  if (!ultraMsgInstance || !ultraMsgToken) {
+    console.info('[WA] no UltraMSG config, skipping ->', to);
+    return;
+  }
+  try {
+    const res = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token: ultraMsgToken, to: `+${to.replace(/[^0-9]/g, '')}`, body }),
+    });
+    const json = await res.json();
+    console.info('[WA] sent to', to, JSON.stringify(json).slice(0, 200));
+  } catch (e) {
+    console.error('[WA] error', e);
+  }
+}
+
+function fmtDate(iso: string, locale: string) {
+  const d = new Date(iso);
+  // Always format in Phuket time — operator and customer expect local ICT.
+  const opts: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Bangkok' };
+  const date = d.toLocaleDateString(locale, { ...opts, day: '2-digit', month: 'short', year: 'numeric' });
+  const time = d.toLocaleTimeString(locale, { ...opts, hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${date} ${time} ICT`;
+}
+
+function buildOperatorMessage(p: TransferNotifyPayload, tr: Record<string, Record<Lang, string>>, confirmUrl: string) {
+  const date = fmtDate(p.scheduled_at, 'en-GB');
+  const dirEn = p.direction === 'from-airport' ? 'AIRPORT → HOTEL' : 'HOTEL → AIRPORT';
+  const dirTh = p.direction === 'from-airport' ? 'สนามบิน → โรงแรม' : 'โรงแรม → สนามบิน';
+  return `🚗 *NEW TRANSFER* / *การจองใหม่*
+
+📋 #${p.order_number}
+✈️ ${dirEn} / ${dirTh}
+📅 ${date}
+🛬 Flight: ${p.flight_number || '—'}
+🚙 ${p.vehicle_name} · ${p.passengers}pax${p.luggage ? ` · ${p.luggage} bags` : ''}
+
+📍 *Pickup (EN):* ${tr.pickup.en}
+📍 *Pickup (TH):* ${tr.pickup.th}
+📍 *Drop-off (EN):* ${tr.dropoff.en}
+📍 *Drop-off (TH):* ${tr.dropoff.th}
+
+👤 ${p.customer_name} · ${p.customer_phone}
+🌐 Lang: ${(p.customer_language || 'ru').toUpperCase()}
+💰 ฿${p.total_amount.toLocaleString()} (${p.payment_method})
+${tr.notes.en ? `\n📝 EN: ${tr.notes.en}\n📝 TH: ${tr.notes.th}` : ''}
+${p.attachments?.length ? `\n📎 ${p.attachments.length} attachment(s)` : ''}
+
+✅ CONFIRM: ${confirmUrl}`;
+}
+
+async function generateConfirmToken(orderId: string): Promise<string> {
+  const { data } = await sb().from('system_settings').select('value').eq('key', 'transfer_operator_confirm_secret').single();
+  const secret = (typeof data?.value === 'string' ? data.value : JSON.parse(JSON.stringify(data?.value))) as string;
+  const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 3600;
+  const payload = `${orderId}.${exp}`;
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
+  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${exp}.${sigHex}`;
+}
+
+// Customer "received" email — localized
+const CUSTOMER_RECEIVED = {
+  ru: {
+    subject: (n: string) => `Заявка #${n} принята — ждём подтверждения оператора`,
+    title: 'Спасибо! Заявка на трансфер принята',
+    orderLabel: 'Номер заявки',
+    routeLabel: 'Маршрут',
+    dateLabel: 'Дата',
+    operatorLine: (name: string) => `Оператор <b>${name}</b> свяжется с вами в течение ~30 минут для подтверждения.`,
+    amountLabel: 'Сумма',
+    locale: 'ru-RU',
+  },
+  en: {
+    subject: (n: string) => `Booking #${n} received — awaiting operator confirmation`,
+    title: 'Thank you! Your transfer request has been received',
+    orderLabel: 'Booking number',
+    routeLabel: 'Route',
+    dateLabel: 'Date',
+    operatorLine: (name: string) => `Operator <b>${name}</b> will contact you within ~30 minutes to confirm.`,
+    amountLabel: 'Total',
+    locale: 'en-GB',
+  },
+  th: {
+    subject: (n: string) => `รับคำขอ #${n} แล้ว — รอการยืนยันจากเจ้าหน้าที่`,
+    title: 'ขอบคุณ! เราได้รับคำขอจองรถรับส่งของคุณแล้ว',
+    orderLabel: 'หมายเลขการจอง',
+    routeLabel: 'เส้นทาง',
+    dateLabel: 'วันที่',
+    operatorLine: (name: string) => `เจ้าหน้าที่ <b>${name}</b> จะติดต่อคุณภายในประมาณ 30 นาทีเพื่อยืนยัน`,
+    amountLabel: 'ยอดรวม',
+    locale: 'th-TH',
+  },
+} as const;
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  const ADMIN_EMAIL = (await getAdminEmails())[0];
-  const ADMIN_WHATSAPP = await getAdminWhatsApp();
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
     const p: TransferNotifyPayload = await req.json();
-    console.log('[Transfer] Notify for order:', p.order_number);
+    const customerLang: Lang = p.customer_language || 'ru';
+    console.info('[Transfer] notify', p.order_number, 'lang=', customerLang);
 
-    const date = new Date(p.scheduled_at);
-    const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const timeStr = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const dirLabel = p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport';
-    const payLabel = p.payment_method === 'stripe' ? 'Online (Stripe)' : 'Concierge Advance';
+    // Always produce EN+TH for operator; also produce customer-language version
+    const langsNeeded: Lang[] = Array.from(new Set<Lang>(['ru', 'en', 'th']));
 
-    // 1. Send WhatsApp (non-blocking)
-    sendWhatsAppNotification(p).catch(err => console.error('[WhatsApp] Failed:', err));
+    const fields = ['pickup', 'dropoff', 'notes'] as const;
+    const sources: Record<string, string> = {
+      pickup: p.pickup_address,
+      dropoff: p.dropoff_address,
+      notes: p.notes || '',
+    };
 
-    // 2. Send emails
-    const resendKey = Deno.env.get('RESEND_API_KEY');
-    if (resendKey) {
-      const resend = new Resend(resendKey);
+    // Translate every field to every needed language (source detected automatically).
+    const tr: Record<string, Record<Lang, string>> = { pickup: {} as any, dropoff: {} as any, notes: {} as any };
+    await Promise.all(
+      fields.flatMap((f) =>
+        langsNeeded.map(async (lang) => {
+          tr[f][lang] = sources[f] ? await translate(sources[f], lang) : '';
+        })
+      )
+    );
 
-      // Admin email
-      const adminHtml = `
-<!DOCTYPE html><html><head><style>
-  body{font-family:Arial,sans-serif;color:#333;line-height:1.6;margin:0;padding:0}
-  .c{max-width:600px;margin:0 auto}
-  .h{background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:24px;border-radius:12px 12px 0 0}
-  .b{background:#f9fafb;padding:20px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px}
-  .d{background:#fff;padding:16px;border-radius:8px;margin:12px 0;border:1px solid #f3f4f6}
-  .l{font-weight:700;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-  .v{font-size:16px;font-weight:600;margin-top:4px}
-  .price{font-size:28px;font-weight:800;color:#059669}
-</style></head><body>
-<div class="c">
-  <div class="h">
-    <h1 style="margin:0;font-size:22px">🚗 Airport Transfer</h1>
-    <p style="margin:6px 0 0;opacity:.9">${dirLabel} · ${p.flight_number} · ${dateStr}</p>
-  </div>
-  <div class="b">
-    <div class="d">
-      <div class="l">Order</div>
-      <div class="v">#${p.order_number}</div>
-    </div>
-    <div class="d">
-      <div class="l">Flight & Schedule</div>
-      <div class="v">${p.flight_number} · ${p.terminal === 'international' ? 'International' : 'Domestic'} Terminal</div>
-      <div>📅 ${dateStr} at ${timeStr}</div>
-    </div>
-    <div class="d">
-      <div class="l">Vehicle</div>
-      <div class="v">${p.vehicle_name}</div>
-      <div>👥 ${p.passengers} pax · 🧳 ${p.luggage} bags</div>
-    </div>
-    <div class="d">
-      <div class="l">Route</div>
-      <div>📍 <strong>From:</strong> ${p.pickup_address}</div>
-      <div>📍 <strong>To:</strong> ${p.dropoff_address}</div>
-    </div>
-    <div class="d">
-      <div class="l">Meeting Sign</div>
-      <div class="v">🪧 ${p.meeting_sign_name}</div>
-    </div>
-    <div class="d">
-      <div class="l">Payment</div>
-      <div class="price">${p.currency} ${p.total_amount.toLocaleString()}</div>
-      <div>${payLabel}</div>
-    </div>
-    <div class="d">
-      <div class="l">Customer</div>
-      <div class="v">${p.customer_name}</div>
-      <div>📱 ${p.customer_phone} · 📧 ${p.customer_email}</div>
-      ${p.notes ? `<div style="margin-top:8px;padding:8px;background:#fffbeb;border-radius:6px">📝 ${p.notes}</div>` : ''}
-    </div>
-  </div>
-</div>
-</body></html>`;
-
-      await resend.emails.send({
-        from: 'myUNO Transfer <noreply@resend.dev>',
-        to: [ADMIN_EMAIL],
-        subject: `🚗 Transfer #${p.order_number} — ${p.flight_number} · ${dateStr}`,
-        html: adminHtml,
-      });
-      console.log('[Email] Admin email sent to', ADMIN_EMAIL);
-
-      // Customer confirmation email
-      if (p.customer_email) {
-        const customerHtml = `
-<!DOCTYPE html><html><head><style>
-  body{font-family:Arial,sans-serif;color:#333;line-height:1.6;margin:0;padding:0}
-  .c{max-width:600px;margin:0 auto}
-  .h{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center}
-  .b{background:#f9fafb;padding:20px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px}
-  .d{background:#fff;padding:16px;border-radius:8px;margin:12px 0;border:1px solid #f3f4f6}
-  .l{font-weight:700;color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-  .v{font-size:16px;font-weight:600;margin-top:4px}
-  .badge{display:inline-block;background:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-weight:600;font-size:13px}
-  .sign{font-size:24px;font-weight:800;color:#4f46e5;text-align:center;padding:16px;background:#eef2ff;border-radius:8px;margin:12px 0}
-  .footer{text-align:center;padding:16px;color:#9ca3af;font-size:12px}
-</style></head><body>
-<div class="c">
-  <div class="h">
-    <h1 style="margin:0;font-size:22px">✅ Transfer Confirmed</h1>
-    <p style="margin:8px 0 0;opacity:.9">Order #${p.order_number}</p>
-  </div>
-  <div class="b">
-    <p style="text-align:center"><span class="badge">🚗 ${p.vehicle_name}</span></p>
-    
-    <div class="d">
-      <div class="l">✈️ Flight</div>
-      <div class="v">${p.flight_number}</div>
-      <div>📅 ${dateStr} at ${timeStr}</div>
-      <div>🏢 ${p.terminal === 'international' ? 'International' : 'Domestic'} Terminal</div>
-    </div>
-
-    ${p.direction === 'from-airport' ? `<div class="sign">🪧 ${p.meeting_sign_name}</div>
-    <p style="text-align:center;color:#6b7280;font-size:13px">Your driver will meet you with this name sign at the terminal exit</p>` : ''}
-
-    <div class="d">
-      <div class="l">📍 Route</div>
-      <div style="margin-top:6px"><strong>From:</strong> ${p.pickup_address}</div>
-      <div><strong>To:</strong> ${p.dropoff_address}</div>
-    </div>
-
-    <div class="d" style="text-align:center">
-      <div class="l">💰 Total</div>
-      <div style="font-size:28px;font-weight:800;color:#059669;margin-top:4px">${p.currency} ${p.total_amount.toLocaleString()}</div>
-    </div>
-
-    <div class="footer">
-      <p>Need help? Contact us via WhatsApp</p>
-      <p>myUNO · Your Phuket Concierge</p>
-    </div>
-  </div>
-</div>
-</body></html>`;
-
-        await resend.emails.send({
-          from: 'myUNO <noreply@resend.dev>',
-          to: [p.customer_email],
-          subject: `✅ Transfer Confirmed — ${p.flight_number} · ${dateStr}`,
-          html: customerHtml,
-        });
-        console.log('[Email] Customer email sent to', p.customer_email);
+    // Persist row-based translations
+    const rows: Array<{ order_id: string; field: string; lang: Lang; value: string }> = [];
+    for (const f of fields) {
+      for (const lang of langsNeeded) {
+        if (tr[f][lang]) rows.push({ order_id: p.order_id, field: `${f}_address`.replace('notes_address', 'notes'), lang, value: tr[f][lang] });
       }
-    } else {
-      console.log('[Email] RESEND_API_KEY not configured');
+    }
+    if (rows.length) {
+      await sb().from('order_translations').upsert(rows, { onConflict: 'order_id,field,lang' }).then(({ error }) => {
+        if (error) console.error('[translations] upsert error', error);
+      });
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    // Lookup operator (Klod by default) + admin contacts.
+    // NOTE: column is `phone_whatsapp` in transfer_operators (NOT `whatsapp_number`).
+    const { data: op } = await sb()
+      .from('transfer_operators')
+      .select('id, phone_whatsapp, email, name')
+      .eq('is_active', true)
+      .order('is_primary', { ascending: false })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    const opWa = op?.phone_whatsapp || '';
+    const operatorMissing = !op;
+    if (operatorMissing) {
+      console.error('[Transfer] CRITICAL: no active operator found for order', p.order_number);
+    }
+
+    // Persist operator_id + financial split on order so admin sees the chain.
+    // Markup multiplier is read from `vertical_commission_rules` (vertical='transfer').
+    // vendor_payout = total / multiplier, platform_fee = remainder.
+    try {
+      const multiplier = await getTransferMarkupMultiplier();
+      const { data: ord } = await sb()
+        .from('orders')
+        .select('total_amount, platform_fee_amount, metadata')
+        .eq('id', p.order_id)
+        .single();
+      if (ord) {
+        const total = Number(ord.total_amount) || p.total_amount;
+        const vendorPayout = Math.round(total / multiplier);
+        const platformFee = total - vendorPayout;
+        const meta = {
+          ...(ord.metadata as Record<string, unknown> || {}),
+          operator_id: op?.id || null,
+          operator_name: op?.name || null,
+          markup_multiplier: multiplier,
+        };
+        await sb().from('orders').update({
+          metadata: meta,
+          vendor_payout_amount: vendorPayout,
+          platform_fee_amount: ord.platform_fee_amount ?? platformFee,
+        }).eq('id', p.order_id);
+      }
+    } catch (e) {
+      console.error('[Transfer] order enrich failed', e);
+    }
+
+    // For cash / concierge_advance: record ledger entries immediately so admin
+    // financial dashboard reflects revenue & vendor payout owed to Klod.
+    if (p.payment_method === 'cash' || p.payment_method === 'concierge_advance') {
+      const { error: ledgerErr } = await sb().rpc('record_ledger_entries', { p_order_id: p.order_id });
+      if (ledgerErr) console.error('[Transfer] record_ledger_entries failed', ledgerErr);
+    }
+
+    const adminEmails = await getAdminEmails();
+    const adminWA = await getAdminWhatsApp();
+    const { data: secondaryWaRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_admin_wa_secondary').maybeSingle();
+    const secondaryWA = secondaryWaRow?.value
+      ? (typeof secondaryWaRow.value === 'string' ? secondaryWaRow.value : JSON.parse(JSON.stringify(secondaryWaRow.value)))
+      : null;
+
+    // Extra operator email recipients (e.g. Klod ops mailbox). Stored in
+    // system_settings.transfer_operator_emails as a jsonb array of strings.
+    // Defaults include sskk253722@gmail.com so notifications never silently drop.
+    const { data: opEmailsRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_operator_emails').maybeSingle();
+    let extraOperatorEmails: string[] = ['sskk253722@gmail.com'];
+    try {
+      const v = opEmailsRow?.value;
+      const parsed = typeof v === 'string' ? JSON.parse(v) : v;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        extraOperatorEmails = parsed.filter((e: unknown) => typeof e === 'string' && e.includes('@'));
+        if (!extraOperatorEmails.includes('sskk253722@gmail.com')) {
+          extraOperatorEmails.push('sskk253722@gmail.com');
+        }
+      }
+    } catch { /* fall back to default */ }
+
+    const baseUrl = Deno.env.get('PUBLIC_APP_URL') || 'https://myuno.app';
+    const token = await generateConfirmToken(p.order_id);
+    const confirmUrl = `${baseUrl}/operate/transfers/confirm?id=${p.order_id}&t=${token}`;
+
+    const opMessage = buildOperatorMessage(p, tr, confirmUrl);
+
+    // ALERT if no operator is configured — admin gets a separate prefixed message so
+    // they immediately escalate, BEFORE the customer waits silently.
+    const alertPrefix = operatorMissing
+      ? `🚨 *NO ACTIVE OPERATOR* — admin must assign manually\n\n`
+      : '';
+
+    // Send WhatsApp: operator Klod (if any), admin primary, admin secondary
+    const waTargets = [opWa, adminWA, secondaryWA].filter(Boolean) as string[];
+    const uniqueWA = Array.from(new Set(waTargets.map(w => w.replace(/[^0-9]/g, ''))));
+    await Promise.all(uniqueWA.map(num => sendWhatsApp(num, alertPrefix + opMessage)));
+
+    // Emails — via Lovable Emails (queue, retries, suppression, unsubscribe handled centrally)
+    const dateEn = fmtDate(p.scheduled_at, 'en-GB');
+    const directionLabel = p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport';
+    const vehicleLine = `${p.vehicle_name} · ${p.passengers}pax${p.luggage ? ` · ${p.luggage} bags` : ''}`;
+    const operatorTemplateData = {
+      orderNumber: p.order_number,
+      directionLabel,
+      dateLabel: dateEn,
+      flightNumber: p.flight_number || '—',
+      vehicleLine,
+      pickupRu: tr.pickup.ru,
+      pickupEn: tr.pickup.en,
+      pickupTh: tr.pickup.th,
+      dropoffRu: tr.dropoff.ru,
+      dropoffEn: tr.dropoff.en,
+      dropoffTh: tr.dropoff.th,
+      notesRu: tr.notes.ru,
+      notesEn: tr.notes.en,
+      notesTh: tr.notes.th,
+      customerName: p.customer_name,
+      customerPhone: p.customer_phone,
+      customerEmail: p.customer_email,
+      customerLang: customerLang,
+      totalLabel: `฿${p.total_amount.toLocaleString()}`,
+      paymentMethod: p.payment_method,
+      attachments: p.attachments || [],
+      confirmUrl,
+      operatorMissing,
+    };
+
+    // Operator
+    if (op?.email) {
+      await sendEmail('transfer-operator-new', op.email, `transfer-op-${p.order_id}`, operatorTemplateData);
+    }
+    // Admin — always
+    for (const adminEmail of adminEmails) {
+      await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData);
+    }
+    // Extra operator inbox(es) — Klod ops, sskk253722@gmail.com etc.
+    const dedupExtra = extraOperatorEmails.filter(
+      (e) => e !== op?.email && !adminEmails.includes(e),
     );
+    for (const extraEmail of dedupExtra) {
+      await sendEmail('transfer-operator-new', extraEmail, `transfer-opx-${p.order_id}-${extraEmail}`, operatorTemplateData);
+    }
+
+    // Customer "received" — localized
+    if (p.customer_email) {
+      const c = CUSTOMER_RECEIVED[customerLang];
+      const localDate = fmtDate(p.scheduled_at, c.locale);
+      await sendEmail('transfer-customer-received', p.customer_email, `transfer-cust-recv-${p.order_id}`, {
+        subjectText: c.subject(p.order_number),
+        title: c.title,
+        orderNumber: p.order_number,
+        orderLabel: c.orderLabel,
+        routeLabel: c.routeLabel,
+        routeValue: `${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}`,
+        dateLabel: c.dateLabel,
+        dateValue: localDate,
+        operatorLine: c.operatorLine(op?.name || 'Klod').replace(/<\/?b>/g, ''),
+        amountLabel: c.amountLabel,
+        amountValue: `฿${p.total_amount.toLocaleString()}`,
+      });
+    }
+
+    // Log — booking_notifications_log columns: channel(single), notification_type, metadata(jsonb)
+    await sb().from('booking_notifications_log').insert({
+      channel: 'whatsapp+email',
+      notification_type: operatorMissing ? 'transfer_new_booking_no_operator' : 'transfer_new_booking',
+      sent_at: new Date().toISOString(),
+      metadata: {
+        order_id: p.order_id,
+        order_number: p.order_number,
+        recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
+        status: operatorMissing ? 'partial' : 'sent',
+      },
+    }).catch((e) => console.error('[log]', e));
+
+    return new Response(JSON.stringify({ success: true, operator: op?.name || null, operator_missing: operatorMissing, customer_language: customerLang }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error: unknown) {
     console.error('[Transfer Notify] Error:', error);
-    const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ success: false, error: msg }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
 });

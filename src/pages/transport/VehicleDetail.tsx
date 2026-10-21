@@ -87,8 +87,16 @@ export default function VehicleDetail() {
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, lang);
   const fuelLabel = getFuelLabel(vehicle.fuel_type, lang);
-  const localizedFeatures = getLocalizedFeatures(vehicle.features, lang);
   const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
+  // Bike-only features should never appear on cars/vans/etc.
+  const BIKE_ONLY = new Set(['helmet', 'helmet_included']);
+  const isBike = categoryConfig.id === 'scooter' || categoryConfig.id === 'motorcycle';
+  const filteredFeatures = (vehicle.features || []).filter((f) => {
+    if (!f) return false;
+    const norm = String(f).toLowerCase().trim();
+    return isBike || !BIKE_ONLY.has(norm);
+  });
+  const localizedFeatures = getLocalizedFeatures(filteredFeatures, lang);
 
   return (
     <AppLayout showBottomNav={false}>
@@ -109,7 +117,7 @@ export default function VehicleDetail() {
               }}
               variant="ghost"
             />
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
@@ -340,10 +348,10 @@ export default function VehicleDetail() {
                 <span className="text-xs font-normal text-muted-foreground ml-0.5">/{isRu ? 'день' : 'day'}</span>
               </p>
             </div>
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
               <Phone className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
               <MessageCircle className="w-4 h-4" />
             </Button>
             <Button

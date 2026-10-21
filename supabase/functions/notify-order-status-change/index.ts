@@ -1,7 +1,11 @@
 import { createNotifyHandler, sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { authorizeOrderEmail } from '../_shared/order-email-auth.ts';
+import { AccessDenied } from '../_shared/operating-space-auth.ts';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'npm:zod@3';
 
-Deno.serve(createNotifyHandler("notify-order-status-change", async (body) => {
+const notification = createNotifyHandler("notify-order-status-change", async (body) => {
   const { order_id, new_status, reason } = body as {
     order_id: string; new_status: string; reason?: string | null;
   };
@@ -11,11 +15,12 @@ Deno.serve(createNotifyHandler("notify-order-status-change", async (body) => {
   // Fetch order
   const { data: order, error: orderError } = await supabase
     .from("orders")
-    .select("order_number, order_type, total_amount, currency, customer_user_id, start_at")
+    .select("order_number, order_type, total_amount, currency, customer_user_id, start_at, status")
     .eq("id", order_id)
     .single();
 
   if (orderError || !order) throw new Error("Order not found");
+  if (new_status !== order.status) throw new Error('Requested notification status differs from canonical order');
 
   // Fetch customer profile
   const { data: profile } = await supabase
@@ -100,4 +105,17 @@ Deno.serve(createNotifyHandler("notify-order-status-change", async (body) => {
   }
 
   return { success: true };
-}));
+});
+const StatusInput = z.object({order_id:z.string().uuid(),new_status:z.string().min(1).max(60),reason:z.string().max(2000).nullable().optional()}).strict();
+Deno.serve(async req => {
+  if (req.method==='OPTIONS') return new Response(null,{headers:corsHeaders});
+  try {
+    const denied=await authorizeOrderEmail(req,corsHeaders,{},true);
+    if(denied) return denied;
+    const parsed=StatusInput.safeParse(await req.clone().json());
+    if(!parsed.success) return new Response(JSON.stringify({error:'Invalid status notification'}),{status:400,headers:{...corsHeaders,'Content-Type':'application/json'}});
+    return notification(req);
+  } catch(error) {
+    return new Response(JSON.stringify({error:error instanceof AccessDenied?'Forbidden':'Notification unavailable'}),{status:error instanceof AccessDenied?403:500,headers:{...corsHeaders,'Content-Type':'application/json'}});
+  }
+});

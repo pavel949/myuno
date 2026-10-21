@@ -100,10 +100,16 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
 
         {/* Price */}
         <div className="text-right shrink-0">
-          {service.price && (
-            <span className="text-base font-bold text-primary">
-              {service.price.toLocaleString()} {service.currency || '฿'}
-            </span>
+          {service.price != null && (
+            service.price > 0 ? (
+              <span className="text-base font-bold text-primary">
+                {service.price.toLocaleString()} {service.currency || '฿'}
+              </span>
+            ) : (
+              <span className="text-base font-bold text-success">
+                {language === 'ru' ? 'Бесплатно' : 'Free'}
+              </span>
+            )
           )}
           {service.duration_minutes && (
             <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground mt-0.5">
@@ -199,10 +205,16 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         
         {/* Price and Duration */}
         <div className="flex items-center justify-between pt-1 border-t border-border/50">
-          {service.price ? (
-            <span className="text-base font-bold text-primary">
-              {service.price.toLocaleString()} {service.currency || '฿'}
-            </span>
+          {service.price != null ? (
+            service.price > 0 ? (
+              <span className="text-base font-bold text-primary">
+                {service.price.toLocaleString()} {service.currency || '฿'}
+              </span>
+            ) : (
+              <span className="text-base font-bold text-success">
+                {language === 'ru' ? 'Бесплатно' : 'Free'}
+              </span>
+            )
           ) : (
             <span className="text-sm text-muted-foreground">
               {language === 'ru' ? 'По запросу' : 'On request'}

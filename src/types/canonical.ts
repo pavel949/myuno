@@ -3,15 +3,22 @@
  * @description Canonical segmentation framework types (M3).
  *
  * Source of truth for the 6-role canonical taxonomy, lifecycle stages,
- * personas (P1..P25), household types, clusters and triggers defined in
+ * personas (P1..P26 — §4 of the framework defines 26, incl. P26 conscious-eater),
+ * household types, clusters and triggers defined in
  * `/docs/canonical/01-segmentation-framework.md`.
+ *
+ * ⚠️ These short codes (P1..P26) are a DIFFERENT persona catalog from the
+ * Master Taxonomy long codes (`P01_*..P25_*` in `src/lib/taxonomies/master.ts`).
+ * The numbering does NOT align positionally (e.g. short P20=retiree vs long
+ * P20=passive-investor) and NO automatic bridge exists between them. Do not
+ * cast/strip-underscore one into the other.
  *
  * These types map onto the **smart-additive** Supabase schema introduced
  * in M2 (see `docs/canonical/audits/M2-schema-extension.md`):
  *  - `profiles.lifecycle_stage`           → enum `lifecycle_stage`
  *  - `profiles.household_type`            → enum `household_type_enum`
  *  - `profiles.preferred_language`        → enum `language_code` (existing)
- *  - `profiles.detected_persona`          → text (free-form `P1`..`P25`)
+ *  - `profiles.detected_persona`          → text (free-form `P1`..`P26`)
  *  - `profiles.active_clusters` / triggers / special_status → text[]
  *  - `profiles.kids_ages`                 → int[]
  *  - `profiles.visits_count` / total_days_in_thailand → int
@@ -66,6 +73,8 @@ export interface CanonicalRoleMeta {
   labelRu: string;
   /** One-line elevator pitch in RU — see segmentation-framework § 0.4 */
   descriptionRu: string;
+  /** One-line elevator pitch in EN — mirrors descriptionRu */
+  descriptionEn: string;
   /** Default cluster surface for this role (Arrive/Live/Manage/Invest/Build) */
   defaultCluster: ClusterId;
 }
@@ -76,6 +85,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Consumer',
     labelRu: 'Потребитель',
     descriptionRu: 'Покупает услуги и впечатления, без длинных обязательств.',
+    descriptionEn: 'Buys services and experiences without long-term commitments.',
     defaultCluster: 'arrive',
   },
   'resident-user': {
@@ -83,6 +93,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Resident',
     labelRu: 'Резидент',
     descriptionRu: 'Живёт на острове, нужны бытовые сервисы и легализация.',
+    descriptionEn: 'Lives on the island — needs daily services and legal status.',
     defaultCluster: 'live',
   },
   'investor-passive': {
@@ -90,6 +101,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Passive Investor',
     labelRu: 'Пассивный инвестор',
     descriptionRu: 'Покупает доходные юниты под управлением УК.',
+    descriptionEn: 'Buys income units managed by a property management company.',
     defaultCluster: 'invest',
   },
   'investor-active': {
@@ -97,6 +109,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Active Investor',
     labelRu: 'Активный инвестор',
     descriptionRu: 'Структурирует сделки, перепродажи, broker-уровень.',
+    descriptionEn: 'Structures deals, flips and broker-level transactions.',
     defaultCluster: 'invest',
   },
   operator: {
@@ -104,6 +117,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Operator',
     labelRu: 'Оператор',
     descriptionRu: 'Управляет своим/чужим объектом — STR, аренда, MC.',
+    descriptionEn: 'Runs own or third-party properties — STR, rental, MC.',
     defaultCluster: 'manage',
   },
   provider: {
@@ -111,6 +125,7 @@ export const CANONICAL_ROLE_META: Record<CanonicalRole, CanonicalRoleMeta> = {
     labelEn: 'Provider',
     labelRu: 'Поставщик',
     descriptionRu: 'Поставщик услуг и контента в маркетплейсе.',
+    descriptionEn: 'Supplies services and content into the marketplace.',
     defaultCluster: 'build',
   },
 };
@@ -183,7 +198,7 @@ export const CLUSTER_META: Record<ClusterId, { labelEn: string; labelRu: string;
 };
 
 /* ------------------------------------------------------------------ */
-/*  Personas — § 0.6 (P1..P25 free-form text in DB)                   */
+/*  Personas — § 4 (P1..P26 free-form text in DB)                     */
 /* ------------------------------------------------------------------ */
 
 export type PersonaCode =
@@ -300,6 +315,19 @@ export function isCanonicalRole(value: string | null | undefined): value is Cano
 export function getCanonicalRoleMeta(role: CanonicalRole | null | undefined): CanonicalRoleMeta | null {
   if (!role) return null;
   return CANONICAL_ROLE_META[role] ?? null;
+}
+
+/**
+ * Default content cluster (Arrive/Live/Manage/Invest/Legal/Build) for a
+ * canonical role. Used by routing layers (Welcome, post-login landing,
+ * role switch) so every role has a non-empty home surface — see
+ * `docs/canonical/01-segmentation-framework.md` § 0.4 and
+ * `src/lib/catalog/taxonomy.ts:CLUSTERS`. Returns `null` for unknown roles
+ * so callers can fall back to a generic landing instead of dead-ending.
+ */
+export function getDefaultClusterForRole(role: CanonicalRole | null | undefined): ClusterId | null {
+  if (!role) return null;
+  return CANONICAL_ROLE_META[role]?.defaultCluster ?? null;
 }
 
 export function nextLifecycleStage(stage: LifecycleStage | null): LifecycleStage | null {

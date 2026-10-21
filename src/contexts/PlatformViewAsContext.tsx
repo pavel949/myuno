@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -43,19 +44,33 @@ export function PlatformViewAsProvider({ children }: { children: ReactNode }) {
     targetUserId: null,
     targetEmail: null,
   });
+  const boundUserRef = useRef<string | null | undefined>(undefined);
 
+  // Hydrate on first mount, then clear the "view-as" scope whenever the
+  // authenticated user changes (account switch or logout) so it never leaks
+  // across accounts on a shared device.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as PlatformViewAsState;
-        if (parsed?.targetUserId) setState(parsed);
+    const currentUserId = user?.id ?? null;
+    if (boundUserRef.current === undefined) {
+      boundUserRef.current = currentUserId;
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as PlatformViewAsState;
+          if (parsed?.targetUserId) setState(parsed);
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
+      return;
     }
-  }, []);
+    if (boundUserRef.current !== currentUserId) {
+      boundUserRef.current = currentUserId;
+      setState({ targetUserId: null, targetEmail: null });
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    }
+  }, [user?.id]);
 
   const persist = useCallback((next: PlatformViewAsState) => {
     setState(next);

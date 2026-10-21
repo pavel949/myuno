@@ -176,6 +176,7 @@ export default function ExperienceCategoriesPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => openEditDialog(category)}
+                          aria-label={isRu ? 'Редактировать' : 'Edit'}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -184,6 +185,7 @@ export default function ExperienceCategoriesPage() {
                           size="icon"
                           className="text-destructive hover:text-destructive"
                           onClick={() => setDeleteConfirmId(category.id)}
+                          aria-label={isRu ? 'Удалить' : 'Delete'}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

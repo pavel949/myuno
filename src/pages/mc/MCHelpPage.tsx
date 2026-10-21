@@ -154,7 +154,7 @@ const FEATURE_SECTIONS: FeatureSection[] = [
       { en: 'Monthly owner financial statements', ru: 'Ежемесячные финансовые отчёты для собственников' },
       { en: 'Budget planning and variance analysis', ru: 'Планирование бюджета и анализ отклонений' },
       { en: 'Invoice generation and payment tracking', ru: 'Генерация счетов и отслеживание оплат' },
-      { en: 'Multi-currency support (THB, USD, EUR, RUB)', ru: 'Мультивалютная поддержка (THB, USD, EUR, RUB)' },
+      { en: 'Multi-currency support for global operations', ru: 'Мультивалютная поддержка для международных операций' },
       { en: 'Customizable financial categories', ru: 'Настраиваемые финансовые категории' },
     ],
   },
@@ -403,7 +403,7 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
             disabled={isLoading}
             className="flex-1 h-9"
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9">
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="min-h-[44px] min-w-[44px] h-9 w-9" aria-label={isRu ? 'Отправить' : 'Send'}>
             <Send className="w-4 h-4" />
           </Button>
         </div>

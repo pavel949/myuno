@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -5,6 +6,8 @@ import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, Calendar
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { Button } from '@/components/ui/button';
@@ -30,6 +33,9 @@ import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
+import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -37,6 +43,8 @@ export default function PropertyInquiry() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
+
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
@@ -147,6 +155,7 @@ export default function PropertyInquiry() {
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
   // Default 'split' preserves the legacy behavior (charge prepay only).
@@ -161,9 +170,11 @@ export default function PropertyInquiry() {
     () =>
       (propertyExt?.currency?.trim?.() ||
         rentalExt?.currency?.trim?.() ||
-        'THB') as string,
-    [property, rentalTerms],
+        currentCity?.default_currency ||
+        'USD') as string,
+    [property, rentalTerms, currentCity?.default_currency],
   );
+
   const { data: isRareFind } = useRareFindBadge(id);
 
   // Persist form draft on every change, with current URL context attached
@@ -252,6 +263,26 @@ export default function PropertyInquiry() {
   // Pull rate seasons (per-property pricing overrides) for the central engine.
   const { data: rateSeasons } = usePropertyRateSeasons(id);
 
+  // Per-date price overrides from the property calendar (same source the server checks).
+  const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!id || !checkIn || !checkOut || differenceInDays(checkOut, checkIn) <= 0) { setDateOverrides({}); return; }
+    let cancelled = false;
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_property_date_prices', { _property_id: id, _from: fmt(checkIn), _to: fmt(checkOut) });
+        if (error) throw error;
+        const map: Record<string, number> = {};
+        for (const r of data ?? []) if (r.price_override != null) map[String(r.date)] = Number(r.price_override);
+        if (!cancelled) setDateOverrides(map);
+      } catch {
+        if (!cancelled) setDateOverrides({});
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, checkIn, checkOut]);
+
   // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
     const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
@@ -266,7 +297,7 @@ export default function PropertyInquiry() {
             last_minute_days: rentalExt?.last_minute_days,
             custom_length_discounts: rentalExt?.custom_length_discounts,
             deposit_amount: rentalTerms?.deposit_amount,
-            deposit_currency: rentalTerms?.deposit_currency || 'THB',
+            deposit_currency: rentalTerms?.deposit_currency || listingCurrency,
             payment_policy: rentalExt?.payment_policy || 'prepay_10',
             prepay_percent: rentalExt?.prepay_percent,
           },
@@ -283,7 +314,7 @@ export default function PropertyInquiry() {
           customLengthDiscounts: rentalExt?.custom_length_discounts,
           seasonalPricing: propertyExt?.seasonal_pricing,
           depositAmount: rentalTerms?.deposit_amount,
-          depositCurrency: rentalTerms?.deposit_currency || 'THB',
+          depositCurrency: rentalTerms?.deposit_currency || listingCurrency,
           paymentPolicy: rentalExt?.payment_policy || 'prepay_10',
           prepayPercent: rentalExt?.prepay_percent,
         };
@@ -291,23 +322,22 @@ export default function PropertyInquiry() {
     if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
-    return calculatePricing(baseRules, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property]);
+    return calculatePricing({ ...baseRules, dateOverrides }, checkIn, checkOut);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency, dateOverrides]);
 
   const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (nights > 0 && rentalTerms?.min_stay_nights && nights < rentalTerms.min_stay_nights) {
-      errors.push(isRu
-        ? `Минимальный срок проживания: ${rentalTerms.min_stay_nights} ночей`
-        : `Minimum stay: ${rentalTerms.min_stay_nights} nights`);
-    }
+    const errors: string[] = getStayRuleErrors(
+      { checkIn, checkOut, terms: rentalTerms },
+      language,
+    );
     if (rentalTerms?.max_guests && guests > rentalTerms.max_guests) {
       errors.push(isRu
         ? `Максимум гостей: ${rentalTerms.max_guests}`
         : `Maximum guests: ${rentalTerms.max_guests}`);
     }
     return errors;
-  }, [nights, rentalTerms, guests, isRu]);
+  }, [checkIn, checkOut, rentalTerms, guests, language, isRu]);
+
 
   const isFormValid = formData.name && formData.phone && hasDates && validationErrors.length === 0;
   const propertyTitle = isRu ? property?.title_ru : property?.title_en;
@@ -320,6 +350,11 @@ export default function PropertyInquiry() {
     moderate: { en: 'Free cancellation up to 5 days before check-in', ru: 'Бесплатная отмена за 5 дней до заезда' },
     strict: { en: 'Non-refundable after booking', ru: 'Невозвратная после бронирования' },
   };
+
+  // Show confirmation screen after a successful viewing request submission.
+  if (submittedOrderId) {
+    return <InquiryConfirmation orderId={submittedOrderId} />;
+  }
 
   // If no dates, prompt the user to go back
   if (!hasDates) {
@@ -343,9 +378,9 @@ export default function PropertyInquiry() {
   }
 
   return (
-    <div className="pb-28">
+    <div className="public-commerce public-commerce--inquiry pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-background/95 border-b">
+        <div className="public-commerce-form-header bg-background border-b">
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath={editUrl} variant="ghost" />
             <h1 className="text-lg font-display font-bold">
@@ -356,7 +391,7 @@ export default function PropertyInquiry() {
           </div>
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="public-commerce-form p-4 space-y-6">
 
           {/* ===== YOUR TRIP ===== */}
           <section className="space-y-4">
@@ -786,6 +821,24 @@ export default function PropertyInquiry() {
               onClick={async () => {
                 if (isSubmitting) return;
 
+                // Strict e-mail validation: confirmations and voucher emails are
+                // sent to this address, so a typo means a silently lost booking.
+                const emailValue = formData.email.trim();
+                if (emailValue) {
+                  const emailOk = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(emailValue)
+                    && emailValue.length <= 254
+                    && !emailValue.includes('..');
+                  if (!emailOk) {
+                    toast.error(
+                      isRu
+                        ? 'Проверьте адрес e-mail — подтверждение отправляется на него.'
+                        : 'Please check the e-mail address — the confirmation is sent there.',
+                    );
+                    return;
+                  }
+                }
+
+
                 // === INSTANT BOOKING PATH ===
                 if (isInstantBooking) {
                   // If payment options aren't visible yet, scroll into view first.
@@ -914,9 +967,9 @@ export default function PropertyInquiry() {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
                     toast.success(isRu
-                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.'
-                      : 'Request sent! The host will respond within 24 hours.');
-                    navigate(`/bookings/${result.order_id}`, { replace: true });
+                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
+                      : "Request sent! We'll WhatsApp you within 24 hours.");
+                    setSubmittedOrderId(result.order_id);
                   } else {
                     // Bug #3 fix: surface failures from createOrder so the user
                     // is never left staring at a silent footer.
@@ -952,8 +1005,8 @@ export default function PropertyInquiry() {
                       ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
                       : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
                 : (isRu
-                    ? 'Оплата не списывается. Хозяин подтвердит бронирование.'
-                    : "You won't be charged. The host will confirm your booking.")}
+                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
+                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
             </p>
           </div>
         )}

@@ -153,6 +153,7 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(section.step)}
+                aria-label={isRu ? 'Редактировать' : 'Edit'}
               >
                 <Pencil className="h-4 w-4" />
               </Button>

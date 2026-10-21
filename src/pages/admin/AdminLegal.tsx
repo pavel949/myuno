@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Scale } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminLegal } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const serviceTypes = [
   { value: 'law_firm', label: 'Law Firm', labelRu: 'Юрфирма' },
@@ -12,7 +13,7 @@ const serviceTypes = [
   { value: 'family_law', label: 'Family Law', labelRu: 'Семейное право' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Legal Service Management',
   titleRu: 'Управление юр. услугами',
   icon: Scale,
@@ -35,13 +36,15 @@ const config: AdminVerticalConfig = {
     { key: 'phone', type: 'text', labelEn: 'Phone', labelRu: 'Телефон' },
     { key: 'email', type: 'text', labelEn: 'Email', labelRu: 'Email' },
     { key: 'website', type: 'text', labelEn: 'Website', labelRu: 'Сайт' },
-    { key: 'price_consultation', type: 'number', labelEn: 'Consultation ฿', labelRu: 'Консультация ฿' },
+    { key: 'price_consultation', type: 'number', labelEn: `Consultation ${sym}`, labelRu: `Консультация ${sym}` },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminLegal() {
   const hook = useAdminLegal();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   return <AdminVerticalCRUD config={config} hook={hook} />;
 }

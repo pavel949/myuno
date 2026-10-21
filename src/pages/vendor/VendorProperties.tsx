@@ -39,6 +39,7 @@ import {
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import { DraftRestorationBanner } from '@/components/vendor';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorProperties = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const VendorProperties = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -382,7 +383,7 @@ const VendorProperties = () => {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

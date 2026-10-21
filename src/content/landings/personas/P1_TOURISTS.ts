@@ -11,12 +11,12 @@ export const P1_TOURISTS: PersonaLanding = {
   slug: 'tourists',
   status: 'live',
   h1: {
-    ru: 'Пхукет для русскоязычных туристов',
-    en: 'Phuket for Russian-speaking travellers',
+    ru: 'Пхукет для иностранных туристов',
+    en: 'Phuket for international travellers',
   },
   subtitle: {
-    ru: 'Трансфер из аэропорта, eSIM, аренда виллы, экскурсии и помощь по-русски — в одном приложении.',
-    en: 'Airport transfer, eSIM, villa rental, tours and Russian-speaking support — in one app.',
+    ru: 'Трансфер из аэропорта, eSIM, аренда виллы, экскурсии и многоязычная поддержка (EN/RU/TH) — в одном приложении.',
+    en: 'Airport transfer, eSIM, villa rental, tours and multilingual support (EN/RU/TH) — in one app.',
   },
   pains: [
     {
@@ -41,7 +41,7 @@ export const P1_TOURISTS: PersonaLanding = {
       slug: 'airport-transfer',
       label: { ru: 'Трансфер из аэропорта', en: 'Airport transfer' },
       oneLiner: { ru: 'Минивэн до отеля, цена THB фикс.', en: 'Fixed-price minivan to your hotel.' },
-      href: '/landing/airport-transfer',
+      href: '/transfer',
     },
     {
       slug: 'esim',
@@ -87,7 +87,7 @@ export const P1_TOURISTS: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать трансфер', en: 'Book a transfer' },
-    href: '/landing/airport-transfer',
+    href: '/transport/airport-transfer',
     subtitle: { ru: 'Цена в THB, оплата в приложении.', en: 'Price in THB, paid in the app.' },
   },
   secondaryCta: {
@@ -96,18 +96,20 @@ export const P1_TOURISTS: PersonaLanding = {
   },
   seo: {
     metaTitle: {
-      ru: 'Пхукет по-русски: трансфер, eSIM, виллы, экскурсии — myUNO',
-      en: 'Phuket in Russian: transfer, eSIM, villas, tours — myUNO',
+      ru: 'Пхукет для туристов: трансфер, eSIM, виллы, экскурсии — myUNO',
+      en: 'Phuket for travellers: transfer, eSIM, villas, tours — myUNO',
     },
     metaDescription: {
-      ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Поддержка по-русски, оплата в THB. Без посредников у стойки.',
-      en: 'Airport transfer, eSIM, villa rental and tours on Phuket. Russian-speaking support, THB payments, no street vendors.',
+      ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Многоязычная поддержка (EN/RU/TH), оплата в THB. Без посредников у стойки.',
+      en: 'Airport transfer, eSIM, villa rental and tours in Phuket. Multilingual support (EN/RU/TH), THB payments, no street vendors.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/tourists',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/tourists?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/tourists?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/tourists?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/tourists?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/tourists?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/tourists?lang=zh-CN' },
     ],
   },
 };

@@ -1,4 +1,5 @@
 import { createClient } from '../_shared/supabase.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -339,10 +340,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authenticated user
+    const authResult = await requireAuth(req, corsHeaders);
+    if (authResult instanceof Response) return authResult;
+    const userId = authResult.user.id;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
-    
+
     if (!firecrawlKey) {
       return new Response(
         JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
@@ -365,7 +371,7 @@ Deno.serve(async (req) => {
     let url = listing_url;
     let ownerId: string | null = null;
 
-    // If connection_id provided, fetch the connection
+    // If connection_id provided, fetch the connection and verify ownership
     if (connection_id) {
       const { data: connection, error: connError } = await supabase
         .from('ota_listing_connections')
@@ -380,6 +386,14 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Ownership check — only the owner of the connection can trigger sync
+      if (connection.owner_id !== userId) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Forbidden: not the owner of this connection' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       url = connection.listing_url;
       ownerId = connection.owner_id;
     }
@@ -387,10 +401,10 @@ Deno.serve(async (req) => {
     // CRITICAL: Normalize URL — convert hosting/editor URLs to public listing URLs
     const originalUrl = url;
     url = normalizeAirbnbUrl(url);
-    console.log(`Normalized URL: ${originalUrl} -> ${url}`);
+    console.info(`Normalized URL: ${originalUrl} -> ${url}`);
 
     const listingId = extractAirbnbListingId(url);
-    console.log(`Syncing Airbnb listing: ${url} (ID: ${listingId})`);
+    console.info(`Syncing Airbnb listing: ${url} (ID: ${listingId})`);
 
     // Create sync log entry
     const { data: syncLog, error: logError } = await supabase
@@ -408,7 +422,7 @@ Deno.serve(async (req) => {
     }
 
     // Scrape the Airbnb listing using Firecrawl
-    console.log('Calling Firecrawl API...');
+    console.info('Calling Firecrawl API...');
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
@@ -465,7 +479,7 @@ Deno.serve(async (req) => {
 
     const markdown = scrapeData.data?.markdown || '';
     const html = scrapeData.data?.html || '';
-    console.log(`Scraped ${markdown.length} chars markdown, ${html.length} chars HTML`);
+    console.info(`Scraped ${markdown.length} chars markdown, ${html.length} chars HTML`);
 
     // Parse the listing data from both markdown and HTML
     const listingData = parseAirbnbListing(markdown, html, url);
@@ -524,7 +538,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Parsed listing data:', JSON.stringify({
+    console.info('Parsed listing data:', JSON.stringify({
       title: listingData.title,
       bedrooms: listingData.bedrooms,
       bathrooms: listingData.bathrooms,
@@ -610,7 +624,7 @@ Deno.serve(async (req) => {
         .eq('id', connectionId);
     }
 
-    console.log(`Sync complete in ${Date.now() - startTime}ms`);
+    console.info(`Sync complete in ${Date.now() - startTime}ms`);
 
     return new Response(
       JSON.stringify({

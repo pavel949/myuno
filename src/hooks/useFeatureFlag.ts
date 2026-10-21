@@ -4,7 +4,7 @@
  * Source of truth: `system_settings.value` (jsonb). Accepts boolean/"true"/"on"/1.
  * Default = `false` (gates the feature off until explicitly enabled in DB).
  *
- * Used by RERE blocks (RealEstateEntry, TrustAsAService) and ClearView/Pricing
+ * Used by RERE blocks (RealEstateEntry) and ClearView/Pricing
  * surfaces to honour rule §13.7 (every new feature gated until GA).
  */
 import { useQuery } from '@tanstack/react-query';
@@ -16,11 +16,25 @@ function coerce(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return value === 1;
   if (typeof value === 'string') {
-    const v = value.toLowerCase().trim();
+    const trimmed = value.trim();
+    // Some legacy rows store JSON-stringified objects like '{"enabled": true}'.
+    if (trimmed.startsWith('{')) {
+      try {
+        return coerce(JSON.parse(trimmed));
+      } catch {
+        return false;
+      }
+    }
+    const v = trimmed.toLowerCase();
     return v === 'true' || v === 'on' || v === '1';
+  }
+  // Canonical jsonb shape: { enabled: boolean, rolloutPct?: number }
+  if (value && typeof value === 'object' && 'enabled' in value) {
+    return Boolean((value as { enabled: unknown }).enabled);
   }
   return false;
 }
+
 
 async function fetchFlags(): Promise<Record<string, boolean>> {
   const { data, error } = await supabase

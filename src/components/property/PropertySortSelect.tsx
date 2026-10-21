@@ -2,6 +2,7 @@
  * PropertySortSelect - Sort dropdown for property listings
  */
 
+import { pickLang } from '@/lib/i18n/pickLang';
 import React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,28 +22,27 @@ interface PropertySortSelectProps {
   onChange: (value: PropertySortKey) => void;
 }
 
-const sortOptions: Array<{ value: PropertySortKey; labelEn: string; labelRu: string }> = [
-  { value: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { value: 'price_asc', labelEn: 'Price: Low → High', labelRu: 'Цена: по возрастанию' },
-  { value: 'price_desc', labelEn: 'Price: High → Low', labelRu: 'Цена: по убыванию' },
-  { value: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { value: 'newest', labelEn: 'Newest', labelRu: 'Новые' },
+const sortOptions: Array<{ value: PropertySortKey; labelEn: string; labelRu: string; labelTh: string }> = [
+  { value: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { value: 'price_asc', labelEn: 'Price: Low → High', labelRu: 'Цена: по возрастанию', labelTh: 'ราคา: ต่ำไปสูง' },
+  { value: 'price_desc', labelEn: 'Price: High → Low', labelRu: 'Цена: по убыванию', labelTh: 'ราคา: สูงไปต่ำ' },
+  { value: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { value: 'newest', labelEn: 'Newest', labelRu: 'Новые', labelTh: 'ใหม่ล่าสุด' },
 ];
 
 export function PropertySortSelect({ value, onChange }: PropertySortSelectProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   return (
     <Select value={value} onValueChange={(v) => onChange(v as PropertySortKey)}>
-      <SelectTrigger className="w-auto gap-1.5 h-8 text-xs border-border/50 bg-background">
+      <SelectTrigger aria-label={pickLang(language, { ru: 'Сортировка', en: 'Sort homes', th: 'เรียงลำดับที่พัก' })} className="w-auto gap-1.5 h-8 text-xs border-border/50 bg-background">
         <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {sortOptions.map((opt) => (
           <SelectItem key={opt.value} value={opt.value} className="text-xs">
-            {isRu ? opt.labelRu : opt.labelEn}
+            {pickLang(language, { ru: opt.labelRu, en: opt.labelEn, th: opt.labelTh })}
           </SelectItem>
         ))}
       </SelectContent>

@@ -12,7 +12,7 @@ export const P15_WEDDINGS: PersonaLanding = {
   status: 'live',
   h1: {
     ru: 'Свадьба на Пхукете под ключ',
-    en: 'Destination wedding on Phuket',
+    en: 'Destination wedding in Phuket',
   },
   subtitle: {
     ru: 'Площадка с видом на закат, юридическая регистрация, сценография, фотограф и логистика гостей — собираем свадьбу на 10–120 человек без сюрпризов в счёте.',
@@ -25,11 +25,11 @@ export const P15_WEDDINGS: PersonaLanding = {
     { ru: 'Хочется уникальную локацию, но не сорвать сроки и бюджет.', en: 'You want a unique venue without blowing the timeline or budget.' },
   ],
   services: [
-    { slug: 'wedding-venues', label: { ru: 'Подбор площадки', en: 'Venue scouting' }, oneLiner: { ru: 'Виллы, beach clubs, отели — 60+ верифицированных локаций.', en: 'Villas, beach clubs, hotels — 60+ verified venues.' }, href: '/wedding/venues' },
-    { slug: 'wedding-legal', label: { ru: 'Юридическая регистрация', en: 'Legal registration' }, oneLiner: { ru: 'Marriage certificate, апостиль, признание в стране.', en: 'Marriage certificate, apostille, home-country recognition.' }, href: '/wedding/legal' },
-    { slug: 'wedding-planner', label: { ru: 'Wedding planner', en: 'Wedding planner' }, oneLiner: { ru: 'Сценография, тайминг, координация подрядчиков.', en: 'Styling, timeline, vendor coordination.' }, href: '/wedding/planner' },
-    { slug: 'wedding-photo', label: { ru: 'Фото и видео', en: 'Photo & video' }, oneLiner: { ru: 'Профессионалы с портфолио на Пхукете.', en: 'Professional portfolios shot on Phuket.' }, href: '/wedding/photo' },
-    { slug: 'guest-logistics', label: { ru: 'Логистика гостей', en: 'Guest logistics' }, oneLiner: { ru: 'Трансфер из аэропорта, блок в отеле, welcome pack.', en: 'Airport transfers, hotel block, welcome pack.' }, href: '/wedding/guests' },
+    { slug: 'wedding-venues', label: { ru: 'Подбор площадки', en: 'Venue scouting' }, oneLiner: { ru: 'Виллы, beach clubs, отели — 60+ верифицированных локаций.', en: 'Villas, beach clubs, hotels — 60+ verified venues.' }, href: '/wedding/venues', availability: 'unavailable' },
+    { slug: 'wedding-legal', label: { ru: 'Юридическая регистрация', en: 'Legal registration' }, oneLiner: { ru: 'Marriage certificate, апостиль, признание в стране.', en: 'Marriage certificate, apostille, home-country recognition.' }, href: '/wedding/legal', availability: 'unavailable' },
+    { slug: 'wedding-planner', label: { ru: 'Wedding planner', en: 'Wedding planner' }, oneLiner: { ru: 'Сценография, тайминг, координация подрядчиков.', en: 'Styling, timeline, vendor coordination.' }, href: '/wedding/planner', availability: 'unavailable' },
+    { slug: 'wedding-photo', label: { ru: 'Фото и видео', en: 'Photo & video' }, oneLiner: { ru: 'Профессионалы с портфолио на Пхукете.', en: 'Professional portfolios shot in Phuket.' }, href: '/wedding/photo', availability: 'unavailable' },
+    { slug: 'guest-logistics', label: { ru: 'Логистика гостей', en: 'Guest logistics' }, oneLiner: { ru: 'Трансфер из аэропорта, блок в отеле, welcome pack.', en: 'Airport transfers, hotel block, welcome pack.' }, href: '/wedding/guests', availability: 'unavailable' },
     { slug: 'honeymoon', label: { ru: 'Honeymoon escape', en: 'Honeymoon escape' }, oneLiner: { ru: 'Виллы 5★ с приватным шефом и dinner setup.', en: '5★ villas with private chef and dinner setup.' }, href: '/property?audience=honeymoon' },
   ],
   faq: [
@@ -42,7 +42,7 @@ export const P15_WEDDINGS: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Подобрать площадку', en: 'Scout a venue' },
-    href: '/wedding/venues',
+    href: '/wedding/venues', availability: 'unavailable',
     subtitle: { ru: 'Подборка под бюджет за 48 часов.', en: 'Curated shortlist within 48 hours.' },
   },
   secondaryCta: {
@@ -50,13 +50,13 @@ export const P15_WEDDINGS: PersonaLanding = {
     href: '/wedding',
   },
   seo: {
-    metaTitle: { ru: 'Свадьба на Пхукете под ключ — myUNO', en: 'Destination wedding on Phuket — myUNO' },
+    metaTitle: { ru: 'Свадьба на Пхукете под ключ — myUNO', en: 'Destination wedding in Phuket — myUNO' },
     metaDescription: { ru: 'Площадки, юридическая регистрация, planner, фото и логистика гостей. Свадьбы на 10–120 человек без сюрпризов в счёте.', en: 'Venues, legal registration, planner, photo and guest logistics. Weddings for 10–120 guests with no budget surprises.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/weddings',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/weddings?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/weddings?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/weddings?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/weddings?lang=en' },
     ],
   },
 };

@@ -10,7 +10,8 @@ import { Resend } from "npm:resend@2.0.0";
 // ── CORS ────────────────────────────────────────────────────────────────
 
 export const NOTIFY_CORS = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
+  "Access-Control-Allow-Origin": "*",
+  "Vary": "Origin",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -40,7 +41,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<{ success: bool
   try {
     const resend = getResend();
     const { error } = await resend.emails.send({
-      from: opts.from ?? "myUNO <notifications@myuno.app>",
+      from: opts.from ?? "myUNO <onboarding@resend.dev>",
       to: Array.isArray(opts.to) ? opts.to : [opts.to],
       subject: opts.subject,
       html: opts.html,
@@ -145,7 +146,7 @@ export function createNotifyHandler(name: string, handler: NotifyHandler) {
     }
     try {
       const body = await req.json();
-      console.log(`[${name}] Processing notification`);
+      console.info(`[${name}] Processing notification`);
       const result = await handler(body);
       return new Response(JSON.stringify(result), {
         status: result.success ? 200 : 500,

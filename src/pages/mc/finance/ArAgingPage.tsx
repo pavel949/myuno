@@ -5,10 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Receipt, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 export default function ArAgingPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { symbol: curSym } = useCityCurrency();
   const { data: rows, isLoading } = useArAging();
 
   const totals = useMemo(() => {
@@ -46,7 +48,7 @@ export default function ArAgingPage() {
         ].map((b, i) => (
           <Card key={i} className="p-3">
             <div className="text-xs text-muted-foreground">{b.label} {isRu ? 'дн.' : 'days'}</div>
-            <div className={cn("text-lg md:text-xl font-bold tabular-nums mt-1", b.color)}>{fmt(b.value)} ฿</div>
+            <div className={cn("text-lg md:text-xl font-bold tabular-nums mt-1", b.color)}>{fmt(b.value)} {curSym}</div>
           </Card>
         ))}
       </div>

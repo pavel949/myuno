@@ -26,10 +26,10 @@ export const P18_LGBTQ: PersonaLanding = {
   services: [
     { slug: 'friendly-stays', label: { ru: 'LGBTQ+ friendly жильё', en: 'LGBTQ+ friendly stays' }, oneLiner: { ru: '120+ проверенных вилл и кондо, отзывы сообщества.', en: '120+ vetted villas and condos with community reviews.' }, href: '/property/rent' },
     { slug: 'community', label: { ru: 'Сообщество и события', en: 'Community & events' }, oneLiner: { ru: 'Patong / Bangla, Pride-неделя апрель, weekly бранчи.', en: 'Patong / Bangla, Pride week in April, weekly brunches.' }, href: '/cluster/lifestyle' },
-    { slug: 'health', label: { ru: 'PrEP / HRT клиники', en: 'PrEP / HRT clinics' }, oneLiner: { ru: 'Pulse Clinic, BIH — конфиденциально, рецепты на EN.', en: 'Pulse Clinic, BIH — confidential, English prescriptions.' }, href: '/cluster/health' },
+    { slug: 'health', label: { ru: 'PrEP / HRT клиники', en: 'PrEP / HRT clinics' }, oneLiner: { ru: 'Pulse Clinic, BIH — конфиденциально, рецепты на EN.', en: 'Pulse Clinic, BIH — confidential, English prescriptions.' }, href: '/cluster/health', availability: 'unavailable' },
     { slug: 'wedding', label: { ru: 'Однополая свадьба', en: 'Same-sex wedding' }, oneLiner: { ru: 'С января 2025 — легально. Регистрация в амфуре, апостиль.', en: 'Legal since January 2025. Amphur registration, apostille.' }, href: '/wedding' },
     { slug: 'long-stay', label: { ru: 'Long-stay аренда', en: 'Long-stay rental' }, oneLiner: { ru: 'Контракт на пару, joint tenancy, без discrimination clauses.', en: 'Couple-friendly contract, joint tenancy, no discrimination clauses.' }, href: '/property/rent' },
-    { slug: 'family-planning', label: { ru: 'IVF и family planning', en: 'IVF & family planning' }, oneLiner: { ru: 'Surrogacy ограничена; IVF/egg freezing в Bangkok IVF Center.', en: 'Surrogacy restricted; IVF / egg freezing at Bangkok IVF Center.' }, href: '/services/health/clinics' },
+    { slug: 'family-planning', label: { ru: 'IVF и family planning', en: 'IVF & family planning' }, oneLiner: { ru: 'Surrogacy ограничена; IVF/egg freezing в Bangkok IVF Center.', en: 'Surrogacy restricted; IVF / egg freezing at Bangkok IVF Center.' }, href: '/services/health/clinics', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Безопасно ли в Таиланде для пар?', en: 'Is Thailand safe for couples?' }, a: { ru: 'Да. С 22 января 2025 года в Таиланде легализован однополый брак (Marriage Equality Act). Пхукет — один из самых открытых регионов SEA, public displays of affection воспринимаются нейтрально.', en: 'Yes. Same-sex marriage is legal in Thailand since 22 January 2025 (Marriage Equality Act). Phuket is among the most open regions in SEA; public displays of affection are received neutrally.' } },
@@ -43,12 +43,12 @@ export const P18_LGBTQ: PersonaLanding = {
   secondaryCta: { label: { ru: 'Открыть сообщество', en: 'Browse community' }, href: '/cluster/lifestyle' },
   seo: {
     metaTitle: { ru: 'LGBTQ+ Пхукет: friendly жильё, брак, клиники — myUNO', en: 'LGBTQ+ Phuket: friendly stays, marriage, clinics — myUNO' },
-    metaDescription: { ru: 'LGBTQ+ friendly виллы и кондо, легальный однополый брак, PrEP/HRT клиники и long-stay аренда на Пхукете без неловких вопросов.', en: 'LGBTQ+ friendly villas and condos, legal same-sex marriage, PrEP/HRT clinics and long-stay rental on Phuket — no awkward questions.' },
+    metaDescription: { ru: 'LGBTQ+ friendly виллы и кондо, легальный однополый брак, PrEP/HRT клиники и long-stay аренда на Пхукете без неловких вопросов.', en: 'LGBTQ+ friendly villas and condos, legal same-sex marriage, PrEP/HRT clinics and long-stay rental in Phuket — no awkward questions.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/lgbtq',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/lgbtq?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/lgbtq?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/lgbtq?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/lgbtq?lang=en' },
     ],
   },
 };

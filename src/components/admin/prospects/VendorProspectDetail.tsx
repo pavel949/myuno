@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { supabase } from '@/integrations/supabase/client';
+import { getOrCreateContactByEmail } from '@/lib/crm/getOrCreateContact';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
@@ -104,21 +105,8 @@ const updateProspect = useUpdateProspect();
       const firstName = nameParts[0] || prospect.business_name;
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Check for duplicate by email or phone
-      if (prospect.email) {
-        const { data: byEmail } = await supabase
-          .from('crm_contacts')
-          .select('id, first_name')
-          .eq('email', prospect.email)
-          .maybeSingle();
-        if (byEmail) {
-          toast(isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM', {
-            description: `${byEmail.first_name} (${prospect.email})`,
-          });
-          setIsConvertingToCrm(false);
-          return;
-        }
-      }
+      // De-dup is handled by getOrCreateContactByEmail, scoped to this company —
+      // no separate unscoped email lookup (which could match another tenant's row).
 
       // Extract enriched data from source_data
       const sd = (prospect.source_data || {}) as Record<string, any>;
@@ -129,8 +117,8 @@ const updateProspect = useUpdateProspect();
         'ai_discovery',
       ].filter(Boolean) as string[];
 
-      // Rich CRM mapping
-      const { error } = await supabase.from('crm_contacts').insert({
+      // Rich CRM mapping (idempotent by email)
+      const { existed } = await getOrCreateContactByEmail({
         company_id: myCompany.company_id,
         first_name: firstName,
         last_name: lastName || null,
@@ -158,9 +146,10 @@ const updateProspect = useUpdateProspect();
           sd.description_ru ? `RU: ${sd.description_ru}` : null,
         ].filter(Boolean).join(' | '),
         lifecycle_stage: 'lead',
-      } as any);
-
-      if (error) throw error;
+      });
+      if (existed) {
+        toast.info(isRussian ? 'Контакт уже был в CRM — открыт существующий' : 'Contact already in CRM — opened existing');
+      }
 
       // Mark prospect as converted
       updateProspect.mutate({ id: prospect.id, status: 'won' });

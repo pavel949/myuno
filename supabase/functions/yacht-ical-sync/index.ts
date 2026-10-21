@@ -5,6 +5,7 @@
 import { createClient } from '../_shared/supabase.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -93,7 +94,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log(`[yacht-ical-sync] ${req.method} ${req.url}`);
+  console.info(`[yacht-ical-sync] ${req.method} ${req.url}`);
 
   // Rate limit
   const rlResponse = await withRateLimit(req, 'yacht-ical-sync', RATE_LIMITS.default, corsHeaders);
@@ -145,7 +146,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Syncing ${calendars?.length || 0} yacht external calendars`);
+    console.info(`Syncing ${calendars?.length || 0} yacht external calendars`);
 
     const results: Array<{
       calendar_id: string;
@@ -158,8 +159,14 @@ Deno.serve(async (req) => {
 
     for (const calendar of calendars || []) {
       try {
-        console.log(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
-        
+        console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
+
+        // SSRF guard: ical_url is user-supplied DB data.
+        const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+        if (!ssrf.allowed) {
+          throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+        }
+
         // Fetch iCal content
         const response = await fetch(calendar.ical_url, {
           headers: {
@@ -174,7 +181,7 @@ Deno.serve(async (req) => {
         const icalContent = await response.text();
         const events = parseICalEvents(icalContent);
         
-        console.log(`Parsed ${events.length} events from ${calendar.name}`);
+        console.info(`Parsed ${events.length} events from ${calendar.name}`);
 
         // Get existing availability entries from this calendar
         const { data: existingEntries } = await supabase
@@ -229,7 +236,7 @@ Deno.serve(async (req) => {
             .from('yacht_availability')
             .delete()
             .in('id', datesToRemove);
-          console.log(`Removed ${datesToRemove.length} outdated entries`);
+          console.info(`Removed ${datesToRemove.length} outdated entries`);
         }
 
         // Update last sync time
@@ -271,7 +278,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Yacht iCal sync completed:', results);
+    console.info('Yacht iCal sync completed:', results);
 
     return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

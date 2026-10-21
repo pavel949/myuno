@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     const payload: PromotionPayload = await req.json();
     const segmentFilter = payload.segment_filter || 'all';
 
-    console.log('Sending promotion with segment filter:', segmentFilter);
+    console.info('Sending promotion with segment filter:', segmentFilter);
 
     // Get eligible user IDs based on segment filter
     let userIds: string[] = [];
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
       userIds = prefs?.map(p => p.user_id) || segmentUserIds;
     }
 
-    console.log(`Found ${userIds.length} eligible users for segment: ${segmentFilter}`);
+    console.info(`Found ${userIds.length} eligible users for segment: ${segmentFilter}`);
 
     if (userIds.length === 0) {
       return new Response(
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
       throw insertError;
     }
 
-    console.log(`Created ${notifications.length} in-app notifications`);
+    console.info(`Created ${notifications.length} in-app notifications`);
 
     // Email channel via Resend (if requested)
     let emailsSent = 0;

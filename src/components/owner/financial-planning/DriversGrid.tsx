@@ -87,8 +87,9 @@ export function DriversGrid({ drivers, onChange }: Props) {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7"
+                      className="min-h-[44px] min-w-[44px]"
                       onClick={() => copyToAll(row.key, 0)}
+                      aria-label={isRu ? 'Скопировать январь во все месяцы' : 'Copy January to all months'}
                       title={isRu ? 'Скопировать январь во все месяцы' : 'Copy January to all months'}
                     >
                       <Copy className={`h-3.5 w-3.5 ${copied === row.key ? 'text-success' : ''}`} />

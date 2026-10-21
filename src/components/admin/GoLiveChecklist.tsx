@@ -1,179 +1,52 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, Rocket, Loader2 } from 'lucide-react';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import { useAdminPlatformStatus } from '@/hooks/useAdminDashboardEvidence';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import type { PlatformStatus } from '@/lib/adminDashboardEvidence';
+import { useDashboardClock } from '@/components/admin/dashboard/DashboardCount';
 
-interface CheckItem {
-  key: string;
-  labelRu: string;
-  labelEn: string;
-  check: () => Promise<boolean>;
-}
+const LABELS: Record<string, LangValues> = {
+  stripe_mode: { en: 'Card payment configuration', ru: 'Настройка оплаты картой', th: 'การตั้งค่าชำระเงินด้วยบัตร' },
+  admin_emails: { en: 'Admin email configuration', ru: 'Почта администраторов', th: 'การตั้งค่าอีเมลผู้ดูแล' },
+  admin_whatsapp: { en: 'Admin WhatsApp configuration', ru: 'WhatsApp администраторов', th: 'การตั้งค่า WhatsApp ผู้ดูแล' },
+  reconciliation: { en: 'Unresolved reconciliation alerts · last 30 days', ru: 'Открытые ошибки сверки · 30 дней', th: 'การแจ้งเตือนกระทบยอดที่ยังไม่แก้ไข · 30 วัน' },
+  verticals: { en: 'Vertical configuration', ru: 'Настройки направлений', th: 'การตั้งค่าหมวดบริการ' },
+};
+const STATES: Record<PlatformStatus, LangValues> = {
+  configured: { en: 'Configured', ru: 'Настроено', th: 'ตั้งค่าแล้ว' },
+  not_configured: { en: 'Not configured', ru: 'Не настроено', th: 'ยังไม่ตั้งค่า' },
+  verified: { en: 'No alerts found', ru: 'Ошибок не найдено', th: 'ไม่พบการแจ้งเตือน' },
+  needs_review: { en: 'Review required', ru: 'Нужна проверка', th: 'ต้องตรวจสอบ' },
+  unknown: { en: 'Unavailable', ru: 'Недоступно', th: 'ไม่มีข้อมูล' },
+};
 
-const checks: CheckItem[] = [
-  {
-    key: 'stripe_live',
-    labelRu: 'Stripe в live-режиме',
-    labelEn: 'Stripe in live mode',
-    check: async () => {
-      const { data } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', 'stripe_mode')
-        .maybeSingle();
-      return data?.value === 'live';
-    },
-  },
-  {
-    key: 'admin_emails',
-    labelRu: 'Email администраторов настроены',
-    labelEn: 'Admin emails configured',
-    check: async () => {
-      const { data } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', 'admin_emails')
-        .maybeSingle();
-      if (!data?.value) return false;
-      try {
-        const emails = JSON.parse(data.value as string);
-        return Array.isArray(emails) && emails.length > 0;
-      } catch {
-        return false;
-      }
-    },
-  },
-  {
-    key: 'admin_whatsapp',
-    labelRu: 'WhatsApp администратора настроен',
-    labelEn: 'Admin WhatsApp configured',
-    check: async () => {
-      const { data } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', 'admin_whatsapp')
-        .maybeSingle();
-      return !!data?.value && (data.value as string).length > 5;
-    },
-  },
-  {
-    key: 'reconciliation_clean',
-    labelRu: 'Сверка без ошибок (30 дней)',
-    labelEn: 'Reconciliation clean (30 days)',
-    check: async () => {
-      const { count } = await (supabase as any)
-        .from('reconciliation_alerts')
-        .select('id', { count: 'exact', head: true })
-        .eq('resolved', false);
-      return (count ?? 0) === 0;
-    },
-  },
-  {
-    key: 'has_orders',
-    labelRu: 'Есть подтверждённые заказы',
-    labelEn: 'Has confirmed orders',
-    check: async () => {
-      const { count } = await supabase
-        .from('orders')
-        .select('id', { count: 'exact', head: true })
-        .in('status', ['confirmed', 'completed']);
-      return (count ?? 0) > 0;
-    },
-  },
-  {
-    key: 'feature_flags_active',
-    labelRu: 'Вертикали включены',
-    labelEn: 'Verticals enabled',
-    check: async () => {
-      const { data } = await supabase
-        .from('system_settings')
-        .select('key, value')
-        .like('key', 'feature_flag:vertical_%');
-      if (!data || data.length === 0) return true; // defaults are enabled
-      return data.some((f) => {
-        try {
-          const val = JSON.parse(f.value as string);
-          return val?.enabled === true;
-        } catch {
-          return f.value === 'true';
-        }
-      });
-    },
-  },
-];
-
+/** Existing export retained; configuration is not a launch/readiness certificate. */
 export function GoLiveChecklist() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-
-  const { data: results, isLoading } = useQuery({
-    queryKey: ['go-live-checklist'],
-    queryFn: async () => {
-      const results: Record<string, boolean> = {};
-      for (const item of checks) {
-        try {
-          results[item.key] = await item.check();
-        } catch {
-          results[item.key] = false;
-        }
-      }
-      return results;
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  if (isLoading) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="py-3 flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {isRu ? 'Проверка готовности...' : 'Checking readiness...'}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!results) return null;
-
-  const passed = Object.values(results).filter(Boolean).length;
-  const total = checks.length;
-  const allGreen = passed === total;
-
-  if (allGreen) return null; // Hide when everything is ready
-
-  return (
-    <Card className="border-warning/30 bg-warning/5">
-      <CardContent className="py-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Rocket className="h-5 w-5 text-warning" />
-          <span className="font-semibold">
-            {isRu ? 'Go-Live Чеклист' : 'Go-Live Checklist'}
-          </span>
-          <Badge variant="outline" className="ml-auto">
-            {passed}/{total}
-          </Badge>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {checks.map((item) => {
-            const ok = results[item.key];
-            return (
-              <div key={item.key} className="flex items-center gap-2 text-sm">
-                {ok ? (
-                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-destructive shrink-0" />
-                )}
-                <span className={ok ? 'text-muted-foreground' : ''}>
-                  {isRu ? item.labelRu : item.labelEn}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const { data, isLoading, isError, isFetching, dataUpdatedAt, refetch } = useAdminPlatformStatus();
+  const now = useDashboardClock();
+  const stale = !!dataUpdatedAt && now - dataUpdatedAt > 60_000;
+  const rows = data ?? Object.keys(LABELS).map(key => ({ key, status: 'unknown' as const }));
+  return <Card data-testid="platform-status">
+    <CardHeader className="pb-2"><CardTitle className="text-lg">{pickLang(language, { en: 'Platform status', ru: 'Состояние платформы', th: 'สถานะแพลตฟอร์ม' })}</CardTitle></CardHeader>
+    <CardContent className="space-y-3">
+      {isLoading && <p role="status" className="text-sm text-muted-foreground">{pickLang(language, { en: 'Checking configuration…', ru: 'Проверяем настройки…', th: 'กำลังตรวจสอบการตั้งค่า…' })}</p>}
+      {isError && <p role="alert" className="text-sm">{pickLang(language, { en: 'Status refresh failed. Previous checks may be outdated.', ru: 'Не удалось обновить статус. Предыдущие проверки могли устареть.', th: 'อัปเดตสถานะไม่สำเร็จ ผลเดิมอาจล้าสมัย' })}</p>}
+      <dl className="divide-y divide-border">
+        {rows.map(item => <div key={item.key} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2 text-sm">
+          <dt className="min-w-0 flex-1">{pickLang(language, LABELS[item.key])}</dt>
+          <dd className={item.status === 'needs_review' ? 'text-warning' : 'text-muted-foreground'}>{isLoading ? '—' : pickLang(language, STATES[item.status])}</dd>
+        </div>)}
+        <div className="flex flex-wrap justify-between gap-2 py-2 text-sm"><dt>{pickLang(language, { en: 'Payment and notification delivery', ru: 'Платежи и доставка уведомлений', th: 'การชำระเงินและการส่งแจ้งเตือน' })}</dt><dd className="text-muted-foreground">{pickLang(language, { en: 'Not verified end to end', ru: 'Полный цикл не проверен', th: 'ยังไม่ตรวจสอบครบวงจร' })}</dd></div>
+      </dl>
+      <p className="text-xs text-muted-foreground">{pickLang(language, { en: 'Configured channels do not confirm delivery or successful payments.', ru: 'Настроенный канал не подтверждает доставку или успешную оплату.', th: 'การตั้งค่าช่องทางไม่ยืนยันการส่งหรือชำระเงินสำเร็จ' })}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Link to="/admin/settings" className="text-sm text-primary underline-offset-4 hover:underline">{pickLang(language, { en: 'Settings and connections', ru: 'Настройки и подключения', th: 'การตั้งค่าและการเชื่อมต่อ' })}</Link>
+        <Button variant="ghost" size="sm" disabled={isFetching} onClick={() => void refetch()}>{pickLang(language, { en: 'Check again', ru: 'Проверить', th: 'ตรวจสอบอีกครั้ง' })}</Button>
+      </div>
+      {!!dataUpdatedAt && <p className="text-xs text-muted-foreground">{stale ? pickLang(language, { en: 'Stale check', ru: 'Проверка устарела', th: 'ผลตรวจสอบล้าสมัย' }) : pickLang(language, { en: 'Checked', ru: 'Проверено', th: 'ตรวจสอบแล้ว' })}: {new Intl.DateTimeFormat(language, { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }).format(dataUpdatedAt)} · {pickLang(language, { en: 'Phuket time', ru: 'время Пхукета', th: 'เวลาภูเก็ต' })}</p>}
+    </CardContent>
+  </Card>;
 }

@@ -126,7 +126,7 @@ export async function updateCanonicalProfile(
 
   const { error } = await supabase
     .from('profiles')
-    .update(dbPatch)
+    .update(dbPatch as never)
     .eq('id', userId);
 
   if (error) throw error;

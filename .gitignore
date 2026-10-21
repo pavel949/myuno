@@ -12,8 +12,14 @@ dist
 dist-ssr
 *.local
 
-# Export data (large JSON files)
+# Local Claude Code agent state (per-machine, never committed)
+.claude/
+
+# Export data (large JSON files) and generated local review artifacts
 tmp/
+/mnt/
+/.design-audit/
+/.audit/
 
 # Environment variables
 .env
@@ -39,3 +45,6 @@ test-results/
 .vercel
 .tmp-design/
 design-archive/
+
+# TypeScript incremental build info (from npm run typecheck)
+*.tsbuildinfo

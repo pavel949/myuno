@@ -2,15 +2,13 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
-};
 
 const PENDING_MAX_AGE_HOURS = 2;
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -45,17 +43,26 @@ Deno.serve(async (req) => {
         (order.metadata as Record<string, unknown> | null)?.stripe_session_id as string | undefined;
       if (sessionId) {
         try {
-          await stripe.checkout.sessions.expire(sessionId);
-          expired++;
+          // Guard: only expire sessions still in 'open' state — expiring an
+          // already-completed/expired session throws and would clobber the loop.
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          if (session.status === "open") {
+            await stripe.checkout.sessions.expire(sessionId);
+            expired++;
+          }
         } catch (e) {
           console.warn("[cleanup-abandoned-orders] Expire session failed:", sessionId, e);
         }
       }
 
+      // Guard against the Stripe webhook confirming this order between the
+      // SELECT above and this UPDATE — only abandon rows that are still pending,
+      // so we never clobber a paid/confirmed order back to 'abandoned'.
       await supabase
         .from("orders")
         .update({ status: "abandoned" })
-        .eq("id", order.id);
+        .eq("id", order.id)
+        .eq("status", "pending");
     }
 
     return new Response(

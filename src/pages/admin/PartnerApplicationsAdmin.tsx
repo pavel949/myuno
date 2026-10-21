@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { parseQueuePage } from '@/lib/adminDashboardQueues';
+import { adminLiteralSearchOr } from '@/lib/adminLiteralSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -61,13 +65,17 @@ interface PartnerApplication {
   city: string | null;
   license_number: string | null;
   tax_id: string | null;
-  status: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'suspended';
+  // BUG-11: DB column is `text` — keep widely typed and fall back in UI lookups.
+  status: string;
   rejection_reason: string | null;
   reviewed_at: string | null;
+  reviewed_by: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
+type KnownStatus = 'pending' | 'reviewing' | 'approved' | 'rejected' | 'suspended';
 
 const statusConfig = {
   pending: { 
@@ -103,6 +111,7 @@ const statusConfig = {
 };
 
 const categoryLabels: Record<string, { ru: string; en: string }> = {
+  other: { ru: 'Другой бизнес', en: 'Other business' },
   services: { ru: 'Услуги', en: 'Services' },
   food: { ru: 'Еда и напитки', en: 'Food & Drinks' },
   beauty: { ru: 'Красота и спа', en: 'Beauty & Spa' },
@@ -120,8 +129,24 @@ export default function PartnerApplicationsAdmin() {
 
   const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [listLoading, setListLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [listError, setListError] = useState(false);
+  const [totalCount, setTotalCount] = useState<number|null>(null);
+  const readSequence = React.useRef(0);
+  const [params, setParams] = useSearchParams();
+  const searchQuery = params.get('q') || '';
+  const rawStatus = params.get('status') || 'all';
+  const statusFilter = Object.prototype.hasOwnProperty.call(statusConfig, rawStatus) ? rawStatus as KnownStatus : 'all';
+  const page = parseQueuePage(params,'application_page');
+  const readKey=JSON.stringify([user?.id,statusFilter,searchQuery,page]);
+  const [loadedKey,setLoadedKey]=useState<string|null>(null);
+  const setSearchQuery = (value: string) => setParams(previous => {
+    const next = new URLSearchParams(previous);next.delete('application_page'); if (value) next.set('q',value); else next.delete('q'); return next;
+  }, {replace:true});
+  const setStatusFilter = (value: string) => {
+    if (value !== 'all' && !Object.prototype.hasOwnProperty.call(statusConfig, value)) return;
+    setParams(previous => { const next = new URLSearchParams(previous);next.delete('application_page'); if(value==='all') next.delete('status'); else next.set('status',value); return next; });
+  };
+  const setPage=(value:number)=>setParams(previous=>{const next=new URLSearchParams(previous);if(value===0)next.delete('application_page');else next.set('application_page',String(value));return next;});
   const [selectedApp, setSelectedApp] = useState<PartnerApplication | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -129,119 +154,101 @@ export default function PartnerApplicationsAdmin() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const isPageLoading = adminCheckLoading || (isAdmin && listLoading);
+  const isPageLoading = adminCheckLoading || (isAdmin && (listLoading||loadedKey!==readKey));
 
-  useEffect(() => {
-    if (!user?.id || !isAdmin || adminCheckLoading) {
-      if (!user?.id) setApplications([]);
-      return;
-    }
-
-    let cancelled = false;
-    setListLoading(true);
-
-    void (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('partner_applications')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (cancelled) return;
-        if (error) throw error;
-        setApplications((data as PartnerApplication[]) || []);
-      } catch {
-        if (!cancelled) {
-          toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-            description:
-              language === 'ru'
-                ? 'Не удалось загрузить заявки'
-                : 'Failed to load applications',
-          });
-          setApplications([]);
-        }
-      } finally {
-        if (!cancelled) setListLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, isAdmin, adminCheckLoading, language]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = React.useCallback(async () => {
     if (!user?.id || !isAdmin) return;
+    const sequence=++readSequence.current;
     setListLoading(true);
+    setListError(false);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('partner_applications')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+        .select('*',{count:'exact'})
+        .order('created_at', { ascending: false }).order('id',{ascending:false});
+      if(statusFilter!=='all')query=query.eq('status',statusFilter);
+      const term=adminLiteralSearchOr('applications', searchQuery);
+      if(term)query=query.or(term);
+      const { data, error, count }=await query.range(page*50,page*50+49);
+      if(sequence!==readSequence.current)return;
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
+      setTotalCount(count??null);
     } catch {
+      if(sequence!==readSequence.current)return;
+      setListError(true);
+      setTotalCount(null);
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-        description: language === 'ru' 
-          ? 'Не удалось загрузить заявки' 
-          : 'Failed to load applications',
+        description:
+          language === 'ru'
+            ? 'Не удалось загрузить заявки'
+            : 'Failed to load applications',
       });
+      setApplications([]);
     } finally {
-      setListLoading(false);
+      if(sequence===readSequence.current){setLoadedKey(readKey);setListLoading(false);}
     }
-  };
+  }, [user?.id, isAdmin, language,statusFilter,searchQuery,page,readKey]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setApplications([]);
+      return;
+    }
+    if (!isAdmin || adminCheckLoading) return;
+    void fetchApplications();
+    return()=>{readSequence.current+=1;};
+  }, [user?.id, isAdmin, adminCheckLoading, fetchApplications]);
 
   const handleStatusChange = async (newStatus: 'approved' | 'rejected' | 'reviewing') => {
     if (!selectedApp || !user) return;
 
     setIsProcessing(true);
     try {
-      if (newStatus === 'approved') {
+      if (newStatus === 'approved' || newStatus === 'rejected') {
         const { data, error } = await supabase.functions.invoke('approve-partner-application', {
-          body: { application_id: selectedApp.id },
+          body: {
+            application_id: selectedApp.id,
+            action: newStatus === 'approved' ? 'approve' : 'reject',
+            rejection_reason: newStatus === 'rejected' ? rejectionReason : undefined,
+          },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
 
-        const updateData = {
-          status: 'approved' as const,
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-        };
-        setApplications(prev =>
-          prev.map(app =>
-            app.id === selectedApp.id ? { ...app, ...updateData, status: 'approved' } as PartnerApplication : app
-          )
-        );
-        toast(language === 'ru' ? 'Успешно' : 'Success', {
-          description: data?.vendor_granted
-            ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан' : 'Application approved, vendor access granted')
-            : (language === 'ru' ? 'Заявка одобрена (без user_id — доступ не создан)' : 'Application approved (no user_id — access not created)'),
-        });
-      } else {
-        const updateData: Record<string, unknown> = {
+        const patch: Partial<PartnerApplication> = {
           status: newStatus,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
+          ...(newStatus === 'rejected' && rejectionReason ? { rejection_reason: rejectionReason } : {}),
         };
-        if (newStatus === 'rejected' && rejectionReason) {
-          updateData.rejection_reason = rejectionReason;
-        }
+        setApplications(prev =>
+          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
+        );
+        toast(language === 'ru' ? 'Успешно' : 'Success', {
+          description: newStatus === 'approved'
+            ? (data?.vendor_granted
+              ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан, письмо отправлено' : 'Application approved, vendor access granted, email sent')
+              : (language === 'ru' ? 'Заявка одобрена (без user_id), письмо отправлено' : 'Application approved (no user_id), email sent'))
+            : (language === 'ru' ? 'Заявка отклонена, письмо отправлено' : 'Application rejected, email sent'),
+        });
+      } else {
+        // reviewing — простая смена статуса, без письма
+        const patch = {
+          status: newStatus,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        } satisfies Partial<PartnerApplication>;
         const { error } = await supabase
           .from('partner_applications')
-          .update(updateData)
+          .update(patch)
           .eq('id', selectedApp.id);
         if (error) throw error;
         setApplications(prev =>
-          prev.map(app =>
-            app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
-          )
+          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
-          description: newStatus === 'rejected'
-            ? (language === 'ru' ? 'Заявка отклонена' : 'Application rejected')
-            : (language === 'ru' ? 'Статус обновлён' : 'Status updated'),
+          description: language === 'ru' ? 'Статус обновлён' : 'Status updated',
         });
       }
 
@@ -249,6 +256,8 @@ export default function PartnerApplicationsAdmin() {
       setIsDetailOpen(false);
       setRejectionReason('');
       setActionType(null);
+      // Refresh the exact filtered count/page after the existing writer settles.
+      void fetchApplications();
     } catch {
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru'
@@ -265,26 +274,8 @@ export default function PartnerApplicationsAdmin() {
     setIsActionDialogOpen(true);
   };
 
-  // Filter applications
-  const filteredApplications = applications.filter(app => {
-    const matchesSearch = 
-      app.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.contact_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.contact_email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  // Stats
-  const stats = {
-    total: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    reviewing: applications.filter(a => a.status === 'reviewing').length,
-    approved: applications.filter(a => a.status === 'approved').length,
-    rejected: applications.filter(a => a.status === 'rejected').length,
-  };
+  // Exact count and rows share the same server-side literal search and status.
+  const filteredApplications = applications;
 
   if (!user) {
     return (
@@ -333,28 +324,6 @@ export default function PartnerApplicationsAdmin() {
         showBack
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-        {[
-          { label: language === 'ru' ? 'Всего' : 'Total', value: stats.total, color: 'bg-primary/20 text-primary' },
-          { label: language === 'ru' ? 'Ожидают' : 'Pending', value: stats.pending, color: 'bg-warning/20 text-warning' },
-          { label: language === 'ru' ? 'На рассмотрении' : 'Reviewing', value: stats.reviewing, color: 'bg-info/20 text-info' },
-          { label: language === 'ru' ? 'Одобрено' : 'Approved', value: stats.approved, color: 'bg-success/20 text-success' },
-          { label: language === 'ru' ? 'Отклонено' : 'Rejected', value: stats.rejected, color: 'bg-destructive/20 text-destructive' },
-        ].map((stat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={cn("rounded-none p-4 text-center", stat.color)}
-          >
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <div className="text-xs opacity-80">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>
-
       {/* Filters */}
       <SectionCard className="mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -390,11 +359,20 @@ export default function PartnerApplicationsAdmin() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="outline" onClick={() => setParams(previous => { const next=new URLSearchParams(previous); next.delete('status'); next.delete('q'); next.delete('application_page'); return next; })}>{pickLang(language,{en:'Reset filters',ru:'Сбросить фильтры',th:'ล้างตัวกรอง'})}</Button>
         </div>
       </SectionCard>
 
       {/* Applications List */}
-      {isPageLoading ? (
+      {!isPageLoading && !listError && <div className="mb-4 flex flex-wrap items-center gap-3">
+        <p role="status">{pickLang(language,{en:'Matching applications',ru:'Подходящие заявки',th:'ใบสมัครที่ตรงกัน'})}: {totalCount ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+        <Button variant="outline" disabled={page===0||listLoading} onClick={()=>setPage(page-1)}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+        <Button variant="outline" disabled={listLoading||totalCount==null||(page+1)*50>=totalCount} onClick={()=>setPage(page+1)}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+      </div>}
+      {listError && loadedKey===readKey ? <div role="alert" className="border border-destructive p-4">
+        {pickLang(language,{en:'Could not load partner applications. Counts and results are unavailable.',ru:'Не удалось загрузить заявки партнёров. Счётчики и результаты недоступны.',th:'โหลดใบสมัครพันธมิตรไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน'})}
+        <Button variant="outline" disabled={listLoading} onClick={()=>fetchApplications()}>{pickLang(language,{en:'Retry',ru:'Повторить',th:'ลองอีกครั้ง'})}</Button>
+      </div> : isPageLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 bg-secondary/50 rounded-none animate-pulse" />
@@ -411,7 +389,7 @@ export default function PartnerApplicationsAdmin() {
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
             {filteredApplications.map((app, index) => {
-              const status = statusConfig[app.status];
+              const status = statusConfig[app.status as KnownStatus] ?? statusConfig.pending;
               const StatusIcon = status.icon;
               
               return (
@@ -452,7 +430,7 @@ export default function PartnerApplicationsAdmin() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="shrink-0">
+                    <Button variant="ghost" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Просмотр' : 'View'}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </div>
@@ -471,10 +449,10 @@ export default function PartnerApplicationsAdmin() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   {selectedApp.business_name}
-                  <Badge variant="outline" className={cn(statusConfig[selectedApp.status].color)}>
-                    {language === 'ru' 
-                      ? statusConfig[selectedApp.status].labelRu 
-                      : statusConfig[selectedApp.status].labelEn}
+                  <Badge variant="outline" className={cn((statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).color)}>
+                    {language === 'ru'
+                      ? (statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).labelRu
+                      : (statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).labelEn}
                   </Badge>
                 </DialogTitle>
                 <DialogDescription>

@@ -1,8 +1,9 @@
+import '@/styles/public-commerce.css';
+import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
  import { useState, useEffect } from 'react';
- import { useParams, useNavigate } from 'react-router-dom';
+ import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
  import { Clock, MapPin, Calendar, MessageSquare, Check, LocateFixed, Loader2 } from 'lucide-react';
  import { BackButton } from '@/components/uno/BackButton';
- import { APP_ROUTES } from '@/lib/config/routes';
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { Textarea } from '@/components/ui/textarea';
@@ -11,24 +12,30 @@
  import { Badge } from '@/components/ui/badge';
  import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
  import { useLanguage } from '@/contexts/LanguageContext';
- import { useServiceFunctions } from '@/hooks/useServiceFunctions';
- import { useUniversalLead } from '@/hooks/useUniversalLead';
- import { useGeolocation } from '@/hooks/useGeolocation';
- import { toast } from 'sonner';
+import { useServiceFunctions } from '@/hooks/useServiceFunctions';
+import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
+import { useOrders } from '@/hooks/useOrders';
+import { useAuth } from '@/contexts/AuthContext';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { toast } from 'sonner';
  import { format } from 'date-fns';
  
  export default function ServiceFunctionOrder() {
    const { functionId } = useParams<{ functionId: string }>();
    const navigate = useNavigate();
+   const [searchParams] = useSearchParams();
+   const location = useLocation();
+   const returnTo = serviceCatalogueReturnTo(searchParams.get('returnTo'));
    const { language, t } = useLanguage();
    const isRu = language === 'ru';
    
-   const { getFunction, getRawFunction } = useServiceFunctions();
-   const { submitLead, isSubmitting } = useUniversalLead();
-   const { latitude, longitude, hasLocation, getPosition, loading: isGeoLoading } = useGeolocation();
-   
-   const fn = getFunction(functionId || '');
-   const rawFn = getRawFunction(functionId || '');
+  const { getFunction, getRawFunction } = useServiceFunctions();
+  const { createOrder, isCreating } = useOrders();
+  const { user } = useAuth();
+  const { latitude, longitude, hasLocation, getPosition, loading: isGeoLoading } = useGeolocation();
+
+  const fn = getFunction(functionId || '');
+  const rawFn = getRawFunction(functionId || '');
    
    const [formData, setFormData] = useState({
      name: '',
@@ -66,51 +73,83 @@
      getPosition();
    };
  
-   const handleSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     
-     if (!fn || !rawFn) return;
-     
-     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-       toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
-       return;
-     }
- 
-     try {
-       await submitLead.mutateAsync({
-         vertical_id: 'home_services',
-         request_type: 'service_order',
-         lead_source: 'cta',
-         entry_point: `/services/order/${functionId}`,
-         name: formData.name,
-         phone: formData.phone,
-         preferred_contact_method: formData.contactMethod,
-         notes: formData.problemDescription,
-         vertical_metadata: {
-           function_id: fn.id,
-           function_name_en: rawFn.nameEn,
-           function_name_ru: rawFn.nameRu,
-           category: fn.category,
-           service_address: formData.address,
-           preferred_date: formData.preferredDate,
-           preferred_time: formData.preferredTime,
-           base_price: fn.basePrice,
-           currency: fn.currency,
-           estimated_time: fn.estimatedTime,
-           includes: fn.includes,
-         },
-       });
-       
-       navigate('/services/order/success', { 
-         state: { 
-           functionName: fn.name,
-           functionIcon: fn.icon,
-         } 
-       });
-     } catch (error) {
-       console.error('Order submission failed:', error);
-     }
-   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fn || !rawFn) return;
+
+    if (!user) {
+      toast.error(isRu ? 'Войдите, чтобы оформить заказ' : 'Please sign in to place an order');
+      navigate('/auth?redirect=' + encodeURIComponent(location.pathname + location.search));
+      return;
+    }
+
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
+      toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
+      return;
+    }
+
+    try {
+      // C6 FIX: Order-First — write to public.orders (visible in cabinets) instead of universal_leads.
+      const startAt = formData.preferredDate
+        ? new Date(`${formData.preferredDate}T09:00:00`)
+        : null;
+
+      const result = await createOrder({
+        order_type: 'service',
+        total_amount: fn.basePrice,
+        currency: fn.currency,
+        start_at: startAt ?? undefined,
+        notes: formData.problemDescription || undefined,
+        serviceName: fn.name,
+        items: [{
+          item_name: fn.name,
+          item_type: 'service',
+          qty: 1,
+          unit_price: fn.basePrice,
+          amount: fn.basePrice,
+          metadata: {
+            function_id: fn.id,
+            function_name_en: rawFn.nameEn,
+            function_name_ru: rawFn.nameRu,
+            category: fn.category,
+            estimated_time: fn.estimatedTime,
+            includes: fn.includes,
+          },
+        }],
+        participants: [{
+          role: 'primary',
+          name: formData.name,
+          phone: formData.phone,
+          email: user.email ?? null,
+        }],
+        addresses: [{
+          address_type: 'service',
+          address_text: formData.address,
+        }],
+        metadata: {
+          preferred_time: formData.preferredTime,
+          contact_method: formData.contactMethod,
+          function_id: fn.id,
+        },
+        payment: { method: 'cash', amount: fn.basePrice },
+        openWhatsAppOnCash: false,
+      });
+
+      if (result.success) {
+        navigate('/services/order/success', {
+          state: {
+            functionName: fn.name,
+            functionIcon: fn.icon,
+            orderId: result.order_id,
+            orderNumber: result.order_number,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Order submission failed:', error);
+    }
+  };
  
    if (!fn || !rawFn) {
      return (
@@ -133,20 +172,20 @@
    ];
  
    return (
-     <div className="min-h-screen bg-background pb-24">
+     <div className="public-commerce public-commerce--request min-h-screen bg-background pb-24">
        {/* Header */}
-       <div className="sticky top-0 z-50 bg-background/95 border-b">
+       <div className="public-commerce-form-header bg-background border-b">
          <div className="flex items-center gap-3 px-4 py-3">
-           <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" />
+           <BackButton fallbackPath={returnTo} variant="ghost" />
            <div className="flex-1">
              <h1 className="font-semibold">{isRu ? 'Заказать услугу' : 'Order Service'}</h1>
            </div>
          </div>
        </div>
  
-       <form onSubmit={handleSubmit} className="p-4 space-y-4">
+       <form onSubmit={handleSubmit} className="public-commerce-form p-4 space-y-6">
          {/* Service Info Card */}
-         <Card className="border-primary/20 bg-primary/5">
+         <Card className="border-border bg-card">
            <CardContent className="p-4">
              <div className="flex gap-4">
                <div className="w-14 h-14 rounded-none bg-primary/20 flex items-center justify-center text-2xl shrink-0">
@@ -201,7 +240,8 @@
                type="button"
                variant="ghost"
                size="icon"
-               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+               aria-label={isRu ? 'Использовать текущее местоположение' : 'Use current location'}
+               className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px]"
                onClick={handleUseCurrentLocation}
                disabled={isGeoLoading || isReverseGeocoding}
              >
@@ -280,7 +320,7 @@
  
          {/* Contact Info */}
          <Card>
-           <CardContent className="p-4 space-y-4">
+           <CardContent className="p-4 space-y-6">
              <h3 className="font-medium">{isRu ? 'Контактные данные' : 'Contact Information'}</h3>
              
              <div className="space-y-2">
@@ -333,17 +373,15 @@
            <Button 
              type="submit" 
              className="w-full h-12 text-base"
-             disabled={isSubmitting}
+             disabled={isCreating}
            >
-             {isSubmitting ? (
+             {isCreating ? (
                <Loader2 className="h-5 w-5 animate-spin mr-2" />
              ) : null}
              {isRu ? 'Отправить заявку' : 'Submit Request'}
            </Button>
            <p className="text-xs text-center text-muted-foreground mt-2">
-             {isRu 
-               ? 'Мы свяжемся с вами в течение 30 минут' 
-               : 'We will contact you within 30 minutes'}
+             {getServiceRequestConfirmationNote(language)}
            </p>
          </div>
        </form>

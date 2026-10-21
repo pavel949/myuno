@@ -728,7 +728,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                   {rule.deduct_before_owner && ` · ${isRu ? 'до доли собственника' : 'before owner split'}`}
                 </p>
               </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => deletePayoutRule.mutate({ id: rule.id, propertyId })}>
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Удалить' : 'Delete'} className="flex-shrink-0" onClick={() => deletePayoutRule.mutate({ id: rule.id, propertyId })}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>

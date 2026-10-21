@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { useMyDelegations } from '@/hooks/usePropertyDelegates';
@@ -23,6 +25,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/lib/errorHandler';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const QUICK_AMOUNTS = [5000, 10000, 20000, 50000];
 
@@ -34,6 +37,8 @@ const QUICK_PAYMENT_METHODS = [
 
 export default function QuickIncome() {
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -80,7 +85,7 @@ export default function QuickIncome() {
         property_id: selectedPropertyId,
         transaction_type: 'income',
         amount: parseFloat(amount),
-        currency: 'THB',
+        currency: cityCurrencyCode,
         category,
         description,
         payment_method: paymentMethod,
@@ -103,7 +108,7 @@ export default function QuickIncome() {
     }
   };
 
-  if (!user) { navigate('/auth'); return null; }
+  if (!user) { redirectToAuth(navigate); return null; }
 
   if (isSuccess) {
     return (
@@ -166,12 +171,12 @@ export default function QuickIncome() {
                 onClick={() => setAmount(String(amt))}
                 className="h-8 px-3 shrink-0 text-xs"
               >
-                ฿{amt.toLocaleString()}
+                {curSym}{amt.toLocaleString()}
               </Button>
             ))}
           </div>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-semibold text-success">฿</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-semibold text-success">{curSym}</span>
             <Input
               type="number"
               inputMode="numeric"
@@ -280,7 +285,7 @@ export default function QuickIncome() {
           {isSubmitting ? (
             <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{isRu ? 'Сохранение...' : 'Saving...'}</>
           ) : (
-            <><Receipt className="h-5 w-5 mr-2" />{isRu ? 'Записать' : 'Save'} {amount ? `฿${parseInt(amount).toLocaleString()}` : ''}</>
+            <><Receipt className="h-5 w-5 mr-2" />{isRu ? 'Записать' : 'Save'} {amount ? `${curSym}${parseInt(amount).toLocaleString()}` : ''}</>
           )}
         </Button>
       </div>

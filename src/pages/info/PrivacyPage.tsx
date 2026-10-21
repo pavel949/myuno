@@ -9,6 +9,7 @@ import {
   Globe, Users, FileText, AlertTriangle, Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LegalEntityBlock } from '@/components/legal/LegalEntityInfo';
 
 export default function PrivacyPage() {
   const { language } = useLanguage();
@@ -174,8 +175,8 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-4xl">
         <PageHeader 
           title={isRu ? 'Политика конфиденциальности' : 'Privacy Policy'} 
           showBack 
@@ -194,8 +195,8 @@ export default function PrivacyPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'myUNO Limited серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
-                    : 'myUNO Limited takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
+                    ? 'Toplight Asia Pacific Co., Ltd. серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
+                    : 'Toplight Asia Pacific Co., Ltd. takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">PDPA Compliant</span>
@@ -217,11 +218,10 @@ export default function PrivacyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              <strong>myUNO Limited</strong><br />
-              {isRu ? 'Адрес: ' : 'Address: '}Thailand / UAE<br />
               {isRu ? 'Email DPO: ' : 'DPO Email: '}dpo@myuno.app<br />
               {isRu ? 'Общие вопросы: ' : 'General inquiries: '}privacy@myuno.app
             </p>
+            <LegalEntityBlock className="mt-3" />
           </CardContent>
         </Card>
 
@@ -441,13 +441,7 @@ export default function PrivacyPage() {
                 <span className="font-medium">privacy@myuno.app</span>
               </p>
             </div>
-            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-              <p>{isRu ? 'Регистрация: Сингапур | Операции: Таиланд' : 'Incorporated: Singapore | Operations: Thailand'}</p>
-              <p className="mt-1">{isRu 
-                ? 'Надзорный орган: PDPC (Сингапур), PDPA (Таиланд), соответствующий DPA для ЕС.'
-                : 'Supervisory authority: PDPC (Singapore), PDPA (Thailand), respective DPA for EU.'}</p>
-            </div>
+            <LegalEntityBlock className="mt-4" />
           </CardContent>
         </Card>
 

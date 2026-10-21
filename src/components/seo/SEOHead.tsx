@@ -13,19 +13,19 @@ interface SEOHeadProps {
 
 const defaultMeta = {
   en: {
-    title: 'myUNO - All Services in One',
-    description: 'Your life abroad, simplified. Book transport, tours, restaurants, beauty services, and more in one app.',
+    title: 'myUNO — Phuket Super-App for Foreigners',
+    description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
   },
   ru: {
-    title: 'myUNO - Все услуги в одном приложении',
-    description: 'Ваша жизнь за рубежом стала проще. Бронируйте транспорт, туры, рестораны, салоны красоты и многое другое.',
+    title: 'myUNO — Phuket Super-App for Foreigners',
+    description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
   },
 };
 
 export function SEOHead({
   title,
   description,
-  image = 'https://myuno.app/og-image.png',
+  image = 'https://www.myuno.app/og-image.png',
   url,
   type = 'website',
   noindex = false,
@@ -41,7 +41,7 @@ export function SEOHead({
   const finalDescription = description || defaultMeta[lang].description;
   
   // Always use production domain for canonical/OG URLs
-  const BASE = 'https://myuno.app';
+  const BASE = 'https://www.myuno.app';
   const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const canonicalUrl = url || `${BASE}${basePath}`;
   
@@ -86,11 +86,11 @@ export function SEOHead({
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
       
-      {/* Hreflang alternate links */}
+      {/* Hreflang alternate links — th omitted until Thai content ships (Trust Stack audit A3) */}
       <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
       <link rel="alternate" hrefLang="ru" href={hreflangUrls.ru} />
-      <link rel="alternate" hrefLang="th" href={hreflangUrls.th} />
       <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
+      
       
       {/* JSON-LD Structured Data */}
       {jsonLd && (
@@ -107,8 +107,8 @@ export const createOrganizationSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'myUNO',
-  url: 'https://myuno.app',
-  logo: 'https://myuno.app/icons/icon-512x512.png',
+  url: 'https://www.myuno.app',
+  logo: 'https://www.myuno.app/icons/icon-512x512.png',
   sameAs: [
     'https://twitter.com/myUNOapp',
   ],

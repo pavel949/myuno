@@ -26,7 +26,7 @@ import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProductCard } from '@/components/market/ProductCard';
 import { useVendor, useVendorProducts } from '@/hooks/useMarketplaceVendors';
 import { useCartToast } from '@/hooks/useCartToast';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 
 const VendorPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -117,7 +117,8 @@ const VendorPage = () => {
           {/* Share button */}
           <button
             onClick={handleShare}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
+            aria-label={language === 'ru' ? 'Поделиться' : 'Share'}
+            className="absolute top-4 right-4 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
           >
             <Share2 className="h-5 w-5" />
           </button>
@@ -285,9 +286,9 @@ const VendorPage = () => {
 
         <StickyCartBar checkoutPath="/market/checkout" itemType="product" />
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default VendorPage;
+const AvailableVendorPage = withMarketAvailability(VendorPage);
+export default AvailableVendorPage;

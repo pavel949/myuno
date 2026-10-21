@@ -16,12 +16,22 @@ export default function AdminAIOps() {
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
 
-  // AI Agents status
+  // AI Agents status (with published-knowledge presence)
   const { data: agents } = useQuery({
     queryKey: ['ai-agents-status'],
     queryFn: async () => {
-      const { data } = await supabase.from('ai_agents').select('*').order('slug');
-      return data || [];
+      const { data } = await supabase
+        .from('ai_agents')
+        .select('*, ai_agent_knowledge!inner(is_published)')
+        .order('slug');
+      // Fallback: also fetch agents without any knowledge row at all
+      const { data: all } = await supabase.from('ai_agents').select('*').order('slug');
+      const publishedIds = new Set(
+        (data || [])
+          .filter((a: any) => (a.ai_agent_knowledge || []).some((k: any) => k.is_published))
+          .map((a: any) => a.id)
+      );
+      return (all || []).map((a: any) => ({ ...a, has_published_knowledge: publishedIds.has(a.id) }));
     },
   });
 
@@ -168,8 +178,10 @@ export default function AdminAIOps() {
     }
   };
 
-  const getHealthBadge = (calls: number, successRate: number) => {
-    if (calls === 0) return <Badge variant="outline" className="text-xs gap-1"><Clock className="h-3 w-3" />{isRu ? 'Неактивен' : 'Idle'}</Badge>;
+  const getHealthBadge = (agent: any, calls: number, successRate: number) => {
+    if (!agent.is_active) return <Badge variant="outline" className="text-xs gap-1 opacity-60"><XCircle className="h-3 w-3" />{isRu ? 'Выключен' : 'Disabled'}</Badge>;
+    if (!agent.has_published_knowledge) return <Badge variant="destructive" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" />{isRu ? 'Нет промпта' : 'No prompt'}</Badge>;
+    if (calls === 0) return <Badge variant="secondary" className="text-xs gap-1"><Clock className="h-3 w-3" />{isRu ? 'Простаивает' : 'Idle'}</Badge>;
     if (successRate >= 95) return <Badge className="text-xs gap-1 bg-success"><CheckCircle2 className="h-3 w-3" />{isRu ? 'Здоров' : 'Healthy'}</Badge>;
     if (successRate >= 80) return <Badge variant="secondary" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" />{isRu ? 'Предупреждение' : 'Warning'}</Badge>;
     return <Badge variant="destructive" className="text-xs gap-1"><XCircle className="h-3 w-3" />{isRu ? 'Критично' : 'Critical'}</Badge>;
@@ -307,7 +319,7 @@ export default function AdminAIOps() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{getHealthBadge(calls, successRate)}</TableCell>
+                        <TableCell>{getHealthBadge(agent, calls, successRate)}</TableCell>
                         <TableCell className="text-right font-mono text-sm">{calls}</TableCell>
                         <TableCell className="text-right font-mono text-sm">
                           {calls > 0 ? `${successRate}%` : '—'}

@@ -2,8 +2,21 @@ import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import tseslint from "typescript-eslint";
-import { FORBIDDEN_SYNONYMS } from "./src/content/semantic/forbiddenSynonyms.ts";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+
+// Node 20 cannot import TypeScript directly. Compile the standalone canonical
+// data module with the existing compiler dependency, preserving one source of
+// truth without requiring a Node-specific experimental loader.
+const { outputText: synonymModule } = ts.transpileModule(
+  readFileSync(new URL("./src/content/semantic/forbiddenSynonyms.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } },
+);
+const { FORBIDDEN_SYNONYMS } = await import(
+  `data:text/javascript;base64,${Buffer.from(synonymModule).toString("base64")}`
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // M9.7 · Canonical synonyms guard (eslint)
@@ -26,6 +39,14 @@ import { FORBIDDEN_SYNONYMS } from "./src/content/semantic/forbiddenSynonyms.ts"
 // ─────────────────────────────────────────────────────────────────────────────
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// jsx-a11y recommended rules default to `error`. Enabling them as errors across
+// the existing ~1000 components would break CI on pre-existing a11y debt, so we
+// surface them at `warn` (consistent with the other wider-codebase guards here).
+// New code can be escalated once the backlog is burned down.
+const JSX_A11Y_WARN_RULES = Object.fromEntries(
+  Object.keys(jsxA11y.configs.recommended.rules).map((rule) => [rule, "warn"]),
+);
 
 // Compiled case-sensitive — §14 explicitly demands exact casing for brand
 // tokens (e.g. canonical `myUNO` vs forbidden `MyUNO`).
@@ -136,7 +157,9 @@ const CANONICAL_SYNONYM_RULES = [
 ];
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  // Vite owns this bundled artifact and regenerates it during build/dev.
+  // Its authored inputs in src/lib/mcp/** remain covered by every rule.
+  { ignores: ["dist", "supabase/functions/mcp/index.ts"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -147,10 +170,12 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "jsx-a11y": jsxA11y,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      ...JSX_A11Y_WARN_RULES,
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       // Allow console.warn / console.error everywhere (deliberate signals);
@@ -230,3 +255,4 @@ export default tseslint.config(
     },
   },
 );
+

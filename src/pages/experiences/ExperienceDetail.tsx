@@ -82,7 +82,7 @@ export default function ExperienceDetail() {
           price: experience.price || undefined,
           currency: 'THB',
           image: experience.cover_image || undefined,
-          url: `https://myuno.app/experiences/${id}`,
+          url: `https://www.myuno.app/experiences/${id}`,
           rating: experience.rating || undefined,
           reviewCount: experience.review_count || undefined,
         })}
@@ -136,6 +136,7 @@ export default function ExperienceDetail() {
                 <button
                   key={idx}
                   onClick={() => setActiveImage(idx)}
+                  aria-label={isRu ? `Фото ${idx + 1}` : `Photo ${idx + 1}`}
                   className={cn(
                     "w-16 h-16 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all",
                     activeImage === idx ? "border-primary" : "border-transparent opacity-70"

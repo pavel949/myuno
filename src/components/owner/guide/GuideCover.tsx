@@ -16,7 +16,7 @@ export function GuideCover() {
       </div>
 
       {/* Title */}
-      <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-gold print:text-foreground">
+      <h1 className="text-4xl md:text-5xl font-bold mb-4 text-primary print:text-foreground">
         {isRu ? 'myUNO' : 'myUNO'}
       </h1>
       

@@ -162,7 +162,7 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
                       <p className="text-sm font-medium truncate">{f.file.name}</p>
                       <p className="text-xs text-muted-foreground">{(f.file.size / 1024).toFixed(0)} KB</p>
                     </div>
-                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeFile(f.id)}>
+                    <Button type="button" variant="ghost" size="icon" aria-label={isRu ? 'Удалить файл' : 'Remove file'} className="min-h-[44px] min-w-[44px] shrink-0" onClick={() => removeFile(f.id)}>
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>

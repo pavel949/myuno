@@ -12,6 +12,7 @@ import {
   Droplets, Building, Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LegalEntityBlock } from '@/components/legal/LegalEntityInfo';
 
 type ServiceType = 'escrow' | 'lead';
 
@@ -351,15 +352,15 @@ export default function RefundPolicyPage() {
       icon: Clock,
       title: isRu ? 'Сроки возврата' : 'Refund Timeline',
       content: isRu 
-        ? 'Escrow-возвраты: 5-10 рабочих дней на карту. UNO Кошелёк — мгновенно.'
-        : 'Escrow refunds: 5-10 business days to card. UNO Wallet — instant.',
+        ? 'Escrow-возвраты: 5-10 рабочих дней на карту. myUNO Кошелёк — мгновенно.'
+        : 'Escrow refunds: 5-10 business days to card. myUNO Wallet — instant.',
     },
     {
       icon: CreditCard,
       title: isRu ? 'Способ возврата' : 'Refund Method',
       content: isRu 
-        ? 'Возврат тем же способом оплаты. Можно выбрать UNO Кошелёк для мгновенного зачисления.'
-        : 'Refund via same payment method. Choose UNO Wallet for instant credit.',
+        ? 'Возврат тем же способом оплаты. Можно выбрать myUNO Кошелёк для мгновенного зачисления.'
+        : 'Refund via same payment method. Choose myUNO Wallet for instant credit.',
     },
     {
       icon: AlertTriangle,
@@ -596,11 +597,7 @@ export default function RefundPolicyPage() {
             <p className="text-xs text-muted-foreground mt-3">
               {isRu ? 'Последнее обновление: Январь 2026' : 'Last updated: January 2026'}
             </p>
-            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-              <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
-              <p className="mt-1">www.myuno.app</p>
-            </div>
+            <LegalEntityBlock className="mt-4" />
           </CardContent>
         </Card>
       </PageContainer>

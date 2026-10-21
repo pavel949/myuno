@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Anchor, Users, Clock, Loader2, AlertCircle, Info, Shield } from 'lucide-react';
@@ -24,6 +24,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { YachtExperienceSelect } from '@/components/yachts/YachtExperienceSelect';
 import { useYachtExperiences } from '@/hooks/useYachtExperiences';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 type CharterType = 'half_day' | 'full_day' | 'sunset' | 'overnight';
 
@@ -63,6 +64,9 @@ export default function YachtBooking() {
   const { platformFeePercent } = useSystemSettings();
 
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  // Guards against double-submit: a second tap before React re-renders the
+  // disabled button must not create a duplicate order.
+  const isSubmittingRef = useRef(false);
 
   // Get pre-filled data from location state (Book Now flow)
   const bookNowData = (location.state as { bookNowData?: BookNowData })?.bookNowData;
@@ -95,7 +99,7 @@ export default function YachtBooking() {
   // Auth redirect - must be after all hooks
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
+      redirectToAuth(navigate, { from: `/yachts/${id}/booking` });
     }
   }, [authLoading, user, navigate, id]);
 
@@ -171,7 +175,10 @@ export default function YachtBooking() {
 
   const handleSubmit = async () => {
     if (!date || !time || !contactData.name || !contactData.phone || !yacht) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
+    try {
     // Check availability before booking
     const scheduledAt = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
@@ -201,7 +208,9 @@ export default function YachtBooking() {
 
     const bookingCharterType = charterType;
 
-    // Stripe checkout for online payments
+    // Stripe checkout for online payments — ORDER-FIRST: create order BEFORE Stripe redirect.
+    // This guarantees a DB record exists even if Stripe checkout is abandoned, so payments
+    // can always be reconciled via webhook → order_id lookup. See ARCHITECTURE_V2 §13.
     if (isInstant && paymentMethod === 'online') {
       const experiences = selectedExperiences.map(expId => {
         const exp = yachtExperiences.find(e => e.id === expId)!;
@@ -272,6 +281,8 @@ export default function YachtBooking() {
       payment: {
         amount: isInstant ? depositAmount : total,
         method: isInstant ? (paymentMethod === 'online' ? 'stripe' : paymentMethod === 'wallet' ? 'wallet' : 'cash') : 'cash',
+        // Wallet deposits are captured immediately; cash/request stays pending.
+        status: isInstant && paymentMethod === 'wallet' ? 'paid' : 'pending',
       },
       metadata: {
         yacht_id: yacht.id,
@@ -313,6 +324,9 @@ export default function YachtBooking() {
       }
 
       setBookingResult({ bookingId: result.order_id });
+    }
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 

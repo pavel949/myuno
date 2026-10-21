@@ -4,10 +4,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
-const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+// Use process.cwd() (the repo root in vitest) instead of import.meta.url —
+// in some sandboxed runners import.meta.url is not a file:// URL and
+// fileURLToPath throws "The URL must be of scheme file".
+const ROOT = process.cwd();
 
 describe('font tokens', () => {
   it('codebase only uses fonts declared in tokens.css (CLAUDE.md §6)', () => {

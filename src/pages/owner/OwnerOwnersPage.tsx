@@ -4,7 +4,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOwnerAccounts } from '@/hooks/useOwnerAccounts';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
+import { useOwnerAccounts, useUnlinkedProperties } from '@/hooks/useOwnerAccounts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -28,9 +30,12 @@ import { ru } from 'date-fns/locale';
 
 export default function OwnerOwnersPage() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const { data: owners, isLoading } = useOwnerAccounts();
+  const { data: unlinkedProperties } = useUnlinkedProperties();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -121,6 +126,36 @@ export default function OwnerOwnersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Unlinked properties — objects with no owner contact drop out of CRM & reports */}
+      {unlinkedProperties && unlinkedProperties.length > 0 && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-3 flex items-start gap-3">
+            <FileWarning className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">
+                {unlinkedProperties.length}{' '}
+                {isRu
+                  ? 'объект(ов) без привязки к собственнику'
+                  : 'propert(ies) without an owner link'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isRu
+                  ? 'Такие объекты не попадают в карточки собственников, CRM и отчёты. Откройте объект и укажите собственника.'
+                  : 'These objects are missing from owner accounts, CRM and statements. Open each one and set its owner.'}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0"
+              onClick={() => navigate('/mc/properties')}
+            >
+              {isRu ? 'К объектам' : 'Properties'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Upcoming birthdays */}
       {upcomingBirthdays.length > 0 && (
@@ -239,7 +274,7 @@ export default function OwnerOwnersPage() {
                       )}
                       {owner.total_revenue > 0 && (
                         <Badge variant="outline" className="text-[10px]">
-                          ฿{owner.total_revenue.toLocaleString()}
+                          {curSym}{owner.total_revenue.toLocaleString()}
                         </Badge>
                       )}
                       {!owner.has_contract && (

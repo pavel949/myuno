@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import {
   LayoutDashboard, Building2, CalendarDays, MessageSquare,
   Crown, ContactRound, TrendingUp, Star, Megaphone,
@@ -12,7 +13,7 @@ import {
   Globe, Search, Shuffle,
   type LucideIcon,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface AppModule {
   id: string;
@@ -73,9 +74,10 @@ const MODULE_GROUPS: ModuleGroup[] = [
     titleEn: 'Finance',
     titleRu: 'Финансы',
     modules: [
-      { id: 'finance', path: '/mc/finance', icon: DollarSign, labelEn: 'Overview', labelRu: 'Обзор', tint: 'bg-success/12', textColor: 'text-success', permModule: 'finance' },
-      { id: 'management-terms', path: '/mc/management-terms', icon: Shuffle, labelEn: 'Payouts', labelRu: 'Выплаты', tint: 'bg-accent-coral/12', textColor: 'text-accent-coral', permModule: 'finance' },
+      { id: 'finance', path: '/mc/finance', icon: DollarSign, labelEn: 'Finance overview', labelRu: 'Обзор финансов', tint: 'bg-success/12', textColor: 'text-success', permModule: 'finance' },
+      { id: 'management-terms', path: '/mc/management-terms', icon: Shuffle, labelEn: 'Management terms', labelRu: 'Условия управления', tint: 'bg-accent-coral/12', textColor: 'text-accent-coral', permModule: 'finance' },
       { id: 'transactions', path: '/mc/financials', icon: ArrowLeftRight, labelEn: 'Transactions', labelRu: 'Транзакции', tint: 'bg-accent-amber/12', textColor: 'text-accent-amber', permModule: 'finance' },
+      { id: 'analytics', path: APP_ROUTES.MC_ANALYTICS, icon: TrendingUp, labelEn: 'Analytics', labelRu: 'Аналитика', tint: 'bg-success/12', textColor: 'text-success', permModule: 'reports' },
       { id: 'reports', path: '/mc/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты', tint: 'bg-primary/12', textColor: 'text-primary', permModule: 'reports' },
       { id: 'budget', path: '/mc/budget', icon: Target, labelEn: 'Budget', labelRu: 'Бюджет', tint: 'bg-accent-purple/12', textColor: 'text-accent-purple', permModule: 'finance' },
       { id: 'invoices', path: '/mc/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы', tint: 'bg-accent-cyan/12', textColor: 'text-accent-cyan', permModule: 'finance' },
@@ -92,115 +94,57 @@ const MODULE_GROUPS: ModuleGroup[] = [
   },
 ];
 
-const CRM_MORE_MODULE_IDS = new Set(['sequences', 'quotes']);
+const THAI_MODULE_LABELS: Record<string, string> = {
+  dashboard: 'ภาพรวม', properties: 'ที่พัก', calendar: 'ปฏิทิน', messages: 'ข้อความ',
+  crm: 'CRM', owners: 'เจ้าของที่พัก', contacts: 'ผู้ติดต่อ', sales: 'การขาย', reviews: 'รีวิว',
+  marketing: 'การตลาด', sequences: 'ลำดับการติดตาม', quotes: 'ใบเสนอราคา', tasks: 'งาน',
+  rates: 'ราคา', channels: 'ช่องทางการจอง', inventory: 'วัสดุและอุปกรณ์', vendors: 'ผู้ให้บริการ',
+  insurance: 'ประกันภัย', documents: 'เอกสาร', finance: 'ภาพรวมการเงิน',
+  'management-terms': 'เงื่อนไขการบริหาร', transactions: 'รายการรับจ่าย', analytics: 'การวิเคราะห์',
+  reports: 'รายงาน', budget: 'งบประมาณ', invoices: 'ใบแจ้งหนี้', staff: 'ทีมงาน',
+  subscription: 'แผนบริการ', guide: 'คู่มือ', plan: 'แผนบริการ',
+};
+
+const MODULE_AREAS = [
+  { en: 'Daily work', ru: 'Ежедневная работа', th: 'งานประจำวัน', ids: ['dashboard', 'calendar', 'tasks', 'messages'] },
+  { en: 'Properties & rates', ru: 'Объекты и тарифы', th: 'ที่พักและราคา', ids: ['properties', 'rates', 'channels', 'inventory', 'vendors', 'insurance', 'documents'] },
+  { en: 'Finance & sales', ru: 'Финансы и продажи', th: 'การเงินและการขาย', ids: ['finance', 'management-terms', 'transactions', 'analytics', 'reports', 'budget', 'invoices', 'crm', 'owners', 'contacts', 'sales', 'reviews', 'marketing', 'sequences', 'quotes'] },
+  { en: 'Team & settings', ru: 'Команда и настройки', th: 'ทีมงานและการตั้งค่า', ids: ['staff', 'subscription', 'plan', 'guide'] },
+];
 
 export default function OwnerModulesPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const { canAccess } = useTeamPermissions();
-  const [crmMoreOpen, setCrmMoreOpen] = useState(false);
-
-  return (
-    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-7 max-w-lg md:max-w-[1536px] mx-auto">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight">
-          {isRu ? 'Все модули' : 'All Modules'}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {isRu ? 'Быстрый доступ ко всем инструментам' : 'Quick access to all tools'}
-        </p>
-      </div>
-
-      {MODULE_GROUPS.map((group, gi) => {
-        const visibleModules = group.modules.filter(m => {
-          if (!m.permModule) return true;
-          return canAccess(m.permModule, 'view');
-        });
-        if (visibleModules.length === 0) return null;
-
-        const isCrmGroup = group.titleEn === 'CRM & Sales';
-        const primaryModules = isCrmGroup
-          ? visibleModules.filter((m) => !CRM_MORE_MODULE_IDS.has(m.id))
-          : visibleModules;
-        const secondaryModules = isCrmGroup
-          ? visibleModules.filter((m) => CRM_MORE_MODULE_IDS.has(m.id))
-          : [];
-
-        return (
-          <motion.div
-            key={group.titleEn}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: gi * 0.05 }}
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-              {isRu ? group.titleRu : group.titleEn}
-            </p>
-            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {primaryModules.map((mod) => {
-                const Icon = mod.icon;
-                return (
-                  <button
-                    key={mod.id}
-                    type="button"
-                    onClick={() => navigate(mod.path)}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all hover:bg-muted/50 group"
-                  >
-                    <div className={cn(
-                      'w-12 h-12 rounded-none flex items-center justify-center',
-                      'shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]',
-                      'transition-transform ',
-                      mod.tint,
-                    )}>
-                      <Icon className={cn('h-6 w-6', mod.textColor)} strokeWidth={2} />
-                    </div>
-                    <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 line-clamp-2">
-                      {isRu ? mod.labelRu : mod.labelEn}
-                    </span>
-                  </button>
-                );
-              })}
-              {isCrmGroup && secondaryModules.length > 0 && crmMoreOpen
-                ? secondaryModules.map((mod) => {
-                    const Icon = mod.icon;
-                    return (
-                      <button
-                        key={mod.id}
-                        type="button"
-                        onClick={() => navigate(mod.path)}
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-none transition-all hover:bg-muted/50 group"
-                      >
-                        <div className={cn(
-                          'w-12 h-12 rounded-none flex items-center justify-center',
-                          'shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]',
-                          'transition-transform ',
-                          mod.tint,
-                        )}>
-                          <Icon className={cn('h-6 w-6', mod.textColor)} strokeWidth={2} />
-                        </div>
-                        <span className="text-[11px] font-medium text-center leading-tight text-foreground/80 line-clamp-2">
-                          {isRu ? mod.labelRu : mod.labelEn}
-                        </span>
-                      </button>
-                    );
-                  })
-                : null}
-            </div>
-            {isCrmGroup && secondaryModules.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setCrmMoreOpen((o) => !o)}
-                className="mt-2 w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground py-2 rounded-none border border-dashed border-muted-foreground/30 bg-muted/20"
-              >
-                {crmMoreOpen
-                  ? (isRu ? 'Свернуть' : 'Show less')
-                  : (isRu ? `Ещё (${secondaryModules.length})` : `More (${secondaryModules.length})`)}
-              </button>
-            )}
-          </motion.div>
-        );
-      })}
-    </div>
+  const [query, setQuery] = useState('');
+  const searchId = useId();
+  const label = (m: AppModule) => pickLang(language, { en: m.labelEn, ru: m.labelRu, th: THAI_MODULE_LABELS[m.id] });
+  const visible = MODULE_GROUPS.flatMap(group => group.modules).filter(m =>
+    (!m.permModule || canAccess(m.permModule, 'view')) && label(m).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
   );
+  return <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6 px-4 py-6 pb-24 md:px-6">
+    <header>
+      <h1 className="font-display text-h2 text-foreground">{pickLang(language, {en:'All tools', ru:'Все инструменты', th:'เครื่องมือทั้งหมด'})}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{pickLang(language, {en:'Choose the job you need to do.', ru:'Выберите задачу, которую нужно выполнить.', th:'เลือกงานที่ต้องการทำ'})}</p>
+    </header>
+    <label htmlFor={searchId} className="flex min-h-11 items-center gap-3 border border-border bg-card px-3">
+      <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+      <span className="sr-only">{pickLang(language, {en:'Find a tool', ru:'Найти инструмент', th:'ค้นหาเครื่องมือ'})}</span>
+      <input id={searchId} aria-label={pickLang(language, {en: 'Find a tool', ru: 'Найти инструмент', th: 'ค้นหาเครื่องมือ'})} className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" value={query} onChange={event => setQuery(event.target.value)} placeholder={pickLang(language, {en:'Search tools', ru:'Поиск по инструментам', th:'ค้นหาเครื่องมือ'})} />
+    </label>
+    {visible.length === 0 && <p role="status" className="py-6 text-sm text-muted-foreground">{pickLang(language, {en:'No matching tools available.', ru:'Доступные инструменты не найдены.', th:'ไม่พบเครื่องมือที่ใช้งานได้'})}</p>}
+    {MODULE_AREAS.map((area, index) => {
+      const modules = visible.filter(m => area.ids.includes(m.id));
+      if (!modules.length) return null;
+      return <details key={`${area.en}:${Boolean(query.trim())}`} open={query.trim() ? true : index === 0} className="border border-border bg-card">
+        <summary className="min-h-12 cursor-pointer px-4 py-4 font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, area)} <span className="ml-2 text-xs text-muted-foreground">{modules.length}</span></summary>
+        <div className="grid gap-px border-t border-border bg-border sm:grid-cols-2">
+          {modules.map(mod => <button type="button" key={mod.id} onClick={() => navigate(mod.path)} className="flex min-h-16 min-w-0 items-center gap-3 bg-card p-4 text-left text-sm text-foreground hover:bg-muted focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <mod.icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <span className="min-w-0 break-words">{label(mod)}</span>
+          </button>)}
+        </div>
+      </details>;
+    })}
+  </div>;
 }

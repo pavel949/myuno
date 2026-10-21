@@ -84,3 +84,59 @@ export function validateUrlForSSRF(rawUrl: string): SSRFValidationResult {
 
   return { allowed: true };
 }
+
+/**
+ * Validate a USER-PROVIDED EXTERNAL url for SSRF safety using a DENY-list.
+ *
+ * Unlike `validateUrlForSSRF` (strict allow-list, Supabase-only), this permits
+ * any *public* hostname but blocks loopback, private/link-local ranges, cloud
+ * metadata endpoints, *.local/*.internal, and bare IP literals. Use this for
+ * features that legitimately fetch arbitrary third-party URLs — partner iCal
+ * calendars (Airbnb/Booking), remote image extraction, etc. — where a strict
+ * allow-list is not viable.
+ *
+ * NOTE: hostname-based filtering does not by itself defeat DNS-rebinding (a
+ * public hostname resolving to a private IP). It is a meaningful first layer;
+ * pair with redirect-following limits / resolved-IP checks for defence in depth.
+ */
+export function validateExternalUrlForSSRF(rawUrl: string): SSRFValidationResult {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { allowed: false, reason: "Invalid URL format" };
+  }
+
+  // Protocol — only http/https (also blocks webcal:, file:, gopher:, etc.).
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return { allowed: false, reason: `Protocol '${parsed.protocol}' not allowed. Only http/https.` };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (BLOCKED_HOSTNAMES.has(hostname)) {
+    return { allowed: false, reason: `Hostname '${hostname}' is blocked` };
+  }
+
+  if (hostname.endsWith(".local") || hostname.endsWith(".internal")) {
+    return { allowed: false, reason: `Domain '${hostname}' is blocked (local/internal)` };
+  }
+
+  if (BLOCKED_IP_PATTERNS.some((pattern) => pattern.test(hostname))) {
+    return { allowed: false, reason: `IP '${hostname}' is in a blocked range` };
+  }
+
+  // Block ALL bare IP literals (v4/v6) — external integrations should target
+  // hostnames, and IP literals are the primary SSRF metadata vector.
+  const isIpAddress = /^[\d.]+$/.test(hostname) || hostname.includes(":");
+  if (isIpAddress) {
+    return { allowed: false, reason: `Direct IP access '${hostname}' is not allowed` };
+  }
+
+  // Require a dotted public hostname (rejects single-label hosts like "intranet").
+  if (!hostname.includes(".")) {
+    return { allowed: false, reason: `Hostname '${hostname}' is not a public domain` };
+  }
+
+  return { allowed: true };
+}

@@ -200,7 +200,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
     <div ref={ref} className="fixed inset-0 z-50 bg-background">
       <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} aria-label={language === 'ru' ? 'Закрыть' : 'Close'} className="p-1 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
             <X className="w-6 h-6" />
           </button>
           <div className="flex-1">
@@ -222,7 +222,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
               className="pl-10"
             />
           </div>
-          <Button onClick={searchLocation} size="icon" variant="outline">
+          <Button onClick={searchLocation} size="icon" variant="outline" aria-label={language === 'ru' ? 'Поиск' : 'Search'}>
             <Search className="w-4 h-4" />
           </Button>
         </div>
@@ -280,6 +280,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       <button
         onClick={getCurrentLocation}
         disabled={isGettingLocation || !!noKey || isLoading}
+        aria-label={language === 'ru' ? 'Моё местоположение' : 'Use my location'}
         className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
       >
         {isGettingLocation ? (

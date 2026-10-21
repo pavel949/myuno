@@ -39,7 +39,17 @@ const FLAGS: Record<string, FeatureFlag> = {
     description: 'AI-powered vendor outreach automation',
     allowedRoles: ['admin', 'uno_team'],
   },
-  
+
+  // Local Services / Thai Business Layer (B2B self-serve + B2C surface).
+  // Enabled (GA 2026-06-24). The system_settings DB override still acts as a
+  // kill-switch: setting feature_flag:thai_business_layer to {"enabled": false}
+  // force-disables the whole module without a redeploy.
+  THAI_BUSINESS_LAYER: {
+    key: 'thai_business_layer',
+    enabled: true,
+    description: 'Thai Business / Local Services layer (B2B dashboard + B2C catalogue + landings)',
+  },
+
   // Payment Features
   STRIPE_PAYMENTS: {
     key: 'stripe_payments',
@@ -119,6 +129,18 @@ const FLAGS: Record<string, FeatureFlag> = {
     rolloutPercentage: 100,
   },
 
+  // Growth — no-budget viral loop (see docs/canonical/research/no-budget-growth-playbook.md)
+  REFERRAL_PROGRAM: {
+    key: 'referral_program',
+    enabled: true,
+    description: 'Refer-a-friend loop: invite code, share link, wallet bonuses',
+  },
+  SHARE_CTA: {
+    key: 'share_cta',
+    enabled: true,
+    description: 'Reusable share CTA with referral link + UTM attribution',
+  },
+
   // Verticals — kill-switch for each business vertical
   VERTICAL_PROPERTY: {
     key: 'vertical_property',
@@ -144,6 +166,14 @@ const FLAGS: Record<string, FeatureFlag> = {
     key: 'vertical_experiences',
     enabled: true,
     description: 'Tours & experiences vertical',
+  },
+
+  // Global access gate — DEPRECATED. Site is fully public since 2026-06-18.
+  // Kept for backwards-compat with code that still reads the flag; always ON.
+  PUBLIC_ACCESS: {
+    key: 'public_access',
+    enabled: true,
+    description: 'Deprecated: app is fully public. Flag retained as no-op.',
   },
 } as const;
 

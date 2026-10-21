@@ -27,6 +27,9 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { CommandPaletteMount } from "@/components/command/CommandPaletteMount";
+import { InstallAppButton } from "@/components/pwa/InstallAppButton";
+import { OrganizationJsonLdHydrator } from "@/components/seo/OrganizationJsonLdHydrator";
 
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
@@ -40,8 +43,6 @@ import { AuthSheetProvider } from "@/contexts/AuthSheetContext";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { VersionWatcher } from "@/components/pwa/VersionWatcher";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
@@ -103,53 +104,28 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
   return <DeferredProviders>{children}</DeferredProviders>;
 }
 
-/** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
-function ComingSoonGate({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
-  const location = useLocation();
-  // Production gate: only authenticated users + explicitly public marketing routes pass through.
-  // To temporarily disable while testing locally, set VITE_BYPASS_COMING_SOON=true in .env.
-  const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
-
-  // Allow auth and public marketing routes through
-  const isPublicRoute = location.pathname.startsWith('/auth')
-    || location.pathname.startsWith('/reset-password')
-    || location.pathname.startsWith('/legal')
-    || location.pathname.startsWith('/for-management-companies')
-    || location.pathname.startsWith('/vendor/join')
-    || location.pathname.startsWith('/vendor/onboarding')
-    || location.pathname.startsWith('/developer-portal/apply')
-    || location.pathname.startsWith('/ref/')
-    || location.pathname.startsWith('/newbuilds')
-    || location.pathname.startsWith('/capital')
-    || location.pathname.startsWith('/clearview')
-    || location.pathname === '/invest/capital-advisory'
-    || location.pathname === '/invest/calculator'
-    || location.pathname === '/property/resale-landing'
-    || location.pathname === '/owner/management-landing'
-    || location.pathname === '/owner/storefront-demo'
-    || location.pathname === '/legal/tax-structuring'
-    || location.pathname.startsWith('/for/')
-    || location.pathname === '/for'
-    || location.pathname.startsWith('/cluster/')
-    || location.pathname.startsWith('/area/')
-    || location.pathname === '/area';
-
-  if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
-  if (!user) return <UnderConstruction />;
-  return <>{children}</>;
+// Coming Soon gate retired on 2026-06-18 — the site is fully public.
+// Any old `myuno_bypass_coming_soon` / `myuno_maintenance_mode` localStorage
+// entries left over from earlier sessions are scrubbed on first load below.
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('myuno_bypass_coming_soon');
+    if (localStorage.getItem('myuno_maintenance_mode') === 'true') {
+      localStorage.setItem('myuno_maintenance_mode', 'false');
+    }
+  } catch { /* noop */ }
 }
+
+
+
 
 // Inner component to use hooks
 function AppContent() {
   useGlobalErrorHandler();
   useEnsureMultiRoleQaBundle();
-  const { isMaintenanceMode, canBypass } = useMaintenance();
+  // Coming Soon / maintenance gate retired 2026-06-18 — site is fully public.
+  // Toggle preserved in admin UI for emergency only (no-op at the context level).
   
-  // Show maintenance page if enabled and user can't bypass
-  if (isMaintenanceMode && !canBypass) {
-    return <UnderConstruction />;
-  }
   
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -161,17 +137,23 @@ function AppContent() {
         <VersionWatcher />
         <LegalComplianceModal />
         <BrowserRouter>
-          <ComingSoonGate>
-            <main
-              id="main-content"
-              tabIndex={-1}
-              className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
-            >
-              <AnimatedRoutes />
-            </main>
-            <UnifiedChatFAB />
-            <CookieConsentBanner />
-          </ComingSoonGate>
+          {/*
+            Coming Soon gate retired 2026-06-18 — site is fully public.
+            Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,
+            because NavShell renders the canonical <main> landmark for every route
+            that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
+          */}
+          <div
+            id="main-content"
+            tabIndex={-1}
+            className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
+          >
+            <AnimatedRoutes />
+          </div>
+          <UnifiedChatFAB />
+          <CommandPaletteMount />
+          <InstallAppButton />
+          <CookieConsentBanner />
         </BrowserRouter>
       </div>
     );
@@ -183,6 +165,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <QueryProviders>
           <DeferredProvidersGate>
+            <OrganizationJsonLdHydrator />
             <AppContent />
           </DeferredProvidersGate>
         </QueryProviders>

@@ -15,6 +15,7 @@ import {
   Hash, Megaphone, Send, Smile, Reply, MoreVertical,
   Headphones, TrendingUp, FileEdit, Loader2
 } from 'lucide-react';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -132,10 +133,10 @@ function MessageBubble({ message, isOwn, onReply }: MessageBubbleProps) {
 
       {/* Actions */}
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onReply}>
+        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" onClick={onReply} aria-label={language === 'ru' ? 'Ответить' : 'Reply'}>
           <Reply className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7">
+        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={language === 'ru' ? 'Реакция' : 'React'}>
           <Smile className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -176,6 +177,11 @@ function ChatInput({ onSend, isSending, placeholder }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder={placeholder || (isRu ? 'Напишите сообщение...' : 'Type a message...')}
           className="flex-1"
+          disabled={isSending}
+        />
+        <VoiceInputButton
+          variant="outline"
+          onTranscript={(text) => setMessage((prev) => appendTranscript(prev, text))}
           disabled={isSending}
         />
         <Button 

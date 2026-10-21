@@ -1,10 +1,9 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 const AGENT_SLUG = 'ai-generate-description';
 const DEFAULT_MODEL = 'google/gemini-2.5-flash';
@@ -37,9 +36,17 @@ interface GenerateRequest {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Require an authenticated user (admin-only tool) + AI rate limit so this
+  // LLM-backed endpoint can't be hit anonymously to drain the API key.
+  const auth = await requireAuth(req, corsHeaders);
+  if (auth instanceof Response) return auth;
+  const rl = await withRateLimit(req, 'ai-generate-description', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+  if (rl) return rl;
 
   const startTime = Date.now();
 
@@ -122,7 +129,7 @@ Deno.serve(async (req) => {
       ? `Напиши описание для: "${name}"\n\n${contextInfo ? `Дополнительная информация:\n${contextInfo}` : ''}`
       : `Write a description for: "${name}"\n\n${contextInfo ? `Additional information:\n${contextInfo}` : ''}`;
 
-    console.log(`Generating ${type} description for: ${name} (${language})`);
+    console.info(`Generating ${type} description for: ${name} (${language})`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -162,7 +169,7 @@ Deno.serve(async (req) => {
     const data = await response.json();
     const description = data.choices?.[0]?.message?.content || "";
 
-    console.log(`Generated description (${description.length} chars)`);
+    console.info(`Generated description (${description.length} chars)`);
 
     // Log usage asynchronously (non-blocking)
     if (agentConfig?.id) {

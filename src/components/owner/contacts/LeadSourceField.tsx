@@ -82,7 +82,7 @@ export function LeadSourceField({ companyId, isRu, leadSources, value, onValueCh
           </SelectContent>
         </Select>
       </div>
-      <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setOpen(true)} title={isRu ? 'Новый источник' : 'Add source'}>
+      <Button type="button" variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Новый источник' : 'Add source'} onClick={() => setOpen(true)} title={isRu ? 'Новый источник' : 'Add source'}>
         <Plus className="h-4 w-4" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

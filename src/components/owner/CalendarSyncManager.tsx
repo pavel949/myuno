@@ -156,13 +156,14 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
               className="font-mono text-sm"
               placeholder={isRu ? 'Загрузка...' : 'Loading...'}
             />
-            <Button variant="outline" onClick={handleCopyExportUrl} disabled={!exportUrl}>
+            <Button variant="outline" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={handleCopyExportUrl} disabled={!exportUrl}>
               <Copy className="h-4 w-4" />
             </Button>
             <Button 
-              variant="outline" 
+              variant="outline"
               onClick={handleRotateToken}
               disabled={isRotating || !exportUrl}
+              aria-label={isRu ? 'Обновить ссылку' : 'Regenerate link'}
               title={isRu ? 'Обновить ссылку (старая перестанет работать)' : 'Regenerate link (old one will stop working)'}
             >
               <RefreshCw className={`h-4 w-4 ${isRotating ? 'animate-spin' : ''}`} />
@@ -329,16 +330,18 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button 
-                      variant="ghost" 
+                      variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Синхронизировать' : 'Sync'}
                       onClick={() => handleSyncCalendar(calendar.id)}
                       disabled={isSyncing}
                     >
                       <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
                     </Button>
                     <Button 
-                      variant="ghost" 
+                      variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
                       onClick={() => handleDeleteCalendar(calendar)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />

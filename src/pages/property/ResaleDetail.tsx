@@ -16,6 +16,8 @@ import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useResaleProperty } from '@/hooks/useResaleProperties';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
@@ -25,7 +27,9 @@ export default function ResaleDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
@@ -72,13 +76,13 @@ export default function ResaleDetail() {
   const seoDescription = isRu
     ? `${title} в ${property.zone || 'Пхукет'}. Цена ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
     : `${title} in ${property.zone || 'Phuket'}. Asking ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
-  const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://myuno.app/og-image.png';
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
+  const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://www.myuno.app/og-image.png';
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
   const jsonLd = createRealEstateListingSchema({
     name: title,
     description: seoDescription,
     price: property.asking_price ?? undefined,
-    currency: 'THB',
+    currency: ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
     image: seoImage as string,
     url: canonicalUrl,
     bedrooms: property.bedrooms ?? undefined,

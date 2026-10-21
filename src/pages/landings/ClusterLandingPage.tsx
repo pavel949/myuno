@@ -1,3 +1,4 @@
+import { LandingActionLink } from '@/components/landings/LandingActionLink';
 /**
  * @file ClusterLandingPage.tsx
  * @description Cluster landing `/cluster/:cluster` — premium template matching
@@ -17,6 +18,7 @@ import {
   type ClusterLanding,
 } from '@/lib/landings/types';
 import { CLUSTER_LANDINGS } from '@/content/landings/clusterLandings';
+import { getSurfaceForCluster } from '@/lib/landings/surfaceLandings';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
@@ -103,7 +105,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         />
         <LandingContainer className="relative max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
           <div
-            className="mb-5 inline-flex items-center gap-2 border bg-background/60 px-3 py-1.5 backdrop-blur"
+            className="mb-5 inline-flex items-center gap-2 border bg-background px-3 py-1.5"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
           >
             <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
@@ -119,24 +121,65 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={withPersona(landing.primaryCta.href)}>
+              <LandingActionLink availability={landing.primaryCta.availability} href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="outline">
-                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
+                <LandingActionLink availability={landing.secondaryCta.availability} href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</LandingActionLink>
               </Button>
             ) : null}
           </div>
-          {landing.primaryCta.subtitle ? (
+          {landing.primaryCta.subtitle && !landing.primaryCta.availability ? (
             <p className="mt-3 text-xs text-muted-foreground">
               {t(landing.primaryCta.subtitle)}
             </p>
           ) : null}
         </LandingContainer>
       </header>
+
+      {/* ─── SURFACE CROSS-LINK (Master Taxonomy v1.0) ──────────── */}
+      {(() => {
+        const surface = getSurfaceForCluster(landing.slug);
+        if (!surface) return null;
+        const SurfaceIcon = surface.icon;
+        return (
+          <aside
+            aria-label={isRu ? 'Связанный surface' : 'Related surface'}
+            className="border-b border-border bg-muted/20"
+          >
+            <LandingContainer className="max-w-3xl px-4 py-4 sm:px-6">
+              <a
+                href={surface.href}
+                className="group flex items-center gap-3 border border-border bg-card p-3 transition-colors hover:border-foreground/30"
+              >
+                <div
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center"
+                  style={{ background: tokenColor(surface.color, 0.15), color: tokenColor(surface.color) }}
+                  aria-hidden
+                >
+                  <SurfaceIcon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: tokenColor(surface.color) }}
+                  >
+                    {isRu ? 'Surface · myUNO' : 'Surface · myUNO'}
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? surface.titleRu : surface.titleEn}
+                    <span className="text-muted-foreground"> — {isRu ? surface.taglineRu : surface.taglineEn}</span>
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </a>
+            </LandingContainer>
+          </aside>
+        );
+      })()}
 
       <article className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         {/* ─── JOBS (lifecycle phrases) ──────────────────────────── */}
@@ -165,7 +208,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
             <ul className="grid gap-3 sm:grid-cols-2">
               {landing.services.map((service) => (
                 <li key={service.slug}>
-                  <a
+                  <LandingActionLink availability={service.availability}
                     href={withPersona(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
@@ -175,12 +218,12 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-foreground">{t(service.label)}</div>
-                      {service.oneLiner ? (
+                      {service.oneLiner && !service.availability ? (
                         <div className="mt-1 text-sm text-muted-foreground">{t(service.oneLiner)}</div>
                       ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                  </a>
+                  </LandingActionLink>
                 </li>
               ))}
             </ul>
@@ -261,14 +304,14 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={withPersona(landing.primaryCta.href)}>
+              <LandingActionLink availability={landing.primaryCta.availability} href={withPersona(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
+                <LandingActionLink availability={landing.secondaryCta.availability} href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</LandingActionLink>
               </Button>
             ) : null}
           </div>
@@ -276,9 +319,9 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
       </article>
 
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
-      <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
+      <div className="sticky bottom-0 z-30 border-t border-border bg-background p-3 sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={withPersona(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
+          <LandingActionLink availability={landing.primaryCta.availability} href={withPersona(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</LandingActionLink>
         </Button>
       </div>
     </AppLayout>

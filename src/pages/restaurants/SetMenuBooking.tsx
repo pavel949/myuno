@@ -8,7 +8,8 @@ import { useBooking } from '@/hooks/useBooking';
 import { useRestaurant } from '@/hooks/useRestaurants';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { 
+import { toast } from 'sonner';
+import {
   BookingSummary,
   BookingDateTimeSelect, 
   BookingParticipants,
@@ -107,7 +108,7 @@ export default function SetMenuBooking() {
     scheduledAt.setHours(parseInt(hours), parseInt(minutes));
 
     if (paymentMethod === 'online') {
-      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
           booking_type: 'set_menu',
           restaurant_id: restaurant.id,
@@ -129,10 +130,14 @@ export default function SetMenuBooking() {
         },
       });
 
-      if (response.data?.url) {
-        window.location.href = response.data.url;
+      // Online payment selected: never fall through to the unpaid booking path
+      // when the checkout call fails.
+      if (error || !data?.url) {
+        toast.error(language === 'ru' ? 'Не удалось создать оплату' : 'Could not start payment');
         return;
       }
+      window.location.href = data.url;
+      return;
     }
 
     const result = await createBooking({

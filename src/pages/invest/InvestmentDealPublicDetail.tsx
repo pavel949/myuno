@@ -142,10 +142,10 @@ export default function InvestmentDealPublicDetail() {
               <Card>
                 <CardContent className="p-4 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <TrendingUp className="h-3.5 w-3.5" /> Comparable IRR
+                    <TrendingUp className="h-3.5 w-3.5" /> Submitted IRR estimate
                   </div>
                   <div className="font-semibold text-sm">{Number(deal.expected_irr).toFixed(1)}%</div>
-                  <p className="text-[10px] text-muted-foreground leading-snug">Based on comparable units. Not a forecast.</p>
+                  <p className="text-[10px] text-muted-foreground leading-snug">Submitted estimate; not verified historical performance or a guaranteed return.</p>
                 </CardContent>
               </Card>
             )}

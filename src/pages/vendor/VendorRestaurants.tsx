@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 import { 
   UtensilsCrossed, 
   Plus, 
@@ -41,6 +42,7 @@ import {
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const cuisineTypes = [
   { value: 'thai', label: 'Thai', labelRu: 'Тайская' },
@@ -71,6 +73,8 @@ const VendorRestaurants = () => {
     cuisine: 'thai',
     address: '',
     district: '',
+    lat: null as number | null,
+    lng: null as number | null,
     phone: '',
     email: '',
     cover_image: '',
@@ -87,7 +91,7 @@ const VendorRestaurants = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -106,6 +110,8 @@ const VendorRestaurants = () => {
       cuisine: 'thai',
       address: '',
       district: '',
+      lat: null,
+      lng: null,
       phone: '',
       email: '',
       cover_image: '',
@@ -130,6 +136,8 @@ const VendorRestaurants = () => {
       cuisine: (item as any).cuisine || 'thai',
       address: item.address || '',
       district: item.district || '',
+      lat: (item as { lat?: number | null }).lat ?? null,
+      lng: (item as { lng?: number | null }).lng ?? null,
       phone: item.phone || '',
       email: item.email || '',
       cover_image: item.cover_image || '',
@@ -160,6 +168,8 @@ const VendorRestaurants = () => {
         cuisine: formData.cuisine,
         address: formData.address || undefined,
         district: formData.district || undefined,
+        lat: formData.lat ?? undefined,
+        lng: formData.lng ?? undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         cover_image: formData.cover_image || undefined,
@@ -274,7 +284,7 @@ const VendorRestaurants = () => {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}><MoreVertical className="h-4 w-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}>
@@ -328,15 +338,26 @@ const VendorRestaurants = () => {
                     <Textarea value={formData.description_ru} onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                    <Input value={formData.address} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
-                    <Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} />
-                  </div>
+                <VendorLocationField
+                  value={{
+                    address: formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    district: formData.district,
+                  }}
+                  onChange={(v) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      address: v.address,
+                      lat: v.lat,
+                      lng: v.lng,
+                      district: v.district ?? prev.district,
+                    }))
+                  }
+                />
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
+                  <Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>{isRussian ? 'Доставка' : 'Delivery'}</Label>

@@ -10,6 +10,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import type { ClusterLanding, PersonaLanding } from '@/lib/landings/types';
 
 vi.mock('@/contexts/LanguageContext', () => ({
@@ -44,18 +45,20 @@ import ClusterLandingPage from '../ClusterLandingPage';
 
 const renderAt = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <HelmetProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/cluster/:cluster" element={<ClusterLandingPage />} />
+        </Routes>
+      </MemoryRouter>
+    </HelmetProvider>,
   );
 
 const liveCluster: ClusterLanding = {
   clusterCode: 'A',
   slug: 'arrival',
   status: 'live',
-  h1: { ru: 'Прибытие на Пхукет', en: 'Arrival on Phuket' },
+  h1: { ru: 'Прибытие на Пхукет', en: 'Arrival in Phuket' },
   subtitle: { ru: 'Подзаголовок', en: 'Subtitle' },
   jobs: [{ ru: 'Заказать трансфер', en: 'Book transfer' }],
   services: [
@@ -171,20 +174,34 @@ describe('ClusterLandingPage — cross-link «По персонам»', () => {
     MOCK_CLUSTERS = [liveCluster];
     MOCK_PERSONAS = [draftPersonaP9];
     renderAt('/cluster/arrival');
-    expect(screen.queryByText('По персонам')).not.toBeInTheDocument();
+    expect(screen.queryByText('Кому актуально')).not.toBeInTheDocument();
   });
 
   it('renders only live related personas as links', () => {
     MOCK_CLUSTERS = [liveCluster];
     MOCK_PERSONAS = [livePersonaP1, draftPersonaP9];
     renderAt('/cluster/arrival');
-    expect(screen.getByText('По персонам')).toBeInTheDocument();
+    expect(screen.getByText('Кому актуально')).toBeInTheDocument();
 
     const link = screen.getByRole('link', { name: 'Туристы' });
     expect(link).toHaveAttribute('href', '/for/tourists');
 
     // P9 (draft) не должен попасть в cross-link
     expect(screen.queryByRole('link', { name: 'HNW' })).not.toBeInTheDocument();
+  });
+
+  it('disables unresolved service and repeated CTA destinations while retaining visible labels', () => {
+    MOCK_CLUSTERS = [{ ...liveCluster,
+      services: [{ slug: 'missing', label: { ru: 'Unavailable service', en: 'Unavailable service' }, href: '/missing-service', availability: 'unavailable' }],
+      primaryCta: { label: { ru: 'Unavailable action', en: 'Unavailable action' }, href: '/missing-action', availability: 'unavailable' },
+    }];
+    MOCK_PERSONAS = [];
+    const { container } = renderAt('/cluster/arrival');
+    expect(container.querySelector('a[href*="missing-"]')).toBeNull();
+    for (const entry of screen.getAllByRole('link', { name: /Unavailable action|Unavailable service/ })) {
+      expect(entry).toHaveAttribute('aria-disabled', 'true');
+      expect(entry).not.toHaveAttribute('href');
+    }
   });
 
   it('does NOT include personas not in relatedPersonas, even if live', () => {

@@ -12,7 +12,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
   status: 'live',
   h1: {
     ru: 'Купите свой зимний дом на Пхукете',
-    en: 'Own your winter home on Phuket',
+    en: 'Own your winter home in Phuket',
   },
   subtitle: {
     ru: 'Если вы возвращаетесь сюда каждую зиму — расчёт «свой vs аренда» обычно сходится за 5–6 сезонов. Покажем цифры на ваших данных.',
@@ -62,7 +62,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
       slug: 'mortgage-estimator',
       label: { ru: 'Финансирование от родного банка', en: 'Financing from your home bank' },
       oneLiner: { ru: 'Сравним ставки в стране резидентства vs Thai mortgage.', en: 'Compare rates in your home country vs Thai mortgage.' },
-      href: '/property/mortgage',
+      href: '/property/mortgage', availability: 'unavailable',
     },
   ],
   faq: [
@@ -107,7 +107,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
   seo: {
     metaTitle: {
       ru: 'Свой зимний дом на Пхукете — myUNO',
-      en: 'Your winter home on Phuket — myUNO',
+      en: 'Your winter home in Phuket — myUNO',
     },
     metaDescription: {
       ru: 'Расчёт «свой vs аренда» для зимовщика на Пхукете. Кондо с rental program, freehold quota, управление 8 мес в ваше отсутствие.',
@@ -116,8 +116,8 @@ export const P5_SNOWBIRDS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/snowbirds',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/snowbirds?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/snowbirds?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/snowbirds?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/snowbirds?lang=en' },
     ],
   },
 };

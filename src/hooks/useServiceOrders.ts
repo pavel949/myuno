@@ -59,7 +59,7 @@ export function useGuestServiceOrders() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  const { data: orders = [], isLoading, error, refetch } = useQuery({
     queryKey: ['guest-service-orders', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -143,7 +143,7 @@ export function useGuestServiceOrders() {
     if (!user) return;
 
     const channel = supabase
-      .channel('guest-orders')
+      .channel(`guest-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -170,6 +170,7 @@ export function useGuestServiceOrders() {
     orders,
     activeOrders,
     completedOrders,
+    error,
     isLoading,
     createOrder,
     cancelOrder,
@@ -249,7 +250,7 @@ export function useStaffServiceOrders() {
     if (!user) return;
 
     const channel = supabase
-      .channel('staff-orders')
+      .channel(`staff-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -341,7 +342,7 @@ export function useAdminServiceOrders(filters?: { status?: string; priority?: st
   // Real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('admin-orders')
+      .channel(`admin-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

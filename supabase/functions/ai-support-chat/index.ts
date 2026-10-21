@@ -3,7 +3,7 @@ import { withRateLimit, RATE_LIMITS, getClientIdentifier } from "../_shared/rate
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -65,19 +65,72 @@ Deno.serve(async (req) => {
       });
     }
     
-    const { messages } = body;
-    
+    const { messages, pageContext } = body ?? {};
+
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages array is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Build a context-aware system prompt so the AI knows which page the user is on.
+    let systemPrompt = SYSTEM_PROMPT;
+    const lang = typeof pageContext?.lang === "string" ? pageContext.lang : "";
+    if (pageContext && typeof pageContext === "object") {
+      const path = typeof pageContext.path === "string" ? pageContext.path : "";
+      const title = typeof pageContext.title === "string" ? pageContext.title : "";
+      if (path || title) {
+        systemPrompt += `\n\nКонтекст пользователя: страница "${title}" (${path}), язык интерфейса: ${lang || "auto"}. Если вопрос относится к этой странице — используй её контекст в ответе.`;
+      }
+    }
+
+    // RAG: retrieve top knowledge chunks based on the last user message.
+    try {
+      const lastUser = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
+      const queryText = lastUser?.content?.toString().slice(0, 2000);
+      if (queryText && queryText.length > 3) {
+        const embedRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-embedding-001",
+            input: queryText,
+            dimensions: 1536,
+          }),
+        });
+        if (embedRes.ok) {
+          const embedJson = await embedRes.json();
+          const queryEmbedding = embedJson.data?.[0]?.embedding;
+          if (queryEmbedding) {
+            const svc = createClient(
+              Deno.env.get("SUPABASE_URL")!,
+              Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+            );
+            const { data: matches } = await svc.rpc("match_ai_knowledge", {
+              query_embedding: queryEmbedding as unknown as string,
+              match_count: 5,
+              similarity_threshold: 0.45,
+              filter_lang: null,
+            });
+            if (matches && matches.length > 0) {
+              const kb = matches
+                .map((m: { title: string; content: string; source: string | null; similarity: number }, i: number) =>
+                  `[${i + 1}] ${m.title}${m.source ? ` (${m.source})` : ""}\n${m.content}`)
+                .join("\n\n---\n\n");
+              systemPrompt += `\n\n# База знаний myUNO (используй для ответа, ссылайся на источники в [скобках] при необходимости):\n\n${kb}\n\nЕсли база знаний даёт прямой ответ — используй её. Если нет — отвечай как обычно, не выдумывай факты.`;
+            }
+          }
+        }
+      }
+    } catch (ragErr) {
+      console.error("RAG retrieval failed (non-fatal):", ragErr);
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -89,7 +142,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           ...messages,
         ],
         stream: true,

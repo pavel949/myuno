@@ -50,7 +50,7 @@ export function buildPropertyPayload({
     is_active: approvalStatus === 'draft' ? false : undefined,
     rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
     // listing_modes is a denormalised cache mirrored from tenancy_modes/sale_intent
-    // so legacy consumers (useStaysSearch, PropertyCard) keep working.
+    // so the PropertyCard renderer can read intent without joining two columns.
     listing_modes: Array.from(new Set([
       ...(platform_listed ? ['platform'] : []),
       ...((is_for_sale || (cleanData as any).sale_intent) ? ['sale'] : []),
@@ -77,4 +77,19 @@ export function buildPropertyPayload({
   });
 
   return payload;
+}
+
+type PropertyPaymentFields = Pick<PropertyFormData, 'deposit_currency' | 'payment_policy' | 'prepay_percent' | 'balance_due_days'>;
+type StoredPropertyPaymentFields = {
+  [Key in keyof PropertyPaymentFields]?: PropertyPaymentFields[Key] | null;
+};
+
+/** Existing-editor payment fields: preserve recorded values, never invent a legacy currency. */
+export function pickPropertyPaymentFields(data: StoredPropertyPaymentFields) {
+  return {
+    deposit_currency: data.deposit_currency?.trim() || undefined,
+    payment_policy: data.payment_policy ?? undefined,
+    prepay_percent: data.prepay_percent ?? undefined,
+    balance_due_days: data.balance_due_days ?? undefined,
+  };
 }

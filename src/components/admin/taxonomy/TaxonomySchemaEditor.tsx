@@ -298,18 +298,20 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
                           </div>
                         </div>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8"
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 min-h-[44px] min-w-[44px]"
+                            aria-label={t('Edit field', 'Редактировать поле')}
                             onClick={() => openEditField(index)}
                           >
                             <Settings2 className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-destructive"
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive"
+                            aria-label={t('Delete field', 'Удалить поле')}
                             onClick={() => removeField(index)}
                           >
                             <Trash2 className="h-4 w-4" />

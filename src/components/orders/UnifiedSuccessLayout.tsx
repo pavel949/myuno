@@ -12,6 +12,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact';
 
 interface UnifiedSuccessLayoutProps {
   isLoading?: boolean;
@@ -28,6 +29,13 @@ interface UnifiedSuccessLayoutProps {
   secondaryLabel?: { ru: string; en: string };
   /** Optional one-line note shown under the title. */
   note?: { ru: string; en: string };
+  /** Краткое описание заказа для подстановки в WhatsApp-сообщение (опционально). */
+  whatsappSummary?: { ru?: string; en?: string };
+  /** Сумма для отображения в WhatsApp-сообщении. */
+  totalAmount?: number;
+  currency?: string;
+  /** Скрыть кнопку WhatsApp (по умолчанию показывается). */
+  hideWhatsApp?: boolean;
 }
 
 const DEFAULT_PRIMARY = { ru: 'Мои заказы', en: 'My orders' };
@@ -43,6 +51,10 @@ export function UnifiedSuccessLayout({
   secondaryHref,
   secondaryLabel = DEFAULT_SECONDARY,
   note,
+  whatsappSummary,
+  totalAmount,
+  currency,
+  hideWhatsApp = false,
 }: UnifiedSuccessLayoutProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -106,6 +118,15 @@ export function UnifiedSuccessLayout({
             >
               {isRu ? secondaryLabel.ru : secondaryLabel.en}
             </Button>
+            {!hideWhatsApp && (
+              <WhatsAppOrderContact
+                orderNumber={orderNumber}
+                summary={whatsappSummary}
+                totalAmount={totalAmount}
+                currency={currency}
+                className="w-full"
+              />
+            )}
           </div>
         </div>
       </div>

@@ -141,7 +141,8 @@ export default function CrmSequencesPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0"
+                    className="shrink-0"
+                    aria-label={isRu ? 'Удалить' : 'Delete'}
                     onClick={e => {
                       e.stopPropagation();
                       setConfirmId(seq.id);

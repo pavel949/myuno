@@ -18,6 +18,7 @@ import { QuickReplies } from '@/components/chat/QuickReplies';
 import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation';
 import { cn } from '@/lib/utils';
 import { ModerationResult } from '@/lib/chatModerationPatterns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface PropertyChatWindowProps {
   propertyId?: string;
@@ -226,10 +227,16 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
             disabled={isSending}
             className="flex-1"
           />
+          <VoiceInputButton
+            variant="outline"
+            onTranscript={(text) => handleMessageChange(appendTranscript(newMessage, text))}
+            disabled={isSending}
+          />
           <Button
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
             size="icon"
+            aria-label={isRu ? 'Отправить' : 'Send'}
           >
             <Send className="h-4 w-4" />
           </Button>

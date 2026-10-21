@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { AvailabilityStatus } from './AvailabilityStatus';
 import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
@@ -21,9 +21,13 @@ import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { DateRange } from 'react-day-picker';
+import type { PropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
+import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+
 
 interface PropertyBookingCardProps {
   propertyId: string;
+  initialGuestContext?: PropertyGuestContext;
   pricePerNight: number;
   rentalTerms?: PropertyRentalTerms | null;
   currency?: string;
@@ -43,6 +47,7 @@ interface PropertyBookingCardProps {
 
 export function PropertyBookingCard({
   propertyId,
+  initialGuestContext,
   pricePerNight,
   rentalTerms,
   currency = 'THB',
@@ -64,16 +69,23 @@ export function PropertyBookingCard({
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [guests, setGuests] = useState(1);
+  // URL preferences may change without a remount. Only untouched fields follow them.
+  // An explicit clear is an edit too; switching properties resets these overrides.
+  const [editedDates, setEditedDates] = useState<{ propertyId: string; value?: DateRange }>();
+  const [editedGuests, setEditedGuests] = useState<{ propertyId: string; value: number }>();
+  const dateRange = editedDates?.propertyId === propertyId ? editedDates.value : initialGuestContext?.dateRange;
+  const guests = editedGuests?.propertyId === propertyId ? editedGuests.value : initialGuestContext?.guests ?? 1;
+  const setDateRange = (value: DateRange | undefined) => setEditedDates({ propertyId, value });
+  const setGuests = (value: number) => setEditedGuests({ propertyId, value });
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { isDesktop } = useBreakpoint();
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   
-  const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
-  const { data: unavailableDates } = usePropertyUnavailableDates(propertyId);
+  const availabilityQuery = usePropertyUnavailableDates(propertyId);
+  const { data: unavailableDates } = availabilityQuery;
+  const availabilityReady = availabilityQuery.isSuccess && !availabilityQuery.isError;
 
   // Index unavailable dates by yyyy-MM-dd for O(1) lookup
   const unavailableMap = useMemo(() => {
@@ -89,16 +101,15 @@ export function PropertyBookingCard({
     [unavailableDates],
   );
 
+  // Clear the calendar auto-close timer on unmount so setState can't fire afterwards
+  useEffect(() => () => {
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+  }, []);
+
   const nights = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return 0;
     return differenceInDays(dateRange.to, dateRange.from);
   }, [dateRange]);
-  
-  const isDateBlocked = (date: Date) => {
-    return blockedDates?.some(
-      blocked => blocked.date.toDateString() === date.toDateString()
-    ) ?? false;
-  };
   
   // Build pricing rules
   const pricing = useMemo(() => {
@@ -160,17 +171,26 @@ export function PropertyBookingCard({
   
   // Validation
   const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (nights > 0 && rentalTerms?.min_stay_nights && nights < rentalTerms.min_stay_nights) {
-      errors.push(isRu ? `Мин. срок: ${rentalTerms.min_stay_nights} ночей` : `Min. stay: ${rentalTerms.min_stay_nights} nights`);
-    }
+    const errors: string[] = getStayRuleErrors(
+      {
+        checkIn: dateRange?.from,
+        checkOut: dateRange?.to,
+        terms: rentalTerms,
+        existingStays: (unavailableDates ?? [])
+          .filter((u) => u.kind === 'booked')
+          .map((u) => ({ start: u.date, end: u.date })),
+      },
+      language,
+    );
     if (rentalTerms?.max_guests && guests > rentalTerms.max_guests) {
       errors.push(isRu ? `Макс. гостей: ${rentalTerms.max_guests}` : `Max guests: ${rentalTerms.max_guests}`);
     }
     return errors;
-  }, [nights, guests, rentalTerms, isRu]);
+  }, [dateRange, guests, rentalTerms, unavailableDates, language, isRu]);
+
   
   const handleReserve = () => {
+    if (!availabilityReady) return;
     const params = new URLSearchParams();
     if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
@@ -234,6 +254,7 @@ export function PropertyBookingCard({
         </div>
         
         {/* Date Selection — Airbnb-style split input */}
+        <AvailabilityStatus loading={!availabilityReady && !availabilityQuery.isError} error={availabilityQuery.isError} onRetry={() => { void availabilityQuery.refetch(); }} />
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <button
@@ -275,6 +296,7 @@ export function PropertyBookingCard({
                 mode="range"
                 selected={dateRange}
                 onSelect={(range) => {
+                  if (!availabilityReady) return;
                   setDateRange(range);
                   if (range?.from && range?.to) {
                     clearTimeout(autoCloseTimer.current);
@@ -283,8 +305,7 @@ export function PropertyBookingCard({
                 }}
                 numberOfMonths={isDesktop ? 2 : 1}
                 disabled={(date) => {
-                  if (isBefore(date, startOfDay(new Date()))) return true;
-                  if (isDateBlocked(date)) return true;
+                  if (!availabilityReady || isBefore(date, startOfDay(new Date()))) return true;
                   const dateKey = format(date, 'yyyy-MM-dd');
                   const kind = unavailableMap.get(dateKey);
                   // Booked / manually blocked nights are fully unavailable.
@@ -303,7 +324,7 @@ export function PropertyBookingCard({
                   return false;
                 }}
                 modifiers={{
-                  booked: blockedDates?.map((b) => b.date) || [],
+                  booked: unavailableDates?.filter(u => u.kind === 'booked' || u.kind === 'blocked').map(u => u.date) ?? [],
                   checkoutOnly: checkoutOnlyDates,
                 }}
                 modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
@@ -369,9 +390,9 @@ export function PropertyBookingCard({
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">{isRu ? 'Гости' : 'Guests'}</span>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1}>-</Button>
+                <Button variant="outline" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full" onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1} aria-label={isRu ? 'Меньше гостей' : 'Fewer guests'}>-</Button>
                 <span className="w-6 text-center font-semibold text-foreground">{guests}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => setGuests(Math.min(rentalTerms?.max_guests || 20, guests + 1))} disabled={guests >= (rentalTerms?.max_guests || 20)}>+</Button>
+                <Button variant="outline" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full" onClick={() => setGuests(Math.min(rentalTerms?.max_guests || 20, guests + 1))} disabled={guests >= (rentalTerms?.max_guests || 20)} aria-label={isRu ? 'Больше гостей' : 'More guests'}>+</Button>
               </div>
             </div>
             {rentalTerms?.max_guests && (
@@ -401,7 +422,7 @@ export function PropertyBookingCard({
             rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
           )}
           onClick={handleReserve}
-          disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+          disabled={!availabilityReady || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
         >
           {!dateRange?.from || !dateRange?.to ? (
             <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Проверить наличие' : 'Check availability'}</>

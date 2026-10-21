@@ -46,7 +46,7 @@ export const RELOCATION_ARTICLE_CATEGORIES: {
 
 const visaOverviewEn = `## Who this is for
 
-Anyone planning to stay in Thailand beyond a short holiday on Phuket.
+Anyone planning to stay in Thailand beyond a short holiday in Phuket.
 
 ## Common routes
 
@@ -162,7 +162,7 @@ const housingRu = `## Сначала аренда
 
 Откройте **поиск недвижимости** в режиме долгосрочной аренды и сохраняйте избранное.`;
 
-const schoolsEn = `## International schools on Phuket
+const schoolsEn = `## International schools in Phuket
 
 There are **10+** international programmes (British, American, IB, Russian streams). Fees often range **฿200k–800k/year** depending on age and campus.
 
@@ -422,7 +422,7 @@ export const RELOCATION_ARTICLE_SEEDS: RelocationArticleRecord[] = [
   {
     slug: 'housing-long-term',
     category: 'housing',
-    title_en: 'Long-term housing on Phuket',
+    title_en: 'Long-term housing in Phuket',
     title_ru: 'Долгосрочное жильё на Пхукете',
     summary_en: 'Budget bands, contracts, TM30, and how to search safely.',
     summary_ru: 'Бюджеты, договор, TM30 и безопасный поиск.',

@@ -93,8 +93,8 @@ export default function CrmQuotesPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7"
                   onClick={() => setConfirmId(q.id)}
+                  aria-label={isRu ? 'Удалить' : 'Delete'}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>

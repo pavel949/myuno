@@ -182,7 +182,8 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8"
+                          className="min-h-[44px] min-w-[44px]"
+                          aria-label={showCode[doc.id] ? (isRu ? 'Скрыть код' : 'Hide code') : (isRu ? 'Показать код' : 'Show code')}
                           onClick={() => toggleShowCode(doc.id)}
                         >
                           {showCode[doc.id] ? (
@@ -194,7 +195,8 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8"
+                          className="min-h-[44px] min-w-[44px]"
+                          aria-label={isRu ? 'Копировать' : 'Copy'}
                           onClick={() => copyCode(doc.access_code!)}
                         >
                           <Copy className="h-4 w-4" />
@@ -459,7 +461,7 @@ function DocumentList({ documents, isRu, onDelete, isDeleting }: DocumentListPro
                 <CheckCircle className="h-4 w-4 text-success mr-2" />
               )}
               {doc.file_url && (
-                <Button size="icon" variant="ghost" className="h-8 w-8" asChild>
+                <Button size="icon" variant="ghost" className="min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Просмотр' : 'View'} asChild>
                   <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
                     <Eye className="h-4 w-4" />
                   </a>
@@ -468,7 +470,8 @@ function DocumentList({ documents, isRu, onDelete, isDeleting }: DocumentListPro
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 text-destructive hover:text-destructive"
+                className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
+                aria-label={isRu ? 'Удалить' : 'Delete'}
                 onClick={() => onDelete(doc.id)}
                 disabled={isDeleting}
               >

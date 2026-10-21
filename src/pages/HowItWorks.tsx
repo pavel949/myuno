@@ -13,6 +13,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const translations = {
   en: {
@@ -255,7 +256,7 @@ export default function HowItWorks() {
             <h2 className="text-xl font-bold mb-2">{t.ctaTitle}</h2>
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">{t.ctaDescription}</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <PremiumButton onClick={() => navigate('/auth')} className="gap-2">
+              <PremiumButton onClick={() => redirectToAuth(navigate)} className="gap-2">
                 {t.ctaButton}
                 <ArrowRight className="w-4 h-4" />
               </PremiumButton>

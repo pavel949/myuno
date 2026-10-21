@@ -26,7 +26,13 @@ export default function RestaurantMap() {
     deliveryOnly: mode === 'delivery' ? true : undefined,
   });
 
-  const filteredRestaurants = restaurants.filter((r) => r.lat && r.lng);
+  // Memoized so its identity is stable across re-renders (e.g. selecting a
+  // marker). Without this the fitBounds effect below re-ran on every render and
+  // reset the camera, undoing the panTo/zoom triggered by a marker click.
+  const filteredRestaurants = useMemo(
+    () => restaurants.filter((r) => r.lat && r.lng),
+    [restaurants],
+  );
 
   const defaultCenter = useMemo(() => {
     const phuket = CITY_GEOGRAPHY.phuket;
@@ -63,6 +69,7 @@ export default function RestaurantMap() {
             variant="secondary"
             size="icon"
             className="bg-background/90 shadow-lg"
+            aria-label={language === 'ru' ? 'Назад' : 'Back'}
             onClick={() => navigate('/restaurants')}
           >
             <ArrowLeft className="w-5 h-5" />

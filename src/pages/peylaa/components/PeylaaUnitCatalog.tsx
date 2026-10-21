@@ -220,7 +220,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                     key={u.id}
                     className="border-b border-white/5 hover:bg-white/5 transition-colors"
                   >
-                    <td className="py-3 font-medium text-white" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <td className="font-mono py-3 font-medium text-white">
                       {u.unit_no}
                     </td>
                     <td className="py-3 text-white/60">{u.building}</td>
@@ -230,14 +230,14 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                         {u.room_type}
                       </Badge>
                     </td>
-                    <td className="py-3 text-white/60" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <td className="font-mono py-3 text-white/60">
                       {u.area_sqm} м²
                     </td>
                     <td className="py-3 text-white/50 text-xs">{u.view}</td>
-                    <td className="py-3 text-right font-semibold text-accent" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <td className="font-mono py-3 text-right font-semibold text-accent">
                       {u.asking_price_thb ? `฿${u.asking_price_thb.toLocaleString()}` : '—'}
                     </td>
-                    <td className="py-3 text-right text-white/40 text-xs" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <td className="font-mono py-3 text-right text-white/40 text-xs">
                       {u.asking_price_thb ? `$${Math.round(u.asking_price_thb / 35).toLocaleString()}` : '—'}
                     </td>
                     <td className="py-3 text-right">
@@ -266,7 +266,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-white text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                    <span className="font-mono font-medium text-white text-sm">
                       {u.unit_no}
                     </span>
                     <Badge variant="outline" className="border-white/20 text-white/50 text-[10px]">
@@ -278,7 +278,7 @@ export function PeylaaUnitCatalog({ onInquiry }: Props) {
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="text-accent font-semibold text-sm" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                  <div className="font-mono text-accent font-semibold text-sm">
                     {formatThb(u.asking_price_thb)}
                   </div>
                   <button

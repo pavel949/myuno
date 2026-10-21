@@ -1,13 +1,11 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -160,7 +158,7 @@ Instructions:
       }
     }
 
-    console.log(`Enriched ${results.length}/${projects.length} projects`);
+    console.info(`Enriched ${results.length}/${projects.length} projects`);
 
     return new Response(
       JSON.stringify({ enriched: results.length, total: projects.length, results }),

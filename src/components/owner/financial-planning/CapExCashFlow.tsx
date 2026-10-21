@@ -92,7 +92,7 @@ export function CapExCashFlow({ capex, loans, assumptions, onCapexChange, onLoan
                         <Input type="number" min={1} value={c.lifespanYears} onChange={e => updateCapex(c.id, { lifespanYears: +e.target.value || 1 })} className="h-8 text-xs text-right w-16" />
                       </td>
                       <td className="px-2 py-1">
-                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeCapex(c.id)}>
+                        <Button size="icon" variant="ghost" aria-label={isRu ? 'Удалить' : 'Delete'} className="min-h-[44px] min-w-[44px]" onClick={() => removeCapex(c.id)}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </td>
@@ -139,7 +139,7 @@ export function CapExCashFlow({ capex, loans, assumptions, onCapexChange, onLoan
                       <td className="px-2 py-1"><Input type="number" value={l.termMonths} onChange={e => updateLoan(l.id, { termMonths: +e.target.value || 1 })} className="h-8 text-xs text-right" /></td>
                       <td className="px-2 py-1"><Input type="number" min={1} max={12} value={l.startMonth ?? 1} onChange={e => updateLoan(l.id, { startMonth: Math.max(1, Math.min(12, +e.target.value || 1)) })} className="h-8 text-xs text-right w-16" /></td>
                       <td className="px-2 py-1">
-                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeLoan(l.id)}>
+                        <Button size="icon" variant="ghost" aria-label={isRu ? 'Удалить' : 'Delete'} className="min-h-[44px] min-w-[44px]" onClick={() => removeLoan(l.id)}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </td>

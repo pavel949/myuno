@@ -1,0 +1,22 @@
+import React from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import OwnerModulesPage from '@/pages/owner/OwnerModulesPage';
+import { getOwnerSidebarForRole, SIDEBAR_NAV } from '@/lib/nav/navigationModel';
+const state=vi.hoisted(()=>({language:'en',blocked:[] as string[]}));
+vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:state.language})}));
+vi.mock('@/hooks/useTeamPermissions',()=>({useTeamPermissions:()=>({canAccess:(module:string)=>!state.blocked.includes(module)})}));
+afterEach(cleanup);beforeEach(()=>{state.language='en';state.blocked=[]});
+function Probe(){return <span data-testid="location">{useLocation().pathname}</span>}
+function mount(){render(<MemoryRouter><OwnerModulesPage/><Probe/></MemoryRouter>)}
+const existingPaths=['/mc','/mc/today','/mc/bookings-list','/mc/calendar','/mc/tasks','/mc/messages','/mc/properties','/mc/performance','/mc/reviews-management','/mc/rates','/mc/inventory','/mc/insurance','/mc/documents','/mc/finance','/mc/invoices','/mc/management-terms','/mc/crm-dashboard','/mc/contacts','/mc/owners','/mc/vendor-acquisition','/mc/staff','/mc/settings','/mc/help'];
+it('preserves all 23 sidebar destinations exactly once in four groups',()=>{const groups=SIDEBAR_NAV.owner;expect(groups).toHaveLength(4);expect(groups.flatMap(g=>g.items.map(i=>i.path)).sort()).toEqual([...existingPaths].sort());expect(groups.filter(g=>g.defaultOpen)).toHaveLength(1)});
+it('includes genuine Thai labels for every MC group and destination',()=>{SIDEBAR_NAV.owner.forEach(group=>{expect(group.labelTh).toMatch(/[ก-๙]/);group.items.forEach(item=>expect(item.labelTh).toMatch(/[ก-๙]/))})});
+it.each(['property_manager','general','sales_agent','service_provider'] as const)('keeps valid destinations and no duplicates for %s',role=>{const paths=getOwnerSidebarForRole(role,{propertyCount:3}).flatMap(g=>g.items.map(i=>i.path));expect(new Set(paths).size).toBe(paths.length);paths.forEach(p=>expect(existingPaths).toContain(p));expect(paths).toContain('/mc/tasks')});
+it('preserves sales persona exclusions after regrouping',()=>{const paths=getOwnerSidebarForRole('sales_agent',{propertyCount:3}).flatMap(g=>g.items.map(i=>i.path));['/mc/rates','/mc/inventory','/mc/finance','/mc/invoices'].forEach(p=>expect(paths).not.toContain(p));expect(paths).toContain('/mc/crm-dashboard')});
+it('preserves single-owner exclusions without treating grouping as new authority',()=>{const paths=getOwnerSidebarForRole('general',{propertyCount:1}).flatMap(g=>g.items.map(i=>i.path));['/mc/staff','/mc/owners','/mc/inventory'].forEach(p=>expect(paths).not.toContain(p));['/mc/settings','/mc/rates','/mc/documents'].forEach(p=>expect(paths).toContain(p))});
+it('keeps every existing tool reachable and corrects management terms labeling',()=>{mount();expect(screen.getAllByRole('button',{hidden:true})).toHaveLength(29);expect(screen.getByRole('button',{name:'Management terms',hidden:true})).toBeInTheDocument();expect(screen.queryByRole('button',{name:'Payouts',hidden:true})).not.toBeInTheDocument()});
+it('search opens the relevant group and navigates to the real destination',()=>{mount();fireEvent.change(screen.getByRole('textbox',{name:'Find a tool'}),{target:{value:'Management terms'}});expect(screen.getAllByRole('button')).toHaveLength(1);fireEvent.click(screen.getByRole('button',{name:'Management terms'}));expect(screen.getByTestId('location')).toHaveTextContent('/mc/management-terms')});
+it('permission filtering remains applied before search',()=>{state.blocked=['finance'];mount();fireEvent.change(screen.getByRole('textbox',{name:'Find a tool'}),{target:{value:'Budget'}});expect(screen.queryByRole('button',{name:'Budget',hidden:true})).not.toBeInTheDocument();expect(screen.getByRole('status')).toHaveTextContent('No matching tools available.')});
+it.each([['ru','Все инструменты','Найти инструмент','Тарифы'],['th','เครื่องมือทั้งหมด','ค้นหาเครื่องมือ','ราคา']])('renders and searches tools in %s', (language,heading,search,rates)=>{state.language=language;mount();expect(screen.getByRole('heading',{name:heading})).toBeInTheDocument();fireEvent.change(screen.getByRole('textbox',{name:search}),{target:{value:rates}});fireEvent.click(screen.getByRole('button',{name:rates}));expect(screen.getByTestId('location')).toHaveTextContent('/mc/rates')});

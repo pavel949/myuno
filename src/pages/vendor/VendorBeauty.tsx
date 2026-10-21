@@ -48,7 +48,9 @@ import {
   Clock
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const salonTypes = [
   { value: 'beauty_salon', label: 'Beauty Salon', labelRu: 'Салон красоты' },
@@ -101,6 +103,8 @@ const VendorBeauty = () => {
     images: [] as string[],
     address: '',
     district: '',
+    lat: null as number | null,
+    lng: null as number | null,
     phone: '',
     email: '',
     website: '',
@@ -115,7 +119,7 @@ const VendorBeauty = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 
@@ -136,6 +140,8 @@ const VendorBeauty = () => {
       images: [],
       address: '',
       district: '',
+      lat: null,
+      lng: null,
       phone: '',
       email: '',
       website: '',
@@ -160,6 +166,8 @@ const VendorBeauty = () => {
       images: salon.images || [],
       address: salon.address || '',
       district: salon.district || '',
+      lat: (salon as { lat?: number | null }).lat ?? null,
+      lng: (salon as { lng?: number | null }).lng ?? null,
       phone: salon.phone || '',
       email: salon.email || '',
       website: salon.website || '',
@@ -190,6 +198,8 @@ const VendorBeauty = () => {
         images: formData.images,
         address: formData.address || null,
         district: formData.district || null,
+        lat: formData.lat,
+        lng: formData.lng,
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
@@ -321,7 +331,7 @@ const VendorBeauty = () => {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}>
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -464,22 +474,31 @@ const VendorBeauty = () => {
                   </div>
                 </div>
 
-                {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Район' : 'District'}</Label>
-                    <Input
-                      value={formData.district}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    />
-                  </div>
+                {/* Location */}
+                <VendorLocationField
+                  value={{
+                    address: formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    district: formData.district,
+                  }}
+                  onChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      address: v.address,
+                      lat: v.lat,
+                      lng: v.lng,
+                      district: v.district ?? formData.district,
+                    })
+                  }
+                />
+
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Район (необязательно)' : 'District (optional)'}</Label>
+                  <Input
+                    value={formData.district}
+                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                  />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">

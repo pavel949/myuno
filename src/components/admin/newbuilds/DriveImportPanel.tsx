@@ -165,6 +165,7 @@ export function DriveImportPanel({ projectId }: Props) {
                   })}
                   disabled={!!activeJob}
                   title="Запустить синк"
+                  aria-label="Sync"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -173,6 +174,7 @@ export function DriveImportPanel({ projectId }: Props) {
                   size="icon"
                   onClick={() => deleteSource.mutate({ sourceId: src.id, projectId })}
                   title="Удалить"
+                  aria-label="Delete"
                 >
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>

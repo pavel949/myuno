@@ -15,6 +15,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const typeIcons: Record<string, React.ElementType> = {
   salon: Scissors,
@@ -77,7 +78,7 @@ export default function ViewHistory() {
             ? 'Чтобы просматривать историю, войдите в аккаунт'
             : 'Sign in to view your browsing history'}
           action={
-            <PremiumButton onClick={() => navigate('/auth')}>
+            <PremiumButton onClick={() => redirectToAuth(navigate)}>
               {language === 'ru' ? 'Войти' : 'Sign In'}
             </PremiumButton>
           }
@@ -185,7 +186,8 @@ export default function ViewHistory() {
 
                       <button
                         onClick={() => removeFromHistory(item.id)}
-                        className="p-2 hover:bg-secondary rounded-none transition-colors"
+                        aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
+                        className="p-2 hover:bg-secondary rounded-none transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <X className="w-4 h-4 text-muted-foreground" />
                       </button>

@@ -24,7 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
-import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
+import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 
@@ -34,7 +34,7 @@ export default function DeveloperDetail() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const { data: developer, isLoading } = useDeveloper(id || '');
+  const { data: developer, isLoading, isError, refetch } = useDeveloper(id || '');
   const { data: allProjects } = useOffplanProjects({ developerId: id });
 
   if (isLoading) {
@@ -43,6 +43,17 @@ export default function DeveloperDetail() {
         <Skeleton className="h-24 rounded-none" />
         <Skeleton className="h-40 rounded-none" />
         <Skeleton className="h-60 rounded-none" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="flex flex-col items-center justify-center gap-4 px-4 py-20 text-center">
+        <Building2 className="h-16 w-16 text-muted-foreground/30" aria-hidden="true" />
+        <p>{isRu ? 'Не удалось загрузить профиль застройщика' : language === 'th' ? 'โหลดโปรไฟล์ผู้พัฒนาไม่สำเร็จ' : 'Developer profile could not be loaded'}</p>
+        <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : language === 'th' ? 'ลองอีกครั้ง' : 'Try again'}</Button>
+        <Button variant="link" onClick={() => navigate(APP_ROUTES.DEVELOPERS)}>{isRu ? 'Вернуться к списку' : language === 'th' ? 'กลับไปที่รายการ' : 'Back to list'}</Button>
       </div>
     );
   }
@@ -68,7 +79,7 @@ export default function DeveloperDetail() {
     || (isRu
       ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} юнитов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
       : `${name} — Phuket developer. ${developer.projectsCompleted} projects, ${developer.totalUnitsSold} units sold.${developer.foundedYear ? ` Founded ${developer.foundedYear}.` : ''}`);
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -80,8 +91,8 @@ export default function DeveloperDetail() {
     ...(developer.website && { sameAs: [developer.website] }),
   };
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Property', url: 'https://myuno.app/property' },
-    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://myuno.app/property/developers' },
+    { name: 'Property', url: 'https://www.myuno.app/property' },
+    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://www.myuno.app/property/developers' },
     { name, url: canonicalUrl },
   ]);
 
@@ -90,7 +101,7 @@ export default function DeveloperDetail() {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        image={developer.logoUrl || 'https://myuno.app/og-image.png'}
+        image={developer.logoUrl || 'https://www.myuno.app/og-image.png'}
         url={canonicalUrl}
         jsonLd={{ '@context': 'https://schema.org', '@graph': [orgSchema, breadcrumbSchema] }}
       />
@@ -131,7 +142,7 @@ export default function DeveloperDetail() {
             </div>
 
             {developer.muunoScore && (
-              <MuunoScoreWidget score={developer.muunoScore} size="md" />
+              <MyunoScoreWidget score={developer.muunoScore} size="md" />
             )}
           </div>
         </div>

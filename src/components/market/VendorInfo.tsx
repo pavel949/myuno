@@ -63,9 +63,9 @@ export const VendorInfo: React.FC<VendorInfoProps> = ({
           {/* Vendor Logo */}
           <div className="w-14 h-14 rounded-none bg-muted/80 flex items-center justify-center overflow-hidden shrink-0">
             {vendor.logo_url ? (
-              <img 
-                src={vendor.logo_url} 
-                alt={name}
+              <img
+                src={vendor.logo_url}
+                alt=""
                 className="w-full h-full object-cover"
               />
             ) : (

@@ -10,6 +10,8 @@ import type { Yacht } from '@/hooks/useYachts';
 import type { Experience } from '@/hooks/useExperiences';
 import { formatDuration } from '@/hooks/useExperiences';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { getLocalizedField } from '@/hooks/useLocalizedField';
+import { cleaningServicePrice } from '@/lib/services/servicePresentation';
 
 // ─── Local input shapes for catalog adapters ─────────────
 // Narrow, hand-rolled — many of these tables are accessed via dynamic select()
@@ -198,8 +200,11 @@ export function mapBouquetToCatalogCard(
   navigate: (path: string) => void
 ): CatalogCardProps {
   const isRu = language === 'ru';
-  const name = isRu ? bouquet.name_ru : bouquet.name_en;
-  const shortDesc = isRu ? bouquet.short_description_ru : bouquet.short_description_en;
+  const lang = (language === 'ru' || language === 'th') ? language : 'en';
+  const nameRes = getLocalizedField(bouquet as Record<string, any>, 'name', lang as 'ru' | 'en' | 'th');
+  const descRes = getLocalizedField(bouquet as Record<string, any>, 'short_description', lang as 'ru' | 'en' | 'th');
+  const name = nameRes.value || (isRu ? bouquet.name_ru : bouquet.name_en) || '';
+  const shortDesc = descRes.value || (isRu ? bouquet.short_description_ru : bouquet.short_description_en) || undefined;
   const hasVariants = bouquet.size_variants?.length;
   const displayPrice = hasVariants
     ? (bouquet.size_variants as SizeVariant[])[0]?.price || bouquet.price
@@ -232,7 +237,8 @@ export function mapBouquetToCatalogCard(
     socialProof,
     price: displayPrice,
     pricePrefix: hasVariants ? (isRu ? 'от' : 'from') : undefined,
-    subtitle: shortDesc || undefined,
+    subtitle: shortDesc,
+    autoTranslatedFrom: (nameRes.isAutoTranslated || descRes.isAutoTranslated) ? nameRes.sourceLang ?? descRes.sourceLang : undefined,
   };
 }
 
@@ -397,7 +403,7 @@ export function mapCleaningToCatalogCard(
 ): CatalogCardProps {
   const isRu = language === 'ru';
   const name = isRu ? service.name_ru : service.name_en;
-  const price = service.price_fixed || service.price_per_hour || 0;
+  const { price, hourly } = cleaningServicePrice(service);
 
   const badges: CatalogBadge[] = [];
   if (service.is_verified) badges.push({ text: isRu ? 'Проверено' : 'Verified', icon: Shield, className: 'bg-primary text-primary-foreground' });
@@ -413,8 +419,8 @@ export function mapCleaningToCatalogCard(
     badges,
     rating: (service.rating ?? 0) > 0 ? service.rating : undefined,
     subtitle: subtitleParts.length > 0 ? subtitleParts.join(' · ') : undefined,
-    price: price > 0 ? price : undefined,
-    priceSuffix: service.price_per_hour ? (isRu ? '/ч' : '/hr') : undefined,
+    price,
+    priceSuffix: hourly ? (language === 'th' ? '/ชม.' : isRu ? '/ч' : '/hr') : undefined,
   };
 }
 

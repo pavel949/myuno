@@ -93,7 +93,7 @@ export function PortalDocumentsTab({ propertyId }: Props) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    aria-label={isRu ? 'Скачать' : 'Download'}
                     onClick={() => handleDownload(doc)}
                     disabled={downloading === doc.id}
                   >

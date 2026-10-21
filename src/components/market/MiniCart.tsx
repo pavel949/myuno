@@ -32,9 +32,10 @@ export function MiniCart({ className }: MiniCartProps) {
 
   if (totalItems === 0) {
     return (
-      <button 
+      <button
         className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
         onClick={() => navigate('/cart')}
+        aria-label={language === 'ru' ? 'Корзина' : 'Cart'}
       >
         <ShoppingCart className="w-6 h-6" />
       </button>
@@ -44,8 +45,9 @@ export function MiniCart({ className }: MiniCartProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button 
+        <button
           className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
+          aria-label={language === 'ru' ? 'Корзина' : 'Cart'}
         >
           <ShoppingCart className="w-6 h-6" />
           <Badge 
@@ -79,7 +81,7 @@ export function MiniCart({ className }: MiniCartProps) {
             <div key={item.id} className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0">
               <div className="w-12 h-12 rounded-none bg-muted overflow-hidden flex-shrink-0">
                 {item.image ? (
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.image} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Package className="w-5 h-5 text-muted-foreground" />
@@ -100,7 +102,8 @@ export function MiniCart({ className }: MiniCartProps) {
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); removeItem(item.id); }}
-                  className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                  className="p-1 text-muted-foreground hover:text-destructive transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

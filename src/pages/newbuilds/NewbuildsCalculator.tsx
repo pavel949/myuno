@@ -130,7 +130,7 @@ export default function NewbuildsCalculator() {
         title={isRu ? 'ROI Калькулятор' : 'ROI Calculator'}
         subtitle={isRu
           ? 'Рассчитайте доходность инвестиций в новостройки Пхукета'
-          : 'Calculate investment returns on Phuket new developments'}
+          : 'Calculate investment returns in Phuket new developments'}
         backTo={APP_ROUTES.NEWBUILDS}
         backLabel={isRu ? 'Новостройки' : 'New developments'}
       />

@@ -5,7 +5,7 @@
  * Philosophy: «Цифровая инфраструктура государственного класса»
  * References: GOV.UK · e-Estonia · The Economist · Apple support docs
  *
- * Light mode = default. Dark mode = inverted navy variant for admin/MC use only.
+ * Light mode = default. Dark mode = the same hierarchy on restrained navy surfaces, across all routes.
  * All colours in HSL for Tailwind compatibility.
  */
 
@@ -94,14 +94,14 @@
   --secondary:            30 10% 98%;       /* surface-raised */
   --secondary-foreground: 24 10% 10%;
 
-  --accent:               22 79% 47%;       /* orange — used very sparingly */
+  --accent:               22 80% 38%;       /* accessible orange action surface with white text */
   --accent-foreground:    0   0% 100%;
 
   --destructive:          0  72% 35%;       /* danger */
   --destructive-foreground: 0 0% 100%;
 
   --muted:                30  8% 96%;       /* border-subtle as surface */
-  --muted-foreground:     24  5% 46%;       /* text-muted */
+  --muted-foreground:     24  8% 38%;       /* text-muted — WCAG AA on cream (≥4.5:1), tightened from 46% (2026-06-18 Lighthouse) */
 
   --card:                 0   0% 100%;      /* white card on cream page */
   --card-foreground:      24 10% 10%;
@@ -314,6 +314,26 @@
   --cluster-enjoy:    22  79% 47%;   /* brand-orange — was rose */
   --cluster-family:   211 67% 32%;   /* navy-700 — was family blue */
 
+  /* Persona hues — DS 2.1 canon §6.3: each of the 14 personas keeps a
+     distinct avatar tint so an at-a-glance scan still reads role identity,
+     but every value is ~20–30% less saturated than the pre-DS-2.1 rainbow
+     palette (retires `#00D68F` mint, vivid hex, etc.). Consume via
+     `personaColor(p)` from `src/lib/roleBlend.ts`, never as raw hex. */
+  --persona-tourist:                 213 60% 55%;   /* muted blue */
+  --persona-resident:                165 50% 40%;   /* muted emerald — retires #00D68F mint */
+  --persona-property-owner:          185 50% 40%;   /* muted teal */
+  --persona-investor:                260 40% 55%;   /* muted purple */
+  --persona-real-estate-developer:   0   55% 50%;   /* muted red */
+  --persona-local-services-provider: 38  70% 50%;   /* muted amber */
+  --persona-family:                  330 55% 55%;   /* muted rose */
+  --persona-couple:                  350 60% 55%;   /* muted rose-red */
+  --persona-nightlife:               290 55% 55%;   /* muted fuchsia */
+  --persona-active:                  25  70% 50%;   /* muted orange — distinct from --accent */
+  --persona-business:                220 12% 45%;   /* slate */
+  --persona-nomad:                   175 50% 38%;   /* muted teal-cyan */
+  --persona-pet-owner:               28  75% 55%;   /* muted peach */
+  --persona-relocation:              230 50% 55%;   /* muted indigo */
+
   /* Removed/zeroed — these used to drive mint accents and luxury gold. */
   --gold:             22 79% 47%;             /* gold tokens collapse to brand-orange */
   --gold-light:       25 89% 65%;
@@ -389,43 +409,43 @@ html:not([lang]) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DARK MODE — admin/MC opt-in only.
+   DARK MODE — user preference shared across consumer and workspace routes.
    Canonical inversion: navy-900 background, cream foreground.
    No mint, no glassmorphism, no glow — same restraint as light mode.
    ═══════════════════════════════════════════════════════════ */
 .dark {
   color-scheme: dark;
-  --background:           214 78%  9%;     /* navy-900 */
+  --background:           216 28% 10%;     /* navy-900 */
   --foreground:           36 27% 96%;      /* cream */
 
-  --primary:              22 79% 47%;      /* orange CTA on dark — better contrast than navy-on-navy */
-  --primary-hover:        22 80% 38%;
-  --primary-foreground:   214 78% 9%;      /* navy text on orange */
+  --primary:              36 27% 90%;      /* cream CTA, restrained emphasis */
+  --primary-hover:        36 27% 98%;
+  --primary-foreground:   216 28% 10%;      /* navy text on orange */
 
-  --secondary:            213 73% 15%;     /* navy */
+  --secondary:            216 22% 18%;     /* navy */
   --secondary-foreground: 36 27% 96%;
 
-  --accent:               213 60% 45%;     /* lighter navy for accents on dark */
-  --accent-foreground:    36 27% 96%;
+  --accent:               25 89% 65%;     /* same warm brand accent */
+  --accent-foreground:    216 28% 10%;
 
   --destructive:          0 75% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --muted:                213 60% 14%;
+  --muted:                216 22% 17%;
   --muted-foreground:     30 12% 75%;      /* cream-muted */
 
-  --card:                 213 73% 13%;     /* slightly lighter than bg */
+  --card:                 216 24% 14%;     /* slightly lighter than bg */
   --card-foreground:      36 27% 96%;
-  --card-elevated:        213 73% 18%;
-  --card-hover:           213 73% 20%;
+  --card-elevated:        216 22% 18%;
+  --card-hover:           216 22% 20%;
 
-  --popover:              213 73% 13%;
+  --popover:              216 24% 14%;
   --popover-foreground:   36 27% 96%;
 
-  --border:               213 50% 25%;
-  --border-strong:        213 50% 30%;
-  --border-subtle:        213 60% 18%;
-  --input:                213 50% 25%;
+  --border:               216 18% 27%;
+  --border-strong:        216 18% 36%;
+  --border-subtle:        216 18% 21%;
+  --input:                216 18% 36%;
   --ring:                 22 79% 47%;      /* orange ring for focus on dark */
 
   --sidebar-background:   214 78%  9%;
@@ -443,6 +463,23 @@ html:not([lang]) {
   --bg-card:    var(--card);
   --bg-elevated: var(--card-elevated);
   --inset:      213 73% 11%;
+
+  /* Persona hues — dark inversion: same hue/saturation as light, lightness
+     +5–8% so each tint reads cleanly against navy-900 background. */
+  --persona-tourist:                 213 60% 62%;
+  --persona-resident:                165 50% 48%;
+  --persona-property-owner:          185 50% 48%;
+  --persona-investor:                260 45% 63%;
+  --persona-real-estate-developer:   0   60% 58%;
+  --persona-local-services-provider: 38  75% 58%;
+  --persona-family:                  330 60% 63%;
+  --persona-couple:                  350 65% 63%;
+  --persona-nightlife:               290 60% 63%;
+  --persona-active:                  25  75% 58%;
+  --persona-business:                220 14% 58%;
+  --persona-nomad:                   175 50% 46%;
+  --persona-pet-owner:               28  80% 63%;
+  --persona-relocation:              230 55% 63%;
 
   --color-skeleton-base:      213 73% 15%;
   --color-skeleton-highlight: 213 73% 18%;
@@ -463,4 +500,59 @@ html:not([lang]) {
   --cv-grade-b:       42 60% 56%;
   --cv-grade-c:       18 67% 62%;
   --cv-grade-d:        3 64% 64%;
+
+  /* Cluster hues — dark inversion. The light values (lightness 25–32%) read as
+     near-black on navy-900 and made the auth value-panel chips illegible. Same
+     hue/saturation, lightness raised to ~58–62% for clean contrast on dark. */
+  --cluster-arrive:   211 60% 62%;   /* navy → light blue */
+  --cluster-live:     211 60% 62%;   /* navy → light blue */
+  --cluster-legal:    220 14% 62%;   /* neutral-dark → light neutral */
+  --cluster-invest:   22  79% 58%;   /* brand-orange, brightened */
+  --cluster-manage:   220 14% 62%;   /* partner neutral */
+  --cluster-build:    28  30% 62%;   /* stone, lifted off black */
+  --cluster-enjoy:    22  79% 58%;   /* brand-orange, brightened */
+  --cluster-family:   211 60% 62%;   /* navy → light blue */
+}
+
+/* Complete the semantic inversion: legacy aliases must not retain light surfaces. */
+.dark {
+  --ink: var(--foreground);
+  --text-primary: var(--foreground);
+  --text-body: 30 14% 84%;
+  --text-muted: var(--muted-foreground);
+  --text-subtle: 30 8% 64%;
+  --surface-raised: var(--card-elevated);
+  --surface-white: var(--card);
+  --foreground-secondary: var(--text-body);
+  --disabled-foreground: var(--text-subtle);
+  --inset: var(--background);
+  --primary-light: 211 60% 72%;
+  --primary-muted: 36 27% 90% / 0.10;
+  --accent-muted: 25 89% 65% / 0.10;
+  --border-accent: 36 27% 90% / 0.30;
+  --success: 145 48% 66%;
+  --success-bg: 145 30% 16%;
+  --warning: 39 85% 70%;
+  --warning-bg: 35 38% 17%;
+  --danger: 0 72% 73%;
+  --danger-bg: 0 36% 18%;
+  --info: 211 75% 74%;
+  --info-bg: 213 36% 19%;
+  --ring-offset: var(--background);
+  --sidebar-background: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--card-elevated);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --color-skeleton-base: var(--card);
+  --color-skeleton-highlight: var(--card-elevated);
+}
+
+.dark {
+  --success-foreground: 216 28% 10%;
+  --warning-foreground: 216 28% 10%;
+  --info-foreground: 216 28% 10%;
+  --destructive-foreground: 216 28% 10%;
 }

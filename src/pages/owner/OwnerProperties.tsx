@@ -1,3 +1,6 @@
+import { ManagedPropertyDrafts } from '@/components/owner/ManagedPropertyDrafts';
+import { readPropertyComplexNames } from '@/hooks/usePropertyComplexes';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,14 +49,13 @@ function localizePropertyType(raw: string, isRu: boolean): string {
 }
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
   const complexQuery = useQuery({
-    queryKey: ['property-complexes-lookup', complexIds],
+    queryKey: ['property-complexes-lookup', user?.id, activeCompany?.company_id, complexIds],
     queryFn: async () => {
       if (!complexIds.length) return {};
-      const { data } = await supabase
-        .from('property_complexes')
-        .select('id, name, name_ru')
-        .in('id', complexIds);
+      const data = await readPropertyComplexNames(complexIds);
       const map: Record<string, { name: string; name_ru: string | null }> = {};
       (data || []).forEach(c => { map[c.id] = { name: c.name, name_ru: c.name_ru }; });
       return map;
@@ -84,14 +86,12 @@ function usePropertyLookups(complexIds: string[], projectIds: string[]) {
 
 /** Fetch all complexes and projects for reassignment */
 function useAllComplexesAndProjects() {
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
   const complexes = useQuery({
-    queryKey: ['all-complexes-for-bulk'],
+    queryKey: ['all-complexes-for-bulk', user?.id, activeCompany?.company_id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('property_complexes')
-        .select('id, name, name_ru')
-        .order('name');
-      return data || [];
+      return readPropertyComplexNames();
     },
   });
 
@@ -249,7 +249,7 @@ const queryClient = useQueryClient();
     const ids = Array.from(selectedIds);
     const { error } = await supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
       .in('id', ids);
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
@@ -342,7 +342,7 @@ const queryClient = useQueryClient();
     if (!deleteTarget) return;
     const { error } = await supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
       .eq('id', deleteTarget);
     if (error) {
       toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {
@@ -397,7 +397,8 @@ const queryClient = useQueryClient();
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 shrink-0"
+              className="h-9 w-9 min-h-[44px] min-w-[44px] shrink-0"
+              aria-label={isRu ? 'Переключить вид' : 'Toggle view'}
               onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
             >
               {viewMode === 'list' ? <Map className="h-4 w-4" /> : <List className="h-4 w-4" />}
@@ -405,6 +406,8 @@ const queryClient = useQueryClient();
           </>
         )}
       </div>
+
+      <ManagedPropertyDrafts />
 
       {/* Filters */}
       {allProperties && allProperties.length > 0 && (
@@ -420,7 +423,7 @@ const queryClient = useQueryClient();
                 className="pl-9 h-9"
               />
               {searchId && (
-                <button onClick={() => setSearchId('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <button onClick={() => setSearchId('')} className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={isRu ? 'Очистить' : 'Clear'}>
                   <X className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               )}
@@ -428,7 +431,8 @@ const queryClient = useQueryClient();
             <Button
               variant={showFilters ? 'default' : 'outline'}
               size="icon"
-              className="h-9 w-9 shrink-0"
+              className="h-9 w-9 min-h-[44px] min-w-[44px] shrink-0"
+              aria-label={isRu ? 'Фильтры' : 'Filters'}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="h-4 w-4" />
@@ -757,7 +761,8 @@ const queryClient = useQueryClient();
             <Button
               size="icon"
               variant="ghost"
-              className="h-7 w-7 shrink-0"
+              className="h-7 w-7 min-h-[44px] min-w-[44px] shrink-0"
+              aria-label={isRu ? 'Закрыть' : 'Close'}
               onClick={exitSelectionMode}
             >
               <XCircle className="h-4 w-4" />

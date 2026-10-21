@@ -642,9 +642,10 @@ export function LifeOSMappingsTab() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Button 
-                        size="icon" 
+                      <Button
+                        size="icon"
                         variant="ghost"
+                        aria-label={isRussian ? 'Удалить' : 'Delete'}
                         onClick={() => handleDeleteWithValidation(mapping.id)}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />

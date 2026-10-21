@@ -16,6 +16,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom as from } from '@/lib/untypedTables';
 import { Building2, Clock, DollarSign, FileText, Send, Users, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -59,13 +60,6 @@ interface UnitHold {
   fee_amount_thb: number;
   created_at: string;
   project_units?: { unit_code: string | null; unit_type: string; project_id: string; property_projects?: { name_en: string } };
-}
-
-// ── Supabase helper for untyped tables ────────────────────────────────────────
-// Returns `any` to bypass TS deep-instantiation explosion on tables not present
-// in the auto-generated Database type.
-function from(table: string): any {
-  return (supabase.from as unknown as (t: string) => any)(table);
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────

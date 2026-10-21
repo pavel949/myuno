@@ -40,7 +40,7 @@ export function ClusterBreadcrumb({ clusterId, serviceLabelRu, serviceLabelEn, c
 
   if (!clusterTitle || !path) return null;
 
-  const color = entry?.color ?? '#94a3b8';
+  const color = entry?.color ?? 'hsl(var(--muted-foreground))';
 
   return (
     <nav className={`flex items-center gap-1.5 text-xs ${className || ''}`}>

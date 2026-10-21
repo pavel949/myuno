@@ -243,8 +243,9 @@ export function FavoriteCollections({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 absolute top-1 right-1"
+                      className="h-8 w-8 min-h-[44px] min-w-[44px] absolute top-1 right-1"
                       onClick={(e) => e.stopPropagation()}
+                      aria-label={language === 'ru' ? 'Действия' : 'Actions'}
                     >
                       <MoreVertical className="w-4 h-4" />
                     </Button>

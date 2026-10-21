@@ -1,426 +1,206 @@
-# PROJECT.md — myUNO · Ignatev Group
-## Единственный источник стратегической истины платформы
+# PROJECT.md — myUNO
+## Canonical Product & Engineering Constitution
 
-> **Версия:** 2.3 · **Дата:** Апрель 2026 · **Автор:** Pavel Ignatev
-> **Назначение:** Системный контекст для Claude, Cursor, Lovable и любого AI-ассистента, работающего на проекте.
-> **Статус:** Этот документ отменяет все предыдущие версии, драфты и роадмапы.
->
-> **Изменения v2.2 → v2.3:** встроен ClearView как Моат восьмой (Раздел 4), таблица сделок расширена с 10 до 13 строк (Раздел 12), Y1 target повышен до $1M net revenue (Разделы 1, 19). Полная методология ClearView — в `/docs/canonical/06-clearview-methodology.md`.
->
-> **⚠️ Master Taxonomy v1.0 (апрель 2026) отменяет любые таксономические решения этого документа.** При расхождении (персоны, кластеры, ClearView grades, deal types) истина — `/docs/canonical/00-master-taxonomy.md`. Ключевые сдвиги: 25 канонических персон P01–P25 (включая воскрешённые P14–P19 lifestyle), два независимых слоя кластеризации (Surfaces×6 для навигации vs JTBD×10 для тегирования), ClearView расширен до AAA–CCC и снято Y1-ограничение на brokered проекты.
+> **v3.2.1 · 18 Oct 2026 · production core: `myuno`**
+> Canonical context for Codex, Lovable, other AI agents, engineers, product and operations.
 
----
+## 00. How to use this document
+Read before product, architecture, DB, auth, workflow, commercial or UX changes. Identify: real problem; canonical domain; actor/scope; place in the Operating Loop; whether the change extends truth or creates parallel truth; evidence required.
 
-## 0. Инструкция для AI-ассистента
+If this document conflicts with current code/live DB, do not force it onto production. Verify current source + read-only evidence and govern the correction under §20. Distinguish **VERIFIED CURRENT**, **APPROVED TARGET**, **REFERENCE IMPLEMENTATION**, **RECOMMENDATION**. Never call target state implemented.
 
-Прочитай этот документ целиком до начала любой задачи. Он описывает, чем является платформа, как устроена монетизация, кто является аудиторией, каковы дизайн-стандарты и какие решения уже приняты. При любом соблазне предложить новую функцию — сначала пропусти идею через пять тестов из Раздела 15.
+## 01. What myUNO is
+myUNO is a **destination property, services and living operating system**.
 
-**Три вещи, которые нужно понять до начала работы.**
+`Discover → Decide → Quote/Price → Request/Reserve/Transact → Pay where applicable → Stay/Receive Service → Operate/Support → Account → Retain → Repeat/Refer/Own/Invest`.
 
-Первое. myUNO — не маркетплейс и не набор приложений. Это **цифровая инфраструктура государственного класса для иностранцев на Пхукете** и одновременно **доверенный оператор рынка недвижимости**. Оба тезиса неотделимы и должны ощущаться в каждом интерфейсе, тексте и продуктовом решении.
+It connects trusted property/service supply, local execution, distribution, customer relationships and financial truth for customers, operators, providers, owners, agents and management.
 
-Второе. Платформа охватывает все сферы взаимодействия иностранца с Пхукетом — от аренды автомобиля до покупки виллы и участия в клубной сделке на $5M. Ни одна вертикаль не является второстепенной: все они формируют доверие, лояльность и готовность клиента доверить бренду самое важное.
+**Living is an experience/surface category over canonical domains, not a separate domain model.**
 
-Третье. Главный финансовый KPI — GMV сделок с недвижимостью. Все остальные вертикали существуют для того, чтобы квалифицировать, прогревать и удерживать пользователя на пути к этой сделке.
+## 02. What myUNO is not
+Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is a UX/workflow donor only. **One Operational Reality** is the product.
 
----
+## 03. Current strategic objective
+Production operational convergence:
+`Ignatev Estate → Layantara | Condominiums`.
 
-## 1. TL;DR — три минуты
+Immediate proof: run a real Layantara booking from quote through checkout and P&L using canonical systems, isolate Layantara/Condo teams, preserve founder consolidated oversight, and keep the architecture reusable.
 
-**Что мы строим:** единственный доверенный цифровой сервис для всего, что касается жизни, отдыха и инвестиций иностранца на Пхукете. Госуслуги для иностранцев — структурные, надёжные, с реальной экспертизой рынка и живым человеческим характером.
+Priority: `correctness → security → operational completeness → usability → distribution → scale`.
 
-**Как зарабатываем:** комиссии и сервисные сборы на всех вертикалях — от трансфера до юридической помощи. Основная выручка — сделки с недвижимостью во всех форматах. Всё остальное прогревает клиента и строит доверие к бренду.
+**Services architecture is canonical now; full Marketplace activation remains P1 and must not expand the current property P0.**
 
-**Единственный маховик:**
+## 04. Canonical Operating Loop
+Shared: `Discover → Select → Quote/Price → Request/Reserve/Transact → Pay → Fulfil → Support/Operate → Account → CRM → Repeat`.
 
-```
-ТУРИСТ → АРЕНДАТОР → ПОКУПАТЕЛЬ → СОБСТВЕННИК → РЕФЕРРЕР
-```
+**Generic “order/request/booking” in diagrams does not imply a DB table.** Specific entities are `orders`, `service_orders`, `property_bookings`, etc.
 
-Один CAC — четыре денежных события на горизонте 24–36 месяцев.
+Property rental: `Property → Availability → Rate → Quote → checked/atomic commercial + inventory commitment → Verified Payment where required → Confirmation → Stay → Checkout → Reconciliation → P&L`.
 
-**Два продукта-ядра:**
+Do not infer a fixed ordering between creation/mutation of `orders` and `property_bookings` from this diagram. Follow the verified canonical writer contract. Commercial transaction ≠ inventory commitment; successful `orders` state does not prove successful inventory reservation; payment confirmation ≠ booking confirmation.
 
-- **myUNO** (`myuno.app`) — единая точка входа, справочник, AI-консьерж, все вертикали, витрина новостроек, платформа аренды
-- **myUNO Invest** (`invest.myuno.app`) — CRM сделок, DueDiligence AI, ClearView™ рейтинги, аналитика для HNW-инвесторов
+Property purchase: `Project/Unit → Terms → Enquiry → Qualification → Viewing/DD → Transaction → Ownership/PM`. Never force Buy into rental semantics.
 
-**Метрика 90 дней:** 3+ закрытых сделки с недвижимостью · 10+ объектов в активной аренде · 50+ квалифицированных лидов в CRM · 2 pilot ClearView assessment.
+Services: `Discovery → Provider/Offering → Availability/Slot where applicable → Price → Service Request/Booking → Fulfilment → Payment/Settlement where applicable → CRM`.
 
-**Метрика 12 месяцев:** **$800K–1M net revenue** (из них ~70% — real estate и Invest слой) · 60+ объектов под управлением · 10+ ClearView-certified проектов · готовность к Seed раунду.
+Service modes:
+- **REQUEST**: provider/human confirmation required.
+- **BOOK**: offering/availability known; payment may be later/outside myUNO.
+- **BOOK+PAY**: offering, availability and server-authoritative price known; canonical checkout exists.
 
----
+Each service vertical must define its authoritative capacity/hold point independently of payment. **Payment must never substitute for capacity reservation.**
 
-## 2. Двойной стратегический тезис
+Creating `service_orders` does not automatically create/require `orders`. If a vertical needs platform checkout/settlement/ledger, use an explicit idempotent reconciled bridge. Where bridged, persist deterministic linkage and enforce at-most-one active commercial order per service transaction unless an explicitly modelled retry/version contract requires otherwise. Never create two financial truths.
 
-Это архитектурный принцип, определяющий каждое продуктовое и дизайн-решение.
+**Structured request → Marketplace first. Exceptional request → Concierge.** Concierge never creates a second service-order model; if it finds a structured offering, hand back to the canonical Marketplace workflow.
 
-### Тезис первый: цифровая инфраструктура государственного класса
+## 05. One Operational Reality
+`Project ≠ Property`; `Property ≠ Operating Space`; `orders ≠ property_bookings`; `service_orders ≠ orders`; `Payment ≠ Ledger`; `Person ≠ Role`; `Provider ≠ Organization`; `UI state ≠ Domain state`; `CRM event ≠ Domain authority`.
 
-myUNO — то, чего у иностранца на Пхукете никогда не было: единая, надёжная, структурированная система для решения любого вопроса, связанного с жизнью на острове. Визы, налоги, медицина, школы, транспорт, юридическая помощь, аренда, покупка недвижимости, доставка цветов — всё в одном месте, на нескольких языках, с понятными следующими шагами.
+Homes, Services, Concierge, PMS, Agent, Owner, Finance and CRM are projections: **different views, one state**.
 
-Модель — государственный сервисный портал. Не только по дизайну, но прежде всего по принципу ответственности: платформа берёт на себя роль, которую в нормальной стране выполняют институты. Для иностранца на Пхукете таких институтов нет. myUNO заполняет этот вакуум. Это означает полноту охвата: нельзя быть «госуслугами», которые закрывают только часть жизненных ситуаций.
+**Immutable/auditable snapshots such as accepted quotes may preserve historical commercial state. They are evidence of the agreed state at a point in time, not competing canonical truth.**
 
-### Тезис второй: доверенный оператор и камертон рынка
+## 06. Canonical domains / sources of truth
+Before adding a table/enum/hook/context/workflow, find the existing canonical implementation and prove it cannot represent the requirement.
 
-Одновременно myUNO — независимый арбитр и центр экспертизы рынка Пхукета. Рейтинги застройщиков, верификация подрядчиков, DueDiligence, флудсcore — это не просто инструменты, это заявление о позиции: мы устанавливаем стандарты, а не следуем им.
+- Physical asset: `properties`.
+- Project: project domain; never auth scope by itself.
+- Rental inventory: `property_bookings` + canonical blocks/exclusion.
+- Stay dates: `[check_in, check_out)`.
+- Commercial order: `orders` where the canonical commercial-order contract applies. Property bookings and service requests remain separate domain entities.
+- Payment: verified canonical payment writers; `payment_intents` where provider/Stripe state applies.
+- Accounting: `ledger_entries`.
+- Services catalogue: approved services/providers + safe public projections.
+- Service request/booking: existing `service_orders`.
+- Service availability: server-side busy-slot/availability rules where applicable.
+- Relationship: unified CRM/person.
+- Operational scope: Management Company + Operating Space + property assignment.
+- AuthN: Supabase Auth. AuthZ: RLS + RBAC/module/action/property/Space.
+- Public discovery: allowlisted projections; private operations: authorized canonical records.
 
-Омбудсмен-статус Павла и институциональные связи с рынком делают эту позицию легитимной. Пользователь, который доверяет myUNO как инфраструктуре своей жизни на Пхукете, естественным образом доверяет ему в сделке на ฿15M. Инфраструктурное доверие конвертируется в транзакционное — это главный актив платформы.
+`providers.id ≠ orgs.id`; `orders.provider_org_id` references an org/counterparty. Missing trusted provider→org mapping blocks flows requiring commercial settlement, but need not block request-only `service_orders`.
 
----
+## 07. Actors & Operating Spaces
+One person may be guest, renter, buyer, investor, owner, referrer, agent, supplier and/or employee; these are relationships/personas, not duplicate identities. Generic `uno_team` means employment, not global private authority.
 
-## 3. Омбудсмен-статус — институциональный фундамент
+`Management Company → Operating Space → Properties + Members`. Target: `Ignatev Estate → Layantara | Condominiums`.
 
-Этот раздел описывает один из ключевых и невоспроизводимых активов бизнеса.
+One primary Space/property unless approved otherwise; cross-space membership explicit; empty/invalid scope never means All. **Operating Space = WHERE; RBAC/module/action = WHAT.** Space membership alone never grants Finance/Pricing/Booking/Admin capability.
 
-**Что это такое.** Павел Игнатьев является официальным представителем Правительства Москвы в Таиланде. Это не почётный титул — это институциональный статус, который несёт конкретные смысловые и операционные последствия для бизнеса.
+**Operating Space constrains employee/management operational access; it does not replace independently verified customer, owner, provider or public rights.**
 
-**Что это даёт на практике.** Для русскоязычного HNWI-клиента, принимающего решение о сделке на $500K+ в незнакомой юрисдикции, вопрос доверия является первостепенным. Обычный брокер — даже самый компетентный — не может предложить институциональную гарантию. Представитель Правительства Москвы — может. Это меняет психологию сделки: клиент перестаёт чувствовать себя один на один с рынком.
+## 08. Product Surfaces
+**Homes:** `Rent | Buy`; Search → Results → Project Portal → Category/Units → Unit → Terms/Availability → Quote → Booking/Enquiry.
 
-Статус также означает доступ к официальным каналам коммуникации с российскими государственными структурами — что критически важно при работе с крупными состояниями, требующими юридической прозрачности на обоих концах транзакции.
+**Services Marketplace:** `Services → Category → Provider/Offering → Availability → Price → REQUEST|BOOK|BOOK+PAY → Confirmation → My Services`. Existing/partial verticals include transport, vehicles, tours, yachts, flowers, beauty/spa, cleaning, fitness, restaurants/events. Code/route existence ≠ readiness. Verify real providers, approved offerings, safe fields, price, availability, commerce mode, mapping, fulfilment, settlement where applicable, and admin editing. No fake fallback catalogue.
 
-**Как это используется в продукте.** Омбудсмен-статус должен присутствовать в двух местах: на landing-странице для инвесторов (как trust signal, объяснённый просто и без бюрократического пафоса) и в материалах по юридическому сопровождению (ContractAI, DueDiligence AI, справочные гайды). Ни в коем случае не эксплуатировать этот статус как рекламный лозунг — только как фактический аргумент в правильном контексте.
+**Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil. Concierge may maintain a case/orchestration record for conversation, requirements, coordination and resolution, but that record must not become a competing booking, payment, inventory or service-order authority. When a structured service is selected, return the transaction to the canonical Marketplace/service workflow.
 
-**Ограничение.** Статус выдан Правительством Москвы. Это максимально релевантно для российской аудитории и понятно части постсоветского пространства (включая монгольскую аудиторию с советским образовательным background). Для европейских, китайских и бангладешских инвесторов этот аргумент работает иначе и должен подаваться через призму «институциональная ответственность и верифицированный track record», а не через конкретное название органа власти.
+**PMS:** Today, Calendar, Bookings, Properties, Workspace, Stay Detail, Housekeeping, Maintenance, Rates, Inventory, Finance, Owners, Staff.
 
----
+**Agent:** authorized inventory/search/availability/pricing/markup/quote/request/booking/status. Availability is instant/request/partner-confirmed.
 
-## 4. Моат — защитные преимущества
+**Owner:** authorized properties/bookings/occupancy/finance/statements/payouts/maintenance/docs.
 
-Этот раздел требует честного и детального анализа — не маркетингового списка, а реальных барьеров для воспроизведения конкурентами.
+**CRM:** context/history across property + service journeys; never transactional truth.
 
-**Моат первый: myUNO как хост на платформе аренды.** Это структурное, а не техническое преимущество. myUNO выступает стороной-хостом во всех транзакциях аренды — даже если физическое управление объектом осуществляет партнёр. Это означает, что гость взаимодействует с myUNO, а не с разными операторами с разным качеством сервиса. Единый стандарт check-in, коммуникации, решения проблем, отчётности. Эту модель нельзя скопировать быстро: она требует юридической структуры, стандартизированных процессов и готовности принять операционную ответственность. Аналог — Airbnb vs. OTA-агрегатор.
+**My:** prefer Stays / Services / Requests / Properties / Payments-Documents. Do not expose ambiguous generic “Orders” mixing internal domains.
 
-**Моат второй: полный жизненный цикл объекта — от покупки до дохода.** Конкурент может предложить либо продажу объекта, либо управление им. myUNO предлагает непрерывный сервис: покупка → контроль хода строительства → приёмка и сопровождение → меблировка → лицензирование → управление арендой → отчётность и выплаты. Покупатель новостройки не уходит после сделки — он остаётся клиентом myUNO на 15–20 лет. Это принципиально другая экономика отношений.
+## 09. Reference implementation — Layantara
+First full property-operating acceptance: `Resort → Categories → Villas → Rates → Availability → Booking → Guest Ops → Housekeeping/Maintenance → Finance/P&L`.
 
-**Моат третий: омбудсмен-статус.** Подробно описан в Разделе 3. Институциональное доверие для русскоязычного HNWI-рынка, которое нельзя воспроизвести.
+No separate booking engine, calendar, guest DB, ledger or CRM. Differences from condos belong in configuration/scope/category/commercial policy.
 
-**Моат четвёртый: партнёрская сеть без заморозки капитала.** 35 партнёрских объектов уже в системе, ~200 готовы к быстрой загрузке. Ключевая структурная идея: myUNO не владеет этими объектами и не несёт расходов на их техническое обслуживание — это ответственность партнёра. myUNO обеспечивает канал продаж, стандарт сервиса и бренд. Это позволяет масштабировать инвентарь без пропорционального роста операционных затрат. Ни один конкурент с прямым владением не может масштабироваться с такой скоростью.
+**Never seed/infer the 39-villa/category manifest from this document. Verify source data.**
 
-**Моат пятый: отношения с девелоперами.** Хорошие отношения с Sansiri, Rhom Bho Properties и рядом других застройщиков дают доступ к проектам и комиссионным условиям, которые недоступны рядовым агентствам. Это не просто «мы с ними знакомы» — это операционные соглашения, которые формировались годами присутствия на рынке.
+## 10. Business model
+Engines: rental/management; sales/investment; owner/asset management; agent distribution; Services Marketplace GMV/fees; monetized high-touch Concierge; separately governed investment/trust products.
 
-**Моат шестой: AI-инструменты без аналогов.** ContractAI, DueDiligence AI, FloodScore — три продукта, которых нет ни у одного конкурента на русскоязычном рынке Пхукета. Они создают асимметричное информационное преимущество для клиента myUNO и делают переход к конкуренту психологически дорогим.
+Property flywheel is economics, not a required state machine. Services are revenue plus high-frequency trust/retention. Every monetized flow defines payer, revenue event, fee, counterparty, recognition and accounting destination. Never invent a universal Marketplace commission.
 
-**Моат седьмой: физическое присутствие и операционная компетентность.** Офис в Cherngtalay, команда на земле (Ольга Игнатьева управляет объектами), сеть подрядчиков. Это нельзя создать дистанционно. Конкурент-агрегатор не имеет ключей от объектов и не знает местных подрядчиков.
+**A service request is not GMV. Marketplace GMV/revenue is recognized only from the configured, verified commercial/financial event for that vertical.**
 
-**Моат восьмой: ClearView™ — институциональная методология оценки рынка.** Публикуемая система рейтингов off-plan проектов (AAA–BB, 8 весовых категорий, 5-ступенчатая maturity progression, audited score modifiers). Это не внутренний инструмент — это публичный market standard: сертификаты, executive summaries, quarterly monitoring, данные становятся цитируемыми Bangkok Post и используются банками при due diligence. Ни у одного конкурента нет сопоставимого методологического аппарата. ClearView превращает myUNO из «ещё одного агентства» в институцию, которая устанавливает правила рынка — ровно как обещает Тезис второй. Воспроизведение конкурентом требует 12–18 месяцев разработки методологии плюс accreditation плюс first-mover advantage, который уже занят. Одновременно ClearView — самостоятельный revenue pillar ($150–235K прямой выручки в Y1) и катализатор основных сделок (ускорение цикла off-plan продажи на 30–40%). Детальная методология — в `/docs/canonical/06-clearview-methodology.md`.
+## 11. Architectural invariants
+1. One Operational Reality.
+2. `myuno` is production core.
+3. Project grouping grants no operational access.
+4. Operating Space is scope, not property/finance truth.
+5. Space=WHERE; RBAC=WHAT.
+6. DB authority protects rental inventory.
+7. Successful order ≠ successful inventory reservation.
+8. Order/Booking/Payment/Ledger remain distinct.
+9. Payment confirmation ≠ Booking confirmation.
+10. `service_orders` ≠ `orders` until explicit reconciled bridge.
+11. Public uses safe projections; private uses authorized records.
+12. Privileged service-role handlers authorize first.
+13. Client IDs/totals/payment states/recipients are untrusted.
+14. Auth fails closed; cache cannot broaden auth.
+15. Persona change does not duplicate identity.
+16. CRM is not transactional truth.
+17. Financial changes are reconcilable/idempotent where required.
+18. Production migrations are forward + rollback-aware.
+19. Do not merge working specialized workflows without proven equivalence.
+20. Search existing canonical implementation before creating new domain structures.
 
-**Что не является моатом** (честная оценка). SEO-трафик — его можно купить или обогнать. Количество вертикалей само по себе — ширина без глубины не защищает. Технологический стек — всё на Supabase и Vercel воспроизводимо. Реальная защита — в операционной интеграции между всеми восемью элементами выше.
+## 12. Financial & Booking invariants
+`[check_in, check_out)`: 10→13 occupies 10,11,12; 13 may host next arrival. Avoid timezone-sensitive date-only parsing. DB overlap/inventory constraints are final authority.
 
----
+UI `paid` is not payment truth. Manual/off-platform payment requires authorized actor, trusted order/amount context, canonical reconciliation and accounting consequence. Stripe/webhooks require verified evidence/idempotency.
 
-## 5. Ignatev Group — структура бизнеса
+`ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.
 
-Ignatev Group — вертикально интегрированный оператор жилой недвижимости для русскоязычного и международного капитала в Юго-Восточной Азии. Три подразделения образуют самоусиливающийся маховик.
+**Operational forecasts, pending amounts and provisional accruals may exist, but must be explicitly labelled non-posted/provisional and must not be included in realized P&L as though they were posted ledger truth.**
 
-**Ignatev Capital** — инвестиционный консалтинг и брокеридж. Минимальный тикет $7–10M. Аудитория: HNWI-клиенты, русскоязычные инвесторы. Комиссия: 1–2% + carried interest. Целевой AUM: $300M+. Павел — единственный, кто закрывает стратегические сделки лично.
+## 13. UX Principles
+Trusted infrastructure, not noisy marketplace. Task first. One obvious primary action. Next **safe** action, not every action. Exceptions before dashboards. Progressive disclosure. Information density may be high; control density low. Mobile-first 375px. RU/EN resilient. Status not color-only. Loading/empty/error distinct. Failed data never zero/all-clear. No page-level overflow. Project Card ≠ Unit Card. Respect public/private boundaries. Admin/content tooling is production-grade. UNKNOWN remains unknown.
 
-**Ignatev Estate** — управление недвижимостью и аренда. Операционное управление — Ольга Игнатьева. Под прямым управлением: 5 кондоминиумов, ещё ~50 объектов появятся к концу 2026 года. В системе: 35 партнёрских объектов. Готовы к быстрой загрузке: ~200 партнёрских объектов. Full PM комиссия на собственных объектах: 20% от валовой ренты. Офис: Plaza Del Mar, Cherngtalay, Пхукет.
+## 14. Engineering Rules
+Small reviewable tranches. Never combine auth cutover, schema redesign, money changes and broad UX redesign.
 
-Принципиальное различие между собственными и партнёрскими объектами: партнёрские объекты физически управляются их владельцами или их операторами — myUNO обеспечивает канал продаж, стандарт клиентского опыта и выступает хостом на платформе, не неся расходов на техническое обслуживание и ремонт партнёрских объектов.
+`Audit → Design → Isolated Tests → Implement → Verify → GO/NO-GO → Next`.
 
-**myUNO Platform** — цифровая инфраструктура. Все вертикали на субдоменах `[name].myuno.app`, единый SSO. Реальная роль: квалификация лидов для Estate и Capital + самостоятельная выручка на сервисных вертикалях.
+Never edit applied migrations; use forward migrations + security-preserving rollback. Test RLS as authenticated non-owner. UI filtering is not isolation. No production business writes for QA. TypeScript strict. Restricted query keys include actor/company/scope/revision or are evicted. Test changed operational UI at 375/390/430 + desktop. Never fabricate successful transitions.
 
----
+## 15. Definition of Done
+Build/UI success is insufficient. Done requires canonical-domain correctness, server auth, explicit states, mobile/RU/EN, tests, auditability, no duplicate truth, rollback evidence and safe operational acceptance where relevant.
 
-## 6. Принцип охвата вертикалей
+If intended operators should manage rates/photos/descriptions/inventory/publication/providers/offerings/pricing, requiring developer/DB edits means it is not operationally done.
 
-Платформа охватывает все сферы взаимодействия иностранца с Пхукетом. Точный реестр вертикалей хранится в кодовой базе; ниже — принцип формирования и репрезентативные примеры.
+**P0:** money/order gate GO; verified Layantara/Condo Spaces; teams isolated + founder consolidated view; Properties/Calendar/Today/Bookings use one scope; controlled Layantara booking completes quote→checkout through inventory/payment/operations/CRM/accounting; finance reconciles.
 
-**Жизнь и быт:** медицина, школы, детские активности, доставка цветов и товаров, коворкинги, домашний персонал, ветеринария, халяльная и буддийская инфраструктура, русские магазины.
+**P1:** Agent Workspace; coherent Homes Rent/Buy; real Services Marketplace + Concierge fallback; Stay 360; Owner/Map/Notifications/Admin.
 
-**Транспорт и перемещение:** трансферы из аэропорта, fast track и VIP-встреча, аренда автомобилей и мотоциклов, яхт-чартер, экскурсии (дайвинг, Муай Тай, гольф, свадьбы).
+## 16. Current P0
+**Replaceable execution pointer; update after every accepted gate. After a gate is accepted, replace it with the next unresolved gate; do not rerun accepted work without new contrary evidence.**
 
-**Административное и юридическое:** визы всех типов (DTV, LTR, Elite, Non-B, METV), TM30, налоговое резидентство, конвертация прав, бизнес-регистрация, юридическая помощь, страхование.
+`A Final Order Mutation Security → B real Space manifest → C seed Spaces with enforcement OFF → D resolver/cache isolation → E Properties → F Calendar → G Today → H Bookings → I supervised enforcement → J Layantara E2E → K Housekeeping/Maintenance → L Identity/CRM → M Finance/P&L`.
 
-**Финансы:** обмен валюты, переводы по всем коридорам (RUB, EUR, USD, MNT, BDT, CNY → THB), открытие банковского счёта, структурирование сделок.
+Proven money/inventory bypasses block progression; unrelated broad security research does not automatically expand P0.
 
-**Недвижимость:** аренда краткосрочная и долгосрочная, новостройки (витрина и полный цикл), продажа вторичного рынка, переуступка, land plots, управление объектами, compliance, DueDiligence, рейтинг застройщиков, клубные и оптовые сделки, привлечение финансирования.
+After P0: Agent Workspace; Homes Rent/Buy; **Services Marketplace Activation** (real provider/vertical audit, remove fake fallbacks, admin editing, pricing, availability, commerce modes, provider→org mapping where required, request/booking, fulfilment, optional commercial bridge/settlement, Concierge fallback); Stay 360; Owner/Map/Notifications/Admin.
 
-**Принцип приоритизации:** бытовые вертикали создают ежедневный контакт с брендом. Юридические и финансовые — доверие. Недвижимостные — основную выручку. Пропуск любой категории создаёт разрыв в инфраструктурной логике, который пользователь немедленно чувствует.
+Stop for review after money, inventory, RLS, schema or enforcement changes.
 
----
+## 17. Explicit Non-Priorities
+No parallel PMS/CRM/finance/property/service-commerce models; no new/replacement Channel Manager architecture before PMS stability (**do not break or remove required existing integrations**); no geographic expansion before Phuket loop works; no white-label PM SaaS; no speculative AI without source data; no broad aesthetic redesign; no schema rewrite for naming purity; no public exposure of private operational data; no endless security-audit expansion after finite P0 unless a proven critical blocker exists.
 
-## 7. Четыре слоя платформы
+## 18. Evidence / No-Hallucination Rules
+Never invent specs, coordinates, availability, prices, payments, providers, roles, permissions, production state or tests. Missing stays missing. **Absence of evidence = UNKNOWN, not false.** Never turn UNKNOWN into a default to make UI complete. Target ≠ implemented. Migration file ≠ applied. Deploy ≠ working path. UI filter ≠ RLS. Green build ≠ business correctness. Synthetic test ≠ production transaction. Prefer current code/live read-only evidence over stale docs. Report conflicts. Use exact paths/migrations/SHAs/test counts for implementation claims.
 
-Каждая вертикаль принадлежит одному из четырёх слоёв. Слой определяет, как её строить, чем измерять и сколько инвестировать.
+## 19. Canonical Documentation Map
+`PROJECT.md` = constitution. `AGENTS.md` = concise execution invariants. `docs/canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md` = connected loop/convergence. `docs/canonical/OPERATING_SPACES_DESIGN.md` = Space contract. `docs/convergence/UX_FOUNDATION_AUDIT.md` = UX evidence. `docs/convergence/FINAL_ORDER_MUTATION_SECURITY.md` = order/payment evidence. Operating Spaces E1–E2.x = implementation evidence. `docs/hardening/rollback/` = security-preserving rollbacks.
 
-**Слой 1 — Привлечение.** Цель: максимальный органический охват, первый контакт с брендом. Примеры: справочник, PhuketWeather, ExchangeBot, SIMstart, AirportTransfer, доставка цветов, шопинг-гид, трансферы. Метрика: MAU, SEO-позиции, email capture. Деньгами не измеряется.
+Canonical docs describe approved architecture. Convergence/audit docs are evidence, **not permanent normative authority**; promote durable accepted rules into canonical docs. Roadmap is execution, not architecture.
 
-**Слой 2 — Доверие.** Цель: авторитет эксперта. Примеры: ContractAI, DueDiligence AI, FloodScore, TaxNav, VisaTrack, ComplianceTrack, InsureMatch, MediFind, рейтинг застройщиков, **ClearView™ Score** (публикуемый рейтинг проектов AAA–BB). Метрика: число использованных инструментов, retention, NPS. Вторичная выручка важна, но не главная цель. ClearView — особый случай: это единственный инструмент Слоя 2, за который платит **застройщик**, а не покупатель, что делает его одновременно revenue pillar и PR-активом.
+## 20. Change Governance
+**A Routine:** UI polish/tests/copy/non-semantic refactors/bug fixes preserving invariants → normal PR.
 
-**Слой 3 — Отношения.** Цель: личный контакт, lead scoring, передача горячего лида Павлу. Примеры: WhatsApp CRM, Concierge, Viewing Request, Lead Scoring AI, мандатный CRM Ignatev Capital. Метрика: лиды в работе, температура лидов, time-to-viewing, viewing-to-deal conversion. Деньги здесь готовятся, а не зарабатываются.
+**B Domain:** workflow/status/source ownership/pricing/availability/CRM/Operating Space/Marketplace behavior → design note + tests + canonical-doc update.
 
-**Слой 4 — Транзакция.** Цель: основная выручка. Все сделки с недвижимостью. Метрика: GMV, сделок в месяц, средний тикет, net commission. Все решения о приоритизации принимаются через вопрос: «Это ускоряет попадание нужного человека в Слой 4?»
+**C Critical:** money/refund, inventory reservation, ledger, auth/RLS, production schema cutover, Space enforcement, source-of-truth boundary → `Evidence → Contract → Isolated tests → Forward implementation → Security-preserving rollback → Read-only verification → GO/NO-GO → Controlled activation`.
 
----
+Passing tests is evidence, **not automatic approval**. Never start the next critical tranche automatically. Critical reports state files/migrations/functions, behavior changed, canonical logic unchanged, tests/counts, production evidence, blockers, rollback, SHA, GO/NO-GO.
 
-## 8. Дизайн-стандарт и тональность платформы
-
-Этот раздел является обязательной директивой для всех AI-ассистентов при разработке интерфейсов, написании контента и принятии UX-решений.
-
-### Идентичность платформы
-
-myUNO должна восприниматься как надёжная государственная инфраструктура с человеческим лицом. Ориентиры: GOV.UK (структура, ясность, доверие), Gosuslugi.ru (полнота охвата, сервисная логика), e-Estonia (цифровая компетентность) — но с теплотой и персональностью, которых у государственных сервисов нет. Пользователь должен чувствовать: «Здесь знают, что мне нужно. Здесь всё понятно. Здесь можно доверять.»
-
-### Тональность — обязательный стандарт
-
-**Спокойная уверенность.** Никакого маркетингового хайпа, никаких восклицательных знаков в серьёзных контекстах, никаких обещаний «лучший сервис в мире». Вместо этого — точные факты, чёткие шаги, конкретные цифры. Авторитет создаётся компетентностью, а не напором.
-
-**Точность и конкретность.** «Штраф за нарушение TM30 составляет 800–1,600 THB» вместо «нарушение может повлечь штраф». Расплывчатость разрушает доверие.
-
-**Профессиональная теплота.** Сервис обращается к пользователю как опытный, внимательный консультант — не как чиновник и не как продавец. Он признаёт, что переезд или покупка недвижимости в чужой стране — это сложно. Он не делает вид, что всё легко. Но он говорит: мы разобрались в этом за вас.
-
-**Многоязычная последовательность.** Одинаковый авторитет и одинаковое уважение на русском, английском, китайском, немецком. Ни один язык не является вторым сортом.
-
-**Запрещено:** рекламные клише («лучший», «уникальный», «революционный»), агрессивные CTA («Купи сейчас!»), панибратство в официальных контекстах, любые формулировки, снижающие восприятие серьёзности платформы.
-
-### UX-принципы
-
-**Сервисная логика, не продуктовая.** Навигация строится вокруг «Что вам нужно сделать?», а не «Посмотрите на наши продукты».
-
-**Одно очевидное следующее действие на каждом экране.** Никаких перегруженных dashboard с 15 кнопками. Один понятный следующий шаг исходя из позиции пользователя в journey.
-
-**Прозрачность статусов.** Каждый сервис имеет чёткий статус: работает / в разработке / запланировано. Пользователь всегда знает, чего ожидать.
-
-**Мобильный приоритет.** Все интерфейсы от 375px.
-
-### Снайперский принцип монетизации
-
-Каждая вертикаль имеет чёткую, простую и предсказуемую модель заработка — без расплывчатых «мы разберёмся позже». Пользователь знает точно, сколько и за что он платит. Платформа знает точно, сколько она зарабатывает с каждой транзакции. Никакого «будущего монетизируем через рекламу», никаких скрытых сборов.
-
-Практически это означает: у каждой вертикали есть одна основная модель (комиссия, подписка или фиксированный сбор), она видна пользователю с первого взаимодействия и не меняется без веской причины. Единообразие модели — это тоже часть узнаваемого опыта myUNO.
-
-### Узнаваемый опыт клиента myUNO
-
-Каждая точка контакта — от первого просмотра объекта до получения ежемесячного отчёта — должна быть unmistakably myUNO. Одинаковое качество коммуникации, одинаковые стандарты документации, одинаковая скорость ответа. Как Marriott: вы можете не знать, в каком городе отель, но вы мгновенно узнаёте бренд. Это достигается стандартами, а не настроением отдельных сотрудников.
-
-### UX для наполнения платформы
-
-Задача для AI-ассистентов при работе над admin-интерфейсами: инструменты управления контентом должны быть не менее продуманными, чем пользовательский фронтенд. Владельцы партнёрских объектов, менеджеры объектов (Ольга и команда), редакторы справочника — все они должны иметь возможность добавлять, обновлять и публиковать контент без необходимости обращаться к разработчику. Шаблонные формы для загрузки объектов, интуитивный редактор статей, bulk-импорт из CSV/Excel для партнёрских объектов, чёткие статусы публикации. Это не второстепенная задача — скорость наполнения платформы напрямую влияет на скорость монетизации.
-
-### Визуальный язык
-
-**Цвета:** глубокий тёмно-синий (#0A2240) как основной авторитетный цвет, тёплый оранжевый (#D96B1A) как акцент человечности, светло-серый (#F5F4F0) как нейтральный фон.
-
-**Типографика:** мультиязычная система. Для русского: Unbounded (заголовки) + Golos Text (тело). Для английского/международного: Noto Serif (заголовки) + Noto Sans (тело). JetBrains Mono для числовых данных.
-
-**Стек:** Tailwind CSS + shadcn/ui.
-
-**Запрещено в интерфейсе:** избыточные анимации, замедляющие восприятие информации; градиентные фоны в духе стартап-лендингов; фотографии без контекстной связи с Пхукетом; любые визуальные элементы, создающие ощущение «ещё одного агрегатора».
-
----
-
-## 9. Полный цикл для покупателя новостройки
-
-Это ключевое ценностное предложение для самой высокодоходной аудитории платформы. Покупатель off-plan объекта приходит не только за сделкой — у него есть цепочка тревог, которую он несёт с момента подписания SPA до первого арендного платежа. myUNO закрывает эту цепочку целиком.
-
-**Этап 1: Выбор и решение.** Витрина новостроек на уровне Dom.rf и CIAN: детальные карточки проектов с планировками, визуализациями, таблицей платёжных вех, данными о застройщике и его track record. FloodScore, DueDiligence AI и **ClearView™ Score (AAA–BB)** как стандартная часть карточки проекта, а не отдельная платная опция. Рейтинг ClearView даёт покупателю моментальный институциональный якорь доверия ещё до углублённой DD. Сравнительный калькулятор доходности с реальными рыночными данными.
-
-**Этап 2: Сделка.** ContractAI проверяет SPA до подписания. FinanceGuide рассчитывает FET и объясняет структуру платежей. Игнатьев Capital сопровождает при тикетах $500K+. Партнёрские юристы — для стандартных сделок.
-
-**Этап 3: Контроль строительства.** Регулярные фотоотчёты с объекта по расписанию. AI-анализ прогресса строительства (Claude Vision + отчёты застройщика). Уведомления по платёжным вехам. Пользователь видит состояние своего объекта в реальном времени из любой точки мира.
-
-**Этап 4: Приёмка и сопровождение.** Snagging checklist — стандартизированный по международным нормам. Команда myUNO присутствует при приёмке или проводит её самостоятельно по доверенности. Все дефекты фиксируются, передаются застройщику, статус устранения отслеживается в системе.
-
-**Этап 5: Меблировка и подготовка.** Пакеты меблировки от партнёрских поставщиков с фиксированными ценами — никаких неприятных сюрпризов. Вариант «под ключ»: покупатель утверждает пакет онлайн, команда реализует.
-
-**Этап 6: Запуск в аренду.** Получение STR-лицензии (ComplianceTrack). Создание листинга на платформе myUNO как хоста. Профессиональная фотосессия. Установка цены на основе рыночных данных и AI-рекомендации.
-
-**Этап 7: Управление и доход.** Ежемесячные финансовые отчёты Owner Portal. Выплаты в удобной валюте с учётом юрисдикционных ограничений. Обслуживание объекта силами команды Ольги Игнатьевой. Уведомления по каждому бронированию. Годовой ROI-отчёт.
-
-**Этап 8: Опциональный exit.** При готовности к продаже — оценка объекта, листинг в системе, сопровождение сделки. Вся история объекта в myUNO становится аргументом при продаже: «верифицированная история управления и дохода».
-
-**Формулировка для маркетинга.** «Вы покупаете объект один раз. myUNO работает с ним всегда.» Это не слоган — это операционная реальность, которую нужно доказывать каждым этапом.
-
----
-
-## 10. Справочник — стратегический актив первого порядка
-
-Справочник — не help-секция. Это система раннего захвата клиента в длинном (4–9 месяцев) цикле принятия решения о покупке недвижимости и живое подтверждение статуса платформы как камертона рынка.
-
-**Пять принципов:** структура по жизненным ситуациям (не по категориям); каждая статья заканчивается одним конкретным следующим шагом; авторитетность через омбудсмен-статус; AI-генерация + ручная верификация; мультиязычный паритет (RU, EN приоритет, CN и DE для ключевых статей).
-
-**Пять разделов и их связь с транзакцией:**
-
-*Жизнь на Пхукете* — безопасность, климат, медицина, стоимость жизни, история и культура. Включая практичные запросы: «опасны ли змеи», «какие акулы на Пхукете», «как быть с путешествием с питомцем». Ведёт в аренду и переезд.
-
-*Право и собственность* — freehold vs leasehold, иностранная квота, SPA, переуступка, земля, клубные сделки, POA, рейтинг застройщиков. Самый горячий инвесторский трафик. Ведёт во все Слой-4 инструменты.
-
-*Финансы и банки* — FET, открытие счёта, переводы по всем ключевым коридорам, DTA по всем юрисдикциям, налоговое резидентство. Ведёт в FinanceGuide и структурирование сделки.
-
-*Инвестиции* — рейтинг застройщиков, клубные сделки, оптовые закупки, упаковка проектов, реальная доходность аренды. Самый высокий lead value. Ведёт в Ignatev Capital.
-
-*Ежедневная жизнь* — TM30, конвертация прав, школы, педиатры, коворкинги, домашний персонал, ввоз питомцев, халяль, особенности путешествий с животными. Ведёт в долгосрочную аренду.
-
----
-
-## 11. Lead Intelligence — квалификация инвестора
-
-Платформа — единая система наблюдения за готовностью пользователя к сделке. Суpabase собирает события по всем доменам (единый SSO — единый user_id). Claude Haiku присваивает score 0–100. При score 80+ — WhatsApp-алерт Павлу с профилем лида.
-
-| Действие пользователя | Вес | Что означает |
-|---|---|---|
-| Прочитал 3+ статьи о покупке | +15 | Горизонт 3–6 мес |
-| Загрузил договор в ContractAI | +20 | Активный участник переговоров |
-| Запустил DueDiligence на проект | +30 | Горизонт 1–3 мес |
-| Задал вопрос консьержу о FET или структуре | +25 | Думает о конкретной сделке |
-| Просмотрел один объект 3+ раза | +35 | Немедленный алерт Павлу |
-| Использовал инвестиционный калькулятор | +20 | Считает доходность реального объекта |
-| Просмотрел ClearView-отчёт по проекту | +35 | Сравнивает институциональные рейтинги |
-| Купил ClearView Full Report ฿4,900 | +50 | Финальная стадия DD, алерт Павлу |
-
-Стадии: Cold (0–25) → Warm (26–60) → Hot (61–85) → Ready (86–100, алерт).
-
----
-
-## 12. Сделки с недвижимостью — основная выручка
-
-| # | Тип сделки | Тикет | Комиссия | Цикл | Исполнитель |
-|---|---|---|---|---|---|
-| 01 | STR-аренда | ฿3,500–45,000/ночь | 15–22% | Мгновенно | Система |
-| 02 | Долгосрочная аренда + PM | ฿25,000–200,000/мес | 20% ongoing | 1–4 нед | Ольга + система |
-| 03 | Переуступка прав | ฿2M–20M | 2–3% или fix ฿50–100K | 2–8 нед | Павел |
-| 04 | Продажа вторичный рынок | ฿3M–80M | 3% buy-side | 1–3 мес | Павел |
-| 05 | Продажа off-plan | ฿3M–30M/юнит | 5–10% от девелопера | 45–90 дней | Павел |
-| 06 | Рейтингование застройщиков | — | ฿2,499/мес (агентства) | Подписка | Автоматически |
-| 07 | Продажа земли | ฿10M–500M+ | 2–4% + success fee | 2–6 мес | Павел |
-| 08 | Клубные сделки | $500K–$10M+ | 1–2% + carry | 3–9 мес | Павел + Capital |
-| 09 | Оптовые закупки юнитов | $1M–$20M | 3–5% + margin | 2–6 мес | Павел + Capital |
-| 10 | Упаковка проектов + финансирование | $5M–$100M | 1.5–3% + success fee | 6–18 мес | Ignatev Capital |
-| 11 | ClearView Developer Assessment | ฿350K–600K/проект | Фикс единоразово | 3–4 нед | Analyst + Павел peer review |
-| 12 | ClearView Investor Report | ฿2,900–4,900/отчёт | Фикс микротранзакция | Мгновенно | Система |
-| 13 | ClearView Quarterly Monitoring | ฿15K/квартал/проект | Retainer | Ongoing | Analyst |
-
----
-
-## 13. Аудитории
-
-Ниже — полный список персонажей с добавленными аудиториями. Корректное позиционирование каждого критично для правильных продуктовых и контентных решений.
-
-**Важно:** монголы, бангладешцы и европейцы на Пхукете — это в первую очередь состоятельные предприниматели, инвесторы, туристы верхнего сегмента и экспортёры капитала.
-
-| Персонаж | Охват | Lead value | Ключевой инсайт |
-|---|---|---|---|
-| 🇷🇺 Русскоязычный турист | 37% | Низкий индивид., высокий объёмно | Первый контакт строит многолетнюю лояльность |
-| 🇨🇳 Китайский турист и инвестор | 8% | Очень высокий · не используется | 25% потока, WeChat-экосистема, отдельный GTM |
-| 🇩🇪 Европейский резидент/инвестор | 44% | Высокий · долгосрочный | Серийный покупатель 2–3 актива, требует точности |
-| 💻 Digital Nomad | 55% | Средний · растёт | DTV-волна, TM30 и коворкинги — главные боли |
-| 🏡 Новый русскоязычный экспат | 63% | Очень высокий | Кто берёт за руку в первые 90 дней — получает клиента навсегда |
-| 👨‍👩‍👧 Семья с детьми | 33% | Высокий · не раскрыт | Самый лояльный сегмент при правильном обслуживании |
-| 🇲🇳 Монгольский инвестор | 41% | Высокий · недооценён | Капитал из горнодобывающей отрасли, RU как второй язык |
-| 🇧🇩 Бангладешская бизнес-аудитория | 38% | Высокий · не раскрыт | Экспорт капитала, исламские финансы — незанятая ниша |
-| 📊 Пассивный инвестор | 58% | Средний · стабильный | Удалённое управление, POA, вывод ренты |
-| 🏦 Активный HNW инвестор | 67% | $20–200K / сделка | DueDiligence + FloodScore — флагманы без аналогов |
-| 🏨 STR / PM оператор | 72% | Стабильный SaaS MRR | AI Guest Messaging — критический пробел vs Hostaway |
-| 🏗️ Застройщик off-plan проектов | 100% | $10–17K assessment + $430/квартал | Новая B2B-аудитория через ClearView — превращает конкурентов в клиентов |
-
-**Дополнительные аудитории, которые платформа должна адресовать явно.**
-
-*Путешественники с животными* 🐾 — значимый и лояльный сегмент. Главные боли: ввоз питомца в Таиланд (карантинные требования, чипы, ветеринарные сертификаты), поиск pet-friendly жилья (фильтр на платформе аренды), ветеринарные клиники с англо- и русскоязычным персоналом, выгул и зоосервисы. Отдельный раздел справочника «Путешествие с питомцем» и фильтр pet-friendly на всех объектах аренды — это не опциональная функция, а конкурентное преимущество.
-
-*Медицинские туристы* 🏥 — приезжают целенаправленно для лечения или процедур (стоматология, пластическая хирургия, проверка здоровья). Пхукет имеет несколько международных больниц уровня Bangkok Hospital и Vachira. Потребности: навигация по клиникам с ценами, помощь с визой (TR с медицинской целью), краткосрочное жильё на период реабилитации, русскоязычный медицинский сопровождающий.
-
-*Снежные птицы (Snowbirds)* ❄️ — сезонные мигранты, 3–6 месяцев в год, преимущественно русские, немецкие и скандинавские пенсионеры или pre-retirees с удалённым доходом. Нет необходимости переезжать навсегда, но нужен стабильный привычный быт. Потребности: надёжное среднесрочное жильё с понятными контрактами, медицинская страховка на сезон, русскоязычная/немецкоязычная врачебная помощь, сообщество «таких же».
-
-*Спортивные и wellness-туристы* 🥊 — приезжают для занятий Муай Тай, дайвинга, гольфа, йоги. Часто возвращаются многократно и со временем переходят в категорию сезонных арендаторов или покупателей. Высокая retention через специализированный контент и сервисные партнёрства.
-
-*Свадебные пары* 💍 — Пхукет является одной из мировых столиц свадебного туризма. Пара, которая провела свадьбу на вилле через myUNO, — эмоционально привязанный к бренду клиент с высоким потенциалом возврата в качестве арендатора или покупателя.
-
-*Яхтенное сообщество* ⛵ — Пхукет является крупнейшим яхтенным хабом ЮВА (Royal Phuket Marina, Yacht Haven). Яхтсмены и чартерные клиенты — состоятельная, мобильная аудитория с интересом к прибрежной недвижимости и долгосрочному базированию.
-
----
-
-## 14. Технологический стек
-
-Все архитектурные решения приняты. Изменения только с явным подтверждением Павла.
-
-| Категория | Инструмент | Примечание |
-|---|---|---|
-| IDE / Dev | Cursor + GitHub monorepo | Primary |
-| Frontend deploy | Vercel, host-based routing | Один repo, все субдомены |
-| Backend | Supabase: PostgreSQL + Auth + Storage + Edge Functions (Deno 2.0) + pgvector | Только public schema. v2 schema не существует |
-| AI reasoning | Claude Sonnet 4 | DueDiligence, ClearView scoring draft, архитектура, сложные задачи |
-| AI high-freq | Claude Haiku | Lead scoring, тесты, дешёвые операции |
-| AI vision | Gemini Flash | OCR, анализ фото объектов |
-| Web scraping | Firecrawl | Все источники данных |
-| DNS / CDN | Cloudflare (`myuno.app`) | DNS + защита |
-| Payments | Stripe + Stripe Connect | Все платежи, DepositSafe escrow |
-| Notifications | WhatsApp Cloud API + Telegram Bot (grammy) + Resend | Основные каналы |
-| Analytics | PostHog + Sentry + Better Uptime | |
-| UI | Tailwind CSS + shadcn/ui | |
-| Fonts (RU) | Unbounded + Golos Text | Кириллица-приоритет |
-| Fonts (EN/INT) | Noto Serif + Noto Sans | Мультиязычность |
-| Data (числа) | JetBrains Mono | |
-
-**Правила, которые нельзя нарушать:** один Supabase public schema; единый SSO (один user_id через все субдомены); TypeScript strict, no `any`; mobile-first 375px; bilingual UI (RU/EN); error handling и loading states везде; conventional commits, English; каждый merge в main — фиксит баг, приносит деньги или снижает техдолг.
-
-**Критические баги — починить до любого нового функционала:** Stripe checkout не создаёт order в БД (приоритет 0); Bloom cart checkout не создаёт order; owner financials inconsistencies; first login role assignment edge cases; booking confirmation state edge cases.
-
----
-
-## 15. Kill / Fold / Defer
-
-**Kill:** отдельные SaaS-продукты для VisaTrack, DTVready, TaxNav → статьи и PDF справочника. PhuketWeather → модуль Hub.
-
-**Fold:** PropertySearch, DueDiligence AI, FloodScore, MarketBrief, ContractAI, DepositSafe, InvestCalc, **ClearView™ Dashboard** → Invest. ComplianceTrack, StaySync, Guest Messaging → Estate/Stay. SchoolMap, EventPass → контент Hub.
-
-**Defer:** white-label SaaS для внешних PM-компаний; расширение в Bali / Koh Samui / Pattaya / Da Nang — после Seed раунда.
-
----
-
-## 16. Пять тестов для любого решения
-
-**Тест 1 — Revenue Line.** Это приносит деньги в течение 90 дней? Нет — отложить.
-
-**Тест 2 — Funnel Proximity.** Это на customer journey турист → арендатор → покупатель → собственник? Нет — убить.
-
-**Тест 3 — Asset Leverage.** Это использует незаменимый актив (объекты Ольги, омбудсмен-статус, Capital network, отношения с Sansiri и Rhom Bho)? Нет — убить.
-
-**Тест 4 — Founder Bandwidth.** Реализуемо с текущей командой без роста burn? Нет — отложить до Seed.
-
-**Тест 5 — Narrative Coherence.** Вписывается в тезис «цифровая инфраструктура + доверенный оператор рынка» в одном предложении? Нет — убить.
-
-Правило: 5 «нет» → убить. 1 «да» → обсудить. 3+ «да» → строить.
-
----
-
-## 17. Операционная модель
-
-**Команда:** Pavel (CEO, deal closer, product, Capital), Ольга Игнатьева (управление объектами Estate), contractors on demand.
-
-**Правило времени Павла:** 60% — Invest и сделки, 25% — Estate стратегия, 10% — Capital, 5% — остальное.
-
-**Еженедельные метрики:** новые лиды в CRM, viewings проведено, deals in negotiation, bookings (count + revenue), occupancy % по собственным объектам, weekly revenue run-rate, cash balance.
-
-**Запрещено в первые 90 дней:** новые субдомены без явного обоснования; investor pitch без живых метрик; миграция схемы БД; переписывание компонентов «для красоты»; найм без revenue.
-
----
-
-## 18. Конкурентный ландшафт
-
-**Прямые конкуренты (RU-сегмент):** Exotic Property (legacy UX, нет PM-интеграции), Phuket Direct (только брокеридж), Tranio/Reginaproperty (европейский трафик, нет local ops), Telegram-агентства (низкий CAC, нет системности). Ни у одного нет полного стека: Sales + PM + AI-платформа + омбудсмен + myUNO-as-host модель.
-
-**Digital-конкуренты:** FazWaz (широкий marketplace без service layer), Airbnb/Booking (OTA без local ops), Hostaway/Guesty (глобальный SaaS без local integration). Конкурируем глубиной, языком и инфраструктурным охватом.
-
----
-
-## 19. Путь к росту
-
-**Year 1:** $800K–1M net revenue. Структура:
-- Real estate сделки (ряды 1–10): $550–650K. 20–25 сделок, avg ticket $22K (ClearView ускоряет конверсию и повышает средний чек на 10%).
-- Estate PM revenue: $120–180K.
-- **ClearView direct revenue: $143–213K.** 8–12 developer assessments ($100–170K) + 380 investor reports ($36K) + 4 monitoring subscriptions ($7K).
-
-Структура выручки: ~70% real estate и Invest слой (включая ClearView), ~30% сервисные вертикали. 10+ ClearView-certified проектов к концу Y1 — формирует baseline для Year 2.
-
-**Year 3:** $5.5–6.5M. Phuket + Bali, 120 сделок/год, 200 объектов под управлением, **40+ ClearView assessments/год ($500–700K в Stream A alone)**. ClearView становится самостоятельным revenue pillar на уровне Estate PM.
-
-**Year 5:** $30–50M. +Pattaya, +Koh Samui, +Da Nang, 600 сделок/год, 1,200 объектов, 150+ ClearView assessments/год с методологией, адаптированной под каждую дестинацию. ClearView как cross-market standard.
-
-**$1B — это AUM, не revenue.** $1B стоимости проданных и управляемых объектов к Year 7. При $1B AUM бренд стоит $100–300M (precedent: boutique real estate SEA — 2–5% AUM при продаже). ClearView как самостоятельный asset к Year 5 оценивается $20–50M отдельно (S&P Global-style data business multiples). Seed раунд (месяц 10–12): цель $1.5–3M, условие — живые метрики + 5+ paid ClearView assessments. Targets: Jungle Ventures, Wavemaker, Golden Gate Ventures, Monk's Hill, East Ventures, Openspace.
-
----
-
-*PROJECT.md · v2.3 · Апрель 2026 · Pavel Ignatev · Ignatev Group · Phuket*
-
-*Платформа, которой доверяют — не потому что она так говорит, а потому что она именно так работает.*
+**Final rule:** when speed conflicts with canonical integrity, preserve canonical truth. When documentation conflicts with evidence, preserve evidence and update documentation.

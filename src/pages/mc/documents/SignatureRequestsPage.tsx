@@ -158,13 +158,14 @@ export default function SignatureRequestsPage() {
                     </div>
                     <div className="flex gap-1">
                       <a href={item.document_url} target="_blank" rel="noopener noreferrer">
-                        <Button size="icon" variant="ghost"><ExternalLink className="w-4 h-4" /></Button>
+                        <Button size="icon" variant="ghost" aria-label={isRu ? 'Открыть документ' : 'Open document'}><ExternalLink className="w-4 h-4" /></Button>
                       </a>
                       {['draft', 'sent', 'partially_signed'].includes(item.status) && (
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => cancel.mutate({ id: item.id })}
+                          aria-label={isRu ? 'Отменить' : 'Cancel'}
                         >
                           <Ban className="w-4 h-4 text-destructive" />
                         </Button>

@@ -69,20 +69,32 @@ export function useUserContext() {
         .maybeSingle();
 
       if (error) throw error;
-      
-      // If no context exists, create default
-      if (!data) {
-        const { data: newContext, error: createError } = await supabase
-          .from('user_active_context')
-          .insert({ user_id: user.id, active_role: 'user' })
-          .select()
-          .single();
-        
-        if (createError) throw createError;
-        return newContext as UserActiveContext;
-      }
 
-      return data as UserActiveContext;
+      if (data) return data as UserActiveContext;
+
+      // No row yet. This is a READ path — never write from here: an insert
+      // races first-login role assignment and can fire from multiple mounted
+      // consumers (duplicate-insert errors / pinning the user to 'user').
+      // Return a safe in-memory default instead. The row is created lazily by
+      // switchContext()/switchMode() (idempotent upsert onConflict: 'user_id')
+      // when the user first changes context.
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('primary_role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const defaultRole = profile?.primary_role ?? 'user';
+
+      return {
+        id: `default-${user.id}`,
+        user_id: user.id,
+        active_role: defaultRole,
+        active_org_id: null,
+        mode: 'user',
+        entity_id: null,
+        updated_at: new Date().toISOString(),
+      } as UserActiveContext;
     },
     enabled: !!user?.id,
     ...CACHE_PROFILES.DYNAMIC,
@@ -228,12 +240,16 @@ export function useUserContext() {
   });
 
   // Get orgs by type - memoized
+  // Only count orgs that are actually active. A pending (is_active=false) org —
+  // e.g. a vendor application awaiting admin approval — must NOT grant access or
+  // trigger the "you're already a vendor" redirect, otherwise applicants get
+  // bounced out of onboarding into a redirect loop.
   const vendorOrgs = useMemo(
-    () => memberships?.filter(m => m.org?.org_type === 'vendor') || [],
+    () => memberships?.filter(m => m.org?.org_type === 'vendor' && m.org?.is_active === true) || [],
     [memberships]
   );
   const ownerOrgs = useMemo(
-    () => memberships?.filter(m => m.org?.org_type === 'owner') || [],
+    () => memberships?.filter(m => m.org?.org_type === 'owner' && m.org?.is_active === true) || [],
     [memberships]
   );
 
@@ -309,6 +325,7 @@ export function useUserContext() {
     
     // Available roles
     availableRoles,
+    hasMCMembership,
     hasRole,
     isOrgMember,
     

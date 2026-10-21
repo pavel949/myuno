@@ -1,11 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -197,6 +193,7 @@ async function processPlacesBatch(
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -240,7 +237,7 @@ Deno.serve(async (req) => {
     const maxBatch = batch_size || 10;
     const batchUrls = urls.slice(0, maxBatch);
 
-    console.log(`Processing ${batchUrls.length} URLs in mode=${mode} for city=${targetSlug}`);
+    console.info(`Processing ${batchUrls.length} URLs in mode=${mode} for city=${targetSlug}`);
 
     let results;
     switch (mode) {
@@ -268,7 +265,7 @@ Deno.serve(async (req) => {
     const okCount = results.filter((r) => r.status === "ok").length;
     const failCount = results.length - okCount;
 
-    console.log(`Done: ${okCount} ok, ${failCount} failed out of ${results.length}`);
+    console.info(`Done: ${okCount} ok, ${failCount} failed out of ${results.length}`);
 
     return new Response(
       JSON.stringify({

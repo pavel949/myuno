@@ -85,7 +85,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
       meta_title: p.meta_title || `${initial.name_en} — Phuket new development`,
       meta_description: p.meta_description || (initial.tagline ?? '').slice(0, 160),
       og_image_url: p.og_image_url || initial.cover_image || '',
-      social_share_text: p.social_share_text || `${initial.name_en}: ${initial.tagline ?? 'New project on Phuket'}`,
+      social_share_text: p.social_share_text || `${initial.name_en}: ${initial.tagline ?? 'New project in Phuket'}`,
     }));
   };
 
@@ -116,11 +116,11 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
           <label className="text-xs text-[hsl(var(--nb-muted))]">Публичный URL</label>
           <div className="flex gap-2">
             <Input value={url} readOnly className="font-mono text-xs bg-[hsl(var(--nb-bg))] border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text))]" />
-            <Button variant="outline" size="icon" onClick={copy} className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+            <Button variant="outline" size="icon" onClick={copy} className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]" aria-label="Копировать ссылку">
               <Copy className="w-4 h-4" />
             </Button>
             <a href={url} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="icon" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+              <Button variant="outline" size="icon" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]" aria-label="Открыть в новой вкладке">
                 <ExternalLink className="w-4 h-4" />
               </Button>
             </a>

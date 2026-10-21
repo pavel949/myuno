@@ -73,7 +73,7 @@ export default function RelocationGuidesHub() {
 
   return (
     <AppLayout>
-      <SEOHead title={title} description={description} type="article" url="https://myuno.app/relocate/guides" />
+      <SEOHead title={title} description={description} type="article" url="https://www.myuno.app/relocate/guides" />
       <div className="px-4 pb-28 pt-4 max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <BackButton fallbackPath={APP_ROUTES.RELOCATE} variant="ghost" />

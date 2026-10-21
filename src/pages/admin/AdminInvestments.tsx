@@ -241,7 +241,7 @@ export default function AdminInvestments() {
     <div className="p-6 space-y-6">
       <PageHeader
         title={isRu ? 'Инвестиционные проекты' : 'Investment Projects'}
-        subtitle={isRu ? 'Управление проектами и скорингом muUNO' : 'Manage projects and muUNO scoring'}
+        subtitle={isRu ? 'Управление проектами и скорингом myUNO' : 'Manage projects and myUNO scoring'}
         actions={
           <Button onClick={handleOpenCreate}>
             <Plus className="h-4 w-4 mr-2" />
@@ -455,16 +455,18 @@ export default function AdminInvestments() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
+                              aria-label={isRu ? 'Редактировать' : 'Edit'}
                               onClick={() => handleOpenEdit(project)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
+                              aria-label={isRu ? 'Удалить' : 'Delete'}
                               className="text-destructive hover:text-destructive"
                               onClick={() => setDeleteConfirmId(project.id)}
                             >
@@ -751,7 +753,7 @@ export default function AdminInvestments() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    muUNO Scoring™
+                    myUNO Scoring™
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">

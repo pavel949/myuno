@@ -58,9 +58,10 @@ export default function KnowledgeSectionPage() {
       <PageContainer className="pb-32">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={language === 'ru' ? 'Назад' : 'Back'}
             onClick={() => navigate('/knowledge')}
             className="shrink-0"
           >

@@ -191,16 +191,18 @@ export function NegotiationPanel({ propertyId, pricePerNight, className }: Negot
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8 text-success"
+                        className="text-success"
                         onClick={() => respondToOffer(offer.id, 'accepted')}
+                        aria-label={isRu ? 'Принять' : 'Accept'}
                       >
                         <Check className="h-4 w-4" />
                       </Button>
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8 text-destructive"
+                        className="text-destructive"
                         onClick={() => respondToOffer(offer.id, 'declined')}
+                        aria-label={isRu ? 'Отклонить' : 'Decline'}
                       >
                         <X className="h-4 w-4" />
                       </Button>

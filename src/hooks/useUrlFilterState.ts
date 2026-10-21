@@ -55,15 +55,19 @@ export function useUrlFilterState(opts: Options = {}) {
           const next = new URLSearchParams(prev);
 
           if (partial.search !== undefined) {
-            partial.search ? next.set('q', partial.search) : next.delete('q');
+            if (partial.search) next.set('q', partial.search);
+            else next.delete('q');
           }
           if (partial.category !== undefined) {
-            partial.category && partial.category !== defaultCategory
-              ? next.set('cat', partial.category)
-              : next.delete('cat');
+            if (partial.category && partial.category !== defaultCategory) {
+              next.set('cat', partial.category);
+            } else {
+              next.delete('cat');
+            }
           }
           if (partial.view !== undefined) {
-            partial.view !== defaultView ? next.set('view', partial.view) : next.delete('view');
+            if (partial.view !== defaultView) next.set('view', partial.view);
+            else next.delete('view');
           }
           if (partial.filters !== undefined) {
             // Wipe existing filter keys, then re-set from new values

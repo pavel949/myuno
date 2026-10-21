@@ -130,16 +130,16 @@ export default function Favorites() {
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-8 w-8"
                   onClick={() => setViewMode('list')}
+                  aria-label={language === 'ru' ? 'Список' : 'List view'}
                 >
                   <List className="h-4 w-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-8 w-8"
                   onClick={() => setViewMode('grid')}
+                  aria-label={language === 'ru' ? 'Сетка' : 'Grid view'}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
@@ -262,6 +262,7 @@ export default function Favorites() {
                           <div className="flex flex-col border-l border-border">
                             <button
                               onClick={() => handleRemove(item)}
+                              aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
                               className="flex-1 px-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                             >
                               <Trash2 className="h-5 w-5" />
@@ -300,7 +301,8 @@ export default function Favorites() {
                               e.stopPropagation();
                               handleRemove(item);
                             }}
-                            className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                            aria-label={language === 'ru' ? 'Удалить из избранного' : 'Remove from favorites'}
+                            className="absolute top-2 right-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-background/80 rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
                           >
                             <Heart className="w-4 h-4 fill-current" />
                           </button>

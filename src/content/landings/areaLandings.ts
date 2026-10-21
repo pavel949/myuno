@@ -15,7 +15,7 @@ import { PHUKET_AREAS, type PhuketArea } from '@/lib/config/phuketAreas';
 import { LIVE_PERSONA_SLUGS } from './personaLandings';
 import { LIVE_CLUSTER_SLUGS } from './clusterLandings';
 
-const OG_DEFAULT = 'https://myuno.app/og/default-og.jpg';
+const OG_DEFAULT = 'https://www.myuno.app/og/default-og.jpg';
 
 export interface AreaLanding {
   slug: string;
@@ -29,7 +29,7 @@ export interface AreaLanding {
     metaDescription: { ru: string; en: string };
     ogImage: string;
     canonicalPath: string;
-    hreflangAlternates: { lang: 'ru' | 'en'; href: string }[];
+    hreflangAlternates: { lang: 'ru' | 'en' | 'th' | 'zh-CN'; href: string }[];
   };
 }
 
@@ -42,16 +42,19 @@ const AREA_LINKS: Record<string, {
   personas: string[];
   clusters: string[];
 }> = {
-  'bang-tao':    { personas: ['hnw', 'families', 'ru-expats'],                 clusters: ['investment', 'settlement', 'lifestyle'] },
-  'laguna':      { personas: ['hnw', 'passive-investors'],                     clusters: ['investment', 'lifestyle'] },
-  'kamala':      { personas: ['families', 'passive-investors', 'ru-expats'],   clusters: ['settlement', 'lifestyle'] },
+  'bang-tao':    { personas: ['hnw', 'passive-investors', 'families', 'snowbirds', 'ru-expats'], clusters: ['investment', 'settlement', 'lifestyle'] },
+  'laguna':      { personas: ['hnw', 'passive-investors', 'families', 'snowbirds'], clusters: ['investment', 'lifestyle'] },
+  'kamala':      { personas: ['families', 'passive-investors', 'snowbirds', 'ru-expats'], clusters: ['settlement', 'lifestyle'] },
   'surin':       { personas: ['hnw'],                                          clusters: ['investment', 'lifestyle'] },
   'layan':       { personas: ['passive-investors', 'hnw'],                     clusters: ['investment', 'lifestyle'] },
   'nai-harn':    { personas: ['ru-expats', 'retirees', 'snowbirds'],           clusters: ['settlement', 'lifestyle'] },
   'rawai':       { personas: ['ru-expats', 'retirees', 'digital-nomads'],      clusters: ['settlement', 'lifestyle'] },
-  'cherngtalay': { personas: ['families', 'passive-investors'],                clusters: ['settlement', 'investment'] },
+  'cherngtalay': { personas: ['families', 'passive-investors', 'snowbirds'],   clusters: ['settlement', 'investment'] },
   'kata':        { personas: ['tourists', 'passive-investors'],                clusters: ['arrival', 'lifestyle'] },
   'phuket-town': { personas: ['digital-nomads', 'ru-expats'],                  clusters: ['settlement', 'arrival'] },
+  'patong':      { personas: ['passive-investors', 'snowbirds', 'families', 'tourists'], clusters: ['arrival', 'investment'] },
+  'karon':       { personas: ['families', 'tourists', 'passive-investors'],    clusters: ['arrival', 'lifestyle'] },
+  'chalong':     { personas: ['families', 'ru-expats', 'retirees'],            clusters: ['settlement', 'lifestyle'] },
 };
 
 function buildSeo(area: PhuketArea): AreaLanding['seo'] {
@@ -73,8 +76,8 @@ function buildSeo(area: PhuketArea): AreaLanding['seo'] {
     ogImage: OG_DEFAULT,
     canonicalPath: path,
     hreflangAlternates: [
-      { lang: 'ru', href: `https://myuno.app${path}?lang=ru` },
-      { lang: 'en', href: `https://myuno.app${path}?lang=en` },
+      { lang: 'ru', href: `https://www.myuno.app${path}?lang=ru` },
+      { lang: 'en', href: `https://www.myuno.app${path}?lang=en` },
     ],
   };
 }

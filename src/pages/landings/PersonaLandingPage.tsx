@@ -1,3 +1,4 @@
+import { LandingActionLink } from '@/components/landings/LandingActionLink';
 /**
  * @file PersonaLandingPage.tsx
  * @description Persona landing `/for/:persona` — premium template with per-persona
@@ -11,6 +12,7 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { AppIcon } from '@/components/ui/AppIcon';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   findPersonaLandingBySlug,
@@ -29,6 +31,8 @@ import { LandingContainer } from '@/components/landings/LandingPrimitives';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
+import { getBundleForPersona } from '@/lib/segmentation/bundles';
+import { BundleCard } from '@/components/segmentation/BundleCard';
 
 /**
  * Wave 3 — map persona slug to a Universal Lead vertical so the inline
@@ -58,7 +62,7 @@ interface PersonaLandingViewProps {
 const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
+  const t = <T,>(pair: { ru: T; en: T; th?: T }): T => (isRu ? pair.ru : language === 'th' ? pair.th ?? pair.en : pair.en);
   const theme = getPersonaTheme(landing.slug);
   const Icon = theme.icon;
 
@@ -77,6 +81,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   // "All apps for you" — pulled from the canonical app registry, filtered by
   // persona (with show-all fallback when no specific apps match).
   const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
+
+  // § 10 — ready-made service bundle for this persona (if any).
+  const bundle = useMemo(() => getBundleForPersona(landing.personaCode), [landing.personaCode]);
 
   return (
     <AppLayout>
@@ -97,7 +104,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         />
         <LandingContainer className="relative max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
           <div
-            className="mb-5 inline-flex items-center gap-2 border border-border bg-background/60 px-3 py-1.5 backdrop-blur"
+            className="mb-5 inline-flex items-center gap-2 border border-border bg-background px-3 py-1.5"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
           >
             <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
@@ -113,18 +120,18 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={wp(landing.primaryCta.href)}>
+              <LandingActionLink availability={landing.primaryCta.availability} href={wp(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="outline">
-                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
+                <LandingActionLink availability={landing.secondaryCta.availability} href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</LandingActionLink>
               </Button>
             ) : null}
           </div>
-          {landing.primaryCta.subtitle ? (
+          {landing.primaryCta.subtitle && !landing.primaryCta.availability ? (
             <p className="mt-3 text-xs text-muted-foreground">
               {t(landing.primaryCta.subtitle)}
             </p>
@@ -183,7 +190,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <ul className="grid gap-3 sm:grid-cols-2">
               {landing.services.map((service) => (
                 <li key={service.slug}>
-                  <a
+                  <LandingActionLink availability={service.availability}
                     href={wp(service.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60 hover:[box-shadow:var(--shadow-elevation-2)]"
                   >
@@ -193,17 +200,32 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-foreground">{t(service.label)}</div>
-                      {service.oneLiner ? (
+                      {service.oneLiner && !service.availability ? (
                         <div className="mt-1 text-sm text-muted-foreground">
                           {t(service.oneLiner)}
                         </div>
                       ) : null}
                     </div>
                     <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                  </a>
+                  </LandingActionLink>
                 </li>
               ))}
             </ul>
+          </section>
+        ) : null}
+
+        {/* ─── READY-MADE BUNDLE (§ 10) ──────────────────────────── */}
+        {bundle ? (
+          <section className="mb-12">
+            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+              {isRu ? 'Готовый пакет' : 'Ready-made bundle'}
+            </h2>
+            <BundleCard
+              bundle={bundle}
+              ctaHref={wp(landing.primaryCta.href)}
+              ctaAvailability={landing.primaryCta.availability}
+              accent={tokenColor(theme.color, 0.15)}
+            />
           </section>
         ) : null}
 
@@ -226,7 +248,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                     href={wp(app.route)}
                     className="group flex h-full flex-col items-start gap-1 border border-border bg-card p-3 transition-all hover:border-primary/60"
                   >
-                    <span className="text-xl" aria-hidden>{app.icon}</span>
+                    <AppIcon id={app.id} size={20} className="text-primary" />
                     <span className="text-sm font-medium text-foreground">
                       {isRu ? app.labelRu : app.labelEn}
                     </span>
@@ -388,14 +410,14 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">
-              <a href={wp(landing.primaryCta.href)}>
+              <LandingActionLink availability={landing.primaryCta.availability} href={wp(landing.primaryCta.href)}>
                 {t(landing.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
             {landing.secondaryCta ? (
               <Button asChild size="lg" variant="ghost">
-                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
+                <LandingActionLink availability={landing.secondaryCta.availability} href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</LandingActionLink>
               </Button>
             ) : null}
           </div>
@@ -403,9 +425,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       </article>
 
       {/* ─── STICKY MOBILE CTA ─────────────────────────────────── */}
-      <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
+      <div className="sticky bottom-0 z-30 border-t border-border bg-background p-3 sm:hidden">
         <Button asChild size="lg" className="w-full">
-          <a href={wp(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</a>
+          <LandingActionLink availability={landing.primaryCta.availability} href={wp(landing.primaryCta.href)}>{t(landing.primaryCta.label)}</LandingActionLink>
         </Button>
       </div>
     </AppLayout>

@@ -27,7 +27,7 @@ export const P4_DIGITAL_NOMADS: PersonaLanding = {
   services: [
     { slug: 'visa-quiz', label: { ru: 'Подбор визы (DTV / LTR / Education)', en: 'Visa picker (DTV / LTR / Education)' }, oneLiner: { ru: '4 вопроса — рекомендация и список документов.', en: '4 questions — recommendation and document checklist.' }, href: '/visa/quiz' },
     { slug: 'long-stay-condo', label: { ru: 'Long-stay condo', en: 'Long-stay condo' }, oneLiner: { ru: 'От 1 месяца, fiber 200 Mbps, кухня, бассейн.', en: 'From 1 month, 200 Mbps fibre, kitchen, pool.' }, href: '/property?staytype=long' },
-    { slug: 'coworking-map', label: { ru: 'Карта коворкингов', en: 'Co-working map' }, oneLiner: { ru: 'KoHub, Garage, Hatch — цены, скорость, день-пасс.', en: 'KoHub, Garage, Hatch — prices, speed, day passes.' }, href: '/services/coworking' },
+    { slug: 'coworking-map', label: { ru: 'Карта коворкингов', en: 'Co-working map' }, oneLiner: { ru: 'KoHub, Garage, Hatch — цены, скорость, день-пасс.', en: 'KoHub, Garage, Hatch — prices, speed, day passes.' }, href: '/services/coworking', availability: 'unavailable' },
     { slug: 'nomad-guide', label: { ru: 'Nomad Guide', en: 'Nomad Guide' }, oneLiner: { ru: 'Полный гид по Пхукету для удалёнщика.', en: 'Full Phuket guide for the remote worker.' }, href: '/nomad-guide' },
   ],
   faq: [
@@ -48,12 +48,12 @@ export const P4_DIGITAL_NOMADS: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пхукет для digital nomad: DTV, condo, коворкинг — myUNO', en: 'Phuket for digital nomads: DTV, condo, co-working — myUNO' },
-    metaDescription: { ru: 'DTV-виза на 5 лет, long-stay condo с fiber-интернетом, карта коворкингов и комьюнити удалёнщиков на Пхукете.', en: 'DTV 5-year visa, long-stay condos with fibre internet, co-working map and remote-worker community on Phuket.' },
+    metaDescription: { ru: 'DTV-виза на 5 лет, long-stay condo с fiber-интернетом, карта коворкингов и комьюнити удалёнщиков на Пхукете.', en: 'DTV 5-year visa, long-stay condos with fibre internet, co-working map and remote-worker community in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/digital-nomads',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/digital-nomads?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/digital-nomads?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/digital-nomads?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/digital-nomads?lang=en' },
     ],
   },
 };

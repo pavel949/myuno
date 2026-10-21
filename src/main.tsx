@@ -1,9 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import * as Sentry from "@sentry/react";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
 import App from "./App.tsx";
+import { requestUpdateCheck } from "./lib/appVersion";
+import { installFetchRecoveryPrompt } from "./lib/pwaRecovery";
 
 function renderBootstrapError(message: string) {
   const root = document.getElementById("root");
@@ -34,25 +35,53 @@ function renderBootstrapError(message: string) {
   root.replaceChildren(outer);
 }
 
-// Initialize Sentry for production error monitoring
+// Lazy-initialize Sentry AFTER first paint to keep ~250KB out of the critical path.
+// In DEV we skip entirely. In PROD we wait for `load` + idle so LCP isn't blocked.
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
-    ],
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
-    replaysSessionSampleRate: 0.01,
-    replaysOnErrorSampleRate: 1.0,
-    beforeSend(event) {
-      if (import.meta.env.DEV) return null;
-      return event;
-    },
-  });
+if (sentryDsn && import.meta.env.PROD && typeof window !== "undefined") {
+  const initSentry = () => {
+    import("@sentry/react").then((Sentry) => {
+      Sentry.init({
+        dsn: sentryDsn,
+        environment: import.meta.env.MODE,
+        release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
+        integrations: [
+          Sentry.browserTracingIntegration(),
+          // PII protection: this app renders passport/visa/bank/payment data.
+          // Mask ALL text and block ALL media in session replays so those never
+          // leave the browser. Do NOT set these to false.
+          Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
+        ],
+        tracesSampleRate: 0.1,
+        replaysSessionSampleRate: 0.01,
+        replaysOnErrorSampleRate: 1.0,
+        // Defence-in-depth scrubber: strip common PII from the request URL/query
+        // and known sensitive fields before any event is sent to Sentry.
+        beforeSend(event) {
+          try {
+            if (event.request?.url) {
+              event.request.url = event.request.url.replace(/([?&](email|phone|token|access_token|session_id)=)[^&]+/gi, "$1[redacted]");
+            }
+            if (event.user) {
+              delete event.user.email;
+              delete event.user.ip_address;
+            }
+          } catch { /* never let scrubbing break error reporting */ }
+          return event;
+        },
+      });
+    }).catch(() => { /* Sentry is non-critical — silent fail */ });
+  };
+  const schedule = () => {
+    if ("requestIdleCallback" in window) {
+      (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void })
+        .requestIdleCallback(initSentry, { timeout: 3000 });
+    } else {
+      setTimeout(initSentry, 2000);
+    }
+  };
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
 }
 
 // Supabase URL/key are public (anon). Hardcoded fallback ensures the app boots
@@ -61,11 +90,14 @@ if (sentryDsn) {
 // VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY through the platform.
 reportWebVitals(undefined, { debug: import.meta.env.DEV });
 
-// ── Service Worker cleanup on non-production hosts ──
-// Only myuno.app / www.myuno.app should keep a registered SW. On preview,
-// sandbox, localhost, or any iframe we proactively unregister stale SWs
-// (left by previous PWA builds) and clear their caches. This eliminates
-// the recurring "Failed to update a ServiceWorker ... Not found" errors.
+// ── Service Worker: register on production, clean up everywhere else ──
+// Only myuno.app / www.myuno.app (and the Capacitor WebView, which loads them)
+// should run a SW. There we register the auto-updating Workbox worker so the
+// app is installable in one tap and refreshes itself across deploys without a
+// reinstall. On preview, sandbox, localhost, or any iframe we proactively
+// unregister stale SWs (left by previous PWA builds) and clear their caches —
+// this eliminates the recurring "Failed to update a ServiceWorker ... Not
+// found" errors and editor reload loops.
 (() => {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
@@ -78,70 +110,51 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     isInIframe = true;
   }
 
-  if (isProductionHost && !isInIframe) return;
-
-  navigator.serviceWorker.getRegistrations().then((regs) => {
-    regs.forEach((r) => r.unregister().catch(() => {}));
-  }).catch(() => {});
-
-  if ("caches" in window) {
-    caches.keys().then((keys) => {
-      keys.forEach((k) => caches.delete(k).catch(() => {}));
+  if (!isProductionHost || isInIframe) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister().catch(() => {}));
     }).catch(() => {});
+
+    if ("caches" in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((k) => caches.delete(k).catch(() => {}));
+      }).catch(() => {});
+    }
+    return;
   }
+
+  // Production: register the auto-updating service worker. `registerType:
+  // 'autoUpdate'` bakes skipWaiting + clientsClaim into the worker, so a new
+  // build installs and activates in the background. We deliberately do NOT
+  // force a reload here — VersionWatcher / PWAUpdatePrompt own the "when to
+  // refresh" UX so users aren't yanked mid-action. The periodic update() keeps
+  // long-lived installed sessions (PWA left open for days) current.
+  import("virtual:pwa-register")
+    .then(({ registerSW }) => {
+      registerSW({
+        immediate: true,
+        // autoUpdate otherwise reloads on activation, including another tab's update.
+        onNeedReload: requestUpdateCheck,
+        onRegisteredSW(_swUrl, registration) {
+          if (!registration) return;
+          const ONE_HOUR = 60 * 60 * 1000;
+          setInterval(() => {
+            registration.update().catch(() => {});
+          }, ONE_HOUR);
+        },
+        onRegisterError() {
+          /* SW registration failure is non-fatal — the app still works online. */
+        },
+      });
+    })
+    .catch(() => {
+      /* virtual:pwa-register unavailable (e.g. dev) — non-fatal. */
+    });
 })();
 
-// ── HTTP 412 recovery (auth-bridge / preview proxy) ──
-// Lovable's preview proxy occasionally returns 412 for auth-bridge token
-// refreshes when the bundle/manifest goes stale. We can't intercept the
-// initial document 412 (React isn't mounted yet), but we CAN catch 412 on
-// runtime fetches: clear SW + caches and force a one-time hard reload so
-// the proxy hands us a fresh token. Guarded by sessionStorage to avoid
-// reload loops.
-(() => {
-  if (typeof window === "undefined" || !window.fetch) return;
-  const RELOAD_KEY = "__myuno_412_reload__";
-  const originalFetch = window.fetch.bind(window);
-
-  const recover = async () => {
-    if (sessionStorage.getItem(RELOAD_KEY)) return;
-    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-    try {
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
-      }
-      if ("caches" in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k).catch(() => {})));
-      }
-    } catch {
-      /* noop */
-    }
-    window.location.reload();
-  };
-
-  window.fetch = async (...args: Parameters<typeof fetch>) => {
-    try {
-      const res = await originalFetch(...args);
-      if (res.status === 412) {
-        const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
-        // Only react to preview-proxy / auth-bridge 412s, not API 412s
-        if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
-          void recover();
-        }
-      }
-      return res;
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  // Clear the reload guard once the app boots successfully
-  window.addEventListener("load", () => {
-    setTimeout(() => sessionStorage.removeItem(RELOAD_KEY), 5000);
-  });
-})();
+// Runtime proxy/auth-bridge 412 responses only offer an explicit recovery prompt.
+// The original response still reaches its caller; no automatic cleanup or reload.
+if (typeof window !== "undefined" && window.fetch) installFetchRecoveryPrompt();
 
 try {
   createRoot(document.getElementById("root")!).render(
