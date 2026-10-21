@@ -1,6 +1,6 @@
 // Real shared controls and compiled application CSS; no data or network adapters.
 import { build } from 'esbuild';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -30,7 +30,10 @@ if (Object.keys(result.metafile.inputs).some(file => /integrations\/supabase|@su
   throw Error('Production data module included');
 }
 await writeFile(path.join(output, 'fixture.css'), (await compileApplicationCss(root)).css);
-await writeFile(path.join(output, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
+const criticalCss = (await readFile(path.join(root, 'index.html'), 'utf8'))
+  .match(/<style id="myuno-critical-styles">([\s\S]*?)<\/style>/)?.[1];
+if (!criticalCss) throw Error('Actual bootstrap critical CSS was not found');
+await writeFile(path.join(output, 'fixture.html'), `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><style>${criticalCss}</style><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>`);
 if (!process.argv.includes('--build-only')) {
   const run = spawnSync('python3', [path.join(root, 'scripts/qa/tailwind-focus-ui.py'), output], { stdio: 'inherit' });
   process.exitCode = run.status ?? 1;

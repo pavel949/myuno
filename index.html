@@ -285,8 +285,9 @@
   <body>
     <!-- Inline critical CSS for fast FCP — canonical cream + navy.
           Primary sans = Geist; locale fallbacks (Noto Sans / Golos Text) keep working if Geist hasn't loaded. -->
-    <style>
-      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    <style id="myuno-critical-styles">
+      @layer properties,theme,base,components,utilities;
+      @layer base{*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}}
       html{-webkit-text-size-adjust:100%;font-family:'Geist','Noto Sans',system-ui,-apple-system,sans-serif}
       html[lang="ru"]{font-family:'Geist','Golos Text','Noto Sans',system-ui,sans-serif}
       body{min-height:100vh;background:#F7F5F1;color:#1C1917;-webkit-font-smoothing:antialiased}
