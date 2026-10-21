@@ -1,5 +1,5 @@
 """Real homepage controls, synthetic hooks, local CSS, no backend or external requests."""
-import asyncio, json, sys
+import asyncio, json, re, sys
 from time import monotonic
 from datetime import datetime, timezone
 from pathlib import Path
@@ -74,13 +74,25 @@ async def main():
                     await expect(dialog).to_be_visible()
                     await bounds(dialog, bottom=width < 768)
                     # Bangkok has advanced to Oct 19; old UTC civil day must be disabled.
-                    await expect(dialog.get_by_role('gridcell', name='18', exact=True)).to_be_disabled()
-                    await expect(dialog.get_by_role('gridcell', name='19', exact=True)).to_be_enabled()
-                    start = dialog.get_by_role('gridcell', name='20', exact=True)
+                    await expect(dialog.locator('[data-day="2026-10-18"] button')).to_be_disabled()
+                    await expect(dialog.locator('[data-day="2026-10-19"] button')).to_be_enabled()
+                    start = dialog.locator('[data-day="2026-10-20"] button')
                     await start.press('Enter')
-                    await expect(dialog.get_by_role('gridcell', name='20', exact=True)).to_have_attribute('aria-selected', 'true')
-                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-calendar.png'))
-                    await dialog.get_by_role('gridcell', name='25', exact=True).press('Space')
+                    await expect(dialog.locator('[data-day="2026-10-20"]')).to_have_attribute('aria-selected', 'true')
+                    selected_color = await start.evaluate('(el)=>getComputedStyle(el.parentElement).color')
+                    await expect(start).to_have_css('color', selected_color)
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-calendar.png'), animations='disabled')
+                    await dialog.locator('[data-day="2026-10-25"] button').press('Space')
+                    await expect(dialog).to_have_count(0)
+                    await expect(trigger).to_be_focused()
+                    await trigger.press('Enter')
+                    dialog = page.get_by_role('dialog')
+                    await bounds(dialog, bottom=width < 768)
+                    await expect(dialog.locator('[data-day="2026-10-20"]')).to_have_class(re.compile('day-range-start'))
+                    await expect(dialog.locator('[data-day="2026-10-22"]')).to_have_attribute('aria-selected', 'true')
+                    await expect(dialog.locator('[data-day="2026-10-25"]')).to_have_class(re.compile('day-range-end'))
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-calendar-range.png'), animations='disabled')
+                    await page.keyboard.press('Escape')
                     await expect(dialog).to_have_count(0)
                     await expect(trigger).to_be_focused()
                     await page.get_by_role('button', name='Найти жильё' if ru else 'Find a home', exact=True).click()
