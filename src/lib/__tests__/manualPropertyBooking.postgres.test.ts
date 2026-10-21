@@ -168,6 +168,35 @@ describe('checked manual unpaid property booking / real PostgreSQL',()=>{
     await create();await sql`UPDATE properties SET owner_id=${outsider} WHERE id=${room}`;
     await expect(create()).rejects.toThrow('forbidden');
   });
+  it('rechecks authority after a competing transaction releases the property lock',async()=>{
+    const locker=await sql.reserve();
+    let pending: ReturnType<typeof create> | undefined;
+    try {
+      await locker.unsafe('BEGIN');
+      await locker`UPDATE properties SET owner_id=${outsider} WHERE id=${room}`;
+      // The first authorization read sees the previously committed owner. The
+      // command must check again after waiting for this transaction's row lock.
+      pending=create();
+      void pending.catch(()=>{});
+      let waiting=false;
+      for(let attempt=0;attempt<100;attempt++) {
+        const [activity]=await sql`SELECT EXISTS(SELECT 1 FROM pg_stat_activity
+          WHERE pid<>pg_backend_pid() AND wait_event_type='Lock'
+          AND query LIKE '%SELECT public.create_manual_property_booking%') waiting`;
+        if(activity.waiting){waiting=true;break;}
+        await new Promise(resolve=>setTimeout(resolve,10));
+      }
+      expect(waiting,'command reached the competing property lock').toBe(true);
+      await locker.unsafe('COMMIT');
+      await expect(pending).rejects.toThrow('forbidden');
+      expect((await counts()).orders).toBe(0);
+      expect((await counts()).receipts).toBe(0);
+    } finally {
+      await locker.unsafe('ROLLBACK');
+      locker.release();
+      if(pending) await pending.catch(()=>{});
+    }
+  });
   it.each([{total_amount:10},{guest_name:'Changed'},{notes:'Changed'},{currency:'USD'},{check_in_time:'15:00'},{status:'pending'}])('rejects changed payload on retry: %j',async changed=>{
     await create();await expect(create(changed)).rejects.toThrow('idempotency_conflict');expect((await counts()).orders).toBe(1);
   });
@@ -225,12 +254,20 @@ describe('checked manual unpaid property booking / real PostgreSQL',()=>{
     const [hold]=await sql`SELECT status,total_amount::text,currency FROM property_bookings`;
     expect(hold).toEqual({status:'pending',total_amount:'1200',currency:'USD'});
   });
-  it('fails preflight when the accepted bridge drifts',async()=>{
+  it.each([
+    'public.trg_sync_order_to_property_booking()',
+    'public.trg_sync_order_item_to_property_booking()',
+    'public.actor_has_platform_admin()',
+    'public.actor_can_operate_property(uuid,uuid,text,text)',
+  ])('fails preflight before creating command objects when %s drifts',async signature=>{
     await sql.unsafe('DROP SCHEMA pms_commands CASCADE; DROP FUNCTION public.create_manual_property_booking(uuid,uuid,jsonb)');
-    const [original]=await sql`SELECT pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure) definition`;
+    const [original]=await sql`SELECT pg_get_functiondef(${signature}::regprocedure) definition`;
     try{
-      await sql.unsafe(original.definition.replace('BEGIN','BEGIN -- fixture drift'));
+      await sql.unsafe(original.definition.replace('AS $function$', 'AS $function$ -- fixture drift'));
       await expect(script(forward)).rejects.toThrow('manual_booking_predecessor_drift');
+      const [objects]=await sql`SELECT to_regnamespace('pms_commands') commands,
+        to_regprocedure('public.create_manual_property_booking(uuid,uuid,jsonb)') wrapper`;
+      expect(objects).toEqual({commands:null,wrapper:null});
     }finally{await sql.unsafe(original.definition);}
   });
   it('exposes an invoker wrapper, denies receipt table access and keeps rollback restrictive',async()=>{
