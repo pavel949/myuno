@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { readCheckoutReturnHint } from '@/hooks/useStripeUnifiedCheckout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,7 +33,8 @@ export default function WellnessOrderSuccess() {
   const { user, isLoading: authLoading } = useAuth();
   const actorId = user?.id;
 
-  const readKey = JSON.stringify([actorId, sessionId]);
+  const hintedOrderId = readCheckoutReturnHint(actorId, sessionId);
+  const readKey = JSON.stringify([actorId, sessionId, hintedOrderId]);
   const [retry, setRetry] = useState(0);
   const [snapshot, setSnapshot] = useState<{ key: string; phase: ReadPhase; row: OrderRow | null }>(
     { key: '', phase: 'loading', row: null },
@@ -60,10 +62,10 @@ export default function WellnessOrderSuccess() {
           controller.abort();
         }, 10000);
         const query = supabase.from('orders')
-          .select('id, order_number, status, total_amount, currency, metadata, created_at, payment_intents!inner(provider_ref)')
+          .select('id, order_number, status, total_amount, currency, metadata, created_at')
           .eq('customer_user_id', actorId)
           .in('order_type', ['beauty', 'fitness', 'medical'])
-          .eq('payment_intents.provider_ref', sessionId!);
+          .eq('id', hintedOrderId!);
         const { data, error } = await query.abortSignal(controller.signal).maybeSingle();
         clearTimeout(deadline);
         if (stopped) return;
@@ -83,10 +85,10 @@ export default function WellnessOrderSuccess() {
     };
     if (authLoading) { /* wait for an actor before querying */ }
     else if (!actorId) publish('signed_out');
-    else if (!sessionId) publish('missing');
+    else if (!sessionId || !hintedOrderId) publish('missing');
     else void poll();
     return () => { stopped = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
-  }, [actorId, authLoading, sessionId, readKey, retry]);
+  }, [actorId, authLoading, sessionId, hintedOrderId, readKey, retry]);
 
   const confirmed = !!order && ['confirmed', 'in_progress', 'completed'].includes(order.status ?? '');
   const pending = !!order && ['draft', 'pending', 'pending_advance', 'awaiting_client_payment', 'pending_deposit'].includes(order.status ?? '');

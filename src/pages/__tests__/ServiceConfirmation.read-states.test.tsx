@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ServiceOrderSuccess from '../services/ServiceOrderSuccess';
 import WellnessOrderSuccess from '../wellness/WellnessOrderSuccess';
+import { rememberCheckoutReturnHint } from '@/hooks/useStripeUnifiedCheckout';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 
 const state = vi.hoisted(() => ({ user: { id: 'actor-a' } as { id: string } | null, authLoading: false, language: 'en', read: vi.fn(), filters: [] as unknown[][], signals: [] as AbortSignal[] }));
@@ -28,7 +29,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: str
 const row = (status = 'confirmed', number = 'ORDER-A') => ({ id: 'order-a', order_number: number, status, total_amount: 1200, currency: 'THB', metadata: { vertical: 'beauty' }, start_at: null });
 const flush = () => act(async () => { await Promise.resolve(); });
 const show = (Page: React.ComponentType, search = '?session_id=cs_synthetic') => render(<MemoryRouter initialEntries={[`/success${search}`]}><Page /></MemoryRouter>);
-beforeEach(() => { vi.useFakeTimers(); state.user = { id: 'actor-a' }; state.authLoading = false; state.language = 'en'; state.read.mockReset().mockResolvedValue({ data: row(), error: null }); state.filters = []; state.signals = []; });
+beforeEach(() => { vi.useFakeTimers(); state.user = { id: 'actor-a' }; state.authLoading = false; state.language = 'en'; state.read.mockReset().mockResolvedValue({ data: row(), error: null }); state.filters = []; state.signals = []; window.sessionStorage.clear(); rememberCheckoutReturnHint('actor-a', { sessionId: 'cs_synthetic', orderId: 'order-a' }); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 for (const [name, Page] of [['service', ServiceOrderSuccess], ['wellness', WellnessOrderSuccess]] as const) {
@@ -41,7 +42,8 @@ for (const [name, Page] of [['service', ServiceOrderSuccess], ['wellness', Welln
       expect(state.filters).toContainEqual(['eq', 'customer_user_id', 'actor-a']);
       expect(state.filters.filter(filter => filter[0] === 'select').every(filter => !String(filter[1]).includes('*'))).toBe(true);
       if (name === 'wellness') {
-        expect(state.filters).toContainEqual(['eq', 'payment_intents.provider_ref', 'cs_synthetic']);
+        expect(state.filters).toContainEqual(['eq', 'id', 'order-a']);
+        expect(state.filters.some(filter => filter[0] === 'select' && String(filter[1]).includes('payment_intents'))).toBe(false);
         expect(state.filters).toContainEqual(['in', 'order_type', ['beauty', 'fitness', 'medical']]);
         expect(state.filters).not.toContainEqual(['eq', 'stripe_session_id', 'cs_synthetic']);
       }
@@ -112,6 +114,7 @@ for (const [name, Page] of [['service', ServiceOrderSuccess], ['wellness', Welln
       state.read.mockReturnValueOnce(new Promise(value => { resolve = value; })).mockResolvedValue({ data: row('confirmed', 'NEW-ACTOR'), error: null });
       const view = show(Page); await flush();
       state.user = { id: 'actor-b' };
+      if (name === 'wellness') rememberCheckoutReturnHint('actor-b', { sessionId: 'cs_synthetic', orderId: 'order-b' });
       view.rerender(<MemoryRouter initialEntries={['/success?session_id=cs_synthetic']}><Page /></MemoryRouter>); await flush();
       expect(state.signals[0].aborted).toBe(true);
       expect(state.filters).toContainEqual(['eq', 'customer_user_id', 'actor-b']);
@@ -132,6 +135,35 @@ for (const [name, Page] of [['service', ServiceOrderSuccess], ['wellness', Welln
     });
   });
 }
+it.each(['missing', 'wrong-actor', 'wrong-session', 'expired', 'storage-error'])('wellness %s navigation hint never broadens an order read', async variant => {
+  window.sessionStorage.clear();
+  if (variant !== 'missing') rememberCheckoutReturnHint(variant === 'wrong-actor' ? 'other-actor' : 'actor-a', {
+    sessionId: variant === 'wrong-session' ? 'cs_other' : 'cs_synthetic', orderId: 'untrusted-order',
+  }, variant === 'expired' ? Date.now() - 31 * 60 * 1000 : Date.now());
+  const denied = variant === 'storage-error' ? vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('storage denied'); }) : undefined;
+  try {
+    show(WellnessOrderSuccess); await flush();
+    expect(state.read).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Order status not verified.' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'My orders' })).toBeVisible();
+  } finally { denied?.mockRestore(); }
+});
+it('wellness continues actor-scoped ID reads after webhook replaces cs_* with pi_*', async () => {
+  // provider_ref is deliberately absent: its lifecycle does not identify the
+  // return URL after webhook confirmation. The browser hint is only a selector.
+  state.read.mockResolvedValueOnce({ data: row('pending'), error: null }).mockResolvedValue({ data: row('confirmed'), error: null });
+  show(WellnessOrderSuccess); await flush();
+  expect(screen.getByRole('heading', { name: 'Order confirmation pending.' })).toBeVisible();
+  await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+  expect(screen.getByRole('heading', { name: 'Order confirmed.' })).toBeVisible();
+  expect(state.filters.filter(filter => filter[0] === 'eq' && filter[1] === 'id')).toEqual([
+    ['eq', 'id', 'order-a'], ['eq', 'id', 'order-a'],
+  ]);
+  expect(state.filters.filter(filter => filter[0] === 'eq' && filter[1] === 'customer_user_id')).toEqual([
+    ['eq', 'customer_user_id', 'actor-a'], ['eq', 'customer_user_id', 'actor-a'],
+  ]);
+  expect(state.filters.some(filter => String(filter[1]).includes('provider_ref'))).toBe(false);
+});
 it('does not invent a wellness category or currency when the persisted row omits them', async () => {
   state.read.mockResolvedValue({ data: { ...row(), metadata: null, currency: null, total_amount: null }, error: null });
   show(WellnessOrderSuccess); await flush();
