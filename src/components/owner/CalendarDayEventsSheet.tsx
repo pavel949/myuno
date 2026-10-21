@@ -57,7 +57,7 @@ export function CalendarDayEventsSheet({
 
   const actionButtons = (
     <div className="grid grid-cols-3 gap-2 w-full">
-      {propertyId && <Button variant="outline" size="sm" asChild><Link to={`/mc/rates?property=${propertyId}&view=calendar&date=${civilDateKey(date)}`}>{isRu ? 'Изменить цену' : 'Edit price'}</Link></Button>}
+      {propertyId && <Button variant="outline" size="sm" asChild><Link to={`/mc/rates?property=${propertyId}&view=calendar&date=${civilDateKey(date)}&returnTo=${encodeURIComponent(`/mc/calendar?property=${propertyId}&date=${civilDateKey(date)}`)}`}>{isRu ? 'Изменить цену' : 'Edit price'}</Link></Button>}
       <Button variant="outline" size="sm" className="gap-1.5"
         onClick={() => { onOpenChange(false); onAddTask(); }}>
         <Plus className="h-4 w-4" />{isRu ? 'Задача' : 'Task'}

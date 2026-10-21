@@ -36,9 +36,11 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
   const end = civilDateKey(addDays(parseCivilDate(start), 42));
   const safeFrom = toBangkokDateKey(from) || start;
   const safeThrough = toBangkokDateKey(through) || end;
-  const rangeFrom = safeFrom < start ? safeFrom : start;
-  const rangeEnd = civilDateKey(addDays(parseCivilDate(safeThrough > end ? safeThrough : end), 1));
-  const rows = useCalendarPrices(property.property_id, category || null, rangeFrom, rangeEnd);
+  // Viewport and selection are independent: browsing future months must not
+  // turn a one-night edit into an unbounded multi-year read.
+  const selectionEnd = civilDateKey(addDays(parseCivilDate(safeThrough >= safeFrom ? safeThrough : safeFrom), 1));
+  const rows = useCalendarPrices(property.property_id, category || null, safeFrom, selectionEnd);
+  const visibleRows = useCalendarPrices(property.property_id, category || null, start, end);
 
   async function save() {
     setSaving(true);
@@ -71,15 +73,15 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
     </select></label>
     {categories.isError && <p role="alert">{t('Categories could not be loaded. Reload the page.', 'Не удалось загрузить категории. Обновите страницу.')}</p>}
     <div className="flex items-center justify-between"><Button variant="outline" aria-label={t('Previous month', 'Предыдущий месяц')} onClick={() => setMonth(addMonths(month, -1))}>←</Button><h3 className="font-medium">{format(month, 'LLLL yyyy', {locale: language === 'ru' ? ru : enUS})}</h3><Button variant="outline" aria-label={t('Next month', 'Следующий месяц')} onClick={() => setMonth(addMonths(month, 1))}>→</Button></div>
-    {rows.isError ? <p role="alert">{t('Prices unavailable. Try reloading.', 'Не удалось загрузить цены. Повторите загрузку.')} <Button variant="outline" onClick={() => rows.refetch()}>{t('Reload', 'Обновить')}</Button></p> : <>
+    {visibleRows.isError ? <p role="alert">{t('Prices unavailable. Try reloading.', 'Не удалось загрузить цены. Повторите загрузку.')} <Button variant="outline" onClick={() => visibleRows.refetch()}>{t('Reload', 'Обновить')}</Button></p> : <>
       <div className="grid grid-cols-7 gap-1">
         {Array.from({length: 7}, (_, i) => <div key={i} className="text-center text-xs text-muted-foreground">{format(addDays(parseCivilDate(start), i), 'EEEEEE', {locale: language === 'ru' ? ru : enUS})}</div>)}
         {Array.from({length: 42}, (_, i) => {
           const date = civilDateKey(addDays(parseCivilDate(start), i));
-          const row = rows.data?.find(r => r.date === date);
+          const row = visibleRows.data?.find(r => r.date === date);
           const selected = date >= from && date <= through;
           const occupied = !category && (stays.data?.unifiedDayMeta.has(date) || row?.status === 'booked' || row?.status === 'blocked');
-          return <button key={date} type="button" disabled={saving || rows.isLoading} aria-pressed={selected} aria-label={`${date} ${row?.price_override ?? t('Inherited rate', 'По тарифу')}`} onClick={event => {
+          return <button key={date} type="button" disabled={saving || visibleRows.isLoading} aria-pressed={selected} aria-label={`${date} ${row?.price_override ?? t('Inherited rate', 'По тарифу')}`} onClick={event => {
             if (event.shiftKey && date >= from) setThrough(date); else { setFrom(date); setThrough(date); }
           }} className={`min-h-20 border p-1 text-left transition-colors ${selected ? 'border-primary bg-primary/10' : 'hover:bg-muted'} ${date.slice(0,7) !== civilDateKey(month).slice(0,7) ? 'opacity-50' : ''}`}>
             <span className="block text-sm">{Number(date.slice(-2))}</span><span className="block text-[10px] sm:text-xs break-all">{row?.price_override != null ? new Intl.NumberFormat(language).format(row.price_override) : t('Rate', 'Тариф')}</span>{occupied && <span className="block text-[9px] whitespace-nowrap text-muted-foreground">{t('Occupied', 'Занято')}</span>}
@@ -89,10 +91,11 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       <p className="text-xs text-muted-foreground">{t('“Rate” inherits base and seasonal pricing. Numbers are explicit nightly overrides, before discounts. Shift-click extends selection.', '«Тариф» — базовая или сезонная цена. Числа — индивидуальная цена за ночь до скидок. Shift + клик расширяет выделение.')}</p>
     </>}
     <div className="grid gap-3 sm:grid-cols-3">
-      <label htmlFor="calendar-price-from" className="text-sm space-y-2"><span>{t('From', 'С даты')}</span><Input id="calendar-price-from" type="date" value={from} disabled={saving} onChange={e => { setFrom(e.target.value); if(e.target.value > through) setThrough(e.target.value); }}/></label>
+      <label htmlFor="calendar-price-from" className="text-sm space-y-2"><span>{t('From', 'С даты')}</span><Input id="calendar-price-from" type="date" value={from} disabled={saving} onChange={e => { setFrom(e.target.value); if(e.target.value > through) setThrough(e.target.value); const day = toBangkokDateKey(e.target.value); if(day) setMonth(startOfMonth(parseCivilDate(day))); }}/></label>
       <label htmlFor="calendar-price-through" className="text-sm space-y-2"><span>{t('Through (inclusive)', 'По дату включительно')}</span><Input id="calendar-price-through" type="date" min={from} value={through} disabled={saving} onChange={e => setThrough(e.target.value)}/></label>
       <label htmlFor="calendar-price-amount" className="text-sm space-y-2"><span>{t('Per night', 'За ночь')} · {currency || '—'}</span><Input id="calendar-price-amount" inputMode="decimal" value={price} placeholder="0.00" disabled={saving} onChange={e => setPrice(e.target.value)}/></label>
     </div>
+    {rows.isError && <p role="alert">{t('Prices for the selected dates could not be loaded. Adjust the range or reload.', 'Не удалось загрузить цены выбранного периода. Измените даты или обновите данные.')} <Button variant="outline" onClick={() => rows.refetch()}>{t('Reload', 'Обновить')}</Button></p>}
     {!currency && <p role="alert">{t('Set the property currency before editing prices.', 'Сначала задайте валюту объекта.')}</p>}
     <Button onClick={save} disabled={saving || !currency || !price || !from || !through || from > through || !rows.data || rows.isFetching || rows.isError}>{saving ? t('Saving…', 'Сохранение…') : t('Apply nightly price', 'Применить цену за ночь')}</Button>
   </section>;
