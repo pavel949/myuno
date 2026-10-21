@@ -53,7 +53,17 @@ describe('CalendarPriceEditor', () => {
   fireEvent.change(screen.getByLabelText('From'),{target:{value:'2028-02-20'}});
   expect(screen.getByText('February 2028')).toBeInTheDocument();
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2028-02-20');
-  await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-01-31',p_to:'2028-03-14'})));
+  await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-02-20',p_to:'2028-02-21'})));
+  await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-01-31',p_to:'2028-03-13'})));
+ });
+
+ it('browses far-future months independently of the selected edit dates', async () => {
+  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
+  for(let month=0;month<16;month++) fireEvent.click(screen.getByRole('button',{name:'Next month'}));
+  expect(screen.getByText('February 2028')).toBeInTheDocument();
+  expect(screen.getByLabelText('From')).toHaveValue('2026-10-21');
+  await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-01-31',p_to:'2028-03-13'})));
+  for(const [name,args] of state.rpc.mock.calls) if(name==='get_property_calendar_prices') expect((Date.parse(args.p_to)-Date.parse(args.p_from))/86400000).toBeLessThanOrEqual(42);
  });
 
 });
