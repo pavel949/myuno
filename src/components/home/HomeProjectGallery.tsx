@@ -25,7 +25,7 @@ const copy = {
   noProjects: { ru: 'По этим условиям комплексы не найдены.', en: 'No communities match these filters.', th: 'ไม่พบโครงการตามตัวกรองนี้' },
   noInventory: { ru: 'Пока нет опубликованных предложений', en: 'No published listings yet', th: 'ยังไม่มีที่พักที่เผยแพร่' },
   countError: { ru: 'Не удалось загрузить количество предложений', en: 'Could not load listing count', th: 'โหลดจำนวนที่พักไม่สำเร็จ' },
-  countNote: { ru: 'Опубликованные предложения. Даты уточняются на странице объекта.', en: 'Published listings. Check dates on the property page.', th: 'ที่พักที่เผยแพร่แล้ว ตรวจสอบวันที่ในหน้าที่พัก' },
+  countNote: { ru: 'Опубликованные предложения. Даты можно проверить внутри комплекса.', en: 'Published listings. Open the complex to check dates.', th: 'ที่พักที่เผยแพร่แล้ว เปิดหน้าโครงการเพื่อตรวจสอบวันที่เข้าพัก' },
   open: { ru: 'Открыть комплекс', en: 'Explore community', th: 'ดูข้อมูลโครงการ' },
   loading: { ru: 'Загружаем комплексы…', en: 'Loading communities…', th: 'กำลังโหลดโครงการ…' },
   error: { ru: 'Не удалось загрузить комплексы.', en: 'Could not load communities.', th: 'โหลดโครงการไม่สำเร็จ' },
