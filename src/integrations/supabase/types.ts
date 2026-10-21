@@ -36547,6 +36547,10 @@ export type Database = {
       }
     }
     Functions: {
+      set_property_calendar_price: {
+        Args: { p_property_id: string; p_category_id: string | null; p_from: string; p_to: string; p_price: number; p_currency: string; p_expected: Json };
+        Returns: Json;
+      };
       actor_booking_ceiling: {
         Args: { p_booking_id: string }
         Returns: boolean

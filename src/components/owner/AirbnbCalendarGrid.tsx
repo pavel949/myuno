@@ -1,4 +1,5 @@
-import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan } from '@/lib/hotelDates';
+import { useSearchParams } from 'react-router-dom';
+import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan, toBangkokDateKey } from '@/lib/hotelDates';
 import { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -37,7 +38,8 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
 
-  const [currentMonth, setCurrentMonth] = useState(() => bangkokTodayDate());
+  const [params] = useSearchParams();
+  const [currentMonth, setCurrentMonth] = useState(() => { const day = toBangkokDateKey(params.get('date')); return day ? parseCivilDate(day) : bangkokTodayDate(); });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showEventsSheet, setShowEventsSheet] = useState(false);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
@@ -405,6 +407,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
       {/* Day events sheet */}
       {selectedDate && (
         <CalendarDayEventsSheet
+          propertyId={propertyId}
           open={showEventsSheet}
           onOpenChange={setShowEventsSheet}
           date={selectedDate}
