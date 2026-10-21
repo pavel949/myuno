@@ -71,7 +71,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           </button>
         ))}
       </div>}
-      {mode === 'rent' && showRefinements && (
+      {mode === 'rent' && (
         <div className="home-search-duration col-span-full flex flex-nowrap gap-1" role="group" aria-label={t({ ru: 'Срок аренды', en: 'Rental duration', th: 'ระยะเวลาเช่า' })}>
           {(['short', 'medium', 'long'] as const).map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
         </div>

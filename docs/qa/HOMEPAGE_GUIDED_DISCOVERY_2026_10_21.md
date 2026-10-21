@@ -39,7 +39,7 @@ PR #155 changes only PROJECT.md, README.md and docs/LAYANTARA_APPLICATION_PARITY
 
 ## Homepage contract
 
-One search invitation precedes optional criteria. Intent maps to existing rent/short, rent/long and buy URL contracts, with no AI parsing promise. Dates and location can remain unset. Type, area, bedrooms, guests and rental-duration refinements remain available after disclosure. Existing reusable search consumers keep their original behavior.
+One search invitation precedes optional criteria. Intent maps to existing rent/short, rent/long and buy URL contracts, with no AI parsing promise. Dates and location can remain unset. The active rental duration is visible before submission and can be changed without opening refinements. Type, area, bedrooms and guests remain available after disclosure. Existing reusable search consumers keep their original behavior.
 
 Neighborhood discovery opens existing /area/:slug guides rather than imposing a search location. Kamala, Surin and Bang Tao lead as existing editorial guide entries; other cards are derived from actual public project rows matched to existing guide slugs. A targeted public Surin read prevents an alphabetical limit from silently omitting its photography. Missing photographs remain explicitly unavailable. Their photos are explicitly labelled by catalogue origin, not asserted panoramas of an entire district. Known stock-photo hosts are excluded from area photography; an assigned stock catalogue illustration does not establish that it depicts the neighborhood. No unsourced investment-profile descriptions, yields, rankings, neighborhood facts or new area photographs are copied into the homepage. Existing guide content is outside this homepage editorial revision and requires its own source audit before enriching teasers.
 
@@ -49,3 +49,13 @@ Homes precede subordinate complexes. Complex filters remain accessible in detail
 
 Merge is authorized only after exact-head checks and review. Public domains resolve to existing Lovable hosting; Vercel success does not prove publication there. Lovable publish is paused pending separate explicit target confirmation; earlier denied action is not retried by this tranche.
 
+
+## Follow-up visual audit: visible rental duration
+
+Fresh independent screen tests found a P1: the longer-stay intent applied yearly tenancy while hiding that selected restriction behind refinements. Rental duration is now visible at the optional-criteria step for every rental search; the first homepage screen stays a single search entry. Existing short/monthly/yearly URL contracts remain unchanged.
+
+Fresh captured and visually inspected synthetic steps at390/768/1440: homepage entry, intent selection, selected yearly duration, keyboard monthly selection with focus indicator, and submission with `mode=rent&tenancy=medium` and no mandatory dates/district. No overflow/page errors or Escape/focus-return failure observed. Results-page rendering is NOT TESTED by this MemoryRouter fixture. Candidate JS was freshly built; unchanged retained release CSS was used. Screens and provenance are local `/tmp/browser/homepage-duration-visible-candidate/visual-retest-manifest.json`; no native Library delivery is claimed.
+
+Three new RU/EN/TH regressions passed twice, proving selected yearly visibility and changing to monthly before submission while district/guest filters remain optional. Scoped ESLint and diff checks passed. Two full23-case local file runs encountered existing calendar5-second timeouts (22/23 then20/23, latter also Vitest RPC timeout); all three affected cases passed unchanged in separate runs with original5-second limits. This is not a claim that the full local file run passed. Fresh exact-head connected/standard CI remains required after commit. No test timeout, assertion or security check was weakened.
+
+Conditional P2 remains: missing-media cards retain large fallback panels and can make scanning long. This fixture state does not establish that production catalog photos are absent. Live catalog, production rendering, screen-reader behavior and deployed font loading were not certified by this visual pass. Product-design package c3/audit was unavailable in this environment; repository redesign skill and actual Chromium screenshots were used.
