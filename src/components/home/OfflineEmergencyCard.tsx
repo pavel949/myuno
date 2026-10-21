@@ -1,21 +1,14 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionCard } from '@/components/uno/SectionCard';
-import { Phone, WifiOff, Shield, Heart, Flame, AlertTriangle } from 'lucide-react';
+import { Phone, WifiOff, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const EMERGENCY_NUMBERS = [
-  { icon: Shield, phone: '1155', labelEn: 'Tourist Police', labelRu: 'Турполиция', color: 'text-info', bg: 'bg-info/10' },
-  { icon: Heart, phone: '1669', labelEn: 'Ambulance', labelRu: 'Скорая', color: 'text-destructive', bg: 'bg-destructive/10' },
-  { icon: Flame, phone: '199', labelEn: 'Fire', labelRu: 'Пожарные', color: 'text-warning', bg: 'bg-warning/10' },
-  { icon: AlertTriangle, phone: '191', labelEn: 'Emergency', labelRu: 'SOS', color: 'text-destructive', bg: 'bg-destructive/10' },
-];
-
-const EXTRA_CONTACTS = [
-  { labelEn: 'Russian Embassy BKK', labelRu: 'Посольство РФ', phone: '02-234-9824' },
-  { labelEn: 'Russian Consulate Phuket', labelRu: 'Консульство РФ Пхукет', phone: '076-510-392' },
-  { labelEn: 'Immigration Hotline', labelRu: 'Иммиграция', phone: '1178' },
-];
+import {
+  getEmergencyContacts,
+  getEmergencyCategory,
+  sanitizeTelNumber,
+  EMERGENCY_TONE_CLASSES,
+} from '@/lib/emergency/contacts';
 
 interface OfflineEmergencyCardProps {
   compact?: boolean;
@@ -25,8 +18,12 @@ export function OfflineEmergencyCard({ compact = false }: OfflineEmergencyCardPr
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
+  const { quickDial } = getEmergencyContacts('phuket');
+  // Embassy / consulate / immigration lines are handy to keep offline too.
+  const extras = getEmergencyCategory('documents')?.contacts.filter(c => c.id !== 'immigration-phuket') ?? [];
+
   const handleCall = (phone: string) => {
-    window.location.href = `tel:${phone}`;
+    window.location.href = `tel:${sanitizeTelNumber(phone)}`;
   };
 
   return (
@@ -39,37 +36,38 @@ export function OfflineEmergencyCard({ compact = false }: OfflineEmergencyCardPr
       </div>
 
       <div className={cn("grid gap-2", compact ? "grid-cols-4" : "grid-cols-2")}>
-        {EMERGENCY_NUMBERS.map(item => {
-          const Icon = item.icon;
+        {quickDial.map(item => {
+          const Icon = item.icon ?? AlertTriangle;
+          const tone = EMERGENCY_TONE_CLASSES[item.tone ?? 'destructive'];
           return (
             <button
-              key={item.phone}
+              key={item.id}
               onClick={() => handleCall(item.phone)}
               className={cn(
                 "flex flex-col items-center gap-1 p-2.5 rounded-none border border-transparent transition-all ",
-                item.bg, "hover:border-current/20"
+                tone.bg, "hover:border-current/20"
               )}
             >
-              <Icon className={cn("w-5 h-5", item.color)} />
+              <Icon className={cn("w-5 h-5", tone.color)} />
               <span className="font-bold text-base">{item.phone}</span>
               <span className="text-[9px] text-muted-foreground leading-tight text-center">
-                {isRu ? item.labelRu : item.labelEn}
+                {isRu ? (item.shortLabelRu ?? item.nameRu) : (item.shortLabelEn ?? item.nameEn)}
               </span>
             </button>
           );
         })}
       </div>
 
-      {!compact && (
+      {!compact && extras.length > 0 && (
         <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
-          {EXTRA_CONTACTS.map(c => (
+          {extras.map(c => (
             <button
-              key={c.phone}
+              key={c.id}
               onClick={() => handleCall(c.phone)}
               className="w-full flex items-center justify-between py-1.5 text-sm hover:bg-muted/30 rounded-none px-2 transition-colors"
             >
               <span className="text-muted-foreground text-xs">
-                {isRu ? c.labelRu : c.labelEn}
+                {isRu ? c.nameRu : c.nameEn}
               </span>
               <span className="flex items-center gap-1 text-primary font-medium text-xs">
                 <Phone className="w-3 h-3" />

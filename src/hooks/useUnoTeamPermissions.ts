@@ -201,7 +201,7 @@ export function useUnoTeamMembers() {
 export function useMyUnoPermissions() {
   const { user } = useAuth();
 
-  const { data: permissions, isLoading } = useQuery({
+  const { data: permissions, isLoading, error, refetch } = useQuery({
     queryKey: ['my-uno-permissions', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -235,6 +235,8 @@ export function useMyUnoPermissions() {
   return {
     permissions,
     isLoading,
+    error,
+    refetch,
     canAccess,
     allowedVerticals,
   };

@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles } from 'lucide-react';
@@ -15,6 +16,7 @@ interface CrossSellSectionProps {
   title?: {
     en: string;
     ru: string;
+    th?: string;
   };
 }
 
@@ -35,6 +37,7 @@ export const CrossSellSection = memo(function CrossSellSection({
   const sectionTitle = title || {
     en: 'You Might Also Like',
     ru: 'Вам также понравится',
+    th: 'คุณอาจสนใจ',
   };
 
   return (
@@ -43,13 +46,13 @@ export const CrossSellSection = memo(function CrossSellSection({
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-accent" />
           <h3 className="font-semibold text-foreground">
-            {language === 'ru' ? sectionTitle.ru : sectionTitle.en}
+            {pickLang(language, sectionTitle)}
           </h3>
         </div>
         <ExploreVerticalsSheet
           trigger={
             <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
-              {language === 'ru' ? 'Все' : 'All'}
+              {pickLang(language, { ru: 'Все', en: 'All', th: 'ทั้งหมด' })}
               <ChevronRight className="w-4 h-4" />
             </button>
           }

@@ -7,6 +7,7 @@ import { Star, MapPin, MessageCircle, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { thaiCategoryMeta, THAI_OWNERSHIP_LABELS, type ThaiBusiness } from '@/types/thaiBusiness';
 
@@ -20,7 +21,11 @@ export function ThaiBusinessCard({ business, onMessage }: Props) {
   const { t, language } = useLanguage();
   const cat = thaiCategoryMeta(business.category);
   const ownership = business.ownership_type ? THAI_OWNERSHIP_LABELS[business.ownership_type] : null;
-  const name = business.name_ru || business.name_en || business.name_th;
+  const name = pickLang(language, {
+    ru: business.name_ru || business.name_th,
+    en: business.name_en || business.name_th,
+    th: business.name_th,
+  });
   const cover = business.logo_url || business.gallery_urls?.[0];
 
   const goDetail = () => navigate(APP_ROUTES.THAI_SERVICES_DETAIL(business.id));
@@ -33,7 +38,7 @@ export function ThaiBusinessCard({ business, onMessage }: Props) {
             <img src={cover} alt={name} className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-              {language === 'ru' ? cat.ru : cat.en}
+              {pickLang(language, cat)}
             </div>
           )}
         </div>
@@ -48,7 +53,7 @@ export function ThaiBusinessCard({ business, onMessage }: Props) {
             )}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>{language === 'ru' ? cat.ru : cat.en}</span>
+            <span>{pickLang(language, cat)}</span>
             {business.district && (
               <span className="inline-flex items-center gap-0.5">
                 <MapPin className="w-3 h-3" />{business.district}
@@ -57,7 +62,7 @@ export function ThaiBusinessCard({ business, onMessage }: Props) {
           </div>
           {ownership && (
             <span className="mt-2 inline-block bg-primary/10 text-primary text-[11px] px-1.5 py-0.5">
-              {language === 'ru' ? ownership.ru : ownership.en}
+              {pickLang(language, ownership)}
             </span>
           )}
         </div>

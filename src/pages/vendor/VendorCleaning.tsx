@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Sparkles, Plus, MoreVertical, Edit, Trash2, Loader2, Star, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const serviceTypes = [
   { value: 'regular', label: 'Regular Cleaning', labelRu: 'Обычная уборка' },
@@ -49,7 +50,7 @@ const VendorCleaning = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {

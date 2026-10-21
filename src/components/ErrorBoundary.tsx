@@ -1,10 +1,11 @@
 import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
-import * as Sentry from '@sentry/react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { getStoredLang as getLang } from '@/lib/languageConfig';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { reloadAfterUserRecovery, requestRecoveryReload } from '@/lib/pwaRecovery';
 
 const errorLog = createErrorHandler('ErrorBoundary');
 
@@ -17,30 +18,36 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  reloading: boolean;
+  reloadFailed: boolean;
 }
 
 // Bilingual error messages
 const ERROR_MESSAGES = {
   chunk: {
-    title: { en: 'Connection issue', ru: 'Проблема с подключением' },
-    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.' },
+    title: { en: 'Connection issue', ru: 'Проблема с подключением', th: 'ปัญหาการเชื่อมต่อ' },
+    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.', th: 'ไม่สามารถโหลดบางส่วนได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง' },
   },
   generic: {
-    title: { en: 'This page failed to load', ru: 'Страница не загрузилась' },
-    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.' },
+    title: { en: 'This page failed to load', ru: 'Страница не загрузилась', th: 'หน้านี้โหลดไม่สำเร็จ' },
+    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.', th: 'ลองอีกครั้งหรือรีเฟรชหน้านี้ เราได้บันทึกปัญหาไว้แล้ว' },
   },
-  tryAgain: { en: 'Try again', ru: 'Попробовать снова' },
-  reload: { en: 'Reload page', ru: 'Перезагрузить' },
+  tryAgain: { en: 'Try again', ru: 'Попробовать снова', th: 'ลองอีกครั้ง' },
+  saveWarning: { en: 'Save unfinished changes before reloading.', ru: 'Сохраните незавершённые изменения перед перезагрузкой.', th: 'บันทึกการเปลี่ยนแปลงก่อนรีเฟรช' },
+  reloadFailed: { en: 'Reload could not be prepared. Please try again later.', ru: 'Не удалось подготовить перезагрузку. Попробуйте позже.', th: 'ยังไม่สามารถรีเฟรชได้ โปรดลองอีกครั้งภายหลัง' },
+  reload: { en: 'Reload page', ru: 'Перезагрузить', th: 'รีเฟรชหน้า' },
 };
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    reloading: false,
+    reloadFailed: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, reloading: false, reloadFailed: false };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -48,39 +55,37 @@ export class ErrorBoundary extends Component<Props, State> {
     // Bible-v2 audit C1: forward to Sentry so boundary-caught crashes show
     // up in ops dashboards alongside unhandled rejections. componentStack
     // gives Sentry a React-aware trace for the failed subtree.
-    Sentry.captureException(error, {
-      contexts: { react: { componentStack: errorInfo.componentStack ?? '' } },
-      tags: { source: 'ErrorBoundary' },
-    });
+    // A telemetry import/reporting failure must not interrupt the fallback UI.
+    void import('@sentry/react')
+      .then((Sentry) =>
+        Sentry.captureException(error, {
+          contexts: { react: { componentStack: errorInfo.componentStack ?? '' } },
+          tags: { source: 'ErrorBoundary' },
+        }),
+      )
+      .catch(() => {});
     this.props.onError?.(error, errorInfo);
 
-    // Stale chunk auto-recovery: when a deploy invalidates the previous
-    // bundle, lazy-loaded routes throw "Failed to fetch dynamically
-    // imported module". A one-shot reload pulls the new index.html and
-    // re-resolves the chunk hashes. We guard against loops with a session
-    // marker — if we already reloaded once and still hit the error, fall
-    // through to the manual UI so the user isn't stuck reloading.
+    // An update-related failure can offer recovery, never reload without consent.
     const msg = error?.message ?? '';
-    const isChunkError =
-      msg.includes('dynamically imported') ||
-      msg.includes('Failed to fetch') ||
-      msg.includes('Loading chunk');
-    if (isChunkError && typeof window !== 'undefined') {
-      const RELOAD_KEY = '__myuno_chunk_reload__';
-      const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
-      if (!alreadyReloaded) {
-        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-        window.location.reload();
-      }
+    if (typeof window !== 'undefined' && (msg.includes('dynamically imported') ||
+        msg.includes('Failed to fetch') || msg.includes('Loading chunk'))) {
+      requestRecoveryReload();
     }
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, reloading: false, reloadFailed: false });
   };
 
-  private handleReload = () => {
-    window.location.reload();
+  private handleReload = async () => {
+    if (this.state.reloading) return;
+    this.setState({ reloading: true, reloadFailed: false });
+    try {
+      await reloadAfterUserRecovery();
+    } catch {
+      this.setState({ reloading: false, reloadFailed: true });
+    }
   };
 
   public render() {
@@ -107,6 +112,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-sm text-muted-foreground mb-4 max-w-md">
             {messages.desc[lang]}
           </p>
+          {isChunkError && <p className="text-sm text-muted-foreground mb-4">{ERROR_MESSAGES.saveWarning[lang]}</p>}
+          {this.state.reloadFailed && <p role="alert" className="text-sm text-destructive mb-4">{ERROR_MESSAGES.reloadFailed[lang]}</p>}
           <div className="flex gap-2">
             {!isChunkError && (
               <Button onClick={this.handleReset} variant="outline" size="sm">
@@ -115,7 +122,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </Button>
             )}
             {isChunkError ? (
-              <Button onClick={this.handleReload} variant="default" size="sm">
+              <Button onClick={this.handleReload} variant="default" size="sm" disabled={this.state.reloading}>
                 {ERROR_MESSAGES.reload[lang]}
               </Button>
             ) : null}
@@ -147,12 +154,6 @@ export function useGlobalErrorHandler() {
   useEffect(() => {
     const lang = getLang();
 
-    // Clear stale-chunk reload marker after a successful mount — the next
-    // chunk failure should be allowed exactly one fresh auto-reload attempt.
-    if (typeof window !== 'undefined') {
-      try { sessionStorage.removeItem('__myuno_chunk_reload__'); } catch { /* ignore */ }
-    }
-
     const handleRejection = (event: PromiseRejectionEvent) => {
       errorLog.silent(event.reason, 'unhandled_rejection');
       
@@ -178,33 +179,27 @@ export function useGlobalErrorHandler() {
       if (message.includes('dynamically imported') ||
           message.includes('Failed to fetch') ||
           message.includes('Loading chunk')) {
-        // Stale-chunk auto-reload (one shot, guarded). Same logic as
-        // ErrorBoundary.componentDidCatch — handles cases where the failed
-        // import bubbles as an unhandled rejection instead of a render
-        // error (e.g. an awaited dynamic import outside a Suspense tree).
-        const RELOAD_KEY = '__myuno_chunk_reload__';
-        const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
-        if (!alreadyReloaded) {
-          sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-          window.location.reload();
-        } else {
-          toast.error(
-            lang === 'ru'
-              ? 'Не удалось загрузить компонент. Обновите страницу.'
-              : 'Failed to load component. Please refresh the page.',
-            {
-              action: {
-                label: lang === 'ru' ? 'Обновить' : 'Refresh',
-                onClick: () => window.location.reload(),
-              },
-            }
-          );
-        }
+        requestRecoveryReload();
+        toast.error(
+          pickLang(lang, {
+            ru: 'Не удалось загрузить компонент. Обновите страницу.',
+            en: 'Failed to load component. Please refresh the page.',
+            th: 'โหลดคอมโพเนนต์ไม่สำเร็จ โปรดรีเฟรชหน้า',
+          }),
+          {
+            action: {
+              label: pickLang(lang, { ru: 'Обновить', en: 'Refresh', th: 'รีเฟรช' }),
+              onClick: () => requestRecoveryReload(true),
+            },
+          }
+        );
       } else {
         toast.error(
-          lang === 'ru'
-            ? 'Запрос не выполнен. Попробуйте ещё раз.'
-            : 'Request failed. Please try again.'
+          pickLang(lang, {
+            ru: 'Запрос не выполнен. Попробуйте ещё раз.',
+            en: 'Request failed. Please try again.',
+            th: 'คำขอไม่สำเร็จ โปรดลองอีกครั้ง',
+          })
         );
       }
       
@@ -216,9 +211,11 @@ export function useGlobalErrorHandler() {
       if (event.error?.message?.includes('dynamically imported')) {
         event.preventDefault();
         toast.error(
-          lang === 'ru'
-            ? 'Проблема с подключением. Обновите страницу.'
-            : 'Connection issue. Please refresh the page.'
+          pickLang(lang, {
+            ru: 'Проблема с подключением. Обновите страницу.',
+            en: 'Connection issue. Please refresh the page.',
+            th: 'ปัญหาการเชื่อมต่อ โปรดรีเฟรชหน้า',
+          })
         );
       }
     };

@@ -222,7 +222,7 @@ export default function PropertyConsultation() {
   // City default currency — used as fallback when the user submits a lead/consultation
   // without an explicit currency picker. Phase 1 multi-location.
 
-  const leadCurrency = (currentCity?.default_currency || 'USD').toUpperCase();
+  const leadCurrency = (currentCity?.default_currency || 'THB').toUpperCase();
 
   const { user } = useAuth();
   const navigate = useNavigate();

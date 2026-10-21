@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { normalizePhone, isLikelyPhone } from '@/lib/phone';
+import { isValidEmail } from '@/lib/crm/validation';
 
 import { toast } from 'sonner';
 interface Props {
@@ -135,7 +136,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     if (!selectedContact && !form.client_name.trim()) {
       nextErrors.client_name = isRu ? 'Введите имя клиента или выберите контакт' : 'Enter client name or select a contact';
     }
-    if (!selectedContact && form.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.client_email.trim())) {
+    if (!selectedContact && form.client_email && !isValidEmail(form.client_email)) {
       nextErrors.client_email = isRu ? 'Неверный формат email' : 'Invalid email format';
     }
     if (!selectedContact && form.client_phone && !isLikelyPhone(form.client_phone)) {

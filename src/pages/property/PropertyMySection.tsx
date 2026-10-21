@@ -13,6 +13,7 @@ import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function PropertyMySection() {
   const { user } = useAuth();
@@ -34,7 +35,7 @@ export default function PropertyMySection() {
             ? 'Добавляйте объекты, отслеживайте бронирования и управляйте портфелем'
             : 'Add properties, track bookings, and manage your portfolio'}
         </p>
-        <Button onClick={() => navigate('/auth')} size="lg">
+        <Button onClick={() => redirectToAuth(navigate)} size="lg">
           {isRu ? 'Войти' : 'Sign In'}
         </Button>
       </div>

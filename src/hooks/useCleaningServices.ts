@@ -241,7 +241,7 @@ export function useCleaningServicesSimple() {
      queryFn: async (): Promise<CleaningService[]> => {
        // Fetch from services table where name contains 'clean'
        const { data, error } = await supabase
-         .from('services')
+         .from('public_service_catalog')
          .select('id, name_en, name_ru, description_en, description_ru, price, duration_minutes, provider_id')
          .eq('is_active', true)
          .or('name_en.ilike.%clean%,name_en.ilike.%laundry%,name_en.ilike.%iron%')
@@ -281,7 +281,7 @@ export function useCleaningServices(serviceType?: string) {
     queryKey: ['cleaning-services-full', serviceType],
     queryFn: async (): Promise<CleaningServiceFull[]> => {
       const queryBuilder = supabase
-        .from('services')
+        .from('public_service_catalog')
         .select('*')
         .eq('is_active', true)
         .or('name_en.ilike.%clean%,name_en.ilike.%laundry%,name_en.ilike.%iron%,name_en.ilike.%dry%')

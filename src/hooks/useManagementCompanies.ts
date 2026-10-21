@@ -42,14 +42,12 @@ export interface ManagementCompany {
 }
 
 /**
- * Public-safe columns for `management_companies`.
+ * Public-safe columns exposed by the `management_companies_public` view.
  *
- * Migration 20260617014700 revoked the table-wide anon SELECT and replaced it
- * with a column-level GRANT (mirrored here). A `select('*')` therefore fails
- * for logged-out visitors on private columns (bank_account, swift_code, …),
- * which left the public MC directory and `/property/mc/:slug` profile pages
- * empty/broken for anon. Selecting this subset keeps both pages working while
- * private fields stay server-side.
+ * Anonymous visitors have no grants on the `management_companies` base table
+ * (financial/legal columns such as bank_account, tax_id, stripe ids must never
+ * leak). The public MC directory and `/property/mc/:slug` profile pages read
+ * the view instead, which only contains marketing columns for active companies.
  */
 const MANAGEMENT_COMPANY_PUBLIC_COLUMNS = `
   id, slug, name_en, name_ru, description_en, description_ru,
@@ -66,7 +64,7 @@ export function useManagementCompanies() {
     queryKey: ['management-companies'],
     queryFn: async (): Promise<ManagementCompany[]> => {
       const { data, error } = await supabase
-        .from('management_companies')
+        .from('management_companies_public')
         .select(MANAGEMENT_COMPANY_PUBLIC_COLUMNS)
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
@@ -84,7 +82,7 @@ export function useManagementCompanyBySlug(slug: string | undefined) {
     queryFn: async (): Promise<ManagementCompany | null> => {
       if (!slug) return null;
       const { data, error } = await supabase
-        .from('management_companies')
+        .from('management_companies_public')
         .select(MANAGEMENT_COMPANY_PUBLIC_COLUMNS)
         .eq('slug', slug)
         .eq('is_active', true)

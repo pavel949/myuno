@@ -41,9 +41,21 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.create-checkout-session]
     verify_jwt = false
+  [functions.create-cleaning-checkout]
+    verify_jwt = false
+  [functions.create-event-checkout]
+    verify_jwt = false
   [functions.create-flowers-checkout]
     verify_jwt = false
+  [functions.create-legal-checkout]
+    verify_jwt = false
+  [functions.create-market-checkout]
+    verify_jwt = false
+  [functions.create-pet-checkout]
+    verify_jwt = false
   [functions.create-restaurant-checkout]
+    verify_jwt = false
+  [functions.create-wellness-checkout]
     verify_jwt = false
   [functions.create-yacht-checkout]
     verify_jwt = false

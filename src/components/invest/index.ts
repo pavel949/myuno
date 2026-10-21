@@ -1,5 +1,5 @@
 export { InvestmentCard } from './InvestmentCard';
-export { MuunoScoreWidget } from './MuunoScoreWidget';
+export { MyunoScoreWidget } from './MyunoScoreWidget';
 export { FundingProgress } from './FundingProgress';
 export { ScoreBreakdown } from './ScoreBreakdown';
 export { InterestForm } from './InterestForm';

@@ -5,6 +5,29 @@
 
 ---
 
+## [1.25.0] — 2026-06-24
+
+### Added (No-Budget Growth Playbook + referral-aware sharing)
+
+**`docs/canonical/research/no-budget-growth-playbook.md` → v1.0 (new)**
+- Операционный плейбук органического роста (без бюджета): карта уже-built активов роста (referral / share / SEO / lead-магниты / WhatsApp-Telegram / flags), barbell-таргетинг 4 аудиторий (туристы·номады / инвесторы·HNW / релокант-семьи / девелоперы·провайдеры) с вирусными free-tool точками входа, no-budget каналы по приоритету, 90-дневный спринт + связка с `PROJECT.md` §19 (путь к Y1 $800K–1M). §7 — build-later gap-фичи.
+
+**`src/components/share/ShareCTA.tsx` (new)**
+- Переиспользуемый мультиканальный share-компонент (copy / WhatsApp / Telegram / Email), добавляющий к ссылке реферальный код (`?ref=`) + UTM-атрибуцию. Обобщает UI из `PropertyShareSheet` для любого контента (статьи, free-tools, лендинги). Gated за флагом `SHARE_CTA`; при выключенном флаге деградирует до copy-link.
+- Вшит в `src/components/uno/ReferralCard.tsx`: реферальная программа получила one-tap шеринг в WhatsApp/Telegram/Email (раньше — только copy-link), что активирует виральную петлю для русскоязычной аудитории Пхукета.
+
+**`src/lib/featureFlags.ts`**
+- Добавлены growth-флаги `REFERRAL_PROGRAM` и `SHARE_CTA` (оба `enabled: true` — бэкенд-петля готова).
+
+### Rationale
+Разведка кодовой базы показала, что реферальная петля и инфраструктура роста уже построены и работают; узкое место — активация и виральные каналы шеринга, а не отсутствие кода. Плейбук фиксирует операционку, ShareCTA закрывает единственный реальный пробел в петле (мультиканальный реферальный шер). Цифры выручки сверены с `PROJECT.md` §19 — новых метрик не вводилось.
+
+### Files
+- created: `docs/canonical/research/no-budget-growth-playbook.md`, `src/components/share/ShareCTA.tsx`
+- edited: `docs/canonical/README.md`, `docs/canonical/CHANGELOG.md`, `src/lib/featureFlags.ts`, `src/components/uno/ReferralCard.tsx`
+
+---
+
 ## [1.24.0] — 2026-05-15
 
 ### Changed (typography canon sync with Design Bible v2)

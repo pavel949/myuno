@@ -3,7 +3,7 @@
 // Flow:
 //   1. Admin (caller) hits POST /functions/v1/admin-invite-user with
 //      { email, full_name?, role?, transfer_operator_id? }.
-//   2. Function verifies the caller has app_role='admin' or 'uno_team'.
+//   2. Function verifies the protected actor_has_platform_admin capability.
 //   3. Calls supabase.auth.admin.inviteUserByEmail() — this creates the
 //      auth.users row, sends the magic-link email, and stores
 //      { full_name, role, invited_by } in user_metadata.
@@ -21,13 +21,10 @@
 // Reuses the same admin-guard pattern as admin-manage-user.
 
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 const PUBLIC_APP_URL = Deno.env.get("PUBLIC_APP_URL") || "https://myuno.app";
 
@@ -50,6 +47,7 @@ const GRANTABLE_ROLES = new Set([
 const ADMIN_ONLY_ROLES = new Set(["uno_team"]);
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -59,19 +57,10 @@ Deno.serve(async (req) => {
     if (authResult instanceof Response) return authResult;
     const callerId = authResult.user.id;
 
+    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    if (guard) return guard;
     const admin = createServiceClient();
-
-    // Caller must be admin or uno_team.
-    const [{ data: isAdmin }, { data: isTeam }] = await Promise.all([
-      admin.rpc("has_role", { _user_id: callerId, _role: "admin" }),
-      admin.rpc("has_role", { _user_id: callerId, _role: "uno_team" }),
-    ]);
-    if (!isAdmin && !isTeam) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Admin or uno_team role required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const isAdmin = true;
 
     const body = await req.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -105,8 +94,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    // A link target must be real and unlinked before any email is sent.
+    if (transferOperatorId) {
+      const { data: operator, error } = await admin.from('transfer_operators')
+        .select('id, user_id').eq('id', transferOperatorId).maybeSingle();
+      if (error || !operator || operator.user_id) {
+        return new Response(JSON.stringify({ success: false, error: 'An existing unlinked operator is required', code: 'operator_unavailable', invite_email_sent: false }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    }
+
     // Send the invitation. Supabase auth.admin.inviteUserByEmail creates the
-    // auth.users row (email_confirmed_at set), generates a recovery token,
+    // auth.users invitation, generates a one-time invitation link,
     // and sends the templated invitation email via the project's SMTP.
     const { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
       email,
@@ -124,12 +123,12 @@ Deno.serve(async (req) => {
     if (inviteErr) {
       // Supabase returns a 422 with code email_exists when the email is
       // already registered — surface that explicitly so the admin UI can
-      // suggest «just send a password-reset» instead.
+      // explain that the existing account must be reviewed; never reset it implicitly.
       const status = /already.*exists|user_already_exists|email_exists/i.test(inviteErr.message)
         ? 409
         : 500;
       return new Response(
-        JSON.stringify({ error: inviteErr.message, code: status === 409 ? "email_exists" : "invite_failed" }),
+        JSON.stringify({ success: false, error: status === 409 ? "Account already exists. Review its existing access." : "Invitation delivery was not confirmed. Check before retrying.", code: status === 409 ? "email_exists" : "invite_failed", invite_email_sent: status === 409 ? false : null }),
         { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -137,35 +136,40 @@ Deno.serve(async (req) => {
     const newUserId = inviteData?.user?.id;
     if (!newUserId) {
       return new Response(
-        JSON.stringify({ error: "Invite returned no user_id" }),
+        JSON.stringify({ success: false, error: "Invitation returned no account. Check delivery before retrying.", invite_email_sent: null }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     // Grant role if requested. UPSERT keeps the call idempotent.
     if (role) {
-      const { error: roleErr } = await admin
+      const { data: grantedRole, error: roleErr } = await admin
         .from("user_roles")
-        .upsert({ user_id: newUserId, role }, { onConflict: "user_id,role" });
-      if (roleErr) {
-        console.error("[admin-invite-user] role upsert failed", roleErr);
-        // Non-fatal — the user still got the invite. Admin can add role later.
+        .upsert({ user_id: newUserId, role }, { onConflict: "user_id,role" }).select('user_id, role').single();
+      if (roleErr || !grantedRole || grantedRole.user_id !== newUserId || grantedRole.role !== role) {
+        return new Response(JSON.stringify({ success: false, code: 'role_grant_incomplete',
+          error: 'Invitation sent, but the requested role was not granted. Review access before retrying.',
+          user_id: newUserId, invite_email_sent: true, role_granted: false, transfer_operator_linked: false }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
     }
 
     // Link to transfer_operators row if requested.
     if (transferOperatorId) {
-      const { error: linkErr } = await admin
+      const { data: linked, error: linkErr } = await admin
         .from("transfer_operators")
         .update({ user_id: newUserId, updated_at: new Date().toISOString() })
-        .eq("id", transferOperatorId);
-      if (linkErr) {
-        console.error("[admin-invite-user] transfer_operators link failed", linkErr);
+        .eq("id", transferOperatorId).is('user_id', null).select('id, user_id').maybeSingle();
+      if (linkErr || !linked || linked.user_id !== newUserId) {
+        return new Response(JSON.stringify({ success: false, code: 'operator_link_incomplete',
+          error: 'Invitation sent, but the operator account link was not completed. Review before retrying.',
+          user_id: newUserId, invite_email_sent: true, role_granted: !!role, transfer_operator_linked: false }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
     }
 
     // Audit
-    await admin
+    const { error: auditError } = await admin
       .from("admin_audit_logs")
       .insert({
         admin_id: callerId,
@@ -173,9 +177,6 @@ Deno.serve(async (req) => {
         entity_type: "user",
         entity_id: newUserId,
         new_data: { email, full_name: fullName, role: role || null, transfer_operator_id: transferOperatorId || null },
-      })
-      .then(({ error }) => {
-        if (error) console.error("[admin-invite-user] audit insert failed", error);
       });
 
     return new Response(
@@ -186,14 +187,15 @@ Deno.serve(async (req) => {
         role: role || null,
         transfer_operator_id: transferOperatorId || null,
         invite_email_sent: true,
+        role_granted: !!role,
+        transfer_operator_linked: !!transferOperatorId,
+        audit_recorded: !auditError,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (err) {
-    console.error("[admin-invite-user] unhandled", err);
-    const message = err instanceof Error ? err.message : String(err);
+  } catch {
     return new Response(
-      JSON.stringify({ error: "Internal Server Error", message }),
+      JSON.stringify({ success: false, error: "Invitation completion is unconfirmed. Check account and access before retrying.", invite_email_sent: null }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }

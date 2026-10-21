@@ -48,6 +48,11 @@ export async function getAccessiblePropertyIds(
       : Promise.resolve({ data: [] as IdRow[], error: null }),
   ]);
 
+  // A failed authorization/data source is unknown, never an empty portfolio.
+  for (const result of [ownedRes, delegatedRes, companyRes]) {
+    if (result.error) throw result.error;
+  }
+
   const ownedIds = (ownedRes.data || []).map((p: IdRow) => p.id);
   const delegatedIds = (delegatedRes.data || []).map((d: PropertyIdRow) => d.property_id);
   const companyIds = (companyRes.data || []).map((p: IdRow) => p.id);

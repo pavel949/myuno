@@ -1,5 +1,6 @@
 import { createClient } from '../_shared/supabase.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { PROPERTY_BOOKING_RELEASE_FILTER } from '../_shared/property-inventory.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -57,8 +58,8 @@ Deno.serve(async (req) => {
     }
 
     // Initialize Supabase client with service role for public access
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // P1-2: Validate token WITH expiration check using backend function
@@ -115,7 +116,7 @@ Deno.serve(async (req) => {
       .from('property_bookings')
       .select('*')
       .eq('property_id', propertyId)
-      .neq('status', 'cancelled')
+      .not('status', 'in', PROPERTY_BOOKING_RELEASE_FILTER)
       .order('check_in', { ascending: true });
 
     if (bookingsError) {

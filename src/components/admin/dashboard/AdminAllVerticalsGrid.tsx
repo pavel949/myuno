@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
+import { useAdminDashboardStats, type DashboardCountKey } from '@/hooks/useAdminDashboardStats';
+import { useAdminCheck } from '@/hooks/useAdmin';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Surface } from '@/components/ui/surface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +45,10 @@ export function AdminAllVerticalsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data, isLoading } = useAdminDashboardStats();
+  const { data: cachedData, isLoading, isError } = useAdminDashboardStats();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const data = !isAdmin || checkingAccess || isError ? undefined : cachedData;
+  const unavailable = pickLang(language, { en: 'Unavailable', ru: 'Недоступно', th: 'ไม่พร้อมใช้งาน' });
   const [isOpen, setIsOpen] = React.useState(false);
 
   if (isLoading) {
@@ -59,14 +64,16 @@ export function AdminAllVerticalsGrid() {
     );
   }
 
-  const getCount = (key: string): number => {
-    if (!data) return 0;
-    const stats = data as unknown as Record<string, number>;
-    return stats[key] || 0;
+  const getCount = (key: string): number | null => {
+    const countKey = key as DashboardCountKey;
+    if (!data || data.sourceErrors?.[countKey]) return null;
+    const value = data[countKey];
+    return typeof value === 'number' ? value : null;
   };
 
-  const total = ALL_VERTICALS.reduce((sum, v) => sum + getCount(v.key), 0);
-  const activeVerticals = ALL_VERTICALS.filter(v => getCount(v.key) > 0);
+  const counts = ALL_VERTICALS.map(vertical => getCount(vertical.key));
+  const total = counts.every(count => count !== null) ? counts.reduce<number>((sum, count) => sum + (count ?? 0), 0) : null;
+  const activeVerticals = ALL_VERTICALS.filter(v => getCount(v.key) !== 0);
   const emptyVerticals = ALL_VERTICALS.filter(v => getCount(v.key) === 0);
 
   return (
@@ -81,7 +88,7 @@ export function AdminAllVerticalsGrid() {
                 size="sm"
               />
               <Badge variant="secondary" className="text-xs">
-                {total}
+                {total ?? unavailable}
               </Badge>
             </div>
             <ChevronDown className={cn(
@@ -110,7 +117,7 @@ export function AdminAllVerticalsGrid() {
                 <div className={cn("mb-0.5", vertical.color)}>
                   <Icon className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-semibold">{count}</p>
+                <p className="break-words text-xs font-semibold">{count ?? unavailable}</p>
                 <p className="text-[8px] text-muted-foreground truncate w-full leading-tight">
                   {isRu ? vertical.labelRu : vertical.label}
                 </p>

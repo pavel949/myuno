@@ -71,7 +71,9 @@ export function PropertyVideoUploader({
     setProgress(10);
     try {
       const ext = file.name.split('.').pop() || 'mp4';
-      const folder = ownerId || 'anon';
+      // Storage policy requires the first folder to be the uploader's own id.
+      const { data: authData } = await supabase.auth.getUser();
+      const folder = authData.user?.id ?? ownerId ?? 'anon';
       const fname = `${propertyId || crypto.randomUUID()}-${Date.now()}.${ext}`;
       const path = `${folder}/${fname}`;
 

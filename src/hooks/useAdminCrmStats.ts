@@ -4,7 +4,6 @@ import { typedFrom } from '@/lib/untypedTables';
 
 export interface AdminCrmStats {
   vendors: { total: number; active: number; won: number; conversionRate: number };
-  users: { total: number; hot: number; converted: number };
   owners: { total: number; interested: number; converted: number };
   totalLeads: number;
   activeLeads: number;
@@ -36,7 +35,6 @@ export function useAdminCrmStats() {
 
       return {
         vendors: { total: vendors.length, active: vActive, won: vWon, conversionRate: vContacted > 0 ? Math.round((vWon / vContacted) * 100) : 0 },
-        users: { total: 0, hot: 0, converted: 0 },
         owners: { total: owners.length, interested: oInterested, converted: oConverted },
         totalLeads,
         activeLeads,

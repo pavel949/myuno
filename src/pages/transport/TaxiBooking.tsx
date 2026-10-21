@@ -18,6 +18,7 @@ import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
 import { supabase } from '@/integrations/supabase/client';
 import { GrabTransitionCard } from '@/components/transport/GrabTransitionCard';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 // Time options generator
 const getTimeOptions = (language: string) => {
@@ -199,7 +200,7 @@ export default function TaxiBooking() {
     
     if (!user) {
       toast.error(language === 'ru' ? 'Требуется авторизация' : 'Login Required');
-      navigate('/auth');
+      redirectToAuth(navigate);
       return;
     }
 

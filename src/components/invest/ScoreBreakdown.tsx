@@ -68,7 +68,7 @@ export function ScoreBreakdown({
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-2 text-sm font-medium">
         <Target className="h-4 w-4 text-primary" />
-        <span>{isRu ? 'Детализация оценки muUNO' : 'muUNO Score Breakdown'}</span>
+        <span>{isRu ? 'Детализация оценки myUNO' : 'myUNO Score Breakdown'}</span>
       </div>
 
       <div className="space-y-3">

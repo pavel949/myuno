@@ -24,6 +24,7 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function CleaningBooking() {
   const { id } = useParams<{ id: string }>();
@@ -62,7 +63,7 @@ export default function CleaningBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/cleaning/${id}/book` } });
+    redirectToAuth(navigate, { from: `/cleaning/${id}/book` });
     return null;
   }
   
@@ -116,6 +117,9 @@ export default function CleaningBooking() {
     if (paymentMethod === 'online') {
       await createCheckout('create-cleaning-checkout', {
         provider_id: service.providerId,
+        // Catalogue row id (URL param) so the edge function can validate the
+        // price server-side against cleaning_services (anti-tampering).
+        service_id: id,
         provider_name: language === 'ru' ? service.nameRu : service.nameEn,
         service_name: language === 'ru' ? service.nameRu : service.nameEn,
         service_price: service.price,

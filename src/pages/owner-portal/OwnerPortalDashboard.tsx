@@ -105,10 +105,17 @@ export default function OwnerPortalDashboard() {
 
       {/* Quick actions for owner */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/statements')}>
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow relative"
+          role="button"
+          tabIndex={0}
+          aria-label={isRu ? 'Отчёты' : 'Statements'}
+          onClick={() => navigate('/my-property/statements')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/my-property/statements'); } }}
+        >
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
-              <FileCheck className="w-4 h-4 text-primary" />
+              <FileCheck className="w-4 h-4 text-primary" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
@@ -127,10 +134,17 @@ export default function OwnerPortalDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow relative" onClick={() => navigate('/my-property/signatures')}>
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow relative"
+          role="button"
+          tabIndex={0}
+          aria-label={isRu ? 'Документы' : 'Documents'}
+          onClick={() => navigate('/my-property/signatures')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/my-property/signatures'); } }}
+        >
           <CardContent className="p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
-              <FileSignature className="w-4 h-4 text-primary" />
+              <FileSignature className="w-4 h-4 text-primary" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
@@ -159,10 +173,14 @@ export default function OwnerPortalDashboard() {
           const title = isRu ? (prop.title_ru || prop.title) : prop.title;
           
           return (
-            <Card 
-              key={portal.id} 
+            <Card
+              key={portal.id}
               className="cursor-pointer hover:shadow-md transition-shadow group"
+              role="button"
+              tabIndex={0}
+              aria-label={isRu ? `Открыть объект: ${title || 'Объект'}` : `Open property: ${title || 'Property'}`}
               onClick={() => navigate(`/my-property/${portal.property_id}`)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/my-property/${portal.property_id}`); } }}
             >
               <CardContent className="p-0">
                 <div className="flex gap-4">

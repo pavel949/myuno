@@ -8,6 +8,7 @@ import { DocumentMode } from './modes/DocumentMode';
 import { AvatarMode } from './modes/AvatarMode';
 import { SingleImageMode } from './modes/SingleImageMode';
 import { cn } from '@/lib/utils';
+import type { MediaModalLayer } from './shared/mediaModalLayer';
 
 export type UploadMode = 'gallery' | 'document' | 'avatar' | 'single';
 export type DocumentType = 'passport' | 'driver_license' | 'insurance' | 'visa' | 'other';
@@ -44,6 +45,7 @@ export interface UnifiedMediaUploaderProps {
   enableQualityTips?: boolean;
   
   // UI
+  modalLayer?: MediaModalLayer;
   className?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -75,6 +77,7 @@ export function UnifiedMediaUploader({
   enableEditing = true,
   enableQualityTips = true,
   className,
+  modalLayer,
   placeholder,
   disabled = false,
 }: UnifiedMediaUploaderProps) {
@@ -98,6 +101,7 @@ export function UnifiedMediaUploader({
           {...commonProps}
           value={Array.isArray(value) ? value : value ? [value] : []}
           onChange={(urls) => onChange(urls)}
+          modalLayer={modalLayer}
           maxItems={maxItems}
           enableCloudImport={enableCloudImport}
           enableUrlImport={enableUrlImport}

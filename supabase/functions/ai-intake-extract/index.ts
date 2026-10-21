@@ -208,19 +208,36 @@ async function resolveMapsCoords(url: string): Promise<{ lat: number; lng: numbe
  * Works ONLY when the folder is shared "Anyone with the link". Uses the public
  * key endpoint that does not require OAuth for publicly-shared folders.
  */
-async function listDriveFolderImages(folderId: string): Promise<Array<{ id: string; name: string; mimeType: string }>> {
+async function listDriveFolderImages(
+  folderId: string,
+): Promise<{ items: Array<{ id: string; name: string; mimeType: string }>; error?: string }> {
   // Public Drive listing without API key works when the folder is publicly shared
   // by scraping the folder HTML page (Drive embeds file metadata in JSON).
+  // Distinguish "folder unreachable" from "folder genuinely empty" so the admin
+  // can tell whether sharing is misconfigured vs. there are simply no images.
   try {
-    const html = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`).then(r => r.text());
+    const resp = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`);
+    if (!resp.ok) {
+      return {
+        items: [],
+        error: `Drive folder not reachable (HTTP ${resp.status}) — confirm it is shared "Anyone with the link".`,
+      };
+    }
+    const html = await resp.text();
     // Each file entry has a div with id starting with 'entry-' and data attributes
     const ids = Array.from(html.matchAll(/href="https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/g))
       .map(m => m[1]);
     const unique = Array.from(new Set(ids)).slice(0, MAX_DRIVE_IMAGES);
-    return unique.map(id => ({ id, name: `${id}.jpg`, mimeType: "image/jpeg" }));
+    if (unique.length === 0) {
+      return {
+        items: [],
+        error: 'Drive folder returned no files — it may be empty or not publicly shared.',
+      };
+    }
+    return { items: unique.map(id => ({ id, name: `${id}.jpg`, mimeType: "image/jpeg" })) };
   } catch (e) {
     console.warn("Drive folder list failed", e);
-    return [];
+    return { items: [], error: `Drive folder listing failed: ${(e as Error)?.message ?? e}` };
   }
 }
 
@@ -267,13 +284,15 @@ async function importDriveImages(
   driveUrl: string,
   supabaseAdmin: any,
   ownerKey: string,
-): Promise<{ urls: string[]; tried: number; saved: number }> {
+): Promise<{ urls: string[]; tried: number; saved: number; warnings: string[] }> {
+  const warnings: string[] = [];
   const parsed = parseDriveUrl(driveUrl);
-  if (!parsed) return { urls: [], tried: 0, saved: 0 };
+  if (!parsed) return { urls: [], tried: 0, saved: 0, warnings: ['Unrecognized Google Drive URL.'] };
 
   let fileIds: string[] = [];
   if (parsed.kind === "folder") {
-    const items = await listDriveFolderImages(parsed.id);
+    const { items, error } = await listDriveFolderImages(parsed.id);
+    if (error) warnings.push(error);
     fileIds = items.map(i => i.id);
   } else {
     fileIds = [parsed.id];
@@ -281,9 +300,13 @@ async function importDriveImages(
 
   const urls: string[] = [];
   let saved = 0;
+  let failed = 0;
   for (const fid of fileIds) {
     const dl = await downloadDriveFile(fid);
-    if (!dl) continue;
+    if (!dl) {
+      failed++;
+      continue;
+    }
     const ext = extFromMime(dl.contentType);
     const path = `intake/${ownerKey}/${Date.now()}-${fid}.${ext}`;
     const { error } = await supabaseAdmin.storage
@@ -291,15 +314,28 @@ async function importDriveImages(
       .upload(path, dl.bytes, { contentType: dl.contentType, upsert: false });
     if (error) {
       console.warn("Storage upload failed", path, error.message);
+      failed++;
       continue;
     }
     const { data: pub } = supabaseAdmin.storage.from(STORAGE_BUCKET).getPublicUrl(path);
     if (pub?.publicUrl) {
       urls.push(pub.publicUrl);
       saved++;
+    } else {
+      failed++;
     }
   }
-  return { urls, tried: fileIds.length, saved };
+
+  // Surface partial / total failures so the admin isn't left with a silent empty gallery.
+  if (fileIds.length > 0 && saved === 0) {
+    warnings.push(
+      `Found ${fileIds.length} Drive file(s) but imported 0 — files are likely not shared "Anyone with the link".`,
+    );
+  } else if (failed > 0) {
+    warnings.push(`Imported ${saved} of ${fileIds.length} Drive images; ${failed} could not be downloaded.`);
+  }
+
+  return { urls, tried: fileIds.length, saved, warnings };
 }
 
 // ---------- Main ----------
@@ -417,13 +453,14 @@ Rules:
     }
 
     // -------- Step 4: Import Drive images into storage --------
-    const driveStats: { tried: number; saved: number; error?: string } = { tried: 0, saved: 0 };
+    const driveStats: { tried: number; saved: number; error?: string; warnings?: string[] } = { tried: 0, saved: 0 };
     if (driveUrl && SUPABASE_URL && SERVICE_ROLE) {
       try {
         const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE);
-        const { urls: photoUrls, tried, saved } = await importDriveImages(driveUrl, supabaseAdmin, userId);
+        const { urls: photoUrls, tried, saved, warnings } = await importDriveImages(driveUrl, supabaseAdmin, userId);
         driveStats.tried = tried;
         driveStats.saved = saved;
+        if (warnings.length > 0) driveStats.warnings = warnings;
         if (photoUrls.length > 0) {
           extracted.images = photoUrls;
           extracted.cover_image = photoUrls[0];

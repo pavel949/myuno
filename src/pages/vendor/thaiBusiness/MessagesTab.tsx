@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Send, Loader2, ChevronLeft, MessagesSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -64,6 +65,7 @@ export function MessagesTab({ businessId }: { businessId: string }) {
         </div>
         <form className="flex gap-2 border-t border-border p-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <Input value={text} onChange={(e) => setText(e.target.value)} placeholder={t('thai.chat.placeholder')} />
+          <VoiceInputButton variant="outline" onTranscript={(v) => setText((prev) => appendTranscript(prev, v))} />
           <Button type="submit" size="icon" disabled={send.isPending || !text.trim()}>
             {send.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>

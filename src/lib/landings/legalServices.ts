@@ -43,14 +43,14 @@ export const LEGAL_SERVICES: Record<LegalServiceId, LegalServiceConfig> = {
   company: {
     id: 'company', emoji: '🏢',
     hero: {
-      ru: { eyebrow: 'КОМПАНИЯ · ТАИЛАНД', title: 'Открытие компании в Таиланде', subtitle: 'Co. Ltd., BOI, USRO, представительство. Подбор структуры под ваш бизнес и долгосрочную визу.' },
-      en: { eyebrow: 'COMPANY · THAILAND', title: 'Thai company formation', subtitle: 'Co. Ltd., BOI, USRO, rep office. Structure tailored to your business and long-term visa.' },
-      th: { eyebrow: 'บริษัท · ประเทศไทย', title: 'จดทะเบียนบริษัทในประเทศไทย', subtitle: 'Co. Ltd., BOI, USRO, สำนักงานตัวแทน เลือกโครงสร้างที่เหมาะกับธุรกิจและวีซ่าระยะยาวของคุณ' },
+      ru: { eyebrow: 'КОМПАНИЯ · ТАИЛАНД', title: 'Открытие компании в Таиланде', subtitle: 'Регистрация и подбор законной структуры под вид деятельности. Требования к владению, лицензиям и документам уточняются с юристом.' },
+      en: { eyebrow: 'COMPANY · THAILAND', title: 'Thai company formation', subtitle: 'Company formation and a lawful structure for your activity. Ownership, licensing and document requirements are reviewed with a lawyer.' },
+      th: { eyebrow: 'บริษัท · ประเทศไทย', title: 'จดทะเบียนบริษัทในประเทศไทย', subtitle: 'จดทะเบียนและเลือกโครงสร้างที่ถูกกฎหมายตามกิจกรรมธุรกิจ ตรวจสอบผู้ถือหุ้น ใบอนุญาต และเอกสารกับทนายความ' },
     },
     bullets: {
-      ru: ['Регистрация Co. Ltd. за 2-3 недели', 'BOI-структура для IT/туризма с налоговыми льготами', 'Тайские номиналы с прозрачным договором', 'Бухгалтер и подача отчётности — отдельная подписка'],
-      en: ['Co. Ltd. registration in 2-3 weeks', 'BOI structure for IT/tourism with tax incentives', 'Thai nominees with a transparent contract', 'Accountant & filings — separate retainer'],
-      th: ['จดทะเบียน Co. Ltd. ภายใน 2-3 สัปดาห์', 'โครงสร้าง BOI สำหรับ IT/ท่องเที่ยว พร้อมสิทธิประโยชน์ทางภาษี', 'นอมินีไทยพร้อมสัญญาโปร่งใส', 'นักบัญชีและยื่นภาษีคิดค่าบริการรายเดือนแยก'],
+      ru: ['Подготовка документов для регистрации компании', 'Оценка применимости BOI и необходимых разрешений', 'Проверка законности структуры владения с юристом', 'Бухгалтер и подача отчётности — отдельная подписка'],
+      en: ['Preparation of company registration documents', 'Assessment of BOI eligibility and required permissions', 'Legal review of the proposed ownership structure', 'Accountant & filings — separate retainer'],
+      th: ['เตรียมเอกสารสำหรับจดทะเบียนบริษัท', 'ประเมินสิทธิ BOI และใบอนุญาตที่จำเป็น', 'ตรวจสอบโครงสร้างการถือหุ้นให้ถูกต้องตามกฎหมาย', 'นักบัญชีและยื่นภาษีคิดค่าบริการรายเดือนแยก'],
     },
     ctaPrimary: {
       label: { ru: 'Записаться на консультацию', en: 'Book a consultation', th: 'นัดหมายปรึกษา' },
@@ -59,11 +59,11 @@ export const LEGAL_SERVICES: Record<LegalServiceId, LegalServiceConfig> = {
     faq: [
       {
         q: { ru: 'Нужно ли мне быть в Таиланде?', en: 'Do I have to be in Thailand?', th: 'ต้องอยู่ในประเทศไทยไหม?' },
-        a: { ru: 'Для подписания учредительных документов — да, хотя бы на 1-2 дня. Остальное можно дистанционно через доверенность.', en: 'To sign founder documents — yes, at least 1-2 days. Everything else can be done remotely via PoA.', th: 'ต้องอยู่ในไทย 1-2 วันเพื่อเซ็นเอกสารจัดตั้งบริษัท นอกนั้นทำผ่านหนังสือมอบอำนาจระยะไกลได้' },
+        a: { ru: 'Порядок подписания и возможность удалённого оформления зависят от выбранной структуры и документов. Уточним их до начала работы.', en: 'Signing and remote handling depend on the selected structure and documents. Confirm these requirements before work begins.', th: 'การลงนามและการดำเนินการทางไกลขึ้นอยู่กับโครงสร้างและเอกสารที่เลือก ต้องยืนยันข้อกำหนดก่อนเริ่มงาน' },
       },
       {
         q: { ru: 'Сколько стоит открытие?', en: 'How much does it cost?', th: 'ค่าจดทะเบียนเท่าไหร่?' },
-        a: { ru: 'От ฿35,000 за Co. Ltd. под ключ + государственные сборы.', en: 'From ฿35,000 turnkey Co. Ltd. + government fees.', th: 'เริ่มต้น ฿35,000 สำหรับ Co. Ltd. ครบวงจร + ค่าธรรมเนียมราชการ' },
+        a: { ru: 'Стоимость услуг, государственные сборы и сроки согласуются после разбора задачи, до начала работы.', en: 'Service fees, government charges and timing are agreed after reviewing your requirements and before work begins.', th: 'ตกลงค่าบริการ ค่าธรรมเนียมราชการ และระยะเวลาหลังตรวจสอบความต้องการและก่อนเริ่มงาน' },
       },
     ],
   },

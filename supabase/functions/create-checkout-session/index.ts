@@ -2,13 +2,12 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { getAllowedOrigin } from '../_shared/cors.ts';
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -81,8 +80,11 @@ Deno.serve(async (req) => {
       console.info("Created new customer:", customerId);
     }
 
-    // Get origin for redirect URLs
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+    // Get origin for redirect URLs. The raw Origin header is attacker-controlled
+    // and is interpolated into the Stripe success/cancel URLs, so validate it
+    // against the allow-list (unknown origins fall back to the canonical site)
+    // to prevent an open-redirect on the post-payment flow.
+    const origin = getAllowedOrigin(req.headers.get("origin"));
     
     // Create Checkout Session with card and PromptPay (Thai QR)
     // Note: PromptPay only works with THB currency

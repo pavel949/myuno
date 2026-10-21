@@ -69,16 +69,18 @@ function mapVisaStatus(s?: string | null): RequestStatus {
   }
 }
 
-async function fetchRequests(userId: string): Promise<MyRequest[]> {
+async function fetchRequests(userId: string): Promise<{ requests: MyRequest[]; failedSources: RequestSource[] }> {
   const out: MyRequest[] = [];
+  const failedSources: RequestSource[] = [];
 
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('concierge_sessions')
       .select('id, goal, status, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(20);
+    if (error) throw error;
     for (const r of data ?? []) {
       const s = (r.status as string) ?? 'open';
       const status: RequestStatus =
@@ -95,15 +97,16 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
         detailPath: '/me/services',
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('concierge'); }
 
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('visa_records')
       .select('id, visa_type, status, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(20);
+    if (error) throw error;
     for (const r of data ?? []) {
       out.push({
         id: `visa-${r.id}`,
@@ -115,15 +118,16 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
         detailPath: '/visa',
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('visa'); }
 
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .select('id, order_number, order_type, vertical, status, created_at')
       .eq('customer_user_id', userId)
       .order('created_at', { ascending: false })
       .limit(30);
+    if (error) throw error;
     for (const r of data ?? []) {
       out.push({
         id: `order-${r.id}`,
@@ -135,15 +139,16 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
         detailPath: `/orders/${r.id}/tracking`,
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('order'); }
 
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('help_requests')
       .select('id, topic, subject, message, status, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(30);
+    if (error) throw error;
     for (const r of data ?? []) {
       const s = (r.status as string) ?? 'new';
       const status: RequestStatus =
@@ -163,18 +168,20 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
         detailPath: '/me/requests',
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('help'); }
 
   out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  return out;
+  return { requests: out, failedSources };
 }
 
 export function useMyRequests() {
   const { user } = useAuth();
-  return useQuery({
+  const query = useQuery({
     queryKey: ['me-requests', user?.id ?? null],
-    queryFn: () => (user ? fetchRequests(user.id) : Promise.resolve([] as MyRequest[])),
+    queryFn: () => (user ? fetchRequests(user.id) : Promise.resolve({ requests: [] as MyRequest[], failedSources: [] as RequestSource[] })),
     enabled: !!user,
     staleTime: 60_000,
   });
+  // Keep the public requests-array API while retaining source-level read completeness.
+  return { ...query, data: query.data?.requests, failedSources: query.data?.failedSources ?? [] };
 }

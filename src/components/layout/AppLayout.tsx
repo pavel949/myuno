@@ -7,12 +7,10 @@ const ActiveSituationBanner = lazy(() =>
     default: m.ActiveSituationBanner,
   })),
 );
-import { useIsDesktop } from '@/hooks/use-desktop';
+import { useNavShellActive } from '@/components/nav/NavShellContext';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { useUserTracking } from '@/hooks/useUserTracking';
 import { usePlatformAnalytics } from '@/hooks/usePlatformAnalytics';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
-import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { NavShell } from '@/components/nav/NavShell';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -30,7 +28,7 @@ export interface AppLayoutProps {
   className?: string;
   contentClassName?: string;
   /**
-   * `consumer` (default): auth-driven nav + consumer-only chrome (banners, install CTAs).
+   * `consumer` (default): consumer navigation and account verification banners.
    * `workspace`: fixed-role shell without consumer marketing surfaces; respects `showFooter` on all breakpoints.
    */
   variant?: 'consumer' | 'workspace';
@@ -49,10 +47,10 @@ export interface AppLayoutProps {
 /**
  * AppLayout — unified shell over `NavShell` for consumer browsing and workspace roles.
  *
- * - **Consumer**: PWA install / email verification / situation banners + optional `ECOSYSTEM_PAGE_CONTAINER`.
+ * - **Consumer**: email verification / optional situation banners + optional `ECOSYSTEM_PAGE_CONTAINER`.
  * - **Workspace**: same nav chrome as legacy `*Layout` wrappers (MCLayout, Admin, …) without consumer-only blocks.
  */
-export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
+const RootAppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
   (
     {
       children,
@@ -69,7 +67,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     },
     ref
   ) => {
-    const isDesktop = useIsDesktop();
     const { activeRole } = useUserContext();
     const { isMCPortal } = useOwnerType();
     useUserTracking();
@@ -78,9 +75,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const isWorkspace = variant === 'workspace';
     const usePageContainer = usePageContainerProp ?? !isWorkspace;
 
-    // Consumer: legacy behavior — desktop shows footer unless mobile-only pages opt out via showFooter.
-    // Workspace: always respect `showFooter` on every breakpoint.
-    const finalShowFooter = isWorkspace ? showFooter : isDesktop ? true : showFooter;
+    const finalShowFooter = showFooter;
 
     const consumerChrome = !isWorkspace;
 
@@ -111,7 +106,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
               <ActiveSituationBanner />
             </Suspense>
           )}
-          {consumerChrome && <InstallBanner />}
 
           {usePageContainer ? (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>{children}</div>
@@ -120,11 +114,19 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
           )}
 
           {finalShowFooter && <Footer />}
-          {consumerChrome && <MobileInstallSheet />}
         </div>
       </NavShell>
     );
   }
 );
 
+RootAppLayout.displayName = 'RootAppLayout';
+
+export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>((props, ref) => {
+  const hasParentShell = useNavShellActive();
+  // A route layout owns navigation. Nested feature pages provide content only;
+  // they must not restart analytics, banners or identity queries either.
+  if (hasParentShell) return <div ref={ref} className="contents">{props.children}</div>;
+  return <RootAppLayout ref={ref} {...props} />;
+});
 AppLayout.displayName = 'AppLayout';

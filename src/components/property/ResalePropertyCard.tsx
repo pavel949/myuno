@@ -1,5 +1,11 @@
 /**
- * ResalePropertyCard — card for secondary market listings
+ * ResalePropertyCard — canonical card for secondary-market listings.
+ *
+ * Kept separate from PropertyListingCard on purpose: it renders a different entity
+ * (`ResaleProperty`) with resale-specific semantics — asking vs original purchase
+ * price, assignment premium, estimated ROI, title type. Merging it into the rental
+ * marketplace card would require union-typing two unrelated shapes, so this stays a
+ * domain card alongside commercial/hotel/land variants.
  */
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';

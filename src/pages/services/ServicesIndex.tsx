@@ -1,402 +1,169 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Info, MessageCircle, Wrench, Zap, ChevronRight } from "lucide-react";
-import { MiniAppLayout } from "@/components/miniapp/MiniAppLayout";
-import { EmptyState } from "@/components/uno/EmptyState";
-import { useServiceFunctions, type LocalizedServiceFunction } from "@/hooks/useServiceFunctions";
-import { ServiceFunctionCard } from "@/components/services";
-import { CrossSellSection } from "@/components/crosssell";
-import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServiceFunctions";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { usePersonaFilter } from "@/hooks/usePersonaFilter";
+import { pickLang } from '@/lib/i18n/pickLang';
+import '@/styles/public-commerce.css';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { lazy, Suspense, useState } from 'react';
+import { Wrench, Car, Users, LayoutGrid, Snowflake, Brush, Droplets, ClipboardList, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { MiniAppLayout, type MiniAppLayoutProps } from '@/components/miniapp/MiniAppLayout';
+import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { useServiceFunctions } from '@/hooks/useServiceFunctions';
+import { ServiceFunctionCard } from '@/components/services';
+import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
+import { cn } from '@/lib/utils';
+import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
+import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 
-/**
- * URL-slug → SERVICE_CATEGORIES.id normaliser.
- *
- * The catalog SSOT (`src/lib/catalog/taxonomy.ts`) and various deep links
- * (Discover, SOS, cross-sells, /wedding, /hooks/useCategories) route services
- * to `/services?category=<slug>`, but SERVICE_CATEGORIES uses underscores +
- * different keys. Without this mapping every deep link from Discover landed
- * on "all services" and looked broken. Keep new aliases here.
- */
-const CATEGORY_ALIAS: Record<string, ServiceCategory> = {
-  laundry: 'cleaning',
-  'pest-control': 'pest_control',
-  pest_control: 'pest_control',
-  'ac-repair': 'ac',
-  gardening: 'garden',
-  locksmith: 'security',
-  storage: 'moving',
-  // Slugs referenced from SOS / wedding / global search / categories hook
-  // that have no dedicated SERVICE_CATEGORIES bucket: map to nearest trade
-  // so the chip lights up, and rely on CATEGORY_INTRO for the landing copy.
-  'road-assistance': 'handyman',
-  photography: 'handyman',
-  maintenance: 'handyman',
-  'property-management': 'cleaning',
+const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
+
+// Only equivalent names are aliases. Unavailable trades must not silently
+// become a different service (e.g. photography → handyman).
+
+const CATEGORY_ALIAS: Record<string, string> = {
+  'pest-control': 'pest_control', 'ac-repair': 'ac', gardening: 'garden',
 };
 
-/**
- * Bilingual one-liner shown above the grid when the user lands on a
- * category-deep-linked page from Discover. Covers categories that don't
- * have a per-service booking flow today — gives users a WhatsApp path
- * to the coordinator instead of an empty list.
- */
-const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; descRu: string; descEn: string }> = {
-  laundry:        { titleRu: 'Прачечная с доставкой', titleEn: 'Laundry & dry-cleaning',
-                    descRu: 'Опишите задачу — координатор найдёт проверенную прачечную и привезёт чистое.',
-                    descEn: 'Tell us what you need — our coordinator picks a vetted laundry and delivers.' },
-  pest_control:   { titleRu: 'Дезинсекция',           titleEn: 'Pest control',
-                    descRu: 'Опишите проблему — пришлём специалиста с сертификатом в течение 24 ч.',
-                    descEn: 'Describe the pest — we send a certified specialist within 24 h.' },
-  handyman:       { titleRu: 'Мастер на час',         titleEn: 'Handyman',
-                    descRu: 'Опишите, что нужно сделать — мастер с инструментами приедет в течение 2 ч.',
-                    descEn: 'Describe the task — a handyman with tools shows up within 2 hours.' },
-  plumbing:       { titleRu: 'Сантехника',            titleEn: 'Plumbing',
-                    descRu: 'Опишите проблему — фотофиксация, смета до выезда, работа в день обращения.',
-                    descEn: 'Describe the issue — photo quote up front, work the same day.' },
-  electrical:     { titleRu: 'Электрика',             titleEn: 'Electrical',
-                    descRu: 'Опишите задачу — лицензированный электрик с протоколом безопасности.',
-                    descEn: 'Describe the job — licensed electrician with safety protocol.' },
-  ac:             { titleRu: 'Кондиционеры',          titleEn: 'Air conditioning',
-                    descRu: 'Чистка, дозаправка фреона, ремонт — фикс-ставки, без сюрпризов.',
-                    descEn: 'Cleaning, refrigerant top-up, repair — fixed rates, no surprises.' },
-  security:       { titleRu: 'Замки',                 titleEn: 'Locksmith',
-                    descRu: 'Срочно — на месте за час. Плановая замена — в удобное время.',
-                    descEn: 'Urgent — on-site within an hour. Planned change — at your time.' },
-  garden:         { titleRu: 'Сад и двор',            titleEn: 'Garden & yard',
-                    descRu: 'Стрижка, полив, уход за пальмами и орхидеями. Разово или по графику.',
-                    descEn: 'Trimming, watering, palm and orchid care. One-off or scheduled.' },
-  moving:         { titleRu: 'Переезд и хранение',    titleEn: 'Moving & storage',
-                    descRu: 'Локальные переезды и склад для вещей. Опишите объём — пришлём смету.',
-                    descEn: 'Local moves and storage. Tell us the volume — we send a quote.' },
-  // Categories without dedicated inventory — chip points to nearest trade,
-  // intro card explains the real service path (coordinator dispatches).
-  'road-assistance':     { titleRu: 'Помощь на дороге',  titleEn: 'Roadside assistance',
-                            descRu: 'Замена колеса, прикурить, эвакуатор. Координатор подключит ближайшую бригаду 24/7.',
-                            descEn: 'Tyre change, jump-start, tow truck. Coordinator dispatches the nearest crew 24/7.' },
-  photography:           { titleRu: 'Фото и видео',       titleEn: 'Photo & video',
-                            descRu: 'Свадьба, семейная съёмка, контент для бизнеса. Подберём команду под бюджет и стиль.',
-                            descEn: 'Wedding, family shoot, business content. We match a team to your budget and style.' },
-  maintenance:           { titleRu: 'Обслуживание дома',  titleEn: 'Home maintenance',
-                            descRu: 'Регулярный осмотр и плановые работы. Опишите объект — соберём пакет.',
-                            descEn: 'Routine inspections and planned works. Tell us about the property — we build a package.' },
-  'property-management': { titleRu: 'Управление недвижимостью', titleEn: 'Property management',
-                            descRu: 'Уборка, чек-ин гостей, оплата счетов. Опишите задачу — подключим МС-партнёра.',
-                            descEn: 'Cleaning, guest check-in, bill pay. Tell us the scope — we plug in an MC partner.' },
-};
-
-const COORDINATOR_WHATSAPP = '66922407355';
-
-function whatsappLink(categoryLabel: string, language: 'ru' | 'en'): string {
-  const summary = language === 'ru'
-    ? `Здравствуйте! Нужна помощь по категории «${categoryLabel}». Опишу детали в ответ.`
-    : `Hello! I need help with "${categoryLabel}". I'll describe the details in a follow-up.`;
-  return `https://wa.me/${COORDINATOR_WHATSAPP}?text=${encodeURIComponent(summary)}`;
+function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
+  return <div className="public-commerce public-commerce--services space-y-6">
+    <header className="space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
+    <Input type="search" aria-label={searchPlaceholder} placeholder={searchPlaceholder} value={searchValue} onChange={event => onSearchChange?.(event.target.value)} />
+    {children}
+  </div>;
 }
 
-type SortMode = 'default' | 'popular' | 'rating';
-
-export default function ServicesIndex() {
+export default function ServicesIndex({ embedded = false }: { embedded?: boolean } = {}) {
   const { language } = useLanguage();
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isRu = language === 'ru';
+  const [params, setParams] = useSearchParams();
+  const { functions, categories, search } = useServiceFunctions();
+  const { applyFilter } = usePersonaFilter();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const query = params.get('q') ?? '';
+  const rawCategory = params.get('category') ?? params.get('type') ?? 'all';
+  const category = CATEGORY_ALIAS[rawCategory] ?? rawCategory;
+  const unknownCategory = category !== 'all' && !SERVICE_CATEGORIES.some(c => c.id === category);
+  const returnTo = location.pathname + location.search;
+  const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  // Original URL slug, preserved for intro-card lookup. The chip ribbon uses
-  // the aliased SERVICE_CATEGORIES id (e.g. laundry → cleaning), but the
-  // intro card is keyed by the discovery slug so /services?category=laundry
-  // still shows the laundry-specific WhatsApp landing copy.
-  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
-  const [sortMode, setSortMode] = useState<SortMode>('default');
-  // True when the URL pointed to a slug we couldn't map anywhere — drives
-  // the "Не нашли категорию" banner so users aren't stuck on a silent page.
-  const [unknownSlug, setUnknownSlug] = useState<string | null>(null);
+  let requests = query.trim() ? search(query) : functions;
+  if (category !== 'all') requests = requests.filter(fn => fn.category === category);
+  requests = applyFilter(requests, fn => [fn.category, fn.id]);
+  if (params.get('sort') === 'popular' || params.get('sort') === 'rating') {
+    requests = [...requests].sort((a, b) => Number(Boolean(b.isPopular)) - Number(Boolean(a.isPopular)));
+  }
 
-  const { functions, categories, popular, search, getFunctionsByCategory } = useServiceFunctions();
-  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
-
-  // Single source of truth for URL → state. Supports `category` (canonical)
-  // and `type` (legacy alias used by BookingCrossSellSheet, TripServicesGrid,
-  // crossSellConfig), plus `sort` and `q`.
-  useEffect(() => {
-    const rawSlug = searchParams.get('category') ?? searchParams.get('type');
-    const sortParam = searchParams.get('sort');
-    const qParam = searchParams.get('q');
-
-    if (rawSlug) {
-      const aliased = CATEGORY_ALIAS[rawSlug] ?? rawSlug;
-      const knownInRibbon = SERVICE_CATEGORIES.some(c => c.id === aliased);
-      const knownInIntro = Boolean(CATEGORY_INTRO[rawSlug]);
-      if (knownInRibbon) {
-        setSelectedCategory(aliased);
-        setOriginalSlug(rawSlug);
-        setUnknownSlug(null);
-      } else if (knownInIntro) {
-        // No catalogue match but we have intro copy — keep chip on All so the
-        // user still sees the full grid, but render the targeted landing card.
-        setSelectedCategory('all');
-        setOriginalSlug(rawSlug);
-        setUnknownSlug(null);
-      } else {
-        // Completely unknown slug → fallback: All chip + auto-search.
-        setSelectedCategory('all');
-        setOriginalSlug(null);
-        setUnknownSlug(rawSlug);
-      }
-    } else {
-      setSelectedCategory('all');
-      setOriginalSlug(null);
-      setUnknownSlug(null);
-    }
-
-    if (sortParam === 'popular' || sortParam === 'rating') {
-      setSortMode(sortParam);
-    } else {
-      setSortMode('default');
-    }
-
-    // q wins over unknown-slug auto-search.
-    if (qParam) {
-      setSearchQuery(qParam);
-    } else if (rawSlug && !CATEGORY_ALIAS[rawSlug] && !SERVICE_CATEGORIES.some(c => c.id === rawSlug) && !CATEGORY_INTRO[rawSlug]) {
-      setSearchQuery(rawSlug.replace(/-/g, ' '));
-    } else {
-      setSearchQuery('');
-    }
-  }, [searchParams]);
-
-  const introCategoryKey = originalSlug ?? (selectedCategory === 'all' ? null : selectedCategory);
-  const intro = introCategoryKey ? CATEGORY_INTRO[introCategoryKey] : null;
-  const introCategoryLabel = intro ? (isRu ? intro.titleRu : intro.titleEn) : '';
-
-  const filteredFunctions = useMemo(() => {
-    let result: LocalizedServiceFunction[] = [];
-
-    if (selectedCategory === 'all') {
-      result = functions;
-    } else {
-      result = getFunctionsByCategory(selectedCategory as ServiceCategory);
-    }
-
-    if (searchQuery.trim()) {
-      result = search(searchQuery);
-      if (selectedCategory !== 'all') {
-        result = result.filter(fn => fn.category === selectedCategory);
-      }
-    }
-
-    result = applyPersonaFilter(result, (fn) => {
-      const raw = fn as unknown as Record<string, unknown>;
-      const tags = (raw.tags as string[] | null) ?? [];
-      return [...tags, fn.category, fn.id].filter(Boolean) as string[];
-    });
-
-    // `rating` is not yet on LocalizedServiceFunction — degrade to popular.
-    if (sortMode === 'popular' || sortMode === 'rating') {
-      result = [...result].sort((a, b) => Number(Boolean(b.isPopular)) - Number(Boolean(a.isPopular)));
-    }
-
-    return result;
-  }, [functions, selectedCategory, searchQuery, sortMode, getFunctionsByCategory, search, applyPersonaFilter]);
-
-  const categoryRibbon = useMemo(() => [
-    { id: 'all', labelEn: 'All Services', labelRu: 'Все услуги' },
-    ...categories.map(c => {
-      const sc = SERVICE_CATEGORIES.find(sc => sc.id === c.id);
-      return {
-        id: c.id as string,
-        labelEn: sc?.nameEn || c.name,
-        labelRu: sc?.nameRu || c.name,
-      };
-    }),
-  ], [categories]);
-
-  const handleFunctionClick = (fn: LocalizedServiceFunction) => {
-    navigate(`/services/order/${fn.id}`);
+  const update = (key: 'q' | 'category', value: string) => {
+    const next = new URLSearchParams(params);
+    if (value && value !== 'all') next.set(key, value);
+    else next.delete(key);
+    if (key === 'category') next.delete('type');
+    setParams(next, { replace: key === 'q' });
   };
-
-  const handleCategoryChange = (cat: string) => {
-    setSelectedCategory(cat);
-    setOriginalSlug(null);
-    setUnknownSlug(null);
-    const newParams = new URLSearchParams(searchParams);
-    if (cat === 'all') {
-      newParams.delete('category');
-    } else {
-      newParams.set('category', cat);
-    }
-    newParams.delete('type');
-    setSearchParams(newParams);
+  const clear = () => {
+    const next = new URLSearchParams(params);
+    ['q', 'category', 'type', 'sort'].forEach(key => next.delete(key));
+    setParams(next);
   };
-
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    const newParams = new URLSearchParams(searchParams);
-    if (value.trim()) {
-      newParams.set('q', value);
-    } else {
-      newParams.delete('q');
-    }
-    setSearchParams(newParams);
-  };
-
-  // Show the popular block when explicitly requested via ?sort=popular or
-  // on the default All-no-search view.
-  const showPopularBlock = sortMode === 'popular' || (selectedCategory === 'all' && !searchQuery);
-
-  const subtitle = isRu
-    ? `Сантехника · электрика · уборка · ремонт · сад. ${filteredFunctions.length} услуг.`
-    : `Plumbing · electrical · cleaning · repair · garden. ${filteredFunctions.length} services.`;
+  const filtered = Boolean(query.trim()) || category !== 'all';
+  // Show a cross-section of the existing catalogue, never fabricated providers
+  // or a claim about live popularity/availability. Filtering always searches all.
+  const previews = categories.flatMap(item => {
+    const matches = requests.filter(fn => fn.category === item.id);
+    const first = matches.find(fn => fn.isPopular) ?? matches[0];
+    return first ? [first] : [];
+  });
+  const visibleRequests = filtered || showAll ? requests : previews.slice(0, 8);
+  const quickCategories = [
+    { id: 'all', name: t('Все услуги для дома', 'All home services', "บริการสำหรับบ้านทั้งหมด"), icon: LayoutGrid },
+    { id: 'cleaning', name: t('Уборка', 'Cleaning', "ทำความสะอาด"), icon: Brush },
+    { id: 'ac', name: t('Кондиционеры', 'Air conditioning', "เครื่องปรับอากาศ"), icon: Snowflake },
+    { id: 'plumbing', name: t('Сантехника', 'Plumbing', "ประปา"), icon: Droplets },
+  ];
 
   return (
-    <MiniAppLayout
-      title={isRu ? 'Услуги для дома' : 'Home services'}
-      subtitle={subtitle}
-      fallbackPath="/discover"
-      categories={categoryRibbon}
-      selectedCategory={selectedCategory}
-      onCategoryChange={handleCategoryChange}
-      searchValue={searchQuery}
-      onSearchChange={handleSearchChange}
-      searchPlaceholder={isRu ? 'Поиск услуг…' : 'Search services…'}
+    <Layout
+      pageWidth="catalogue"
+      contentClassName="public-commerce public-commerce--services"
+      title={t('Услуги на Пхукете', 'Services in Phuket', "บริการในภูเก็ต")}
+      subtitle={t('Для дома, поездок и повседневных дел.', 'For your home, travel and everyday life.', "สำหรับบ้าน การเดินทาง และชีวิตประจำวันของคุณ")}
+      fallbackPath="/"
+      searchValue={query}
+      onSearchChange={value => update('q', value)}
+      searchPlaceholder={t('Поиск услуг…', 'Search services…', "ค้นหาบริการ…")}
       showHero={false}
       showFilter={false}
+      showEcosystemHint={false}
     >
-      {/* Unknown-slug fallback banner */}
-      {unknownSlug && (
-        <div className="rounded-none border border-border bg-muted/40 p-4 flex items-start gap-3">
-          <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-          <p className="text-[13px] text-muted-foreground leading-snug">
-            {isRu
-              ? <>Не нашли категорию «{unknownSlug}» — показываем похожие услуги по поиску.</>
-              : <>Couldn't find category "{unknownSlug}" — showing similar services from search.</>}
-          </p>
-        </div>
-      )}
+      <nav aria-label={t('Категории услуг', 'Service categories', "หมวดหมู่บริการ")} className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {quickCategories.map(({ id, name, icon: Icon }) => <button key={id} type="button"
+          onClick={() => update('category', id)} aria-pressed={category === id}
+          className={cn('flex min-h-16 min-w-0 items-center gap-2 border bg-card px-2 py-3 text-left text-[13px] font-medium transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:text-sm', category === id ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground')}>
+          <Icon className="h-5 w-5 shrink-0" aria-hidden="true" /><span>{name}</span>
+        </button>)}
+        <Link className="flex min-h-16 items-center gap-3 border border-border bg-card px-3 py-3 text-sm font-medium hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" to="/transport"><Car className="h-5 w-5 shrink-0" aria-hidden="true" />{t('Транспорт', 'Transport', "การเดินทาง")}</Link>
+        <Link className="flex min-h-16 items-center gap-3 border border-border bg-card px-3 py-3 text-sm font-medium hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" to="/thai-services"><Users className="h-5 w-5 shrink-0" aria-hidden="true" />{t('Местные компании', 'Local businesses', "ธุรกิจท้องถิ่น")}</Link>
+      </nav>
+      <div className="flex flex-wrap justify-between gap-2"><Link to="/trip-planner" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">{t('Спланировать поездку', 'Plan a trip', 'วางแผนการเดินทาง')}</Link><Link to="/bookings" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium underline underline-offset-4"><ClipboardList className="h-4 w-4" aria-hidden="true" />{t('Мои услуги и заявки', 'My services and requests', "บริการและคำขอของฉัน")}</Link></div>
 
-      {/* Popular Section */}
-      {showPopularBlock && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">
-              {isRu ? 'Популярные услуги' : 'Popular Services'}
-            </h3>
+      <section aria-labelledby="service-requests" className="space-y-4">
+        <header className="space-y-2">
+          <h2 id="service-requests" className="font-display text-lg">{t('Услуги для дома по запросу', 'Home service requests', "คำขอบริการสำหรับบ้าน")}</h2>
+          <p className="text-sm text-muted-foreground">{t('Цены ориентировочные. Исполнитель, время и итоговая стоимость подтверждаются после заявки.', 'Prices are estimates. The provider, time and final price are confirmed after your request.', "ราคาเป็นเพียงประมาณการ ผู้ให้บริการ เวลา และราคาสุดท้ายจะได้รับการยืนยันหลังจากส่งคำขอ")}</p>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span id="request-category-label">{t('Категория заявки', 'Request category', "หมวดหมู่คำขอ")}</span>
+            <Select value={category} onValueChange={value => update('category', value)}>
+              <SelectTrigger aria-labelledby="request-category-label" className="min-h-11 w-full sm:w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent collisionPadding={12} className="max-w-[calc(100vw-24px)]">
+                <SelectItem className="min-h-11" value="all">{t('Все категории', 'All categories', "ทุกหมวดหมู่")}</SelectItem>
+                {unknownCategory && <SelectItem className="min-h-11" value={category}>{rawCategory}</SelectItem>}
+                {categories.map(item => <SelectItem className="min-h-11" key={item.id} value={item.id}>{homeServiceCategoryLabel(item.id, language)}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid gap-2">
-            {popular.slice(0, 4).map((fn) => (
-              <ServiceFunctionCard
-                key={fn.id}
-                fn={fn}
-                onClick={() => handleFunctionClick(fn)}
-              />
-            ))}
+        </header>
+        {requests.length === 0 ? (
+          <div className="space-y-2">
+            <EmptyState icon={Wrench} title={t('Услуги не найдены', 'No services found', "ไม่พบบริการ")} />
+            <Button variant="outline" onClick={clear}>{t('Сбросить поиск и категорию', 'Clear search and category', "ล้างการค้นหาและหมวดหมู่")}</Button>
           </div>
-        </div>
-      )}
-
-      {/* Category Header when filtered */}
-      {selectedCategory !== 'all' && (
-        <div className="flex items-center gap-2">
-          <span className="text-xl">
-            {categories.find(c => c.id === selectedCategory)?.icon}
-          </span>
-          <h3 className="font-semibold">
-            {categories.find(c => c.id === selectedCategory)?.name}
-          </h3>
-          <Badge variant="secondary" className="ml-auto">
-            {filteredFunctions.length} {isRu ? 'услуг' : 'services'}
-          </Badge>
-        </div>
-      )}
-
-      {/* Category landing card — shown for categories that arrive here from
-          /discover deep links. Gives users a path even when the per-service
-          grid is empty: describe the task via WhatsApp coordinator. */}
-      {intro && (
-        <div className="rounded-none border border-border bg-card p-4 sm:p-5 space-y-3">
-          <div className="space-y-1">
-            <h4 className="font-display text-[17px] font-semibold tracking-tight text-foreground">
-              {isRu ? intro.titleRu : intro.titleEn}
-            </h4>
-            <p className="text-[13px] text-muted-foreground leading-snug">
-              {isRu ? intro.descRu : intro.descEn}
-            </p>
+        ) : (
+          <div className={PUBLIC_CATALOG_GRID} data-testid="service-request-grid">
+            {visibleRequests.map(fn => <div key={fn.id} data-service-category={fn.category} className="flex min-w-0 flex-col gap-2 [&>article]:flex-1">
+              <p className="text-sm font-medium text-muted-foreground">{homeServiceCategoryLabel(fn.category, language)}</p>
+              <ServiceFunctionCard fn={fn} catalogue onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />
+            </div>)}
           </div>
-          <Button asChild className="w-full sm:w-auto" size="lg">
-            <a
-              href={whatsappLink(introCategoryLabel, language as 'ru' | 'en')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              {isRu ? 'Описать задачу в WhatsApp' : 'Describe the task on WhatsApp'}
-            </a>
-          </Button>
-        </div>
-      )}
+        )}
+        {!filtered && !showAll && requests.length > visibleRequests.length && <Button variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setShowAll(true)}>
+          {t(`Все услуги для дома (${requests.length})`, `All home services (${requests.length})`, `บริการสำหรับบ้านทั้งหมด (${requests.length})`)}<ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+        </Button>}
+      </section>
 
-      {filteredFunctions.length === 0 ? (
-        <EmptyState
-          icon={Wrench}
-          title={isRu ? 'Услуги не найдены' : 'No services found'}
-        />
-      ) : (
-        <>
-          <div className="grid gap-3">
-            {(selectedCategory === 'all' && !searchQuery && sortMode === 'default' ? filteredFunctions.slice(0, 10) : filteredFunctions).map((fn) => (
-              <ServiceFunctionCard
-                key={fn.id}
-                fn={fn}
-                onClick={() => handleFunctionClick(fn)}
-              />
-            ))}
-          </div>
+      <section className="flex flex-col gap-4 border border-primary/15 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6" aria-labelledby="service-help-title">
+        <div className="min-w-0"><h2 id="service-help-title" className="font-display text-h3">{t('Не нашли нужную услугу?', 'Can’t find the right service?', "ไม่พบบริการที่ต้องการ?")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t('Опишите задачу — команда myUNO поможет с подбором.', 'Describe your task and the myUNO team can help you find an option.', "อธิบายสิ่งที่ต้องการ แล้วทีม myUNO จะช่วยค้นหาตัวเลือกให้คุณ")}</p></div>
+        <Button className="min-h-11 shrink-0" onClick={() => setHelpOpen(true)}>{t('Описать задачу', 'Describe your task', "อธิบายสิ่งที่ต้องการ")}</Button>
+      </section>
+      {helpOpen && <Suspense fallback={<p role="status">{t('Открываем форму…', 'Opening request form…', "กำลังเปิดแบบฟอร์มคำขอ…")}</p>}><ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic="general" initialSubject={query} sourceData={{ source: 'services_catalogue', returnTo }} /></Suspense>}
 
-          {selectedCategory === 'all' && !searchQuery && sortMode === 'default' && (
-            <div className="space-y-6">
-              {categories.map(category => {
-                const categoryFunctions = getFunctionsByCategory(category.id);
-                if (categoryFunctions.length === 0) return null;
+      <MarketplaceServiceGrid search={query} returnTo={returnTo} />
 
-                return (
-                  <div key={category.id}>
-                    <button
-                      onClick={() => handleCategoryChange(category.id)}
-                      className="flex items-center gap-2 mb-3 w-full"
-                    >
-                      <span className="text-lg">{category.icon}</span>
-                      <h3 className="font-semibold text-sm">{category.name}</h3>
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {categoryFunctions.length}
-                      </Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
-                    </button>
-                    <div className="grid gap-2">
-                      {categoryFunctions.slice(0, 3).map((fn) => (
-                        <ServiceFunctionCard
-                          key={fn.id}
-                          fn={fn}
-                          onClick={() => handleFunctionClick(fn)}
-                          compact
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      <CrossSellSection currentVertical="services" />
-    </MiniAppLayout>
+      <ol aria-label={t('Как оставить заявку', 'How requests work', "ขั้นตอนการส่งคำขอ")} className="grid gap-5 border-t border-border pt-6 md:grid-cols-3">
+        {[
+          [t('Выберите услугу', 'Choose a service', "เลือกบริการ"), t('Найдите подходящую услугу или опишите задачу.', 'Find a service or describe what you need.', "ค้นหาบริการหรืออธิบายสิ่งที่คุณต้องการ")],
+          [t('Уточните адрес и время', 'Share the place and time', "ระบุสถานที่และเวลา"), t('Укажите адрес, удобное время и детали.', 'Add your address, preferred time and details.', "เพิ่มที่อยู่ เวลาที่สะดวก และรายละเอียด")],
+          [t('Дождитесь подтверждения', 'Wait for confirmation', "รอการยืนยัน"), t('Заявка не означает подтверждённую запись. Время и стоимость требуют согласования.', 'A request is not a confirmed booking. Time and price need confirmation.', "การส่งคำขอไม่ใช่การยืนยันการจอง เวลาและราคาต้องได้รับการยืนยัน")],
+        ].map(([title, description], index) => <li key={title} className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">{index + 1}</span><div><h3 className="text-sm font-medium">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{description}</p></div></li>)}
+      </ol>
+    </Layout>
   );
 }

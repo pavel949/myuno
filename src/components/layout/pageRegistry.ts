@@ -18,7 +18,8 @@ export const ForOwners = lazy(() => import('@/pages/ForOwners'));
 export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
 export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
-export const Discover = lazy(() => import('@/components/navigation/v3/NavigatorPageV3'));
+export const Discover = lazy(() => import('@/pages/services/ServicesIndex'));
+export const SituationNavigator = lazy(() => import('@/components/navigation/v3/NavigatorPageV3'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
 // Wave 3 stabilize: PlatformCatalog removed (orphan — /catalog redirects to /discover).
 export const MapView = lazy(() => import('@/pages/MapView'));
@@ -46,6 +47,7 @@ export const PropertyLanding = lazy(() => import('@/pages/property/PropertyLandi
 export const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
 export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySearchPage'));
 // Wave 3 stabilize: StaysSearchPage removed (orphan — /stays/search redirects to /property/browse).
+export const GuestComplexDetail = lazy(() => import('@/pages/property/GuestComplexDetail'));
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 export const ManualPaymentPending = lazy(() => import('@/pages/property/ManualPaymentPending'));
@@ -59,6 +61,7 @@ export const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDeta
 export const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
 export const PropertyMySection = lazy(() => import('@/pages/property/PropertyMySection'));
 export const ManagementCompanyProfile = lazy(() => import('@/pages/property/ManagementCompanyProfile'));
+export const ManagementCompaniesIndex = lazy(() => import('@/pages/property/ManagementCompaniesIndex'));
 export const ResaleIndex = lazy(() => import('@/pages/property/ResaleIndex'));
 export const PricingPage = lazy(() => import('@/pages/PricingPage'));
 export const JoinInvite = lazy(() => import('@/pages/JoinInvite'));
@@ -301,6 +304,7 @@ export const ThaiServicesIndex = lazy(() => import('@/pages/thaiServices/ThaiSer
 export const ThaiBusinessDetail = lazy(() => import('@/pages/thaiServices/ThaiBusinessDetail'));
 export const ThaiMyBookings = lazy(() => import('@/pages/thaiServices/ThaiMyBookings'));
 export const ThaiBusinessLanding = lazy(() => import('@/pages/thaiServices/ThaiBusinessLanding'));
+export const ThaiBusinessPartner = lazy(() => import('@/pages/thaiServices/ThaiBusinessPartner'));
 export const VendorThaiBusiness = lazy(() => import('@/pages/vendor/thaiBusiness/ThaiBusinessDashboard'));
 export const AdminThaiBusiness = lazy(() => import('@/pages/admin/AdminThaiBusiness'));
 
@@ -336,9 +340,7 @@ export const WalletCards = lazy(() => import('@/pages/wallet/WalletCards'));
 export const SOS = lazy(() => import('@/pages/SOS'));
 export const VipConcierge = lazy(() => import('@/pages/VipConcierge'));
 // Wave-1 IA cleanup: StartOnboarding v1 удалён, /start теперь рендерит V2.
-// Алиас StartOnboarding оставлен как re-export V2 на случай старых импортов.
 export const StartOnboardingV2 = lazy(() => import('@/pages/StartOnboardingV2'));
-export const StartOnboarding = StartOnboardingV2;
 export const Support = lazy(() => import('@/pages/Support'));
 export const OrderTracking = lazy(() => import('@/pages/orders/OrderTracking'));
 export const AdvanceRequested = lazy(() => import('@/pages/booking/AdvanceRequested'));
@@ -388,6 +390,7 @@ export const AdminPoiClaims = lazy(() => import('@/pages/admin/AdminPoiClaims'))
 export const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'));
 export const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
+export const AdminReview = lazy(() => import('@/pages/admin/AdminReview'));
 export const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
 export const AdminTransfers = lazy(() => import('@/pages/admin/AdminTransfers'));
 export const AdminTransferSLA = lazy(() => import('@/pages/admin/AdminTransferSLA'));
@@ -475,6 +478,8 @@ export const AdminUsersAccess = lazy(() => import('@/pages/admin/AdminUsersAcces
 export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
 export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
+export const AdminGoogleMapsDiagnostics = lazy(() => import('@/pages/admin/AdminGoogleMapsDiagnostics'));
+export const AdminGoogleMapsSettings = lazy(() => import('@/pages/admin/AdminGoogleMapsSettings'));
 
 // ── Provider ── (ProviderOnboarding removed 2026-06-12; duplicated /become-partner. /provider/onboarding now redirects.)
 
@@ -486,6 +491,7 @@ export const StaysSubscriptionLanding = lazy(() => import('@/pages/landings/Stay
 export const LegalServiceLanding = lazy(() => import('@/pages/landings/LegalServiceLanding'));
 export const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
 export const VendorBookings = lazy(() => import('@/pages/vendor/VendorBookings'));
+export const VendorServiceDesk = lazy(() => import('@/pages/vendor/VendorServiceDesk'));
 export const VendorServices = lazy(() => import('@/pages/vendor/VendorServices'));
 export const VendorAnalytics = lazy(() => import('@/pages/vendor/VendorAnalytics'));
 export const VendorPayouts = lazy(() => import('@/pages/vendor/VendorPayouts'));
@@ -593,6 +599,7 @@ export const NewDealPage = lazy(() => import('@/pages/owner/NewDealPage'));
 export const PipelineSettingsPage = lazy(() => import('@/pages/owner/PipelineSettingsPage'));
 export const MCSettingsPage = lazy(() => import('@/pages/mc/MCSettingsPage'));
 export const RateManagementPage = lazy(() => import('@/pages/owner/RateManagementPage'));
+export const PropertyStructurePage = lazy(() => import('@/pages/owner/PropertyStructurePage'));
 export const ReviewsManagementPage = lazy(() => import('@/pages/owner/ReviewsManagementPage'));
 export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/DocumentsInsurancePage'));
 // OwnerReportsPage removed — functionality merged into ReportsPage
@@ -700,3 +707,5 @@ export const OutreachHub = lazy(() => import('@/pages/outreach/OutreachHub'));
 
 // ── Investor Quiz (real funnel, replaces /invest redirect stub) ──
 export const InvestorQuiz = lazy(() => import('@/pages/invest/InvestorQuiz'));
+export const GoalEntryPage = lazy(() => import('@/pages/discover/GoalEntryPage'));
+export const PmsTodayPage = lazy(() => import('@/pages/mc/operations/PmsTodayPage'));

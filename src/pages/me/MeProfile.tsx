@@ -27,7 +27,7 @@ export default function MeProfile() {
   };
 
   return (
-    <MeShellLayout title={isRu ? 'Профиль' : 'Profile'}>
+    <MeShellLayout title={isRu ? 'Мой профиль' : 'My profile'}>
       <div className="space-y-6">
         <AccountProfileCard />
         <Separator className="bg-border/50" />
@@ -38,7 +38,7 @@ export default function MeProfile() {
           className="w-full flex items-center gap-3 py-3 text-destructive hover:opacity-70 transition-opacity"
         >
           <LogOut className="h-5 w-5" />
-          <span className="text-base font-medium">{isRu ? 'Выйти' : 'Log out'}</span>
+          <span className="text-base font-medium">{isRu ? 'Выйти из аккаунта' : 'Sign out'}</span>
         </button>
       </div>
     </MeShellLayout>

@@ -10,14 +10,11 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -31,28 +28,37 @@ Deno.serve(async (req) => {
   // Configure ULTRAMSG_WEBHOOK_TOKEN in Supabase Edge Function secrets and set the
   // same token in the UltraMSG dashboard.
   const expectedToken = Deno.env.get("ULTRAMSG_WEBHOOK_TOKEN");
-  if (expectedToken) {
-    const provided =
-      req.headers.get("x-ultramsg-token") ??
-      req.headers.get("x-webhook-token") ??
-      new URL(req.url).searchParams.get("token") ??
-      "";
-    if (provided !== expectedToken) {
-      console.warn("[WhatsApp Incoming] Rejected request with invalid/missing token");
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-  } else {
-    console.warn("[WhatsApp Incoming] ULTRAMSG_WEBHOOK_TOKEN not set — webhook is unauthenticated");
+  if (!expectedToken) {
+    // Fail closed: if the verification secret is not configured we must NOT
+    // accept unauthenticated callbacks. An open webhook lets anyone forge
+    // WhatsApp payloads to create leads, inject CRM activity, and trigger
+    // outbound messages on the platform's UltraMSG account.
+    console.error("[WhatsApp Incoming] ULTRAMSG_WEBHOOK_TOKEN not set — rejecting request");
+    return new Response(
+      JSON.stringify({ error: "Webhook not configured" }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+  const provided =
+    req.headers.get("x-ultramsg-token") ??
+    req.headers.get("x-webhook-token") ??
+    new URL(req.url).searchParams.get("token") ??
+    "";
+  if (provided !== expectedToken) {
+    console.warn("[WhatsApp Incoming] Rejected request with invalid/missing token");
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   const ADMIN_PHONE = await getAdminWhatsApp();
 
   try {
     const body = await req.json();
-    console.info("[WhatsApp Incoming] Payload:", JSON.stringify(body));
+    // Do not log the full payload — it contains the sender's phone number,
+    // push name and message body (customer PII). Log only routing metadata.
+    console.info("[WhatsApp Incoming] event:", body?.event_type ?? "direct");
 
     // UltraMSG sends: { event_type, data: { from, pushName, body, ... } }
     // Or direct: { from, body, pushName, ... }

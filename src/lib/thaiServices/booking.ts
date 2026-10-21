@@ -25,9 +25,9 @@ export function customerCanCancel(status: ThaiBookingStatus): boolean {
   return status === 'requested';
 }
 
-export const THAI_BOOKING_STATUS_LABELS: Record<ThaiBookingStatus, { ru: string; en: string }> = {
-  requested: { ru: 'Запрошено', en: 'Requested' },
-  confirmed: { ru: 'Подтверждено', en: 'Confirmed' },
-  cancelled: { ru: 'Отменено', en: 'Cancelled' },
-  completed: { ru: 'Завершено', en: 'Completed' },
+export const THAI_BOOKING_STATUS_LABELS: Record<ThaiBookingStatus, { ru: string; en: string; th: string }> = {
+  requested: { ru: 'Запрошено', en: 'Requested', th: 'ส่งคำขอแล้ว' },
+  confirmed: { ru: 'Подтверждено', en: 'Confirmed', th: 'ยืนยันแล้ว' },
+  cancelled: { ru: 'Отменено', en: 'Cancelled', th: 'ยกเลิกแล้ว' },
+  completed: { ru: 'Завершено', en: 'Completed', th: 'เสร็จสิ้น' },
 };

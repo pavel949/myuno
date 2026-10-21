@@ -104,22 +104,27 @@ export function useCanonicalOnboarding() {
         }
       }
 
-      // 2. Always write a canonical concierge_sessions row (anon or authed)
+      // 2. Always write a canonical concierge_sessions row (anon or authed).
+      // `channel` is constrained by a DB CHECK to ('web','whatsapp','telegram','landing');
+      // the entry surface is tracked in raw_answers.generator instead.
       const sessionPayload: Record<string, unknown> = {
-        channel: 'web_start_v2',
+        channel: 'web',
         language,
-        raw_answers: { lifecycle, role, modifiers, generator: source },
+        raw_answers: { lifecycle, role, modifiers, generator: source, surface: 'start_v2' },
         status: 'completed',
         completed_at: new Date().toISOString(),
       };
       if (user?.id) sessionPayload.user_id = user.id;
       else sessionPayload.anon_session_id = anonId;
 
-      await supabase.from('concierge_sessions' as any).insert(sessionPayload as any);
+      const { error: sessionErr } = await supabase
+        .from('concierge_sessions' as any)
+        .insert(sessionPayload as any);
+      if (sessionErr) errorLog.silent(sessionErr, 'insert_concierge_session');
 
       // 3. Always append to persona_detection_log (audit trail)
       const logPayload: Record<string, unknown> = {
-        source: user?.id ? 'start_v2' : 'start_v2',
+        source: 'start_v2',
         signals: {
           lifecycle,
           role,
@@ -133,7 +138,10 @@ export function useCanonicalOnboarding() {
       if (user?.id) logPayload.user_id = user.id;
       else logPayload.anon_session_id = anonId;
 
-      await supabase.from('persona_detection_log' as any).insert(logPayload as any);
+      const { error: logErr } = await supabase
+        .from('persona_detection_log' as any)
+        .insert(logPayload as any);
+      if (logErr) errorLog.silent(logErr, 'insert_persona_detection_log');
 
       const recommendations = recommendServices({
         activeClusters: finalProposal.active_clusters,

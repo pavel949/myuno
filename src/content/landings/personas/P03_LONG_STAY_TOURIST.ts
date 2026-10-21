@@ -28,9 +28,9 @@ export const P03_LONG_STAY_TOURIST: PersonaLanding = {
     { slug: 'visa-quiz', label: { ru: 'Виза на длительное пребывание', en: 'Long-stay visa' }, oneLiner: { ru: 'DTV (5 лет) или TR-90 (60+30 дней).', en: 'DTV (5 years) or TR-90 (60+30 days).' }, href: '/visa/quiz' },
     { slug: 'monthly-rental', label: { ru: 'Аренда по месяцам', en: 'Monthly rental' }, oneLiner: { ru: 'Кондо и виллы 30/60/90 дней с защитой депозита.', en: 'Condos and villas 30/60/90 days, deposit-protected.' }, href: '/property?intent=rent-month' },
     { slug: 'sim-start', label: { ru: 'Тайская SIM', en: 'Thai SIM' }, oneLiner: { ru: 'AIS / TrueMove от ฿299, 30 дней.', en: 'AIS / TrueMove from ฿299, 30 days.' }, href: '/sim' },
-    { slug: 'travel-insurance', label: { ru: 'Страховка на месяцы', en: 'Multi-month insurance' }, oneLiner: { ru: 'От ฿4 500/мес, с эвакуацией.', en: 'From ฿4,500/month, with evacuation.' }, href: '/legal/insurance' },
+    { slug: 'travel-insurance', label: { ru: 'Страховка на месяцы', en: 'Multi-month insurance' }, oneLiner: { ru: 'От ฿4 500/мес, с эвакуацией.', en: 'From ฿4,500/month, with evacuation.' }, href: '/insurance' },
     { slug: 'exchange', label: { ru: 'Выгодный обмен', en: 'FX exchange' }, oneLiner: { ru: 'Курс лучше банковского, без скрытых комиссий.', en: 'Better than bank rate, no hidden fees.' }, href: '/exchange' },
-    { slug: 'area-guide', label: { ru: 'Гид по районам', en: 'Area guide' }, oneLiner: { ru: 'Бангтао, Раваи, Чалонг — что подходит вам.', en: 'Bang Tao, Rawai, Chalong — what fits you.' }, href: '/areas' },
+    { slug: 'area-guide', label: { ru: 'Гид по районам', en: 'Area guide' }, oneLiner: { ru: 'Бангтао, Раваи, Чалонг — что подходит вам.', en: 'Bang Tao, Rawai, Chalong — what fits you.' }, href: '/area' },
   ],
   faq: [
     { q: { ru: 'TR-90 или DTV — что выбрать на зиму?', en: 'TR-90 or DTV for a winter stay?' }, a: { ru: 'TR-90 — туристическая, 60 дней + 30 продление, цена ฿2 000. DTV — 5 лет, multiple entry, до 180 дней за визит, цена $400. Если планируете возвращаться — DTV выгоднее.', en: 'TR-90 — tourist, 60 days + 30 extension, ฿2,000. DTV — 5 years, multi-entry, up to 180 days per stay, $400. If you plan repeat visits — DTV pays off.' } },

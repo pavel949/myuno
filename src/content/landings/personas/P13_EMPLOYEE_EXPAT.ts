@@ -25,10 +25,10 @@ export const P13_EMPLOYEE_EXPAT: PersonaLanding = {
     { ru: 'Виза привязана к работодателю — что будет при увольнении.', en: 'The visa is tied to the employer — what happens if you leave.' },
   ],
   services: [
-    { slug: 'work-permit', label: { ru: 'Non-B + Work Permit', en: 'Non-B + Work Permit' }, oneLiner: { ru: 'Сопровождение оформления и продления.', en: 'Full filing and renewal support.' }, href: '/legal/work-permit' },
+    { slug: 'work-permit', label: { ru: 'Non-B + Work Permit', en: 'Non-B + Work Permit' }, oneLiner: { ru: 'Сопровождение оформления и продления.', en: 'Full filing and renewal support.' }, href: '/legal/work-permit', availability: 'unavailable' },
     { slug: 'relocation-package', label: { ru: 'Релокационный пакет', en: 'Relocation package' }, oneLiner: { ru: 'Жильё, школа, переезд вещей, авто.', en: 'Housing, school, shipping, car.' }, href: '/visa/quiz?intent=employee' },
     { slug: 'tax-pit', label: { ru: 'Тайский подоходный налог (PIT)', en: 'Thai personal income tax' }, oneLiner: { ru: 'Декларация PND.91, вычеты, DTA.', en: 'PND.91 filing, deductions, DTA.' }, href: '/legal/tax' },
-    { slug: 'expat-insurance', label: { ru: 'Страховка сверх SSF', en: 'Insurance beyond SSF' }, oneLiner: { ru: 'SSF — это базовая клиника. Нужен private.', en: 'SSF is basic clinic-tier. Top up with private.' }, href: '/legal/insurance' },
+    { slug: 'expat-insurance', label: { ru: 'Страховка сверх SSF', en: 'Insurance beyond SSF' }, oneLiner: { ru: 'SSF — это базовая клиника. Нужен private.', en: 'SSF is basic clinic-tier. Top up with private.' }, href: '/insurance' },
     { slug: 'family-rental', label: { ru: 'Жильё для экспата', en: 'Expat housing' }, oneLiner: { ru: 'Виллы и кондо рядом с офисом.', en: 'Villas and condos near your office.' }, href: '/property?intent=rent-long' },
     { slug: 'school-finder', label: { ru: 'Школа для детей', en: 'School for kids' }, oneLiner: { ru: 'International + ED-visa для детей.', en: 'International + ED visa for kids.' }, href: '/school-finder' },
   ],
@@ -41,7 +41,7 @@ export const P13_EMPLOYEE_EXPAT: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Оформить Work Permit', en: 'Apply for Work Permit' },
-    href: '/legal/work-permit',
+    href: '/legal/work-permit', availability: 'unavailable',
     subtitle: { ru: 'От ฿35 000, срок 7–14 дней.', en: 'From ฿35,000, 7–14 days.' },
   },
   secondaryCta: {

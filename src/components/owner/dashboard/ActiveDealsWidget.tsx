@@ -54,7 +54,7 @@ export function ActiveDealsWidget() {
 
       {activeDeals.length === 0 && deals.length === 0 && (
         <p className="text-xs text-muted-foreground">
-          {isRu ? 'Нажмите, чтобы создать первую сделку' : 'Tap to create your first deal'}
+          {isRu ? 'Сделок пока нет. Создайте сделку.' : 'Tap to create your first deal'}
         </p>
       )}
     </div>

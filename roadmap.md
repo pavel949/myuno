@@ -1,0 +1,202 @@
+# Roadmap
+
+## 2026-10-17 · Connected-system continuation (GitHub verification)
+- [x] Reconcile actual plans and current architecture against source and SELECT-only Lovable catalog; distinguish tables from storage buckets and historical audit findings.
+- [x] Correct PMS status/date/turnover, category/plan persistence confirmation and guest cache refresh, data-entry draft lifecycle, and browse/map/filter/pagination continuity.
+- [x] Add network-denying real-page browser fixtures and isolated hook/authorization/postgres tests without changing RBAC, pricing, inventory writers or ledger models.
+- [x] Prepare fail-closed scheduled-backup retrieval and synthetic actual-entrypoint checks; code-only, NOT deployed.
+- [x] Record runtime CI evidence and remaining gate reconciliation (final blocking-CI results tracked in PR #89): see docs/qa/CONNECTED_SYSTEM_EXECUTION_2026_10_17.md and the connected-system PR.
+- [ ] Real hosted end-to-end acceptance remains BLOCKED without an isolated backend and resolved business/financial/data contracts. No automatic enforcement/seed/payment/deploy.
+- Existing service-entry UX uses Admin/Vendor forms. The removed legacy staff shell is not revived; employment does not grant catalogue/private authority.
+
+## 2026-10-17 · Authorized isolated PMS end-to-end verification
+- [x] Establish HEAD and read canonical/PMS QA boundaries; trace Bookings list/detail → Calendar → Today/tasks → check-in/out → owner report.
+- [x] Re-run current isolated integration and network-denying browser fixtures; cover IDs, loading/error/empty, invalidation and Bangkok half-open dates.
+- [x] Correct only reproduced code defects with focused regressions; record exact commands, evidence, residual blockers and SHA in docs/qa/PMS_END_TO_END_VERIFICATION_2026_10_17.md.
+- Boundaries: no production business reads/writes, notifications/export, migrations/edge deploy/publish, enforcement, assignments, E3 or financial P0-A/P0-B. Real E2E remains blocked without an isolated backend.
+
+## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)
+- [x] Approved public projection applied as 0034: four read-only allowlisted catalogs + public-category-bound aggregate availability; guest UI switched. Private policy hash unchanged, data counts unchanged, enforcement 0. Effective ACL check corrected earlier missing-grant diagnosis.
+- [x] Stage status audited: schema + server quote + room assignment + MC structure page live; guest page unwired, restrictions editor missing, live categories/rate plans 0 (33 properties all `unit`).
+- [x] Wire category offers into property detail with dates/guests and existing multi-unit flag; add property/category date-rule editor with row-ID insert/update, retained failed drafts and offer invalidation. No live data writes or permission changes.
+- [x] Narrow verification: 21 existing quote/page tests pass; real editor/hooks/offers driven with isolated browser fixtures (insert, update, reopen, failed draft, shared date price, stop sell, guest changes), widths 375/390/430/1280, zero browser errors; automatic build OK.
+- [x] Public-read blocker closed: actual ACLs already granted anon access; signed-in season ceiling and broad base reads required projections, not more grants. Real anonymous Data API reads of all four views succeed; six isolated PostgreSQL security tests + 15 existing quote tests pass; browser verifies projection-only queries, 11,000 THB quote and guest capacity; build OK.
+- [ ] Separate agreement: legacy get_category_availability still allows direct public aggregate calls for arbitrary categories; existing permissions unchanged to avoid breaking private callers. Recommend a reviewed caller migration before tightening. Meal-plan disclosure and extra private tariff fields remain excluded.
+- [ ] Stage 5 live validation — blocked: requires team-entered category/rate data or explicit approval for [TEST] resort rows (no production writes by agent).
+
+
+## 2026-10-17 · Property and tariff data-entry priority
+- [x] Correct stale season drafts, selected-property default and edit-time property reassignment in existing tariff form; retain price edits after errors, prevent duplicate base-price submissions and refresh existing property views. Seasonal property controls now fit narrow screens and use non-submit buttons.
+- [x] Verify only the changed tariff workflow with synthetic browser data: edit/reopen, second season, selected property and failed-save draft retention; no production reads/writes/outbound requests. Automatic build OK. No broad test expansion, permission expansion, enforcement, assignments or E3 cutover.
+- Live persisted tariff/property save remains unverified: no authorized production business writes were performed; financial/source/settlement blockers below remain open.
+- Financial settlement and mutation blockers remain NO-GO; this priority does not authorize bypassing financial safeguards.
+
+## 2026-10-17 · Revised P0/P1 executable master task
+- [x] Read the uploaded master task and verify starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`; preserve accepted UX/security work.
+- [ ] P0-A: close remaining proven order/payment/inventory mutation blockers; exact isolated tests and security-preserving rollback before any apply/deploy; report GO-A/NO-GO and stop.
+- [x] P0-A bounded refund containment: deploy read-only refund rejection after 16/16 entrypoint cases, 129/129 selected regressions and independent review; 19/19 retained operator boundary cases; no Stripe/DML; unchanged read-only 0/0/0/0 and business counts.
+- [x] P0-A contract audit continuation: code/live-backed amount, finance-duty and atomic-transition matrices plus PC-01–PC-10 register; retained tests 161/161 + refund 16/16 + operator boundaries 19/19; documentation only, no permission/runtime changes. PC-01–PC-05 await bounded business approval; existing unsafe writers remain explicitly unclosed.
+- [ ] P0-A pricing/settlement contract — blocked on exact discount/negotiated-price authority and off-platform conversion/deposit/reversal accounting; direct writers, signed operator financial bypass and webhook/inventory atomicity remain NO-GO.
+- [ ] P0-B: real manifest, separately supervised seed with enforcement OFF, existing resolver and cache isolation — blocked until GO-A and explicit cutover-stage approval.
+- [ ] P0-C: Properties → Calendar → Today → Bookings, one consumer at a time — blocked until preceding gates.
+- [ ] P0-D: supervised reversible enforcement — blocked until C1–C4 isolation/revocation/deep-link gates pass.
+- [ ] P0-E: controlled Layantara closed-loop acceptance — blocked until GO-D and approval of the real operation; never a production QA transaction.
+- [ ] P0-F/G/H, then P1 Agent → Homes Rent/Buy → Stay 360 → Owner/Map/Notifications/Admin — blocked until preceding gates; reuse canonical truth.
+- Restrictions: no automatic next gated tranche; no production business test writes/outbound calls, enforcement or assignments during P0-A; no broad UX/catalog/support redesign.
+
+## 2026-10-17 · FINAL PRE-E3 order mutation security
+- [x] Capture live catalog and source census (65 source writers/15 direct SQL writers), required field/state matrix at baseline `1f40588db94e8d0e1e83cd024bf5556034bafcb0`; no blanket certification.
+- [x] Reproduce wallet/provider bypass locally; apply exact 0033 wallet containment and deploy terminal/type transfer protection after isolated tests.
+- [x] Verify 296/296 selected regressions, 19/19 operator cases, 58 date tests in each of 3 timezones; read-only aggregates and zero enforcement/spaces/assignments/members unchanged.
+- [x] Publish FINAL_ORDER_MUTATION_SECURITY.md with dispositions, evidence, observed SHA and E3 NO-GO.
+- [ ] Full financial closure — blocked by missing authoritative quote/creation, checked manual/wallet settlement/refund contracts and unverified legacy compatibility; direct order/payment/booking bypasses and webhook recovery gaps remain. Broader SQL candidate is UNAPPLIED, not production-safe certification.
+- Restrictions: no real business mutations/outbound calls, catalog/support cleanup, enforcement, spaces/assignments or E3.
+
+## 2026-10-17 · E2.9 continuation — 14 blocker closure
+- [x] Establish operator booking-edit property duty versus unproved customer/CRM automation rights; deploy restricted booking-message gate after 21 synthetic cases.
+- [x] Reconcile all RO-01–RO-14 in e2_9/blockers-14.csv; report proven fixes versus named ambiguous blockers; verify production read-only zero enforcement/assignments and observed SHA.
+- Restrictions: no business DML, support grants, enforcement, assignments, E3 or Order Mutation Audit.
+
+## 2026-10-17 · E2.9 — Catalog + notification security (partial NO-GO)
+- [x] Reconcile baselines and live field/policy/recipient metadata; E29-01–10 dispositions recorded.
+- [x] Apply exact tested forward 0032 for provider/service/salon privacy and named unpublished employment branches; safe public consumers, protected property-submission recipient gate, security-preserving rollback.
+- [x] Isolated focused 53/53, prior E1–E2.8 166/166; synthetic edge 15+45+10; read-only public API/page and zero enforcement/spaces/assignments/members verified.
+- [x] Update E2.9 report, E2.8 disposition and bypass register without claiming full closure.
+- [ ] Full E2.9 closure — E29-01–03 blocked by deep public JSON/field contracts and mixed editor compatibility; E29-04 child audience contract; E29-05–07 legitimate automation/guest dispatch authority; E29-08–10 metadata/support/moderation decisions. See report.
+- Restrictions: no support grants, E3, Order Mutation Audit, enforcement, seed or production business writes.
+
+## 2026-10-17 · E2.8 read-only continuation
+- [x] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; 47 residual policies / 30 relations; no writes, grants, deploys or business calls.
+- [x] Update the bypass register and E2.8 report with RO-01–RO-14 evidence, legitimate authority, blockers and next-step recommendation; equal before/after aggregates and catalog sanity verified.
+- Next corrective work is not started: needs separate approval, safe public-provider/salon replacements, exact isolated tests and independent applied/deployed manifest; full E2.8 closure remains NO-GO.
+- Restrictions retained: enforcement off; no spaces/assignments seeded; no Order Mutation Audit or E3.
+
+## 2026-10-17 · E2.8 — UNO_TEAM least privilege
+- [x] Source/live census and confirmed/UNKNOWN dispositions saved under docs/convergence/e2_8/.
+- [x] Proven private employment bypasses narrowed: 0028–0031, 128 policies, checked RPCs, 15 deployed handlers after isolated tests.
+- [x] Read-only aggregates, security-preserving rollback, register and E2.8 report; no enforcement, seed, Order Mutation Audit or E3.
+- [ ] Full E2.8 closure — blocked by RO-01–RO-14: proved private/public catalog paths, source-only notification recipient/ingress defect, legacy backup/export/CRM entitlements, support contract and deployment parity; no implicit grants. See OPERATING_SPACES_E2_8_UNO_TEAM.md.
+
+## 2026-10-17 · E2.5 continuation
+- [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
+- [x] Authenticated private-column exposure on approved properties closed (0026, 0027).
+- [ ] Order customer update breadth audit.
+
+## 2026-10-17 · E2.6 — Cutover blockers
+- [x] Migration 0024, isolated tests, rollback, doc (docs/convergence/OPERATING_SPACES_E2_6_CUTOVER_BLOCKERS.md).
+- [x] Public consumers migrated to public_property_catalog; signed-in base approved-row read closed.
+- [ ] Optional later: revoke anon column grants on base properties once no anon consumer reads it (not required for privacy: anon grants are the public contract).
+- [ ] Wire MC property creation to create_managed_property_checked (E3 blocker).
+
+## 2026-10-17 · E2.5 — Security cutover readiness
+- [x] Reopen bypass register against source/live catalog and cron job names; record confirmed blockers and deployment limits.
+- [x] Harden proven export/report/order-notification paths; apply forward 0023 ceilings, no seed/enforcement/PMS integration; deploy five changed edges.
+- [x] Verify isolated PostgreSQL/edge tests and automatic build; tested revoke rollback, live zero-enforcement/seed aggregates and E3 stop gates documented.
+- E3 blocked: public/private property projection, backup distribution, delegation/assignment governance, property INSERT and uncovered finance/owner/order siblings; no new tranche started.
+
+## 2026-10-17 · E2 — Shadow operational scope resolver
+- [x] Review and narrow E1 platform oversight through forward 0022; production aggregates: 2 companies, 0 enforced; spaces/assignments/memberships 0.
+- [x] Add server-derived canonical scope and isolated preference/cache lifecycle; no PMS consumers.
+- [x] Run isolated E1/E2 and retained regressions: 93/93; automatic build OK; document API, tested rollback, unchanged consumers and live aggregate evidence.
+- E3 not started; requires confirmed property/team manifests, report/export bypass closure, coordinated RLS cutover approval and hosted synthetic actor isolation checks.
+
+## 2026-10-17 · Tranche 2E — Operating spaces audit/design only
+- [x] Audit current company/property/staff scope and live read-only catalog; distinguish facts from proposals.
+- [x] Document minimal nested operating-space design, surface impact map, E1–E6 rollout/rollback and isolation acceptance matrix.
+- [x] Verify documentation-only diff, links, required surface/rollout coverage and independent design review; automatic build OK; no runtime/schema/data/permission changes.
+- Future implementation is not started: requires approved inventory/member manifest, capability/default-scope contract and closure of broad authorization/export paths; see docs/convergence/OPERATING_SPACES_GAP_AUDIT.md.
+
+## 2026-10-17 · Tranche 2D — Today presentation only
+- [x] Reprioritize existing Today projections and contextual navigation; no hooks, writers or domain changes.
+- [x] Verify synthetic RU/EN 375/390/430/1280, five states each; 30/30 focused plus 58/58 date/inventory in each of three TZ; no production access.
+- [x] Document exact data gaps, source preservation, reviewed screenshots, automatic build and tested source SHA in docs/convergence/TRANCHE2D_TODAY_UX.md; no other tranches.
+
+## 2026-10-17 · Tranche 2C.2 — Booking writer date correctness
+- [x] Correct checkout-inclusive blocked-date preflight in create and update writers; no UX changes.
+- [x] Trace timestamp producers/readers and live SQL with read-only evidence; mixed contract, no timestamp/SQL changes.
+- [x] Exercise real writer preflights with synthetic fixtures across three timezones (61/61 each); retain calendar/inventory tests; SQL predicate cases 7/7.
+- [x] Document evidence and unresolved timestamp rollout blockers in docs/convergence/BOOKING_WRITER_DATE_CORRECTNESS.md; no production writes or Today work.
+
+## 2026-10-17 · Tranche 2C.1 — Calendar date correctness only
+- [x] Audit projection dependencies, half-open occupancy and civil-date conversion; live catalog read-only, no production writes.
+- [x] Correct proven projection/form-date defects without UX, inventory-status, pricing rules or backend/writer changes.
+- [x] Run synthetic regression/TZ matrix (66 date executions, 24 browser variants, 28 retained regressions) and automatic build; see docs/convergence/CALENDAR_DATE_CORRECTNESS.md for timestamp/writer risks outside scope.
+
+## 2026-10-17 · Tranche 2C — Calendar presentation only
+- [x] Simplify modes/scope/actions/date navigation without changing date or business contracts.
+- [x] Verify real calendar projections with synthetic fixtures at RU/EN 375/390/430/1280; no writes (8/8).
+- [x] Review screenshots and report results, date risks and SHA; see docs/convergence/TRANCHE2C_CALENDAR_UX.md; Today not started.
+
+## 2026-10-17 · Tranche 2B correction — runtime presentation
+- [x] Change MCBookingsPage header/KPIs/controls/cards/bulk bar without changing business logic.
+- [x] Verify RU/EN heading, overflow and isolated interactions at 375/390/430 and desktop (8/8 browser, 12/12 component tests).
+- [x] Report exact runtime files, reviewed screenshots, automatic build and SHA; see docs/convergence/TRANCHE2B_UI_TESTS.md.
+
+## 2026-10-17 · Tranche 2B isolated UI regression tests
+- [x] Add synthetic RU/EN fixtures and isolated checkbox/card/bulk-confirmation tests (12/12).
+- [x] Exercise the actual page with fixtures at 375/390/430; block all external requests and real writes (6/6).
+- [x] Report tests, viewport evidence and source SHA without changing business behavior; see docs/convergence/TRANCHE2B_UI_TESTS.md.
+
+## 2026-10-17 · Tranche 2A — documentation and architecture only
+- [x] Create canonical connected-product blueprint, layered identity model and Rent/Buy Homes IA.
+- [x] Audit current consumer Homes and PMS UX from source; distinguish proven code facts from runtime-only risks.
+- [x] Cross-link PROJECT.md and convergence mapping without duplicating the blueprint.
+- [x] Report exact files, evidence, SHA and smallest-blast-radius first UX implementation tranche.
+- [x] No feature implementation, identity tables, CRM migration or inventory-contract reopening.
+
+## 2026-10-17 · Remaining Tranche 1 verification (no Tranche 2)
+- [ ] Obtain an independently reported typecheck result through permitted remote CI — blocked: no accessible GitHub connection/token or identified Actions repository.
+- [ ] Verify the full Stripe test booking journey — blocked: no positively identified isolated test inventory or contained webhook side effects in the shared production database.
+- [x] Report verification evidence and tested source SHA; see docs/convergence/TRANCHE1_REMAINING_CHECKS.md. Payment mode unchanged; Tranche 2 not started.
+
+## 2026-10-17 · Tranche 1 correction pass (no Tranche 2)
+- [x] Verify and align inventory status predicates, writers and availability; add regression coverage.
+- [x] Verify Drizzle snapshot convention and replace instruction-only rollback with exact SQL.
+- [x] Document transaction boundaries and exercise the assignment/hold race without production writes.
+- [x] Verify quote parity and focused tests plus semantic checks; report harness build evidence.
+- [ ] Standalone typecheck result — blocked by workspace policy: manual typechecks/builds are prohibited; harness supplies build log only.
+
+## Done (2026-08-28 · architecture pass)
+- [x] Security: anon доступ к `management_companies` закрыт, публичные данные через вью `management_companies_public`
+- [x] 8 отсутствовавших таблиц созданы (платежи/ваучеры/лиды/CRM/трансферы)
+- [x] `magnet-submit` → `property_projects`
+- [x] `scripts/architecture-scan.mjs` + `npm run scan:architecture` (DB drift / routes / orphans)
+- [x] `docs/canonical/architecture/ARCHITECTURE_SCAN.md`
+- [x] Удалены 32 неиспользуемых модуля (Home V1 остатки, PWA-дубли, мёртвые хуки/либы)
+
+## Next: «Phuket One-Stop Platform» transformation
+1. [x] Аудит (docs/canonical/architecture/ONE_STOP_IA.md): карта существующих маршрутов/фич → новая IA (Stay / Live / Buy / Sell / Services / Own / Manage / Developers / CRM)
+2. [~] Role-aware (меню гостя обновлено; переключатель ролей — существующий в меню профиля) app shell + переключатель ролей (My Phuket / Owner / Operations / Provider / Developer / Admin-CRM)
+3. [x] Публичная навигация: Home · Stay · Live · Buy · Services · Explore/Map · Trips · Profile
+4. [ ] Новый Home («One Phuket. One app.») + goal-first вход, премиальный 3D-hero с CSS-фолбэком и reduced-motion
+5. [ ] Единый Explore/Map shell со слоями (stays / long-term / sale / newbuilds / services / POI), синхронизация карты, списка и фильтров в URL
+6. [~] Entry-страницы Stay / Live / Buy / Services готовы (Sell — далее) на существующих данных
+7. [ ] Рабочие пространства: Owner Hub, Operations (PMS Today/календарь/housekeeping/maintenance/rates), Provider, Developer, Admin-CRM — на существующих фичах
+8. [ ] Убрать «мертвые» маршруты и дубли страниц одной сущности; пометить legacy-флоу как migration TODO
+9. [ ] i18n: все новые строки в ключах, EN по умолчанию, RU/TH сохранены, без смешения языков на экране
+10. [ ] Производительность и адаптивность: ленивые тяжёлые визуалы, мобильные фолбэки, отсутствие обрезанных экранов
+11. [ ] Отчёт: что изменено, что сохранено, что требует миграции схемы, что функционально vs только UI
+
+### Ограничения
+- Не удалять работающую функциональность ради упрощения UI
+- Не создавать «мертвые» кнопки и фейковые метрики (occupancy/ROI/рейтинги)
+- Без рискованного массового переписывания БД в одном шаге — только TODO-заметки о консолидации
+
+## 2026-10-06 · Госуслуги-копирайт и исправления
+- [x] Главная: убрана стартовая заставка, первый экран переписан (заголовок, описание, кнопки «Подать заявку» / «Каталог услуг»)
+- [x] Закрыт доступ к оценкам заявок и документам проектов (клининги и цены на карте открыты)
+- [x] Каталог: ~70 названий разделов и услуг переписаны
+- [ ] Каталог: цены и графики приёма — ждут реальных данных от Павла
+- [x] Кабинет собственника: тексты виджетов главной панели
+- [ ] Кабинет собственника: остальные страницы (80+) — следующий заход
+- [x] Ночная сверка платежей запускается напрямую в базе (234 расхождения выявлено)
+- [x] Синхронизация календаря: не отменяет уже отменённые брони и не стирает всё при пустом ответе площадки
+- [x] Заполнить часы работы у 5 исполнителей (пн–сб 09:00–18:00)
+
+## 2026-10-17 · Tranche 2B — MC bookings-list UX simplification (done)
+- [x] Single primary action (New Booking); Export/sort secondary; compact KPIs.
+- [x] Six status filters as bounded grid — no page-level overflow (verified 375/390/430/1280).
+- [x] Checkbox selection isolated from card click (44px zone, stopPropagation, aria-labels).
+- [x] Bulk actions: selected count, clear, two-step confirm; same mutations/statuses.
+- [x] Backend/query/pricing/inventory logic untouched; build OK; commit d7dfb2719.
+- Isolated correction checks now cover checkbox/card and stub-only bulk interactions in RU/EN; live order mutations remain deliberately untested.

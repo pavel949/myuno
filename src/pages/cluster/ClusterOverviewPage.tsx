@@ -19,12 +19,14 @@ import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
 import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
+import { ServiceCategorySection } from '@/components/services/ServiceCategorySection';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CLUSTERS,
-  FLAT_SERVICES,
+  CATEGORIES,
   getClusterById,
   type ClusterId,
 } from '@/lib/catalog/taxonomy';
@@ -39,8 +41,8 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
   const isRu = language === 'ru';
 
   const cluster = useMemo(() => getClusterById(clusterId), [clusterId]);
-  const services = useMemo(
-    () => FLAT_SERVICES.filter((s) => s.clusterId === clusterId),
+  const categories = useMemo(
+    () => CATEGORIES.filter(category => category.clusterId === clusterId && category.services.length > 0),
     [clusterId],
   );
 
@@ -85,22 +87,25 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
           <WorkspaceClusterBanner clusterId={clusterId} />
         )}
 
-        {!isWorkspace && services.length > 0 && (
-          <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((svc) => {
+        {!isWorkspace && categories.length > 0 && (
+          <div className="space-y-6 px-4">
+            {categories.map(category => <ServiceCategorySection key={category.id} id={`cluster-group-${category.id}`}
+              title={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}>
+            {category.services.map((svc) => {
               const Icon = svc.icon;
               return (
                 <ClusterAppCard
                   key={svc.id}
                   clusterId={clusterId}
                   icon={Icon}
-                  title={isRu ? svc.labelRu : svc.labelEn}
-                  description={isRu ? svc.categoryLabelRu : svc.categoryLabelEn}
+                  title={pickLang(language, { ru: svc.labelRu, en: svc.labelEn, th: svc.labelTh })}
+                  description={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}
                   path={svc.path}
                   status={svc.status}
                 />
               );
             })}
+            </ServiceCategorySection>)}
           </div>
         )}
 

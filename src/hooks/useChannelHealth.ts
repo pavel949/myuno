@@ -345,23 +345,23 @@ export function useAllBookingConflicts() {
       }
 
       // Check conflicts for each property
-      const allConflicts: (ConflictInfo & { propertyId: string })[] = [];
+      type ConflictRpcRow = {
+        booking_id_1: string; booking_id_2: string;
+        guest_name_1: string; guest_name_2: string;
+        source_1: string; source_2: string;
+        check_in_1: string; check_out_1: string;
+        check_in_2: string; check_out_2: string;
+        overlap_days: number;
+      };
 
-      for (const prop of properties) {
-        const { data } = await supabase.rpc('detect_booking_conflicts', {
-          p_property_id: prop.id,
-        });
-
-        if (data) {
-          type ConflictRpcRow = {
-            booking_id_1: string; booking_id_2: string;
-            guest_name_1: string; guest_name_2: string;
-            source_1: string; source_2: string;
-            check_in_1: string; check_out_1: string;
-            check_in_2: string; check_out_2: string;
-            overlap_days: number;
-          };
-          allConflicts.push(...(data as ConflictRpcRow[]).map((c) => ({
+      // Run the per-property conflict RPCs in parallel instead of a serial loop
+      // (owners with several properties otherwise pay N sequential round trips).
+      const perProperty = await Promise.all(
+        properties.map(async (prop) => {
+          const { data } = await supabase.rpc('detect_booking_conflicts', {
+            p_property_id: prop.id,
+          });
+          return ((data as ConflictRpcRow[] | null) ?? []).map((c) => ({
             propertyId: prop.id,
             bookingId1: c.booking_id_1,
             bookingId2: c.booking_id_2,
@@ -374,9 +374,10 @@ export function useAllBookingConflicts() {
             checkIn2: c.check_in_2,
             checkOut2: c.check_out_2,
             overlapDays: c.overlap_days,
-          })));
-        }
-      }
+          }));
+        }),
+      );
+      const allConflicts: (ConflictInfo & { propertyId: string })[] = perProperty.flat();
 
       return {
         conflicts: allConflicts,

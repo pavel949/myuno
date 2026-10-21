@@ -113,6 +113,8 @@ export interface UseExperiencesOptions {
   category?: string;
   featured?: boolean;
   limit?: number;
+  /** Homepage discovery must exclude explicitly unpublished catalogue entries. */
+  publishedOnly?: boolean;
   search?: string;
 }
 
@@ -189,6 +191,8 @@ const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experie
     .eq('vertical', 'experience')
     .eq('is_active', true);
 
+  if (options.publishedOnly) query = query.eq('attributes->>status', 'published');
+
   // Filter by type via attributes
   if (options.type && options.type !== 'all') {
     query = query.eq('attributes->>experience_type', options.type);
@@ -235,8 +239,8 @@ const fetchExperienceById = async (id: string): Promise<Experience | null> => {
 // ====== HOOKS ======
 export const useExperiences = (options: UseExperiencesOptions = {}) => {
   const queryKey = useMemo(
-    () => ['experiences', options.type || 'all', options.category || 'all', options.featured, options.limit, options.search],
-    [options.type, options.category, options.featured, options.limit, options.search]
+    () => ['experiences', options.type || 'all', options.category || 'all', options.featured, options.limit, options.search, options.publishedOnly],
+    [options.type, options.category, options.featured, options.limit, options.search, options.publishedOnly]
   );
 
   const { data, isLoading, refetch, error } = useQuery({

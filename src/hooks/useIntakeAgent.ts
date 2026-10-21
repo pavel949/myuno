@@ -412,15 +412,21 @@ export function useIntakeAgent() {
         lastName = parts.slice(1).join(' ');
       }
 
-      // Check for existing contact by phone to avoid duplicates
-      if (phone) {
+      // Check for an existing contact by phone OR email to avoid duplicates.
+      // Two scoped lookups (not a single .or()) keeps us clear of PostgREST filter
+      // escaping issues with characters like '+' in phones or '@' in emails.
+      const identifiers: Array<{ col: 'phone' | 'email'; val: string }> = [];
+      if (phone) identifiers.push({ col: 'phone', val: phone });
+      if (email) identifiers.push({ col: 'email', val: email });
+      for (const { col, val } of identifiers) {
         const { data: existing } = await supabase
           .from('crm_contacts')
           .select('id')
           .eq('company_id', companyId)
-          .eq('phone', phone)
+          .eq(col, val)
+          .limit(1)
           .maybeSingle();
-        
+
         if (existing) {
           logger.log('[INTAKE] CRM contact already exists:', existing.id);
           return;

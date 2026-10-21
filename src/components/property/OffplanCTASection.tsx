@@ -31,7 +31,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
     {
       icon: TrendingUp,
       title: isRu ? 'Узнать реальную доходность' : 'Check Real ROI',
-      description: isRu ? 'Независимая аналитика muUNO' : 'Independent muUNO analytics',
+      description: isRu ? 'Независимая аналитика myUNO' : 'Independent myUNO analytics',
       action: () => navigate('/property/invest'),
     },
     {
@@ -68,8 +68,8 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isRu 
-                ? 'Проверьте надёжность проекта с экспертизой muUNO' 
-                : 'Verify project reliability with muUNO expertise'}
+                ? 'Проверьте надёжность проекта с экспертизой myUNO' 
+                : 'Verify project reliability with myUNO expertise'}
             </p>
           </div>
         </div>

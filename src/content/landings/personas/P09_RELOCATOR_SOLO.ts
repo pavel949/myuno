@@ -14,7 +14,7 @@ export const P09_RELOCATOR_SOLO: PersonaLanding = {
     en: 'Solo relocation: DTV, year-long rental, legalisation',
   },
   subtitle: {
-    ru: 'Уезжаете на 1–2 года без семьи: DTV или Non-B виза, кондо или квартира на год, банковский счёт, страховка и налоговый статус — собираем за 60 дней.',
+    ru: 'Переезд на 1–2 года без семьи: виза DTV или Non-B, жильё на год, банковский счёт, страховка и налоговый статус — за 60 дней.',
     en: 'Moving solo for 1–2 years: DTV or Non-B visa, condo or apartment for a year, bank account, insurance, tax residency — set up in 60 days.',
   },
   pains: [
@@ -29,8 +29,8 @@ export const P09_RELOCATOR_SOLO: PersonaLanding = {
     { slug: 'long-term-rental', label: { ru: 'Аренда на год', en: 'Year-long rental' }, oneLiner: { ru: 'Кондо и квартиры, контракт с защитой депозита.', en: 'Condos and apartments, deposit-protected contract.' }, href: '/property?intent=rent-long' },
     { slug: 'bank-account', label: { ru: 'Тайский банк', en: 'Thai bank account' }, oneLiner: { ru: 'Kasikorn / Bangkok Bank — за один визит.', en: 'Kasikorn / Bangkok Bank — opened in one visit.' }, href: '/banking' },
     { slug: 'tax-consultation', label: { ru: 'Налоговая консультация', en: 'Tax consultation' }, oneLiner: { ru: 'Резидентство, DTA, отчётность — ฿3 500.', en: 'Residency, DTA, reporting — ฿3,500.' }, href: '/legal/tax' },
-    { slug: 'expat-insurance', label: { ru: 'Страховка для экспата', en: 'Expat insurance' }, oneLiner: { ru: 'От ฿35 000/год с эвакуацией.', en: 'From ฿35,000/year with evacuation.' }, href: '/legal/insurance' },
-    { slug: 'lawyer-consultation', label: { ru: 'Консультация юриста', en: 'Lawyer consultation' }, oneLiner: { ru: '60 минут (EN/RU/TH), ฿2 000.', en: '60 minutes (EN/RU/TH), ฿2,000.' }, href: '/legal/consultation' },
+    { slug: 'expat-insurance', label: { ru: 'Страховка для экспата', en: 'Expat insurance' }, oneLiner: { ru: 'От ฿35 000/год с эвакуацией.', en: 'From ฿35,000/year with evacuation.' }, href: '/insurance' },
+    { slug: 'lawyer-consultation', label: { ru: 'Консультация юриста', en: 'Lawyer consultation' }, oneLiner: { ru: '60 минут (EN/RU/TH), ฿2 000.', en: '60 minutes (EN/RU/TH), ฿2,000.' }, href: '/legal/consultation', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'DTV или Non-B — что лучше для фрилансера?', en: 'DTV or Non-B for a freelancer?' }, a: { ru: 'DTV (Destination Thailand Visa) — 5 лет, дешевле, для удалёнки и фрилансеров без локального дохода. Non-B — если планируете оформлять Work Permit и работать на тайскую компанию. Подбор — в Visa Quiz.', en: 'DTV (Destination Thailand Visa) — 5 years, cheaper, for remote workers/freelancers without Thai income. Non-B — if you plan a Work Permit and Thai employment. Use Visa Quiz.' } },

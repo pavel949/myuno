@@ -1,9 +1,10 @@
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 
-export default function MarketSuccess() {
+function MarketSuccess() {
   const { language } = useLanguage();
   const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
@@ -46,3 +47,6 @@ export default function MarketSuccess() {
     />
   );
 }
+
+const AvailableMarketSuccess = withMarketAvailability(MarketSuccess);
+export default AvailableMarketSuccess;

@@ -10,12 +10,13 @@
  *   - connector: через Google Drive OAuth connector gateway
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
 
 declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 };
 
 const GOOGLE_DRIVE_API = 'https://www.googleapis.com/drive/v3';
@@ -295,6 +296,12 @@ async function extractUnitsFromFile(
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
+  // Allow either an authenticated caller (manual trigger) or the internal
+  // cron secret (drive-watch-cron scheduler).
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const callerUserId = gate.mode === "user" ? gate.userId : null;
+
   try {
     const { sourceId, projectId, driveUrl, accessMode = 'public', triggerMode = 'manual' } = await req.json();
 
@@ -305,7 +312,14 @@ Deno.serve(async (req) => {
 
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
+    if (callerUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, 'actor_can_import_project', {
+        p_project_id: projectId, p_source_id: sourceId ?? null, p_connector: accessMode === 'connector',
+      });
+      if (denied) return denied;
+    }
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
     const folderId = extractFolderId(driveUrl);
     if (!folderId) throw new Error('Invalid Google Drive URL');
 

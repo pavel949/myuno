@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,24 +19,22 @@ import { OperationsDisputesTab } from '@/components/admin/operations/OperationsD
 import { OperationsManualPaymentsTab } from '@/components/admin/operations/OperationsManualPaymentsTab';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { applyOrderQueue, applyTicketQueue } from '@/lib/adminDashboardQueues';
 
 function useOperationsOverview() {
   return useQuery({
     queryKey: ['operations-overview'],
     queryFn: async () => {
       const [orders, tickets, prospects] = await Promise.all([
-        supabase.from('orders').select('status', { count: 'exact', head: false })
-          .is('deleted_at', null).limit(500),
-        supabase.from('support_tickets').select('status', { count: 'exact', head: false })
-          .limit(500),
-        supabase.from('vendor_prospects').select('status', { count: 'exact', head: false })
-          .limit(500),
+        applyOrderQueue(supabase.from('orders').select('id', { count: 'exact', head: true }), {status: 'pending', createdBefore: null}),
+        applyTicketQueue(supabase.from('support_tickets').select('id', { count: 'exact', head: true }), 'active'),
+        supabase.from('vendor_prospects').select('id', { count: 'exact', head: true }).or('status.eq.new,status.is.null'),
       ]);
 
       return {
-        pendingOrders: orders.data?.filter(o => o.status === 'pending').length || 0,
-        openTickets: tickets.data?.filter(t => t.status === 'open').length || 0,
-        newLeads: prospects.data?.filter(p => p.status === 'new' || !p.status).length || 0,
+        pendingOrders: orders.error ? null : orders.count,
+        openTickets: tickets.error ? null : tickets.count,
+        newLeads: prospects.error ? null : prospects.count,
       };
     },
     refetchInterval: 30000,
@@ -47,20 +45,12 @@ const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 
 
 export default function AdminOperations() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const tabFromUrl = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<typeof VALID_TABS[number]>(
-    tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number]) ? tabFromUrl as typeof VALID_TABS[number] : 'bookings'
-  );
+  const activeTab = tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number]) ? tabFromUrl as typeof VALID_TABS[number] : 'bookings';
   const { data: overview, refetch: refetchOverview } = useOperationsOverview();
-
-  useEffect(() => {
-    if (tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number])) {
-      setActiveTab(tabFromUrl as typeof VALID_TABS[number]);
-    }
-  }, [tabFromUrl]);
 
   const tabs = [
     { 
@@ -180,7 +170,7 @@ export default function AdminOperations() {
       </Card>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+      <Tabs value={activeTab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next; })} className="w-full">
         <TabsList className="flex w-full overflow-x-auto h-auto gap-1 bg-muted/50 p-1 justify-start sm:flex-wrap">
           {tabs.map((tab) => (
             <TabsTrigger

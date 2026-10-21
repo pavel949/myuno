@@ -9,6 +9,7 @@
 /* Onboarding flow (friction-removal animation + 4 screens). Scoped under
    `.onboarding-scope` so it never leaks into other surfaces. */
 @import './styles/onboarding.css';
+@import './styles/consumer-system.css';
 
 /* Fonts loaded via index.html for better performance */
 
@@ -58,14 +59,16 @@ html {
 
 body {
   overscroll-behavior-x: none;
-  overflow-x: hidden;
+  /* Clip horizontally without creating a non-scrolling sticky ancestor. */
+  overflow-x: clip;
   width: 100%;
   max-width: 100vw;
 }
 
 #root {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* hidden computes overflow-y:auto and traps the consumer sticky header. */
+  overflow-x: clip;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -456,18 +459,18 @@ body {
   /* Card press effect */
   .card-interactive:active,
   .card-content:active {
-    transform: scale(0.97) !important;
+    transform: none;
     box-shadow: none !important;
   }
   
   /* Button press */
   button:active, a:active, [role="button"]:active {
-    transform: scale(0.96);
+    transform: none;
   }
   
   /* Button hover brightness */
   button:hover, [role="button"]:hover {
-    filter: brightness(1.05);
+    filter: none;
   }
 
   /* Touch webkit scrolling for carousels */

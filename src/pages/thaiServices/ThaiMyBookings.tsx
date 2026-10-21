@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useMyThaiBookings, useUpdateThaiBookingStatus } from '@/hooks/thaiServices/useThaiServices';
@@ -41,7 +42,7 @@ export default function ThaiMyBookings() {
               <div key={b.id} className="border border-border p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <Badge variant={b.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                    {language === 'ru' ? status.ru : status.en}
+                    {pickLang(language, status)}
                   </Badge>
                   <span className="font-mono text-sm text-foreground">{formatPrice(b.total_amount_thb)}</span>
                 </div>

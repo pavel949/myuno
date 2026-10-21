@@ -1,6 +1,7 @@
 // Deno.serve used (native edge runtime)
-import { createClient } from "../_shared/supabase.ts";
+import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -13,12 +14,22 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: this endpoint is invoked internally (stripe-webhook, confirm-manual-
+    // payment via service-role) OR — potentially — by an end user. It returns
+    // guest PII, amounts, address and a check-in QR, so it must not be an
+    // unauthenticated IDOR. Internal callers pass; user callers must be
+    // authenticated AND own the order/booking (or hold a staff role).
+    const gate = await requireInternalOrUser(req, corsHeaders);
+    if (gate instanceof Response) return gate;
+    const callerUserId = gate.mode === 'user' ? gate.userId : null;
+
     // Rate limiting - public read endpoints (100/min)
     const rateLimitResponse = await withRateLimit(
       req,
       'generate-booking-voucher',
       RATE_LIMITS.publicRead,
-      corsHeaders
+      corsHeaders,
+      callerUserId ?? undefined,
     );
     if (rateLimitResponse) return rateLimitResponse;
 
@@ -29,13 +40,19 @@ Deno.serve(async (req) => {
       throw new Error('orderId or bookingId is required');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    if ((orderId && bookingId) || (!orderId && !bookingId)) return new Response(JSON.stringify({error:'Exactly one booking or order required'}),{status:400,headers:corsHeaders});
+    if (callerUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, 'actor_can_generate_voucher', { p_order_id: orderId ?? null, p_booking_id: bookingId ?? null });
+      if (denied) return denied;
+    }
+    const supabase = createServiceClient();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    if (!supabaseUrl) throw new Error('Service configuration unavailable');
 
     const isRu = language === 'ru';
     let voucherData: any = null;
     let entityType = 'order';
+    let ownerUserId: string | null = null;
 
     // Try fetching as order first
     if (orderId) {
@@ -46,6 +63,7 @@ Deno.serve(async (req) => {
         .single();
 
       if (!orderError && order) {
+        ownerUserId = order.customer_user_id ?? null;
         // Fetch participants
         const { data: participants } = await supabase
           .from('order_participants')
@@ -108,6 +126,7 @@ Deno.serve(async (req) => {
 
       if (!bookingError && booking) {
         entityType = 'property_booking';
+        ownerUserId = (booking as any).guest_id ?? (booking as any).owner_id ?? null;
         const property = (booking as any).properties;
         const fallbackTitle = isRu ? 'Объект' : 'Property';
         const fallbackLocation = isRu ? 'Адрес уточняется' : 'Address on request';
@@ -138,6 +157,8 @@ Deno.serve(async (req) => {
     if (!voucherData) {
       throw new Error('Order or booking not found');
     }
+
+
 
     // Generate QR code data - contains verification URL
     const qrCodeData = JSON.stringify({
@@ -184,6 +205,19 @@ Deno.serve(async (req) => {
           },
         });
       }
+    }
+
+    // Escape all user-derived string fields before they are interpolated into the
+    // voucher HTML below. Fields like guest_name / title / location / subtitle come
+    // from booking/order records and are attacker-influencable, so interpolating
+    // them raw is a stored-XSS vector in the rendered/emailed voucher.
+    const escapeHtml = (v: unknown): string =>
+      String(v ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string),
+      );
+    const vd = voucherData as Record<string, unknown>;
+    for (const k of ['title', 'subtitle', 'date', 'time', 'guest_name', 'location', 'booking_type', 'voucher_number', 'status', 'currency']) {
+      if (typeof vd[k] === 'string') vd[k] = escapeHtml(vd[k]);
     }
 
     // Generate HTML voucher

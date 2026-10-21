@@ -370,6 +370,13 @@ export type Database = {
             foreignKeyName: "agent_deals_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -393,6 +400,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -447,12 +461,17 @@ export type Database = {
           correlation_id: string | null
           created_at: string
           error_code: string | null
+          execution_status: string | null
           feedback: string | null
           id: string
+          input_tokens: number | null
+          intent: string | null
           is_success: boolean | null
           messages_count: number | null
           model: string | null
+          output_tokens: number | null
           response_time_ms: number | null
+          route_reason: string | null
           session_id: string | null
           tokens_used: number | null
           user_id: string | null
@@ -464,12 +483,17 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           error_code?: string | null
+          execution_status?: string | null
           feedback?: string | null
           id?: string
+          input_tokens?: number | null
+          intent?: string | null
           is_success?: boolean | null
           messages_count?: number | null
           model?: string | null
+          output_tokens?: number | null
           response_time_ms?: number | null
+          route_reason?: string | null
           session_id?: string | null
           tokens_used?: number | null
           user_id?: string | null
@@ -481,12 +505,17 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           error_code?: string | null
+          execution_status?: string | null
           feedback?: string | null
           id?: string
+          input_tokens?: number | null
+          intent?: string | null
           is_success?: boolean | null
           messages_count?: number | null
           model?: string | null
+          output_tokens?: number | null
           response_time_ms?: number | null
+          route_reason?: string | null
           session_id?: string | null
           tokens_used?: number | null
           user_id?: string | null
@@ -963,6 +992,53 @@ export type Database = {
           },
         ]
       }
+      airport_passengers: {
+        Row: {
+          booking_id: string
+          created_at: string
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          is_primary: boolean
+          last_name: string | null
+          nationality: string | null
+          passport_number: string | null
+          sort_order: number
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string | null
+          nationality?: string | null
+          passport_number?: string | null
+          sort_order?: number
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string | null
+          nationality?: string | null
+          passport_number?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airport_passengers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       airport_services: {
         Row: {
           airport_code: string
@@ -1125,6 +1201,54 @@ export type Database = {
         }
         Relationships: []
       }
+      amenity_catalog: {
+        Row: {
+          applies_to: string[]
+          category: string
+          code: string
+          created_at: string
+          icon: string | null
+          is_active: boolean
+          is_filterable: boolean
+          is_highlight: boolean
+          name_en: string
+          name_ru: string
+          name_th: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string[]
+          category: string
+          code: string
+          created_at?: string
+          icon?: string | null
+          is_active?: boolean
+          is_filterable?: boolean
+          is_highlight?: boolean
+          name_en: string
+          name_ru: string
+          name_th?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string[]
+          category?: string
+          code?: string
+          created_at?: string
+          icon?: string | null
+          is_active?: boolean
+          is_filterable?: boolean
+          is_highlight?: boolean
+          name_en?: string
+          name_ru?: string
+          name_th?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -1281,6 +1405,13 @@ export type Database = {
             foreignKeyName: "booking_conflicts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_conflicts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -1418,6 +1549,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_message_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -1639,6 +1777,56 @@ export type Database = {
           },
         ]
       }
+      booking_payments: {
+        Row: {
+          amount: number | null
+          booking_id: string
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          booking_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_status_history: {
         Row: {
           booking_id: string
@@ -1676,6 +1864,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      booking_vouchers: {
+        Row: {
+          booking_id: string | null
+          booking_type: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          order_id: string | null
+          qr_code_data: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          valid_from: string | null
+          valid_until: string | null
+          voucher_number: string
+        }
+        Insert: {
+          booking_id?: string | null
+          booking_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          qr_code_data?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          valid_from?: string | null
+          valid_until?: string | null
+          voucher_number: string
+        }
+        Update: {
+          booking_id?: string | null
+          booking_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          qr_code_data?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          voucher_number?: string
+        }
+        Relationships: []
       }
       bookings: {
         Row: {
@@ -1735,8 +1971,22 @@ export type Database = {
             foreignKeyName: "bookings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_service_catalog"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "bookings_service_id_fkey"
@@ -2186,6 +2436,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_sync_logs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -3502,6 +3759,13 @@ export type Database = {
             foreignKeyName: "cleaning_services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cleaning_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -3719,6 +3983,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_agreements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -4362,6 +4633,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_development_project_id_fkey"
+            columns: ["development_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "consultation_requests_resale_property_id_fkey"
@@ -5495,6 +5773,13 @@ export type Database = {
             foreignKeyName: "crm_documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -5745,6 +6030,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      crm_nurture_queue: {
+        Row: {
+          channel: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          error: string | null
+          id: string
+          message_body: string
+          recipient_email: string | null
+          recipient_phone: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          error?: string | null
+          id?: string
+          message_body: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          error?: string | null
+          id?: string
+          message_body?: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_oauth_states: {
+        Row: {
+          code_verifier: string
+          created_at: string
+          expires_at: string
+          redirect_to: string | null
+          state: string
+          user_id: string
+        }
+        Insert: {
+          code_verifier: string
+          created_at?: string
+          expires_at?: string
+          redirect_to?: string | null
+          state: string
+          user_id: string
+        }
+        Update: {
+          code_verifier?: string
+          created_at?: string
+          expires_at?: string
+          redirect_to?: string | null
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       crm_pipeline_stages: {
         Row: {
@@ -6257,6 +6620,13 @@ export type Database = {
             foreignKeyName: "crm_tasks_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -6272,6 +6642,47 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_web_form_submissions: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          data: Json
+          deal_id: string | null
+          form_id: string
+          id: string
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          data?: Json
+          deal_id?: string | null
+          form_id: string
+          id?: string
+          source_url?: string | null
+          status?: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          data?: Json
+          deal_id?: string | null
+          form_id?: string
+          id?: string
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_web_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "crm_web_forms"
             referencedColumns: ["id"]
           },
         ]
@@ -7110,6 +7521,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "development_units_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       dispute_packs: {
@@ -7406,6 +7824,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "drive_import_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "drive_import_jobs_source_id_fkey"
             columns: ["source_id"]
             isOneToOne: false
@@ -7527,6 +7952,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -7667,6 +8099,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "education_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -7977,6 +8416,13 @@ export type Database = {
             foreignKeyName: "events_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -8175,6 +8621,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "floor_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       flower_addons: {
@@ -8326,6 +8779,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flower_shops_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -8693,6 +9153,13 @@ export type Database = {
             foreignKeyName: "gyms_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gyms_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -8999,6 +9466,13 @@ export type Database = {
             foreignKeyName: "insurance_providers_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -9108,6 +9582,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_listings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -9546,6 +10027,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "investment_projects_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       investor_inquiries: {
@@ -9679,6 +10167,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "juristic_contacts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "juristic_contacts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -9690,6 +10185,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -9842,6 +10344,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "juristic_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "juristic_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -9853,6 +10362,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -10082,6 +10598,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_attributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -10639,6 +11162,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -11304,6 +11834,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -11601,6 +12138,7 @@ export type Database = {
           min_contract_months: number | null
           name_en: string
           name_ru: string
+          operating_spaces_enforced: boolean
           paid_slots: number
           phone: string | null
           properties_count: number | null
@@ -11657,6 +12195,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en: string
           name_ru: string
+          operating_spaces_enforced?: boolean
           paid_slots?: number
           phone?: string | null
           properties_count?: number | null
@@ -11713,6 +12252,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en?: string
           name_ru?: string
+          operating_spaces_enforced?: boolean
           paid_slots?: number
           phone?: string | null
           properties_count?: number | null
@@ -11748,6 +12288,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: true
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_companies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -12741,6 +13288,13 @@ export type Database = {
             foreignKeyName: "mc_property_slots_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: true
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -13274,6 +13828,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nb_alert_log_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       nb_alert_preferences: {
@@ -13416,6 +13977,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nb_leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       nb_project_updates: {
@@ -13462,6 +14030,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nb_project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -13707,6 +14282,45 @@ export type Database = {
         }
         Relationships: []
       }
+      offer_history: {
+        Row: {
+          channel: string | null
+          client_name: string | null
+          created_at: string
+          deal_id: string | null
+          deal_type: string | null
+          generated_at: string
+          id: string
+          language: string | null
+          offer_text: string | null
+          subject: string | null
+        }
+        Insert: {
+          channel?: string | null
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_type?: string | null
+          generated_at?: string
+          id?: string
+          language?: string | null
+          offer_text?: string | null
+          subject?: string | null
+        }
+        Update: {
+          channel?: string | null
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_type?: string | null
+          generated_at?: string
+          id?: string
+          language?: string | null
+          offer_text?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       official_news: {
         Row: {
           city_id: string | null
@@ -13765,6 +14379,199 @@ export type Database = {
             columns: ["city_id"]
             isOneToOne: false
             referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operating_space_assignment_audit: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          from_space_id: string | null
+          id: string
+          management_company_id: string
+          property_id: string
+          reason: string | null
+          to_space_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          from_space_id?: string | null
+          id?: string
+          management_company_id: string
+          property_id: string
+          reason?: string | null
+          to_space_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          from_space_id?: string | null
+          id?: string
+          management_company_id?: string
+          property_id?: string
+          reason?: string | null
+          to_space_id?: string | null
+        }
+        Relationships: []
+      }
+      operating_space_members: {
+        Row: {
+          company_member_id: string
+          granted_at: string
+          granted_by: string | null
+          is_active: boolean
+          management_company_id: string
+          operating_space_id: string
+        }
+        Insert: {
+          company_member_id: string
+          granted_at?: string
+          granted_by?: string | null
+          is_active?: boolean
+          management_company_id: string
+          operating_space_id: string
+        }
+        Update: {
+          company_member_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          is_active?: boolean
+          management_company_id?: string
+          operating_space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_space_members_member_same_company_fkey"
+            columns: ["company_member_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_company_members"
+            referencedColumns: ["id", "company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_members_space_same_company_fkey"
+            columns: ["operating_space_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "operating_spaces"
+            referencedColumns: ["id", "management_company_id"]
+          },
+        ]
+      }
+      operating_space_properties: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          management_company_id: string
+          operating_space_id: string
+          property_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          management_company_id: string
+          operating_space_id: string
+          property_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          management_company_id?: string
+          operating_space_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_space_same_company_fkey"
+            columns: ["operating_space_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "operating_spaces"
+            referencedColumns: ["id", "management_company_id"]
+          },
+        ]
+      }
+      operating_spaces: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key: string
+          management_company_id: string
+          name_en: string
+          name_ru: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          management_company_id: string
+          name_en: string
+          name_ru: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          management_company_id?: string
+          name_en?: string
+          name_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_spaces_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operating_spaces_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -14474,6 +15281,13 @@ export type Database = {
             foreignKeyName: "ota_listing_connections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ota_listing_connections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -14810,6 +15624,13 @@ export type Database = {
             foreignKeyName: "owner_invoices_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -14876,6 +15697,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_notifications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -15019,6 +15847,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -15205,6 +16040,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -15957,6 +16799,13 @@ export type Database = {
             foreignKeyName: "pharmacies_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pharmacies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -16459,6 +17308,13 @@ export type Database = {
             foreignKeyName: "portal_messages_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -16537,6 +17393,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_recommendations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -16913,6 +17776,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       project_drive_sources: {
@@ -16965,6 +17835,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_drive_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -17120,6 +17997,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "project_units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "project_units_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -17131,6 +18015,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -17208,6 +18099,7 @@ export type Database = {
           actual_owner_phone: string | null
           address: string | null
           advance_months_long: number | null
+          advance_notice_hours: number | null
           ai_autoreply_enabled: boolean
           ai_autoreply_instructions: string | null
           allow_pay_later: boolean
@@ -17224,6 +18116,7 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           beds: Json | null
+          booking_window_months: number | null
           building_condition: string | null
           building_management_contact: string | null
           building_name: string | null
@@ -17363,6 +18256,7 @@ export type Database = {
           marketplace_property_id: string | null
           max_guests: number | null
           max_party_guests: number | null
+          max_stay_nights: number | null
           min_lease_months: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
@@ -17385,6 +18279,7 @@ export type Database = {
           ownership_verification_status: string | null
           ownership_verified_at: string | null
           ownership_verified_by: string | null
+          parent_property_id: string | null
           parking_included: boolean | null
           parking_notes: string | null
           parking_spaces: number | null
@@ -17403,6 +18298,7 @@ export type Database = {
           pm_company_id: string | null
           pool_size: string | null
           pool_type: string | null
+          preparation_days: number | null
           prepay_percent: number | null
           price: number | null
           price_per_month: number | null
@@ -17410,6 +18306,7 @@ export type Database = {
           price_per_year: number | null
           price_period: string | null
           project_id: string | null
+          property_kind: string
           property_type: string
           provider_id: string | null
           purchase_currency: string | null
@@ -17432,6 +18329,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           road_access: string | null
+          room_category_id: string | null
           rooms: Json | null
           safety_features: string[] | null
           sale_currency: string | null
@@ -17492,6 +18390,7 @@ export type Database = {
           actual_owner_phone?: string | null
           address?: string | null
           advance_months_long?: number | null
+          advance_notice_hours?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -17508,6 +18407,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
+          booking_window_months?: number | null
           building_condition?: string | null
           building_management_contact?: string | null
           building_name?: string | null
@@ -17647,6 +18547,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          max_stay_nights?: number | null
           min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
@@ -17669,6 +18570,7 @@ export type Database = {
           ownership_verification_status?: string | null
           ownership_verified_at?: string | null
           ownership_verified_by?: string | null
+          parent_property_id?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -17687,6 +18589,7 @@ export type Database = {
           pm_company_id?: string | null
           pool_size?: string | null
           pool_type?: string | null
+          preparation_days?: number | null
           prepay_percent?: number | null
           price?: number | null
           price_per_month?: number | null
@@ -17694,6 +18597,7 @@ export type Database = {
           price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
+          property_kind?: string
           property_type: string
           provider_id?: string | null
           purchase_currency?: string | null
@@ -17716,6 +18620,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           road_access?: string | null
+          room_category_id?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -17776,6 +18681,7 @@ export type Database = {
           actual_owner_phone?: string | null
           address?: string | null
           advance_months_long?: number | null
+          advance_notice_hours?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -17792,6 +18698,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
+          booking_window_months?: number | null
           building_condition?: string | null
           building_management_contact?: string | null
           building_name?: string | null
@@ -17931,6 +18838,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          max_stay_nights?: number | null
           min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
@@ -17953,6 +18861,7 @@ export type Database = {
           ownership_verification_status?: string | null
           ownership_verified_at?: string | null
           ownership_verified_by?: string | null
+          parent_property_id?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -17971,6 +18880,7 @@ export type Database = {
           pm_company_id?: string | null
           pool_size?: string | null
           pool_type?: string | null
+          preparation_days?: number | null
           prepay_percent?: number | null
           price?: number | null
           price_per_month?: number | null
@@ -17978,6 +18888,7 @@ export type Database = {
           price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
+          property_kind?: string
           property_type?: string
           provider_id?: string | null
           purchase_currency?: string | null
@@ -18000,6 +18911,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           road_access?: string | null
+          room_category_id?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -18060,6 +18972,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_city_id_fkey"
             columns: ["city_id"]
             isOneToOne: false
@@ -18102,6 +19021,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
@@ -18112,8 +19073,29 @@ export type Database = {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "properties_room_category_fk"
+            columns: ["room_category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_room_category_fk"
+            columns: ["room_category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18227,6 +19209,13 @@ export type Database = {
             foreignKeyName: "property_accounting_policies_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -18285,6 +19274,83 @@ export type Database = {
         }
         Relationships: []
       }
+      property_amenities: {
+        Row: {
+          amenity_code: string
+          created_at: string
+          id: string
+          note_en: string | null
+          note_ru: string | null
+          property_id: string
+        }
+        Insert: {
+          amenity_code: string
+          created_at?: string
+          id?: string
+          note_en?: string | null
+          note_ru?: string | null
+          property_id: string
+        }
+        Update: {
+          amenity_code?: string
+          created_at?: string
+          id?: string
+          note_en?: string | null
+          note_ru?: string | null
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_amenities_amenity_code_fkey"
+            columns: ["amenity_code"]
+            isOneToOne: false
+            referencedRelation: "amenity_catalog"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_analytics: {
         Row: {
           bookings: number | null
@@ -18341,6 +19407,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_analytics_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -18423,6 +19496,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_availability_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -18646,6 +19726,13 @@ export type Database = {
             foreignKeyName: "property_bookings_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -18737,6 +19824,13 @@ export type Database = {
             foreignKeyName: "property_budgets_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_budgets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -18822,6 +19916,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_chat_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -19093,6 +20194,13 @@ export type Database = {
             foreignKeyName: "property_delegates_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_delegates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19225,6 +20333,13 @@ export type Database = {
             foreignKeyName: "property_documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19306,6 +20421,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_external_calendars_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -19498,6 +20620,13 @@ export type Database = {
             foreignKeyName: "property_financials_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_financials_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19628,6 +20757,13 @@ export type Database = {
             foreignKeyName: "property_guidebook_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_guidebook_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19706,6 +20842,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -19814,6 +20957,13 @@ export type Database = {
             foreignKeyName: "property_inspections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19916,6 +21066,13 @@ export type Database = {
             foreignKeyName: "property_inventory_items_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inventory_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -19994,6 +21151,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_key_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20081,6 +21245,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: true
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_listing_scores_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20177,6 +21348,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_management_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20288,6 +21466,13 @@ export type Database = {
             foreignKeyName: "property_management_terms_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_management_terms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -20360,6 +21545,13 @@ export type Database = {
             foreignKeyName: "property_manager_assignments_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -20372,6 +21564,115 @@ export type Database = {
           },
           {
             foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_media: {
+        Row: {
+          alt_en: string | null
+          alt_ru: string | null
+          caption_en: string | null
+          caption_ru: string | null
+          caption_th: string | null
+          created_at: string
+          created_by: string | null
+          display_order: number
+          height_px: number | null
+          id: string
+          is_active: boolean
+          is_cover: boolean
+          kind: string
+          property_id: string
+          room_tag: string | null
+          storage_path: string | null
+          updated_at: string
+          url: string
+          width_px: number | null
+        }
+        Insert: {
+          alt_en?: string | null
+          alt_ru?: string | null
+          caption_en?: string | null
+          caption_ru?: string | null
+          caption_th?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          height_px?: number | null
+          id?: string
+          is_active?: boolean
+          is_cover?: boolean
+          kind?: string
+          property_id: string
+          room_tag?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          url: string
+          width_px?: number | null
+        }
+        Update: {
+          alt_en?: string | null
+          alt_ru?: string | null
+          caption_en?: string | null
+          caption_ru?: string | null
+          caption_th?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          height_px?: number | null
+          id?: string
+          is_active?: boolean
+          is_cover?: boolean
+          kind?: string
+          property_id?: string
+          room_tag?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          url?: string
+          width_px?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
@@ -20423,6 +21724,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20547,6 +21855,13 @@ export type Database = {
             foreignKeyName: "property_operational_tasks_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_operational_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -20629,6 +21944,13 @@ export type Database = {
             foreignKeyName: "property_owners_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -20704,6 +22026,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_ownership_invites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20801,6 +22130,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -20911,6 +22247,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_price_offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -21329,6 +22672,13 @@ export type Database = {
             foreignKeyName: "property_promotions_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -21348,8 +22698,81 @@ export type Database = {
           },
         ]
       }
+      property_rate_plans: {
+        Row: {
+          adjustment_type: string
+          adjustment_value: number
+          category_id: string
+          created_at: string
+          free_cancellation_days: number | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          is_refundable: boolean
+          max_stay_nights: number | null
+          meal_plan: string
+          min_advance_days: number | null
+          min_stay_nights: number | null
+          name_en: string
+          name_ru: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjustment_type?: string
+          adjustment_value?: number
+          category_id: string
+          created_at?: string
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_refundable?: boolean
+          max_stay_nights?: number | null
+          meal_plan?: string
+          min_advance_days?: number | null
+          min_stay_nights?: number | null
+          name_en: string
+          name_ru?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjustment_type?: string
+          adjustment_value?: number
+          category_id?: string
+          created_at?: string
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_refundable?: boolean
+          max_stay_nights?: number | null
+          meal_plan?: string
+          min_advance_days?: number | null
+          min_stay_nights?: number | null
+          name_en?: string
+          name_ru?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_rate_seasons: {
         Row: {
+          category_id: string | null
           created_at: string | null
           currency: string | null
           early_booking_days: number | null
@@ -21374,6 +22797,7 @@ export type Database = {
           weekly_rate: number | null
         }
         Insert: {
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           early_booking_days?: number | null
@@ -21398,6 +22822,7 @@ export type Database = {
           weekly_rate?: number | null
         }
         Update: {
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           early_booking_days?: number | null
@@ -21423,6 +22848,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "property_rate_seasons_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -21434,6 +22873,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -21542,6 +22988,13 @@ export type Database = {
             foreignKeyName: "property_reports_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -21563,60 +23016,93 @@ export type Database = {
       }
       property_reviews: {
         Row: {
+          booking_id: string | null
           created_at: string | null
           external_id: string | null
           guest_name: string | null
           id: string
           is_public: boolean | null
+          is_verified_stay: boolean
           language: string | null
           owner_id: string
+          photos: string[]
           platform: string
           property_id: string
           rating: number | null
+          rating_accuracy: number | null
+          rating_checkin: number | null
+          rating_cleanliness: number | null
+          rating_communication: number | null
+          rating_location: number | null
+          rating_value: number | null
           responded_at: string | null
           responded_by: string | null
           response_text: string | null
           review_date: string | null
           review_text: string | null
+          reviewer_id: string | null
           sentiment: string | null
+          stay_date: string | null
           updated_at: string | null
         }
         Insert: {
+          booking_id?: string | null
           created_at?: string | null
           external_id?: string | null
           guest_name?: string | null
           id?: string
           is_public?: boolean | null
+          is_verified_stay?: boolean
           language?: string | null
           owner_id: string
+          photos?: string[]
           platform?: string
           property_id: string
           rating?: number | null
+          rating_accuracy?: number | null
+          rating_checkin?: number | null
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_location?: number | null
+          rating_value?: number | null
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
           review_date?: string | null
           review_text?: string | null
+          reviewer_id?: string | null
           sentiment?: string | null
+          stay_date?: string | null
           updated_at?: string | null
         }
         Update: {
+          booking_id?: string | null
           created_at?: string | null
           external_id?: string | null
           guest_name?: string | null
           id?: string
           is_public?: boolean | null
+          is_verified_stay?: boolean
           language?: string | null
           owner_id?: string
+          photos?: string[]
           platform?: string
           property_id?: string
           rating?: number | null
+          rating_accuracy?: number | null
+          rating_checkin?: number | null
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_location?: number | null
+          rating_value?: number | null
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
           review_date?: string | null
           review_text?: string | null
+          reviewer_id?: string | null
           sentiment?: string | null
+          stay_date?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -21638,6 +23124,13 @@ export type Database = {
             foreignKeyName: "property_reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -21650,6 +23143,112 @@ export type Database = {
           },
           {
             foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_room_categories: {
+        Row: {
+          amenities: string[]
+          area_sqm: number | null
+          base_price_per_night: number
+          bed_config: string | null
+          bedrooms: number | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          max_guests: number
+          min_stay_nights: number
+          name_en: string
+          name_ru: string | null
+          property_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[]
+          area_sqm?: number | null
+          base_price_per_night: number
+          bed_config?: string | null
+          bedrooms?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          max_guests?: number
+          min_stay_nights?: number
+          name_en: string
+          name_ru?: string | null
+          property_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[]
+          area_sqm?: number | null
+          base_price_per_night?: number
+          bed_config?: string | null
+          bedrooms?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          max_guests?: number
+          min_stay_nights?: number
+          name_en?: string
+          name_ru?: string | null
+          property_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
@@ -21767,6 +23366,13 @@ export type Database = {
             foreignKeyName: "property_service_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -21779,6 +23385,102 @@ export type Database = {
           },
           {
             foreignKeyName: "property_service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_stay_restrictions: {
+        Row: {
+          category_id: string | null
+          closed_to_arrival: boolean
+          closed_to_departure: boolean
+          created_at: string
+          date: string
+          id: string
+          min_stay_nights: number | null
+          price_override: number | null
+          property_id: string
+          stop_sell: boolean
+        }
+        Insert: {
+          category_id?: string | null
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          created_at?: string
+          date: string
+          id?: string
+          min_stay_nights?: number | null
+          price_override?: number | null
+          property_id: string
+          stop_sell?: boolean
+        }
+        Update: {
+          category_id?: string | null
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          min_stay_nights?: number | null
+          price_override?: number | null
+          property_id?: string
+          stop_sell?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
@@ -21836,6 +23538,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: true
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stays_subscriptions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -21936,6 +23645,13 @@ export type Database = {
             foreignKeyName: "property_utility_schedules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_utility_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "v_marketplace_listings"
             referencedColumns: ["id"]
           },
@@ -21952,6 +23668,58 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_properties_public"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          provider_id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          provider_id: string
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          provider_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
           },
         ]
       }
@@ -21996,6 +23764,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_badges_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -22148,6 +23923,59 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_org_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_org_links_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
       provider_payout_methods: {
         Row: {
           account_holder_name: string | null
@@ -22194,6 +24022,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_payout_methods_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -23153,6 +24988,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "resale_properties_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       reservations: {
@@ -23269,6 +25111,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "reservations_unit_id_fkey"
@@ -23615,6 +25464,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rln_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       salon_services: {
@@ -23664,6 +25520,13 @@ export type Database = {
           salon_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "salon_services_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
+            referencedRelation: "public_salon_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salon_services_salon_id_fkey"
             columns: ["salon_id"]
@@ -23741,6 +25604,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "salon_staff_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
+            referencedRelation: "public_salon_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salon_staff_salon_id_fkey"
             columns: ["salon_id"]
@@ -23884,6 +25754,13 @@ export type Database = {
             foreignKeyName: "salons_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -23921,7 +25798,10 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string | null
+          duration_minutes: number | null
           guest_id: string
+          guest_name: string | null
+          guest_phone: string | null
           id: string
           notes: string | null
           order_number: string | null
@@ -23932,6 +25812,7 @@ export type Database = {
           rating: number | null
           review: string | null
           scheduled_at: string | null
+          service_id: string | null
           service_name: string
           service_name_ru: string | null
           service_type: string
@@ -23949,7 +25830,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          duration_minutes?: number | null
           guest_id: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
@@ -23960,6 +25844,7 @@ export type Database = {
           rating?: number | null
           review?: string | null
           scheduled_at?: string | null
+          service_id?: string | null
           service_name: string
           service_name_ru?: string | null
           service_type: string
@@ -23977,7 +25862,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          duration_minutes?: number | null
           guest_id?: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
@@ -23988,6 +25876,7 @@ export type Database = {
           rating?: number | null
           review?: string | null
           scheduled_at?: string | null
+          service_id?: string | null
           service_name?: string
           service_name_ru?: string | null
           service_type?: string
@@ -24015,6 +25904,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -24049,8 +25945,29 @@ export type Database = {
             foreignKeyName: "service_orders_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "service_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_service_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -24244,14 +26161,55 @@ export type Database = {
             foreignKeyName: "services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
         ]
       }
+      signature_request_signer_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          signer_id: string
+          signer_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          signer_id: string
+          signer_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          signer_id?: string
+          signer_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_request_signer_tokens_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: true
+            referencedRelation: "signature_request_signers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signature_request_signers: {
         Row: {
-          access_token: string | null
           created_at: string
           decline_reason: string | null
           declined_at: string | null
@@ -24272,7 +26230,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          access_token?: string | null
           created_at?: string
           decline_reason?: string | null
           declined_at?: string | null
@@ -24293,7 +26250,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          access_token?: string | null
           created_at?: string
           decline_reason?: string | null
           declined_at?: string | null
@@ -24743,6 +26699,13 @@ export type Database = {
             foreignKeyName: "stores_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stores_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -24909,6 +26872,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -25828,6 +27798,482 @@ export type Database = {
         }
         Relationships: []
       }
+      thai_bookings: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_id: string
+          date_time: string | null
+          id: string
+          notes: string | null
+          payment_status: string
+          service_id: string | null
+          status: string
+          total_amount_thb: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_id: string
+          date_time?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          service_id?: string | null
+          status?: string
+          total_amount_thb?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          date_time?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          service_id?: string | null
+          status?: string
+          total_amount_thb?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_bookings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "thai_business_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_business_reviews: {
+        Row: {
+          booking_id: string | null
+          business_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          images: string[] | null
+          rating: number
+          text: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          business_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          images?: string[] | null
+          rating: number
+          text?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          images?: string[] | null
+          rating?: number
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_business_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "thai_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_business_services: {
+        Row: {
+          business_id: string
+          created_at: string
+          description_ru: string | null
+          description_th: string | null
+          duration_minutes: number | null
+          id: string
+          name_ru: string | null
+          name_th: string
+          options: Json | null
+          price_thb: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name_ru?: string | null
+          name_th: string
+          options?: Json | null
+          price_thb?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name_ru?: string | null
+          name_th?: string
+          options?: Json | null
+          price_thb?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_business_services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_businesses: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          description_ru: string | null
+          description_th: string | null
+          district: string | null
+          gallery_urls: string[] | null
+          id: string
+          is_active: boolean
+          landing_subtitle_ru: string | null
+          landing_title_ru: string | null
+          lat: number | null
+          line_id: string | null
+          lng: number | null
+          logo_url: string | null
+          name_en: string | null
+          name_ru: string | null
+          name_th: string
+          owner_id: string
+          ownership_type: string | null
+          payment_methods: string[] | null
+          phone: string | null
+          provider_id: string | null
+          rating_avg: number | null
+          rating_count: number
+          slug: string
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          district?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          is_active?: boolean
+          landing_subtitle_ru?: string | null
+          landing_title_ru?: string | null
+          lat?: number | null
+          line_id?: string | null
+          lng?: number | null
+          logo_url?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          name_th: string
+          owner_id: string
+          ownership_type?: string | null
+          payment_methods?: string[] | null
+          phone?: string | null
+          provider_id?: string | null
+          rating_avg?: number | null
+          rating_count?: number
+          slug: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          district?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          is_active?: boolean
+          landing_subtitle_ru?: string | null
+          landing_title_ru?: string | null
+          lat?: number | null
+          line_id?: string | null
+          lng?: number | null
+          logo_url?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          name_th?: string
+          owner_id?: string
+          ownership_type?: string | null
+          payment_methods?: string[] | null
+          phone?: string | null
+          provider_id?: string | null
+          rating_avg?: number | null
+          rating_count?: number
+          slug?: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      thai_chat_messages: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_image: boolean
+          is_read: boolean
+          lang_original: string
+          lang_target: string
+          sender_id: string
+          text_original: string
+          text_translated: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_image?: boolean
+          is_read?: boolean
+          lang_original?: string
+          lang_target?: string
+          sender_id: string
+          text_original?: string
+          text_translated?: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_image?: boolean
+          is_read?: boolean
+          lang_original?: string
+          lang_target?: string
+          sender_id?: string
+          text_original?: string
+          text_translated?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "thai_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_chats: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          last_message_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          last_message_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          last_message_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_chats_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chats_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chats_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_partner_leads: {
+        Row: {
+          business_name: string | null
+          category: string | null
+          contact_name: string
+          created_at: string
+          email: string | null
+          id: string
+          interests: string[]
+          message: string | null
+          notes: string | null
+          phone: string
+          preferred_lang: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          category?: string | null
+          contact_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[]
+          message?: string | null
+          notes?: string | null
+          phone: string
+          preferred_lang?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          category?: string | null
+          contact_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[]
+          message?: string | null
+          notes?: string | null
+          phone?: string
+          preferred_lang?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ticket_messages: {
         Row: {
           attachments: Json | null
@@ -26195,6 +28641,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -27466,6 +29919,13 @@ export type Database = {
             foreignKeyName: "vendor_bookings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -27834,6 +30294,13 @@ export type Database = {
             foreignKeyName: "vendor_payouts_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payouts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -28041,6 +30508,13 @@ export type Database = {
             foreignKeyName: "vendor_prospects_converted_provider_id_fkey"
             columns: ["converted_provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_prospects_converted_provider_id_fkey"
+            columns: ["converted_provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -28104,6 +30578,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -28174,6 +30655,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: true
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_subscriptions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -28432,6 +30920,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veterinary_clinics_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -28846,6 +31341,13 @@ export type Database = {
             foreignKeyName: "water_activities_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "water_activities_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -29252,6 +31754,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -29363,6 +31872,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -29465,6 +31981,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -29594,6 +32117,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -29816,6 +32346,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -29948,6 +32485,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -30519,6 +33063,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_management_company_id_fkey"
             columns: ["management_company_id"]
             isOneToOne: false
@@ -30647,6 +33198,1097 @@ export type Database = {
           },
           {
             foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      public_property_catalog: {
+        Row: {
+          accepts_installments: boolean | null
+          accessibility_features: string[] | null
+          address: string | null
+          advance_months_long: number | null
+          advance_notice_hours: number | null
+          amenities: string[] | null
+          approval_status: string | null
+          approved_at: string | null
+          area_sqm: number | null
+          asset_class: string | null
+          available_from: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          beds: Json | null
+          booking_window_months: number | null
+          building_condition: string | null
+          building_name: string | null
+          building_year: number | null
+          cancellation_policy: string | null
+          cap_rate_pct: number | null
+          check_in_time: string | null
+          check_out_time: string | null
+          children_friendly: boolean | null
+          cleaning_frequency: string | null
+          cleaning_included: boolean | null
+          clearview_badge: string | null
+          clearview_recommendation: string | null
+          clearview_score: number | null
+          clearview_synced_at: string | null
+          complex_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          custom_length_discounts: Json | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          deposit_months_long: number | null
+          deposit_type: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          early_booking_days: number | null
+          early_booking_discount: number | null
+          electricity_included: boolean | null
+          electricity_load_kw: number | null
+          encumbrances_disclosed: boolean | null
+          equipment: string[] | null
+          escrow_offered: boolean | null
+          escrow_provider: string | null
+          extra_guest_price: number | null
+          extra_guest_threshold: number | null
+          extra_services: Json | null
+          floor: number | null
+          floor_area_sqm: number | null
+          foreign_quota_available: boolean | null
+          frontage_m: number | null
+          furnishing_level: string | null
+          garden_type: string | null
+          has_crib: boolean | null
+          has_elevator: boolean | null
+          has_high_chair: boolean | null
+          highlights: string[] | null
+          host_languages: string[] | null
+          hotel_brand: string | null
+          hotel_keys: number | null
+          hotel_license_type: string | null
+          hotel_star_rating: number | null
+          hotel_year_renovated: number | null
+          house_rules: string | null
+          house_rules_ru: string | null
+          id: string | null
+          images: string[] | null
+          included_services: Json | null
+          installment_plan: Json | null
+          instant_booking: boolean | null
+          instant_booking_enabled_at: string | null
+          internet_speed: string | null
+          is_active: boolean | null
+          is_assignment: boolean | null
+          is_featured: boolean | null
+          is_for_sale: boolean | null
+          is_quick_sale: boolean | null
+          is_verified: boolean | null
+          land_size_rai: number | null
+          land_size_sqm: number | null
+          last_minute_days: number | null
+          last_minute_discount: number | null
+          lat: number | null
+          listing_modes: string[] | null
+          listing_type: string | null
+          lng: number | null
+          location_id: string | null
+          management_company_id: string | null
+          marketplace_property_id: string | null
+          max_guests: number | null
+          max_party_guests: number | null
+          max_stay_nights: number | null
+          min_lease_months: number | null
+          min_stay_nights: number | null
+          monthly_discount: number | null
+          nearby_places: Json | null
+          ownership_form: string | null
+          ownership_type: string | null
+          parking_included: boolean | null
+          parking_notes: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          parties_allowed: boolean | null
+          payment_model: string | null
+          payment_policy: string | null
+          permitted_uses: string[] | null
+          pet_notes: string | null
+          pet_notes_ru: string | null
+          pet_policy: string | null
+          pets_allowed: boolean | null
+          plot_size_sqm: number | null
+          pm_company_id: string | null
+          pool_size: string | null
+          pool_type: string | null
+          preparation_days: number | null
+          price: number | null
+          price_per_month: number | null
+          price_per_night: number | null
+          price_per_year: number | null
+          price_period: string | null
+          project_id: string | null
+          property_type: string | null
+          provider_id: string | null
+          quick_sale_discount_pct: number | null
+          quick_sale_reason: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          rating: number | null
+          review_count: number | null
+          road_access: string | null
+          rooms: Json | null
+          safety_features: string[] | null
+          sale_currency: string | null
+          sale_intent: string | null
+          sale_price: number | null
+          seasonal_pricing: Json | null
+          smoking_policy: string | null
+          status: string | null
+          tenancy_modes: string[] | null
+          title: string | null
+          title_deed_type: string | null
+          title_en: string | null
+          title_ru: string | null
+          tm30_registration_supported: boolean | null
+          total_floors: number | null
+          transfer_airport_price: number | null
+          transfer_available: boolean | null
+          transfer_notes: string | null
+          transfer_notes_ru: string | null
+          unit_number: string | null
+          updated_at: string | null
+          urgency_deadline: string | null
+          utilities_included_long: string[] | null
+          video_file_url: string | null
+          video_url: string | null
+          view_type: string | null
+          virtual_tour_url: string | null
+          water_included: boolean | null
+          water_supply: string | null
+          weekly_discount: number | null
+          wifi_included: boolean | null
+          wifi_speed: string | null
+          yield_pct: number | null
+          zoning: string | null
+        }
+        Insert: {
+          accepts_installments?: boolean | null
+          accessibility_features?: string[] | null
+          address?: string | null
+          advance_months_long?: number | null
+          advance_notice_hours?: number | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          approved_at?: string | null
+          area_sqm?: number | null
+          asset_class?: string | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: Json | null
+          booking_window_months?: number | null
+          building_condition?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          cap_rate_pct?: number | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          clearview_badge?: string | null
+          clearview_recommendation?: string | null
+          clearview_score?: number | null
+          clearview_synced_at?: string | null
+          complex_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          custom_length_discounts?: Json | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_months_long?: number | null
+          deposit_type?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
+          electricity_included?: boolean | null
+          electricity_load_kw?: number | null
+          encumbrances_disclosed?: boolean | null
+          equipment?: string[] | null
+          escrow_offered?: boolean | null
+          escrow_provider?: string | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          floor_area_sqm?: number | null
+          foreign_quota_available?: boolean | null
+          frontage_m?: number | null
+          furnishing_level?: string | null
+          garden_type?: string | null
+          has_crib?: boolean | null
+          has_elevator?: boolean | null
+          has_high_chair?: boolean | null
+          highlights?: string[] | null
+          host_languages?: string[] | null
+          hotel_brand?: string | null
+          hotel_keys?: number | null
+          hotel_license_type?: string | null
+          hotel_star_rating?: number | null
+          hotel_year_renovated?: number | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          installment_plan?: Json | null
+          instant_booking?: boolean | null
+          instant_booking_enabled_at?: string | null
+          internet_speed?: string | null
+          is_active?: boolean | null
+          is_assignment?: boolean | null
+          is_featured?: boolean | null
+          is_for_sale?: boolean | null
+          is_quick_sale?: boolean | null
+          is_verified?: boolean | null
+          land_size_rai?: number | null
+          land_size_sqm?: number | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
+          lat?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          location_id?: string | null
+          management_company_id?: string | null
+          marketplace_property_id?: string | null
+          max_guests?: number | null
+          max_party_guests?: number | null
+          max_stay_nights?: number | null
+          min_lease_months?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          nearby_places?: Json | null
+          ownership_form?: string | null
+          ownership_type?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
+          payment_policy?: string | null
+          permitted_uses?: string[] | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pet_policy?: string | null
+          pets_allowed?: boolean | null
+          plot_size_sqm?: number | null
+          pm_company_id?: string | null
+          pool_size?: string | null
+          pool_type?: string | null
+          preparation_days?: number | null
+          price?: number | null
+          price_per_month?: number | null
+          price_per_night?: number | null
+          price_per_year?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          quick_sale_discount_pct?: number | null
+          quick_sale_reason?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          rating?: number | null
+          review_count?: number | null
+          road_access?: string | null
+          rooms?: Json | null
+          safety_features?: string[] | null
+          sale_currency?: string | null
+          sale_intent?: string | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tenancy_modes?: string[] | null
+          title?: string | null
+          title_deed_type?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          tm30_registration_supported?: boolean | null
+          total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          urgency_deadline?: string | null
+          utilities_included_long?: string[] | null
+          video_file_url?: string | null
+          video_url?: string | null
+          view_type?: string | null
+          virtual_tour_url?: string | null
+          water_included?: boolean | null
+          water_supply?: string | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_speed?: string | null
+          yield_pct?: number | null
+          zoning?: string | null
+        }
+        Update: {
+          accepts_installments?: boolean | null
+          accessibility_features?: string[] | null
+          address?: string | null
+          advance_months_long?: number | null
+          advance_notice_hours?: number | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          approved_at?: string | null
+          area_sqm?: number | null
+          asset_class?: string | null
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: Json | null
+          booking_window_months?: number | null
+          building_condition?: string | null
+          building_name?: string | null
+          building_year?: number | null
+          cancellation_policy?: string | null
+          cap_rate_pct?: number | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          clearview_badge?: string | null
+          clearview_recommendation?: string | null
+          clearview_score?: number | null
+          clearview_synced_at?: string | null
+          complex_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          custom_length_discounts?: Json | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_months_long?: number | null
+          deposit_type?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
+          electricity_included?: boolean | null
+          electricity_load_kw?: number | null
+          encumbrances_disclosed?: boolean | null
+          equipment?: string[] | null
+          escrow_offered?: boolean | null
+          escrow_provider?: string | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          floor_area_sqm?: number | null
+          foreign_quota_available?: boolean | null
+          frontage_m?: number | null
+          furnishing_level?: string | null
+          garden_type?: string | null
+          has_crib?: boolean | null
+          has_elevator?: boolean | null
+          has_high_chair?: boolean | null
+          highlights?: string[] | null
+          host_languages?: string[] | null
+          hotel_brand?: string | null
+          hotel_keys?: number | null
+          hotel_license_type?: string | null
+          hotel_star_rating?: number | null
+          hotel_year_renovated?: number | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          installment_plan?: Json | null
+          instant_booking?: boolean | null
+          instant_booking_enabled_at?: string | null
+          internet_speed?: string | null
+          is_active?: boolean | null
+          is_assignment?: boolean | null
+          is_featured?: boolean | null
+          is_for_sale?: boolean | null
+          is_quick_sale?: boolean | null
+          is_verified?: boolean | null
+          land_size_rai?: number | null
+          land_size_sqm?: number | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
+          lat?: number | null
+          listing_modes?: string[] | null
+          listing_type?: string | null
+          lng?: number | null
+          location_id?: string | null
+          management_company_id?: string | null
+          marketplace_property_id?: string | null
+          max_guests?: number | null
+          max_party_guests?: number | null
+          max_stay_nights?: number | null
+          min_lease_months?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          nearby_places?: Json | null
+          ownership_form?: string | null
+          ownership_type?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          parties_allowed?: boolean | null
+          payment_model?: string | null
+          payment_policy?: string | null
+          permitted_uses?: string[] | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pet_policy?: string | null
+          pets_allowed?: boolean | null
+          plot_size_sqm?: number | null
+          pm_company_id?: string | null
+          pool_size?: string | null
+          pool_type?: string | null
+          preparation_days?: number | null
+          price?: number | null
+          price_per_month?: number | null
+          price_per_night?: number | null
+          price_per_year?: number | null
+          price_period?: string | null
+          project_id?: string | null
+          property_type?: string | null
+          provider_id?: string | null
+          quick_sale_discount_pct?: number | null
+          quick_sale_reason?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          rating?: number | null
+          review_count?: number | null
+          road_access?: string | null
+          rooms?: Json | null
+          safety_features?: string[] | null
+          sale_currency?: string | null
+          sale_intent?: string | null
+          sale_price?: number | null
+          seasonal_pricing?: Json | null
+          smoking_policy?: string | null
+          status?: string | null
+          tenancy_modes?: string[] | null
+          title?: string | null
+          title_deed_type?: string | null
+          title_en?: string | null
+          title_ru?: string | null
+          tm30_registration_supported?: boolean | null
+          total_floors?: number | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          urgency_deadline?: string | null
+          utilities_included_long?: string[] | null
+          video_file_url?: string | null
+          video_url?: string | null
+          view_type?: string | null
+          virtual_tour_url?: string | null
+          water_included?: boolean | null
+          water_supply?: string | null
+          weekly_discount?: number | null
+          wifi_included?: boolean | null
+          wifi_speed?: string | null
+          yield_pct?: number | null
+          zoning?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "properties_complex_id_fkey"
+            columns: ["complex_id"]
+            isOneToOne: false
+            referencedRelation: "property_complexes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      public_provider_catalog: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          booking_flow: string | null
+          business_category: string | null
+          city_id: string | null
+          cover_image: string | null
+          coverage_areas: string[] | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          has_guarantee: boolean | null
+          has_insurance: boolean | null
+          has_machine_translation: boolean | null
+          id: string | null
+          is_active: boolean | null
+          is_demo: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          logo_url: string | null
+          name: string | null
+          phone: string | null
+          provider_type: string | null
+          rating: number | null
+          response_time_minutes: number | null
+          review_count: number | null
+          service_domains: string[] | null
+          trust_score: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          booking_flow?: string | null
+          business_category?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          coverage_areas?: string[] | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: never
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
+          has_machine_translation?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_demo?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          provider_type?: string | null
+          rating?: number | null
+          response_time_minutes?: number | null
+          review_count?: number | null
+          service_domains?: string[] | null
+          trust_score?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          booking_flow?: string | null
+          business_category?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          coverage_areas?: string[] | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: never
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
+          has_machine_translation?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_demo?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          provider_type?: string | null
+          rating?: number | null
+          response_time_minutes?: number | null
+          review_count?: number | null
+          service_domains?: string[] | null
+          trust_score?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_category_catalog: {
+        Row: {
+          base_price_per_night: number | null
+          id: string | null
+          is_active: boolean | null
+          max_guests: number | null
+          min_stay_nights: number | null
+          name_en: string | null
+          name_ru: string | null
+          property_id: string | null
+          sort_order: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_rate_plan_catalog: {
+        Row: {
+          adjustment_type: string | null
+          adjustment_value: number | null
+          category_id: string | null
+          free_cancellation_days: number | null
+          id: string | null
+          is_active: boolean | null
+          is_refundable: boolean | null
+          max_stay_nights: number | null
+          min_advance_days: number | null
+          min_stay_nights: number | null
+          name_en: string | null
+          name_ru: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_rate_season_catalog: {
+        Row: {
+          category_id: string | null
+          end_date: string | null
+          is_active: boolean | null
+          min_stay_nights: number | null
+          nightly_rate: number | null
+          start_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_stay_rule_catalog: {
+        Row: {
+          category_id: string | null
+          closed_to_arrival: boolean | null
+          closed_to_departure: boolean | null
+          date: string | null
+          min_stay_nights: number | null
+          price_override: number | null
+          property_id: string | null
+          stop_sell: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_salon_catalog: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          approval_status: string | null
+          city_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          price_from: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          salon_type: string | null
+          services: string[] | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: never
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: never
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salons_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      public_service_catalog: {
+        Row: {
+          approval_status: string | null
+          availability_mode: string | null
+          booking_flow: string | null
+          category: Json | null
+          category_id: string | null
+          category_slug: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_minutes: number | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lead_time_hours: number | null
+          location_id: string | null
+          name_en: string | null
+          name_ru: string | null
+          price: number | null
+          pricing_model: string | null
+          provider: Json | null
+          provider_id: string | null
+          tags: string[] | null
+          unit: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "services_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
@@ -30838,6 +34480,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -30976,6 +34625,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -31085,6 +34741,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -31303,10 +34966,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -31966,6 +35643,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_complex_id_fkey"
             columns: ["complex_id"]
             isOneToOne: false
@@ -32005,6 +35689,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -32125,8 +35816,8 @@ export type Database = {
           lng: number | null
           management_company_id: string | null
           max_guests: number | null
-          owner_id: string | null
           price: number | null
+          price_period: string | null
           property_type: string | null
           sale_price: number | null
           title_en: string | null
@@ -32156,8 +35847,8 @@ export type Database = {
           lng?: number | null
           management_company_id?: string | null
           max_guests?: number | null
-          owner_id?: string | null
           price?: number | null
+          price_period?: string | null
           property_type?: string | null
           sale_price?: number | null
           title_en?: string | null
@@ -32187,8 +35878,8 @@ export type Database = {
           lng?: number | null
           management_company_id?: string | null
           max_guests?: number | null
-          owner_id?: string | null
           price?: number | null
+          price_period?: string | null
           property_type?: string | null
           sale_price?: number | null
           title_en?: string | null
@@ -32277,6 +35968,58 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      v_real_estate_domain_chain: {
+        Row: {
+          city_id: string | null
+          developer_id: string | null
+          is_linked_to_project: boolean | null
+          project_id: string | null
+          unit_id: string | null
+          unit_label: string | null
+          unit_number: string | null
+          unit_source: string | null
+          unit_status: string | null
+        }
+        Relationships: []
+      }
+      v_real_estate_projects: {
+        Row: {
+          city_id: string | null
+          developer_id: string | null
+          developer_name_en: string | null
+          developer_name_legacy: string | null
+          developer_name_ru: string | null
+          developer_slug: string | null
+          has_developer_link: boolean | null
+          project_id: string | null
+          project_name_en: string | null
+          project_name_ru: string | null
+          project_slug: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_projects_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_unified_contacts: {
         Row: {
@@ -32459,6 +36202,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -32783,6 +36533,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -32790,6 +36547,104 @@ export type Database = {
       }
     }
     Functions: {
+      actor_booking_ceiling: {
+        Args: { p_booking_id: string }
+        Returns: boolean
+      }
+      actor_can_access_operating_space: {
+        Args: { _space_id: string }
+        Returns: boolean
+      }
+      actor_can_analyze_booking: {
+        Args: { p_booking_id: string }
+        Returns: boolean
+      }
+      actor_can_analyze_crm: {
+        Args: {
+          p_company_id: string
+          p_contact_id?: string
+          p_deal_id?: string
+        }
+        Returns: boolean
+      }
+      actor_can_analyze_property: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_can_export_company: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_can_generate_voucher: {
+        Args: { p_booking_id?: string; p_order_id?: string }
+        Returns: boolean
+      }
+      actor_can_govern_property_access: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_can_import_project: {
+        Args: {
+          p_connector?: boolean
+          p_project_id: string
+          p_source_id?: string
+        }
+        Returns: boolean
+      }
+      actor_can_manage_company_billing: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_can_notify_property_submission: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_can_operate_property: {
+        Args: {
+          p_action?: string
+          p_company_id: string
+          p_module: string
+          p_property_id: string
+        }
+        Returns: boolean
+      }
+      actor_can_place_property_in_company: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_can_read_company_backup: {
+        Args: { p_folder: string }
+        Returns: boolean
+      }
+      actor_can_send_property_report: {
+        Args: { p_report_id: string }
+        Returns: boolean
+      }
+      actor_company_property_ceiling: {
+        Args: { p_company_id: string; p_property_id: string }
+        Returns: boolean
+      }
+      actor_has_platform_admin: { Args: never; Returns: boolean }
+      actor_is_operating_company_overseer: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
+      actor_is_space_limited: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_ledger_account_ceiling: {
+        Args: { p_account_id: string }
+        Returns: boolean
+      }
+      actor_private_property_ceiling: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_property_scope_ceiling: {
+        Args: { p_company_id?: string; p_property_id: string }
+        Returns: boolean
+      }
       add_team_points: {
         Args: {
           p_action_type: string
@@ -32800,6 +36655,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: number
+      }
+      admin_process_payout: {
+        Args: {
+          p_new_status: string
+          p_payment_reference?: string
+          p_payout_id: string
+        }
+        Returns: Json
       }
       apply_lead_score_event: {
         Args: {
@@ -32820,6 +36683,10 @@ export type Database = {
       apply_referral_code: {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
+      }
+      assign_room_for_category: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: string
       }
       assign_transfer_operator: { Args: never; Returns: string }
       calculate_distance_km: {
@@ -32847,6 +36714,11 @@ export type Database = {
       calculate_sla_deadline: {
         Args: { created_at: string; request_type: string }
         Returns: string
+      }
+      can_manage_property: { Args: { _property_id: string }; Returns: boolean }
+      can_manage_property_e28_private: {
+        Args: { _property_id: string }
+        Returns: boolean
       }
       canonical_provider_category: {
         Args: { input_slug: string }
@@ -32972,6 +36844,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_managed_property_checked: {
+        Args: {
+          p_company_id: string
+          p_listing_type: string
+          p_operating_space_id: string
+          p_property_type: string
+          p_title_en: string
+          p_title_ru: string
+        }
+        Returns: string
+      }
       create_order_atomic: {
         Args: {
           p_addresses?: Json
@@ -32988,6 +36871,38 @@ export type Database = {
           p_provider_org_id?: string
           p_start_at?: string
           p_total_amount?: number
+        }
+        Returns: Json
+      }
+      create_order_checked: {
+        Args: {
+          p_addresses: Json
+          p_currency: string
+          p_customer_user_id?: string
+          p_end_at: string
+          p_items: Json
+          p_metadata: Json
+          p_notes: string
+          p_order_type: string
+          p_participants: Json
+          p_payment_amount: number
+          p_payment_method: string
+          p_provider_org_id: string
+          p_start_at: string
+          p_total_amount: number
+        }
+        Returns: Json
+      }
+      create_partner_onboarding: {
+        Args: {
+          p_business_category: string
+          p_business_name: string
+          p_contact_name?: string
+          p_email?: string
+          p_language?: string
+          p_phone?: string
+          p_user_id: string
+          p_verticals?: string[]
         }
         Returns: Json
       }
@@ -33024,6 +36939,7 @@ export type Database = {
       devmod_is_broker_or_admin: { Args: never; Returns: boolean }
       devmod_my_developer_id: { Args: never; Returns: string }
       devmod_release_expired_holds: { Args: never; Returns: number }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -33049,6 +36965,10 @@ export type Database = {
         Returns: string[]
       }
       get_capital_crm_owner: { Args: never; Returns: string }
+      get_category_availability: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: number
+      }
       get_company_member_role: {
         Args: { _company_id: string; _user_id: string }
         Returns: string
@@ -33097,6 +37017,10 @@ export type Database = {
           tax_id: string
         }[]
       }
+      get_my_signer_access_token: {
+        Args: { _signer_id: string }
+        Returns: string
+      }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }
         Returns: Json
@@ -33135,6 +37059,23 @@ export type Database = {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
       }
+      get_property_calendar_prices: {
+        Args: {
+          p_category_id: string | null
+          p_from: string
+          p_property_id: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      get_property_date_prices: {
+        Args: { _from: string; _property_id: string; _to: string }
+        Returns: {
+          date: string
+          min_nights_override: number
+          price_override: number
+        }[]
+      }
       get_property_unavailable_dates: {
         Args: { p_from: string; p_property_id: string; p_to: string }
         Returns: {
@@ -33145,6 +37086,17 @@ export type Database = {
       get_property_user_role: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
+      }
+      get_provider_busy_slots: {
+        Args: { _from: string; _provider_id: string; _to: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
+      }
+      get_public_room_category_availability: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: number
       }
       get_subscription_revenue: {
         Args: { p_days?: number }
@@ -33169,6 +37121,10 @@ export type Database = {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
         Returns: number
       }
+      guest_stay_property_details: {
+        Args: { p_booking_id: string }
+        Returns: Json
+      }
       has_canonical_role: {
         Args: { _canonical_role: string; _user_id: string }
         Returns: boolean
@@ -33189,6 +37145,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
+      is_admin_or_uno_team_e28_private: { Args: never; Returns: boolean }
       is_assigned_manager: {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
@@ -33198,10 +37155,16 @@ export type Database = {
         Returns: boolean
       }
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
+      is_company_admin_e28_private: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
       is_company_member: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }
+      is_finance_staff: { Args: { _uid: string }; Returns: boolean }
+      is_finance_staff_e28_private: { Args: { _uid: string }; Returns: boolean }
       is_mc_admin: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
@@ -33214,11 +37177,19 @@ export type Database = {
       }
       is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_property_bookable_active: {
+        Args: { _property_id: string }
+        Returns: boolean
+      }
       is_property_owner: {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
       }
       is_team_member: { Args: { check_user_id: string }; Returns: boolean }
+      is_team_member_e28_private: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
@@ -33245,6 +37216,15 @@ export type Database = {
         }[]
       }
       mc_can_access: {
+        Args: {
+          _action?: string
+          _company_id: string
+          _module: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      mc_can_access_e28_private: {
         Args: {
           _action?: string
           _company_id: string
@@ -33311,6 +37291,15 @@ export type Database = {
         }
         Returns: Json
       }
+      property_booking_holds_inventory: {
+        Args: { _status: string }
+        Returns: boolean
+      }
+      property_is_public: { Args: { _property_id: string }; Returns: boolean }
+      public_policy_property_manager: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
         Returns: string
@@ -33322,6 +37311,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      reassign_property_operating_space: {
+        Args: { p_property_id: string; p_reason: string; p_to_space_id: string }
+        Returns: undefined
       }
       recalc_developer_project_counters: {
         Args: { _developer_id: string }
@@ -33370,6 +37363,10 @@ export type Database = {
           weight: number
         }[]
       }
+      resolve_operational_scope: {
+        Args: { p_company_id?: string; p_requested_space_id?: string }
+        Returns: Json
+      }
       resolve_user_context: {
         Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }
         Returns: Json
@@ -33382,6 +37379,18 @@ export type Database = {
           unresolved_alerts: number
         }[]
       }
+      set_property_calendar_price: {
+        Args: {
+          p_category_id: string | null
+          p_currency: string
+          p_expected: Json
+          p_from: string
+          p_price: number
+          p_property_id: string
+          p_to: string
+        }
+        Returns: Json
+      }
       set_user_pin: {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean
@@ -33391,6 +37400,11 @@ export type Database = {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
       }
+      staff_can_access_property_e28_private: {
+        Args: { p_property_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      submit_consultation_request: { Args: { payload: Json }; Returns: string }
       sync_properties_clearview_for_project: {
         Args: { _project_id: string }
         Returns: undefined
@@ -33409,6 +37423,10 @@ export type Database = {
         Returns: undefined
       }
       user_has_clearview_access: {
+        Args: { _project_id: string }
+        Returns: boolean
+      }
+      user_has_clearview_access_e28_private: {
         Args: { _project_id: string }
         Returns: boolean
       }
@@ -33474,6 +37492,7 @@ export type Database = {
         | "sales"
         | "investor"
         | "broker"
+        | "property_manager"
       booking_status:
         | "draft"
         | "submitted"
@@ -33725,12 +37744,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -33754,11 +37773,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -33779,11 +37798,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -33804,11 +37823,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -33821,11 +37840,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -33882,6 +37901,7 @@ export const Constants = {
         "sales",
         "investor",
         "broker",
+        "property_manager",
       ],
       booking_status: [
         "draft",

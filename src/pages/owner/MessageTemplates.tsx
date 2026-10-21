@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface TemplateFormData {
   name: string;
@@ -55,7 +56,7 @@ export default function MessageTemplates() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для управления шаблонами' : 'Sign in to manage templates'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

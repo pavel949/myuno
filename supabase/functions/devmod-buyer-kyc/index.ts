@@ -120,7 +120,10 @@ Deno.serve(async (req) => {
   try {
     const authResult = await requireAuth(req, CORS);
     if (authResult instanceof Response) return authResult;
-    const user = authResult;
+    // requireAuth returns an AuthContext ({ user: { id, email } }). The user
+    // identity lives under `.user`; binding directly to authResult left every
+    // `created_by_user_id` filter comparing against `undefined`.
+    const user = authResult.user;
 
     const body = await req.json() as Record<string, unknown>;
     const action = (body.action as string) ?? "lite";
@@ -220,14 +223,18 @@ Deno.serve(async (req) => {
         return err("buyer_id and passport_storage_path are required");
       }
 
-      // Verify buyer belongs to authenticated user
+      // Verify buyer belongs to authenticated user. Without the
+      // created_by_user_id filter any authenticated user could pass another
+      // user's buyer_id to overwrite their KYC record with attacker-supplied
+      // passport data and read their nationality / date of birth (IDOR).
       const { data: buyer } = await sb
         .from("buyers" as never)
         .select("id, kyc_status, nationality, date_of_birth")
         .eq("id", buyer_id)
+        .eq("created_by_user_id" as never, user.id)
         .maybeSingle();
 
-      if (!buyer) return err("Buyer not found", 404);
+      if (!buyer) return err("Buyer not found or access denied", 404);
 
       // Get signed URL for the passport image
       const { data: signedUrl } = await sb.storage

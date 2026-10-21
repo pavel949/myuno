@@ -1,6 +1,8 @@
+import '@/styles/public-commerce.css';
+import { projectFeatureLabel } from '@/lib/offplan/presentation';
 /**
  * OffplanDetail - Detailed view of an off-plan project
- * Shows gallery, developer info, muUNO scoring, investment metrics
+ * Shows gallery, developer info, myUNO scoring, investment metrics
  */
 
 import React, { useState } from 'react';
@@ -46,7 +48,7 @@ import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocu
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
-import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
@@ -83,6 +85,7 @@ export default function OffplanDetail() {
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+  const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const { data: project, isLoading } = useOffplanProject(id);
@@ -122,15 +125,15 @@ export default function OffplanDetail() {
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `ROI ${project.roiProjected}%.` : ''} muUNO Score, due diligence, инвестиционная аналитика.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `${project.roiProjected}% projected ROI.` : ''} muUNO Score, due diligence, investment analytics.`.trim();
+    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} Сведения о проекте и опубликованные отчёты.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} Project information and published reports.`.trim();
   const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
     description: seoDescription,
     price: project.priceFrom ?? undefined,
-    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
+    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'THB').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
     address: project.district ?? undefined,
@@ -149,7 +152,7 @@ export default function OffplanDetail() {
   };
 
   return (
-    <>
+    <div className="public-commerce public-commerce--project">
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -194,7 +197,7 @@ export default function OffplanDetail() {
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
           </Badge>
-          <h1 className="text-2xl font-bold text-white mb-1">{name}</h1>
+          <h1 className="public-commerce-title text-white mb-1">{name}</h1>
           {project.district && (
             <div className="flex items-center gap-1 text-white/80 text-sm">
               <MapPin className="w-4 h-4" />
@@ -204,51 +207,10 @@ export default function OffplanDetail() {
         </div>
       </div>
 
-      <div className="px-4 py-4 pb-32 space-y-6">
-        {/* ClearView Disclosure — for brokered/curated projects */}
-        {!project.isClearviewRated && (
-          <div className="rounded-none border border-warning/30 bg-warning/5 p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm">
-              <p className="font-semibold text-warning">
-                {isRu ? 'Не оценён по ClearView™' : 'Not ClearView™ rated'}
-              </p>
-              <p className="text-muted-foreground mt-1">
-                {isRu
-                  ? 'Этот проект представлен брокером и не проходил независимую методологическую оценку ClearView V3. Цифры и описание предоставлены застройщиком/партнёром.'
-                  : 'This project is brokered/curated and has not been independently scored under the ClearView V3 methodology. Figures and content are provided by the developer/partner.'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ClearView V3 — full due diligence block (free summary + paid full report) */}
-        <ClearViewReport
-          projectId={project.id}
-          isBrokered={!project.isClearviewRated}
-        />
-
-        {/* Key metrics cards */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* muUNO Score */}
-          {project.muunoScore && (
-            <div className="rounded-none border bg-card p-3">
-              <MuunoScoreWidget score={project.muunoScore} size="md" showLabel />
-            </div>
-          )}
-
-          {/* ROI */}
-          {project.roiProjected && (
-            <div className="rounded-none border bg-card p-3 flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-success mb-1">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-2xl font-bold">{project.roiProjected}%</span>
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Прогнозируемый ROI' : 'Projected ROI'}
-              </span>
-            </div>
-          )}
+      <div className="px-4 py-6 pb-32 space-y-8 sm:px-6">
+        {/* Published report is the sole public assessment source. */}
+        <div id="clearview-report" className="scroll-mt-24">
+          <ClearViewReport projectId={project.id} publicView />
         </div>
 
         {/* Price & Units */}
@@ -340,91 +302,23 @@ export default function OffplanDetail() {
                 <h3 className="font-medium mb-2">{isRu ? 'Удобства' : 'Amenities'}</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.amenities.map((a, i) => (
-                    <Badge key={i} variant="outline">{a}</Badge>
+                    <Badge key={i} variant="outline">{projectFeatureLabel(a, language)}</Badge>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Due Diligence Status Block */}
-            <div className={cn(
-              "rounded-none p-4 space-y-3 border",
-              project.riskLevel 
-                ? "bg-success/5 border-success/20" 
-                : "bg-warning/5 border-warning/20"
-            )}>
-              <div className="flex items-start gap-3">
-                {project.riskLevel ? (
-                  <ShieldCheck className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                ) : (
-                  <ShieldAlert className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <p className="font-semibold">
-                    {project.riskLevel 
-                      ? (isRu ? 'Due Diligence пройден' : 'Due Diligence Complete')
-                      : (isRu ? 'Due Diligence не проведён' : 'Due Diligence Pending')
-                    }
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {project.riskLevel 
-                      ? (isRu 
-                          ? 'Проект прошёл независимую экспертизу muUNO. Получите персональный отчёт с детальной оценкой рисков.' 
-                          : 'Project has passed independent muUNO assessment. Get a personalized report with detailed risk analysis.')
-                      : (isRu 
-                          ? 'Этот проект ещё не прошёл независимую экспертизу. Запросите оценку рисков, чтобы принять взвешенное решение.'
-                          : 'This project has not yet been independently assessed. Request a risk evaluation to make an informed decision.')
-                    }
-                  </p>
-                </div>
-              </div>
-              <Button 
-                className="w-full gap-2" 
-                variant={project.riskLevel ? "outline" : "default"}
-                onClick={() => setShowLeadForm(true)}
-              >
-                <FileSearch className="w-4 h-4" />
-                {project.riskLevel
-                  ? (isRu ? 'Получить полный отчёт' : 'Get Full Report')
-                  : (isRu ? 'Запросить оценку рисков' : 'Request Risk Assessment')
-                }
-              </Button>
-            </div>
+            <a href="#clearview-report" className="inline-flex min-h-11 items-center gap-2 text-sm text-primary underline">
+              <FileSearch className="h-4 w-4" aria-hidden="true" />
+              {assessmentLabel}
+            </a>
           </TabsContent>
 
           <TabsContent value="scoring" className="pt-4">
-            {project.muunoScore ? (
-              <div className="space-y-4">
-                <ScoreBreakdown
-                  scoreBreakdown={{
-                    location: 80,
-                    developer: 85,
-                    financial: 75,
-                    market: 78,
-                  }}
-                  projectType="real_estate_offplan"
-                />
-                <Button 
-                  className="w-full gap-2" 
-                  variant="outline"
-                  onClick={() => setShowLeadForm(true)}
-                >
-                  <FileSearch className="w-4 h-4" />
-                  {isRu ? 'Получить детальный анализ' : 'Get Detailed Analysis'}
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-8 space-y-3">
-                <ShieldAlert className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-                <p className="text-muted-foreground">
-                  {isRu ? 'Скоринг ещё не проведён' : 'Scoring not yet available'}
-                </p>
-                <Button onClick={() => setShowLeadForm(true)} className="gap-2">
-                  <FileSearch className="w-4 h-4" />
-                  {isRu ? 'Запросить оценку' : 'Request Assessment'}
-                </Button>
-              </div>
-            )}
+            <a href="#clearview-report" className="inline-flex min-h-11 items-center gap-2 text-primary underline">
+              <FileSearch className="h-4 w-4" aria-hidden="true" />
+              {assessmentLabel}
+            </a>
           </TabsContent>
 
           <TabsContent value="documents" className="pt-4 space-y-4">
@@ -509,7 +403,7 @@ export default function OffplanDetail() {
                   </div>
                   <div className="rounded-none bg-muted/50 p-3 text-center">
                     <div className="text-2xl font-bold">{developer.muunoScore || '—'}</div>
-                    <div className="text-xs text-muted-foreground">muUNO Score</div>
+                    <div className="text-xs text-muted-foreground">myUNO Score</div>
                   </div>
                 </div>
 
@@ -568,6 +462,6 @@ export default function OffplanDetail() {
           onSuccess={() => setShowLeadForm(false)}
         />
       </ResponsiveModal>
-    </>
+    </div>
   );
 }

@@ -8,7 +8,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useRestaurant } from '@/hooks/useRestaurants';
 import { supabase } from '@/integrations/supabase/client';
-import { 
+import { toast } from 'sonner';
+import {
   BookingContactForm,
   BookingPaymentSelect,
   BookingBottomBar,
@@ -125,19 +126,24 @@ export default function DeliveryCheckout() {
 
       if (!result.success || !result.booking_id) return;
 
-      const checkoutItems = cartItems.map(item => ({
-        name: language === 'ru' ? (item.nameRu || item.name) : item.name,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-      
+      const checkoutItems: Array<{ id?: string; name: string; quantity: number; price: number }> =
+        cartItems.map(item => ({
+          // Menu-item id (restaurant_menu_items.id) for server-side price validation.
+          id: item.id,
+          name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+
+      // Delivery is a fee line, not a menu item — no id, so it is skipped by
+      // the server-side menu-price validation.
       checkoutItems.push({
         name: language === 'ru' ? 'Доставка' : 'Delivery',
         quantity: 1,
         price: deliveryFee,
       });
 
-      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
           booking_id: result.booking_id,
           booking_type: 'food_delivery',
@@ -155,11 +161,15 @@ export default function DeliveryCheckout() {
         },
       });
 
-      if (response.data?.url) {
-        clearByProvider(id || '');
-        window.location.href = response.data.url;
+      // The pending booking was already created above; surface a clear error on
+      // checkout failure instead of silently stranding the user (who would
+      // otherwise re-submit and create duplicate pending orders).
+      if (error || !data?.url) {
+        toast.error(language === 'ru' ? 'Не удалось создать оплату' : 'Could not start payment');
         return;
       }
+      clearByProvider(id || '');
+      window.location.href = data.url;
       return;
     }
 

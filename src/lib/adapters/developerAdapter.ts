@@ -84,3 +84,8 @@ export function toDeveloperUI(row: DeveloperRow): DeveloperUI {
     address: row.address ?? null,
   };
 }
+
+/** Match the public detail route: identity alone does not prove a published profile. */
+export function hasPublicDeveloperProfile(expectedId: string | null | undefined, developer: { id?: string; is_active?: boolean | null } | null | undefined): boolean {
+  return !!expectedId && developer?.id === expectedId && developer.is_active === true;
+}

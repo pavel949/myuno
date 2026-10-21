@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,15 +12,17 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { APP_ROUTES } from '@/lib/config/routes';
+import { complexDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import {
   getProjectFacilityLabel,
-  normalizeProjectFacilityId,
+  normalizeProjectFacilityIds,
+  PROJECT_FACILITY_LABELS,
 } from '@/lib/propertyAttributeRegistry';
 import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
 
 interface ProjectInfoCardProps {
   project: PropertyProject;
+  mode?: 'rent' | 'buy';
   className?: string;
 }
 
@@ -40,18 +42,20 @@ const projectFacilityIcons: Record<string, React.ReactNode> = {
   shuttle: <Bus className="h-4 w-4" />,
 };
 
-export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
+export function ProjectInfoCard({ project, className, mode = 'rent' }: ProjectInfoCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
 
   const name = isRu ? project.name_ru : project.name_en;
   const description = isRu ? project.description_ru : project.description_en;
-  const amenities = project.amenities || [];
+  const amenities = normalizeProjectFacilityIds(project.amenities || [])
+    .filter(id => Object.prototype.hasOwnProperty.call(PROJECT_FACILITY_LABELS, id));
 
   const handleExploreProject = () => {
-    navigate(APP_ROUTES.PROJECT_DETAIL(project.id));
+    navigate(complexDetailHref(project.id, mode, location.search));
   };
 
   return (
@@ -113,8 +117,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
               {isRu ? 'Удобства территории' : 'Project Amenities'}
             </p>
             <div className="flex flex-wrap gap-2">
-              {amenities.slice(0, expanded ? undefined : 6).map((amenity) => {
-                const id = normalizeProjectFacilityId(amenity);
+              {amenities.slice(0, expanded ? undefined : 6).map((id) => {
                 return (
                   <PropertyAttributeChip
                     key={id}

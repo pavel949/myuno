@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useMyThaiBusiness } from '@/hooks/thaiServices/useThaiServices';
 import { ProfileTab } from './ProfileTab';
 import { ServicesTab } from './ServicesTab';
@@ -19,13 +20,13 @@ import { LandingTab } from './LandingTab';
 
 export default function ThaiBusinessDashboard() {
   const enabled = useFeatureFlag('THAI_BUSINESS_LAYER');
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: business, isLoading } = useMyThaiBusiness();
 
   if (!enabled) {
     return (
       <div className="p-8 text-center text-muted-foreground">
-        {t('thai.owner.title')} — coming soon.
+        {t('thai.owner.title')} — {pickLang(language, { ru: 'скоро', en: 'coming soon', th: 'เร็ว ๆ นี้' })}.
       </div>
     );
   }

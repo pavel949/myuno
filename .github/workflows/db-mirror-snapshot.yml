@@ -39,8 +39,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Node 22 ships a global WebSocket; @supabase/realtime-js (loaded by
+          # supabase-js createClient) cannot find one under Node 20.
+          node-version: '22'
           cache: 'npm'
+
+      - name: Preflight — global WebSocket available
+        run: |
+          node -e "if (typeof globalThis.WebSocket !== 'function') { console.error('FATAL: globalThis.WebSocket is unavailable in Node ' + process.version + '. @supabase/realtime-js needs it; use Node >= 22.'); process.exit(1) } else { console.log('WebSocket OK on Node ' + process.version) }"
 
       - name: Install dependencies
         run: npm ci --no-audit --no-fund --prefer-offline

@@ -1,9 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
+import { addMonths, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
+import { sanitizeStayRuleTerms } from '@/lib/property/stayRulesSchema';
+
+/** Localized message for an unavailable date range (RU/EN/TH on one page). */
+export const DATES_UNAVAILABLE_MESSAGE = {
+  ru: 'Эти даты недоступны',
+  en: 'These dates are not available',
+  th: 'วันที่เลือกไม่ว่าง',
+} as const;
+
 
 export interface PropertyRentalTerms {
   price_per_night?: number;
   min_stay_nights?: number;
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number;
   max_guests?: number;
   deposit_amount?: number;
   deposit_currency?: string;
@@ -15,6 +34,7 @@ export interface PropertyRentalTerms {
   instant_booking?: boolean;
 }
 
+
 export interface BlockedDate {
   date: Date;
   reason: 'booked' | 'blocked';
@@ -22,12 +42,19 @@ export interface BlockedDate {
 }
 
 // Check if a property is available for specific dates
-export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?: string, checkOut?: string) {
+export function usePropertyAvailability(
+  marketplacePropertyId?: string,
+  checkIn?: string,
+  checkOut?: string,
+  language: string = 'ru',
+) {
+  const locale = language === 'en' ? 'en' : language === 'th' ? 'th' : 'ru';
+
   return useQuery({
-    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut],
+    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut, locale],
     queryFn: async () => {
       if (!marketplacePropertyId || !checkIn || !checkOut) {
-        return { isAvailable: true, message: '' };
+        return { isAvailable: true, message: '', code: null as null | 'dates_unavailable' };
       }
 
       // Use the database function to check availability
@@ -38,16 +65,19 @@ export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?
           p_check_out: checkOut,
         });
 
-      if (error) return { isAvailable: true, message: '' };
+      if (error) throw error;
 
+      const isAvailable = data as boolean;
       return {
-        isAvailable: data as boolean,
-        message: data ? '' : 'These dates are not available',
+        isAvailable,
+        code: isAvailable ? null : ('dates_unavailable' as const),
+        message: isAvailable ? '' : DATES_UNAVAILABLE_MESSAGE[locale],
       };
     },
     enabled: !!marketplacePropertyId && !!checkIn && !!checkOut,
   });
 }
+
 
 // Get all blocked dates for a property
 export function usePropertyBlockedDates(marketplacePropertyId?: string) {
@@ -58,44 +88,17 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
 
       const propertyId = marketplacePropertyId;
 
-      // Query unified orders table (property_bookings is legacy/deprecated)
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          id, start_at, end_at, status,
-          order_items!inner (resource_id, item_type)
-        `)
-        .eq('vertical', 'property')
-        .eq('order_items.item_type', 'property')
-        .eq('order_items.resource_id', propertyId)
-        .is('deleted_at', null)
-        .not('status', 'in', '("cancelled","refunded")');
-
-      if (ordersError || !orders) {
-        return [];
-      }
-
-      // Convert bookings to blocked dates array
-      const blockedDates: BlockedDate[] = [];
-      
-      orders.forEach(order => {
-        if (!order.start_at || !order.end_at) return;
-        const checkIn = new Date(order.start_at);
-        const checkOut = new Date(order.end_at);
-        
-        // Add all dates between check_in and check_out (exclusive of check_out)
-        const currentDate = new Date(checkIn);
-        while (currentDate < checkOut) {
-          blockedDates.push({
-            date: new Date(currentDate),
-            reason: 'booked',
-            bookingId: order.id,
-          });
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
+      const today = new Date();
+      const { data, error } = await supabase.rpc('get_property_unavailable_dates', {
+        p_property_id: propertyId,
+        p_from: format(today, 'yyyy-MM-dd'),
+        p_to: format(addMonths(today, 12), 'yyyy-MM-dd'),
       });
-
-      return blockedDates;
+      if (error) throw error;
+      return (data ?? []).filter(row => row.kind !== 'checkout_only').map(row => ({
+        date: new Date(`${row.date}T00:00:00`),
+        reason: row.kind === 'blocked' ? 'blocked' as const : 'booked' as const,
+      }));
     },
     enabled: !!marketplacePropertyId,
   });
@@ -108,30 +111,19 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return null;
 
-      // In unified model, the marketplace property ID IS the property ID
-      const { data, error } = await supabase
-        .from('properties')
-        .select(`
-          price_per_night,
-          min_stay_nights,
-          max_guests,
-          deposit_amount,
-          deposit_currency,
-          check_in_time,
-          check_out_time,
-          house_rules,
-          house_rules_ru,
-          cancellation_policy,
-          instant_booking
-        `)
-        .eq('id', marketplacePropertyId)
-        .maybeSingle();
+      // Public catalog first; base table only for authorized PMS preview.
+      const data = await selectPropertyCatalogFirst(marketplacePropertyId, 'price_per_night,min_stay_nights,max_stay_nights,advance_notice_hours,preparation_days,booking_window_months,max_guests,deposit_amount,deposit_currency,check_in_time,check_out_time,house_rules,house_rules_ru,cancellation_policy,instant_booking').catch(() => null);
+      const error = null;
 
-      if (error) {
+      if (error || !data) {
         return null;
       }
 
-      return data as PropertyRentalTerms;
+      // Normalize stay rules through the shared validator limits so filters,
+      // calendars and SSR consumers never see inconsistent rules.
+      const sanitized = sanitizeStayRuleTerms(data as PropertyRentalTerms);
+      return { ...(data as PropertyRentalTerms), ...sanitized } as PropertyRentalTerms;
+
     },
     enabled: !!marketplacePropertyId,
   });

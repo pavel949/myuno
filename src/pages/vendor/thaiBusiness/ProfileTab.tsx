@@ -14,6 +14,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useSaveThaiBusiness } from '@/hooks/thaiServices/useThaiServices';
 import {
   THAI_CATEGORIES, THAI_DISTRICTS, THAI_PAYMENT_METHODS, THAI_OWNERSHIP_LABELS,
@@ -48,8 +49,26 @@ export function ProfileTab({ business }: { business: ThaiBusiness | null }) {
       ? form.payment_methods.filter((x) => x !== m)
       : [...form.payment_methods, m]);
 
+  // Trilingual field labels for the owner cabinet (Thai owners must see Thai).
+  const L = {
+    nameTh: { ru: 'Название (тайский) *', en: 'Name (Thai) *', th: 'ชื่อร้าน (ไทย) *' },
+    nameEn: { ru: 'Название (англ.)', en: 'Name (English)', th: 'ชื่อร้าน (อังกฤษ)' },
+    category: { ru: 'Категория', en: 'Category', th: 'หมวดหมู่' },
+    descTh: { ru: 'Описание (тайский)', en: 'Description (Thai)', th: 'รายละเอียด (ไทย)' },
+    address: { ru: 'Адрес', en: 'Address', th: 'ที่อยู่' },
+    district: { ru: 'Район', en: 'District', th: 'พื้นที่' },
+    phone: { ru: 'Телефон', en: 'Phone', th: 'โทรศัพท์' },
+    ownership: { ru: 'Тип владения', en: 'Ownership type', th: 'ประเภทเจ้าของ' },
+    payment: { ru: 'Способы оплаты', en: 'Payment methods', th: 'วิธีการชำระเงิน' },
+    logo: { ru: 'Логотип', en: 'Logo', th: 'โลโก้' },
+    photos: { ru: 'Фотографии', en: 'Photos', th: 'รูปภาพ' },
+  };
+
   const onSave = async () => {
-    if (!form.name_th.trim()) { toast.error('Название (тайский) обязательно'); return; }
+    if (!form.name_th.trim()) {
+      toast.error(pickLang(language, { ru: 'Название (тайский) обязательно', en: 'Name (Thai) is required', th: 'ต้องระบุชื่อร้าน (ไทย)' }));
+      return;
+    }
     try {
       await save.mutateAsync({ id: business?.id, ...form });
       toast.success(t('thai.owner.saved'));
@@ -65,20 +84,20 @@ export function ProfileTab({ business }: { business: ThaiBusiness | null }) {
       )}
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <Field label="Название (тайский) *"><Input value={form.name_th} onChange={(e) => set('name_th', e.target.value)} /></Field>
-        <Field label="Название (англ.)"><Input value={form.name_en} onChange={(e) => set('name_en', e.target.value)} /></Field>
+        <Field label={pickLang(language, L.nameTh)}><Input value={form.name_th} onChange={(e) => set('name_th', e.target.value)} /></Field>
+        <Field label={pickLang(language, L.nameEn)}><Input value={form.name_en} onChange={(e) => set('name_en', e.target.value)} /></Field>
       </div>
 
-      <Field label="Категория">
+      <Field label={pickLang(language, L.category)}>
         <Select value={form.category} onValueChange={(v) => set('category', v as ThaiCategory)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            {THAI_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{language === 'ru' ? c.ru : c.en}</SelectItem>)}
+            {THAI_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{pickLang(language, c)}</SelectItem>)}
           </SelectContent>
         </Select>
       </Field>
 
-      <Field label="Описание (тайский)">
+      <Field label={pickLang(language, L.descTh)}>
         <Textarea rows={4} value={form.description_th} onChange={(e) => set('description_th', e.target.value)} />
       </Field>
 
@@ -90,8 +109,8 @@ export function ProfileTab({ business }: { business: ThaiBusiness | null }) {
       </Field>
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <Field label="Адрес"><Input value={form.address} onChange={(e) => set('address', e.target.value)} /></Field>
-        <Field label="Район">
+        <Field label={pickLang(language, L.address)}><Input value={form.address} onChange={(e) => set('address', e.target.value)} /></Field>
+        <Field label={pickLang(language, L.district)}>
           <Select value={form.district} onValueChange={(v) => set('district', v as ThaiDistrict)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{THAI_DISTRICTS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
@@ -100,22 +119,22 @@ export function ProfileTab({ business }: { business: ThaiBusiness | null }) {
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <Field label="Телефон"><Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+66…" /></Field>
+        <Field label={pickLang(language, L.phone)}><Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+66…" /></Field>
         <Field label="Line ID"><Input value={form.line_id} onChange={(e) => set('line_id', e.target.value)} /></Field>
       </div>
 
-      <Field label="Тип владения">
+      <Field label={pickLang(language, L.ownership)}>
         <Select value={form.ownership_type} onValueChange={(v) => set('ownership_type', v as ThaiOwnershipType)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             {(Object.keys(THAI_OWNERSHIP_LABELS) as ThaiOwnershipType[]).map((k) => (
-              <SelectItem key={k} value={k}>{language === 'ru' ? THAI_OWNERSHIP_LABELS[k].ru : THAI_OWNERSHIP_LABELS[k].en}</SelectItem>
+              <SelectItem key={k} value={k}>{pickLang(language, THAI_OWNERSHIP_LABELS[k])}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </Field>
 
-      <Field label="Способы оплаты">
+      <Field label={pickLang(language, L.payment)}>
         <div className="flex flex-wrap gap-2">
           {THAI_PAYMENT_METHODS.map((m) => (
             <button
@@ -124,17 +143,17 @@ export function ProfileTab({ business }: { business: ThaiBusiness | null }) {
               onClick={() => togglePayment(m.id)}
               className={`text-sm rounded-full border px-3 py-1.5 ${form.payment_methods.includes(m.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground'}`}
             >
-              {language === 'ru' ? m.ru : m.en}
+              {pickLang(language, m)}
             </button>
           ))}
         </div>
       </Field>
 
-      <Field label="Логотип">
+      <Field label={pickLang(language, L.logo)}>
         <ImageUpload value={form.logo_url} onChange={(url) => set('logo_url', url)} folder="thai-business" />
       </Field>
 
-      <Field label="Фотографии">
+      <Field label={pickLang(language, L.photos)}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {form.gallery_urls.map((url, i) => (
             <div key={i} className="relative">

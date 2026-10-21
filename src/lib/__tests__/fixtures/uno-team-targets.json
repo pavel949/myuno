@@ -1,0 +1,2956 @@
+{
+  "policies": [
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "audit_logs_admin_only",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "admin_audit_logs",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 4,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_delete",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null,
+      "snapshot_index": 5,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_insert",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "snapshot_index": 6,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "replacement_qual": null,
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_read",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null,
+      "snapshot_index": 7,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_update",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null,
+      "snapshot_index": 8,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert deals",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "snapshot_index": 13,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_qual": null,
+      "replacement_with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can update deals",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null,
+      "snapshot_index": 14,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view deals",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null,
+      "snapshot_index": 15,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company owner/admin can delete deals",
+      "qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null,
+      "snapshot_index": 16,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all knowledge",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agent_knowledge",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 17,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all logs",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agent_logs",
+      "with_check": null,
+      "snapshot_index": 19,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all agents",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agents",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 22,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can view AI artifacts",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'uno_team'::app_role))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ai_artifacts",
+      "with_check": null,
+      "snapshot_index": 25,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'uno_team'::app_role))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (false))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage intake sessions",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ai_intake_sessions",
+      "with_check": null,
+      "snapshot_index": 27,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update own airport bookings",
+      "qual": "((auth.uid() = user_id) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_bookings",
+      "with_check": null,
+      "snapshot_index": 33,
+      "classification": "private-operational",
+      "original_qual": "((auth.uid() = user_id) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view own airport bookings",
+      "qual": "((auth.uid() = user_id) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_bookings",
+      "with_check": null,
+      "snapshot_index": 34,
+      "classification": "private-operational",
+      "original_qual": "((auth.uid() = user_id) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage airport passengers",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_passengers",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 35,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage airport suppliers",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_suppliers",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 38,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members can view booking notifications",
+      "qual": "(is_admin_or_uno_team() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM ((property_bookings pb\n     JOIN properties p ON ((p.id = pb.property_id)))\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_notifications_log",
+      "with_check": null,
+      "snapshot_index": 55,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM ((property_bookings pb\n     JOIN properties p ON ((p.id = pb.property_id)))\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM ((property_bookings pb\n     JOIN properties p ON ((p.id = pb.property_id)))\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage booking payments",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_payments",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 58,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage vouchers",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_vouchers",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 63,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "hygiene_log_admin_insert",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "catalog_hygiene_log",
+      "with_check": "((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",
+      "snapshot_index": 98,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",
+      "replacement_qual": null,
+      "replacement_with_check": "((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role]))))))",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "hygiene_log_read",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "catalog_hygiene_log",
+      "with_check": null,
+      "snapshot_index": 99,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "uno_team_update_leads",
+      "qual": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "consultation_requests",
+      "with_check": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))",
+      "snapshot_index": 160,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))",
+      "replacement_qual": "(false OR has_role(auth.uid(), 'admin'::app_role))",
+      "replacement_with_check": "(false OR has_role(auth.uid(), 'admin'::app_role))",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "uno_team_view_leads",
+      "qual": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "consultation_requests",
+      "with_check": null,
+      "snapshot_index": 161,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
+      "original_with_check": null,
+      "replacement_qual": "(false OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff read all identities",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "contact_identities",
+      "with_check": null,
+      "snapshot_index": 162,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff read all identity links",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "contact_identity_links",
+      "with_check": null,
+      "snapshot_index": 164,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_delete",
+      "qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null,
+      "snapshot_index": 181,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "snapshot_index": 182,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_qual": null,
+      "replacement_with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_select",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null,
+      "snapshot_index": 183,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_update",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null,
+      "snapshot_index": 184,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert contact notes",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contact_notes",
+      "with_check": "((auth.uid() = user_id) AND (EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))",
+      "snapshot_index": 185,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((auth.uid() = user_id) AND (EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))",
+      "replacement_qual": null,
+      "replacement_with_check": "((auth.uid() = user_id) AND (EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))",
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view contact notes",
+      "qual": "(EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contact_notes",
+      "with_check": null,
+      "snapshot_index": 186,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company admins can delete contacts",
+      "qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null,
+      "snapshot_index": 188,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert contacts",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "snapshot_index": 189,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_qual": null,
+      "replacement_with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can update contacts",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null,
+      "snapshot_index": 190,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view contacts",
+      "qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null,
+      "snapshot_index": 191,
+      "classification": "private-operational",
+      "original_qual": "mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "original_with_check": null,
+      "replacement_qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "mc_can_access"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage nurture queue",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_nurture_queue",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 207,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins view form submissions",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_web_form_submissions",
+      "with_check": null,
+      "snapshot_index": 223,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Paid users can read published DD reports",
+      "qual": "((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access(project_id))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "due_diligence_reports",
+      "with_check": null,
+      "snapshot_index": 260,
+      "classification": "private-operational",
+      "original_qual": "((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access(project_id))",
+      "original_with_check": null,
+      "replacement_qual": "((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access_e28_private(project_id))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "user_has_clearview_access",
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can read all DD reports",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "due_diligence_reports",
+      "with_check": null,
+      "snapshot_index": 261,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can update help requests",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "help_requests",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 309,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can view all help requests",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "help_requests",
+      "with_check": null,
+      "snapshot_index": 310,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage interests",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "investment_interests",
+      "with_check": null,
+      "snapshot_index": 329,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage juristic contacts",
+      "qual": "(EXISTS ( SELECT 1\n   FROM uno_team_permissions\n  WHERE (uno_team_permissions.user_id = auth.uid())))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "juristic_contacts",
+      "with_check": null,
+      "snapshot_index": 337,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM uno_team_permissions\n  WHERE (uno_team_permissions.user_id = auth.uid())))",
+      "original_with_check": null,
+      "replacement_qual": "(false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update their own draft requests",
+      "qual": "(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (EXISTS ( SELECT 1\n   FROM uno_team_permissions\n  WHERE (uno_team_permissions.user_id = auth.uid()))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "juristic_requests",
+      "with_check": null,
+      "snapshot_index": 338,
+      "classification": "private-operational",
+      "original_qual": "(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (EXISTS ( SELECT 1\n   FROM uno_team_permissions\n  WHERE (uno_team_permissions.user_id = auth.uid()))))",
+      "original_with_check": null,
+      "replacement_qual": "(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (false))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "team_create_activity_logs",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "lead_activity_log",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 341,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": null,
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "team_view_activity_logs",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "lead_activity_log",
+      "with_check": null,
+      "snapshot_index": 342,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Account owners view own ledger entries",
+      "qual": "((EXISTS ( SELECT 1\n   FROM ledger_accounts la\n  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ledger_entries",
+      "with_check": null,
+      "snapshot_index": 356,
+      "classification": "private-operational",
+      "original_qual": "((EXISTS ( SELECT 1\n   FROM ledger_accounts la\n  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",
+      "original_with_check": null,
+      "replacement_qual": "((EXISTS ( SELECT 1\n   FROM ledger_accounts la\n  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can read all acceptances",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "legal_acceptances",
+      "with_check": null,
+      "snapshot_index": 362,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage companies",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_companies",
+      "with_check": null,
+      "snapshot_index": 403,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Members and admins can view their companies",
+      "qual": "((is_active = true) AND ((EXISTS ( SELECT 1\n   FROM management_company_members m\n  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_companies",
+      "with_check": null,
+      "snapshot_index": 405,
+      "classification": "private-operational",
+      "original_qual": "((is_active = true) AND ((EXISTS ( SELECT 1\n   FROM management_company_members m\n  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
+      "original_with_check": null,
+      "replacement_qual": "((is_active = true) AND ((EXISTS ( SELECT 1\n   FROM management_company_members m\n  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR false))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all memberships",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": null,
+      "snapshot_index": 406,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company admins can manage members",
+      "qual": "is_company_admin(company_id)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": "is_company_admin(company_id)",
+      "snapshot_index": 407,
+      "classification": "private-operational",
+      "original_qual": "is_company_admin(company_id)",
+      "original_with_check": "is_company_admin(company_id)",
+      "replacement_qual": "is_company_admin_e28_private(company_id)",
+      "replacement_with_check": "is_company_admin_e28_private(company_id)",
+      "helper_paths": [
+        [
+          "is_company_admin"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Members can view their company colleagues",
+      "qual": "((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": null,
+      "snapshot_index": 408,
+      "classification": "private-operational",
+      "original_qual": "((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids))))",
+      "original_with_check": null,
+      "replacement_qual": "((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can insert terms activity",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_terms_activity",
+      "with_check": "((user_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))",
+      "snapshot_index": 410,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((user_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))",
+      "replacement_qual": null,
+      "replacement_with_check": "((user_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins read offer history",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "offer_history",
+      "with_check": null,
+      "snapshot_index": 483,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can manage all flower order details",
+      "qual": "has_role(auth.uid(), 'uno_team'::app_role)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "order_item_flower_details",
+      "with_check": null,
+      "snapshot_index": 499,
+      "classification": "private-operational",
+      "original_qual": "has_role(auth.uid(), 'uno_team'::app_role)",
+      "original_with_check": null,
+      "replacement_qual": "false",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "orders_admin_select_all",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "orders",
+      "with_check": null,
+      "snapshot_index": 520,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "orders_admin_update",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "orders",
+      "with_check": null,
+      "snapshot_index": 521,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all OTA connections",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ota_listing_connections",
+      "with_check": null,
+      "snapshot_index": 531,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all sync logs",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ota_sync_logs",
+      "with_check": null,
+      "snapshot_index": 536,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all synced listings",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ota_synced_listings",
+      "with_check": null,
+      "snapshot_index": 538,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "pageviews_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "page_views",
+      "with_check": null,
+      "snapshot_index": 570,
+      "classification": "private-operational",
+      "original_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can view all profiles",
+      "qual": "has_role(auth.uid(), 'uno_team'::app_role)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "profiles",
+      "with_check": null,
+      "snapshot_index": 622,
+      "classification": "private-operational",
+      "original_qual": "has_role(auth.uid(), 'uno_team'::app_role)",
+      "original_with_check": null,
+      "replacement_qual": "false",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update properties",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 641,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "mc_member_select_company_properties_v2",
+      "qual": "staff_can_access_property(auth.uid(), id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": null,
+      "snapshot_index": 650,
+      "classification": "private-operational",
+      "original_qual": "staff_can_access_property(auth.uid(), id)",
+      "original_with_check": null,
+      "replacement_qual": "staff_can_access_property_e28_private(auth.uid(), id)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "mc_member_update_company_properties_v2",
+      "qual": "staff_can_access_property(auth.uid(), id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": "staff_can_access_property(auth.uid(), id)",
+      "snapshot_index": 651,
+      "classification": "private-operational",
+      "original_qual": "staff_can_access_property(auth.uid(), id)",
+      "original_with_check": "staff_can_access_property(auth.uid(), id)",
+      "replacement_qual": "staff_can_access_property_e28_private(auth.uid(), id)",
+      "replacement_with_check": "staff_can_access_property_e28_private(auth.uid(), id)",
+      "helper_paths": [
+        [
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_amenities_manage",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_amenities",
+      "with_check": "can_manage_property(property_id)",
+      "snapshot_index": 673,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": "can_manage_property(property_id)",
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": "can_manage_property_e28_private(property_id)",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_amenities_public_read",
+      "qual": "(property_is_public(property_id) OR can_manage_property(property_id))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_amenities",
+      "with_check": null,
+      "snapshot_index": 674,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "(property_is_public(property_id) OR can_manage_property(property_id))",
+      "original_with_check": null,
+      "replacement_qual": "(property_is_public(property_id) OR can_manage_property_e28_private(property_id))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can insert analytics",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_analytics",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 675,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": null,
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update analytics",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_analytics",
+      "with_check": null,
+      "snapshot_index": 676,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Chat: participant scoped insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_chat_messages",
+      "with_check": "((sender_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id\n           FROM providers pr\n          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))",
+      "snapshot_index": 689,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((sender_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id\n           FROM providers pr\n          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))",
+      "replacement_qual": null,
+      "replacement_with_check": "((sender_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id\n           FROM providers pr\n          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Chat: participant scoped read",
+      "qual": "((sender_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_chat_messages",
+      "with_check": null,
+      "snapshot_index": 690,
+      "classification": "private-operational",
+      "original_qual": "((sender_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((sender_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authorized users can view documents",
+      "qual": "(is_admin_or_uno_team() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null,
+      "snapshot_index": 708,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC admins and owners can delete documents",
+      "qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null,
+      "snapshot_index": 709,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC admins and owners can update documents",
+      "qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null,
+      "snapshot_index": 710,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members and owners can insert documents",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": "(is_admin_or_uno_team() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "snapshot_index": 711,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "(is_admin_or_uno_team() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "replacement_qual": null,
+      "replacement_with_check": "(is_admin_or_uno_team_e28_private() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage listing scores",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_listing_scores",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 740,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers read own listing scores",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_listing_scores",
+      "with_check": null,
+      "snapshot_index": 741,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": null,
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can delete terms",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null,
+      "snapshot_index": 745,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors and owners can view terms",
+      "qual": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null,
+      "snapshot_index": 746,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can insert terms",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()))",
+      "snapshot_index": 747,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()))",
+      "replacement_qual": null,
+      "replacement_with_check": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()))",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can update terms",
+      "qual": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null,
+      "snapshot_index": 748,
+      "classification": "private-operational",
+      "original_qual": "(is_admin_or_uno_team() OR (manager_user_id = auth.uid()))",
+      "original_with_check": null,
+      "replacement_qual": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all assignments",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_manager_assignments",
+      "with_check": null,
+      "snapshot_index": 749,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_media_manage",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_media",
+      "with_check": "can_manage_property(property_id)",
+      "snapshot_index": 756,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": "can_manage_property(property_id)",
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": "can_manage_property_e28_private(property_id)",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers manage rate plans",
+      "qual": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_rate_plans",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))",
+      "snapshot_index": 784,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))",
+      "original_with_check": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))",
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))",
+      "replacement_with_check": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_reviews_host_manage",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_reviews",
+      "with_check": "can_manage_property(property_id)",
+      "snapshot_index": 799,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": "can_manage_property(property_id)",
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": "can_manage_property_e28_private(property_id)",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_reviews_public_read",
+      "qual": "(((is_public = true) AND property_is_public(property_id)) OR can_manage_property(property_id) OR (reviewer_id = auth.uid()))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_reviews",
+      "with_check": null,
+      "snapshot_index": 800,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "(((is_public = true) AND property_is_public(property_id)) OR can_manage_property(property_id) OR (reviewer_id = auth.uid()))",
+      "original_with_check": null,
+      "replacement_qual": "(((is_public = true) AND property_is_public(property_id)) OR can_manage_property_e28_private(property_id) OR (reviewer_id = auth.uid()))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers read categories",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_room_categories",
+      "with_check": null,
+      "snapshot_index": 801,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": null,
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers write categories",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_room_categories",
+      "with_check": "can_manage_property(property_id)",
+      "snapshot_index": 802,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": "can_manage_property(property_id)",
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": "can_manage_property_e28_private(property_id)",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers manage restrictions",
+      "qual": "can_manage_property(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_stay_restrictions",
+      "with_check": "can_manage_property(property_id)",
+      "snapshot_index": 807,
+      "classification": "mixed-public-safe-read/private-management",
+      "original_qual": "can_manage_property(property_id)",
+      "original_with_check": "can_manage_property(property_id)",
+      "replacement_qual": "can_manage_property_e28_private(property_id)",
+      "replacement_with_check": "can_manage_property_e28_private(property_id)",
+      "helper_paths": [
+        [
+          "can_manage_property"
+        ],
+        [
+          "can_manage_property",
+          "staff_can_access_property"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage contracts",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_contracts",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 816,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all contracts",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_contracts",
+      "with_check": null,
+      "snapshot_index": 817,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "input_rules_admin_write",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "provider_input_rules",
+      "with_check": null,
+      "snapshot_index": 818,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff manage provider org links",
+      "qual": "is_finance_staff(auth.uid())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_org_links",
+      "with_check": "is_finance_staff(auth.uid())",
+      "snapshot_index": 821,
+      "classification": "private-operational",
+      "original_qual": "is_finance_staff(auth.uid())",
+      "original_with_check": "is_finance_staff(auth.uid())",
+      "replacement_qual": "is_finance_staff_e28_private(auth.uid())",
+      "replacement_with_check": "is_finance_staff_e28_private(auth.uid())",
+      "helper_paths": [
+        [
+          "is_finance_staff"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view installs",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "pwa_installs",
+      "with_check": null,
+      "snapshot_index": 837,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view realtime stats",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "realtime_stats",
+      "with_check": null,
+      "snapshot_index": 850,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Only admins can update realtime stats",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "realtime_stats",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 851,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins view all tokens",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "signature_request_signer_tokens",
+      "with_check": null,
+      "snapshot_index": 906,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members view request signers",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (signature_requests sr\n     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))\n  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "signature_request_signers",
+      "with_check": null,
+      "snapshot_index": 910,
+      "classification": "private-operational",
+      "original_qual": "((EXISTS ( SELECT 1\n   FROM (signature_requests sr\n     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))\n  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((EXISTS ( SELECT 1\n   FROM (signature_requests sr\n     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))\n  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage simulation runs",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "simulation_runs",
+      "with_check": null,
+      "snapshot_index": 918,
+      "classification": "private-operational",
+      "original_qual": "(EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
+      "original_with_check": null,
+      "replacement_qual": "(EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role])))))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage intake configs",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "sys_intake_configs",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 938,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage lead configs",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "sys_lead_configs",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 940,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "system_settings_admin_read",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "system_settings",
+      "with_check": null,
+      "snapshot_index": 947,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "system_settings_admin_write",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "system_settings",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 948,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Author or admin can view task comments",
+      "qual": "((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "task_comments",
+      "with_check": null,
+      "snapshot_index": 951,
+      "classification": "private-operational",
+      "original_qual": "((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can insert own activity",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "team_activity_log",
+      "with_check": "((auth.uid() = user_id) AND is_team_member(auth.uid()))",
+      "snapshot_index": 965,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((auth.uid() = user_id) AND is_team_member(auth.uid()))",
+      "replacement_qual": null,
+      "replacement_with_check": "((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid()))",
+      "helper_paths": [
+        [
+          "is_team_member"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view channels",
+      "qual": "is_team_member(auth.uid())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "team_channels",
+      "with_check": null,
+      "snapshot_index": 968,
+      "classification": "private-operational",
+      "original_qual": "is_team_member(auth.uid())",
+      "original_with_check": null,
+      "replacement_qual": "is_team_member_e28_private(auth.uid())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_team_member"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view all team members",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_members",
+      "with_check": null,
+      "snapshot_index": 978,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can send messages",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "team_messages",
+      "with_check": "((auth.uid() = sender_id) AND is_team_member(auth.uid()))",
+      "snapshot_index": 979,
+      "classification": "private-operational",
+      "original_qual": null,
+      "original_with_check": "((auth.uid() = sender_id) AND is_team_member(auth.uid()))",
+      "replacement_qual": null,
+      "replacement_with_check": "((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid()))",
+      "helper_paths": [
+        [
+          "is_team_member"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view messages",
+      "qual": "(is_team_member(auth.uid()) AND (is_deleted = false))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "team_messages",
+      "with_check": null,
+      "snapshot_index": 980,
+      "classification": "private-operational",
+      "original_qual": "(is_team_member(auth.uid()) AND (is_deleted = false))",
+      "original_with_check": null,
+      "replacement_qual": "(is_team_member_e28_private(auth.uid()) AND (is_deleted = false))",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_team_member"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team can view all user achievements",
+      "qual": "is_team_member(auth.uid())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "team_user_achievements",
+      "with_check": null,
+      "snapshot_index": 989,
+      "classification": "private-operational",
+      "original_qual": "is_team_member(auth.uid())",
+      "original_with_check": null,
+      "replacement_qual": "is_team_member_e28_private(auth.uid())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_team_member"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_bookings_select",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "thai_bookings",
+      "with_check": null,
+      "snapshot_index": 993,
+      "classification": "private-operational",
+      "original_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_bookings_update",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "thai_bookings",
+      "with_check": null,
+      "snapshot_index": 994,
+      "classification": "private-operational",
+      "original_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chat_messages_select",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (thai_chats c\n     JOIN thai_businesses b ON ((b.id = c.business_id)))\n  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "thai_chat_messages",
+      "with_check": null,
+      "snapshot_index": 1004,
+      "classification": "private-operational",
+      "original_qual": "((EXISTS ( SELECT 1\n   FROM (thai_chats c\n     JOIN thai_businesses b ON ((b.id = c.business_id)))\n  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((EXISTS ( SELECT 1\n   FROM (thai_chats c\n     JOIN thai_businesses b ON ((b.id = c.business_id)))\n  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chats_select",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "thai_chats",
+      "with_check": null,
+      "snapshot_index": 1006,
+      "classification": "private-operational",
+      "original_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chats_update",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "thai_chats",
+      "with_check": null,
+      "snapshot_index": 1007,
+      "classification": "private-operational",
+      "original_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins read partner leads",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_partner_leads",
+      "with_check": null,
+      "snapshot_index": 1008,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": null,
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": null,
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins update partner leads",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_partner_leads",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 1009,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update documents for verification",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "user_documents",
+      "with_check": null,
+      "snapshot_index": 1048,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all documents for verification",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "user_documents",
+      "with_check": null,
+      "snapshot_index": 1049,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": null,
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "events_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_events",
+      "with_check": null,
+      "snapshot_index": 1058,
+      "classification": "private-operational",
+      "original_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "analytics_admin_only",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 1080,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "segments_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": null,
+      "snapshot_index": 1081,
+      "classification": "private-operational",
+      "original_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "segments_write",
+      "qual": "is_admin_or_uno_team()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": "is_admin_or_uno_team()",
+      "snapshot_index": 1082,
+      "classification": "private-operational",
+      "original_qual": "is_admin_or_uno_team()",
+      "original_with_check": "is_admin_or_uno_team()",
+      "replacement_qual": "is_admin_or_uno_team_e28_private()",
+      "replacement_with_check": "is_admin_or_uno_team_e28_private()",
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "sessions_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_sessions",
+      "with_check": null,
+      "snapshot_index": 1085,
+      "classification": "private-operational",
+      "original_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team())",
+      "original_with_check": null,
+      "replacement_qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "replacement_with_check": null,
+      "helper_paths": [
+        [
+          "is_admin_or_uno_team"
+        ]
+      ],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage commission rules",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "vertical_commission_rules",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "snapshot_index": 1122,
+      "classification": "private-operational",
+      "original_qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "original_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+      "replacement_qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "replacement_with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "helper_paths": [],
+      "action": "ALTER only changed USING/WITH CHECK expressions; retain name, command, roles, permissiveness, and NULL clauses",
+      "effective_update_check": "If with_check is NULL for UPDATE/ALL, PostgreSQL uses USING; keep this fallback."
+    }
+  ],
+  "clones": [
+    {
+      "schema": "public",
+      "proname": "is_admin_or_uno_team",
+      "args": "",
+      "recommended_name": "is_admin_or_uno_team_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.is_admin_or_uno_team()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM public.user_roles \n    WHERE user_id = auth.uid() \n      AND role IN ('admin', 'uno_team')\n  );\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.is_admin_or_uno_team_e28_private()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM public.user_roles \n    WHERE user_id = auth.uid() \n      AND role IN ('admin')\n  );\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "is_company_admin",
+      "args": "p_company_id uuid",
+      "recommended_name": "is_company_admin_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.is_company_admin(p_company_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM management_company_members\n    WHERE company_id = p_company_id\n      AND user_id = auth.uid()\n      AND role IN ('director', 'admin', 'owner')\n      AND is_active = true\n  )\n  OR EXISTS (\n    SELECT 1 FROM user_roles\n    WHERE user_id = auth.uid()\n      AND role IN ('admin', 'uno_team')\n  );\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.is_company_admin_e28_private(p_company_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    SELECT 1 FROM management_company_members\n    WHERE company_id = p_company_id\n      AND user_id = auth.uid()\n      AND role IN ('director', 'admin', 'owner')\n      AND is_active = true\n  )\n  OR EXISTS (\n    SELECT 1 FROM user_roles\n    WHERE user_id = auth.uid()\n      AND role IN ('admin')\n  );\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "is_finance_staff",
+      "args": "_uid uuid",
+      "recommended_name": "is_finance_staff_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.is_finance_staff(_uid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _uid\n    AND role IN ('admin'::app_role,'staff'::app_role,'uno_team'::app_role,'finance'::app_role));\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.is_finance_staff_e28_private(_uid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _uid\n    AND role IN ('admin'::app_role,'staff'::app_role,'finance'::app_role));\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "is_team_member",
+      "args": "check_user_id uuid",
+      "recommended_name": "is_team_member_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.is_team_member(check_user_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN EXISTS (\n    SELECT 1 FROM public.user_roles \n    WHERE user_id = check_user_id \n    AND role IN ('uno_team', 'admin', 'staff')\n  );\nEND;\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.is_team_member_e28_private(check_user_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN EXISTS (\n    SELECT 1 FROM public.user_roles \n    WHERE user_id = check_user_id \n    AND role IN ('admin', 'staff')\n  );\nEND;\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "mc_can_access",
+      "args": "_user_id uuid, _company_id uuid, _module text, _action text",
+      "recommended_name": "mc_can_access_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.mc_can_access(_user_id uuid, _company_id uuid, _module text, _action text DEFAULT 'view'::text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    -- Directors and company admins have full access\n    SELECT 1 FROM management_company_members\n    WHERE user_id = _user_id\n      AND company_id = _company_id\n      AND role IN ('director', 'admin')\n      AND is_active = true\n  )\n  OR EXISTS (\n    -- Other members: check team_member_permissions\n    SELECT 1 FROM management_company_members mcm\n    JOIN team_member_permissions tmp ON tmp.user_id = mcm.user_id AND tmp.company_id = mcm.company_id\n    WHERE mcm.user_id = _user_id\n      AND mcm.company_id = _company_id\n      AND mcm.is_active = true\n      AND tmp.module = _module\n      AND CASE _action\n            WHEN 'view' THEN tmp.can_view\n            WHEN 'edit' THEN tmp.can_edit\n            WHEN 'export' THEN tmp.can_export\n            ELSE false\n          END\n  )\n  OR (\n    -- Platform admins always pass\n    EXISTS (\n      SELECT 1 FROM user_roles\n      WHERE user_id = _user_id AND role IN ('admin', 'uno_team')\n    )\n  );\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.mc_can_access_e28_private(_user_id uuid, _company_id uuid, _module text, _action text DEFAULT 'view'::text)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    -- Directors and company admins have full access\n    SELECT 1 FROM management_company_members\n    WHERE user_id = _user_id\n      AND company_id = _company_id\n      AND role IN ('director', 'admin')\n      AND is_active = true\n  )\n  OR EXISTS (\n    -- Other members: check team_member_permissions\n    SELECT 1 FROM management_company_members mcm\n    JOIN team_member_permissions tmp ON tmp.user_id = mcm.user_id AND tmp.company_id = mcm.company_id\n    WHERE mcm.user_id = _user_id\n      AND mcm.company_id = _company_id\n      AND mcm.is_active = true\n      AND tmp.module = _module\n      AND CASE _action\n            WHEN 'view' THEN tmp.can_view\n            WHEN 'edit' THEN tmp.can_edit\n            WHEN 'export' THEN tmp.can_export\n            ELSE false\n          END\n  )\n  OR (\n    -- Platform admins always pass\n    EXISTS (\n      SELECT 1 FROM user_roles\n      WHERE user_id = _user_id AND role IN ('admin')\n    )\n  );\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "staff_can_access_property",
+      "args": "p_user_id uuid, p_property_id uuid",
+      "recommended_name": "staff_can_access_property_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.staff_can_access_property(p_user_id uuid, p_property_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    -- Directors/admins of the company that manages the property \u2014 full access\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role IN ('director', 'admin')\n      AND mcm.is_active = true\n  )\n  OR EXISTS (\n    -- Managers/accountants \u2014 full company properties\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role IN ('manager', 'accountant')\n      AND mcm.is_active = true\n  )\n  OR EXISTS (\n    -- Staff \u2014 only assigned properties\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    JOIN property_manager_assignments pma ON pma.property_id = p.id AND pma.manager_user_id = p_user_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role = 'staff'\n      AND mcm.is_active = true\n      AND pma.is_active = true\n  )\n  OR EXISTS (\n    -- Platform admins\n    SELECT 1 FROM user_roles\n    WHERE user_id = p_user_id AND role IN ('admin', 'uno_team')\n  );\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.staff_can_access_property_e28_private(p_user_id uuid, p_property_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (\n    -- Directors/admins of the company that manages the property \u2014 full access\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role IN ('director', 'admin')\n      AND mcm.is_active = true\n  )\n  OR EXISTS (\n    -- Managers/accountants \u2014 full company properties\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role IN ('manager', 'accountant')\n      AND mcm.is_active = true\n  )\n  OR EXISTS (\n    -- Staff \u2014 only assigned properties\n    SELECT 1 FROM management_company_members mcm\n    JOIN properties p ON p.management_company_id = mcm.company_id\n    JOIN property_manager_assignments pma ON pma.property_id = p.id AND pma.manager_user_id = p_user_id\n    WHERE mcm.user_id = p_user_id\n      AND p.id = p_property_id\n      AND mcm.role = 'staff'\n      AND mcm.is_active = true\n      AND pma.is_active = true\n  )\n  OR EXISTS (\n    -- Platform admins\n    SELECT 1 FROM user_roles\n    WHERE user_id = p_user_id AND role IN ('admin')\n  );\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "can_manage_property",
+      "args": "_property_id uuid",
+      "recommended_name": "can_manage_property_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.can_manage_property(_property_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT public.has_role(auth.uid(), 'admin'::app_role)\n      OR public.has_role(auth.uid(), 'uno_team'::app_role)\n      OR EXISTS (\n        SELECT 1 FROM public.properties p\n        WHERE p.id = _property_id\n          AND (\n            p.owner_id = auth.uid()\n            OR p.provider_id = auth.uid()\n            OR EXISTS (SELECT 1 FROM public.providers pr WHERE pr.id = p.provider_id AND pr.user_id = auth.uid())\n            OR public.staff_can_access_property(auth.uid(), p.id)\n            OR public.is_assigned_manager(auth.uid(), p.id)\n          )\n      )\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.can_manage_property_e28_private(_property_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT public.has_role(auth.uid(), 'admin'::app_role)\n      OR false\n      OR EXISTS (\n        SELECT 1 FROM public.properties p\n        WHERE p.id = _property_id\n          AND (\n            p.owner_id = auth.uid()\n            OR p.provider_id = auth.uid()\n            OR EXISTS (SELECT 1 FROM public.providers pr WHERE pr.id = p.provider_id AND pr.user_id = auth.uid())\n            OR public.staff_can_access_property_e28_private(auth.uid(), p.id)\n            OR public.is_assigned_manager(auth.uid(), p.id)\n          )\n      )\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    },
+    {
+      "schema": "public",
+      "proname": "user_has_clearview_access",
+      "args": "_project_id uuid",
+      "recommended_name": "user_has_clearview_access_e28_private",
+      "action": "create private-only narrowed clone; preserve shared original for catalog-only callers",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.user_has_clearview_access(_project_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT\n    public.has_role(auth.uid(), 'admin')\n    OR public.is_admin_or_uno_team()\n    OR EXISTS (\n      SELECT 1 FROM public.clearview_purchases p\n      WHERE auth.uid() IS NOT NULL\n        AND p.user_id = auth.uid()\n        AND p.valid_until > now()\n        AND (\n          coalesce(p.amount_paid_cents, 0) > 0\n          OR p.stripe_subscription_id IS NOT NULL\n          OR p.stripe_session_id IS NOT NULL\n        )\n        AND (\n          (p.tier = 'single' AND p.project_id = _project_id)\n          OR (p.tier = 'investor_pass')\n          OR (p.tier = 'bundle3' AND p.project_id = _project_id)\n        )\n    );\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.user_has_clearview_access_e28_private(_project_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT\n    public.has_role(auth.uid(), 'admin')\n    OR public.is_admin_or_uno_team_e28_private()\n    OR EXISTS (\n      SELECT 1 FROM public.clearview_purchases p\n      WHERE auth.uid() IS NOT NULL\n        AND p.user_id = auth.uid()\n        AND p.valid_until > now()\n        AND (\n          coalesce(p.amount_paid_cents, 0) > 0\n          OR p.stripe_subscription_id IS NOT NULL\n          OR p.stripe_session_id IS NOT NULL\n        )\n        AND (\n          (p.tier = 'single' AND p.project_id = _project_id)\n          OR (p.tier = 'investor_pass')\n          OR (p.tier = 'bundle3' AND p.project_id = _project_id)\n        )\n    );\n$function$\n",
+      "preserves": "All non-uno_team explicit roles, company membership/module checks, owner/provider/assigned-manager and paid customer branches unchanged."
+    }
+  ],
+  "replacements": [
+    {
+      "schema": "public",
+      "proname": "get_management_company_sensitive",
+      "args": "_company_id uuid",
+      "action": "replace definition in place after grants/trigger/caller verification",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.get_management_company_sensitive(_company_id uuid)\n RETURNS TABLE(id uuid, legal_name text, legal_address text, registration_number text, tax_id text, license_number text, bank_name text, bank_account text, swift_code text, stripe_customer_id text, stripe_subscription_id text, dbd_card_url text, documents jsonb)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  IF NOT (\n    public.has_role(auth.uid(), 'admin'::app_role)\n    OR public.has_role(auth.uid(), 'uno_team'::app_role)\n    OR EXISTS (\n      SELECT 1 FROM public.management_company_members m\n      WHERE m.company_id = _company_id\n        AND m.user_id = auth.uid()\n        AND m.is_active = true\n        AND m.role = 'director'\n    )\n  ) THEN\n    RAISE EXCEPTION 'Access denied: director or admin role required';\n  END IF;\n\n  RETURN QUERY\n  SELECT mc.id, mc.legal_name, mc.legal_address, mc.registration_number,\n         mc.tax_id, mc.license_number, mc.bank_name, mc.bank_account,\n         mc.swift_code, mc.stripe_customer_id, mc.stripe_subscription_id,\n         mc.dbd_card_url, mc.documents\n  FROM public.management_companies mc\n  WHERE mc.id = _company_id;\nEND;\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.get_management_company_sensitive(_company_id uuid)\n RETURNS TABLE(id uuid, legal_name text, legal_address text, registration_number text, tax_id text, license_number text, bank_name text, bank_account text, swift_code text, stripe_customer_id text, stripe_subscription_id text, dbd_card_url text, documents jsonb)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  IF NOT (\n    public.has_role(auth.uid(), 'admin'::app_role)\n    OR public.false\n    OR EXISTS (\n      SELECT 1 FROM public.management_company_members m\n      WHERE m.company_id = _company_id\n        AND m.user_id = auth.uid()\n        AND m.is_active = true\n        AND m.role = 'director'\n    )\n  ) THEN\n    RAISE EXCEPTION 'Access denied: director or admin role required';\n  END IF;\n\n  RETURN QUERY\n  SELECT mc.id, mc.legal_name, mc.legal_address, mc.registration_number,\n         mc.tax_id, mc.license_number, mc.bank_name, mc.bank_account,\n         mc.swift_code, mc.stripe_customer_id, mc.stripe_subscription_id,\n         mc.dbd_card_url, mc.documents\n  FROM public.management_companies mc\n  WHERE mc.id = _company_id;\nEND;\n$function$\n",
+      "preserves": "Only remove uno_team from authorization/recipient role lists; preserve admin and every other branch. resolve_user_context team output label remains compatibility metadata, not authorization."
+    },
+    {
+      "schema": "public",
+      "proname": "resolve_user_context",
+      "args": "p_user_id uuid, p_mode text, p_entity_id uuid",
+      "action": "replace definition in place after grants/trigger/caller verification",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.resolve_user_context(p_user_id uuid, p_mode text DEFAULT NULL::text, p_entity_id uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_mode text;\n  v_entity_id uuid;\n  v_role text;\n  v_permissions text[];\n  v_mc_role text;\nBEGIN\n  -- SECURITY: Ensure caller can only resolve their own context\n  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN\n    RAISE EXCEPTION 'Unauthorized: cannot resolve context for another user';\n  END IF;\n\n  -- Get current context or use provided override\n  IF p_mode IS NOT NULL THEN\n    v_mode := p_mode;\n    v_entity_id := p_entity_id;\n  ELSE\n    SELECT mode, entity_id INTO v_mode, v_entity_id\n    FROM user_active_context\n    WHERE user_id = p_user_id;\n    \n    IF v_mode IS NULL THEN\n      v_mode := 'user';\n    END IF;\n  END IF;\n\n  -- Resolve role based on mode\n  CASE v_mode\n    WHEN 'mc' THEN\n      SELECT mcm.role INTO v_mc_role\n      FROM management_company_members mcm\n      WHERE mcm.user_id = p_user_id\n        AND mcm.company_id = v_entity_id\n        AND mcm.is_active = true;\n      \n      IF v_mc_role IS NULL THEN\n        v_mode := 'user';\n        v_role := 'user';\n      ELSE\n        v_role := v_mc_role;\n        \n        SELECT array_agg(DISTINCT module) INTO v_permissions\n        FROM team_member_permissions\n        WHERE user_id = p_user_id\n          AND company_id = v_entity_id\n          AND can_view = true;\n        \n        IF v_mc_role IN ('director', 'admin') THEN\n          v_permissions := ARRAY['crm', 'finance', 'bookings', 'properties', 'team', 'reports', 'settings', 'operations', 'channels', 'messages', 'inventory', 'maintenance'];\n        END IF;\n      END IF;\n      \n    WHEN 'owner' THEN\n      v_role := 'owner';\n      v_permissions := ARRAY['properties', 'finance', 'reports'];\n      \n    WHEN 'admin' THEN\n      IF EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id AND role IN ('admin', 'uno_team')) THEN\n        v_role := 'admin';\n        v_permissions := ARRAY['*'];\n      ELSE\n        v_mode := 'user';\n        v_role := 'user';\n      END IF;\n      \n    WHEN 'vendor' THEN\n      v_role := 'vendor';\n      v_permissions := ARRAY['services', 'bookings', 'finance'];\n      \n    WHEN 'team' THEN\n      IF EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id AND role IN ('uno_team', 'admin')) THEN\n        v_role := 'uno_team';\n        v_permissions := ARRAY['*'];\n      ELSE\n        v_mode := 'user';\n        v_role := 'user';\n      END IF;\n      \n    ELSE\n      v_role := 'user';\n      v_permissions := ARRAY[]::text[];\n  END CASE;\n\n  RETURN jsonb_build_object(\n    'mode', v_mode,\n    'entity_id', v_entity_id,\n    'role', v_role,\n    'permissions', COALESCE(v_permissions, ARRAY[]::text[]),\n    'resolved_at', now()\n  );\nEND;\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.resolve_user_context(p_user_id uuid, p_mode text DEFAULT NULL::text, p_entity_id uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_mode text;\n  v_entity_id uuid;\n  v_role text;\n  v_permissions text[];\n  v_mc_role text;\nBEGIN\n  -- SECURITY: Ensure caller can only resolve their own context\n  IF auth.uid() IS NULL OR auth.uid() <> p_user_id THEN\n    RAISE EXCEPTION 'Unauthorized: cannot resolve context for another user';\n  END IF;\n\n  -- Get current context or use provided override\n  IF p_mode IS NOT NULL THEN\n    v_mode := p_mode;\n    v_entity_id := p_entity_id;\n  ELSE\n    SELECT mode, entity_id INTO v_mode, v_entity_id\n    FROM user_active_context\n    WHERE user_id = p_user_id;\n    \n    IF v_mode IS NULL THEN\n      v_mode := 'user';\n    END IF;\n  END IF;\n\n  -- Resolve role based on mode\n  CASE v_mode\n    WHEN 'mc' THEN\n      SELECT mcm.role INTO v_mc_role\n      FROM management_company_members mcm\n      WHERE mcm.user_id = p_user_id\n        AND mcm.company_id = v_entity_id\n        AND mcm.is_active = true;\n      \n      IF v_mc_role IS NULL THEN\n        v_mode := 'user';\n        v_role := 'user';\n      ELSE\n        v_role := v_mc_role;\n        \n        SELECT array_agg(DISTINCT module) INTO v_permissions\n        FROM team_member_permissions\n        WHERE user_id = p_user_id\n          AND company_id = v_entity_id\n          AND can_view = true;\n        \n        IF v_mc_role IN ('director', 'admin') THEN\n          v_permissions := ARRAY['crm', 'finance', 'bookings', 'properties', 'team', 'reports', 'settings', 'operations', 'channels', 'messages', 'inventory', 'maintenance'];\n        END IF;\n      END IF;\n      \n    WHEN 'owner' THEN\n      v_role := 'owner';\n      v_permissions := ARRAY['properties', 'finance', 'reports'];\n      \n    WHEN 'admin' THEN\n      IF EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id AND role IN ('admin')) THEN\n        v_role := 'admin';\n        v_permissions := ARRAY['*'];\n      ELSE\n        v_mode := 'user';\n        v_role := 'user';\n      END IF;\n      \n    WHEN 'vendor' THEN\n      v_role := 'vendor';\n      v_permissions := ARRAY['services', 'bookings', 'finance'];\n      \n    WHEN 'team' THEN\n      IF EXISTS (SELECT 1 FROM user_roles WHERE user_id = p_user_id AND role IN ('admin')) THEN\n        v_role := 'uno_team';\n        v_permissions := ARRAY['*'];\n      ELSE\n        v_mode := 'user';\n        v_role := 'user';\n      END IF;\n      \n    ELSE\n      v_role := 'user';\n      v_permissions := ARRAY[]::text[];\n  END CASE;\n\n  RETURN jsonb_build_object(\n    'mode', v_mode,\n    'entity_id', v_entity_id,\n    'role', v_role,\n    'permissions', COALESCE(v_permissions, ARRAY[]::text[]),\n    'resolved_at', now()\n  );\nEND;\n$function$\n",
+      "preserves": "Only remove uno_team from authorization/recipient role lists; preserve admin and every other branch. resolve_user_context team output label remains compatibility metadata, not authorization."
+    },
+    {
+      "schema": "public",
+      "proname": "actor_can_operate_property",
+      "args": "p_property_id uuid, p_company_id uuid, p_module text, p_action text",
+      "action": "replace only positive authorization helper calls with private clones in both legacy and overseer branches",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.actor_can_operate_property(p_property_id uuid, p_company_id uuid, p_module text, p_action text DEFAULT 'view'::text)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE enforced boolean; actor uuid := auth.uid();\nBEGIN\n IF p_company_id IS NULL OR p_module NOT IN ('properties','bookings','tasks','reports','finance') OR p_action NOT IN ('view','edit','export') THEN RETURN false; END IF;\n IF NOT public.actor_property_scope_ceiling(p_property_id,p_company_id) THEN RETURN false; END IF;\n SELECT operating_spaces_enforced INTO enforced FROM public.management_companies WHERE id=p_company_id;\n IF enforced IS FALSE THEN\n   RETURN public.staff_can_access_property(actor,p_property_id) AND public.mc_can_access(actor,p_company_id,p_module,p_action);\n END IF;\n IF public.actor_is_operating_company_overseer(p_company_id) THEN RETURN public.mc_can_access(actor,p_company_id,p_module,p_action); END IF;\n -- Do not inherit mc_can_access's generic uno_team bypass in enforced mode.\n RETURN EXISTS(SELECT 1 FROM public.management_company_members m JOIN public.team_member_permissions t\n ON t.company_id=m.company_id AND t.user_id=m.user_id\n WHERE m.company_id=p_company_id AND m.user_id=actor AND m.is_active IS TRUE AND t.module=p_module\n AND CASE p_action WHEN 'view' THEN t.can_view WHEN 'edit' THEN t.can_edit WHEN 'export' THEN t.can_export ELSE false END\n AND (m.role <> 'staff' OR EXISTS(SELECT 1 FROM public.property_manager_assignments a\n WHERE a.property_id=p_property_id AND a.manager_user_id=actor AND a.is_active IS TRUE)));\nEND $function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.actor_can_operate_property(p_property_id uuid, p_company_id uuid, p_module text, p_action text DEFAULT 'view'::text)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE enforced boolean; actor uuid := auth.uid();\nBEGIN\n IF p_company_id IS NULL OR p_module NOT IN ('properties','bookings','tasks','reports','finance') OR p_action NOT IN ('view','edit','export') THEN RETURN false; END IF;\n IF NOT public.actor_property_scope_ceiling(p_property_id,p_company_id) THEN RETURN false; END IF;\n SELECT operating_spaces_enforced INTO enforced FROM public.management_companies WHERE id=p_company_id;\n IF enforced IS FALSE THEN\n   RETURN public.staff_can_access_property_e28_private(actor,p_property_id) AND public.mc_can_access_e28_private(actor,p_company_id,p_module,p_action);\n END IF;\n IF public.actor_is_operating_company_overseer(p_company_id) THEN RETURN public.mc_can_access_e28_private(actor,p_company_id,p_module,p_action); END IF;\n -- Do not inherit mc_can_access's generic uno_team bypass in enforced mode.\n RETURN EXISTS(SELECT 1 FROM public.management_company_members m JOIN public.team_member_permissions t\n ON t.company_id=m.company_id AND t.user_id=m.user_id\n WHERE m.company_id=p_company_id AND m.user_id=actor AND m.is_active IS TRUE AND t.module=p_module\n AND CASE p_action WHEN 'view' THEN t.can_view WHEN 'edit' THEN t.can_edit WHEN 'export' THEN t.can_export ELSE false END\n AND (m.role <> 'staff' OR EXISTS(SELECT 1 FROM public.property_manager_assignments a\n WHERE a.property_id=p_property_id AND a.manager_user_id=actor AND a.is_active IS TRUE)));\nEND $function$\n",
+      "preserves": "All existing scope ceilings, enforcement branches, company membership, module/action permissions and staff assignment logic."
+    },
+    {
+      "proname": "admin_process_payout",
+      "args": "p_payout_id uuid, p_new_status text, p_payment_reference text",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.admin_process_payout(p_payout_id uuid, p_new_status text, p_payment_reference text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE r jsonb;\nBEGIN\n  IF NOT public.is_finance_staff(auth.uid()) THEN RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501'; END IF;\n  SELECT to_jsonb(x) INTO r FROM public.process_payout(p_payout_id, p_new_status, p_payment_reference) x;\n  RETURN r;\nEND $function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.admin_process_payout(p_payout_id uuid, p_new_status text, p_payment_reference text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE r jsonb;\nBEGIN\n  IF NOT public.is_finance_staff_e28_private(auth.uid()) THEN RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501'; END IF;\n  SELECT to_jsonb(x) INTO r FROM public.process_payout(p_payout_id, p_new_status, p_payment_reference) x;\n  RETURN r;\nEND $function$\n"
+    },
+    {
+      "proname": "create_order_checked",
+      "args": "p_order_type text, p_provider_org_id uuid, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_total_amount numeric, p_currency text, p_notes text, p_metadata jsonb, p_items jsonb, p_participants jsonb, p_addresses jsonb, p_payment_method text, p_payment_amount numeric, p_customer_user_id uuid",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.create_order_checked(p_order_type text, p_provider_org_id uuid, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_total_amount numeric, p_currency text, p_notes text, p_metadata jsonb, p_items jsonb, p_participants jsonb, p_addresses jsonb, p_payment_method text, p_payment_amount numeric, p_customer_user_id uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid(); v_customer uuid; v_staff boolean;\nBEGIN\n  IF v_uid IS NULL THEN RETURN jsonb_build_object('success', false, 'error', 'not_authenticated'); END IF;\n  v_staff := public.is_finance_staff(v_uid);\n  v_customer := CASE WHEN v_staff AND p_customer_user_id IS NOT NULL THEN p_customer_user_id ELSE v_uid END;\n  IF p_total_amount IS NULL OR p_total_amount <= 0 OR p_total_amount > 100000000 THEN\n    RETURN jsonb_build_object('success', false, 'error', 'invalid_amount'); END IF;\n  IF p_payment_amount IS NOT NULL AND (p_payment_amount < 0 OR p_payment_amount > p_total_amount) THEN\n    RETURN jsonb_build_object('success', false, 'error', 'invalid_amount'); END IF;\n  IF NOT v_staff AND p_payment_method = 'wallet' THEN\n    RETURN jsonb_build_object('success', false, 'error', 'wallet_payment_not_allowed'); END IF;\n  IF p_provider_org_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.orgs WHERE id = p_provider_org_id AND coalesce(is_active, true)) THEN\n    RETURN jsonb_build_object('success', false, 'error', 'org_not_found'); END IF;\n  RETURN public.create_order_atomic(p_order_type, v_customer, p_provider_org_id, p_start_at, p_end_at,\n    p_total_amount, p_currency, p_notes, p_metadata, p_items, p_participants, p_addresses,\n    p_payment_method, p_payment_amount);\nEND $function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.create_order_checked(p_order_type text, p_provider_org_id uuid, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_total_amount numeric, p_currency text, p_notes text, p_metadata jsonb, p_items jsonb, p_participants jsonb, p_addresses jsonb, p_payment_method text, p_payment_amount numeric, p_customer_user_id uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid(); v_customer uuid; v_staff boolean;\nBEGIN\n  IF v_uid IS NULL THEN RETURN jsonb_build_object('success', false, 'error', 'not_authenticated'); END IF;\n  v_staff := public.is_finance_staff_e28_private(v_uid);\n  v_customer := CASE WHEN v_staff AND p_customer_user_id IS NOT NULL THEN p_customer_user_id ELSE v_uid END;\n  IF p_total_amount IS NULL OR p_total_amount <= 0 OR p_total_amount > 100000000 THEN\n    RETURN jsonb_build_object('success', false, 'error', 'invalid_amount'); END IF;\n  IF p_payment_amount IS NOT NULL AND (p_payment_amount < 0 OR p_payment_amount > p_total_amount) THEN\n    RETURN jsonb_build_object('success', false, 'error', 'invalid_amount'); END IF;\n  IF NOT v_staff AND p_payment_method = 'wallet' THEN\n    RETURN jsonb_build_object('success', false, 'error', 'wallet_payment_not_allowed'); END IF;\n  IF p_provider_org_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM public.orgs WHERE id = p_provider_org_id AND coalesce(is_active, true)) THEN\n    RETURN jsonb_build_object('success', false, 'error', 'org_not_found'); END IF;\n  RETURN public.create_order_atomic(p_order_type, v_customer, p_provider_org_id, p_start_at, p_end_at,\n    p_total_amount, p_currency, p_notes, p_metadata, p_items, p_participants, p_addresses,\n    p_payment_method, p_payment_amount);\nEND $function$\n"
+    },
+    {
+      "proname": "guard_customer_order_update",
+      "args": "",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.guard_customer_order_update()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid();\nBEGIN\n  IF v_uid IS NULL OR public.is_finance_staff(v_uid) THEN RETURN NEW; END IF;\n  IF EXISTS (SELECT 1 FROM public.org_members WHERE org_id = OLD.provider_org_id AND user_id = v_uid) THEN RETURN NEW; END IF;\n  IF OLD.customer_user_id = v_uid THEN\n    IF (to_jsonb(NEW) - 'status' - 'updated_at') IS DISTINCT FROM (to_jsonb(OLD) - 'status' - 'updated_at')\n       OR (NEW.status IS DISTINCT FROM OLD.status AND NEW.status::text <> 'cancelled') THEN\n      RAISE EXCEPTION 'customers can only cancel orders' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.guard_customer_order_update()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid();\nBEGIN\n  IF v_uid IS NULL OR public.is_finance_staff_e28_private(v_uid) THEN RETURN NEW; END IF;\n  IF EXISTS (SELECT 1 FROM public.org_members WHERE org_id = OLD.provider_org_id AND user_id = v_uid) THEN RETURN NEW; END IF;\n  IF OLD.customer_user_id = v_uid THEN\n    IF (to_jsonb(NEW) - 'status' - 'updated_at') IS DISTINCT FROM (to_jsonb(OLD) - 'status' - 'updated_at')\n       OR (NEW.status IS DISTINCT FROM OLD.status AND NEW.status::text <> 'cancelled') THEN\n      RAISE EXCEPTION 'customers can only cancel orders' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "proname": "has_elevated_access",
+      "args": "p_required_roles text[]",
+      "original_definition": "CREATE OR REPLACE FUNCTION public.has_elevated_access(p_required_roles text[] DEFAULT ARRAY['admin'::text, 'uno_team'::text])\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Elevated access is ONLY granted via user_roles table (admin-managed).\n  -- Org owner/admin roles are tenant-scoped and must NOT grant platform-wide privileges.\n  IF EXISTS (\n    SELECT 1 FROM public.user_roles\n    WHERE user_id = auth.uid()\n      AND role::text = ANY(p_required_roles)\n  ) THEN\n    RETURN TRUE;\n  END IF;\n\n  RETURN FALSE;\nEND;\n$function$\n",
+      "replacement_definition": "CREATE OR REPLACE FUNCTION public.has_elevated_access(p_required_roles text[] DEFAULT ARRAY['admin'::text])\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  -- Elevated access is ONLY granted via user_roles table (admin-managed).\n  -- Org owner/admin roles are tenant-scoped and must NOT grant platform-wide privileges.\n  IF EXISTS (\n    SELECT 1 FROM public.user_roles\n    WHERE user_id = auth.uid()\n      AND role::text = ANY(p_required_roles) AND role::text <> 'uno_team'\n  ) THEN\n    RETURN TRUE;\n  END IF;\n\n  RETURN FALSE;\nEND;\n$function$\n"
+    }
+  ]
+}

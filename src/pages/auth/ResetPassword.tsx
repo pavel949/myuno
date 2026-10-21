@@ -24,7 +24,7 @@ export default function ResetPassword() {
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
   const [linkStatus, setLinkStatus] = useState<LinkStatus>('checking');
   const [linkError, setLinkError] = useState<string | null>(null);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   // When user clicks link in email: Supabase redirects to /auth/reset-password#access_token=...&refresh_token=...&type=recovery
@@ -67,7 +67,7 @@ export default function ResetPassword() {
       passwordSchema.parse(password);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
+        newErrors.password = e.issues[0].message;
       }
     }
     
@@ -207,13 +207,14 @@ export default function ResetPassword() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label htmlFor="new-password" className="text-sm font-medium text-foreground">
                     {language === 'ru' ? 'Новый пароль' : 'New password'}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      id="new-password"
                       name="new-password"
                       autoComplete="new-password"
                       value={password}
@@ -228,6 +229,8 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')}
+                      aria-pressed={showPassword}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -242,13 +245,14 @@ export default function ResetPassword() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label htmlFor="confirm-password" className="text-sm font-medium text-foreground">
                     {language === 'ru' ? 'Подтвердите пароль' : 'Confirm password'}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      id="confirm-password"
                       name="confirm-password"
                       autoComplete="new-password"
                       value={confirmPassword}

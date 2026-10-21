@@ -1,9 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 
 export type DocumentType = 'passport' | 'driver_license' | 'insurance' | 'visa' | 'other';
+
+/** Max upload size for an identity document (10 MB). */
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+/** Accepted document file types — scans/photos of IDs and PDFs. */
+const ALLOWED_DOCUMENT_MIME = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'application/pdf',
+];
 
 export interface UserDocument {
   id: string;
@@ -35,7 +48,9 @@ export interface CreateDocumentData {
 
 export function useUserDocuments() {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const isRu = language === 'ru';
 
   const { data: documents, isLoading, error } = useQuery({
     queryKey: ['user-documents', user?.id],
@@ -56,8 +71,21 @@ export function useUserDocuments() {
 
   const uploadFile = async (file: File, documentType: DocumentType): Promise<string> => {
     if (!user?.id) throw new Error('Not authenticated');
+    if (!file || file.size === 0) {
+      throw new Error(isRu ? 'Файл пустой или не выбран' : 'File is empty or missing');
+    }
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      throw new Error(isRu ? 'Файл больше 10 МБ' : 'File exceeds 10 MB');
+    }
+    if (file.type && !ALLOWED_DOCUMENT_MIME.includes(file.type)) {
+      throw new Error(
+        isRu ? 'Поддерживаются только изображения и PDF' : 'Only image and PDF files are supported',
+      );
+    }
 
-    const fileExt = file.name.split('.').pop();
+    // Derive extension from the filename, falling back to the MIME subtype so we
+    // never produce a path ending in "undefined".
+    const fileExt = file.name.split('.').pop() || file.type.split('/').pop() || 'bin';
     const fileName = `${user.id}/${documentType}-${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
@@ -107,11 +135,12 @@ export function useUserDocuments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-documents', user?.id] });
-      toast.success('Документ сохранён');
+      toast.success(isRu ? 'Документ сохранён' : 'Document saved');
     },
     onError: (error) => {
-      console.error('Document save error:', error);
-      toast.error('Ошибка сохранения документа');
+      logger.error('Document save error:', error);
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || (isRu ? 'Ошибка сохранения документа' : 'Failed to save document'));
     },
   });
 
@@ -126,11 +155,11 @@ export function useUserDocuments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-documents', user?.id] });
-      toast.success('Документ удалён');
+      toast.success(isRu ? 'Документ удалён' : 'Document deleted');
     },
     onError: (error) => {
-      console.error('Document delete error:', error);
-      toast.error('Ошибка удаления');
+      logger.error('Document delete error:', error);
+      toast.error(isRu ? 'Ошибка удаления' : 'Failed to delete document');
     },
   });
 

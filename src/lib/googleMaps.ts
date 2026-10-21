@@ -1,7 +1,7 @@
 /**
  * Google Maps API key and config.
- * Key is loaded dynamically from system_config table,
- * with fallback to VITE_GOOGLE_MAPS_API_KEY env var.
+ * Browser Maps JS uses the Google Maps connector public browser key first,
+ * with legacy env/system_config values as fallback.
  */
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,15 +12,25 @@ export const DEFAULT_ZOOM = 12;
 let _resolvedKey: string | null = null;
 let _fetchPromise: Promise<string | null> | null = null;
 
+function getEnvGoogleMapsKey(): string | null {
+  const connectorKey = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY as string | undefined;
+  if (connectorKey?.trim()) return connectorKey.trim();
+
+  const legacyKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  if (legacyKey?.trim()) return legacyKey.trim();
+
+  return null;
+}
+
 /**
  * Synchronous getter – returns the key if already resolved.
  * If not yet resolved, tries env var once so first render can have the key without waiting for fetch.
  */
 export function getGoogleMapsKey(): string | null {
   if (_resolvedKey) return _resolvedKey;
-  const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-  if (envKey?.trim()) {
-    _resolvedKey = envKey.trim();
+  const envKey = getEnvGoogleMapsKey();
+  if (envKey) {
+    _resolvedKey = envKey;
     return _resolvedKey;
   }
   return null;
@@ -33,8 +43,8 @@ export async function fetchGoogleMapsKey(): Promise<string | null> {
   if (_resolvedKey) return _resolvedKey;
 
   // Check env var first
-  const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-  if (envKey && envKey.length > 0) {
+  const envKey = getEnvGoogleMapsKey();
+  if (envKey) {
     _resolvedKey = envKey;
     return _resolvedKey;
   }
@@ -76,9 +86,9 @@ export function hasGoogleMapsKey(): boolean {
 export function getGoogleMapsAvailabilitySummary(): { hasKey: boolean; source: 'env' | 'memory' | 'none' } {
   const key = getGoogleMapsKey();
   if (!key) return { hasKey: false, source: 'none' };
-  const fromEnv = Boolean((import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string)?.trim());
+  const fromEnv = Boolean(getEnvGoogleMapsKey());
   return { hasKey: true, source: fromEnv ? 'env' : 'memory' };
 }
 
 // Legacy export for backwards compat (will be null until fetched)
-export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+export const GOOGLE_MAPS_API_KEY = getEnvGoogleMapsKey() ?? undefined;

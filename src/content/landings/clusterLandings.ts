@@ -69,7 +69,7 @@ const A_ARRIVAL: ClusterLanding = {
       slug: 'airport-transfer',
       label: { ru: 'Трансфер из аэропорта', en: 'Airport transfer' },
       oneLiner: { ru: 'Седан 800 THB, минивэн 1 200 THB.', en: 'Sedan 800 THB, minivan 1,200 THB.' },
-      href: '/landing/airport-transfer',
+      href: '/transfer',
     },
     {
       slug: 'esim',
@@ -81,19 +81,19 @@ const A_ARRIVAL: ClusterLanding = {
       slug: 'cash-currency',
       label: { ru: 'Где снять и обменять THB', en: 'Where to withdraw and exchange THB' },
       oneLiner: { ru: 'Карта банкоматов SuperRich и комиссии за снятие.', en: 'SuperRich ATM map and withdrawal fees.' },
-      href: '/services/finance/cash',
+      href: '/services/finance/cash', availability: 'unavailable',
     },
     {
       slug: 'check-in-help',
       label: { ru: 'Помощь с заселением', en: 'Check-in support' },
       oneLiner: { ru: 'Контроль депозита, состояния номера, договора аренды.', en: 'Deposit, room condition and rental contract review.' },
-      href: '/concierge?topic=checkin',
+      href: '/concierge?topic=checkin', availability: 'unavailable',
     },
     {
       slug: 'area-guide',
       label: { ru: 'Гид по районам', en: 'Area guide' },
       oneLiner: { ru: 'Патонг, Камала, Сурин, Лагуна, Раваи, Чалонг — за 6 минут.', en: 'Patong, Kamala, Surin, Laguna, Rawai, Chalong in 6 minutes.' },
-      href: '/guide/areas',
+      href: '/area',
     },
     {
       slug: 'first-tour',
@@ -148,12 +148,12 @@ const A_ARRIVAL: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать трансфер', en: 'Book a transfer' },
-    href: '/landing/airport-transfer',
+    href: '/transport/airport-transfer',
     subtitle: { ru: 'Цена в THB, оплата в приложении.', en: 'Price in THB, paid in the app.' },
   },
   secondaryCta: {
     label: { ru: 'Открыть гид по районам', en: 'Open the area guide' },
-    href: '/guide/areas',
+    href: '/area',
   },
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P11', 'P14', 'P15', 'P16', 'P25'],
   seo: {
@@ -203,13 +203,13 @@ const D_INVESTMENT: ClusterLanding = {
       slug: 'area-comparison',
       label: { ru: 'Сравнение районов', en: 'Area comparison' },
       oneLiner: { ru: 'Цены, инфраструктура, динамика за 5 лет.', en: 'Prices, infrastructure, 5-year dynamics.' },
-      href: '/property/areas',
+      href: '/area',
     },
     {
       slug: 'clearview-rating',
       label: { ru: 'ClearView™ рейтинг', en: 'ClearView™ rating' },
       oneLiner: { ru: '8 категорий, AAA–CCC, отчёт за 5 рабочих дней.', en: '8 categories, AAA–CCC, 5-day report.' },
-      href: '/clearview',
+      href: '/property/clearview',
     },
     {
       slug: 'offplan-catalog',
@@ -233,7 +233,7 @@ const D_INVESTMENT: ClusterLanding = {
       slug: 'inspection',
       label: { ru: 'Независимый осмотр', en: 'Independent inspection' },
       oneLiner: { ru: 'Инженер на сдаче и приёмке, отчёт с фото.', en: 'Engineer at handover, photo report.' },
-      href: '/services/property/inspection',
+      href: '/services/property/inspection', availability: 'unavailable',
     },
   ],
   faq: [
@@ -282,7 +282,7 @@ const D_INVESTMENT: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать ClearView-отчёт', en: 'Order a ClearView report' },
-    href: '/clearview',
+    href: '/property/clearview',
     subtitle: { ru: 'Готов за 5 рабочих дней.', en: 'Ready in 5 working days.' },
   },
   secondaryCta: {
@@ -337,25 +337,25 @@ const F_OPERATIONS: ClusterLanding = {
       slug: 'pms',
       label: { ru: 'PMS подписка', en: 'PMS subscription' },
       oneLiner: { ru: 'От $25/мес за объект, синхронизация Booking/Airbnb/Agoda.', en: 'From $25/mo per unit, Booking/Airbnb/Agoda sync.' },
-      href: '/owner/pms',
+      href: '/owner/pms', availability: 'unavailable',
     },
     {
       slug: 'rental-management',
       label: { ru: 'Управление сдачей', en: 'Rental management' },
       oneLiner: { ru: 'Комиссия 25–30%, оплата только с фактического дохода.', en: '25–30% fee, charged only on realised revenue.' },
-      href: '/owner/rental',
+      href: '/owner/rental', availability: 'unavailable',
     },
     {
       slug: 'maintenance',
       label: { ru: 'Эксплуатация и ТО', en: 'Maintenance & upkeep' },
       oneLiner: { ru: 'Чек-листы по сезонам, прозрачная закупка запчастей.', en: 'Seasonal checklists, transparent parts procurement.' },
-      href: '/owner/maintenance',
+      href: '/owner/maintenance', availability: 'unavailable',
     },
     {
       slug: 'monthly-report',
       label: { ru: 'Ежемесячный отчёт', en: 'Monthly statement' },
       oneLiner: { ru: 'Доходы, расходы, остаток к выплате — одной таблицей.', en: 'Income, costs, payout balance — in one statement.' },
-      href: '/owner/reports',
+      href: '/owner/reports', availability: 'unavailable',
     },
     {
       slug: 'tax-filing',
@@ -367,7 +367,7 @@ const F_OPERATIONS: ClusterLanding = {
       slug: 'insurance',
       label: { ru: 'Страхование объекта', en: 'Property insurance' },
       oneLiner: { ru: 'От 0.15% от стоимости в год, выплата в THB.', en: 'From 0.15% of value per year, payouts in THB.' },
-      href: '/services/finance/insurance',
+      href: '/services/finance/insurance', availability: 'unavailable',
     },
   ],
   faq: [
@@ -416,12 +416,12 @@ const F_OPERATIONS: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Подключить PMS', en: 'Activate PMS' },
-    href: '/owner/pms',
+    href: '/owner/pms', availability: 'unavailable',
     subtitle: { ru: 'От $25 в месяц за объект.', en: 'From $25/month per unit.' },
   },
   secondaryCta: {
     label: { ru: 'Заказать аудит объекта', en: 'Request a property audit' },
-    href: '/owner/audit',
+    href: '/owner/audit', availability: 'unavailable',
   },
   relatedPersonas: ['P8', 'P9', 'P10'],
   seo: {
@@ -470,7 +470,7 @@ const G_COMPLIANCE: ClusterLanding = {
     { slug: 'tax-advisor', label: { ru: 'Tax Advisor', en: 'Tax Advisor' }, oneLiner: { ru: 'Расчёт обязательств: 180-day rule, foreign income.', en: '180-day rule and foreign-income tax planning.' }, href: '/tax' },
     { slug: 'rental-tax', label: { ru: 'Налог с аренды', en: 'Rental tax' }, oneLiner: { ru: '5% withholding + House&Land 12.5%, что декларировать.', en: '5% WHT + 12.5% House&Land, what to declare.' }, href: '/legal' },
     { slug: 'contract-analysis', label: { ru: 'Анализ контракта AI', en: 'AI contract review' }, oneLiner: { ru: 'Проверка sale/lease/PMS-договора за 24 часа.', en: 'Sale, lease and PMS contract review in 24 hours.' }, href: '/legal/contract-analysis' },
-    { slug: 'due-diligence', label: { ru: 'Due Diligence', en: 'Due diligence' }, oneLiner: { ru: 'Title deed, encumbrances, land use, EIA.', en: 'Title deed, encumbrances, land use, EIA.' }, href: '/property/due-diligence' },
+    { slug: 'due-diligence', label: { ru: 'Due Diligence', en: 'Due diligence' }, oneLiner: { ru: 'Title deed, encumbrances, land use, EIA.', en: 'Title deed, encumbrances, land use, EIA.' }, href: '/property/due-diligence', availability: 'unavailable' },
     { slug: 'thai-company', label: { ru: 'Тайская компания', en: 'Thai company setup' }, oneLiner: { ru: 'Регистрация LLC для владения землёй, structure 51/49.', en: 'LLC setup for land ownership, 51/49 structure.' }, href: '/legal/company' },
     { slug: 'visa-quiz', label: { ru: 'Подбор визы', en: 'Visa picker' }, oneLiner: { ru: 'DTV, LTR, Elite, Retirement — что подходит вам.', en: 'DTV, LTR, Elite, Retirement — pick yours.' }, href: '/visa/quiz' },
   ],
@@ -529,11 +529,11 @@ const H_EMERGENCY: ClusterLanding = {
     { ru: 'Получить помощь с эвакуацией питомца или ребёнка.', en: 'Arrange evacuation help for a pet or child.' },
   ],
   services: [
-    { slug: 'sos-button', label: { ru: 'SOS-чат myUNO', en: 'myUNO SOS chat' }, oneLiner: { ru: 'Ответ дежурного за 10 минут, 24/7.', en: 'Duty agent reply in 10 minutes, 24/7.' }, href: '/concierge?topic=emergency' },
-    { slug: 'hospitals', label: { ru: 'Карта клиник', en: 'Hospital map' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — с прямыми телефонами.', en: 'Bangkok Hospital, BIH, Mission, Vachira — direct phone numbers.' }, href: '/services/health/hospitals' },
-    { slug: 'police-help', label: { ru: 'Помощь с полицией', en: 'Police support' }, oneLiner: { ru: 'Туристическая полиция 1155, перевод и сопровождение.', en: 'Tourist police 1155, translation and escort.' }, href: '/concierge?topic=police' },
-    { slug: 'document-recovery', label: { ru: 'Восстановление документов', en: 'Document recovery' }, oneLiner: { ru: 'Паспорт, виза, права — пошаговый чек-лист.', en: 'Passport, visa, licence — step-by-step checklist.' }, href: '/legal/lost-documents' },
-    { slug: 'insurance-help', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Гарантийное письмо в клинику, работа с ассистансом.', en: 'Hospital guarantee letter, assistance coordination.' }, href: '/concierge?topic=insurance' },
+    { slug: 'sos-button', label: { ru: 'SOS-чат myUNO', en: 'myUNO SOS chat' }, oneLiner: { ru: 'Ответ дежурного за 10 минут, 24/7.', en: 'Duty agent reply in 10 minutes, 24/7.' }, href: '/concierge?topic=emergency', availability: 'unavailable' },
+    { slug: 'hospitals', label: { ru: 'Карта клиник', en: 'Hospital map' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — с прямыми телефонами.', en: 'Bangkok Hospital, BIH, Mission, Vachira — direct phone numbers.' }, href: '/services/health/hospitals', availability: 'unavailable' },
+    { slug: 'police-help', label: { ru: 'Помощь с полицией', en: 'Police support' }, oneLiner: { ru: 'Туристическая полиция 1155, перевод и сопровождение.', en: 'Tourist police 1155, translation and escort.' }, href: '/concierge?topic=police', availability: 'unavailable' },
+    { slug: 'document-recovery', label: { ru: 'Восстановление документов', en: 'Document recovery' }, oneLiner: { ru: 'Паспорт, виза, права — пошаговый чек-лист.', en: 'Passport, visa, licence — step-by-step checklist.' }, href: '/legal/lost-documents', availability: 'unavailable' },
+    { slug: 'insurance-help', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Гарантийное письмо в клинику, работа с ассистансом.', en: 'Hospital guarantee letter, assistance coordination.' }, href: '/concierge?topic=insurance', availability: 'unavailable' },
     { slug: 'urgent-lawyer', label: { ru: 'Срочный юрист', en: 'On-call lawyer' }, oneLiner: { ru: 'Задержание, штраф, ДТП — выезд в течение 2 часов.', en: 'Detention, fines, accidents — on-site within 2 hours.' }, href: '/legal' },
   ],
   faq: [
@@ -546,12 +546,12 @@ const H_EMERGENCY: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Открыть SOS-чат', en: 'Open SOS chat' },
-    href: '/concierge?topic=emergency',
+    href: '/concierge?topic=emergency', availability: 'unavailable',
     subtitle: { ru: 'Дежурный отвечает за 10 минут.', en: 'Duty agent replies in 10 minutes.' },
   },
   secondaryCta: {
     label: { ru: 'Карта клиник', en: 'Hospital map' },
-    href: '/services/health/hospitals',
+    href: '/services/health/hospitals', availability: 'unavailable',
   },
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25'],
   seo: {
@@ -591,12 +591,12 @@ const B_EXTENSION: ClusterLanding = {
     { ru: 'Сделать TM30 / TM47 правильно с первой попытки.', en: 'File TM30 / TM47 correctly the first time.' },
   ],
   services: [
-    { slug: 'visa-extension', label: { ru: 'Продление визы', en: 'Visa extension' }, oneLiner: { ru: '30 дней через иммиграцию Пхукета, ฿1 900.', en: '30-day extension at Phuket immigration, ฿1,900.' }, href: '/legal/visa-extension' },
-    { slug: 'visa-run', label: { ru: 'Visa Run сервис', en: 'Visa Run service' }, oneLiner: { ru: 'Малайзия / Камбоджа за 1 день, от ฿4 500.', en: 'Malaysia / Cambodia in 1 day, from ฿4,500.' }, href: '/legal/visa-run' },
+    { slug: 'visa-extension', label: { ru: 'Продление визы', en: 'Visa extension' }, oneLiner: { ru: '30 дней через иммиграцию Пхукета, ฿1 900.', en: '30-day extension at Phuket immigration, ฿1,900.' }, href: '/legal/visa-extension', availability: 'unavailable' },
+    { slug: 'visa-run', label: { ru: 'Visa Run сервис', en: 'Visa Run service' }, oneLiner: { ru: 'Малайзия / Камбоджа за 1 день, от ฿4 500.', en: 'Malaysia / Cambodia in 1 day, from ฿4,500.' }, href: '/legal/visa-run', availability: 'unavailable' },
     { slug: 'visa-transition', label: { ru: 'Переход на DTV/Education', en: 'Switch to DTV / Education' }, oneLiner: { ru: 'Подбор и подача документов под ваш профиль.', en: 'Picking and filing the right visa for your profile.' }, href: '/visa/quiz' },
     { slug: 'long-stay-rental', label: { ru: 'Long-stay аренда', en: 'Long-stay rentals' }, oneLiner: { ru: 'Condo от 1 месяца, фикс цена, без депозита под застройщика.', en: 'Condos from 1 month, fixed price, no developer deposit.' }, href: '/property?staytype=long' },
-    { slug: 'tm30-tm47', label: { ru: 'TM30 / TM47 сопровождение', en: 'TM30 / TM47 filing' }, oneLiner: { ru: 'Регистрация по адресу и 90-day report.', en: 'Address registration and 90-day report.' }, href: '/legal/tm30' },
-    { slug: 'overstay-help', label: { ru: 'Помощь при overstay', en: 'Overstay support' }, oneLiner: { ru: 'Сопровождение в иммиграцию, минимизация штрафа и blacklist.', en: 'Immigration escort, fine and blacklist minimisation.' }, href: '/concierge?topic=overstay' },
+    { slug: 'tm30-tm47', label: { ru: 'TM30 / TM47 сопровождение', en: 'TM30 / TM47 filing' }, oneLiner: { ru: 'Регистрация по адресу и 90-day report.', en: 'Address registration and 90-day report.' }, href: '/legal/tm30', availability: 'unavailable' },
+    { slug: 'overstay-help', label: { ru: 'Помощь при overstay', en: 'Overstay support' }, oneLiner: { ru: 'Сопровождение в иммиграцию, минимизация штрафа и blacklist.', en: 'Immigration escort, fine and blacklist minimisation.' }, href: '/concierge?topic=overstay', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Как продлить туристическую визу?', en: 'How do I extend a tourist visa?' }, a: { ru: 'Иммиграция Пхукета (Phuket Immigration Office, Soi Saen Sabai) даёт +30 дней. Госпошлина ฿1 900, нужны: паспорт, фото 4×6, копия штампа въезда, TM30 от арендодателя.', en: 'Phuket Immigration Office (Soi Saen Sabai) grants +30 days. Fee ฿1,900. Required: passport, 4×6 photo, entry-stamp copy, TM30 from your landlord.' } },
@@ -613,7 +613,7 @@ const B_EXTENSION: ClusterLanding = {
   },
   secondaryCta: {
     label: { ru: 'Заказать visa run', en: 'Book a visa run' },
-    href: '/legal/visa-run',
+    href: '/legal/visa-run', availability: 'unavailable',
   },
   relatedPersonas: ['P3', 'P4', 'P5', 'P6', 'P7', 'P25'],
   seo: {
@@ -653,12 +653,12 @@ const C_SETTLEMENT: ClusterLanding = {
     { ru: 'Оформить международную медицинскую страховку.', en: 'Take out international health insurance.' },
   ],
   services: [
-    { slug: 'bank-account', label: { ru: 'Открытие банковского счёта', en: 'Bank account opening' }, oneLiner: { ru: 'Bangkok Bank, Kasikorn, SCB — сопровождение от ฿15 000.', en: 'Bangkok Bank, Kasikorn, SCB — assistance from ฿15,000.' }, href: '/services/finance/bank-account' },
-    { slug: 'thai-license', label: { ru: 'Тайские права', en: 'Thai driving licence' }, oneLiner: { ru: 'Сдача в DLT, перевод документов, медсправка.', en: 'DLT exam, document translation, medical certificate.' }, href: '/legal/driving-license' },
+    { slug: 'bank-account', label: { ru: 'Открытие банковского счёта', en: 'Bank account opening' }, oneLiner: { ru: 'Bangkok Bank, Kasikorn, SCB — сопровождение от ฿15 000.', en: 'Bangkok Bank, Kasikorn, SCB — assistance from ฿15,000.' }, href: '/services/finance/bank-account', availability: 'unavailable' },
+    { slug: 'thai-license', label: { ru: 'Тайские права', en: 'Thai driving licence' }, oneLiner: { ru: 'Сдача в DLT, перевод документов, медсправка.', en: 'DLT exam, document translation, medical certificate.' }, href: '/legal/driving-license', availability: 'unavailable' },
     { slug: 'school-finder-c', label: { ru: 'School Finder', en: 'School Finder' }, oneLiner: { ru: '15 школ, фильтр по программе и району.', en: '15 schools filtered by curriculum and area.' }, href: '/school-finder' },
-    { slug: 'car-rent-buy', label: { ru: 'Аренда и покупка авто', en: 'Car rent or buy' }, oneLiner: { ru: 'От ฿15 000/мес аренда, проверка VIN при покупке.', en: 'From ฿15,000/mo rental, VIN check on purchase.' }, href: '/services/transport' },
-    { slug: 'home-internet', label: { ru: 'Подключение интернета', en: 'Home internet' }, oneLiner: { ru: 'AIS / 3BB / True 500 Mbps fiber, ฿700–1 200/мес.', en: 'AIS / 3BB / True 500 Mbps fibre, ฿700–1,200/mo.' }, href: '/services/utilities/internet' },
-    { slug: 'health-insurance', label: { ru: 'Медицинская страховка', en: 'Health insurance' }, oneLiner: { ru: 'Cigna, April, Pacific Cross — расчёт под бюджет.', en: 'Cigna, April, Pacific Cross — quoted to budget.' }, href: '/services/insurance' },
+    { slug: 'car-rent-buy', label: { ru: 'Аренда и покупка авто', en: 'Car rent or buy' }, oneLiner: { ru: 'От ฿15 000/мес аренда, проверка VIN при покупке.', en: 'From ฿15,000/mo rental, VIN check on purchase.' }, href: '/services/transport', availability: 'unavailable' },
+    { slug: 'home-internet', label: { ru: 'Подключение интернета', en: 'Home internet' }, oneLiner: { ru: 'AIS / 3BB / True 500 Mbps fiber, ฿700–1 200/мес.', en: 'AIS / 3BB / True 500 Mbps fibre, ฿700–1,200/mo.' }, href: '/services/utilities/internet', availability: 'unavailable' },
+    { slug: 'health-insurance', label: { ru: 'Медицинская страховка', en: 'Health insurance' }, oneLiner: { ru: 'Cigna, April, Pacific Cross — расчёт под бюджет.', en: 'Cigna, April, Pacific Cross — quoted to budget.' }, href: '/services/insurance', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Можно ли открыть тайский счёт на туристической визе?', en: 'Can I open a Thai account on a tourist visa?' }, a: { ru: 'Да, в Bangkok Bank и Kasikorn — через сопровождение и условия минимального депозита от ฿20 000. Без сопровождения чаще всего отказывают.', en: 'Yes, at Bangkok Bank and Kasikorn — with assistance and a min deposit of ฿20,000. Walking in without help is usually rejected.' } },
@@ -715,11 +715,11 @@ const E_TRANSACTION: ClusterLanding = {
     { ru: 'Продать актив через 3–5 лет с минимальным WHT.', en: 'Resell in 3–5 years with minimal withholding tax.' },
   ],
   services: [
-    { slug: 'reservation', label: { ru: 'Reservation agreement', en: 'Reservation agreement' }, oneLiner: { ru: 'Шаблон договора и проверка пунктов о возврате.', en: 'Contract template and refund-clause review.' }, href: '/property/reservation' },
-    { slug: 'due-diligence-e', label: { ru: 'Due Diligence', en: 'Due diligence' }, oneLiner: { ru: 'Чанот, обременения, EIA, корпоративная структура продавца.', en: 'Chanote, encumbrances, EIA, seller corporate structure.' }, href: '/property/due-diligence' },
+    { slug: 'reservation', label: { ru: 'Reservation agreement', en: 'Reservation agreement' }, oneLiner: { ru: 'Шаблон договора и проверка пунктов о возврате.', en: 'Contract template and refund-clause review.' }, href: '/property/reservation', availability: 'unavailable' },
+    { slug: 'due-diligence-e', label: { ru: 'Due Diligence', en: 'Due diligence' }, oneLiner: { ru: 'Чанот, обременения, EIA, корпоративная структура продавца.', en: 'Chanote, encumbrances, EIA, seller corporate structure.' }, href: '/property/due-diligence', availability: 'unavailable' },
     { slug: 'fet-transfer', label: { ru: 'Перевод средств с FET', en: 'FX transfer with FET' }, oneLiner: { ru: 'Foreign Exchange Transaction для регистрации freehold.', en: 'Foreign Exchange Transaction for freehold registration.' }, href: '/services/finance/fet' },
-    { slug: 'spa-signing', label: { ru: 'SPA и Land Office', en: 'SPA & Land Office' }, oneLiner: { ru: 'Подписание, регистрация, получение чанота за 1 день.', en: 'Signing, registration, chanote handover in one day.' }, href: '/legal/spa' },
-    { slug: 'tax-split', label: { ru: 'Расчёт налогов сделки', en: 'Transaction tax calculator' }, oneLiner: { ru: 'Transfer 2% + SBT 3.3% + WHT — кто платит что.', en: 'Transfer 2% + SBT 3.3% + WHT — who pays what.' }, href: '/property/tax-calculator' },
+    { slug: 'spa-signing', label: { ru: 'SPA и Land Office', en: 'SPA & Land Office' }, oneLiner: { ru: 'Подписание, регистрация, получение чанота за 1 день.', en: 'Signing, registration, chanote handover in one day.' }, href: '/legal/spa', availability: 'unavailable' },
+    { slug: 'tax-split', label: { ru: 'Расчёт налогов сделки', en: 'Transaction tax calculator' }, oneLiner: { ru: 'Transfer 2% + SBT 3.3% + WHT — кто платит что.', en: 'Transfer 2% + SBT 3.3% + WHT — who pays what.' }, href: '/property/tax-calculator', availability: 'unavailable' },
     { slug: 'resale', label: { ru: 'Продажа актива', en: 'Selling your asset' }, oneLiner: { ru: 'Размещение в каталог resale, экспозиция, документы.', en: 'Listing in the resale catalogue, exposure, paperwork.' }, href: '/property/resale' },
   ],
   faq: [
@@ -732,12 +732,12 @@ const E_TRANSACTION: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать Due Diligence', en: 'Order due diligence' },
-    href: '/property/due-diligence',
+    href: '/property/due-diligence', availability: 'unavailable',
     subtitle: { ru: 'Отчёт за 7 рабочих дней.', en: 'Report in 7 working days.' },
   },
   secondaryCta: {
     label: { ru: 'Калькулятор налогов сделки', en: 'Transaction tax calculator' },
-    href: '/property/tax-calculator',
+    href: '/property/tax-calculator', availability: 'unavailable',
   },
   relatedPersonas: ['P2', 'P8', 'P9', 'P11', 'P12'],
   seo: {
@@ -777,12 +777,12 @@ const I_LIFESTYLE: ClusterLanding = {
     { ru: 'Заказать опыт под повод: предложение, юбилей, корпоратив.', en: 'Curate an experience for a proposal, anniversary or corporate event.' },
   ],
   services: [
-    { slug: 'restaurants', label: { ru: 'Рестораны и брони', en: 'Restaurants & reservations' }, oneLiner: { ru: 'PRU, Suay, Mia, Black Ginger — стол к нужному часу.', en: 'PRU, Suay, Mia, Black Ginger — table at the right time.' }, href: '/dining' },
+    { slug: 'restaurants', label: { ru: 'Рестораны и брони', en: 'Restaurants & reservations' }, oneLiner: { ru: 'PRU, Suay, Mia, Black Ginger — стол к нужному часу.', en: 'PRU, Suay, Mia, Black Ginger — table at the right time.' }, href: '/restaurants' },
     { slug: 'yacht-charter', label: { ru: 'Аренда яхт', en: 'Yacht charter' }, oneLiner: { ru: 'Катамараны, моторные яхты, sunset cruise — от ฿18 000.', en: 'Catamarans, motor yachts, sunset cruise — from ฿18,000.' }, href: '/yachts' },
-    { slug: 'wellness', label: { ru: 'Wellness и spa', en: 'Wellness & spa' }, oneLiner: { ru: 'Six Senses, Anantara, COMO Shambhala — программы детокса.', en: 'Six Senses, Anantara, COMO Shambhala — detox programs.' }, href: '/wellness' },
-    { slug: 'fight-camps', label: { ru: 'Muay Thai и fight camps', en: 'Muay Thai & fight camps' }, oneLiner: { ru: 'Tiger, Sinbi, Phuket Top Team — пробное занятие.', en: 'Tiger, Sinbi, Phuket Top Team — trial session.' }, href: '/fitness/muay-thai' },
+    { slug: 'wellness', label: { ru: 'Wellness и spa', en: 'Wellness & spa' }, oneLiner: { ru: 'Six Senses, Anantara, COMO Shambhala — программы детокса.', en: 'Six Senses, Anantara, COMO Shambhala — detox programs.' }, href: '/wellness', availability: 'unavailable' },
+    { slug: 'fight-camps', label: { ru: 'Muay Thai и fight camps', en: 'Muay Thai & fight camps' }, oneLiner: { ru: 'Tiger, Sinbi, Phuket Top Team — пробное занятие.', en: 'Tiger, Sinbi, Phuket Top Team — trial session.' }, href: '/fitness/muay-thai', availability: 'unavailable' },
     { slug: 'events', label: { ru: 'События и фестивали', en: 'Events & festivals' }, oneLiner: { ru: 'Афиша концертов, маркетов, гонок и закрытых вечеринок.', en: 'Concerts, markets, races and private parties listings.' }, href: '/events' },
-    { slug: 'private-experiences', label: { ru: 'Приватные опыты', en: 'Private experiences' }, oneLiner: { ru: 'Шеф на дом, фотосессия, helicopter tour, квест.', en: 'Private chef, photoshoot, helicopter tour, custom quest.' }, href: '/experiences/private' },
+    { slug: 'private-experiences', label: { ru: 'Приватные опыты', en: 'Private experiences' }, oneLiner: { ru: 'Шеф на дом, фотосессия, helicopter tour, квест.', en: 'Private chef, photoshoot, helicopter tour, custom quest.' }, href: '/experiences/private', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Какие рестораны лучше бронировать заранее?', en: 'Which restaurants need advance booking?' }, a: { ru: 'PRU (Michelin) — за 2–4 недели. Suay, Mia, Black Ginger — за 3–7 дней. В high season (декабрь–февраль) — заранее всё.', en: 'PRU (Michelin) — 2–4 weeks ahead. Suay, Mia, Black Ginger — 3–7 days. In high season (Dec–Feb) book everything in advance.' } },
@@ -843,7 +843,7 @@ const J_EXIT: ClusterLanding = {
     { ru: 'Снять иммигрантский статус и закрыть TM30.', en: 'Cancel immigration status and close TM30.' },
   ],
   services: [
-    { slug: 'asset-valuation', label: { ru: 'Оценка актива', en: 'Asset valuation' }, oneLiner: { ru: 'Comparative market analysis за 48 часов.', en: 'Comparative market analysis in 48 hours.' }, href: '/property/sell' },
+    { slug: 'asset-valuation', label: { ru: 'Оценка актива', en: 'Asset valuation' }, oneLiner: { ru: 'Comparative market analysis за 48 часов.', en: 'Comparative market analysis in 48 hours.' }, href: '/property/sell', availability: 'unavailable' },
     { slug: 'sale-listing', label: { ru: 'Resale-листинг', en: 'Resale listing' }, oneLiner: { ru: 'Каталог + рассылка по 1 200 инвесторам.', en: 'Catalog + outreach to 1,200 investors.' }, href: '/property/resale' },
     { slug: 'company-closure', label: { ru: 'Закрытие компании', en: 'Company closure' }, oneLiner: { ru: 'Юристы по тайскому корпоративному праву.', en: 'Thai corporate lawyers.' }, href: '/cluster/compliance' },
     { slug: 'repatriation', label: { ru: 'Репатриация капитала', en: 'Capital repatriation' }, oneLiner: { ru: 'THB → EUR/USD/AED через лицензированных брокеров.', en: 'THB → EUR/USD/AED via licensed brokers.' }, href: '/contact' },
@@ -855,7 +855,7 @@ const J_EXIT: ClusterLanding = {
     { q: { ru: 'Можно ли вывести деньги в Россию?', en: 'Can I wire funds to Russia?' }, a: { ru: 'Прямой SWIFT в РФ ограничен. Используем транзит через ОАЭ/Казахстан или Wise/Revolut в долларах.', en: 'Direct SWIFT to Russia is restricted. We route via UAE/Kazakhstan or Wise/Revolut in USD.' } },
     { q: { ru: 'Нужно ли закрывать тайскую компанию после продажи?', en: 'Do I need to close my Thai company after the sale?' }, a: { ru: 'Если компания держала виллу — да, ликвидация занимает 6–9 месяцев. Без закрытия — ежегодные отчёты и налоги продолжают начисляться.', en: 'If the company held the villa — yes, liquidation takes 6–9 months. Without it, annual filings and taxes keep accruing.' } },
   ],
-  primaryCta: { label: { ru: 'Оценить актив', en: 'Get asset valuation' }, href: '/property/sell' },
+  primaryCta: { label: { ru: 'Оценить актив', en: 'Get asset valuation' }, href: '/property/sell', availability: 'unavailable' },
   secondaryCta: { label: { ru: 'Связаться с advisor', en: 'Talk to an advisor' }, href: '/contact' },
   relatedPersonas: ['P8', 'P9', 'P10', 'P20'],
   seo: {

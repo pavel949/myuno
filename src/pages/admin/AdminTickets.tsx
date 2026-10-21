@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -26,12 +26,17 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useAdminTickets } from '@/hooks/useAdminTickets';
-import type { TicketStatus, TicketPriority } from '@/hooks/useTickets';
+import type { TicketPriority } from '@/hooks/useTickets';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
+import type { TicketQueueStatus } from '@/lib/adminDashboardQueues';
 
 export default function AdminTickets() {
   const navigate = useNavigate();
-  const { tickets, stats, isLoading, filters, setFilters, refetch } = useAdminTickets();
-  const [searchInput, setSearchInput] = useState('');
+  const { tickets, total, page, pageSize, setPage, stats, isLoading, error, statsError, statsLoading, filters, setFilters, refetch } = useAdminTickets();
+  const { language } = useLanguage();
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+  useEffect(() => { setSearchInput(filters.search || ''); }, [filters.search]);
 
   const handleSearch = () => {
     setFilters(prev => ({ ...prev, search: searchInput }));
@@ -56,7 +61,12 @@ export default function AdminTickets() {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {(error || statsError) && <div role="alert" className="border border-destructive p-4 mb-4">
+          {pickLang(language, { en: 'Some support data could not be loaded. Failed counts and results are unavailable.', ru: 'Не удалось загрузить часть данных поддержки. Соответствующие счётчики и результаты недоступны.', th: 'โหลดข้อมูลฝ่ายสนับสนุนบางส่วนไม่สำเร็จ จำนวนและผลลัพธ์ที่มีข้อผิดพลาดไม่พร้อมใช้งาน' })}
+          <Button variant="outline" onClick={refetch}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+        </div>}
+        {statsLoading && <p role="status">{pickLang(language, {en:'Loading support counts…',ru:'Загрузка счётчиков поддержки…',th:'กำลังโหลดจำนวนรายการฝ่ายสนับสนุน…'})}</p>}
+        {!statsError && !statsLoading && <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -112,7 +122,7 @@ export default function AdminTickets() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div>}
 
         {/* Filters */}
         <Card className="mb-4">
@@ -135,7 +145,7 @@ export default function AdminTickets() {
                 value={filters.status || 'all'}
                 onValueChange={(value) => setFilters(prev => ({ 
                   ...prev, 
-                  status: value as TicketStatus | 'all' 
+                  status: value as TicketQueueStatus
                 }))}
               >
                 <SelectTrigger className="w-[140px]">
@@ -143,6 +153,7 @@ export default function AdminTickets() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Все статусы</SelectItem>
+                  <SelectItem value="active">{pickLang(language, { en: 'Open + in progress', ru: 'Открыты + в работе', th: 'เปิดและกำลังดำเนินการ' })}</SelectItem>
                   <SelectItem value="open">Открытые</SelectItem>
                   <SelectItem value="in_progress">В работе</SelectItem>
                   <SelectItem value="waiting_response">Ожидает ответа</SelectItem>
@@ -174,12 +185,17 @@ export default function AdminTickets() {
                 <Filter className="w-4 h-4 mr-2" />
                 Применить
               </Button>
+              <Button variant="outline" onClick={() => setFilters({ status: 'all', priority: 'all' })}>{pickLang(language, { en: 'Reset filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })}</Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Tickets Table */}
-        <Card>
+        {!error && <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+          <p role="status">{pickLang(language, { en: 'Matching tickets', ru: 'Подходящие обращения', th: 'คำขอที่ตรงกัน' })}: {total ?? pickLang(language, { en: 'Unavailable', ru: 'Недоступно', th: 'ไม่พร้อมใช้งาน' })}. {pickLang(language, { en: 'Page', ru: 'Страница', th: 'หน้า' })} {page + 1}</p>
+          <div className="flex gap-2"><Button variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>{pickLang(language, { en: 'Previous', ru: 'Назад', th: 'ก่อนหน้า' })}</Button><Button variant="outline" disabled={total === null || (page + 1) * pageSize >= total} onClick={() => setPage(page + 1)}>{pickLang(language, { en: 'Next', ru: 'Далее', th: 'ถัดไป' })}</Button></div>
+        </div>}
+        {!error && <Card>
           <CardContent className="p-0 overflow-x-auto">
             <Table className="min-w-[820px]">
               <TableHeader>
@@ -246,7 +262,7 @@ export default function AdminTickets() {
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
+        </Card>}
       </PageContainer>
     </>
   );

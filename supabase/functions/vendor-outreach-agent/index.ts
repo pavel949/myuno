@@ -10,11 +10,9 @@
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from "../_shared/authz.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface OutreachContact {
   id: string;
@@ -295,11 +293,17 @@ async function processOutreach(
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Real outbound messages require an existing trusted internal caller or a
+    // server-resolved platform admin, before any service-role data access.
+    const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);
+    if (gate instanceof Response) return gate;
+
     const supabase = createServiceClient();
     const body = await req.json().catch(() => ({}));
     const { action = "initial", limit = 10 } = body;
@@ -307,15 +311,33 @@ Deno.serve(async (req) => {
     let contacts: OutreachContact[] = [];
     let sequence = 1;
 
+    // crm_contacts is shared across every MC's private book. Vendor outreach is a
+    // platform activity, so scope it to the house MC — never message a tenant's
+    // own "vendor"-typed contacts. Runs with the service role (bypasses RLS), so
+    // this filter is the only thing enforcing the boundary.
+    const { data: houseCompany, error: houseCompanyError } = await supabase
+      .from("management_companies")
+      .select("id")
+      .eq("slug", "myuno-house")
+      .maybeSingle();
+    const houseCompanyId = houseCompany?.id;
+    if (houseCompanyError || typeof houseCompanyId !== "string" || !houseCompanyId.trim()) {
+      return new Response(
+        JSON.stringify({ success: false, error: "House company scope unavailable" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (action === "initial") {
       // Get contacts that haven't been contacted yet
-      const { data } = await supabase
+      const q = supabase
         .from("crm_contacts")
         .select("id, first_name, last_name, company_name, email, phone, category, outreach_status, outreach_sent_at")
         .eq("contact_type", "vendor")
         .eq("outreach_status", "not_contacted")
-        .not("email", "is", null)
-        .limit(limit);
+        .eq("company_id", houseCompanyId)
+        .not("email", "is", null);
+      const { data } = await q.limit(limit);
 
       contacts = (data || []) as OutreachContact[];
       sequence = 1;
@@ -330,6 +352,7 @@ Deno.serve(async (req) => {
             id, first_name, last_name, company_name, email, phone, category, outreach_status, outreach_sent_at
           )
         `)
+        .eq("crm_contacts.company_id", houseCompanyId)
         .lte("next_followup_at", new Date().toISOString())
         .in("status", ["sent", "delivered", "opened"])
         .lt("followup_sequence", 3)

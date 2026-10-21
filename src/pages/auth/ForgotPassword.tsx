@@ -28,7 +28,7 @@ export default function ForgotPassword() {
       emailSchema.parse(email);
     } catch (e) {
       if (e instanceof z.ZodError) {
-        setError(e.errors[0].message);
+        setError(e.issues[0].message);
         return;
       }
     }

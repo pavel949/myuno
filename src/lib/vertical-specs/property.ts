@@ -7,6 +7,20 @@
  * this spec is for marketplace listings, not PMS sync.
  */
 import type { VerticalSpec, FieldOption } from './types';
+import { PROPERTY_TYPES as CANONICAL_PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
+import { ALL_LISTING_AMENITY_UI_ITEMS } from '@/lib/propertyAttributeRegistry';
+
+/** Map a canonical `{ id, labelEn, labelRu }` taxonomy row into the spec's FieldOption. */
+const toFieldOption = (t: {
+  id: string;
+  labelEn: string;
+  labelRu: string;
+  icon?: string;
+}): FieldOption => ({
+  value: t.id,
+  label: { en: t.labelEn, ru: t.labelRu },
+  icon: t.icon,
+});
 
 const DEAL_TYPES: FieldOption[] = [
   { value: 'rent_short', label: { en: 'Short rent (daily)', ru: 'Краткосрочно (посуточно)' } },
@@ -14,35 +28,9 @@ const DEAL_TYPES: FieldOption[] = [
   { value: 'sale', label: { en: 'For sale', ru: 'Продажа' } },
 ];
 
-const PROPERTY_TYPES: FieldOption[] = [
-  { value: 'apartment', label: { en: 'Apartment', ru: 'Апартаменты' } },
-  { value: 'condo', label: { en: 'Condominium', ru: 'Кондоминиум' } },
-  { value: 'villa', label: { en: 'Villa', ru: 'Вилла' } },
-  { value: 'townhouse', label: { en: 'Townhouse', ru: 'Таунхаус' } },
-  { value: 'studio', label: { en: 'Studio', ru: 'Студия' } },
-  { value: 'penthouse', label: { en: 'Penthouse', ru: 'Пентхаус' } },
-  { value: 'land', label: { en: 'Land plot', ru: 'Участок' } },
-  { value: 'commercial', label: { en: 'Commercial', ru: 'Коммерческая' } },
-];
-
-const AMENITIES: FieldOption[] = [
-  { value: 'pool_private', label: { en: 'Private pool', ru: 'Частный бассейн' } },
-  { value: 'pool_shared', label: { en: 'Shared pool', ru: 'Общий бассейн' } },
-  { value: 'sea_view', label: { en: 'Sea view', ru: 'Вид на море' } },
-  { value: 'mountain_view', label: { en: 'Mountain view', ru: 'Вид на горы' } },
-  { value: 'beachfront', label: { en: 'Beachfront', ru: 'У моря' } },
-  { value: 'air_conditioning', label: { en: 'Air conditioning', ru: 'Кондиционер' } },
-  { value: 'wifi', label: { en: 'Wi-Fi', ru: 'Wi-Fi' } },
-  { value: 'parking', label: { en: 'Parking', ru: 'Парковка' } },
-  { value: 'gym', label: { en: 'Gym', ru: 'Спортзал' } },
-  { value: 'security_24h', label: { en: '24/7 security', ru: 'Охрана 24/7' } },
-  { value: 'pet_friendly', label: { en: 'Pet-friendly', ru: 'С животными' } },
-  { value: 'kids_friendly', label: { en: 'Kids-friendly', ru: 'Для детей' } },
-  { value: 'washer', label: { en: 'Washing machine', ru: 'Стиральная машина' } },
-  { value: 'kitchen_full', label: { en: 'Full kitchen', ru: 'Полная кухня' } },
-  { value: 'workspace', label: { en: 'Workspace', ru: 'Рабочее место' } },
-  { value: 'elevator', label: { en: 'Elevator', ru: 'Лифт' } },
-];
+// Derived from the single source of truth — no longer a hand-maintained literal.
+const PROPERTY_TYPES: FieldOption[] = CANONICAL_PROPERTY_TYPES.map(toFieldOption);
+const AMENITIES: FieldOption[] = ALL_LISTING_AMENITY_UI_ITEMS.map(toFieldOption);
 
 const FURNISHING: FieldOption[] = [
   { value: 'furnished', label: { en: 'Fully furnished', ru: 'С мебелью' } },

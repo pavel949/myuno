@@ -242,8 +242,8 @@ export default function PartnersPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-5xl">
         <PageHeader 
           title={isRu ? 'Для партнёров' : 'For Partners'} 
           showBack 
@@ -255,7 +255,7 @@ export default function PartnersPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <SectionCard className="text-center bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 border-primary/20">
+          <SectionCard className="text-center bg-card border-primary/20">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 rounded-none bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                 <Handshake className="w-8 h-8 text-primary-foreground" />
@@ -515,7 +515,7 @@ export default function PartnersPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <SectionCard className="text-center bg-gradient-to-br from-primary/10 to-primary/5">
+          <SectionCard className="text-center bg-card">
             <h3 className="text-lg font-semibold mb-2">
               {isRu ? 'Готовы начать?' : 'Ready to Start?'}
             </h3>

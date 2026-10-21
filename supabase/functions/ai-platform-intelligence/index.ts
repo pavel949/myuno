@@ -1,15 +1,17 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from "../_shared/authz.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Dual-mode: internal secret (cron) OR authenticated admin/uno_team staff
+  const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);
+  if (gate instanceof Response) return gate;
 
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

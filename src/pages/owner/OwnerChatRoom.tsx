@@ -16,6 +16,7 @@ import { MessageCircle, Calendar, Users, DollarSign, ChevronDown, ChevronUp } fr
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function OwnerChatRoom() {
   const { type, id } = useParams<{ type: 'property' | 'booking'; id: string }>();
@@ -58,7 +59,7 @@ export default function OwnerChatRoom() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для доступа к чату' : 'Sign in to access chat'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

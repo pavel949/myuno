@@ -1,3 +1,4 @@
+import { parseCivilDate } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -38,7 +39,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
       if (error) throw error;
 
       return (data as PropertyAvailabilityRow[]).map(row => ({
-        date: new Date(row.date),
+        date: parseCivilDate(row.date),
         status: row.status,
         priceOverride: row.price_override ?? undefined,
         minNightsOverride: row.min_nights_override ?? undefined,

@@ -141,7 +141,7 @@ export function useAdminPayouts() {
       paymentReference?: string;
     }) => {
       // Use atomic database function for transaction safety
-      const { data, error } = await supabase.rpc('process_payout', {
+      const { data, error } = await supabase.rpc('admin_process_payout', {
         p_payout_id: payoutId,
         p_new_status: status,
         p_payment_reference: paymentReference || null,

@@ -105,21 +105,8 @@ const updateProspect = useUpdateProspect();
       const firstName = nameParts[0] || prospect.business_name;
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Check for duplicate by email or phone
-      if (prospect.email) {
-        const { data: byEmail } = await supabase
-          .from('crm_contacts')
-          .select('id, first_name')
-          .eq('email', prospect.email)
-          .maybeSingle();
-        if (byEmail) {
-          toast(isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM', {
-            description: `${byEmail.first_name} (${prospect.email})`,
-          });
-          setIsConvertingToCrm(false);
-          return;
-        }
-      }
+      // De-dup is handled by getOrCreateContactByEmail, scoped to this company —
+      // no separate unscoped email lookup (which could match another tenant's row).
 
       // Extract enriched data from source_data
       const sd = (prospect.source_data || {}) as Record<string, any>;

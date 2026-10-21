@@ -1,5 +1,7 @@
+import { pickLang } from '@/lib/i18n/pickLang';
+import type { Language } from '@/i18n';
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,7 +15,7 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
+import { ru, enUS, th } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton, type BookingStatusEvent } from '@/components/bookings/BookingStatusTimeline';
 import { RealtimeIndicator, type RealtimeStatus } from '@/components/bookings/RealtimeIndicator';
@@ -24,6 +26,9 @@ import {
   invalidateStatusHistoryCache,
 } from '@/lib/bookings/statusHistoryCache';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+
+import { BookingTrackingOverview } from '@/components/bookings/BookingTrackingOverview';
 
 interface BookingItem {
   id: string;
@@ -68,35 +73,35 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusLabel = (status: string, language: string) => {
-  const labels: Record<string, { en: string; ru: string }> = {
-    pending: { en: 'Pending', ru: 'Ожидает' },
-    submitted: { en: 'Submitted', ru: 'Отправлено' },
-    confirmed: { en: 'Confirmed', ru: 'Подтверждено' },
-    completed: { en: 'Completed', ru: 'Завершено' },
-    cancelled: { en: 'Cancelled', ru: 'Отменено' },
-    cancelled_by_user: { en: 'Cancelled', ru: 'Отменено' },
-    cancelled_by_provider: { en: 'Declined', ru: 'Отклонено' },
-    in_progress: { en: 'In Progress', ru: 'В процессе' },
+const getStatusLabel = (status: string, language: Language) => {
+  const labels: Record<string, { en: string; ru: string; th: string }> = {
+    pending: { en: 'Waiting for confirmation', ru: 'Ждём подтверждения', th: 'รอการยืนยัน' },
+    submitted: { en: 'Sent to the provider', ru: 'Отправлено исполнителю', th: 'ส่งให้ผู้ให้บริการแล้ว' },
+    confirmed: { en: 'Confirmed', ru: 'Подтверждено', th: 'ยืนยันแล้ว' },
+    completed: { en: 'Done', ru: 'Выполнено', th: 'เสร็จสิ้น' },
+    cancelled: { en: 'Cancelled', ru: 'Отменено', th: 'ยกเลิกแล้ว' },
+    cancelled_by_user: { en: 'Cancelled by you', ru: 'Вы отменили', th: 'คุณยกเลิกแล้ว' },
+    cancelled_by_provider: { en: 'Provider declined', ru: 'Исполнитель отказал', th: 'ผู้ให้บริการปฏิเสธ' },
+    in_progress: { en: 'In progress', ru: 'В работе', th: 'กำลังดำเนินการ' },
   };
-  return labels[status]?.[language === 'ru' ? 'ru' : 'en'] || status;
+  return labels[status] ? pickLang(language, labels[status]) : status;
 };
 
-const getBookingTypeLabel = (type: string, language: string) => {
-  const labels: Record<string, { en: string; ru: string }> = {
-    beauty: { en: 'Beauty', ru: 'Красота' },
-    service: { en: 'Service', ru: 'Услуга' },
-    food: { en: 'Restaurants', ru: 'Рестораны' },
-    flower: { en: 'Flowers', ru: 'Цветы' },
-    transport: { en: 'Transport', ru: 'Транспорт' },
-    tour: { en: 'Tour', ru: 'Тур' },
-    event: { en: 'Event', ru: 'Событие' },
-    property: { en: 'Property', ru: 'Недвижимость' },
-    water: { en: 'Water', ru: 'Водный спорт' },
-    medical: { en: 'Medical', ru: 'Медицина' },
-    fitness: { en: 'Fitness', ru: 'Фитнес' },
+const getBookingTypeLabel = (type: string, language: Language) => {
+  const labels: Record<string, { en: string; ru: string; th: string }> = {
+    beauty: { en: 'Beauty', ru: 'Красота', th: 'ความงาม' },
+    service: { en: 'Service', ru: 'Услуга', th: 'บริการ' },
+    food: { en: 'Restaurants', ru: 'Рестораны', th: 'ร้านอาหาร' },
+    flower: { en: 'Flowers', ru: 'Цветы', th: 'ดอกไม้' },
+    transport: { en: 'Transport', ru: 'Транспорт', th: 'การเดินทาง' },
+    tour: { en: 'Tour', ru: 'Тур', th: 'ทัวร์' },
+    event: { en: 'Event', ru: 'Событие', th: 'กิจกรรม' },
+    property: { en: 'Property', ru: 'Недвижимость', th: 'ที่พัก' },
+    water: { en: 'Water', ru: 'Водный спорт', th: 'กิจกรรมทางน้ำ' },
+    medical: { en: 'Medical', ru: 'Медицина', th: 'การแพทย์' },
+    fitness: { en: 'Fitness', ru: 'Фитнес', th: 'ฟิตเนส' },
   };
-  return labels[type]?.[language === 'ru' ? 'ru' : 'en'] || type;
+  return labels[type] ? pickLang(language, labels[type]) : type;
 };
 
 /**
@@ -120,17 +125,18 @@ const OPEN_BOOKING_STATUSES = new Set([
   'in_progress',
 ]);
 
-const CLUSTER_FILTER_LABEL: Record<string, { en: string; ru: string }> = {
-  arrive: { en: 'Arrive', ru: 'Приезд' },
-  live: { en: 'Live', ru: 'Жизнь' },
-  manage: { en: 'Manage', ru: 'Управление' },
+const CLUSTER_FILTER_LABEL: Record<string, { en: string; ru: string; th: string }> = {
+  arrive: { en: 'Arrive', ru: 'Приезд', th: 'เมื่อเดินทางมาถึง' },
+  live: { en: 'Live', ru: 'Жизнь', th: 'การใช้ชีวิต' },
+  manage: { en: 'Manage', ru: 'Управление', th: 'การจัดการ' },
 };
 
 export default function Bookings() {
   const { t, language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const clusterParam = searchParams.get('cluster') ?? '';
   const statusParam = searchParams.get('status') ?? '';
   const [bookings, setBookings] = useState<BookingItem[]>([]);
@@ -262,7 +268,7 @@ export default function Bookings() {
     } catch (error) {
       console.error('Error loading bookings:', error);
       setLoadError(true);
-      toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
+      toast.error(pickLang(language, { ru: 'Не удалось загрузить бронирования', en: 'Failed to load bookings', th: 'โหลดการจองไม่สำเร็จ' }));
       setIsLoading(false);
     } finally {
       setHistoryLoading(false);
@@ -271,9 +277,9 @@ export default function Bookings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
+      redirectToAuth(navigate, { replace: true, from: location.pathname + location.search + location.hash });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, location.pathname, location.search, location.hash]);
 
   useEffect(() => {
     if (user) {
@@ -531,15 +537,13 @@ export default function Bookings() {
   }, [bookings, allowedTypes, statusParam, filterIsActive]);
 
   const clearFilter = useCallback(() => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete('cluster');
-      next.delete('status');
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    const next = new URLSearchParams(searchParams);
+    next.delete('cluster');
+    next.delete('status');
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true });
+  }, [searchParams, navigate, location.pathname, location.hash]);
 
-  if (authLoading || isLoading) {
+  if (authLoading) {
     return (
       <AppLayout>
         <BookingListSkeleton />
@@ -554,7 +558,7 @@ export default function Bookings() {
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return format(date, 'd MMM yyyy', { locale: language === 'ru' ? ru : enUS });
+      return format(date, 'd MMM yyyy', { locale: language === 'ru' ? ru : language === 'th' ? th : enUS });
     } catch {
       return dateStr;
     }
@@ -565,45 +569,45 @@ export default function Bookings() {
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <PageContainer>
           <PageHeader
-            title={t('nav.bookings')}
+            title={(language === 'th' ? 'การจอง' : t('nav.bookings'))}
             actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
           />
+
+          <BookingTrackingOverview />
 
           {/* Active filter pill — surfaces deep-link context from PersonaHalo. */}
           {filterIsActive && (
             <div className="flex items-center gap-2 mb-3 px-1">
               <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
-                {language === 'ru' ? 'Фильтр' : 'Filter'}
+                {pickLang(language, { ru: 'Показываем', en: 'Showing', th: 'กำลังแสดง' })}
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium border border-primary/20">
                 {clusterParam && CLUSTER_FILTER_LABEL[clusterParam]
-                  ? (language === 'ru'
-                      ? CLUSTER_FILTER_LABEL[clusterParam].ru
-                      : CLUSTER_FILTER_LABEL[clusterParam].en)
+                  ? pickLang(language, CLUSTER_FILTER_LABEL[clusterParam])
                   : null}
                 {clusterParam && statusParam === 'open' ? ' · ' : ''}
-                {statusParam === 'open' ? (language === 'ru' ? 'Открытые' : 'Open') : null}
+                {statusParam === 'open' ? (pickLang(language, { ru: 'В работе', en: 'Still active', th: 'กำลังดำเนินการ' })) : null}
               </span>
               <button
                 type="button"
                 onClick={clearFilter}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                aria-label={pickLang(language, { ru: 'Показать все заказы', en: 'Show all orders', th: 'แสดงคำสั่งทั้งหมด' })}
               >
                 <X className="w-3 h-3" />
-                {language === 'ru' ? 'Сбросить' : 'Clear'}
+                {pickLang(language, { ru: 'Показать все', en: 'Show all', th: 'แสดงทั้งหมด' })}
               </button>
             </div>
           )}
 
-          {loadError ? (
+          {isLoading ? <BookingListSkeleton /> : loadError ? (
             <EmptyState
               icon={AlertCircle}
-              title={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
-              description={language === 'ru' ? 'Потяните вниз, чтобы повторить' : 'Pull down to retry'}
+              title={pickLang(language, { ru: 'Не удалось загрузить заказы', en: 'We could not load your orders', th: 'ไม่สามารถโหลดคำสั่งของคุณได้' })}
+              description={pickLang(language, { ru: 'Проверьте связь и попробуйте ещё раз — или потяните экран вниз.', en: 'Check your connection and try again — or pull the screen down.', th: 'ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง หรือดึงหน้าจอลง' })}
               action={
                 <PremiumButton onClick={handleRetry}>
-                  {language === 'ru' ? 'Повторить' : 'Retry'}
+                  {pickLang(language, { ru: 'Попробовать снова', en: 'Try again', th: 'ลองอีกครั้ง' })}
                 </PremiumButton>
               }
             />
@@ -611,18 +615,18 @@ export default function Bookings() {
             <EmptyState
               icon={Calendar}
               title={filterIsActive
-                ? (language === 'ru' ? 'Ничего не найдено' : 'Nothing found')
-                : t('booking.noBookings')}
+                ? (pickLang(language, { ru: 'Здесь пока пусто', en: 'Nothing here yet', th: 'ยังไม่มีรายการ' }))
+                : (language === 'th' ? 'ยังไม่มีการจอง' : t('booking.noBookings'))}
               description={filterIsActive
-                ? (language === 'ru' ? 'По выбранному фильтру нет заказов.' : 'No orders match the selected filter.')
-                : t('booking.noBookingsDesc')}
+                ? (pickLang(language, { ru: 'По этому фильтру заказов нет. Посмотрите все заказы.', en: 'No orders match this filter. Have a look at all of them.', th: 'ไม่มีคำสั่งตรงกับตัวกรองนี้ ลองดูคำสั่งทั้งหมด' }))
+                : (language === 'th' ? 'การจองของคุณจะแสดงที่นี่' : t('booking.noBookingsDesc'))}
               action={filterIsActive ? (
                 <PremiumButton onClick={clearFilter}>
-                  {language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                  {pickLang(language, { ru: 'Показать все заказы', en: 'Show all orders', th: 'แสดงคำสั่งทั้งหมด' })}
                 </PremiumButton>
               ) : (
                 <PremiumButton onClick={() => navigate('/discover')}>
-                  {t('nav.discover')}
+                  {(language === 'th' ? 'ค้นหา' : t('nav.discover'))}
                 </PremiumButton>
               )}
             />
@@ -638,9 +642,11 @@ export default function Bookings() {
                     className="bg-card border border-border rounded-none hover:border-primary/30 transition-all"
                   >
                     {/* Card body */}
-                    <div
+                    <button
+                      type="button"
                       onClick={() => navigate(`/bookings/${booking.id}`)}
-                      className="p-4 cursor-pointer"
+                      className="p-4 w-full text-left"
+                      aria-label={pickLang(language, { ru: `Открыть заказ: ${booking.title}`, en: `Open order: ${booking.title}`, th: `เปิดคำสั่ง: ${booking.title}` })}
                     >
                       <div className="flex gap-3">
                         <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center">
@@ -668,9 +674,9 @@ export default function Bookings() {
                             )}
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 self-center" />
+                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 self-center" aria-hidden="true" />
                       </div>
-                    </div>
+                    </button>
 
                     {/* Timeline toggle + content */}
                     <div className="border-t border-border/60">
@@ -685,7 +691,7 @@ export default function Bookings() {
                         className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
                       >
                         <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
-                          {language === 'ru' ? 'История статусов' : 'Status timeline'}
+                          {pickLang(language, { ru: 'Что происходило с заказом', en: 'What happened so far', th: 'ประวัติคำสั่ง' })}
                           {historyLoading ? (
                             <span
                               className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"

@@ -32,8 +32,9 @@ interface CheckInDetailsProps {
   };
   currency?: string;
   className?: string;
-  /** When true, show a deposit hint row linking to #property-pricing (no amount duplicated here). */
+  /** Show a deposit hint without duplicating the authoritative booking amount. */
   showPricingDeposit?: boolean;
+  onViewPricing?: () => void;
 }
 
 const keyHandoverLabels: Record<string, { en: string; ru: string; icon: string }> = {
@@ -63,6 +64,7 @@ export function CheckInDetails({
   currency = 'THB',
   className,
   showPricingDeposit,
+  onViewPricing,
 }: CheckInDetailsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -197,16 +199,17 @@ export function CheckInDetails({
             <div className="min-w-0 text-sm">
               <p className="font-medium text-foreground">{isRu ? 'Залог / депозит' : 'Security deposit'}</p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                {isRu
-                  ? 'Сумма и условия возврата указаны в разделе «Стоимость» — не дублируем цифры здесь.'
-                  : 'Amount and refund terms are in the Pricing section — we do not repeat them here.'}
+                {onViewPricing
+                  ? (isRu ? 'Выберите даты и проверьте стоимость и условия залога перед запросом бронирования.' : 'Choose dates and review the price and deposit terms before requesting a booking.')
+                  : (isRu ? 'Уточните размер и условия возврата залога у менеджера.' : 'Ask the manager about the deposit amount and refund terms.')}
               </p>
-              <a
-                href="#property-pricing"
+              {onViewPricing && <button
+                type="button"
+                onClick={onViewPricing}
                 className="inline-flex mt-1 text-xs font-medium text-primary hover:underline"
               >
                 {isRu ? 'Перейти к разделу «Стоимость»' : 'Go to Pricing'}
-              </a>
+              </button>}
             </div>
           </div>
         )}

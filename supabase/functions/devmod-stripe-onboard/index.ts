@@ -12,13 +12,12 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
+  // Restrict CORS to the allow-listed origins instead of a wildcard — this is a
+  // credentialed endpoint that creates Stripe Connect accounts.
+  const CORS = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
   try {
@@ -42,14 +41,18 @@ Deno.serve(async (req) => {
 
     const sb = createServiceClient();
 
-    // Fetch developer
+    // Fetch developer — bind to the authenticated user so a caller cannot pass
+    // another developer's id to read their Stripe Connect status or create an
+    // onboarding link for an account they do not own (IDOR). Mirrors the
+    // ownership check in devmod-apply.
     const { data: dev, error: devErr } = await sb
       .from("developers")
       .select("id, name_en, email, stripe_connect_id")
       .eq("id", developer_id)
+      .eq("user_id", authResult.user.id)
       .single();
     if (devErr || !dev) {
-      return new Response(JSON.stringify({ error: "Developer not found" }), {
+      return new Response(JSON.stringify({ error: "Developer not found or access denied" }), {
         status: 404, headers: { ...CORS, "Content-Type": "application/json" },
       });
     }

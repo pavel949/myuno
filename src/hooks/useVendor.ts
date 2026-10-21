@@ -144,7 +144,7 @@ export function useVendorProfile() {
           business_category: data.business_category || 'services',
           commission_rate: Number(data.commission_rate) || 10,
           is_verified: data.is_verified || false,
-          is_active: data.is_active || true,
+          is_active: Boolean(data.is_active),
           trust_score: Number(data.trust_score) || 0,
           rating: data.rating ? Number(data.rating) : undefined,
           review_count: data.review_count || undefined,
@@ -206,7 +206,7 @@ export function useVendorProfile() {
             business_category: data.business_category || 'services',
             commission_rate: Number(data.commission_rate) || 10,
             is_verified: data.is_verified || false,
-            is_active: data.is_active || true,
+            is_active: Boolean(data.is_active),
             trust_score: Number(data.trust_score) || 0,
             rating: data.rating ? Number(data.rating) : undefined,
             review_count: data.review_count || undefined,
@@ -288,6 +288,13 @@ export function useVendorProfile() {
   }) => {
     if (!user) return { error: new Error('Not authenticated') };
 
+    // Track rows created during this call so a failure at any later step can be
+    // rolled back — otherwise a failed org/member insert leaves an orphan
+    // provider + marketplace_vendor that pollute the admin moderation queue.
+    let createdProviderId: string | null = null;
+    let createdMarketplaceVendorId: string | null = null;
+    let createdOrgId: string | null = null;
+
     try {
       // P0 FIX: Check for existing provider to prevent duplicates
       const { data: existingProvider } = await supabase
@@ -323,6 +330,7 @@ export function useVendorProfile() {
         .single();
 
       if (providerError) throw providerError;
+      createdProviderId = providerData.id;
 
       // 1.5 P0 FIX: Auto-create marketplace_vendor for product selling
       // Generate slug from business name
@@ -353,7 +361,8 @@ export function useVendorProfile() {
 
         if (!vendorError && vendorData) {
           marketplaceVendorId = vendorData.id;
-          
+          createdMarketplaceVendorId = vendorData.id;
+
           // Link marketplace_vendor to provider
           await supabase
             .from('providers')
@@ -388,6 +397,7 @@ export function useVendorProfile() {
         .single();
 
       if (orgError) throw orgError;
+      createdOrgId = orgData.id;
 
       // 3. Add current user as org owner (membership row only — org itself stays inactive).
       const { error: memberError } = await supabase
@@ -410,6 +420,22 @@ export function useVendorProfile() {
 
     } catch (error) {
       errorLog.silent(error, 'create_vendor_profile');
+      // Best-effort rollback of any rows created before the failure so the
+      // admin queue and storefront stay clean. Reverse insertion order.
+      try {
+        if (createdOrgId) {
+          await supabase.from('org_members').delete().eq('org_id', createdOrgId);
+          await supabase.from('orgs').delete().eq('id', createdOrgId);
+        }
+        if (createdMarketplaceVendorId) {
+          await supabase.from('marketplace_vendors').delete().eq('id', createdMarketplaceVendorId);
+        }
+        if (createdProviderId) {
+          await supabase.from('providers').delete().eq('id', createdProviderId);
+        }
+      } catch (cleanupError) {
+        errorLog.silent(cleanupError, 'create_vendor_profile_rollback');
+      }
       return { data: null, error: error as Error };
     }
   };

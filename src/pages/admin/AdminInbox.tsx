@@ -12,11 +12,11 @@
  * refetch через React Query (staleTime 60s). Realtime-канал добавим, когда
  * объёмы заявок превысят ~200/день.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Inbox, Search, Filter, ExternalLink, AlertCircle, MessageSquare, Building2, Briefcase, Sparkles, Home } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageShell } from '@/components/page/PageShell';
@@ -24,23 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ru as ruLocale, enUS as enLocale } from 'date-fns/locale';
-
-type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries';
-
-type InboxStatus = 'new' | 'in_progress' | 'escalated' | 'closed';
-
-interface InboxItem {
-  id: string;
-  source: InboxSource;
-  status: InboxStatus;
-  rawStatus: string;
-  createdAt: string;
-  title: string;
-  subtitle: string | null;
-  contact: string | null;
-  href: string;
-  vertical?: string | null;
-}
+import { fetchInbox, type InboxSource, type InboxStatus } from '@/lib/adminInbox';
 
 const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
   partner_applications:  { labelRu: 'Партнёры',     labelEn: 'Partners',     icon: Briefcase,     color: 'hsl(var(--cluster-build))' },
@@ -50,82 +34,6 @@ const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon:
   property_inquiries:    { labelRu: 'Property',     labelEn: 'Property',     icon: Home,          color: 'hsl(var(--cluster-live))' },
 };
 
-function normalizeStatus(source: InboxSource, raw: string | null): InboxStatus {
-  const s = (raw || '').toLowerCase();
-  if (['closed', 'rejected', 'completed', 'converted', 'archived', 'cancelled'].includes(s)) return 'closed';
-  if (['escalated', 'urgent', 'sla_breach'].includes(s)) return 'escalated';
-  if (['in_progress', 'contacted', 'reviewing', 'qualified', 'follow_up'].includes(s)) return 'in_progress';
-  return 'new';
-}
-
-async function fetchInbox(): Promise<InboxItem[]> {
-  const [partners, listings, consults, nbLeads, propertyInq] = await Promise.all([
-    supabase.from('partner_applications').select('id, status, created_at, business_name, contact_name, contact_email, business_category').order('created_at', { ascending: false }).limit(200),
-    supabase.from('listing_applications').select('id, status, created_at, applicant_name, applicant_email, listing_type, service_category, product_category, property_type, city').order('created_at', { ascending: false }).limit(200),
-    supabase.from('consultation_requests').select('id, status, created_at, name, email, request_type, vertical_id').order('created_at', { ascending: false }).limit(200),
-    supabase.from('nb_leads').select('id, status, created_at, full_name, email, phone, project_id').order('created_at', { ascending: false }).limit(200),
-    supabase.from('property_inquiries').select('id, status, created_at, name, email, phone, property_id, message').order('created_at', { ascending: false }).limit(200),
-  ]);
-
-  const items: InboxItem[] = [];
-
-  for (const r of partners.data ?? []) {
-    items.push({
-      id: r.id, source: 'partner_applications',
-      rawStatus: r.status ?? 'new', status: normalizeStatus('partner_applications', r.status),
-      createdAt: r.created_at!, title: r.business_name || r.contact_name || 'Partner',
-      subtitle: r.business_category || null,
-      contact: r.contact_email || null,
-      href: '/admin/partner-applications',
-      vertical: r.business_category,
-    });
-  }
-  for (const r of listings.data ?? []) {
-    items.push({
-      id: r.id, source: 'listing_applications',
-      rawStatus: r.status ?? 'pending', status: normalizeStatus('listing_applications', r.status),
-      createdAt: r.created_at!, title: r.applicant_name || `Listing ${r.listing_type}`,
-      subtitle: r.service_category || r.product_category || r.property_type || r.listing_type,
-      contact: r.applicant_email || null,
-      href: '/admin/catalog',
-      vertical: r.listing_type,
-    });
-  }
-  for (const r of consults.data ?? []) {
-    items.push({
-      id: r.id, source: 'consultation_requests',
-      rawStatus: r.status ?? 'new', status: normalizeStatus('consultation_requests', r.status),
-      createdAt: r.created_at!, title: r.name || 'Consultation',
-      subtitle: r.request_type || r.vertical_id,
-      contact: r.email || null,
-      href: '/admin/consultations',
-      vertical: r.vertical_id,
-    });
-  }
-  for (const r of nbLeads.data ?? []) {
-    items.push({
-      id: r.id, source: 'nb_leads',
-      rawStatus: r.status ?? 'new', status: normalizeStatus('nb_leads', r.status),
-      createdAt: r.created_at!, title: r.full_name || 'Newbuild lead',
-      subtitle: r.project_id ? `Project ${r.project_id.slice(0, 8)}` : null,
-      contact: r.email || r.phone || null,
-      href: '/admin/nb-leads',
-    });
-  }
-  for (const r of propertyInq.data ?? []) {
-    items.push({
-      id: r.id, source: 'property_inquiries',
-      rawStatus: r.status ?? 'new', status: normalizeStatus('property_inquiries', r.status),
-      createdAt: r.created_at!, title: r.name || 'Property inquiry',
-      subtitle: r.message ? r.message.slice(0, 80) : null,
-      contact: r.email || r.phone || null,
-      href: '/admin/properties',
-    });
-  }
-
-  return items.sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1));
-}
-
 const TABS: { id: InboxStatus | 'all'; labelRu: string; labelEn: string }[] = [
   { id: 'all',         labelRu: 'Все',         labelEn: 'All' },
   { id: 'new',         labelRu: 'Новые',       labelEn: 'New' },
@@ -133,40 +41,32 @@ const TABS: { id: InboxStatus | 'all'; labelRu: string; labelEn: string }[] = [
   { id: 'escalated',   labelRu: 'Эскалация',   labelEn: 'Escalated' },
   { id: 'closed',      labelRu: 'Закрытые',    labelEn: 'Closed' },
 ];
+const SEARCH_HINTS: Record<InboxSource, [string, string]> = {
+  partner_applications: ['Business, name, email, category', 'Компания, имя, email, категория'],
+  listing_applications: ['Name, email, exact type, category', 'Имя, email, точный тип, категория'],
+  consultation_requests: ['Name, email, request type, vertical', 'Имя, email, тип запроса, направление'],
+  nb_leads: ['Name, email, phone', 'Имя, email, телефон'],
+  property_inquiries: ['Name, email, phone, message', 'Имя, email, телефон, сообщение'],
+};
 
 export default function AdminInbox() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const [tab, setTab] = useState<InboxStatus | 'all'>('new');
-  const [sourceFilter, setSourceFilter] = useState<InboxSource | 'all'>('all');
+  const [sourceFilter, setSourceFilter] = useState<InboxSource>('partner_applications');
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(0);
 
-  const { data: items, isLoading, isError, refetch } = useQuery({
-    queryKey: ['admin-inbox'],
-    queryFn: fetchInbox,
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['admin-inbox', user?.id, sourceFilter, page, tab, query], enabled: !!user,
+    queryFn: () => fetchInbox(sourceFilter, page, tab, query),
     staleTime: 60_000,
     refetchInterval: 90_000,
   });
 
-  const filtered = useMemo(() => {
-    if (!items) return [];
-    const q = query.trim().toLowerCase();
-    return items.filter((i) => {
-      if (tab !== 'all' && i.status !== tab) return false;
-      if (sourceFilter !== 'all' && i.source !== sourceFilter) return false;
-      if (q) {
-        const hay = [i.title, i.subtitle, i.contact, i.vertical].filter(Boolean).join(' ').toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [items, tab, sourceFilter, query]);
-
-  const counts = useMemo(() => {
-    const c: Record<string, number> = { all: items?.length ?? 0, new: 0, in_progress: 0, escalated: 0, closed: 0 };
-    for (const i of items ?? []) c[i.status] = (c[i.status] ?? 0) + 1;
-    return c;
-  }, [items]);
+  const items = data?.items;
+  const filtered = items ?? [];
 
   return (
     <AppLayout>
@@ -184,7 +84,7 @@ export default function AdminInbox() {
             <p className="mt-2 text-[13px] text-muted-foreground max-w-2xl">
               {isRu
                 ? 'Партнёры, листинги, консультации, лиды по новостройкам и Property — в одном списке.'
-                : 'Partners, listings, consultations, newbuild leads and property inquiries — in one list.'}
+                : 'Partners, listings, consultations, newbuild leads and property inquiries — in separate source queues.'}
             </p>
           </div>
         </header>
@@ -193,12 +93,12 @@ export default function AdminInbox() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar border-b border-border mb-4" role="tablist">
           {TABS.map((t) => {
             const isActive = tab === t.id;
-            const count = counts[t.id] ?? 0;
+            const count = t.id === tab && !isError ? data?.total : null;
             return (
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTab(t.id)}
+                onClick={() => { setTab(t.id); setPage(0); }}
                 role="tab"
                 aria-selected={isActive}
                 className={cn(
@@ -207,7 +107,7 @@ export default function AdminInbox() {
                 )}
               >
                 {isRu ? t.labelRu : t.labelEn}
-                <span className="ml-1.5 font-mono text-[10px] opacity-60">{count}</span>
+                <span className="ml-1.5 font-mono text-[10px] opacity-60">{count ?? "—"}</span>
               </button>
             );
           })}
@@ -217,18 +117,6 @@ export default function AdminInbox() {
         <div className="flex gap-3 mb-4 flex-wrap items-center">
           <div className="flex gap-1.5 items-center flex-wrap">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <button
-              type="button"
-              onClick={() => setSourceFilter('all')}
-              className={cn(
-                'px-2.5 py-1 text-[11px] font-medium border',
-                sourceFilter === 'all'
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-border text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {isRu ? 'Все источники' : 'All sources'}
-            </button>
             {(Object.keys(SOURCE_META) as InboxSource[]).map((src) => {
               const m = SOURCE_META[src];
               const isActive = sourceFilter === src;
@@ -236,7 +124,7 @@ export default function AdminInbox() {
                 <button
                   key={src}
                   type="button"
-                  onClick={() => setSourceFilter(src)}
+                  onClick={() => { setSourceFilter(src); setPage(0); }}
                   className={cn(
                     'px-2.5 py-1 text-[11px] font-medium border whitespace-nowrap',
                     isActive
@@ -254,14 +142,22 @@ export default function AdminInbox() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" strokeWidth={1.75} />
             <input
               type="search"
+              aria-label={isRu ? 'Поиск заявок' : 'Search applications'}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={isRu ? 'Имя, email, категория…' : 'Name, email, category…'}
+              onChange={(e) => { setQuery(e.target.value); setPage(0); }}
+              placeholder={SEARCH_HINTS[sourceFilter][isRu ? 1 : 0]}
               className="w-full pl-9 pr-3 py-2 text-[13px] border border-border bg-card focus:border-primary outline-none"
             />
           </div>
         </div>
 
+        <nav aria-label="Application source pages" className="mb-4 flex items-center gap-3 text-sm">
+          <button className="min-h-11 underline disabled:opacity-40" disabled={page === 0 || isFetching} onClick={() => setPage(value => value - 1)}>{isRu ? 'Назад' : 'Previous'}</button>
+          <span>{page + 1} · {isError ? '—' : data?.total ?? '—'}</span>
+          <button className="min-h-11 underline disabled:opacity-40" disabled={isFetching || isError || !data || (page + 1) * 50 >= data.total} onClick={() => setPage(value => value + 1)}>{isRu ? 'Далее' : 'Next'}</button>
+          <span>{isRu ? 'Отдельная страница и количество для выбранного источника. Поиск и фильтры применяются на сервере.' : 'Separate page and count for the selected source. Filters and search apply on the server.'}</span>
+        </nav>
+        <p className="mb-4 text-xs text-muted-foreground">{isRu ? 'Фильтры используют точные сохранённые статусы. Остальные статусы доступны во вкладке «Все» с исходным названием.' : 'Filters match stored statuses exactly. Other statuses remain under All with their original label.'}</p>
         {/* List */}
         {isLoading && (
           <div className="space-y-2">
@@ -318,7 +214,7 @@ export default function AdminInbox() {
                           item.status === 'in_progress' && 'text-primary',
                         )}
                       >
-                        {item.rawStatus}
+                        {item.status === 'other' ? `${isRu ? 'Другой статус' : 'Other status'}: ${item.rawStatus}` : item.rawStatus}
                       </span>
                       <span className="font-mono text-[10px] text-muted-foreground/60 ml-auto">{ago}</span>
                     </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { sanitizeAuthReturnPath } from '@/lib/auth/redirectToAuth';
+import { postAuthDestination } from '@/lib/auth/postAuthDestination';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Gift, Phone, ChevronLeft } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +69,8 @@ export default function Auth() {
     redirectToLoginOnClose: boolean;
   }>({ open: false, userId: null, expectedPhone: null, report: null, error: null, emailConfirmationRequired: false, redirectToLoginOnClose: false });
   const SHOW_FORGOT_AFTER = 3;
+  const [routingError, setRoutingError] = useState(false);
+  const [routingAttempt, setRoutingAttempt] = useState(0);
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
@@ -74,7 +78,7 @@ export default function Auth() {
   const location = useLocation();
   const isRu = language === 'ru';
   const isTh = language === 'th';
-  const { activeRole } = useUserContext();
+  const { activeRole, availableRoles, hasMCMembership, switchContext, isLoading: userContextLoading } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
   // Bible-v2 audit B3: parse sessionStorage payload `{ path, ts }` and ignore
@@ -99,21 +103,12 @@ export default function Auth() {
     }
   }, []);
 
-  const rawRedirect = (location.state as { from?: string })?.from ||
+  const rawRedirect = (location.state as { from?: unknown })?.from ||
     searchParams.get('redirect') ||
     storedOAuthRedirect ||
     APP_ROUTES.HOME;
 
-  const redirectPath = React.useMemo(() => {
-    if (!rawRedirect) return APP_ROUTES.HOME;
-    try {
-      const parsed = new URL(rawRedirect, window.location.origin);
-      if (parsed.origin !== window.location.origin) return APP_ROUTES.HOME;
-      return `${parsed.pathname}${parsed.search}${parsed.hash}` || APP_ROUTES.HOME;
-    } catch {
-      return rawRedirect.startsWith('/') ? rawRedirect : APP_ROUTES.HOME;
-    }
-  }, [rawRedirect]);
+  const redirectPath = React.useMemo(() => sanitizeAuthReturnPath(rawRedirect), [rawRedirect]);
 
   const oauthRedirectUrl = React.useMemo(
     () => new URL(redirectPath, window.location.origin).toString(),
@@ -121,24 +116,76 @@ export default function Auth() {
   );
 
   useEffect(() => {
-    if (!user || authLoading) return;
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('myuno_post_auth_redirect');
-    }
-    if (redirectPath !== APP_ROUTES.HOME) {
-      navigate(redirectPath, { replace: true });
-      return;
-    }
-    if (ownerTypeLoading) return;
-    const dest =
-      activeRole === 'vendor' ? '/vendor'
-      : activeRole === 'investor' ? '/invest'
-      : (activeRole === 'owner' || activeRole === 'property_manager')
-        ? (isMCPortal ? '/my-property' : '/mc')
-      : isMCPortal ? '/my-property'
-      : '/';
-    navigate(dest, { replace: true });
-  }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
+    if (!user || authLoading || userContextLoading || ownerTypeLoading) return;
+    let cancelled = false;
+    setRoutingError(false);
+
+    (async () => {
+      // Mandatory account-type step: a user without `primary_role` has never
+      // told us who they are. Sending them to the home page created a dead end
+      // (the /start wizard can be flag-disabled), so route them through
+      // /auth/account-type first and carry the intended destination along.
+      let needsAccountType = false;
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('primary_role')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (error) throw error;
+        needsAccountType = !profile?.primary_role;
+      } catch {
+        if (!cancelled) setRoutingError(true);
+        return;
+      }
+      if (cancelled) return;
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('myuno_post_auth_redirect');
+      }
+
+      const destination = postAuthDestination({ redirectPath, activeRole, availableRoles, hasMCMembership, needsAccountType, isMCPortal });
+      if (destination.activateRole) {
+        try {
+          // Existing, server-validated context selection; this grants no role or
+          // membership. Never derive employee authority from invite metadata.
+          await switchContext({ role: destination.activateRole });
+        } catch {
+          if (!cancelled) setRoutingError(true);
+          return;
+        }
+      }
+      if (!cancelled) navigate(destination.path, { replace: true });
+    })();
+
+    return () => { cancelled = true; };
+  }, [user, authLoading, userContextLoading, ownerTypeLoading, navigate, redirectPath, activeRole, availableRoles, hasMCMembership, switchContext, isMCPortal, routingAttempt]);
+
+  // OAuth callback error surfacing — `/auth/callback` renders this same page and
+  // relies on Supabase auto session-detection. When the provider returns an
+  // error (user denied access, broker failure) the tokens never arrive and the
+  // user would otherwise land back on a silent login form. Parse the error out
+  // of both the query string and the hash fragment and show it once.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const fromQuery = new URLSearchParams(window.location.search);
+    const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const oauthError = fromQuery.get('error') || fromHash.get('error');
+    if (!oauthError) return;
+    const detail =
+      fromQuery.get('error_description') || fromHash.get('error_description');
+    toast.error(isTh ? 'เข้าสู่ระบบด้วย Google ล้มเหลว' : isRu ? 'Ошибка входа через Google' : 'Google sign-in failed', {
+      description:
+        detail ||
+        (isTh
+          ? 'การเข้าสู่ระบบถูกยกเลิกหรือล้มเหลว กรุณาลองอีกครั้ง'
+          : isRu
+            ? 'Вход был отменён или не удался. Попробуйте снова.'
+            : 'Sign-in was cancelled or failed. Please try again.'),
+    });
+    // Strip the error params so a refresh / re-render doesn't re-fire the toast.
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [isRu, isTh]);
 
   const validatePhoneStep = () => {
     const newErrors: Record<string, string> = {};
@@ -163,7 +210,7 @@ export default function Auth() {
     if (!lastName.trim()) {
       newErrors.lastName = isTh ? 'กรุณาใส่นามสกุล' : isRu ? 'Введите фамилию' : 'Please enter your last name';
     }
-    try { emailSchema.parse(email); } catch {
+    try { emailSchema.parse(email.trim()); } catch {
       newErrors.email = isTh ? 'รูปแบบอีเมลไม่ถูกต้อง' : isRu ? 'Неверный формат email' : 'Invalid email address';
     }
     try { passwordSchema.parse(password); } catch {
@@ -183,7 +230,7 @@ export default function Auth() {
 
   const validateLoginForm = () => {
     const newErrors: Record<string, string> = {};
-    try { emailSchema.parse(email); } catch {
+    try { emailSchema.parse(email.trim()); } catch {
       newErrors.email = isTh ? 'รูปแบบอีเมลไม่ถูกต้อง' : isRu ? 'Неверный формат email' : 'Invalid email address';
     }
     try { passwordSchema.parse(password); } catch {
@@ -216,6 +263,7 @@ export default function Auth() {
     setIsLoading(true);
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    const normalisedEmail = email.trim();
 
     // E.164 normalisation: keep a leading '+' if user typed one, strip
     // everything non-digit. Previously `.replace(/\D/g,'')` dropped the '+'
@@ -226,7 +274,7 @@ export default function Auth() {
 
     try {
       const { error, data } = await withTimeout(signUp({
-        email, password, fullName,
+        email: normalisedEmail, password, fullName,
         phone: normalisedPhone,
       }), 15000);
 
@@ -267,7 +315,7 @@ export default function Auth() {
 
         supabase.functions.invoke('notify-new-signup', {
           body: {
-            user_email: email, user_name: fullName,
+            user_email: normalisedEmail, user_name: fullName,
             user_phone: normalisedPhone || undefined,
             referral_code: referralCode || undefined,
             signup_source: 'auth_page',
@@ -345,7 +393,7 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await withTimeout(signIn(email, password), 15000);
+      const { error } = await withTimeout(signIn(email.trim(), password), 15000);
       if (error) {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
@@ -406,6 +454,12 @@ export default function Auth() {
   // already authenticated (the redirect effect will fire on the next tick).
   // Previously this was `authLoading && user` which never both held true at
   // the same time, briefly flashing the form to logged-in users.
+  if (user && routingError) {
+    return <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center" role="alert">
+      <p>{isTh ? 'ตรวจสอบบัญชีหรือเปิดพื้นที่ทำงานไม่สำเร็จ กรุณาลองอีกครั้ง' : isRu ? 'Не удалось проверить аккаунт или открыть рабочий кабинет. Повторите попытку.' : 'Could not check your account or open your workspace. Please try again.'}</p>
+      <PremiumButton onClick={() => setRoutingAttempt(value => value + 1)}>{isTh ? 'ลองอีกครั้ง' : isRu ? 'Повторить' : 'Retry'}</PremiumButton>
+    </div>;
+  }
   if (authLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -436,11 +490,11 @@ export default function Auth() {
     </div>
   );
 
-  // Section header matching reference app style (bold title + colored subtitle)
-  const SectionHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
+  // Section header matching reference app style (bold title + optional subtitle)
+  const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
     <div className="pt-6 pb-2">
       <h2 className="text-lg font-bold">{title}</h2>
-      <p className="text-sm text-primary font-medium">{subtitle}</p>
+      {subtitle && <p className="text-sm text-primary font-medium">{subtitle}</p>}
     </div>
   );
 
@@ -489,10 +543,11 @@ export default function Auth() {
 
                 <form onSubmit={handleLogin} name="login" className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('auth.email')}</label>
+                    <label htmlFor="login-email" className="text-sm font-medium">{t('auth.email')}</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <input
+                        id="login-email"
                         type="email"
                         name="email"
                         autoComplete="email"
@@ -510,10 +565,11 @@ export default function Auth() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('auth.password')}</label>
+                    <label htmlFor="login-password" className="text-sm font-medium">{t('auth.password')}</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <input
+                        id="login-password"
                         type={showPassword ? 'text' : 'password'}
                         name="password"
                         autoComplete="current-password"
@@ -528,6 +584,7 @@ export default function Auth() {
                       />
                       <button
                         type="button"
+                        aria-label={t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')}
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
@@ -600,7 +657,7 @@ export default function Auth() {
                           {t('auth.signInOrSignUp')}
                         </h1>
                         <p className="text-sm text-primary font-medium tracking-wide">
-                          {isRu ? 'Вход в myUNO' : 'Welcome to myUNO'}
+                          {isTh ? 'ยินดีต้อนรับสู่ myUNO' : isRu ? 'Вход в myUNO' : 'Welcome to myUNO'}
                         </p>
                       </div>
 
@@ -611,7 +668,7 @@ export default function Auth() {
 
                       <div className="pt-4">
                         <UnderlineInput
-                          label={`${t('auth.phone')}/${isTh ? 'Mobile Phone' : isRu ? 'Mobile Phone' : 'Mobile Phone'}*`}
+                          label={`${t('auth.phone')}*`}
                           type="tel"
                           autoComplete="tel"
                           value={phone}
@@ -661,20 +718,14 @@ export default function Auth() {
                         <h1 className="text-2xl font-display font-bold">
                           {t('auth.register')}
                         </h1>
-                        <p className="text-sm text-primary font-medium uppercase tracking-wide">
-                          REGISTER
-                        </p>
                       </div>
 
                       {/* Section: Signing In */}
-                      <SectionHeader
-                        title={t('auth.signingIn')}
-                        subtitle={isTh ? 'Signing In' : isTh ? '' : ''}
-                      />
+                      <SectionHeader title={t('auth.signingIn')} />
 
                       <div className="space-y-2">
                         <UnderlineInput
-                          label={`${t('auth.phone')}/${isTh ? 'Mobile Phone' : 'Mobile Phone'}*`}
+                          label={`${t('auth.phone')}*`}
                           type="tel"
                           value={phone}
                           onChange={() => {}}
@@ -682,7 +733,7 @@ export default function Auth() {
                         />
 
                         <UnderlineInput
-                          label={`${t('auth.email')}/Email*`}
+                          label={`${t('auth.email')}*`}
                           type="email"
                           autoComplete="email"
                           value={email}
@@ -693,11 +744,12 @@ export default function Auth() {
                         />
 
                         <div className="space-y-1">
-                          <label className="block text-sm text-muted-foreground">
-                            {t('auth.password')}/Password*
+                          <label htmlFor="signup-password" className="block text-sm text-muted-foreground">
+                            {t('auth.password')}*
                           </label>
                           <div className="relative">
                             <input
+                              id="signup-password"
                               type={showPassword ? 'text' : 'password'}
                               name="new-password"
                               autoComplete="new-password"
@@ -712,6 +764,7 @@ export default function Auth() {
                             />
                             <button
                               type="button"
+                              aria-label={t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')}
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                             >
@@ -723,11 +776,12 @@ export default function Auth() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="block text-sm text-muted-foreground">
-                            {t('auth.confirmPassword')}/{isTh ? 'Confirm Password' : 'Confirm Password'}*
+                          <label htmlFor="signup-confirm-password" className="block text-sm text-muted-foreground">
+                            {t('auth.confirmPassword')}*
                           </label>
                           <div className="relative">
                             <input
+                              id="signup-confirm-password"
                               type={showPassword ? 'text' : 'password'}
                               name="confirm-password"
                               autoComplete="new-password"
@@ -742,6 +796,7 @@ export default function Auth() {
                             />
                             <button
                               type="button"
+                              aria-label={t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')}
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                             >
@@ -752,7 +807,7 @@ export default function Auth() {
                         </div>
 
                         <UnderlineInput
-                          label={`${t('auth.referralCode')}/Referral Code`}
+                          label={t('auth.referralCode')}
                           value={referralCode}
                           onChange={(val) => setReferralCode(val.toUpperCase())}
                           placeholder="ABC123"
@@ -761,14 +816,11 @@ export default function Auth() {
                       </div>
 
                       {/* Section: Personal Information */}
-                      <SectionHeader
-                        title={t('auth.personalInfo')}
-                        subtitle={isTh ? 'Personal Information' : isTh ? '' : ''}
-                      />
+                      <SectionHeader title={t('auth.personalInfo')} />
 
                       <div className="space-y-2">
                         <UnderlineInput
-                          label={`${t('auth.firstName')}/${isTh ? 'First Name' : 'First Name'}*`}
+                          label={`${t('auth.firstName')}*`}
                           type="text"
                           autoComplete="given-name"
                           value={firstName}
@@ -778,7 +830,7 @@ export default function Auth() {
                         />
 
                         <UnderlineInput
-                          label={`${t('auth.lastName')}/${isTh ? 'Last Name' : 'Last Name'}*`}
+                          label={`${t('auth.lastName')}*`}
                           type="text"
                           autoComplete="family-name"
                           value={lastName}
@@ -814,7 +866,7 @@ export default function Auth() {
                           className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors font-medium"
                         >
                           <ArrowLeft className="w-4 h-4" />
-                          {t('auth.back')}/{isTh ? 'Back' : 'Back'}
+                          {t('auth.back')}
                         </button>
                         <button
                           onClick={handleSignup}

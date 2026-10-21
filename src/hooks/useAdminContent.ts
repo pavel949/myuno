@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
@@ -166,39 +166,58 @@ export function useAdminActivities(filterProviderId?: string) {
 }
 
 // ── Properties (filter by provider OR management company) ──────────────────
-export function useAdminProperties(filterProviderId?: string, filterType?: 'provider' | 'mc') {
+export function useAdminProperties(filterProviderId?: string, filterType?: 'provider' | 'mc', filterPropertyId?: string) {
   const { user } = useAuth();
   const [properties, setProperties] = useState<VendorProperty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const requestGeneration = useRef(0);
+  const activeContext = useRef<string | null>(null);
+  const requestContext = JSON.stringify([user?.id ?? null, filterProviderId ?? null, filterType ?? null, filterPropertyId ?? null]);
 
-  const fetchProperties = useCallback(async (isMounted?: () => boolean) => {
-    const checkMounted = isMounted || (() => true);
-    if (!user) return;
-    if (checkMounted()) setIsLoading(true);
+  const fetchProperties = useCallback(async () => {
+    // Saved retry/writer callbacks from an earlier provider/user must not start a
+    // request in the current view. Every effect read and manual retry shares the
+    // same generation, so only the latest request can commit any read state.
+    if (!user || activeContext.current !== requestContext) return;
+    const generation = ++requestGeneration.current;
+    const isCurrent = () => activeContext.current === requestContext && requestGeneration.current === generation;
+    setIsLoading(true);
+    setError(null);
 
-    let query = supabase.from('properties').select('*');
+    try {
+      let query = supabase.from('properties').select('*').is('deleted_at', null);
+      if (filterPropertyId) query = query.eq('id', filterPropertyId);
 
-    if (filterProviderId) {
-      if (filterType === 'mc') {
-        query = query.eq('management_company_id', filterProviderId);
-      } else if (filterType === 'provider') {
-        query = query.eq('provider_id', filterProviderId);
-      } else {
-        query = query.or(`provider_id.eq.${filterProviderId},management_company_id.eq.${filterProviderId}`);
+      if (filterProviderId) {
+        if (filterType === 'mc') {
+          query = query.eq('management_company_id', filterProviderId);
+        } else if (filterType === 'provider') {
+          query = query.eq('provider_id', filterProviderId);
+        } else {
+          query = query.or(`provider_id.eq.${filterProviderId},management_company_id.eq.${filterProviderId}`);
+        }
       }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (isCurrent()) setProperties((data || []) as unknown as VendorProperty[]);
+    } catch (cause) {
+      if (isCurrent()) setError(cause instanceof Error ? cause : new Error('Properties could not be loaded'));
+    } finally {
+      if (isCurrent()) setIsLoading(false);
     }
-
-    const { data, error } = await query.order('created_at', { ascending: false });
-
-    if (!error && data && checkMounted()) setProperties(data as unknown as VendorProperty[]);
-    if (checkMounted()) setIsLoading(false);
-  }, [user, filterProviderId, filterType]);
+  }, [user, filterProviderId, filterType, filterPropertyId, requestContext]);
 
   useEffect(() => {
-    let isMounted = true;
-    fetchProperties(() => isMounted);
-    return () => { isMounted = false; };
-  }, [fetchProperties]);
+    activeContext.current = requestContext;
+    void fetchProperties();
+    return () => {
+      activeContext.current = null;
+      requestGeneration.current += 1;
+    };
+  }, [fetchProperties, requestContext]);
 
   const createProperty = async (propertyData: Partial<VendorProperty> & { provider_id?: string; management_company_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };
@@ -207,7 +226,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
       .from('properties')
       .insert({
         ...(propertyData as Record<string, unknown>),
-        is_active: true,
+        is_active: propertyData.is_active ?? true,
       } as never)
       .select()
       .single();
@@ -216,16 +235,26 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
     return { data, error };
   };
 
-  const updateProperty = async (id: string, propertyData: Partial<VendorProperty>) => {
+  const updateProperty = async (id: string, propertyData: Partial<VendorProperty>, expectedUpdatedAt?: string) => {
+    if (!user) return { error: new Error('Not authenticated') };
+    if (!expectedUpdatedAt) return { error: new Error('Property revision unavailable. Reload before saving.') };
     const { data, error } = await supabase
       .from('properties')
       .update(propertyData as never)
       .eq('id', id)
+      .eq('updated_at', expectedUpdatedAt)
+      .is('deleted_at', null)
       .select()
       .single();
 
-    if (!error) await fetchProperties();
-    return { data, error };
+    if (error) return { data, error };
+    if (!data || data.id !== id
+      || (propertyData.approval_status !== undefined && data.approval_status !== propertyData.approval_status)
+      || (propertyData.is_active !== undefined && data.is_active !== propertyData.is_active)) {
+      return { data, error: new Error('Property change was not confirmed. Reload before saving.') };
+    }
+    await fetchProperties();
+    return { data, error: null };
   };
 
   const deleteProperty = async (id: string) => {
@@ -238,7 +267,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
     return { error };
   };
 
-  return { properties, isLoading, createProperty, updateProperty, deleteProperty, refetch: fetchProperties };
+  return { properties, isLoading, error, createProperty, updateProperty, deleteProperty, refetch: fetchProperties };
 }
 
 // ── Restaurants (listings vertical='restaurant') ───────────────────────────

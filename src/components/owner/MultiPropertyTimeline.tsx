@@ -1,3 +1,4 @@
+import { bangkokTodayDate, bangkokTodayISO, civilDateKey, civilStaySpan, stayHasDayEvent } from '@/lib/hotelDates';
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +16,7 @@ import { type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, addDays, subDays, isToday, startOfWeek } from 'date-fns';
+import { format, addDays, subDays, startOfWeek } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -81,7 +82,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     return groups;
   }, [sortedProperties, groupNameMap, getGroupKey]);
 
-  const [startDate, setStartDate] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [startDate, setStartDate] = useState(() => startOfWeek(bangkokTodayDate(), { weekStartsOn: 1 }));
 
   // Day events sheet state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -175,9 +176,9 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
 
   const goBack = () => setStartDate(d => subDays(d, 7));
   const goForward = () => setStartDate(d => addDays(d, 7));
-  const goToday = () => setStartDate(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const goToday = () => setStartDate(startOfWeek(bangkokTodayDate(), { weekStartsOn: 1 }));
 
-  const todayIndex = days.findIndex(d => isToday(d));
+  const todayIndex = days.findIndex(d => civilDateKey(d) === bangkokTodayISO());
 
   const handleCellClick = useCallback((day: Date, propertyId: string) => {
     setSelectedDate(day);
@@ -199,7 +200,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     if (!selectedDate || !selectedPropertyId) return { bookings: [], tasks: [] };
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
     const propertyBookings = bookingsByProperty.get(selectedPropertyId) || [];
-    const dayBookings = propertyBookings.filter(b => dateKey >= b.check_in && dateKey < b.check_out);
+    const dayBookings = propertyBookings.filter(b => stayHasDayEvent(b, dateKey));
     const dayTasks = taskMap.get(`${selectedPropertyId}_${dateKey}`) || [];
     return { bookings: dayBookings, tasks: dayTasks };
   }, [selectedDate, selectedPropertyId, bookingsByProperty, taskMap]);
@@ -231,27 +232,27 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
 
   return (
     <>
-      <div className="space-y-2">
+      <div className="space-y-2 min-w-0 max-w-full">
         {/* Navigation bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between" role="group" aria-label={isRu ? 'Период календаря' : 'Calendar period'}>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Previous'} onClick={goBack} className="min-h-[44px] min-w-[44px]">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={goToday} className="h-8 text-xs">
+            <Button variant="outline" size="sm" onClick={goToday} className="min-h-11 text-sm">
               {isRu ? 'Сегодня' : 'Today'}
             </Button>
             <Button variant="ghost" size="icon" aria-label={isRu ? 'Вперёд' : 'Next'} onClick={goForward} className="min-h-[44px] min-w-[44px]">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground break-words" aria-live="polite">
             {format(startDate, 'd MMM', { locale })} — {format(addDays(startDate, DAYS_TO_SHOW - 1), 'd MMM yyyy', { locale })}
           </span>
         </div>
 
         {/* Timeline grid */}
-        <div className="border rounded-none overflow-hidden">
+        <div className="border rounded-none overflow-hidden min-w-0 max-w-full">
           <div className="flex">
             {/* Sticky property labels */}
             <div className="flex-shrink-0 z-10 bg-background border-r" style={{ width: LABEL_WIDTH }}>
@@ -272,7 +273,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       </div>
                     )}
                     <div
-                      className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
+                      className="h-20 sm:h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
                       onClick={() => navigate(`/mc/properties/${property.property_id}`)}
                       title={isRu ? 'Открыть объект' : 'View property'}
                     >
@@ -282,7 +283,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                           {(isRu ? property.title_ru : property.title).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-medium truncate leading-tight group-hover/label:text-primary transition-colors">
+                      <span title={isRu ? property.title_ru : property.title} className="text-xs font-medium truncate leading-tight group-hover/label:text-primary transition-colors">
                         {isRu ? property.title_ru : property.title}
                       </span>
                       <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover/label:opacity-100 transition-opacity flex-shrink-0 ml-auto" />
@@ -293,12 +294,12 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
             </div>
 
             {/* Scrollable days area */}
-            <div ref={scrollRef} className="overflow-x-auto flex-1">
+            <div ref={scrollRef} className="overflow-x-auto flex-1 min-w-0 focus-visible:ring-2 focus-visible:ring-ring" tabIndex={0} role="region" aria-label={isRu ? 'Даты и события объектов' : 'Property dates and events'}>
               <div style={{ width: CELL_WIDTH * DAYS_TO_SHOW, minWidth: '100%' }}>
                 {/* Day headers */}
                 <div className="h-10 border-b flex relative">
                   {days.map((day, i) => {
-                    const today = isToday(day);
+                    const today = civilDateKey(day) === bangkokTodayISO();
                     const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                     return (
                       <div
@@ -337,12 +338,12 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       {group && group.complexName && (
                         <div className="h-7 border-b bg-muted/50" />
                       )}
-                      <div className="h-14 border-b last:border-b-0 flex relative">
+                      <div className="h-20 sm:h-14 border-b last:border-b-0 flex relative">
                       {/* Day cells */}
                       {days.map((day, dayIdx) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
                         const isWeekend = day.getDay() === 0 || day.getDay() === 6;
-                        const today = isToday(day);
+                        const today = civilDateKey(day) === bangkokTodayISO();
                         const dayTasks = taskMap.get(`${property.property_id}_${dateKey}`) || [];
                         const hasCleaning = dayTasks.some(t => t.task_type === 'cleaning');
                         const hasMaintenance = dayTasks.some(t => t.task_type === 'maintenance');
@@ -352,12 +353,16 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                         const cellExpenses = expenseMap.get(`${property.property_id}_${dateKey}`) || [];
 
                         return (
-                          <button
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${getPropertyTitle(property.property_id)}: ${format(day, 'd MMM yyyy', { locale })}`}
+                            onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleCellClick(day, property.property_id); } }}
                             key={dayIdx}
                             onClick={() => handleCellClick(day, property.property_id)}
                             className={cn(
-                              "flex-shrink-0 border-r last:border-r-0 flex items-end justify-center pb-1 transition-colors",
-                              "hover:bg-muted/50 active:bg-muted",
+                              "h-full flex-shrink-0 border-r last:border-r-0 flex items-end justify-center pb-1 transition-colors",
+                              "hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                               isWeekend && "bg-muted/20",
                               today && "bg-primary/5",
                               cellDocs.length > 0 && "bg-destructive/5",
@@ -368,7 +373,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               {hasCleaning && (
                                 <button
                                   onClick={(e) => cleaningTask && handleTaskIconClick(cleaningTask, e)}
-                                  className="transition-transform"
+                                  className="min-h-6 min-w-6 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring"
                                   aria-label={isRu ? 'Уборка' : 'Cleaning'}
                                 >
                                   <Sparkles className="h-3 w-3 text-info" />
@@ -377,7 +382,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               {hasMaintenance && (
                                 <button
                                   onClick={(e) => maintenanceTask && handleTaskIconClick(maintenanceTask, e)}
-                                  className="transition-transform"
+                                  className="min-h-6 min-w-6 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring"
                                   aria-label={isRu ? 'Ремонт' : 'Maintenance'}
                                 >
                                   <Wrench className="h-3 w-3 text-accent-foreground" />
@@ -416,23 +421,18 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                                 </TooltipProvider>
                               )}
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
 
                       {/* Booking bars overlay */}
                       {propertyBookings.map((booking) => {
-                        const checkIn = new Date(booking.check_in);
-                        const checkOut = new Date(booking.check_out);
-                        const startOffset = Math.max(0, Math.floor((checkIn.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-                        const endOffset = Math.min(DAYS_TO_SHOW, Math.ceil((checkOut.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-                        
-                        if (startOffset >= DAYS_TO_SHOW || endOffset <= 0) return null;
+                        const span = civilStaySpan(booking, startDate, DAYS_TO_SHOW);
+                        if (!span) return null;
+                        const { startOffset, endOffset, isStart, isEnd } = span;
 
                         const left = startOffset * CELL_WIDTH;
                         const width = (endOffset - startOffset) * CELL_WIDTH;
-                        const isStart = checkIn >= startDate;
-                        const isEnd = checkOut <= addDays(startDate, DAYS_TO_SHOW);
                         
                         const guestName = booking.guest_name || '?';
                         const statusColor = booking.status === 'confirmed' 
@@ -449,7 +449,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                             className={cn(
                               "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10 top-1",
                               statusColor,
-                              "hover:opacity-90 hover:shadow-sm transition-all",
+                              "hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring transition-all",
                               isStart && "rounded-none ml-0.5",
                               isEnd && "rounded-none mr-0.5",
                             )}
@@ -457,6 +457,11 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               left: left + (isStart ? 2 : 0),
                               width: width - (isStart ? 2 : 0) - (isEnd ? 2 : 0),
                             }}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${guestName}: ${booking.status}, ${booking.check_in} — ${booking.check_out}`}
+                            title={`${guestName}: ${booking.status}, ${booking.check_in} — ${booking.check_out}`}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setDetailBooking(booking); } }}
                             onClick={(e) => handleBookingBarClick(booking, e)}
                           >
                             <span className="truncate">{guestName}</span>

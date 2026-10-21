@@ -93,9 +93,9 @@ export function CapitalIntroForm({
 
       {showCapitalRange && (
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Капитал' : 'Capital range'}</Label>
+          <Label id="ci-capital-label">{isRu ? 'Капитал' : 'Capital range'}</Label>
           <Select value={capitalRange} onValueChange={(v) => setCapitalRange(v as CapitalRangeBand)}>
-            <SelectTrigger>
+            <SelectTrigger aria-labelledby="ci-capital-label">
               <SelectValue placeholder={isRu ? 'Выберите диапазон' : 'Select range'} />
             </SelectTrigger>
             <SelectContent>
@@ -111,9 +111,9 @@ export function CapitalIntroForm({
 
       {showTimeline && (
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Горизонт' : 'Timeline'}</Label>
+          <Label id="ci-timeline-label">{isRu ? 'Горизонт' : 'Timeline'}</Label>
           <Select value={timeline} onValueChange={(v) => setTimeline(v as CapitalTimeline)}>
-            <SelectTrigger>
+            <SelectTrigger aria-labelledby="ci-timeline-label">
               <SelectValue placeholder={isRu ? 'Когда планируете?' : 'When are you planning?'} />
             </SelectTrigger>
             <SelectContent>

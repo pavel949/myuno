@@ -120,8 +120,8 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
       <footer className="mt-2 pt-2 border-t border-border">
         <p className="text-[11px] text-muted-foreground leading-snug">
           {isRu
-            ? `${MONETIZATION_LABELS.serviceOperator.ru}: myUNO Pte. Ltd. Все суммы фиксируются в реестре операций (аудит-маркер на странице платежа).`
-            : `${MONETIZATION_LABELS.serviceOperator.en}: myUNO Pte. Ltd. All amounts are recorded in the ledger (audit marker shown on the payment screen).`}
+            ? `${MONETIZATION_LABELS.serviceOperator.ru}: Toplight Asia Pacific Co., Ltd. Все суммы фиксируются в реестре операций (аудит-маркер на странице платежа).`
+            : `${MONETIZATION_LABELS.serviceOperator.en}: Toplight Asia Pacific Co., Ltd. All amounts are recorded in the ledger (audit marker shown on the payment screen).`}
         </p>
       </footer>
     </section>

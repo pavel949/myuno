@@ -11,6 +11,7 @@ export const adminRoutes = (
   <>
     <Route path="/admin" element={<Pages.AdminDashboard />} />
     <Route path="/admin/inbox" element={<Pages.AdminInbox />} />
+    <Route path="/admin/review" element={<Pages.AdminReview />} />
     <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
     <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
     <Route path="/admin/master-catalog" element={<Pages.AdminMasterCatalog />} />
@@ -107,6 +108,8 @@ export const adminRoutes = (
     <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
     <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
     <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
+    <Route path="/admin/diagnostics/google-maps" element={<Pages.AdminGoogleMapsDiagnostics />} />
+    <Route path="/admin/settings/google-maps" element={<Pages.AdminGoogleMapsSettings />} />
     <Route path="/admin/official-news" element={<Pages.AdminOfficialNews />} />
   </>
 );

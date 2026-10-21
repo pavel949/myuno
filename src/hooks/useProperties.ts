@@ -2,8 +2,11 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { districtFilterAliases } from '@/lib/taxonomies';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import {
   normalizePropertyTaxonomyArrays,
   normalizeListingAmenities,
@@ -18,6 +21,7 @@ export interface Property {
   description_ru?: string;
   property_type: string;
   listing_type: string;
+  listing_modes?: string[] | null;
   price?: number;
   /** Sale / total asking when listing is for purchase */
   sale_price?: number;
@@ -46,6 +50,7 @@ export interface Property {
   updated_at: string;
   // Unit-specific fields
   project_id?: string;
+  management_company_id?: string | null;
   floor?: number;
   unit_number?: string;
   view_type?: string | null;
@@ -73,6 +78,19 @@ export interface Property {
   pool_type?: string;
   parking_type?: string;
   is_for_sale?: boolean;
+  /** Structured bedrooms/bed configuration (jsonb) used by sleeping arrangements. */
+  rooms?: import('@/integrations/supabase/types').Json | null;
+  /** Number of beds across the unit. */
+  beds?: number | null;
+  // Stay rules (property-level fallbacks for property_rental_terms)
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number | null;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number | null;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number | null;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number | null;
 }
 
 export interface PropertyProject {
@@ -98,7 +116,16 @@ export interface PropertyProject {
 export interface PropertyRentalTerms {
   price_per_night?: number;
   min_stay_nights?: number;
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number;
   max_guests?: number;
+
   deposit_amount?: number;
   deposit_currency?: string;
   deposit_type?: string;
@@ -158,9 +185,9 @@ export interface PropertyRentalTerms {
   max_party_guests?: number;
   quiet_hours_start?: string;
   quiet_hours_end?: string;
-  children_friendly?: boolean;
-  has_crib?: boolean;
-  has_high_chair?: boolean;
+  children_friendly?: boolean | null;
+  has_crib?: boolean | null;
+  has_high_chair?: boolean | null;
   smoking_penalty?: number;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
@@ -215,7 +242,7 @@ const PAGE_SIZE = 20;
  * Using explicit columns instead of select('*') reduces payload ~60%.
  */
 const PROPERTY_LIST_COLUMNS = `
-  id, title_en, title_ru, property_type, listing_type,
+  id, title_en, title_ru, property_type, listing_type, listing_modes,
   price, price_per_night, price_period, currency, bedrooms, bathrooms, area_sqm,
   max_guests, amenities, equipment, images, cover_image, address, district,
   lat, lng, is_active, is_featured, is_verified, instant_booking,
@@ -250,6 +277,7 @@ export const PROPERTY_PUBLIC_DETAIL_COLUMNS = `
   lat, lng, address, district,
   is_active, is_featured, is_verified, approval_status, status,
   available_from, min_stay_nights, min_lease_months,
+  max_stay_nights, advance_notice_hours, preparation_days, booking_window_months,
   rating, review_count,
   created_at, updated_at, approved_at,
   instant_booking, instant_booking_enabled_at,
@@ -303,7 +331,11 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.in('property_type', types);
   }
 
-  if (filters.listingType && filters.listingType !== 'all') {
+  if (filters.listingType === 'sale') {
+    query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
+  } else if (filters.listingType === 'rent') {
+    query = query.or(PUBLIC_RENT_ELIGIBILITY);
+  } else if (filters.listingType && filters.listingType !== 'all') {
     query = query.eq('listing_type', filters.listingType);
   }
 
@@ -323,7 +355,8 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.eq('is_quick_sale', true);
   }
 
-  const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const requestedDistricts = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const dists = [...new Set(requestedDistricts.flatMap(districtFilterAliases))];
   if (dists.length === 1) {
     query = query.eq('district', dists[0]);
   } else if (dists.length > 1) {
@@ -421,7 +454,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
     gcTime: 10 * 60 * 1000,     // 10 min cache
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
@@ -453,7 +486,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
@@ -478,13 +511,7 @@ export function useProperty(id?: string) {
     queryFn: async () => {
       if (!id) return null;
 
-      const { data, error } = await supabase
-        .from('properties')
-        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) throw error;
+      const data = await selectPropertyCatalogFirst(id, PROPERTY_PUBLIC_DETAIL_COLUMNS);
       if (!data) return null;
       return normalizePropertyTaxonomyArrays(data as unknown as Property) as Property;
     },
@@ -503,16 +530,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       // Use the public-safe column list (not select('*')) so anonymous
       // visitors — who only have a column-level GRANT on `properties` — can
       // read the listing. select('*') fails for anon on restricted columns.
-      const { data: rawProperty, error: propError } = await supabase
-        .from('properties')
-        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
-        .eq('id', marketplacePropertyId)
-        .maybeSingle();
-
-      if (propError) {
-        if (propError.code === 'PGRST116') return null;
-        throw propError;
-      }
+      const rawProperty = await selectPropertyCatalogFirst(marketplacePropertyId, PROPERTY_PUBLIC_DETAIL_COLUMNS);
       if (!rawProperty) return null;
 
       // Cast to the full generated Row type: the select() above returns a
@@ -536,12 +554,21 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       const rentalTerms: PropertyRentalTerms = {
         price_per_night: property.price_per_night,
         min_stay_nights: property.min_stay_nights,
+        max_stay_nights: property.max_stay_nights ?? undefined,
+        advance_notice_hours: property.advance_notice_hours ?? undefined,
+        preparation_days: property.preparation_days ?? undefined,
+        booking_window_months: property.booking_window_months ?? undefined,
+
         max_guests: property.max_guests,
         deposit_amount: property.deposit_amount,
         deposit_currency: property.deposit_currency,
         deposit_type: property.deposit_type,
         check_in_time: property.check_in_time,
         check_out_time: property.check_out_time,
+        // Preserve public structured child policy, including unknown legacy values.
+        children_friendly: property.children_friendly,
+        has_crib: property.has_crib,
+        has_high_chair: property.has_high_chair,
         house_rules: property.house_rules,
         house_rules_ru: property.house_rules_ru,
         cancellation_policy: property.cancellation_policy,
@@ -588,7 +615,7 @@ export function useFeaturedProperties(limit = 6) {
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('is_featured', true)
@@ -608,7 +635,7 @@ export function useInstantBookingProperties(limit = 10) {
     queryKey: ['instant-booking-properties', limit],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('instant_booking', true)
@@ -629,16 +656,11 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
     queryKey: ['properties-count', filters],
     queryFn: async () => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id', { count: 'exact', head: true })
         .eq('is_active', true);
 
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
+      query = applyPropertyFiltersToQuery(query, filters);
 
       const { count, error } = await query;
       if (error) throw error;
@@ -648,24 +670,33 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
 }
 
 // Fetch properties by project ID
-export function usePropertiesByProject(projectId?: string, limit = 20) {
+export function usePropertiesByProject(
+  projectId?: string,
+  limit = 20,
+  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {},
+) {
   return useQuery({
-    queryKey: ['properties-by-project', projectId, limit],
+    queryKey: ['properties-by-project', projectId, limit, options.mode, options.managementCompanyId, options.propertyType],
     queryFn: async () => {
-      if (!projectId) return [];
+      if (!projectId) return { properties: [] as Property[], total: 0 };
 
-      const { data, error } = await supabase
-        .from('properties')
-        .select(PROPERTY_LIST_COLUMNS)
-        .eq('project_id', projectId)
-        .eq('is_active', true)
+      // Public projection enforces active, approved, non-deleted inventory.
+      // A project is not an operator: management scope must be explicitly supplied.
+      let query = supabase.from('public_property_catalog')
+        .select(PROPERTY_LIST_COLUMNS, { count: 'exact' })
+        .eq('project_id', projectId);
+      if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
+      if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
+      if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
+      if (options.propertyType) query = query.eq('property_type', options.propertyType);
+      const { data, error, count } = await query
         .order('is_featured', { ascending: false })
-        .order('sale_price', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
       const rows = (data || []) as unknown as Property[];
-      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
+      return { properties: rows.map((p) => normalizePropertyTaxonomyArrays(p)), total: count ?? 0 };
     },
     enabled: !!projectId,
   });

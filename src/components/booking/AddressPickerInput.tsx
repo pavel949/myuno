@@ -96,11 +96,15 @@ export function AddressPickerInput({
     [reverseGeocode]
   );
 
+  // On each open, re-seed from the committed `value` and drop any stale pin from
+  // a prior session that was dismissed without confirming. Coordinates aren't
+  // passed back in as a prop, so they can't be restored — clearing them keeps
+  // the shown address and the map pin from drifting out of sync.
   useEffect(() => {
-    if (!isOpen || !selectedCoords) return;
+    if (!isOpen) return;
     setSelectedAddress(value);
-    setSelectedCoords(selectedCoords);
-  }, [isOpen]);
+    setSelectedCoords(null);
+  }, [isOpen, value]);
 
   const searchLocation = async () => {
     if (!searchQuery.trim()) return;
@@ -159,7 +163,7 @@ export function AddressPickerInput({
   const showMap = hasKey && isLoaded;
   const mapPlaceholder = !hasKey && (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted p-4 text-center text-sm text-muted-foreground">
-      <p>{language === 'ru' ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env' : 'Set VITE_GOOGLE_MAPS_API_KEY in .env'}</p>
+      <p>{language === 'ru' ? 'Подключите Google Maps Platform connector' : 'Connect the Google Maps Platform connector'}</p>
     </div>
   );
 

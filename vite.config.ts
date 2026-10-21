@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
+import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
+import { version } from "./package.json";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Lucide icon strategy:
 // We tried tiered chunking (core/extended/rare) — it didn't reduce the entry
@@ -14,8 +18,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
-  const buildTimestamp = new Date().toISOString();
-
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
   // Hardcoded fallback ensures the app boots on every host (myuno.app,
   // Capacitor native shells, custom deployments) even when build-time env
@@ -30,6 +32,7 @@ export default defineConfig(({ mode, command }) => {
 
   return {
     server: {
+      allowedHosts: ["terminal.local"],
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
@@ -63,7 +66,6 @@ export default defineConfig(({ mode, command }) => {
       port: 8080,
     },
     define: {
-      __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
@@ -73,6 +75,7 @@ export default defineConfig(({ mode, command }) => {
     esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
+      deploymentMetadataPlugin(version),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
       // Applies to `vite` and `vite preview` (both command === "serve"), not to `vite build`
@@ -89,19 +92,26 @@ export default defineConfig(({ mode, command }) => {
         },
       },
       mode === "development" && componentTagger(),
+      mcpPlugin(),
       VitePWA({
-        // Temporary kill-switch worker: clears stale production caches that kept
-        // serving old split chunks, then unregisters itself.
-        strategies: 'injectManifest',
-        srcDir: 'src',
-        filename: 'sw.ts',
+        // Auto-updating Workbox service worker. Two jobs:
+        //  1. Installability — a SW with a fetch handler + the manifest below
+        //     satisfies Chrome/Edge install criteria so `beforeinstallprompt`
+        //     fires and the in-app "Install" button is a genuine one-tap install.
+        //  2. Auto-update without reinstall — each deploy ships a new precache
+        //     revision; the SW installs it in the background, `skipWaiting` +
+        //     `clientsClaim` activate it immediately, and `cleanupOutdatedCaches`
+        //     evicts the old shell. The next reload (driven by VersionWatcher /
+        //     PWAUpdatePrompt) serves the fresh build — no app-store reinstall,
+        //     and the same flow updates the Capacitor WebView shells.
+        // Registered manually in src/main.tsx (production host only).
         registerType: 'autoUpdate',
         injectRegister: false,
-        
+
         manifest: {
-          name: 'myUNO — Phuket SuperApp',
+          name: 'myUNO — Phuket Super-App for Foreigners',
           short_name: 'myUNO',
-          description: 'Digital infrastructure for foreigners in Phuket: rentals, services, legal help and real estate deals in one app.',
+          description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
           // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
           // requires literal CSS color strings; CSS variables are not resolved at
           // install time. Synced 2026-06-18 with DS 2.1 navy palette.
@@ -173,13 +183,69 @@ export default defineConfig(({ mode, command }) => {
         },
         
         includeAssets: ['favicon.ico', 'icons/*.png'],
-        
-        injectManifest: {
-          injectionPoint: undefined,
-          globPatterns: [],
-          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+
+        workbox: {
+          // Precache only the app shell (HTML/CSS/icons/manifest) so install
+          // stays light — the 557-route JS graph is cached at runtime on demand
+          // (see runtimeCaching) instead of force-downloading every chunk up front.
+          globPatterns: ['**/*.{css,html,ico,svg,webmanifest}', 'icons/**/*.png'],
+          // Old precache revisions are content-hashed; remove them on activate so
+          // a stale shell can never be served after a deploy.
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+          // SPA: serve the cached index.html for navigations (incl. offline launch),
+          // which is also what makes the app installable.
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [
+            /^\/api\//,
+            /^\/auth\//,
+            /^\/functions\//,
+            // OAuth broker paths must always hit the network — Lovable's proxy
+            // worker intercepts these on the edge. If the SW returns the SPA
+            // shell instead, Google sign-in dies with a client-side 404.
+            /^\/~oauth(\/|$)/,
+            /\/version\.json$/,
+          ],
+
+          runtimeCaching: [
+            {
+              // Hashed JS/CSS/worker chunks — safe to cache, revalidate in the
+              // background so a new deploy's chunks are picked up without a wipe.
+              urlPattern: ({ request }) =>
+                request.destination === 'script' ||
+                request.destination === 'style' ||
+                request.destination === 'worker',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-assets',
+                plugins: [{ cacheWillUpdate: assetCacheWillUpdate }],
+                expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ request }) => request.destination === 'image',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-images',
+                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ url }) =>
+                url.origin === 'https://fonts.googleapis.com' ||
+                url.origin === 'https://fonts.gstatic.com',
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts',
+                cacheableResponse: { statuses: [0, 200] },
+                expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              },
+            },
+          ],
         },
-        
+
         devOptions: {
           enabled: false,
         },

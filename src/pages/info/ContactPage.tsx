@@ -63,8 +63,8 @@ export default function ContactPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-5xl">
         <PageHeader 
           title={isRu ? 'Контакты' : 'Contact Us'} 
           showBack 
@@ -100,17 +100,17 @@ export default function ContactPage() {
           {departments.map((dept, index) => (
             <Card key={index}>
               <CardContent className="py-4">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   <div className="p-2 rounded-none bg-muted">
                     <dept.icon className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1 basis-48">
                     <h3 className="font-medium">{dept.title}</h3>
                     <p className="text-sm text-muted-foreground">{dept.description}</p>
                   </div>
                   <a 
                     href={`mailto:${dept.email}`}
-                    className="text-sm text-primary hover:underline"
+                    className="min-h-11 inline-flex items-center break-all text-sm text-primary hover:underline"
                   >
                     {dept.email}
                   </a>
@@ -165,7 +165,9 @@ export default function ContactPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               <strong>{COMPANY_CONTACTS.legal.companyName}</strong><br />
-              Tax ID: {COMPANY_CONTACTS.legal.taxId}<br />
+              {COMPANY_CONTACTS.legal.companyNameTh}<br />
+              {isRu ? COMPANY_CONTACTS.legal.addressRu : COMPANY_CONTACTS.legal.addressEn}<br />
+              {COMPANY_CONTACTS.legal.phone} · {COMPANY_CONTACTS.legal.email}<br />
               {isRu 
                 ? `Зарегистрировано в Королевстве ${COMPANY_CONTACTS.legal.registrationCountry}`
                 : `Registered in the Kingdom of ${COMPANY_CONTACTS.legal.registrationCountry}`}

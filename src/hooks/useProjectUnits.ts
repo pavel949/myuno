@@ -5,6 +5,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useLegacyUnitTablesEnabled } from '@/lib/real-estate/unitSourceFlag';
 
 export interface ProjectUnit {
   id: string;
@@ -67,8 +68,10 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
 }
 
 export function useProjectUnits(projectId?: string) {
+  const legacyEnabled = useLegacyUnitTablesEnabled();
+
   return useQuery({
-    queryKey: ['project-units', projectId],
+    queryKey: ['project-units', projectId, legacyEnabled],
     queryFn: async (): Promise<ProjectUnit[]> => {
       if (!projectId) return [];
 
@@ -86,7 +89,10 @@ export function useProjectUnits(projectId?: string) {
         return (data as ProjectUnitRow[]).map(mapRow);
       }
 
-      // Fallback — legacy `development_units` (deprecated, kept for compatibility)
+      // Fallback — legacy `development_units`. Only when the kill-switch flag
+      // `feature_flag:legacy_unit_tables` is on (rollback path).
+      if (!legacyEnabled) return [];
+
       const { data: legacy, error: legacyErr } = await supabase
         .from('development_units')
         .select('*')

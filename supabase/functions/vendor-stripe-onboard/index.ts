@@ -12,20 +12,18 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS, "Content-Type": "application/json" },
-  });
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
+  // Restrict CORS to the allow-listed origins — this endpoint creates Stripe
+  // Connect accounts for vendors and must not be wildcard-open.
+  const CORS = getCorsHeaders(req);
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...CORS, "Content-Type": "application/json" },
+    });
+
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
   try {

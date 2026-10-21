@@ -37,6 +37,7 @@ import {
   DollarSign, Receipt, Save, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function OwnerFinancialForm() {
   const { language } = useLanguage();
@@ -151,7 +152,7 @@ export default function OwnerFinancialForm() {
   const isPending = createFinancial.isPending || updateFinancial.isPending;
 
   if (!user) {
-    navigate('/auth');
+    redirectToAuth(navigate);
     return null;
   }
 

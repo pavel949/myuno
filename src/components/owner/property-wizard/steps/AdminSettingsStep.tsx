@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 /**
  * AdminSettingsStep — Admin-only fields: status, moderation, commission, investment data
  */
@@ -49,37 +50,39 @@ export const AdminSettingsStep = memo(function AdminSettingsStep({ data, onChang
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
-            {isRu ? 'Статус и модерация' : 'Status & Moderation'}
+            {pickLang(language, { en: "Status & Moderation", ru: "Статус и модерация", th: "สถานะและการตรวจสอบ" })}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>{isRu ? 'Активен' : 'Active'}</Label>
-            <Switch checked={data.is_active ?? true} onCheckedChange={v => onChange({ is_active: v })} />
+            <Label htmlFor="admin-property-active">{pickLang(language, { en: "Active", ru: "Активен", th: "ใช้งาน" })}</Label>
+            <Switch id="admin-property-active" checked={data.is_active ?? true} onCheckedChange={v => onChange({ is_active: v })} />
           </div>
           <div className="flex items-center justify-between">
-            <Label>{isRu ? 'Рекомендуемый' : 'Featured'}</Label>
+            <Label>{pickLang(language, { en: "Featured", ru: "Рекомендуемый", th: "แนะนำ" })}</Label>
             <Switch checked={data.is_featured ?? false} onCheckedChange={v => onChange({ is_featured: v })} />
           </div>
           <div className="flex items-center justify-between">
-            <Label>{isRu ? 'Верифицирован' : 'Verified'}</Label>
+            <Label>{pickLang(language, { en: "Verified", ru: "Верифицирован", th: "ตรวจสอบแล้ว" })}</Label>
             <Switch checked={data.is_verified ?? false} onCheckedChange={v => onChange({ is_verified: v })} />
           </div>
           <div>
-            <Label className="text-xs">{isRu ? 'Статус модерации' : 'Approval status'}</Label>
+            <Label htmlFor="admin-property-approval" className="text-xs">{pickLang(language, { en: "Approval status", ru: "Статус модерации", th: "สถานะการอนุมัติ" })}</Label>
             <Select value={data.approval_status || 'pending'} onValueChange={v => onChange({ approval_status: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger id="admin-property-approval"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">{isRu ? 'На модерации' : 'Pending'}</SelectItem>
-                <SelectItem value="approved">{isRu ? 'Одобрен' : 'Approved'}</SelectItem>
-                <SelectItem value="rejected">{isRu ? 'Отклонён' : 'Rejected'}</SelectItem>
+                <SelectItem value="draft">{pickLang(language, { en: "Draft", ru: "Черновик", th: "ฉบับร่าง" })}</SelectItem>
+                <SelectItem value="pending">{pickLang(language, { en: "Pending", ru: "На модерации", th: "รออนุมัติ" })}</SelectItem>
+                <SelectItem value="approved">{pickLang(language, { en: "Approved", ru: "Одобрен", th: "อนุมัติแล้ว" })}</SelectItem>
+                <SelectItem value="rejected">{pickLang(language, { en: "Rejected", ru: "Отклонён", th: "ไม่อนุมัติ" })}</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          <p className="text-sm text-muted-foreground">{pickLang(language, { en: "Only active, approved properties appear in the catalog. Changes take effect after saving.", ru: "В каталоге отображаются только активные одобренные объекты. Изменения вступят в силу после сохранения.", th: "แคตตาล็อกแสดงเฉพาะที่พักที่ใช้งานและอนุมัติแล้ว การเปลี่ยนแปลงจะมีผลหลังบันทึก" })}</p>
           {data.approval_status === 'rejected' && (
             <div>
-              <Label className="text-xs">{isRu ? 'Причина отказа' : 'Rejection reason'}</Label>
-              <Textarea
+              <Label htmlFor="admin-property-rejection" className="text-xs">{pickLang(language, { en: "Rejection reason", ru: "Причина отказа", th: "เหตุผลที่ไม่อนุมัติ" })}</Label>
+              <Textarea id="admin-property-rejection"
                 rows={2}
                 value={data.rejection_reason ?? ''}
                 onChange={e => onChange({ rejection_reason: e.target.value })}
@@ -87,12 +90,12 @@ export const AdminSettingsStep = memo(function AdminSettingsStep({ data, onChang
             </div>
           )}
           <div>
-            <Label className="text-xs">{isRu ? 'Заметки (внутренние)' : 'Notes (internal)'}</Label>
+            <Label className="text-xs">{pickLang(language, { en: "Notes (internal)", ru: "Заметки (внутренние)", th: "หมายเหตุภายใน" })}</Label>
             <Textarea
               rows={2}
               value={data.notes ?? ''}
               onChange={e => onChange({ notes: e.target.value })}
-              placeholder={isRu ? 'Только для администраторов...' : 'Admin-only notes...'}
+              placeholder={pickLang(language, { en: "Admin-only notes...", ru: "Только для администраторов...", th: "หมายเหตุสำหรับผู้ดูแลเท่านั้น..." })}
             />
           </div>
         </CardContent>

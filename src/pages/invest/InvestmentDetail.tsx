@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentProject } from '@/hooks/useInvestmentProjects';
 import { 
-  MuunoScoreWidget, 
+  MyunoScoreWidget, 
   FundingProgress, 
   ScoreBreakdown,
   InterestForm 
@@ -160,9 +160,9 @@ export default function InvestmentDetail() {
               </div>
             )}
 
-            {/* muUNO Score */}
+            {/* myUNO Score */}
             <div className="pt-2 border-t border-border/50">
-              <MuunoScoreWidget
+              <MyunoScoreWidget
                 score={project.muuno_score}
                 size="md"
                 showRisk={false}

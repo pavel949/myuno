@@ -56,6 +56,8 @@ const APPROVED_TOP_LEVEL = new Set<string>([
   '/partner-agreement', '/ip-policy', '/dispute-resolution',
   // ── Misc utility ──
   '/clearview', '/vip', '/account-type',
+  // ── Grandfathered (split-front-door dashboard, referrals, marketplace) ──
+  '/home', '/invite', '/join', '/marketplace', '/bloom',
 ]);
 
 describe('IA Wave-1 — Top-level URL allowlist', () => {

@@ -99,8 +99,8 @@
 
 ## 3. БЛОКИ РАБОТ (по приоритету)
 
-### 🏪 THAI BUSINESS LAYER (Local Services) — за флагом `feature_flag:thai_business_layer` (default OFF)
-**Статус:** MVP в разработке (ветка `claude/thai-services-integration-*`)
+### 🏪 THAI BUSINESS LAYER (Local Services) — флаг `feature_flag:thai_business_layer` (ON с GA 2026-06-24)
+**Статус:** GA — включён (флаг в `system_settings` остаётся kill-switch'ем: `{"enabled": false}` выключает модуль без редеплоя)
 - B2B self-serve кабинет тайского бизнеса (`/vendor/thai-business`) + B2C каталог (`/thai-services`) + лендинги (`/ts/:slug`)
 - Dedicated tables `thai_businesses` / `thai_business_services` / `thai_bookings` / `thai_chats` / `thai_chat_messages` / `thai_business_reviews`
 - Авто-перевод RU↔TH/EN: поля бизнеса/услуг — клиентский вызов `ai-translate`; чат — edge `thai-chat-send` (хранит оригинал + перевод)

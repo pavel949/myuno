@@ -27,8 +27,8 @@ export const P16_ATHLETES: PersonaLanding = {
     { slug: 'gym-matcher', label: { ru: 'Подбор зала', en: 'Gym matcher' }, oneLiner: { ru: 'Tiger / PTT / AKA / Sinbi сравнение по уровню и цене.', en: 'Tiger / PTT / AKA / Sinbi compared by level and price.' }, href: '/cluster/lifestyle' },
     { slug: 'gym-side-housing', label: { ru: 'Жильё рядом с залом', en: 'Gym-side housing' }, oneLiner: { ru: 'Студии в Чалонге и Раваи от 14 ночей, ฿18 000–35 000/мес.', en: 'Studios in Chalong and Rawai from 14 nights, ฿18,000–35,000/mo.' }, href: '/property/rent' },
     { slug: 'ed-visa', label: { ru: 'ED Visa через зал', en: 'ED Visa via gym' }, oneLiner: { ru: 'Education Visa 6 / 12 месяцев через лицензированный зал.', en: 'Education Visa 6 / 12 months via a licensed gym.' }, href: '/visa/quiz' },
-    { slug: 'sports-recovery', label: { ru: 'Sports recovery', en: 'Sports recovery' }, oneLiner: { ru: 'Спорт-массаж ฿1 500, физио ฿2 800, ice bath ฿800.', en: 'Sports massage ฿1,500, physio ฿2,800, ice bath ฿800.' }, href: '/wellness' },
-    { slug: 'athlete-nutrition', label: { ru: 'Питание под cut/bulk', en: 'Athlete nutrition' }, oneLiner: { ru: 'Meal-prep с макросами, доставка к вилле, ฿7 500/неделя.', en: 'Macro-tracked meal-prep, villa delivery, ฿7,500/week.' }, href: '/services/health/nutrition' },
+    { slug: 'sports-recovery', label: { ru: 'Sports recovery', en: 'Sports recovery' }, oneLiner: { ru: 'Спорт-массаж ฿1 500, физио ฿2 800, ice bath ฿800.', en: 'Sports massage ฿1,500, physio ฿2,800, ice bath ฿800.' }, href: '/wellness', availability: 'unavailable' },
+    { slug: 'athlete-nutrition', label: { ru: 'Питание под cut/bulk', en: 'Athlete nutrition' }, oneLiner: { ru: 'Meal-prep с макросами, доставка к вилле, ฿7 500/неделя.', en: 'Macro-tracked meal-prep, villa delivery, ฿7,500/week.' }, href: '/services/health/nutrition', availability: 'unavailable' },
     { slug: 'team-retreat', label: { ru: 'Team retreats', en: 'Team retreats' }, oneLiner: { ru: 'Сборы клуба 8–30 человек: вилла + зал + восстановление.', en: 'Club camps for 8–30 athletes: villa + gym + recovery.' }, href: '/contact' },
   ],
   faq: [
