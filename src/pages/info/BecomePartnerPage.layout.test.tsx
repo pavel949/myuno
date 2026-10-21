@@ -53,7 +53,7 @@ it.each([false, true])('preserves the bounded frame through synthetic submit (er
   expect(container.querySelector('form button[type="submit"]')).not.toBeDisabled();
   expect(fixture.notify).not.toHaveBeenCalled();
  } else {
-  expect(await screen.findByRole('heading', { name: 'Application Received!' })).toBeVisible();
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Application Received!' })).toBeVisible());
   expect(fixture.notify).toHaveBeenCalledWith('notify-admin-partner-application', { body: { application_id: 'synthetic-only' } });
  }
  assertFrame(container);

@@ -22,8 +22,15 @@ describe('React runtime dependency compatibility', () => {
   it('opens and closes the real Vaul drawer without leaving a dialog mounted', async () => {
     render(<StrictMode><Drawer shouldScaleBackground={false}><DrawerTrigger>Open drawer</DrawerTrigger><DrawerContent><DrawerTitle>Account tools</DrawerTitle><DrawerDescription>Available account actions</DrawerDescription><DrawerClose>Close drawer</DrawerClose></DrawerContent></Drawer></StrictMode>);
     fireEvent.click(screen.getByRole('button', { name: 'Open drawer' }));
-    expect(await screen.findByRole('dialog', { name: 'Account tools' })).toBeVisible();
+    const drawer = await screen.findByRole('dialog', { name: 'Account tools' });
+    expect(drawer).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Close drawer' }));
+    expect(drawer).toHaveAttribute('data-state', 'closed');
+    // JSDOM does not run CSS animations. Supply the browser's completion event
+    // while retaining the actual close-state and final unmount assertions.
+    const animationEnd = new Event('animationend', { bubbles: true });
+    Object.defineProperty(animationEnd, 'animationName', { value: getComputedStyle(drawer).animationName });
+    fireEvent(drawer, animationEnd);
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
   it('preserves Radix sheet focus restoration through StrictMode mount/unmount', async () => {

@@ -40,3 +40,11 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium python3 scripts/qa/react-runtim
 ```
 
 The smoke only loads localhost application GETs and supplies synthetic localhost backend GET responses. Every external or POST request is aborted, including read RPCs; no authentication dispatch, production business write, migration, deployment or settings change occurs. This is runtime compatibility evidence, not a hosted catalog/RLS certificate. Without an executable override, Playwright uses its installed Chromium.
+
+## Full-suite regression correction
+
+The first full run at `b508dd36c` passed TypeScript and 3912 tests, but failed five assertions. Four unchanged booking-calendar tests exposed a real nested-popover regression: npm had upgraded Dialog to 1.3.1 while existing Popover components used an older internal focus/dismissal generation. Merely awaiting the calendar did not resolve it. Pinning Dialog to main's React-19-compatible 1.1.17 restores the shared modal contract; all four original calendar tests then pass unchanged. The lockfile no longer carries the unnecessary newer modal primitive graph.
+
+The partner confirmation test now awaits the heading becoming visible through its real Framer entrance transition, retaining the visible-result assertion. The new drawer unit supplies an animationend event because JSDOM does not execute CSS animations; it still asserts the real closed state and final unmount. Native Chromium separately confirms drawer close/unmount and focus restoration at 390 and 1440.
+
+The resulting four focused files pass 12/12, including the original regressions and the head/drawer/sheet/help tests. Fresh exact-head full verification is required; the failed first run is not represented as green.
