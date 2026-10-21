@@ -57,7 +57,9 @@ function ProjectCard({ project, mode, propertyType, language }: {
   const image = [project.cover_image, ...(project.images || [])]
     .map(complexMediaUrl)
     .find((value): value is string => Boolean(value));
-  const href = `${APP_ROUTES.COMPLEX_DETAIL(project.id)}?mode=${mode}`;
+  const portalParams = new URLSearchParams({ mode });
+  if (propertyType) portalParams.set('propertyType', propertyType);
+  const href = `${APP_ROUTES.COMPLEX_DETAIL(project.id)}?${portalParams.toString()}`;
 
   return (
     <article className="home-project-card">
