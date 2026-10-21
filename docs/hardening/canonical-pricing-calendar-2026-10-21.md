@@ -12,6 +12,8 @@ Target: `pavel949/myuno`, Vite app serving myuno.app. The Next.js donor
 - The canonical month grid and editor share `useCalendarPrices`, so unit price
   overrides remain visible even when direct inventory reads are denied.
 - No new price table, pricing authority, currency conversion or inventory writer.
+- Manually entering a date also moves the displayed month. Day-to-price links
+  include a safe return destination preserving the selected civil date.
 - Date ranges sent to SQL are half-open; maximum 366 nights; positive prices
   have at most two decimal places and retain the stored property's currency.
 - Numeric cells show explicit dated prices before discounts; “Rate” means an
@@ -39,7 +41,7 @@ notes, guest details or unrelated properties.
 - Migrations `20261021062539` and `20261021063811` applied transactionally and registered once each in
   `supabase_migrations.schema_migrations`. Postflight: anonymous execute false,
   authenticated execute true, both private authority guards present, pinned path.
-- 60 focused tests pass: editor RPC/confirmation/failure/currency/selection,
+- 62 focused tests pass: editor RPC/confirmation/failure/currency/selection,
   civil ranges, old rates currency/navigation and existing property quote tests.
 - Fresh isolated PostgreSQL fixture exercises actual migration: unit/category
   saves, inventory preservation, half-open dates, stale snapshots, currency

@@ -48,4 +48,12 @@ describe('CalendarPriceEditor', () => {
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2026-10-23');
   expect(screen.getByRole('link',{name:'Open booking calendar'})).toHaveAttribute('href','/mc/calendar?property=property&date=2026-10-21');
  });
+ it('moves the displayed month when a distant date is typed, keeping reads bounded', async () => {
+  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
+  fireEvent.change(screen.getByLabelText('From'),{target:{value:'2028-02-20'}});
+  expect(screen.getByText('February 2028')).toBeInTheDocument();
+  expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2028-02-20');
+  await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-01-31',p_to:'2028-03-14'})));
+ });
+
 });

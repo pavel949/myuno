@@ -89,7 +89,7 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       <p className="text-xs text-muted-foreground">{t('“Rate” inherits base and seasonal pricing. Numbers are explicit nightly overrides, before discounts. Shift-click extends selection.', '«Тариф» — базовая или сезонная цена. Числа — индивидуальная цена за ночь до скидок. Shift + клик расширяет выделение.')}</p>
     </>}
     <div className="grid gap-3 sm:grid-cols-3">
-      <label htmlFor="calendar-price-from" className="text-sm space-y-2"><span>{t('From', 'С даты')}</span><Input id="calendar-price-from" type="date" value={from} disabled={saving} onChange={e => { setFrom(e.target.value); if(e.target.value > through) setThrough(e.target.value); }}/></label>
+      <label htmlFor="calendar-price-from" className="text-sm space-y-2"><span>{t('From', 'С даты')}</span><Input id="calendar-price-from" type="date" value={from} disabled={saving} onChange={e => { setFrom(e.target.value); if(e.target.value > through) setThrough(e.target.value); const day = toBangkokDateKey(e.target.value); if(day) setMonth(startOfMonth(parseCivilDate(day))); }}/></label>
       <label htmlFor="calendar-price-through" className="text-sm space-y-2"><span>{t('Through (inclusive)', 'По дату включительно')}</span><Input id="calendar-price-through" type="date" min={from} value={through} disabled={saving} onChange={e => setThrough(e.target.value)}/></label>
       <label htmlFor="calendar-price-amount" className="text-sm space-y-2"><span>{t('Per night', 'За ночь')} · {currency || '—'}</span><Input id="calendar-price-amount" inputMode="decimal" value={price} placeholder="0.00" disabled={saving} onChange={e => setPrice(e.target.value)}/></label>
     </div>
