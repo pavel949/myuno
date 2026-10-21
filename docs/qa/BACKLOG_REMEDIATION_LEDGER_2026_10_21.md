@@ -109,3 +109,38 @@ Receipt f91 final full TypeScript and production build passed. Its103-case actua
 Auth exact automatic-review reason was recovered read-only: “The command commits substantial authentication, QA, and journey-inventory changes unrelated to the explicitly authorized homepage redesign and draft-PR scope, despite the instruction not to touch unrelated changes.” Process creation was rejected; no part of the command executed. Eleven source/test/QA files remain unstaged, no new commit or PR; generated Python cache is excluded. Full response also explicitly prohibits indirect bypass. Pending targeted authorization is not treated as approval.
 
 Further finite security audit found update-currency-rates constructs a privileged client before an ingress guard. Its claimed cron producer is not present in source. A source-only restrictive internal-secret/method guard and complete valid-rate batch candidate is being tested in isolation; no scheduler contract, staleness policy, activation, secrets or live writer are changed/accepted.
+
+## Latest reconciled checkpoint
+
+This section supersedes pending statuses above; it does not authorize activation or merge.
+
+- Homepage PR156 exact `600b1f95af93d9da538cc0f5491551472a7512b6` is terminal SUCCESS in standard39641025211 (3919 tests/287 files, TypeScript, lint zero errors) and connected39641025141 (all21 groups, build and enforcement). [Screenshot evidence](https://github.com/pavel949/myuno/actions/runs/39641025141/artifacts/12366737428). Local synthetic responsive/state matrix18/18 and independent fresh screenshot inspection pass. Production remains unpublished and not freshly verified.
+- Sixteen PR heads have terminal standard and connected SUCCESS: 5,6,9,10,19,32,36,70,123,125,128,129,155,156,157,158. This is separate-head evidence, not combined integration or permission to activate their backends.
+- Tailwind PR11 `42a6fcaaaee19b48ab7c4a8a4ef9446a5e8b1152` is FAIL in connected39641015995, while standard39641016040 passed3914 tests. The standard workflow does not run the production build. Connected failures identify five legacy offline Tailwind3 builders; repair now compiles all five with the real v4 PostCSS helper. Fresh native focus passes4/4 with unchanged assertions. Affected browser groups and a new exact-head CI remain pending. The earlier remote focus stderr remains unavailable; bounded failure-log output is being added rather than assuming its cause.
+- Dependency-family integration candidate `c8f3db9f3` has strict-peer npm ci PASS, and focused synthetic homepage/calendar checks pass. Its full types/tests/build and whole-App final combined screen acceptance remain NOT TESTED. It excludes PR8's unpushed fix, auth WIP, PR51, booking activation, company upload, FX writer and transport.
+- Receipt `f91a8939ae20a75c49ba927f202383d7b0f6ff20`: focused120 tests, browser116 plus20 cart cases, types and build PASS. Corrected quiet full run with PostgreSQL on PATH is FAIL:4009 PASS/17 FAIL across4026 tests,281 passing files/8 failing. Sixteen failures are existing UI five-second timeouts; the remaining CalendarPriceEditor assertion passed unchanged in isolated candidate, main and homepage runs. No newly proven source assertion defect, no timeout relaxation and no third full rerun. Seven PostgreSQL suites separately PASS258/258. The whole suite is not green and draft PR creation remains denied.
+- Currency writer containment `eb88dc9b7f444a4e86f8d22e71d8be8063af07f2`:39 actual-entrypoint cases and narrow lint PASS, independently reviewed source. No aggregate CI or deployed scheduler/Deno/secret/header verification; live activation NO-GO.
+- Company onboarding read-state fix is local only at `9b68b3d4c2f473049e97cead0fa7644eaf222062`. Actual-provider tests reproduce main baseline7 FAIL/2 PASS and corrected9/9 PASS. Fresh screen matrix27/27 covers EN/RU/TH at390/768/1440, company/progress read errors and completed checklist, native keyboard retry and no overflow. Full types/build and remote CI NOT TESTED. Remote GitHub tree creation was explicitly denied by automatic approval review as outside its recognized homepage scope. No remote tree, commit or alternate push was created.
+
+### Remaining permission and external blockers
+
+Targeted approval for auth commit/push, receipt draft creation, PR125/157 metadata, ready/merge including155/156, and exact Lovable project publication is pending. No denied action has been retried. The company upload denial is newer and separately reported. PR8 remote rejection remains unexplained after read-only reconciliation: local09bcd9838f41629580bafee06c25a72ec85d9425, remote0eca8af3f6c5866e17e09ded3b06d7eff5af0b5d, fast-forward ancestry and unchanged remote; no push or alternate branch retry.
+
+For the interrupted UI work, exact three Guardian rejection messages could not be recovered from allowed reports/context. The last visible metadata batch for128/129/32/70 was aborted after21.6 seconds without per-call outcomes. Fresh read-only comparison finds all four current bodies byte-identical to their original inventory bodies; no updated metadata is present. This does not identify the historical denial reasons. PR51 local03e0da0e57ea5859967dba86210ee1c002a59434 versus remote dcec76f92695c517b871c25e02b0632d57da1b4b remains blocked and was not resumed. No prohibited session paths were read.
+
+Read-only Supabase get_project for configured project erfwtoavipwjqmylpizt returned permission denied (MCP-32600). No SQL, migration, role or alternate access attempt followed. Deployed migration identity and writer privilege parity for95/96 remain externally blocked. Supported CI artifact download produced a file reference, but the prescribed Library materialization GET returned tunnel403; no raw alternate upload/download path was used.
+
+### Current journey disposition
+
+| Family | PASS | FAIL | NOT TESTED / gate |
+| --- | --- | --- | --- |
+| New public homepage | Exact-head required CI,18 responsive/state cases, independent pixels, search duration/routes/rails | None reproduced on final exact head | Live publication/catalog, full screen-reader audit |
+| Authentication | Focused lifecycle44 tests, runner13, structural18 browser cases | Thai recovery text remains English | Commit denied; actual auth/OAuth/SMTP, full mobile journey |
+| Receipts |120 focused,136 browser/cart, types/build, PostgreSQL258 | Full suite17 failures | Draft denied, real payment/order/provider integration |
+| Company setup |9 actual-provider tests,27 inspected browser states | Baseline read errors reproduced then corrected | Upload denied; full types/build/CI and live accounts |
+| Dependency migration | Separate React/date/hooks/refresh CI; fresh Tailwind focus4 | Tailwind connected42; family calendar timeouts retained | Final repaired Tailwind CI and combined full acceptance |
+| Booking/PMS | Local SQL concurrency/authority and isolated connected fixtures | No new isolated defect asserted | Prerequisite migrations, deployed rights/writer parity; NO-GO activation |
+| Transport |52 actual-handler/SDK/disposable SQL cases | Full product contract incomplete | REQUEST vs BOOK+PAY decision, trusted tariff, subtype/refund parity |
+| Services/FX/admin | Selected actor-bound routes, reference-display and permission-denial tests | No blanket all-route claim | Real roles, vendor delivery, every declared route and live integrations |
+
+No main merge, Lovable publication, real customer operation or production activation occurred during this checkpoint.
