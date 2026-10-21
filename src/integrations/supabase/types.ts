@@ -37067,6 +37067,15 @@ export type Database = {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
       }
+      get_property_calendar_prices: {
+        Args: {
+          p_category_id: string
+          p_from: string
+          p_property_id: string
+          p_to: string
+        }
+        Returns: Json
+      }
       get_property_date_prices: {
         Args: { _from: string; _property_id: string; _to: string }
         Returns: {
@@ -37377,6 +37386,18 @@ export type Database = {
           orders_checked: number
           unresolved_alerts: number
         }[]
+      }
+      set_property_calendar_price: {
+        Args: {
+          p_category_id: string
+          p_currency: string
+          p_expected: Json
+          p_from: string
+          p_price: number
+          p_property_id: string
+          p_to: string
+        }
+        Returns: Json
       }
       set_user_pin: {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
