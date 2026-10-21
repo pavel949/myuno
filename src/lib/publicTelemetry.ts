@@ -12,7 +12,7 @@ export function canLoadPublicTelemetry(options: {
   if (!options.enabled || !options.production || !options.consent) return false;
   try {
     const url = new URL(options.href);
-    const knownHost = url.hostname === 'myuno.app' || url.hostname === 'www.myuno.app' || url.hostname.endsWith('.vercel.app');
+    const knownHost = url.hostname === 'myuno.app' || url.hostname === 'www.myuno.app';
     // Avoid loading a same-origin script with potentially sensitive query/hash in its referrer.
     return url.protocol === 'https:' && knownHost && !url.search && !url.hash && isPublicTelemetryPath(url.pathname);
   } catch { return false; }
@@ -26,6 +26,8 @@ export function sanitizePublicTelemetry<T extends { url: string }>(event: T, cur
     if (url.origin !== current.origin || !isPublicTelemetryPath(current.pathname) || !isPublicTelemetryPath(url.pathname)) return null;
     url.search = '';
     url.hash = '';
-    return { ...event, url: url.href };
+    return 'route' in event
+      ? { ...event, url: url.href, route: url.pathname }
+      : { ...event, url: url.href };
   } catch { return null; }
 }

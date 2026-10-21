@@ -13,12 +13,15 @@ describe('optional public telemetry boundary', () => {
     expect(sanitizePublicTelemetry({ url: href }, href, true)).toBeNull();
     expect(sanitizePublicTelemetry({ url: ready.href }, href, true)).toBeNull();
   });
-  it.each(['http://www.myuno.app/', 'https://localhost/', 'https://unrelated.example/', 'https://www.myuno.app/?token=secret', 'https://www.myuno.app/#access_token=secret'])('does not inject scripts from unsafe initial context %s', href => {
+  it.each(['http://www.myuno.app/', 'https://localhost/', 'https://unrelated.example/', 'https://myuno-preview.vercel.app/', 'https://www.myuno.app/?token=secret', 'https://www.myuno.app/#access_token=secret'])('does not inject scripts from unsafe initial context %s', href => {
     expect(canLoadPublicTelemetry({ ...ready, href })).toBe(false);
   });
   it('removes query/hash data without changing the public pathname', () => {
     const event = { url: 'https://www.myuno.app/property/search?name=private#access_token=secret', type: 'pageview' };
     expect(sanitizePublicTelemetry(event, ready.href, true)).toEqual({ ...event, url: 'https://www.myuno.app/property/search' });
+  });
+  it('sanitizes the optional Speed Insights route field too', () => {
+    expect(sanitizePublicTelemetry({ url: ready.href, route: '/mc/private-id?token=secret' }, ready.href, true)).toEqual({ url: ready.href, route: '/' });
   });
   it('drops queued events after consent is withdrawn or current route becomes private', () => {
     const event = { url: ready.href };
