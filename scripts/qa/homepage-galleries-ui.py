@@ -152,7 +152,7 @@ async def main():
             if state=='error':
                 await expect(page.get_by_role('alert')).to_have_count(5)
                 await page.get_by_role('button',name='Try again').first.click()
-                assert await page.evaluate('window.fixtureRetries') == 1
+                assert await page.evaluate('window.fixtureRetries') == 2
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
                 await expect(page.get_by_text('No published experiences yet. Check back later.')).to_be_visible()
