@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Building2, MapPin, Search } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -36,20 +36,39 @@ const copy = {
   noImage: { ru: 'Фото скоро появится', en: 'Photo coming soon', th: 'กำลังเพิ่มรูปภาพ' },
 } as const;
 
+function formatListingCount(total: number, language: string) {
+  const amount = new Intl.NumberFormat(language).format(total);
+  if (language === 'ru') {
+    const lastTwo = total % 100;
+    const last = total % 10;
+    const word = lastTwo >= 11 && lastTwo <= 14 ? 'предложений' : last === 1 ? 'предложение' : last >= 2 && last <= 4 ? 'предложения' : 'предложений';
+    return amount + ' ' + word;
+  }
+  if (language === 'th') return amount + ' ที่พัก';
+  return amount + ' ' + (total === 1 ? 'listing' : 'listings');
+}
+
 function projectLocation(project: PropertyProject) {
   return project.location_area || project.district || '';
 }
 
-function ProjectCard({ project, mode, propertyType, language }: {
+function ProjectCard({ project, mode, propertyType, language, queryKey, onCount, hidden }: {
   project: PropertyProject;
   mode: ListingMode;
   propertyType: string;
   language: string;
+  queryKey: string;
+  onCount: (projectId: string, queryKey: string, total: number | null) => void;
+  hidden: boolean;
 }) {
   const count = usePropertiesByProject(project.id, 1, {
     mode,
     propertyType: propertyType || undefined,
   });
+  useEffect(() => {
+    if (count.isSuccess) onCount(project.id, queryKey, count.data?.total ?? 0);
+    else if (count.isError) onCount(project.id, queryKey, null);
+  }, [count.data?.total, count.isError, count.isSuccess, onCount, project.id, queryKey]);
   const isRu = language === 'ru';
   const lang = language === 'ru' ? 'ru' : 'en';
   const name = (isRu ? project.name_ru : project.name_en) || project.name_en || project.name_ru;
@@ -62,7 +81,7 @@ function ProjectCard({ project, mode, propertyType, language }: {
   const href = `${APP_ROUTES.COMPLEX_DETAIL(project.id)}?${portalParams.toString()}`;
 
   return (
-    <article className="home-project-card">
+    <article hidden={hidden} className="home-project-card">
       <Link to={href} className="home-project-card-link" aria-label={`${name} — ${copy.open[isRu ? 'ru' : 'en']}`}>
         <div className="home-project-card-image">
           {image ? <img src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}</span></div>}
@@ -72,7 +91,7 @@ function ProjectCard({ project, mode, propertyType, language }: {
           <h3>{name}</h3>
           <p className="home-project-count" aria-live="polite">
             {count.isLoading ? '…' : count.isError ? copy.countError[isRu ? 'ru' : language === 'th' ? 'th' : 'en'] : count.data?.total
-              ? `${count.data.total} ${isRu ? 'предложений' : language === 'th' ? 'ที่พัก' : 'listings'}`
+              ? formatListingCount(count.data.total, language)
               : copy.noInventory[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}
             {!count.isLoading && !count.isError && count.data?.total ? <span>{copy.countNote[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}</span> : null}
           </p>
@@ -87,13 +106,24 @@ export function HomeProjectGallery() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const lang = isRu ? 'ru' : language === 'th' ? 'th' : 'en';
-  const { data: projects, isLoading, isError, refetch } = usePublicPropertyProjects(24);
+  const { data: projects, isLoading, isError, refetch } = usePublicPropertyProjects(12);
   const { propertyTypes } = usePropertyFilterOptions();
   const [search, setSearch] = useState('');
   const [district, setDistrict] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [mode, setMode] = useState<ListingMode>('rent');
-  const [showAll, setShowAll] = useState(false);
+  const [inventory, setInventory] = useState<{ key: string; values: Record<string, number | null> }>({ key: '', values: {} });
+  const countKey = String(mode) + ':' + propertyType;
+  const activeCountKey = useRef(countKey);
+  activeCountKey.current = countKey;
+  const reportCount = useCallback((projectId: string, queryKey: string, total: number | null) => {
+    if (activeCountKey.current !== queryKey) return;
+    setInventory((previous) => {
+      const values = previous.key === queryKey ? previous.values : {};
+      if (values[projectId] === total) return previous;
+      return { key: queryKey, values: { ...values, [projectId]: total } };
+    });
+  }, []);
   const rows = projects || [];
 
   const districts = useMemo(() => {
@@ -111,7 +141,9 @@ export function HomeProjectGallery() {
     });
   }, [rows, search, district, language]);
 
-  const visible = showAll ? filtered : filtered.slice(0, 6);
+  const countsForFilter = inventory.key === countKey ? inventory.values : {};
+  const visibleResults = filtered.filter((project) => !propertyType || countsForFilter[project.id] == null || countsForFilter[project.id]! > 0);
+  const inventoryReady = !propertyType || filtered.every((project) => Object.prototype.hasOwnProperty.call(countsForFilter, project.id));
 
   return (
     <section className="home-projects home-container" aria-labelledby="home-projects-title">
@@ -126,18 +158,18 @@ export function HomeProjectGallery() {
       <div className="home-project-filters" aria-label={isRu ? 'Фильтры комплексов' : language === 'th' ? 'ตัวกรองโครงการ' : 'Community filters'}>
         <label className="home-project-search">
           <span className="home-field-label">{copy.search[lang]}</span>
-          <span className="home-project-search-control"><Search size={17} aria-hidden="true" /><input type="search" value={search} onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} placeholder={isRu ? 'Например, Лаян' : language === 'th' ? 'เช่น ลายัน' : 'For example, Layan'} /></span>
+          <span className="home-project-search-control"><Search size={17} aria-hidden="true" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={isRu ? 'Например, Лаян' : language === 'th' ? 'เช่น ลายัน' : 'For example, Layan'} /></span>
         </label>
         <label className="home-project-filter">
           <span className="home-field-label">{copy.area[lang]}</span>
-          <select value={district} onChange={(event) => { setDistrict(event.target.value); setShowAll(false); }} aria-label={copy.area[lang]}>
+          <select value={district} onChange={(event) => setDistrict(event.target.value)} aria-label={copy.area[lang]}>
             <option value="">{copy.allAreas[lang]}</option>
             {districts.map((value) => <option key={value} value={value}>{getDistrictLabel(value, isRu ? 'ru' : 'en')}</option>)}
           </select>
         </label>
         <label className="home-project-filter">
           <span className="home-field-label">{copy.homeType[lang]}</span>
-          <select value={propertyType} onChange={(event) => { setPropertyType(event.target.value); setShowAll(false); }} aria-label={copy.homeType[lang]}>
+          <select value={propertyType} onChange={(event) => setPropertyType(event.target.value)} aria-label={copy.homeType[lang]}>
             <option value="">{copy.allTypes[lang]}</option>
             {propertyTypes.map((option) => <option key={option.id} value={option.id}>{isRu ? option.labelRu : option.labelEn}</option>)}
           </select>
@@ -150,12 +182,11 @@ export function HomeProjectGallery() {
         </div>
       </div>
 
-      {isLoading ? <p className="home-project-state" role="status">{copy.loading[lang]}</p> : isError ? <div className="home-project-state" role="alert"><p>{copy.error[lang]}</p><button type="button" onClick={() => refetch()}>{copy.retry[lang]}</button></div> : filtered.length === 0 ? <p className="home-project-state" role="status">{copy.noProjects[lang]}</p> : <>
-        <p className="home-project-result-count">{filtered.length} {copy.resultCount[lang]}</p>
+      {isLoading ? <p className="home-project-state" role="status">{copy.loading[lang]}</p> : isError ? <div className="home-project-state" role="alert"><p>{copy.error[lang]}</p><button type="button" onClick={() => refetch()}>{copy.retry[lang]}</button></div> : filtered.length === 0 || inventoryReady && visibleResults.length === 0 ? <p className="home-project-state" role="status">{copy.noProjects[lang]}</p> : <>
+        <p className="home-project-result-count">{visibleResults.length} {copy.resultCount[lang]}</p>
         <div className="home-project-grid">
-          {visible.map((project) => <ProjectCard key={project.id} project={project} mode={mode} propertyType={propertyType} language={language} />)}
+          {filtered.map((project) => <ProjectCard key={project.id} project={project} mode={mode} propertyType={propertyType} language={language} queryKey={countKey} onCount={reportCount} hidden={Boolean(propertyType && countsForFilter[project.id] === 0)} />)}
         </div>
-        {filtered.length > 6 && <button type="button" className="home-project-more" onClick={() => setShowAll((value) => !value)}>{showAll ? copy.less[lang] : copy.more[lang]}</button>}
       </>}
     </section>
   );
