@@ -198,3 +198,10 @@ it('keeps Kamala, Surin and Bang Tao discoverable even without catalog photos', 
   expect(screen.getAllByText('Area photograph not available yet')).toHaveLength(3);
   expect(screen.queryByText(/available units|popular|rating/i)).toBeNull();
 });
+
+it('does not relabel a stock catalog illustration as an area photograph', () => {
+  state.projects = [{ district: 'Surin', name_en: 'Published Surin community', cover_image: 'https://images.unsplash.com/photo-example' }];
+  show();
+  expect(document.querySelector('.home-locations img')).toBeNull();
+  expect(screen.getByRole('link', { name: /Published Surin community/ })).toHaveAttribute('href', '/area/surin');
+});

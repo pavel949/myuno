@@ -77,6 +77,16 @@ function CatalogPhoto({ image }: { image?: string | null }) {
   );
 }
 
+/** Stock catalog illustrations must not be presented as neighborhood photography. */
+function areaProjectPhoto(project?: { cover_image?: string | null; images?: string[] | null }) {
+  return [project?.cover_image, ...(project?.images ?? [])].find(value => {
+    const safe = complexMediaUrl(value);
+    if (!safe) return false;
+    const host = new URL(safe).hostname;
+    return !/(^|\.)(unsplash\.com|pexels\.com|pixabay\.com)$/.test(host);
+  });
+}
+
 export function HomeLocationGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
@@ -106,8 +116,8 @@ export function HomeLocationGallery() {
     {(projects.isLoading || surin.isLoading || projects.isError || surin.isError) && <CatalogState loading={projects.isLoading || surin.isLoading} error={projects.isError || surin.isError} retry={retry} empty={{ ru: 'Фото районов пока нет.', en: 'Area photographs are not available yet.', th: 'ยังไม่มีภาพย่าน' }} />}
     <HorizontalRail label={title}>
       {areas.map(({ slug, district, project }) => <Link className="home-location-card home-location-card--editorial" key={slug} to={R.AREA_DETAIL(slug)}>
-        <CatalogPhoto image={project?.cover_image || project?.images?.[0]} />
-        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{project ? <>{t(project.cover_image || project.images?.[0] ? { ru: 'На фото — комплекс', en: 'Pictured community', th: 'โครงการในภาพ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</> : t({ ru: 'Фото района пока нет', en: 'Area photograph not available yet', th: 'ยังไม่มีภาพย่าน' })}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
+        <CatalogPhoto image={areaProjectPhoto(project)} />
+        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{project ? <>{t(areaProjectPhoto(project) ? { ru: 'Фото из карточки комплекса', en: 'Image from the community catalog', th: 'ภาพจากรายการโครงการ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</> : t({ ru: 'Фото района пока нет', en: 'Area photograph not available yet', th: 'ยังไม่มีภาพย่าน' })}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
       </Link>)}
     </HorizontalRail>
   </section>;
