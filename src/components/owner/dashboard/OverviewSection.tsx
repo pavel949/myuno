@@ -135,7 +135,7 @@ export function OverviewBlock({
                     key={item.id}
                     type="button"
                     onClick={() => navigate(item.href || ctaHref)}
-                    className="flex min-h-11 w-full items-start gap-2 border bg-card p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex min-h-11 w-full items-start gap-2 border bg-card p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <ItemIcon className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden />
                     <div className="min-w-0 flex-1 space-y-1">

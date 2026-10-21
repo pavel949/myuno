@@ -56,7 +56,7 @@ export function MapListBottomSheet({
           aria-label="Список локаций"
           className={cn(
             'fixed inset-x-0 bottom-0 z-30 flex flex-col bg-background border-t border-border shadow-2xl',
-            'h-[92dvh] outline-none lg:hidden',
+            'h-[92dvh] outline-hidden lg:hidden',
             className,
           )}
         >

@@ -194,7 +194,7 @@ export default function NavigatorPageV3() {
             <button
               type="button"
               onClick={() => setRoleSheetOpen(true)}
-              className="inline-flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium border border-border text-foreground hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors shrink-0 min-h-[44px]"
+              className="inline-flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium border border-border text-foreground hover:border-primary/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary transition-colors shrink-0 min-h-[44px]"
               aria-label={t('discover.editRole')}
             >
               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -218,7 +218,7 @@ export default function NavigatorPageV3() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('discover.search.placeholder')}
                 className={cn(
-                  'w-full pl-[46px] pr-12 py-3.5 text-[14px] outline-none',
+                  'w-full pl-[46px] pr-12 py-3.5 text-[14px] outline-hidden',
                   'border border-border bg-card text-foreground placeholder:text-muted-foreground',
                   'focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
                 )}
@@ -319,7 +319,7 @@ export default function NavigatorPageV3() {
             <button
               type="button"
               onClick={() => setShowMore((v) => !v)}
-              className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-border text-[13px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-border text-[13px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary transition-colors"
             >
               {showMore ? t('discover.showLess') : t('discover.moreAreas').replace('{count}', String(visibleClusters.rest.length))}
               <ChevronDown

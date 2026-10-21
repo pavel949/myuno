@@ -117,7 +117,7 @@ export const MiniAppCard: React.FC<MiniAppCardProps> = ({
       className={cn(
         'group relative flex flex-col gap-2 p-3 min-h-[124px]',
         'border border-border bg-card hover:border-primary/50 hover:bg-primary/[0.03]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
         'transition-colors',
         isSoon && 'opacity-75',
       )}

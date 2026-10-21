@@ -17,7 +17,7 @@ export function AdminKPIGrid() {
     { title: pickLang(language, { en: 'Listings & properties pending review', ru: 'Объявления и объекты на проверке', th: 'รายการและที่พักรอตรวจสอบ' }), value: data?.pendingContent, href: '/admin/operations?tab=moderation' },
   ];
   return <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    {kpis.map(kpi => <Link key={kpi.href} to={kpi.href} className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    {kpis.map(kpi => <Link key={kpi.href} to={kpi.href} className="min-w-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
       <Surface variant="card" padding="md" radius="xl" className="h-full transition-colors hover:bg-muted/30">
         <p className="text-sm text-muted-foreground">{kpi.title}</p>
         {isLoading ? <Skeleton className="mt-2 h-8 w-16" /> : <p className="mt-2 break-words text-2xl font-semibold">{kpi.value ?? unavailable}</p>}

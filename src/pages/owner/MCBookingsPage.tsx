@@ -421,7 +421,7 @@ export default function MCBookingsPage() {
             return (
               <Card
                 key={booking.id}
-                className="cursor-pointer min-w-0 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="cursor-pointer min-w-0 hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 tabIndex={0}
                 role="group"
                 aria-label={isRu ? `Бронирование: ${guestName}` : `Booking: ${guestName}`}

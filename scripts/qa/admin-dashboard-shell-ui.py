@@ -221,6 +221,9 @@ async def main():
             except Exception as error:
                 row.update(error=str(error), runtimeErrors=errors, blocked=blocked,
                     focus=await page.evaluate('document.activeElement?.outerHTML.slice(0,600)'))
+                diagnostic = {'language': lang, 'width': width, 'state': state,
+                    'error': row['error'], 'focus': row['focus']}
+                print('Admin shell fixture failure: ' + json.dumps(diagnostic, ensure_ascii=False)[:6000], flush=True)
             rows.append(row)
             (OUTPUT / 'results.json').write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
             await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{state}-{row["outcome"]}.png'), full_page=True)

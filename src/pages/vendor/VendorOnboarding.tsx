@@ -255,7 +255,7 @@ const VendorOnboarding = () => {
                       placeholder=" "
                       autoFocus
                       className={cn(
-                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-none",
+                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-hidden",
                         "focus:ring-2 focus:ring-inset focus:ring-primary/50",
                         "placeholder-transparent"
                       )}
@@ -285,7 +285,7 @@ const VendorOnboarding = () => {
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder=" "
                       className={cn(
-                        "peer w-full pl-10 pr-4 pt-7 pb-2 text-base bg-card border-0 outline-none",
+                        "peer w-full pl-10 pr-4 pt-7 pb-2 text-base bg-card border-0 outline-hidden",
                         "focus:ring-2 focus:ring-inset focus:ring-primary/50",
                         "placeholder-transparent"
                       )}
@@ -362,7 +362,7 @@ const VendorOnboarding = () => {
                       placeholder=" "
                       autoFocus
                       className={cn(
-                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-none",
+                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-hidden",
                         "focus:ring-2 focus:ring-inset focus:ring-primary/50",
                         "placeholder-transparent"
                       )}
@@ -393,7 +393,7 @@ const VendorOnboarding = () => {
                       onChange={(e) => setServicePrice(e.target.value)}
                       placeholder=" "
                       className={cn(
-                        "peer w-full pl-9 pr-4 pt-7 pb-2 text-base bg-card border-0 outline-none",
+                        "peer w-full pl-9 pr-4 pt-7 pb-2 text-base bg-card border-0 outline-hidden",
                         "focus:ring-2 focus:ring-inset focus:ring-primary/50",
                         "placeholder-transparent",
                         "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -423,7 +423,7 @@ const VendorOnboarding = () => {
                       placeholder=" "
                       rows={2}
                       className={cn(
-                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-none resize-none",
+                        "peer w-full px-4 pt-7 pb-2 text-base bg-card border-0 outline-hidden resize-none",
                         "focus:ring-2 focus:ring-inset focus:ring-primary/50",
                         "placeholder-transparent"
                       )}

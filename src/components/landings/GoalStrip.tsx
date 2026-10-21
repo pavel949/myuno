@@ -30,7 +30,7 @@ export function GoalStrip() {
             <Link
               key={id}
               to={g.path}
-              className="group flex min-h-24 flex-col justify-between border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group flex min-h-24 flex-col justify-between border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Icon className="size-5 text-primary" aria-hidden />
               <span className="mt-3 flex items-center justify-between font-medium text-foreground">

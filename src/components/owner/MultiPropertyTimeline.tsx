@@ -362,7 +362,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                             onClick={() => handleCellClick(day, property.property_id)}
                             className={cn(
                               "h-full flex-shrink-0 border-r last:border-r-0 flex items-end justify-center pb-1 transition-colors",
-                              "hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                              "hover:bg-muted/50 active:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                               isWeekend && "bg-muted/20",
                               today && "bg-primary/5",
                               cellDocs.length > 0 && "bg-destructive/5",

@@ -304,7 +304,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
             compact && "h-11 w-11 justify-center p-0 md:w-auto md:pl-3 md:pr-1.5",
             "border border-border/60 bg-background hover:shadow-md",
             "transition-all duration-200 cursor-pointer",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           )}
         >
           <Menu className={cn("w-4 h-4 text-foreground/70", compact && "hidden md:block")} />

@@ -556,7 +556,7 @@ export default function Auth() {
                         placeholder="your@email.com"
                         className={cn(
                           "w-full h-12 pl-10 pr-4 rounded-none bg-secondary border transition-colors",
-                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                          "focus:outline-hidden focus:ring-2 focus:ring-primary/50 focus:border-primary",
                           errors.email ? "border-destructive" : "border-border"
                         )}
                       />
@@ -578,7 +578,7 @@ export default function Auth() {
                         placeholder="••••••••"
                         className={cn(
                           "w-full h-12 pl-10 pr-12 rounded-none bg-secondary border transition-colors",
-                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                          "focus:outline-hidden focus:ring-2 focus:ring-primary/50 focus:border-primary",
                           errors.password ? "border-destructive" : "border-border"
                         )}
                       />
@@ -758,7 +758,7 @@ export default function Auth() {
                               placeholder="••••••••"
                               className={cn(
                                 "w-full h-12 bg-transparent border-0 border-b-2 px-0 pr-10 text-base transition-colors",
-                                "focus:outline-none focus:ring-0",
+                                "focus:outline-hidden focus:ring-0",
                                 errors.password ? "border-b-destructive" : "border-b-border focus:border-b-primary"
                               )}
                             />
@@ -790,7 +790,7 @@ export default function Auth() {
                               placeholder="••••••••"
                               className={cn(
                                 "w-full h-12 bg-transparent border-0 border-b-2 px-0 pr-10 text-base transition-colors",
-                                "focus:outline-none focus:ring-0",
+                                "focus:outline-hidden focus:ring-0",
                                 errors.confirmPassword ? "border-b-destructive" : "border-b-border focus:border-b-primary"
                               )}
                             />

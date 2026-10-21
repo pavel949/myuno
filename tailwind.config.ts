@@ -16,7 +16,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
  * Anything between 2px and 9999px is forbidden by canon §5.
  */
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {

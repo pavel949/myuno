@@ -67,7 +67,7 @@ export function ServiceCard({ service, onClick, compact = false }: ServiceCardPr
   const description = (language === 'ru' ? service.description_ru : service.description_en) || service.description_en;
   const image = service.images?.[0];
   return <button type="button" onClick={onClick} className={cn(
-    'flex shrink-0 snap-center flex-col overflow-hidden border border-border bg-card text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'flex shrink-0 snap-center flex-col overflow-hidden border border-border bg-card text-left transition-shadow hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     compact ? 'w-[180px]' : 'w-[240px]'
   )}>
     <span className="relative flex h-28 w-full items-center justify-center border-b border-border bg-muted/50">

@@ -39,6 +39,7 @@ FIXTURE_SPECS = (
     ('home-search-ui', 'home-search-isolated'),
     ('homepage-galleries-ui', 'homepage-galleries-isolated'),
     ('guest-complex-ui', 'guest-complex-isolated'),
+    ('tailwind-focus-ui', 'tailwind-focus-isolated'),
 )
 
 
@@ -126,6 +127,14 @@ def run_suite(fixtures, evidence_root, timeout_seconds=FIXTURE_TIMEOUT_SECONDS, 
                 except OSError as error:
                     result.update(outcome='FAIL', error=f'Cannot record fixture evidence: {error}')
                 results.append(result)
+                if result.get('outcome') != 'PASS' and fixture.script.name == 'tailwind-focus-ui.mjs':
+                    # Keep assertion failures visible when artifact downloads are
+                    # unavailable. This never changes the failed outcome.
+                    try:
+                        tail = (fixture.output / 'fixture.log').read_text(errors='replace')[-6000:]
+                        print('Tailwind focus failure diagnostic (last 6000 characters):\n' + tail, flush=True)
+                    except OSError as error:
+                        print(f'Cannot read Tailwind focus diagnostic: {error}', flush=True)
                 line = f"{fixture.script}: {result['outcome']}"
                 if result.get('error'):
                     line += f" ({result['error']})"

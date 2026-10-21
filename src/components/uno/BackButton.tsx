@@ -55,7 +55,7 @@ export function BackButton({
       aria-label="Go back"
       className={cn(
         "flex items-center justify-center rounded-full transition-all duration-200",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         "touch-manipulation",
         sizeClasses[size],
         variantClasses[variant],

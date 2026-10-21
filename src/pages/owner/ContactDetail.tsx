@@ -159,7 +159,7 @@ function InlineEditableText({
             setEditing(false);
           }
         }}
-        className="w-full bg-transparent border-b border-primary outline-none text-sm py-0.5"
+        className="w-full bg-transparent border-b border-primary outline-hidden text-sm py-0.5"
         placeholder={placeholder}
       />
     );

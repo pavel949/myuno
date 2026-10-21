@@ -87,7 +87,7 @@ export function PageHeader({
               {bc.href ? (
                 <button
                   onClick={() => navigate(bc.href!)}
-                  className="hover:text-foreground transition-colors truncate max-w-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="hover:text-foreground transition-colors truncate max-w-[120px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {bc.label}
                 </button>
@@ -109,7 +109,7 @@ export function PageHeader({
                 'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
                 'hover:bg-secondary transition-all touch-manipulation flex-shrink-0',
                 'h-[var(--touch-target)] w-[var(--touch-target)]',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
               )}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -145,7 +145,7 @@ export function PageHeader({
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all ',
                         'h-[var(--touch-target)] px-3',
-                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                        'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
                         a.variant === 'primary'
                           ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
                           : 'bg-secondary text-foreground hover:bg-secondary/80',
@@ -165,7 +165,7 @@ export function PageHeader({
                           'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
                           'hover:bg-secondary transition-all ',
                           'h-[var(--touch-target)] w-[var(--touch-target)]',
-                          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                          'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
                         )}
                       >
                         <MoreVertical className="w-5 h-5" />

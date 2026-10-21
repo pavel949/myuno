@@ -168,7 +168,7 @@ export function BookingContactForm({
             aria-invalid={hasError || undefined}
             aria-describedby={hasError ? errorId : undefined}
             className={cn(
-              "w-full bg-transparent outline-none text-sm text-foreground pl-11 pr-10",
+              "w-full bg-transparent outline-hidden text-sm text-foreground pl-11 pr-10",
               hasFloatingLabel ? "pt-5 pb-2" : "py-3.5",
             )}
           />
@@ -271,7 +271,7 @@ export function BookingContactForm({
               onFocus={() => handleFocus('notes')}
               placeholder=""
               className={cn(
-                "w-full bg-transparent outline-none text-sm text-foreground pl-11 pr-4 pt-5 pb-3 min-h-[80px] resize-none",
+                "w-full bg-transparent outline-hidden text-sm text-foreground pl-11 pr-4 pt-5 pb-3 min-h-[80px] resize-none",
               )}
             />
           </div>

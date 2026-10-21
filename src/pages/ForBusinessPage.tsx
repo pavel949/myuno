@@ -433,7 +433,7 @@ export default function ForBusinessPage() {
               {href:'/legal/company',title:{ru:'Регистрация компании',en:'Company formation',th:'จดทะเบียนบริษัท'},description:{ru:'Структура владения, документы и порядок регистрации.',en:'Ownership structure, documents and registration process.',th:'โครงสร้างผู้ถือหุ้น เอกสาร และขั้นตอนจดทะเบียน'}},
               {href:'/legal/tax',title:{ru:'Налоговое сопровождение',en:'Tax support',th:'การดูแลด้านภาษี'},description:{ru:'Налоговая ситуация и отчётность; уточните задачи по бухгалтерскому сопровождению.',en:'Tax situation and reporting; discuss your accounting support requirements.',th:'สถานะภาษี การรายงาน และการดูแลต่อเนื่อง'}},
               {href:'/legal',title:{ru:'Юридическое сопровождение',en:'Legal support',th:'บริการด้านกฎหมาย'},description:{ru:'Выберите специалиста и обсудите вашу задачу.',en:'Choose a specialist and discuss your requirements.',th:'เลือกผู้เชี่ยวชาญและปรึกษาความต้องการของคุณ'}},
-            ].map(item=><Link key={item.href} to={item.href} className="group min-w-0 border border-border bg-card p-6 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            ].map(item=><Link key={item.href} to={item.href} className="group min-w-0 border border-border bg-card p-6 hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
               <h3 className="text-lg leading-snug mb-2">{t(item.title)}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{t(item.description)}</p>
               <ArrowRight aria-hidden className="mt-4 h-5 w-5" />

@@ -37,7 +37,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
        <article className="min-w-0 border border-border bg-card transition-shadow hover:shadow-md">
          <button type="button" onClick={onClick} data-testid="service-request-card"
            aria-labelledby={`${titleId} ${actionId}`} aria-describedby={`${descriptionId} ${termsId}`}
-           className="group flex h-full w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
+           className="group flex h-full w-full min-w-0 flex-col text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
            <span aria-hidden="true" className="flex h-16 w-full items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><Icon className="!h-10 !w-10" strokeWidth={1.25} /></span>
            <span className="flex w-full flex-1 flex-col p-4">
            <span id={titleId} className="block font-display text-h4 leading-snug text-foreground">{fn.name}</span>

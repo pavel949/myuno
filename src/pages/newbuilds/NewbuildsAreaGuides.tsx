@@ -43,7 +43,7 @@ export default function NewbuildsAreaGuides() {
               <Link
                 key={area.slug}
                 to={`/newbuilds/areas/${area.slug}`}
-                className="nb-glass overflow-hidden group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="nb-glass overflow-hidden group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={`Профиль района ${area.name_ru}`}
               >
                 {/* Header gradient */}

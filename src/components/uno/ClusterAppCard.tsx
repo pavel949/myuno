@@ -65,7 +65,7 @@ export function ClusterAppCard({
       to={path}
       className={cn(
         'group block rounded-none border border-border bg-background p-4 transition-colors',
-        'hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'hover:bg-card/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         isSoon && 'opacity-70',
       )}
     >

@@ -53,7 +53,7 @@ export function PropertyThumbnailSelector({
             onClick={() => onSelect(property.id)}
             className={cn(
               "flex-shrink-0 p-2 rounded-none border-2 transition-all",
-              "hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30",
+              "hover:border-primary/50 focus:outline-hidden focus:ring-2 focus:ring-primary/30",
               isSelected 
                 ? "border-primary bg-primary/10 ring-2 ring-primary/20" 
                 : "border-border bg-card"

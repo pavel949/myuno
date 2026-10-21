@@ -121,7 +121,7 @@ export function QuickCategoryGrid({
               onClick={() => onSelect(cat.code)}
               className={cn(
                 'flex flex-col items-center gap-1 p-2.5 rounded-none shrink-0 min-w-[64px] transition-all',
-                'border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
+                'border-2 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-1',
                 isSelected 
                   ? 'border-primary bg-primary text-primary-foreground shadow-md' 
                   : 'border-transparent bg-card hover:bg-muted'

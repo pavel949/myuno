@@ -84,7 +84,7 @@ export function CheckInDetails({
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="rounded-full p-1 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+              className="rounded-full p-1 text-muted-foreground hover:text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring shrink-0"
               aria-label={isRu ? 'Справка по заезду' : 'About check-in'}
             >
               <Info className="w-4 h-4" />

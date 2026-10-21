@@ -278,7 +278,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
           aria-controls="map-search-listbox"
           aria-autocomplete="list"
           aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
-          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-none bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
+          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-none bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
         />
         {selectedId && !loading && (
           <span
@@ -337,7 +337,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
                       onMouseEnter={() => setActiveIdx(idx)}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handlePick(r)}
-                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 transition-colors duration-500 ${
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-hidden border-l-2 transition-colors duration-500 ${
                         isSelected ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
                       } ${active ? 'bg-muted' : 'hover:bg-muted'} ${isFlash ? 'ring-2 ring-primary/60 ring-inset bg-primary/10' : ''}`}
                     >

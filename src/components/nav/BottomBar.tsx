@@ -106,7 +106,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           onFocus={() => handlePrefetch(path)}
           aria-label={label}
           aria-current={active ? 'page' : undefined}
-          className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
+          className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
         >
           {active && (
             <div
@@ -166,7 +166,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
                   setAppsOpen(true);
                 }}
                 aria-label={pickLang(language, { ru: 'Все сервисы', en: 'All apps', th: 'บริการทั้งหมด' })}
-                className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
+                className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
               >
                 <div className="w-10 h-10 rounded-none flex items-center justify-center bg-primary/10 border border-primary/25">
                   <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />

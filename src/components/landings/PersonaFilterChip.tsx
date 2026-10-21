@@ -58,7 +58,7 @@ export function PersonaFilterChip({ className }: Props) {
       <button
         type="button"
         onClick={clearPersona}
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
         aria-label={clearLabel}
       >
         <X className="h-3 w-3" />

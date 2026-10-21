@@ -106,7 +106,7 @@ export default function NewbuildsDueDiligence() {
                 onClick={() => setActiveCategory(cat.id)}
                 className={cn(
                   'flex items-center gap-2 px-4 py-2.5 rounded-none text-sm whitespace-nowrap transition-all flex-shrink-0 border',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
                   isActive
                     ? 'bg-primary/15 text-primary border-primary/30'
                     : 'bg-card text-muted-foreground border-border hover:text-foreground'
@@ -139,7 +139,7 @@ export default function NewbuildsDueDiligence() {
                 <div className="flex items-start gap-3">
                   <button
                     onClick={() => toggle(item.id)}
-                    className="mt-0.5 flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                    className="mt-0.5 flex-shrink-0 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-full"
                     aria-pressed={isDone}
                     aria-label={isDone ? `Отменить: ${item.title_ru}` : `Отметить выполненным: ${item.title_ru}`}
                   >

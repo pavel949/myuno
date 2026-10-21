@@ -185,7 +185,7 @@ for (const file of required) if (!inputs.some(input => input.endsWith(file))) th
 
 // Compile all production styles locally. No Vite server or CSS network fetch.
 const cssPath = path.join(output, 'production.css');
-const cssBuild = spawnSync(process.execPath, [path.join(root, 'node_modules/tailwindcss/lib/cli.js'), '-c', path.join(root, 'tailwind.config.ts'), '-i', path.join(root, 'src/index.css'), '-o', cssPath], { cwd: root, encoding: 'utf8', timeout: 30000 });
+const cssBuild = spawnSync(process.execPath, [path.join(root, 'scripts/qa/compile-application-css.mjs'), '--write-application-css', cssPath], { cwd: root, encoding: 'utf8', timeout: 30000 });
 if (cssBuild.status !== 0) throw new Error(`Production CSS compilation failed: ${cssBuild.stderr || cssBuild.stdout}`);
 let css = await readFile(cssPath, 'utf8');
 if (/^\s*@import\s/m.test(css)) throw new Error('Production CSS still contains unresolved imports.');
@@ -197,7 +197,7 @@ const report = {
   build: 'pass', browserValidation: 'not-run', productionDataModules: 0,
   mode: manifest.mode, planned: manifest.counts, runtimeStatus: manifest.runtimeStatus,
   actualComponents: required, syntheticModules: Object.keys(virtual),
-  stylesheet: 'src/index.css compiled by repository Tailwind CLI',
+  stylesheet: 'src/index.css compiled by repository Tailwind v4 PostCSS plugin',
   fonts: 'Network fonts intentionally excluded; system fallbacks only. A production-font visual gate remains separate.',
   surfaceScope: 'Actual Index (legacy gate) and IndexV2, actual compact personal components and pending-order query. AppLayout, drawer, onboarding and lower ancillary sections are synthetic.',
   dataScope: 'Synthetic hooks test presentation only; not evidence of production authorization, notification delivery or preference persistence.',

@@ -54,7 +54,7 @@ export function QuickPropertySelector({
             onClick={() => onSelect(property.id)}
             className={cn(
               'relative w-28 h-20 rounded-none overflow-hidden shrink-0 transition-all',
-              'border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1',
+              'border-2 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-1',
               isSelected ? 'border-primary shadow-lg scale-[1.02]' : 'border-transparent'
             )}
           >

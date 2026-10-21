@@ -266,7 +266,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           <TabsTrigger value="more" className="rounded-none text-xs sm:text-sm">{tabMore}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="main" className="mt-4 space-y-3 focus-visible:outline-none">
+        <TabsContent value="main" className="mt-4 space-y-3 focus-visible:outline-hidden">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
@@ -386,7 +386,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           </div>
         </TabsContent>
 
-        <TabsContent value="comms" className="mt-4 space-y-3 focus-visible:outline-none">
+        <TabsContent value="comms" className="mt-4 space-y-3 focus-visible:outline-hidden">
           <p className="text-xs text-muted-foreground">
             {isRu ? 'Мессенджеры и соцсети — телефон и email на вкладке «Основное».' : 'Messengers and socials — phone and email are on Main.'}
           </p>
@@ -403,7 +403,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           </div>
         </TabsContent>
 
-        <TabsContent value="address" className="mt-4 space-y-3 focus-visible:outline-none">
+        <TabsContent value="address" className="mt-4 space-y-3 focus-visible:outline-hidden">
           <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Адрес и реквизиты' : 'Address & legal'}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><Label>{isRu ? 'Улица' : 'Street'}</Label><Input value={form.address_street} onChange={(e) => setForm((f) => ({ ...f, address_street: e.target.value }))} /></div>
@@ -427,7 +427,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         </TabsContent>
 
         {showPropertyTab && (
-          <TabsContent value="property" className="mt-4 space-y-3 focus-visible:outline-none">
+          <TabsContent value="property" className="mt-4 space-y-3 focus-visible:outline-hidden">
             <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Интерес к недвижимости' : 'Property preferences'}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={(e) => setForm((f) => ({ ...f, budget_min: e.target.value }))} /></div>
@@ -483,7 +483,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           </TabsContent>
         )}
 
-        <TabsContent value="more" className="mt-4 space-y-3 focus-visible:outline-none">
+        <TabsContent value="more" className="mt-4 space-y-3 focus-visible:outline-hidden">
           <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Персональное' : 'Personal'}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

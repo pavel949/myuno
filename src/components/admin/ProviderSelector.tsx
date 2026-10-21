@@ -236,7 +236,7 @@ export function ProviderSelector({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('admin.providerSelector.searchPlaceholder')}
-                className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                className="flex h-10 w-full bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground"
               />
             </div>
             {/* Provider list */}
@@ -262,7 +262,7 @@ export function ProviderSelector({
                             setOpen(false);
                           }}
                           className={cn(
-                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-none",
+                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-hidden",
                             "hover:bg-accent hover:text-accent-foreground",
                             value === mc.id && "bg-accent"
                           )}
@@ -297,7 +297,7 @@ export function ProviderSelector({
                             setOpen(false);
                           }}
                           className={cn(
-                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-none",
+                            "relative flex w-full cursor-pointer select-none items-center rounded-none px-2 py-1.5 text-sm outline-hidden",
                             "hover:bg-accent hover:text-accent-foreground",
                             value === provider.id && "bg-accent"
                           )}

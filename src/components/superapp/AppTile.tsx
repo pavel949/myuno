@@ -57,7 +57,7 @@ export const AppTile: React.FC<AppTileProps> = ({
 
   const className = cn(
     'group flex flex-col items-center text-center px-1 py-2',
-    'min-h-[88px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+    'min-h-[88px] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
     isSoon && 'opacity-70',
   );
 

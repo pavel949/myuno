@@ -160,7 +160,7 @@ export default function NewbuildsCompare() {
           </div>
           <button
             onClick={clear}
-            className="text-xs px-3 py-1.5 rounded-none text-muted-foreground border border-border hover:text-foreground hover:border-foreground/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-xs px-3 py-1.5 rounded-none text-muted-foreground border border-border hover:text-foreground hover:border-foreground/30 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             Очистить
           </button>
@@ -183,7 +183,7 @@ export default function NewbuildsCompare() {
                       </Link>
                       <button
                         onClick={() => remove(item.id)}
-                        className="p-1 flex-shrink-0 text-muted-foreground hover:text-foreground rounded-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="p-1 flex-shrink-0 text-muted-foreground hover:text-foreground rounded-none focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                         aria-label={`Убрать ${item.name_ru || item.name_en} из сравнения`}
                       >
                         <X className="w-4 h-4" aria-hidden />

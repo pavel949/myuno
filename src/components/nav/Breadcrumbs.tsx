@@ -59,7 +59,7 @@ export const Breadcrumbs = memo(function Breadcrumbs({
               {crumb.href && !isLast && !isEllipsis ? (
                 <Link
                   to={crumb.href}
-                  className="truncate hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                  className="truncate hover:text-foreground transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
                 >
                   {label}
                 </Link>

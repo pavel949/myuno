@@ -384,7 +384,7 @@ export default function WelcomeLanding() {
               className={cn(
                 'group inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none px-5 font-sans text-body font-semibold',
                 'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
               {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
@@ -396,7 +396,7 @@ export default function WelcomeLanding() {
               className={cn(
                 'inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground',
                 'hover:bg-foreground hover:text-background transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
               {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
@@ -511,7 +511,7 @@ export default function WelcomeLanding() {
                   key={a.id}
                   to={a.href}
                   data-testid={`welcome-audience-${a.id}`}
-                  className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                  className="group flex flex-col gap-3 bg-background p-6 transition-colors hover:bg-card/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
                 >
                   <div className="flex items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center border border-border bg-card text-foreground">
@@ -581,7 +581,7 @@ export default function WelcomeLanding() {
               className={cn(
                 'inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground',
                 'hover:bg-foreground hover:text-background transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
               {tx(language, { ru: 'Открыть справочник', en: 'Open directory', th: 'เปิดสารบัญ' })}
@@ -616,7 +616,7 @@ export default function WelcomeLanding() {
                   data-testid="welcome-cluster-card"
                   data-cluster-id={c.id}
                   onClick={() => navigate(c.homeRoute)}
-                  className="group flex flex-col gap-3 bg-background p-6 text-left transition-colors hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                  className="group flex flex-col gap-3 bg-background p-6 text-left transition-colors hover:bg-card/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center border border-border bg-card text-foreground">
@@ -710,7 +710,7 @@ export default function WelcomeLanding() {
                 type="button"
                 onClick={() => setHelpOpen(true)}
                 data-testid="welcome-cta-emergency"
-                className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <LifeBuoy className="h-4 w-4" strokeWidth={2} />
                 {tx(language, { ru: 'Запросить помощь', en: 'Request help', th: 'ขอความช่วยเหลือ' })}
@@ -777,7 +777,7 @@ export default function WelcomeLanding() {
           <Link
             to={APP_ROUTES.VENDOR_JOIN}
             data-testid="welcome-cta-partner-bottom"
-            className="inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
@@ -809,7 +809,7 @@ export default function WelcomeLanding() {
             <Link
               to={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS}
               data-testid="welcome-cta-developers"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               {tx(language, { ru: 'Портал застройщика', en: 'Developer portal' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2} />
@@ -839,7 +839,7 @@ export default function WelcomeLanding() {
               className={cn(
                 'group inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none px-6 font-sans text-body font-semibold',
                 'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
               {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
@@ -850,7 +850,7 @@ export default function WelcomeLanding() {
               className={cn(
                 'inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground',
                 'hover:bg-foreground hover:text-background transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
               {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}

@@ -26,7 +26,7 @@ export function AdminRevenueBlock() {
       <CardTitle className="text-lg">{pickLang(language, { en: 'Metrics for the period', ru: 'Показатели за период', th: 'ตัวชี้วัดตามช่วงเวลา' })}</CardTitle>
       <label htmlFor={periodId} className="flex flex-wrap items-center gap-2 text-sm">
         <span>{pickLang(language, { en: 'Period', ru: 'Период', th: 'ช่วงเวลา' })}</span>
-        <select id={periodId} className="min-h-11 max-w-full border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={days} onChange={event => setDays(Number(event.target.value))}>
+        <select id={periodId} className="min-h-11 max-w-full border border-input bg-background px-3 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring" value={days} onChange={event => setDays(Number(event.target.value))}>
           {[7, 30, 90].map(day => <option key={day} value={day}>{pickLang(language, { en: `Last ${day} complete days`, ru: `Последние ${day} полных дней`, th: `${day} วันที่ครบแล้วล่าสุด` })}</option>)}
         </select>
       </label>
@@ -48,7 +48,7 @@ export function AdminRevenueBlock() {
         th: 'จำนวนเงินเป็นค่าประมาณ ไม่มีข้อมูลสกุลเงิน และวันที่ขาดไม่ถือเป็นศูนย์',
       })}</p>
       <details className="text-xs text-muted-foreground">
-        <summary className="w-fit cursor-pointer py-1 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, {
+        <summary className="w-fit cursor-pointer py-1 text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, {
           en: 'How metrics are calculated',
           ru: 'Как считаются показатели',
           th: 'วิธีคำนวณตัวชี้วัด',

@@ -90,7 +90,7 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
                 <Button onClick={handleInstall} size="sm" variant="outline" disabled={isLoading} className="shrink-0 h-8 px-3 text-xs">
                   {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t.download}
                 </Button>
-                <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none" aria-label={t.close}>
+                <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-none" aria-label={t.close}>
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -98,7 +98,7 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-foreground">{isIOS ? t.iosTitle : t.androidTitle}</p>
-                  <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none" aria-label={t.close}>
+                  <button onClick={handleDismiss} className="p-1 text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-none" aria-label={t.close}>
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>

@@ -59,7 +59,7 @@ export function WorkspaceHomeBanner() {
     setChoice({ key: storageKey, to });
     try { localStorage.setItem(storageKey, to); } catch { /* Navigation works without persistent storage. */ }
   };
-  const control = 'flex min-h-11 min-w-0 items-center justify-center gap-2 px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset';
+  const control = 'flex min-h-11 min-w-0 items-center justify-center gap-2 px-3 py-2 text-sm font-medium focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset';
   return (
     <nav aria-label={pickLang(language, { ru: 'Личное и работа', en: 'Personal and work', th: 'ส่วนตัวและงาน' })} className="mx-4 mb-1">
       <div className="grid grid-cols-2 border border-border">
@@ -75,12 +75,12 @@ export function WorkspaceHomeBanner() {
       </div>
       {links.length > 1 && (
         <details className="group border-b border-border text-sm">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 py-2 text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 py-2 text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
             <span className="min-w-0 break-words">{pickLang(language, selected.label)}</span>
             <span className="inline-flex shrink-0 items-center gap-1 text-xs">{pickLang(language, { ru: 'Сменить', en: 'Change', th: 'เปลี่ยน' })}<ChevronDown className="h-4 w-4 group-open:rotate-180" aria-hidden="true" /></span>
           </summary>
           <ul className="pb-2">
-            {links.map(link => <li key={link.to}><Link to={link.to} onClick={() => remember(link.to)} className="flex min-h-11 items-center justify-between gap-3 px-2 py-2 text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><span className="min-w-0 break-words">{pickLang(language, link.label)}</span><ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link></li>)}
+            {links.map(link => <li key={link.to}><Link to={link.to} onClick={() => remember(link.to)} className="flex min-h-11 items-center justify-between gap-3 px-2 py-2 text-primary hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><span className="min-w-0 break-words">{pickLang(language, link.label)}</span><ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link></li>)}
           </ul>
         </details>
       )}

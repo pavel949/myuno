@@ -48,7 +48,7 @@ export function RoleSheet({
 }: RoleSheetProps) {
   const { language } = useLanguage();
   const mutationsDisabled = isBusy || hasError;
-  const controlClass = 'inline-flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-35';
+  const controlClass = 'inline-flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-35';
 
   const preferenceLabel = (persona: UserPersona) => {
     return pickLang(language, {
@@ -90,7 +90,7 @@ export function RoleSheet({
                 onClick={() => onToggle(p)}
                 disabled={mutationsDisabled}
                 aria-label={`${pickLang(language, { ru: 'Добавить', en: 'Add', th: 'เพิ่ม' })}: ${label}`}
-                className="flex min-h-14 w-full items-center gap-3 px-2 py-2.5 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-14 w-full items-center gap-3 px-2 py-2.5 text-left transition-colors hover:bg-muted/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block break-words text-sm font-medium text-foreground">{label}</span>
@@ -224,7 +224,7 @@ export function RoleSheet({
           <button
             type="button"
             onClick={onClose}
-            className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {pickLang(language, { ru: 'Готово', en: 'Done', th: 'เสร็จสิ้น' })}
           </button>

@@ -103,7 +103,7 @@ export default function KnowledgePillarsIndex() {
                         goTo(p.slug);
                       }
                     }}
-                    className="cursor-pointer transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="cursor-pointer transition-all hover:shadow-md focus:outline-hidden focus:ring-2 focus:ring-primary"
                   >
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center justify-between gap-2">

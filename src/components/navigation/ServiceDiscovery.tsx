@@ -76,7 +76,7 @@ export function ServiceDiscoveryContent() {
           </CardHeader>
           <CardContent className="p-2">
             {c.services.map(s => <Link key={s.id} to={s.path}
-              className="group flex min-h-12 items-center justify-between gap-3 px-3 py-3 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              className="group flex min-h-12 items-center justify-between gap-3 px-3 py-3 text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
               <span>{label(s)}</span><ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
             </Link>)}
           </CardContent>

@@ -32,12 +32,12 @@ export function PendingPaymentsChip() {
   if (isError) return (
     <div role="status" className="mx-4 mb-3 border-l-2 border-border pl-3 text-sm">
       <p>{pickLang(language, { ru: 'Не удалось проверить ожидающие заказы.', en: 'Pending orders could not be checked.', th: 'ไม่สามารถตรวจสอบรายการที่รอดำเนินการได้' })}</p>
-      <button type="button" onClick={() => { void refetch(); }} className="inline-flex min-h-11 items-center text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, { ru: 'Повторить проверку', en: 'Retry order check', th: 'ตรวจสอบอีกครั้ง' })}</button>
+      <button type="button" onClick={() => { void refetch(); }} className="inline-flex min-h-11 items-center text-primary underline underline-offset-4 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, { ru: 'Повторить проверку', en: 'Retry order check', th: 'ตรวจสอบอีกครั้ง' })}</button>
     </div>
   );
   if (!count) return null;
   return (
-    <Link to={APP_ROUTES.ME} className="mx-4 mb-4 flex min-h-11 items-center justify-between gap-3 border-l-2 border-primary bg-muted/40 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Link to={APP_ROUTES.ME} className="mx-4 mb-4 flex min-h-11 items-center justify-between gap-3 border-l-2 border-primary bg-muted/40 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
       <span>{pickLang(language, { ru: `Проверить ожидающие заказы: ${count}`, en: `Review pending orders: ${count}`, th: `ตรวจสอบรายการที่รอดำเนินการ: ${count}` })}</span>
       <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
     </Link>

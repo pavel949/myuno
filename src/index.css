@@ -1,9 +1,10 @@
+@import 'tailwindcss';
+
 /* Design system tokens — single source of truth */
 @import './design-system/index.css';
 
 /* Phase 3 of Canon Migration — globally remap legacy palette + remove glassmorphism.
-   Imported AFTER design tokens AND BEFORE Tailwind so utilities can layer on top,
-   but the override layer below wins via !important + :where() pattern. */
+   Keep the canonical overrides after the framework import and design tokens. */
 @import './styles/canon-overrides.css';
 
 /* Onboarding flow (friction-removal animation + 4 screens). Scoped under
@@ -23,9 +24,17 @@
   animation: shake 0.5s ease-in-out;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config '../tailwind.config.ts';
+
+/* Preserve existing focus/effect scales while upgrading the compiler. The
+   canonical color, typography, radius and shadow tokens still come from the
+   design system and the loaded configuration above. */
+@theme {
+  --default-ring-width: 3px;
+  --default-ring-color: var(--color-blue-500);
+  --blur-sm: 4px;
+  --drop-shadow-sm: 0 1px 1px rgb(0 0 0 / 0.05);
+}
 
 /* Global Lucide icon size boost for mobile readability */
 .lucide {
@@ -143,6 +152,12 @@ body {
 }
 
 @layer base {
+  /* v4 preflight uses the default cursor; preserve the v3 interaction affordance. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   * {
     @apply border-border;
     min-width: 0;

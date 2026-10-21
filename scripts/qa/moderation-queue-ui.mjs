@@ -1,12 +1,9 @@
+import { compileApplicationCss } from './compile-application-css.mjs';
 // Real moderation queue/dashboard components and router/query provider; synthetic reads.
 // --bundle-only compiles JS/CSS/HTML without a browser or application server.
 // The browser runner fulfills local fixture assets and blocks every other request.
 import { build } from 'esbuild';
-import postcss from 'postcss';
-import postcssImport from 'postcss-import';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -213,8 +210,7 @@ if (!Object.keys(bundle.metafile.inputs).includes('fixture:@/lib/adminModeration
   throw Error('The moderation component did not use the isolated helper read boundary');
 }
 await writeFile(path.join(output, 'bundle-inputs.json'), JSON.stringify(realInputs, null, 2));
-const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
-  .process(await readFile(path.join(root, 'src/index.css'), 'utf8'), { from: path.join(root, 'src/index.css') });
+const css = await compileApplicationCss(root);
 await writeFile(path.join(output, 'fixture.css'), css.css);
 await writeFile(path.join(output, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 

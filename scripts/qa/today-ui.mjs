@@ -1,13 +1,10 @@
+import { compileApplicationCss } from './compile-application-css.mjs';
 // Synthetic rendering of the real Today page. No SPA boot or database client.
 import { build } from 'esbuild';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import postcss from 'postcss';
-import postcssImport from 'postcss-import';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
 const root = process.cwd();
 const output = '/tmp/browser/today-isolated';
 await mkdir(output, { recursive: true });
@@ -38,9 +35,7 @@ const result = await build({
 });
 if (Object.keys(result.metafile.inputs).some(p => !p.startsWith('fixture:') && /integrations\/supabase\/client|hooks\/usePmsToday\.ts$/.test(p))) throw Error('Production data module included');
 // Compile the real styles without booting Vite, the app, auth, or a web server.
-const cssPath = path.join(root, 'src/index.css');
-const css = await postcss([postcssImport(), tailwindcss(path.join(root, 'tailwind.config.ts')), autoprefixer()])
-  .process(await readFile(cssPath, 'utf8'), { from: cssPath });
+const css = await compileApplicationCss(root);
 await writeFile(path.join(output,'fixture.css'), css.css);
 await writeFile(path.join(output,'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if (process.argv.includes('--bundle-only')) {

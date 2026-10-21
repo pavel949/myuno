@@ -146,7 +146,7 @@ export default function AdminInbox() {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setPage(0); }}
               placeholder={SEARCH_HINTS[sourceFilter][isRu ? 1 : 0]}
-              className="w-full pl-9 pr-3 py-2 text-[13px] border border-border bg-card focus:border-primary outline-none"
+              className="w-full pl-9 pr-3 py-2 text-[13px] border border-border bg-card focus:border-primary outline-hidden"
             />
           </div>
         </div>
