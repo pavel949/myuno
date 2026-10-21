@@ -33,3 +33,16 @@ Head `ae3388f7babd30a24ac231a8e28817c11ab6fa82` changes 21 files (+3401/-2756), 
 | Graphify SessionStart hook | Installs an unrelated CLI package and changes agent setup automatically. Not needed for app/dependency correctness; not restored. |
 
 No PR was closed or deleted. A superseded proposal remaining open is not an authorization to replay its removed workflows, helpers or installation hooks.
+
+## Terminal verification checkpoint
+
+Read from exact-head GitHub checks and completed job logs on 21 October:
+
+| PR | Verified source head | Terminal outcome / evidence |
+| --- | --- | --- |
+| 10 | `7f077402b88881adfba0604882ec929da0b63b32` | Standard [39629491167](https://github.com/pavel949/myuno/actions/runs/39629491167) and connected [39629491305](https://github.com/pavel949/myuno/actions/runs/39629491305) succeeded. [Browser evidence](https://github.com/pavel949/myuno/actions/runs/39629491305/artifacts/12360482718). |
+| 6 | `718b4d4c7fbe40d75e054c9fb33d09632556b6bc` | Date-fns 4.1.0 + DayPicker 9.14.0 migration complete. Standard [39635095570](https://github.com/pavel949/myuno/actions/runs/39635095570) and connected [39635095702](https://github.com/pavel949/myuno/actions/runs/39635095702) succeeded; 3914 tests / 288 files, 21/21 browser groups. [Browser evidence](https://github.com/pavel949/myuno/actions/runs/39635095702/artifacts/12363382715). |
+| 9 | `d35f96a573d06dd883ca49398c0def0a4d6cdc17` | Hooks 7.0.1 using the package's documented custom configuration, preserving exactly the two existing rule IDs and severities. No React Compiler adoption or claim of compliance with its new recommended rules. Standard [39634902184](https://github.com/pavel949/myuno/actions/runs/39634902184) and connected [39634902371](https://github.com/pavel949/myuno/actions/runs/39634902371) succeeded; 3914 tests / 288 files, 21/21 browser groups. [Browser evidence](https://github.com/pavel949/myuno/actions/runs/39634902371/artifacts/12365150834). |
+| 8 | Remote `0eca8af3f6c5866e17e09ded3b06d7eff5af0b5d`; local repair `09bcd9838f41629580bafee06c25a72ec85d9425` | Standard CI succeeded, connected CI exposed the real Lucide `.mjs` resolution incompatibility in two fixture builders. Their repair builds locally and UI-backlog 8/8 browser cases passed. One ordinary push returned `remote rejected ... (failed)`, exit 1; readback confirms remote unchanged. The remote reason is unknown, and push was not retried or routed through another write mechanism. Admin-shell browser execution remains CI-only; its guard was respected. |
+
+The previous planning sections describe original incompatibilities; these exact-head terminal records supersede their pending wording. The Tailwind migration remains under local/CI verification, React 19 is owned by the operations workstream, and no integration or release acceptance is implied by independently green dependency branches.
