@@ -12,6 +12,7 @@ import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import { HomeProjectGallery } from '@/components/home/HomeProjectGallery';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { useProperties } from '@/hooks/useProperties';
 import { homeCopy as copy, homeJourneys } from '@/content/home/cinematicHome';
@@ -100,6 +101,7 @@ export default function Landing() {
           </button>
         </div>}
       </section>
+      <HomeProjectGallery />
       <section className="home-properties home-container" aria-labelledby="home-stays-title">
         <div className="home-section-heading"><div><h2 id="home-stays-title">{t(copy.stays)}</h2><p className="home-section-lead">{t(copy.staysLead)}</p></div><Link className="home-text-link" to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}<ArrowRight size={18} aria-hidden="true" /></Link></div>
         {stays.isLoading ? <div className="home-properties-loading" role="status">{t({ ru: 'Загружаем варианты…', en: 'Loading homes…', th: 'กำลังโหลดที่พัก…' })}</div> : stays.isError ? <p className="home-properties-empty">{t(copy.loadHomesError)}</p> : stays.data?.length ? <div className="home-properties-grid">{stays.data.map(property => <PropertyListingCard key={property.id} property={property} mode="rent" />)}</div> : <p className="home-properties-empty">{t(copy.emptyHomes)} <Link to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}</Link></p>}
