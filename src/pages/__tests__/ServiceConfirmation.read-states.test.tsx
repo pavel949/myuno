@@ -207,7 +207,7 @@ it.each(['pending', 'unknown', 'cancelled'])('preserves the flowers cart for sta
   show(FlowersSuccess); await flush();
   expect(state.clearCart).not.toHaveBeenCalled();
 });
-it('clears flowers only once after a fresh owned confirmed order, not on return URL alone', async () => {
+it('preserves the current flowers cart even when revisiting a confirmed historical receipt', async () => {
   show(FlowersSuccess); await flush();
-  expect(state.clearCart).toHaveBeenCalledExactlyOnceWith('flowers');
+  expect(state.clearCart).not.toHaveBeenCalled();
 });

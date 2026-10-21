@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Package, MapPin, Calendar, User, Gift } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
 import { useOrderReturnRead } from '@/hooks/useOrderReturnRead';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
@@ -11,7 +10,6 @@ import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 const FlowersSuccess = () => {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
-  const { clearByType } = useCart();
   const isRu = language === 'ru';
 
   const sessionId = searchParams.get('session_id');
@@ -22,13 +20,9 @@ const FlowersSuccess = () => {
   const order = record ? { ...record, items: (record.order_items || []).map(item => ({
     product_name: item.item_name, qty: item.qty, unit_price: item.unit_price,
   })) } : null;
-  const clearedOrder = useRef<string>();
-  useEffect(() => {
-    if (confirmed && record && clearedOrder.current !== record.id) {
-      clearedOrder.current = record.id;
-      clearByType('flowers');
-    }
-  }, [confirmed, record, clearByType]);
+  // A confirmed historical order does not identify the current cart. Receipt
+  // revisits must not delete new or unrelated items; reconciliation belongs to
+  // the accepted checkout/cart association, not this read-only page.
 
   const meta = order?.metadata || {};
   const statusLabel = order?.status === 'confirmed'
@@ -119,8 +113,8 @@ const FlowersSuccess = () => {
       whatsappSummary={
         order
           ? {
-              ru: `Цветы · ${order.items?.length ?? 0} поз.${meta.delivery_date ? ` · доставка ${meta.delivery_date as string}` : ''}`,
-              en: `Flowers · ${order.items?.length ?? 0} item(s)${meta.delivery_date ? ` · delivery ${meta.delivery_date as string}` : ''}`,
+              ru: `Цветы${order.items.length ? ` · ${order.items.length} поз.` : ''}${meta.delivery_date ? ` · доставка ${meta.delivery_date as string}` : ''}`,
+              en: `Flowers${order.items.length ? ` · ${order.items.length} item(s)` : ''}${meta.delivery_date ? ` · delivery ${meta.delivery_date as string}` : ''}`,
             }
           : undefined
       }
