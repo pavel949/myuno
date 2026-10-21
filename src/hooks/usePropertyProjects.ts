@@ -23,7 +23,6 @@ export interface PropertyProject {
   description_ru?: string;
   address?: string;
   district?: string;
-  location_area?: string | null;
   lat?: number;
   lng?: number;
   developer_id?: string;
@@ -110,7 +109,7 @@ export function useAdminPropertyProjects() {
 }
 
 // Guest pages request only descriptive, public project facts; no investment or private fields.
-export const GUEST_PROJECT_COLUMNS = 'id,name_en,name_ru,description_en,description_ru,address,district,location_area,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active,is_featured';
+export const GUEST_PROJECT_COLUMNS = 'id,name_en,name_ru,description_en,description_ru,address,district,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active';
 
 /** Public, allowlisted project collection for guest discovery surfaces. */
 export function usePublicPropertyProjects(limit = 24) {
@@ -121,7 +120,6 @@ export function usePublicPropertyProjects(limit = 24) {
     queryFn: async () => {
       const { data, error } = await createProjectCatalogQuery(GUEST_PROJECT_COLUMNS)
         .eq('is_active', true)
-        .order('is_featured', { ascending: false })
         .order('name_en')
         .limit(limit);
 
