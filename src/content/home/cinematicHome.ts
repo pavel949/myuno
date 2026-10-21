@@ -4,7 +4,7 @@ import type { LangValues } from '@/lib/i18n/pickLang';
 /** Public navigation only: no new domain state, catalogue, prices or availability. */
 export const homeCopy = {
   place: { ru: 'Остановитесь на Пхукете.', en: 'Stay in Phuket.', th: 'พักที่ภูเก็ต' },
-  headline: { ru: 'Мы поможем со всем остальным.', en: 'We’ll help with the rest.', th: 'เราช่วยดูแลเรื่องอื่นให้' },
+  headline: { ru: 'С остальным поможем.', en: 'We’ll help with the rest.', th: 'เราช่วยดูแลเรื่องอื่นให้' },
   lead: { ru: 'Жильё для отпуска и переезда, местные услуги и поддержка команды на острове.', en: 'Homes for holidays and longer stays, local services, and support from our team on the island.', th: 'ที่พักสำหรับวันหยุดหรือการอยู่อาศัยระยะยาว บริการท้องถิ่น และทีมงานที่พร้อมช่วยเหลือบนเกาะ' },
   stays: { ru: 'Где остановиться', en: 'Places to stay', th: 'ที่พักสำหรับคุณ' },
   staysLead: { ru: 'Посмотрите доступные варианты и откройте карточку, чтобы узнать подробности и выбрать даты.', en: 'Browse real listings, then open a home to see details and choose your dates.', th: 'ดูที่พักที่ลงประกาศ แล้วเปิดรายละเอียดเพื่อเลือกวันเข้าพัก' },
