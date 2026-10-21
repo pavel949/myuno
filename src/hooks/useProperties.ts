@@ -673,10 +673,10 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
 export function usePropertiesByProject(
   projectId?: string,
   limit = 20,
-  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string } = {},
+  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {},
 ) {
   return useQuery({
-    queryKey: ['properties-by-project', projectId, limit, options.mode, options.managementCompanyId],
+    queryKey: ['properties-by-project', projectId, limit, options.mode, options.managementCompanyId, options.propertyType],
     queryFn: async () => {
       if (!projectId) return { properties: [] as Property[], total: 0 };
 
@@ -688,6 +688,7 @@ export function usePropertiesByProject(
       if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
       if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
       if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
+      if (options.propertyType) query = query.eq('property_type', options.propertyType);
       const { data, error, count } = await query
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })

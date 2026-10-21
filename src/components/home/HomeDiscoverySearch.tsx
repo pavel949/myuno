@@ -11,7 +11,7 @@ import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, initialParams, onSearch }: { rentalOnly?: boolean; hideModeSwitch?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
+export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, showGuestsInline = false, initialParams, onSearch }: { rentalOnly?: boolean; hideModeSwitch?: boolean; showGuestsInline?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
   const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
@@ -62,7 +62,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   }
 
   return (
-    <form className="home-search" onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
+    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}`} onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
       {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {(['rent', 'buy'] as const).map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
@@ -76,6 +76,14 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         </div>
       )}
       {mode === 'rent' && <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />}
+      {showGuestsInline && mode === 'rent' && (
+        <label className="home-search-guests home-search-guests-inline" htmlFor={guestsId}>
+          <Users size={18} aria-hidden="true" /><span>
+            <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
+            <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое количество', en: 'Any number', th: 'ไม่จำกัด' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+          </span>
+        </label>
+      )}
       <div className="home-search-type">
         <span className="home-field-label">{t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}</span>
         <Select value={propertyType || '__all'} onValueChange={value => setPropertyType(value === '__all' ? '' : value)} disabled={typesLoading}>
@@ -114,13 +122,13 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
       </div>
       <button type="submit" className="home-search-submit">{t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}<ArrowRight size={18} aria-hidden="true" /></button>
       <details className="home-search-secondary">
-        <summary>{t({ ru: mode === 'rent' ? 'Название и гости' : 'Название объекта', en: mode === 'rent' ? 'Name and guests' : 'Property name', th: mode === 'rent' ? 'ชื่อที่พักและผู้เข้าพัก' : 'ชื่อที่พัก' })}</summary>
+        <summary>{t({ ru: mode === 'rent' && !showGuestsInline ? 'Название и гости' : 'Название объекта', en: mode === 'rent' && !showGuestsInline ? 'Name and guests' : 'Property name', th: mode === 'rent' && !showGuestsInline ? 'ชื่อที่พักและผู้เข้าพัก' : 'ชื่อที่พัก' })}</summary>
         <div className="home-search-secondary-fields">
           <label className="home-search-query" htmlFor={queryId}>
             <span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span>
             <input id={queryId} aria-label={t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Введите название виллы или квартиры', en: 'Type a villa or apartment name', th: 'พิมพ์ชื่อวิลล่าหรืออพาร์ตเมนต์' })} />
           </label>
-          {mode === 'rent' && (
+          {mode === 'rent' && !showGuestsInline && (
             <label className="home-search-guests" htmlFor={guestsId}><Users size={18} aria-hidden="true" /><span>
               <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
               <input id={guestsId} aria-describedby={`${guestsId}-optional`} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое', en: 'Any', th: 'ไม่ระบุ' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />

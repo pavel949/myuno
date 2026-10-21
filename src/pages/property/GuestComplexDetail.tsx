@@ -10,6 +10,7 @@ import { PropertyDetailGallery } from '@/components/property/detail/PropertyDeta
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
 import { getProjectFacilityLabel, normalizeProjectFacilityIds, PROJECT_FACILITY_LABELS } from '@/lib/propertyAttributeRegistry';
+import { getPropertyTypeLabel } from '@/lib/taxonomies';
 import { complexMediaUrl, complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { propertyCatalogHref } from '@/lib/real-estate/propertyDetailIntent';
 import { Button } from '@/components/ui/button';
@@ -22,12 +23,13 @@ export default function GuestComplexDetail() {
   const isRu = language === 'ru';
   const mode = params.get('mode') === 'buy' ? 'buy' : 'rent';
   const managementCompanyId = params.get('managementCompanyId') || undefined;
+  const propertyType = params.get('propertyType') || undefined;
   const [limit, setLimit] = useState(24);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [playVideo, setPlayVideo] = useState(false);
   const projectQuery = usePropertyProject(id, true);
-  const rentQuery = usePropertiesByProject(projectQuery.data?.id, mode === 'rent' ? limit : 1, { mode: 'rent', managementCompanyId });
-  const saleQuery = usePropertiesByProject(projectQuery.data?.id, mode === 'buy' ? limit : 1, { mode: 'buy', managementCompanyId });
+  const rentQuery = usePropertiesByProject(projectQuery.data?.id, mode === 'rent' ? limit : 1, { mode: 'rent', managementCompanyId, propertyType });
+  const saleQuery = usePropertiesByProject(projectQuery.data?.id, mode === 'buy' ? limit : 1, { mode: 'buy', managementCompanyId, propertyType });
   const unitsQuery = mode === 'rent' ? rentQuery : saleQuery;
   const companiesQuery = useManagementCompanies();
   const project = projectQuery.data;
@@ -84,6 +86,7 @@ export default function GuestComplexDetail() {
 
       <section id="complex-units" className="scroll-mt-24" aria-labelledby="complex-units-title">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8"><div><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">{isRu ? 'Найдите своё пространство' : 'Find your space'}</p><h2 id="complex-units-title" className="text-3xl sm:text-4xl tracking-tight">{mode === 'rent' ? (isRu ? 'Жильё в аренду' : 'Homes to rent') : (isRu ? 'Жильё на продажу' : 'Homes for sale')}</h2>{operator && <p className="mt-3 text-muted-foreground">{isRu ? 'Управляющая компания: ' : 'Managed by: '}{companyName(operator)}</p>}</div>
+          {propertyType && <p className="mt-3 text-sm text-muted-foreground">{isRu ? 'Тип жилья: ' : 'Home type: '}{getPropertyTypeLabel(propertyType, isRu ? 'ru' : 'en')} · <button type="button" className="underline underline-offset-4" onClick={() => setParams(previous => { const next = new URLSearchParams(previous); next.delete('propertyType'); return next; }, { replace: true })}>{isRu ? 'Показать все типы' : 'Show all home types'}</button></p>}
           <div className="flex gap-2" aria-label={isRu ? 'Тип предложения' : 'Listing type'}>{(['rent', 'buy'] as const).map(value => <Button key={value} variant={mode === value ? 'default' : 'outline'} aria-pressed={mode === value} onClick={() => { setLimit(24); setParams(previous => { const next = new URLSearchParams(previous); next.set('mode', value); return next; }, { replace: true }); }}>{value === 'rent' ? (isRu ? 'Аренда' : 'Rent') : (isRu ? 'Покупка' : 'Buy')} <span className="ml-2 tabular-nums">{(value === 'rent' ? rentQuery : saleQuery).isSuccess ? (value === 'rent' ? rentQuery : saleQuery).data?.total : '…'}</span></Button>)}</div>
         </div>
         {unitsQuery.isLoading ? <div role="status" className="py-12 text-muted-foreground">{isRu ? 'Загружаем предложения…' : 'Loading homes…'}</div> : unitsQuery.isError ? <div role="alert" className="border p-8 space-y-4"><p>{isRu ? 'Не удалось загрузить предложения.' : 'Could not load homes.'}</p><Button variant="outline" onClick={() => unitsQuery.refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div> : units.length === 0 ? <div className="border border-dashed p-8 sm:p-12 text-center space-y-4"><Building2 className="h-8 w-8 mx-auto text-muted-foreground" /><p>{isRu ? 'По выбранным условиям пока нет опубликованных предложений.' : 'No published homes match these choices yet.'}</p><Button asChild variant="outline"><Link to={catalogHref}>{isRu ? 'Посмотреть другие варианты' : 'Explore other homes'}</Link></Button></div> : <><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">{units.map(property => { const company = companies.find(c => c.id === property.management_company_id); return <div key={property.id}><PropertyListingCard property={property} mode={mode} companyName={company ? companyName(company) : undefined} companySlug={company?.slug} />{company && !company.slug && <p className="mt-2 text-sm text-muted-foreground">{isRu ? 'Управляет: ' : 'Managed by: '}{companyName(company)}</p>}</div>; })}</div>{units.length < (unitsQuery.data?.total ?? 0) && <Button variant="outline" className="mt-8" onClick={() => setLimit(limit + 24)}>{isRu ? 'Показать ещё' : 'Show more'}</Button>}</>}
