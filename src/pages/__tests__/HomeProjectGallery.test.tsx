@@ -20,6 +20,7 @@ vi.mock('@/hooks/useProperties', () => ({
       : options.mode === 'rent' ? options.propertyType === 'condo' ? 4 : 0 : 3 },
     isLoading: false,
     isError: false,
+    isSuccess: true,
   }),
 }));
 vi.mock('@/lib/taxonomies', () => ({ getDistrictLabel: (value: string) => value }));
@@ -53,5 +54,5 @@ it('updates the displayed count when guests switch between rent and purchase', (
   fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
   const layanLink = screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' });
   expect(layanLink).toHaveAttribute('href', '/property/complex/layan?mode=buy');
-  expect(within(layanLink).getByText('1 listings')).toBeVisible();
+  expect(within(layanLink).getByText('1 listing')).toBeVisible();
 });
