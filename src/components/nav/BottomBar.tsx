@@ -10,7 +10,7 @@
  *  - Optional Apps launcher button (consumer roles only).
  */
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -91,21 +91,21 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       : totalCols === 3 ? 'grid-cols-3'
       : 'grid-cols-5';
 
-    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, exact }: NavItem) => {
+    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, mobileLabelRu, exact }: NavItem) => {
       const active = isActive({ path, icon: Icon, labelEn, labelRu, labelTh, exact });
       const label = pickLang(language, { ru: labelRu, en: labelEn, th: labelTh });
+      const mobileLabel = language === 'ru' ? mobileLabelRu ?? label : label;
       return (
-        <NavLink
+        <Link
           key={path}
           to={path}
-          end={exact}
-          aria-current={active ? 'page' : false}
           onClick={handleNavClick}
           onPointerDown={() => handlePrefetch(path)}
           onMouseEnter={() => handlePrefetch(path)}
           onTouchStart={() => handlePrefetch(path)}
           onFocus={() => handlePrefetch(path)}
           aria-label={label}
+          aria-current={active ? 'page' : undefined}
           className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
         >
           {active && (
@@ -125,12 +125,13 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           <span
             className={cn(
               'max-w-full px-0.5 text-center text-[11px] leading-tight',
+              mobileLabelRu && 'whitespace-nowrap',
               active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground',
             )}
           >
-            {label}
+            {mobileLabel}
           </span>
-        </NavLink>
+        </Link>
       );
     };
 

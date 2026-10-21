@@ -9,16 +9,19 @@ import { Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { ServiceBundle } from '@/lib/segmentation/bundles';
+import { LandingActionLink } from '@/components/landings/LandingActionLink';
+import type { LandingLinkAvailability } from '@/lib/landings/types';
 
 interface BundleCardProps {
   bundle: ServiceBundle;
   /** Where the CTA points — typically the persona landing's primary CTA. */
   ctaHref: string;
+  ctaAvailability?: LandingLinkAvailability;
   /** Optional accent (token-derived rgba) for the icon chip. */
   accent?: string;
 }
 
-export function BundleCard({ bundle, ctaHref, accent }: BundleCardProps) {
+export function BundleCard({ bundle, ctaHref, ctaAvailability, accent }: BundleCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
@@ -51,10 +54,10 @@ export function BundleCard({ bundle, ctaHref, accent }: BundleCardProps) {
       </ul>
 
       <Button asChild className="mt-5 w-full sm:w-auto">
-        <a href={ctaHref}>
+        <LandingActionLink href={ctaHref} availability={ctaAvailability}>
           {isRu ? 'Запросить пакет' : 'Request this bundle'}
           <ArrowRight className="ml-2 h-4 w-4" />
-        </a>
+        </LandingActionLink>
       </Button>
     </div>
   );

@@ -166,14 +166,14 @@ export function useAdminActivities(filterProviderId?: string) {
 }
 
 // ── Properties (filter by provider OR management company) ──────────────────
-export function useAdminProperties(filterProviderId?: string, filterType?: 'provider' | 'mc') {
+export function useAdminProperties(filterProviderId?: string, filterType?: 'provider' | 'mc', filterPropertyId?: string) {
   const { user } = useAuth();
   const [properties, setProperties] = useState<VendorProperty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const requestGeneration = useRef(0);
   const activeContext = useRef<string | null>(null);
-  const requestContext = JSON.stringify([user?.id ?? null, filterProviderId ?? null, filterType ?? null]);
+  const requestContext = JSON.stringify([user?.id ?? null, filterProviderId ?? null, filterType ?? null, filterPropertyId ?? null]);
 
   const fetchProperties = useCallback(async () => {
     // Saved retry/writer callbacks from an earlier provider/user must not start a
@@ -187,6 +187,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
 
     try {
       let query = supabase.from('properties').select('*').is('deleted_at', null);
+      if (filterPropertyId) query = query.eq('id', filterPropertyId);
 
       if (filterProviderId) {
         if (filterType === 'mc') {
@@ -207,7 +208,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
     } finally {
       if (isCurrent()) setIsLoading(false);
     }
-  }, [user, filterProviderId, filterType, requestContext]);
+  }, [user, filterProviderId, filterType, filterPropertyId, requestContext]);
 
   useEffect(() => {
     activeContext.current = requestContext;

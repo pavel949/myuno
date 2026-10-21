@@ -71,7 +71,7 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     expect(paths).toEqual([
       APP_ROUTES.HOME,
       APP_ROUTES.GOAL_STAY,
-      APP_ROUTES.TRIP_PLANNER,
+      APP_ROUTES.BOOKINGS,
       APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.ACCOUNT,
     ]);
@@ -119,10 +119,10 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.admin.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.ADMIN,
-      APP_ROUTES.ADMIN_CRM,
-      APP_ROUTES.ADMIN_TICKETS,
-      APP_ROUTES.ADMIN_MODERATION,
-      APP_ROUTES.PROFILE,
+      APP_ROUTES.ADMIN_OPERATIONS,
+      '/admin/review',
+      APP_ROUTES.ADMIN_CATALOG,
+      APP_ROUTES.ADMIN_USERS,
     ]);
   });
 
@@ -176,7 +176,7 @@ describe('isBottomBarRoute — membership check', () => {
   it('returns true for routes that belong to the role bar', () => {
     expect(isBottomBarRoute('owner', APP_ROUTES.MC_FINANCE)).toBe(true);
     expect(isBottomBarRoute('vendor', APP_ROUTES.VENDOR_PAYOUTS)).toBe(true);
-    expect(isBottomBarRoute('guest', APP_ROUTES.TRIP_PLANNER)).toBe(true);
+    expect(isBottomBarRoute('guest', APP_ROUTES.BOOKINGS)).toBe(true);
   });
 
   it('returns false for routes that are not in the role bar', () => {
@@ -225,13 +225,13 @@ describe('isBottomBarItemActive — exact-match items', () => {
 });
 
 describe('isBottomBarItemActive — prefix items', () => {
-  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /trip-planner
+  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /bookings
   const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
   const ownerProps = BOTTOM_BAR_BY_ROLE.owner[1]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
-    expect(isBottomBarItemActive(market, '/trip-planner')).toBe(true);
-    expect(isBottomBarItemActive(market, '/trip-planner/x')).toBe(true);
+    expect(isBottomBarItemActive(market, '/bookings')).toBe(true);
+    expect(isBottomBarItemActive(market, '/bookings/x')).toBe(true);
     expect(isBottomBarItemActive(property, '/discover/services')).toBe(true);
     expect(isBottomBarItemActive(ownerProps, '/mc/properties/abc/edit')).toBe(true);
   });
@@ -252,7 +252,7 @@ describe('isBottomBarItemActive — alias groups', () => {
     expect(isBottomBarItemActive(account, '/profile')).toBe(true);
     expect(isBottomBarItemActive(account, '/profile/edit')).toBe(true);
     expect(isBottomBarItemActive(account, '/me')).toBe(true);
-    expect(isBottomBarItemActive(account, '/me/services')).toBe(true);
+    expect(isBottomBarItemActive(account, '/me/services')).toBe(false);
   });
 
   it('does not over-match unrelated paths', () => {
@@ -291,7 +291,7 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
   });
 
   it('admin on /admin/crm/123 highlights CRM', () => {
-    expect(getActiveBottomBarItem('admin', '/admin/crm/123')?.labelEn).toBe('CRM');
+    expect(getActiveBottomBarItem('admin', '/admin/review')?.labelEn).toBe('Review');
   });
 
   it('vendor on /vendor highlights Dashboard (exact match)', () => {
@@ -311,10 +311,13 @@ describe('consumer journey ownership', () => {
     ['/property/search', '/discover/stay'],
     ['/property/browse', '/discover/stay'],
     ['/discover/buy', '/discover/stay'],
-    ['/trip-planner', '/trip-planner'],
+    ['/trip-planner', '/discover/services'],
     ['/transport/airport-transfer', '/discover/services'],
     ['/experiences', '/discover/services'],
-    ['/bookings', '/account'],
+    ['/bookings', '/bookings'],
+    ['/me/bookings', '/bookings'],
+    ['/me/requests', '/bookings'],
+    ['/me/services', '/discover/services'],
   ])('%s has one active consumer destination', (path, destination) => {
     expect(getActiveBottomBarItem('guest', path)?.path).toBe(destination);
     expect(BOTTOM_BAR_BY_ROLE.guest.filter(item => isBottomBarItemActive(item, path))).toHaveLength(1);

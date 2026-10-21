@@ -2,6 +2,7 @@
  * Hook for fetching off-plan property projects with filters
  */
 
+import { hasPublicDeveloperProfile } from '@/lib/adapters/developerAdapter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { OffplanCatalogFacet } from '@/lib/offplan/types';
@@ -19,6 +20,7 @@ export interface OffplanProject {
   isFeatured: boolean;
   isActive: boolean;
   developerId: string | null;
+  developerProfileAvailable?: boolean;
   developerName: string | null;
   developerLogo: string | null;
   developerScore: number | null;
@@ -114,6 +116,8 @@ type ProjectRow = Record<string, unknown> & {
 };
 
 type DeveloperEmbed = {
+  id?: string;
+  is_active?: boolean | null;
   name_en?: string;
   logo_url?: string | null;
   muuno_score?: number | null;
@@ -179,6 +183,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           coverImage: p.cover_image ?? null,
           isFeatured: Boolean(p.is_featured),
           developerId: p.developer_id ?? null,
+          developerProfileAvailable: hasPublicDeveloperProfile(p.developer_id, developer),
           developerName: developer?.name_en || p.developer_name || null,
           developerLogo: developer?.logo_url ?? null,
           developerScore: developer?.muuno_score ?? null,
@@ -225,6 +230,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           is_clearview_rated,
           developers (
             id,
+            is_active,
             name_en,
             logo_url,
             muuno_score,
@@ -353,6 +359,7 @@ export function useOffplanProject(id?: string) {
           is_clearview_rated,
           developers (
             id,
+            is_active,
             name_en,
             logo_url,
             muuno_score,
@@ -384,6 +391,7 @@ export function useOffplanProject(id?: string) {
         isFeatured: Boolean(p.is_featured),
         isActive: Boolean(p.is_active),
         developerId: p.developer_id ?? null,
+        developerProfileAvailable: hasPublicDeveloperProfile(p.developer_id, developer),
         developerName: (developer?.name_en as string | undefined) || p.developer_name,
         developerLogo: (developer?.logo_url as string | null | undefined) || null,
         developerScore: (developer?.muuno_score as number | null | undefined) ?? null,

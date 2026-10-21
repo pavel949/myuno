@@ -21,14 +21,14 @@ const clients: QueryClient[] = [];
 function view(cached: object[]) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   clients.push(client);
-  client.setQueryData(['admin', 'providers'], cached);
+  client.setQueryData(['admin', 'providers', 'synthetic-admin', 'inactive', 'keep', 0, 'provider-b'], {rows:cached,count:cached.length});
   return <QueryClientProvider client={client}><MemoryRouter initialEntries={['/admin/providers?edit=provider-b&q=keep&filter=inactive']}><Location /><AdminProviders /></MemoryRouter></QueryClientProvider>;
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
   state.language = 'en';
-  state.from.mockImplementation(() => ({ select: () => ({ order: state.order }) }));
+  state.from.mockImplementation(() => { const query = {select:()=>query,order:()=>query,eq:()=>query,or:()=>query,range:()=>query,then:(resolve: (value: unknown)=>unknown,reject: (reason: unknown)=>unknown)=>state.order().then(resolve,reject)}; return query; });
 });
 afterEach(() => { cleanup(); clients.splice(0).forEach(client => client.clear()); });
 
@@ -45,7 +45,7 @@ describe('provider edit waits for the real query refetch', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Edit Provider' });
     expect(within(dialog).getByDisplayValue(provider.name)).toBeTruthy();
     expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive');
-    expect(state.from).toHaveBeenCalledTimes(1);
+    await waitFor(()=>expect(state.from).toHaveBeenCalledTimes(2));
     expect(state.from).toHaveBeenCalledWith('providers');
   });
 
@@ -62,6 +62,6 @@ describe('provider edit waits for the real query refetch', () => {
       : 'Could not load providers. Please try again.'));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive');
-    expect(state.from).toHaveBeenCalledTimes(1);
+    await waitFor(()=>expect(state.from).toHaveBeenCalledTimes(2));
   });
 });

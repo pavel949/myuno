@@ -11,6 +11,7 @@ export const adminRoutes = (
   <>
     <Route path="/admin" element={<Pages.AdminDashboard />} />
     <Route path="/admin/inbox" element={<Pages.AdminInbox />} />
+    <Route path="/admin/review" element={<Pages.AdminReview />} />
     <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
     <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
     <Route path="/admin/master-catalog" element={<Pages.AdminMasterCatalog />} />

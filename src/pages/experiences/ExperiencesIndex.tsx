@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * ExperiencesIndex — Unified catalog using MiniAppLayout + CatalogCard
  */
@@ -94,6 +95,7 @@ export default function ExperiencesIndex() {
 
   return (
     <MiniAppLayout
+      contentClassName="public-commerce public-commerce--experiences"
       title={isRu ? 'Туры и активности' : 'Tours & Activities'}
       subtitle={isRu ? `Найдено: ${sorted.length}` : `${sorted.length} results`}
       fallbackPath="/"
@@ -179,7 +181,7 @@ export default function ExperiencesIndex() {
       <VerticalContextBanner verticalId="experience" />
 
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {[1,2,3,4,5,6].map(i => (
             <div key={i} className="space-y-2">
               <Skeleton className="aspect-[4/3] rounded-none" />
@@ -195,9 +197,9 @@ export default function ExperiencesIndex() {
           description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {sorted.map(exp => (
-            <CatalogCard key={exp.id} {...mapExperienceToCatalogCard(exp, language, navigate)} />
+            <CatalogCard className="public-commerce-catalog-card" key={exp.id} {...mapExperienceToCatalogCard(exp, language, navigate)} />
           ))}
         </div>
       )}

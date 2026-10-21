@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
@@ -31,4 +32,13 @@ describe('departure metadata versus occupied nights', () => {
     expect(screen.getByText(/Check-in/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Book' })).toBeNull();
   });
+  it('returns from the price editor to the same property and civil day', () => {
+    cleanup();
+    render(<MemoryRouter><CalendarDayEventsSheet open propertyId="synthetic-home" onOpenChange={vi.fn()} date={parseCivilDate('2026-10-21')} bookings={[]} tasks={[]} onAddTask={vi.fn()} onViewBooking={vi.fn()} onCompleteTask={vi.fn()} /></MemoryRouter>);
+    const url = new URL(screen.getByRole('link', {name:'Edit price'}).getAttribute('href')!, 'https://myuno.invalid');
+    expect(url.searchParams.get('property')).toBe('synthetic-home');
+    expect(url.searchParams.get('date')).toBe('2026-10-21');
+    expect(url.searchParams.get('returnTo')).toBe('/mc/calendar?property=synthetic-home&date=2026-10-21');
+  });
+
 });

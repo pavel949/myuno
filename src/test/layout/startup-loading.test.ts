@@ -8,6 +8,8 @@ describe('HTML startup loading', () => {
     const document = new DOMParser().parseFromString(html, 'text/html');
     const status = document.querySelector('#root [role="status"]');
     expect(status?.classList.contains('uno-splash')).toBe(true);
+    expect(status?.hasAttribute('data-myuno-bootstrap-splash')).toBe(true);
+    expect(document.querySelectorAll('[data-myuno-bootstrap-splash]')).toHaveLength(1);
     expect(status?.getAttribute('aria-label')).toBe('Loading myUNO');
     expect(status?.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
     expect(document.querySelector('.uno-boot')).toBeNull();

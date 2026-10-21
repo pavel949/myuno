@@ -41,7 +41,7 @@ import {
 import { InternationalAddressForm } from '@/components/market/InternationalAddressForm';
 import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
 import { getCurrencySymbol } from '@/lib/config/currencies';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 // Order Item Card Component
@@ -747,9 +747,9 @@ const MarketCheckout = () => {
           submitLabel={language === 'ru' ? 'Оформить заказ' : 'Place Order'}
         />
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default MarketCheckout;
+const AvailableMarketCheckout = withMarketAvailability(MarketCheckout);
+export default AvailableMarketCheckout;

@@ -11,7 +11,7 @@ export function PersonalHomeActions() {
   const actions = [
     { to: APP_ROUTES.PROPERTY, icon: House, label: { ru: 'Жильё', en: 'Homes', th: 'ที่พัก' } },
     { to: APP_ROUTES.SERVICES, icon: Shapes, label: { ru: 'Услуги', en: 'Services', th: 'บริการ' } },
-    { to: APP_ROUTES.ME, icon: CalendarDays, label: { ru: 'Брони и заявки', en: 'Bookings & requests', th: 'การจองและคำขอ' } },
+    { to: APP_ROUTES.BOOKINGS, icon: CalendarDays, label: { ru: 'Брони и заявки', en: 'Bookings & requests', th: 'การจองและคำขอ' } },
     { to: APP_ROUTES.SUPPORT, icon: LifeBuoy, label: { ru: 'Помощь', en: 'Help', th: 'ความช่วยเหลือ' } },
   ];
   return (
@@ -28,6 +28,7 @@ export function PersonalHomeActions() {
           </Link>
         ))}
       </nav>
+      <Link to={APP_ROUTES.TRIP_PLANNER} className="mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4">{pickLang(language, { ru: 'Спланировать поездку', en: 'Plan a trip', th: 'วางแผนการเดินทาง' })}</Link>
     </div>
   );
 }

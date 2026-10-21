@@ -23,7 +23,7 @@ import { useVendorProducts } from '@/hooks/useMarketplaceVendors';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 
 interface StoreProduct {
   id: string;
@@ -216,7 +216,6 @@ const StoreDetail = () => {
             minOrder: store?.min_order_amount,
           }}
         />
-        <MarketComingSoonOverlay />
       </div>
     </AppLayout>
   );
@@ -259,4 +258,5 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, language, quantity, 
   );
 };
 
-export default StoreDetail;
+const AvailableStoreDetail = withMarketAvailability(StoreDetail);
+export default AvailableStoreDetail;

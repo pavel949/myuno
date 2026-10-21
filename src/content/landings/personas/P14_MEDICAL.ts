@@ -25,12 +25,12 @@ export const P14_MEDICAL: PersonaLanding = {
     { ru: 'Цены на check-up отличаются в 3 раза между клиниками за тот же набор анализов.', en: 'Check-up prices vary 3× between clinics for the same panel.' },
   ],
   services: [
-    { slug: 'hospital-match', label: { ru: 'Подбор клиники', en: 'Hospital matching' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — под диагноз и бюджет.', en: 'Bangkok Hospital, BIH, Mission, Vachira — by diagnosis and budget.' }, href: '/services/health/hospitals' },
-    { slug: 'medical-coordinator', label: { ru: 'Многоязычный координатор', en: 'Multilingual coordinator' }, oneLiner: { ru: 'Сопровождение на приёмы, перевод заключений (EN/RU/TH).', en: 'Appointment escort, report translation (EN/RU/TH).' }, href: '/concierge?topic=medical' },
-    { slug: 'insurance-liaison', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Cashless approval и работа с ассистансом.', en: 'Cashless approval and assistance coordination.' }, href: '/services/insurance/liaison' },
-    { slug: 'checkup', label: { ru: 'Пакеты check-up', en: 'Check-up packages' }, oneLiner: { ru: 'Executive ฿18 000, кардио ฿28 000, женский ฿22 000.', en: 'Executive ฿18,000, cardio ฿28,000, women’s ฿22,000.' }, href: '/services/health/checkup' },
-    { slug: 'dental', label: { ru: 'Стоматология', en: 'Dentistry' }, oneLiner: { ru: 'Имплантация Straumann ฿55 000, виниры ฿18 000.', en: 'Straumann implants ฿55,000, veneers ฿18,000.' }, href: '/services/health/dental' },
-    { slug: 'surgery-recovery', label: { ru: 'Восстановление после операции', en: 'Post-surgery recovery' }, oneLiner: { ru: 'Виллы с медсестрой и реабилитационная программа.', en: 'Villas with on-call nurse and rehab program.' }, href: '/services/health/recovery' },
+    { slug: 'hospital-match', label: { ru: 'Подбор клиники', en: 'Hospital matching' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — под диагноз и бюджет.', en: 'Bangkok Hospital, BIH, Mission, Vachira — by diagnosis and budget.' }, href: '/services/health/hospitals', availability: 'unavailable' },
+    { slug: 'medical-coordinator', label: { ru: 'Многоязычный координатор', en: 'Multilingual coordinator' }, oneLiner: { ru: 'Сопровождение на приёмы, перевод заключений (EN/RU/TH).', en: 'Appointment escort, report translation (EN/RU/TH).' }, href: '/concierge?topic=medical', availability: 'unavailable' },
+    { slug: 'insurance-liaison', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Cashless approval и работа с ассистансом.', en: 'Cashless approval and assistance coordination.' }, href: '/services/insurance/liaison', availability: 'unavailable' },
+    { slug: 'checkup', label: { ru: 'Пакеты check-up', en: 'Check-up packages' }, oneLiner: { ru: 'Executive ฿18 000, кардио ฿28 000, женский ฿22 000.', en: 'Executive ฿18,000, cardio ฿28,000, women’s ฿22,000.' }, href: '/services/health/checkup', availability: 'unavailable' },
+    { slug: 'dental', label: { ru: 'Стоматология', en: 'Dentistry' }, oneLiner: { ru: 'Имплантация Straumann ฿55 000, виниры ฿18 000.', en: 'Straumann implants ฿55,000, veneers ฿18,000.' }, href: '/services/health/dental', availability: 'unavailable' },
+    { slug: 'surgery-recovery', label: { ru: 'Восстановление после операции', en: 'Post-surgery recovery' }, oneLiner: { ru: 'Виллы с медсестрой и реабилитационная программа.', en: 'Villas with on-call nurse and rehab program.' }, href: '/services/health/recovery', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Какие клиники аккредитованы JCI?', en: 'Which hospitals are JCI-accredited?' }, a: { ru: 'Bangkok Hospital Phuket и BIH — обе с JCI. Mission Hospital — без JCI, но с международным отделением. Vachira (государственная) — без JCI, но 24/7 для критических случаев.', en: 'Bangkok Hospital Phuket and BIH — both JCI-accredited. Mission Hospital — no JCI but has an international wing. Vachira (public) — no JCI, 24/7 for critical cases.' } },
@@ -42,12 +42,12 @@ export const P14_MEDICAL: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Подобрать клинику', en: 'Match a hospital' },
-    href: '/services/health/hospitals',
+    href: '/services/health/hospitals', availability: 'unavailable',
     subtitle: { ru: 'Бесплатно, ответ за 4 часа.', en: 'Free, reply within 4 hours.' },
   },
   secondaryCta: {
     label: { ru: 'Заказать check-up', en: 'Book a check-up' },
-    href: '/services/health/checkup',
+    href: '/services/health/checkup', availability: 'unavailable',
   },
   seo: {
     metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI-клиники — myUNO', en: 'Medical tourism in Phuket: JCI hospitals — myUNO' },

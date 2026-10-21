@@ -13,10 +13,12 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface PropertyDetailMobileBarProps {
   propertyId: string;
   isSaleListing: boolean;
+  isLongStayOnly?: boolean;
   salePrice: number;
   pricePerNight: number;
   ownershipLabel?: string;
@@ -32,6 +34,7 @@ interface PropertyDetailMobileBarProps {
 export function PropertyDetailMobileBar({
   propertyId,
   isSaleListing,
+  isLongStayOnly = false,
   salePrice,
   pricePerNight,
   ownershipLabel,
@@ -62,13 +65,15 @@ export function PropertyDetailMobileBar({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
+    <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
       <div className="max-w-[1536px] mx-auto flex items-center gap-3">
-        {isSaleListing ? (
+        {isSaleListing || isLongStayOnly ? (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-              <span className="text-xl font-bold text-foreground">{salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
+              {isSaleListing ? <>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
+                <span className="text-xl font-bold text-foreground">{salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
+              </> : <p className="text-sm font-semibold text-foreground">{pickLang(language, { ru: 'Условия аренды', en: 'Rental terms', th: 'เงื่อนไขการเช่า' })}</p>}
               {ownershipLabel && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
               )}
@@ -79,8 +84,8 @@ export function PropertyDetailMobileBar({
               propertyTitleRu={titleRu ?? undefined}
               variant="default"
               className="flex-shrink-0"
-              labelRu="Запросить консультацию"
-              labelEn="Request consultation"
+              labelRu={isSaleListing ? 'Запросить консультацию' : 'Запросить аренду'}
+              labelEn={isSaleListing ? 'Request consultation' : pickLang(language, { en: 'Request rental', ru: 'Запросить аренду', th: 'สอบถามการเช่า' })}
             />
           </>
         ) : (

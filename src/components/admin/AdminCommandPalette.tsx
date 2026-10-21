@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CommandDialog,
@@ -175,19 +175,29 @@ export function AdminCommandPalette({ open, onOpenChange }: AdminCommandPaletteP
 
 // Hook for managing command palette state with keyboard shortcut
 export function useAdminCommandPalette() {
-  const [open, setOpen] = useState(false);
+  const [open, updateOpen] = useState(false);
+  const origin = useRef<HTMLElement | null>(null);
+  const setOpen = useCallback((next: boolean) => {
+    updateOpen(next);
+    if (!next) requestAnimationFrame(() => {
+      if (origin.current?.isConnected) origin.current.focus({preventScroll: true});
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        // Do not stack the palette over another modal (e.g. global search).
+        if (!open && document.querySelector('[role="dialog"]')) return;
+        if (!open) origin.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setOpen(!open);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [open, setOpen]);
 
   return { open, setOpen };
 }

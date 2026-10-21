@@ -25,6 +25,8 @@ interface UnifiedHeaderProps {
   isSearching?: boolean;
   rightAction?: ReactNode;
   className?: string;
+  /** Opt-in feature frame; does not change other mini-app/detail headers. */
+  containerClassName?: string;
 }
 
 export const UnifiedHeader = memo(function UnifiedHeader({
@@ -41,6 +43,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   isSearching,
   rightAction,
   className,
+  containerClassName,
 }: UnifiedHeaderProps) {
   const navigate = useNavigate();
 
@@ -50,7 +53,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
 
   return (
     <div className={cn(ECOSYSTEM_STICKY_SURFACE, className)}>
-      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-2.5")}>
+      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-2.5", containerClassName)}>
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-2">
           {showBack && (

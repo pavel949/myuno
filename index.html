@@ -5,6 +5,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover" />
     
+    <!-- Runs without the app bundle: a missing entry must not leave an endless splash. -->
+    <script id="myuno-boot-recovery">
+      (function () {
+        var retrying = false;
+        function showRecovery() {
+          var splash = document.querySelector('#root > [data-myuno-bootstrap-splash]');
+          if (!splash || splash.querySelector('button')) return;
+          var language = (document.documentElement.lang || navigator.language || 'en').slice(0, 2);
+          var copy = language === 'ru'
+            ? ['Не удалось загрузить myUNO', 'Проверьте подключение и попробуйте снова. Ваши данные сохранены.', 'Повторить']
+            : language === 'th'
+              ? ['โหลด myUNO ไม่สำเร็จ', 'ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง ข้อมูลของคุณยังคงอยู่', 'ลองอีกครั้ง']
+              : ['myUNO could not load', 'Check your connection and try again. Your saved data is kept.', 'Try again'];
+          splash.textContent = '';
+          splash.style.flexDirection = 'column';
+          splash.style.gap = '16px';
+          splash.style.padding = '24px';
+          splash.style.textAlign = 'center';
+          splash.setAttribute('role', 'alert');
+          splash.removeAttribute('aria-label');
+          var title = document.createElement('h1'); title.textContent = copy[0];
+          var message = document.createElement('p'); message.textContent = copy[1];
+          var button = document.createElement('button'); button.type = 'button'; button.textContent = copy[2];
+          button.style.cssText = 'min-height:44px;padding:12px 24px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer';
+          button.onclick = function () {
+            if (retrying) return;
+            retrying = true; button.disabled = true;
+            var reloaded = false;
+            function reload() { if (!reloaded) { reloaded = true; window.location.reload(); } }
+            // Update only the existing worker; never delete caches, credentials or drafts.
+            if ('serviceWorker' in navigator) {
+              setTimeout(reload, 2500);
+              navigator.serviceWorker.getRegistration().then(function (registration) {
+                return registration ? registration.update() : undefined;
+              }).then(reload, reload);
+            } else reload();
+          };
+          splash.appendChild(title); splash.appendChild(message); splash.appendChild(button);
+        }
+        window.addEventListener('error', function (event) {
+          var target = event.target;
+          if (!target || target.tagName !== 'SCRIPT' || target.type !== 'module' || !target.src) return;
+          var source = new URL(target.src, window.location.href);
+          if (source.origin !== window.location.origin) return;
+          if (!document.querySelector('#root > [data-myuno-bootstrap-splash]')) return;
+          // One bounded navigation per entry version. Storage unavailable => show recovery only.
+          try {
+            var key = 'myuno:boot-retry:' + source.pathname;
+            if (!sessionStorage.getItem(key) && !new URL(window.location.href).searchParams.has('_bootRetry')) {
+              sessionStorage.setItem(key, '1');
+              var next = new URL(window.location.href);
+              next.searchParams.set('_bootRetry', String(Date.now()));
+              window.location.replace(next.href);
+              return;
+            }
+          } catch (error) {}
+          showRecovery();
+        }, true);
+        // Only the static bootstrap indicator is owned here; React route loaders are not.
+        setTimeout(showRecovery, 20000);
+      })();
+    </script>
+
     <!-- Force fresh content - no caching for HTML -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -241,7 +304,7 @@
       (function(){try{var t=localStorage.getItem('myuno-theme');if(t!=='light'&&t!=='dark'&&t!=='system')t='light';var r='dark';if(t==='light')r='light';else if(t==='system')r=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';else r='dark';var d=document.documentElement;d.classList.remove('light','dark');d.classList.add(r);}catch(e){}})();
     </script>
     <div id="root">
-      <div class="uno-splash" role="status" aria-label="Loading myUNO">
+      <div class="uno-splash" data-myuno-bootstrap-splash role="status" aria-label="Loading myUNO">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       </div>
     </div>

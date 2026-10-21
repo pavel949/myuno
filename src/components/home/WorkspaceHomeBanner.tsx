@@ -45,15 +45,15 @@ export function WorkspaceHomeBanner() {
   if (availableRoles.includes('uno_team')) {
     links.push({ to: APP_ROUTES.TEAM, label: { ru: 'Команда myUNO', en: 'myUNO team', th: 'ทีม myUNO' } });
   }
-  if (availableRoles.includes('staff')) {
-    links.push({ to: '/staff', label: { ru: 'Кабинет сотрудника', en: 'Staff workspace', th: 'พื้นที่ทำงานพนักงาน' } });
-  }
   if (availableRoles.includes('investor')) {
     links.push({ to: APP_ROUTES.INVEST_DASHBOARD, label: { ru: 'Кабинет инвестора', en: 'Investor workspace', th: 'พื้นที่ทำงานนักลงทุน' } });
   }
+  if (availableRoles.includes('investor')) {
+    links.push({ to: APP_ROUTES.CAPITAL, label: { ru: 'Работа с инвестиционными сделками', en: 'Capital deal workspace', th: 'พื้นที่จัดการดีลลงทุน' } });
+  }
   if (!user || contextLoading || ownerTypeLoading || links.length === 0) return null;
 
-  const activeDestination = { vendor: APP_ROUTES.VENDOR, uno_team: APP_ROUTES.TEAM, staff: '/staff', investor: APP_ROUTES.INVEST_DASHBOARD }[activeRole];
+  const activeDestination = { vendor: APP_ROUTES.VENDOR, uno_team: APP_ROUTES.TEAM, investor: APP_ROUTES.INVEST_DASHBOARD }[activeRole];
   const selected = links.find(link => link.to === remembered) ?? links.find(link => link.to === activeDestination) ?? links[0];
   const remember = (to: string) => {
     setChoice({ key: storageKey, to });

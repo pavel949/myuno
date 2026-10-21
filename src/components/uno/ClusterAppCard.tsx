@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import type { ClusterId, ServiceStatus } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const ACCENT_BG: Record<ClusterId, string> = {
   arrive: 'bg-cluster-arrive',
@@ -34,8 +36,13 @@ export interface ClusterAppCardProps {
 }
 
 function StatusBadge({ status }: { status: ServiceStatus }) {
+  const { language } = useLanguage();
   if (status === 'available') return null;
-  const label = status === 'soon' ? 'Soon' : 'Pro';
+  const label = status === 'soon'
+    ? pickLang(language, { ru: 'Скоро', en: 'Coming soon', th: 'เร็ว ๆ นี้' })
+    : status === 'info'
+      ? pickLang(language, { ru: 'Информация', en: 'Information', th: 'ข้อมูล' })
+      : pickLang(language, { ru: 'Для специалистов', en: 'Professional', th: 'สำหรับมืออาชีพ' });
   return (
     <span className="rounded-none border border-border bg-muted/60 px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
       {label}
