@@ -3,13 +3,13 @@ import type { LangValues } from '@/lib/i18n/pickLang';
 
 /** Public navigation only: no new domain state, catalogue, prices or availability. */
 export const homeCopy = {
-  place: { ru: 'Пхукет.', en: 'Phuket.', th: 'ภูเก็ต' },
-  headline: { ru: 'Вы дома.', en: 'You’re home.', th: 'บ้านของคุณ' },
-  lead: { ru: 'Планируете отпуск, переезжаете или ищете услуги? myUNO поможет с жильём и делами на острове.', en: 'Planning a holiday, moving here, or looking for a service? myUNO can help with a home and life on the island.', th: 'วางแผนวันหยุด ย้ายมาอยู่ หรือกำลังหาบริการใช่ไหม myUNO ช่วยเรื่องที่พักและชีวิตบนเกาะได้' },
+  place: { ru: 'Остановитесь на Пхукете.', en: 'Stay in Phuket.', th: 'พักที่ภูเก็ต' },
+  headline: { ru: 'Мы поможем со всем остальным.', en: 'We’ll help with the rest.', th: 'เราช่วยดูแลเรื่องอื่นให้' },
+  lead: { ru: 'Жильё для отпуска и переезда, местные услуги и поддержка команды на острове.', en: 'Homes for holidays and longer stays, local services, and support from our team on the island.', th: 'ที่พักสำหรับวันหยุดหรือการอยู่อาศัยระยะยาว บริการท้องถิ่น และทีมงานที่พร้อมช่วยเหลือบนเกาะ' },
   stays: { ru: 'Где остановиться', en: 'Places to stay', th: 'ที่พักสำหรับคุณ' },
   staysLead: { ru: 'Посмотрите доступные варианты и откройте карточку, чтобы узнать подробности и выбрать даты.', en: 'Browse real listings, then open a home to see details and choose your dates.', th: 'ดูที่พักที่ลงประกาศ แล้วเปิดรายละเอียดเพื่อเลือกวันเข้าพัก' },
   layantara: { ru: 'Layantara Villas', en: 'Layantara Villas', th: 'Layantara Villas' },
-  layantaraLead: { ru: 'Хотите остановиться в Layantara? Посмотрите опубликованные виллы или уточните у команды свободные даты.', en: 'Want to stay at Layantara? Browse published villas or ask our team about available dates.', th: 'อยากพักที่ Layantara ใช่ไหม ดูวิลล่าที่ลงประกาศหรือติดต่อทีมงานเพื่อสอบถามวันที่ว่าง' },
+  layantaraLead: { ru: 'Уточните у команды свободные даты и подходящий вариант.', en: 'Ask our team about available dates and the right villa for your stay.', th: 'ติดต่อทีมงานเพื่อสอบถามวันที่ว่างและวิลล่าที่เหมาะกับการเข้าพัก' },
   layantaraAction: { ru: 'Уточнить даты', en: 'Ask about dates', th: 'สอบถามวันที่ว่าง' },
   emptyHomes: { ru: 'Пока нет опубликованных вариантов. Посмотрите весь каталог жилья.', en: 'There are no published homes to show here yet. Browse the full catalogue.', th: 'ยังไม่มีที่พักที่เผยแพร่ในขณะนี้ ดูที่พักทั้งหมด' },
   loadHomesError: { ru: 'Не удалось загрузить варианты. Каталог жилья доступен по ссылке ниже.', en: 'Homes could not be loaded. Use the link below to open the catalogue.', th: 'โหลดที่พักไม่สำเร็จ ใช้ลิงก์ด้านล่างเพื่อเปิดแค็ตตาล็อก' },
