@@ -19,6 +19,7 @@ CREATE POLICY own_property ON properties TO authenticated USING(owner_id=auth.ui
 ALTER TABLE property_availability ENABLE ROW LEVEL SECURITY;
 CREATE POLICY own_prices ON property_availability TO authenticated USING(can_manage_property_e28_private(property_id)) WITH CHECK(can_manage_property_e28_private(property_id));
 \ir ../../supabase/migrations/20261021062539_canonical_pricing_calendar.sql
+\ir ../../supabase/migrations/20261021063811_canonical_pricing_calendar_read.sql
 INSERT INTO properties VALUES ('00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002','THB');
 INSERT INTO property_room_categories VALUES ('00000000-0000-0000-0000-000000000003','00000000-0000-0000-0000-000000000001');
 INSERT INTO property_availability VALUES ('00000000-0000-0000-0000-000000000001','2026-10-21',100,'blocked','00000000-0000-0000-0000-000000000004',3);
@@ -27,6 +28,7 @@ SET test.actor='00000000-0000-0000-0000-000000000002';
 SELECT set_property_calendar_price('00000000-0000-0000-0000-000000000001',NULL,'2026-10-21','2026-10-23',2500.50,'THB','{"2026-10-21":{"price":100,"minimum":3,"status":"blocked","booking":"00000000-0000-0000-0000-000000000004"}}');
 DO $$ BEGIN
  IF NOT EXISTS(SELECT 1 FROM property_availability WHERE date='2026-10-21' AND status='blocked' AND booking_id='00000000-0000-0000-0000-000000000004' AND min_nights_override=3 AND price_override=2500.50) THEN RAISE EXCEPTION 'Occupancy changed'; END IF;
+ IF jsonb_array_length(get_property_calendar_prices('00000000-0000-0000-0000-000000000001',NULL,'2026-10-21','2026-10-23'))<>2 THEN RAISE EXCEPTION 'Price read missing'; END IF;
  IF (SELECT count(*) FROM property_availability)<>2 THEN RAISE EXCEPTION 'Half-open range violated'; END IF;
  BEGIN
  PERFORM set_property_calendar_price('00000000-0000-0000-0000-000000000001',NULL,'2026-10-21','2026-10-22',99,'THB','{}');
@@ -51,6 +53,10 @@ DO $$ BEGIN
  BEGIN
  PERFORM set_property_calendar_price('00000000-0000-0000-0000-000000000001',NULL,'2026-10-23','2026-10-24',99,'THB','{}');
  RAISE EXCEPTION 'Unauthorized actor accepted';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ BEGIN
+ PERFORM get_property_calendar_prices('00000000-0000-0000-0000-000000000001',NULL,'2026-10-21','2026-10-23');
+ RAISE EXCEPTION 'Unauthorized price read accepted';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
 END $$;
 RESET ROLE;

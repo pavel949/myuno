@@ -15,7 +15,7 @@ function mount(currency: string | null = 'THB') {
  const property = {property_id:'property',title:'Villa',record_currency:currency} as UnifiedProperty;
  return render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><MemoryRouter initialEntries={['/mc/rates?date=2026-10-21']}><CalendarPriceEditor property={property}/></MemoryRouter></QueryClientProvider>);
 }
-beforeEach(() => { vi.clearAllMocks(); state.rows=[{date:'2026-10-21',price_override:100,status:'blocked',booking_id:'booking',min_nights_override:2}]; state.rpc.mockImplementation(async (_name,args) => ({data:{property_id:args.p_property_id,category_id:args.p_category_id,nights:1,nightly_rate:args.p_price,currency:args.p_currency},error:null})); });
+beforeEach(() => { vi.clearAllMocks(); state.rows=[{date:'2026-10-21',price_override:100,status:'blocked',booking_id:'booking',min_nights_override:2}]; state.rpc.mockImplementation(async (name,args) => name === 'get_property_calendar_prices' ? {data:state.rows,error:null} : ({data:{property_id:args.p_property_id,category_id:args.p_category_id,nights:1,nightly_rate:args.p_price,currency:args.p_currency},error:null})); });
 describe('CalendarPriceEditor', () => {
  it('saves native unit price through the price-only RPC with inventory snapshot', async () => {
   mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
@@ -34,10 +34,10 @@ describe('CalendarPriceEditor', () => {
  });
  it('blocks unknown currency and never substitutes deposit currency', () => {
   mount(null); expect(screen.getByRole('alert')).toHaveTextContent('Set the property currency');
-  expect(screen.getByRole('button',{name:'Apply nightly price'})).toBeDisabled(); expect(state.rpc).not.toHaveBeenCalled();
+  expect(screen.getByRole('button',{name:'Apply nightly price'})).toBeDisabled(); expect(state.rpc.mock.calls.some(([name]) => name === 'set_property_calendar_price')).toBe(false);
  });
  it('does not announce success when the server fails', async () => {
-  state.rpc.mockResolvedValue({data:null,error:{code:'40001'}}); mount();
+  state.rpc.mockImplementation(async name => name === 'get_property_calendar_prices' ? {data:state.rows,error:null} : {data:null,error:{code:'40001'}}); mount();
   fireEvent.change(screen.getByLabelText('Per night · THB'),{target:{value:'800'}});
   await waitFor(() => expect(screen.getByRole('button',{name:'Apply nightly price'})).not.toBeDisabled()); fireEvent.click(screen.getByRole('button',{name:'Apply nightly price'}));
   await waitFor(() => expect(state.error).toHaveBeenCalled()); expect(state.success).not.toHaveBeenCalled();

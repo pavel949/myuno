@@ -22,6 +22,11 @@ Target: `pavel949/myuno`, Vite app serving myuno.app. The Next.js donor
   policies/grants are widened. It updates price columns only, preserves occupancy
   and restrictions, checks snapshots/locks and records before-images in audit.
 
+`get_property_calendar_prices` exposes only authorized dated pricing and
+comparison fields. It uses the same private guards because live availability
+SELECT RLS otherwise returns no rows for non-admin owners. It does not expose
+notes, guest details or unrelated properties.
+
 ## Evidence
 
 - Production Lovable project `dcc2b024-7627-4ad9-a915-a3df3dd839f0` matched
@@ -29,10 +34,10 @@ Target: `pavel949/myuno`, Vite app serving myuno.app. The Next.js donor
 - Authorized read-only preflight checked canonical columns, unique constraints,
   authority helpers and RLS. Supabase connector itself lacked project access;
   migration used the project's authorized Lovable database connector.
-- Migration `20261021062539` applied transactionally and registered once in
+- Migrations `20261021062539` and `20261021063811` applied transactionally and registered once each in
   `supabase_migrations.schema_migrations`. Postflight: anonymous execute false,
   authenticated execute true, both private authority guards present, pinned path.
-- 56 focused tests pass: editor RPC/confirmation/failure/currency/selection,
+- 59 focused tests pass: editor RPC/confirmation/failure/currency/selection,
   civil ranges, old rates currency/navigation and existing property quote tests.
 - Fresh isolated PostgreSQL fixture exercises actual migration: unit/category
   saves, inventory preservation, half-open dates, stale snapshots, currency

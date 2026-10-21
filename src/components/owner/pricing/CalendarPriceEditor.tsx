@@ -44,14 +44,16 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
     enabled: !!user && !!property.property_id,
     staleTime: 0, gcTime: 0,
     queryFn: async (): Promise<CalendarPriceRow[]> => {
-      if (category) {
-        const result = await supabase.from('property_stay_restrictions').select('date,price_override,min_stay_nights,closed_to_arrival,closed_to_departure,stop_sell').eq('property_id', property.property_id).eq('category_id', category).gte('date', rangeFrom).lt('date', rangeEnd);
-        if (result.error) throw result.error;
-        return result.data;
-      }
-      const result = await supabase.from('property_availability').select('date,price_override,min_nights_override,status,booking_id').eq('property_id', property.property_id).gte('date', rangeFrom).lt('date', rangeEnd);
-      if (result.error) throw result.error;
-      return result.data;
+      const { data, error } = await supabase.rpc('get_property_calendar_prices', {
+        p_property_id: property.property_id, p_category_id: category || null,
+        p_from: rangeFrom, p_to: rangeEnd,
+      });
+      if (error) throw error;
+      if (!Array.isArray(data)) throw new Error('Invalid calendar price response');
+      return data.map(row => {
+        if (!row || typeof row !== 'object' || Array.isArray(row) || typeof row.date !== 'string' || (row.price_override !== null && typeof row.price_override !== 'number')) throw new Error('Invalid calendar price row');
+        return row as CalendarPriceRow;
+      });
     },
   });
   async function save() {

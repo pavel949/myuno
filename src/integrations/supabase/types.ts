@@ -36547,6 +36547,10 @@ export type Database = {
       }
     }
     Functions: {
+      get_property_calendar_prices: {
+        Args: { p_property_id: string; p_category_id: string | null; p_from: string; p_to: string };
+        Returns: Json;
+      };
       set_property_calendar_price: {
         Args: { p_property_id: string; p_category_id: string | null; p_from: string; p_to: string; p_price: number; p_currency: string; p_expected: Json };
         Returns: Json;
