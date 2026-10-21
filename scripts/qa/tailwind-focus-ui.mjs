@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { compileApplicationCss } from './compile-application-css.mjs';
 
 const root = process.cwd();
 const output = '/tmp/browser/tailwind-focus-isolated';
@@ -28,9 +29,7 @@ const result = await build({
 if (Object.keys(result.metafile.inputs).some(file => /integrations\/supabase|@supabase\//.test(file))) {
   throw Error('Production data module included');
 }
-const response = await fetch('http://localhost:8080/src/index.css?direct');
-if (!response.ok) throw Error('Compiled application CSS unavailable');
-await writeFile(path.join(output, 'fixture.css'), await response.text());
+await writeFile(path.join(output, 'fixture.css'), (await compileApplicationCss(root)).css);
 await writeFile(path.join(output, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if (!process.argv.includes('--build-only')) {
   const run = spawnSync('python3', [path.join(root, 'scripts/qa/tailwind-focus-ui.py'), output], { stdio: 'inherit' });
