@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Baby, Clock, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const babysitters: Record<string, { nameEn: string; nameRu: string; pricePerHour: number; image: string }> = {
   'bs-1': { nameEn: 'Anna Petrova', nameRu: 'Анна Петрова', pricePerHour: 500, image: PLACEHOLDER_IMAGES.avatar },
@@ -58,7 +59,7 @@ export default function BabysitterBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/babysitter/${id}/book` } });
+    redirectToAuth(navigate, { from: `/babysitter/${id}/book` });
     return null;
   }
 

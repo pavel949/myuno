@@ -15,7 +15,7 @@ export interface ProviderDetails {
   is_verified: boolean;
   rating?: number;
   review_count?: number;
-  pending_payout: number;
+  pending_payout?: number;
   total_earnings?: number;
   commission_rate?: number;
   logo_url?: string;
@@ -71,7 +71,7 @@ export interface ProviderBooking {
   service_name?: string;
 }
 
-export function useProviderDetails(providerId: string | null) {
+export function useProviderDetails(providerId: string | null, visibility: 'private' | 'public' = 'private') {
   const [provider, setProvider] = useState<ProviderDetails | null>(null);
   const [services, setServices] = useState<ProviderService[]>([]);
   const [products, setProducts] = useState<ProviderProduct[]>([]);
@@ -96,8 +96,8 @@ export function useProviderDetails(providerId: string | null) {
 
     try {
       // Fetch provider details
-      const { data: providerData, error: providerError } = await supabase
-        .from('providers')
+      const providerQuery = visibility === 'public' ? supabase.from('public_provider_catalog') : supabase.from('providers');
+      const { data: providerData, error: providerError } = await providerQuery
         .select('*')
         .eq('id', providerId)
         .maybeSingle();
@@ -114,11 +114,11 @@ export function useProviderDetails(providerId: string | null) {
         return;
       }
       
-      setProvider(providerData);
+      setProvider(providerData as unknown as ProviderDetails);
 
       // Fetch services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from('services')
+      const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
+      const { data: servicesData, error: servicesError } = await serviceQuery
         .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
@@ -127,9 +127,16 @@ export function useProviderDetails(providerId: string | null) {
         setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
       }
 
+      if (visibility === 'public') {
+        setProducts([]);
+        setContracts([]);
+        setBookings([]);
+        return;
+      }
+
       // Fetch products (if provider is linked to marketplace vendor)
       // Use the already-fetched providerData instead of a redundant query
-      if (providerData.marketplace_vendor_id) {
+      if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
         const { data: productsData, error: productsError } = await supabase
           .from('marketplace_products')
           .select('id, name_en, name_ru, price, currency, is_active, created_at')
@@ -191,7 +198,7 @@ export function useProviderDetails(providerId: string | null) {
     } finally {
       setIsLoading(false);
     }
-  }, [providerId]);
+  }, [providerId, visibility]);
 
   useEffect(() => {
     fetchProviderDetails();

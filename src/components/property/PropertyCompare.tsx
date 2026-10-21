@@ -8,13 +8,13 @@ import { X, GitCompareArrows, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { getPropertyTypeLabel, getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
+import { formatCurrencyAmount } from '@/lib/config/currencies';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { propertyDetailHref, propertyCatalogHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = 'myuno_compare_properties';
@@ -30,6 +30,12 @@ export interface CompareProperty {
   bathrooms?: number;
   area_sqm?: number;
   max_guests?: number;
+  mode?: 'rent' | 'buy';
+  guestSearch?: string;
+  listing_type?: string;
+  sale_price?: number | null;
+  currency?: string | null;
+  sale_currency?: string | null;
   price?: number;
   price_per_night?: number;
   price_period?: string;
@@ -42,7 +48,7 @@ interface CompareContextType {
   add: (property: CompareProperty) => void;
   remove: (id: string) => void;
   clear: () => void;
-  isInCompare: (id: string) => boolean;
+  isInCompare: (id: string, mode?: 'rent' | 'buy') => boolean;
   openSheet: () => void;
 }
 
@@ -71,12 +77,10 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((property: CompareProperty) => {
     setItems(prev => {
+      // Revisiting a dual-listed home in another intent refreshes its snapshot.
+      if (prev.some(p => p.id === property.id)) return [...prev.filter(p => p.id !== property.id), property];
       if (prev.length >= MAX_COMPARE) {
         toast.error(isRu ? `Максимум ${MAX_COMPARE} объекта` : `Maximum ${MAX_COMPARE} properties`);
-        return prev;
-      }
-      if (prev.some(p => p.id === property.id)) {
-        toast.info(isRu ? 'Уже в сравнении' : 'Already in compare');
         return prev;
       }
       toast.success(isRu ? 'Добавлено к сравнению' : 'Added to compare');
@@ -90,45 +94,36 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
 
   const clear = useCallback(() => setItems([]), []);
 
-  const isInCompare = useCallback((id: string) => items.some(p => p.id === id), [items]);
+  const isInCompare = useCallback((id: string, mode?: 'rent' | 'buy') => items.some(p => p.id === id && p.mode === mode), [items]);
 
   const openSheet = useCallback(() => setSheetOpen(true), []);
 
   return (
     <CompareContext.Provider value={{ items, add, remove, clear, isInCompare, openSheet }}>
       {children}
-      {/* Floating compare bar */}
-      <AnimatePresence>
-        {items.length > 0 && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className={`fixed ${FLOATING_OFFSET.aboveBottomNav} left-1/2 -translate-x-1/2 ${FLOATING.compare}`}
-          >
-            <Button
-              onClick={() => setSheetOpen(true)}
-              className="gap-2 rounded-full shadow-lg px-5 py-3 h-auto"
-              size="lg"
-            >
-              <GitCompareArrows className="w-4 h-4" />
-              {isRu ? 'Сравнить' : 'Compare'} ({items.length})
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Compare Sheet */}
       <CompareSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </CompareContext.Provider>
   );
 }
 
+/** In-flow entry point: shares the existing sheet and persisted selection. */
+export function PropertyCompareTrigger() {
+  const context = useContext(CompareContext);
+  const { language } = useLanguage();
+  if (!context?.items.length) return null;
+  return <Button variant="outline" size="sm" className="gap-1.5 min-h-11" onClick={(event) => {
+    event.stopPropagation();
+    context.openSheet();
+  }}><GitCompareArrows className="w-4 h-4" />
+    {pickLang(language, { ru: 'Сравнить', en: 'Compare', th: 'เปรียบเทียบ' })} ({context.items.length})
+  </Button>;
+}
+
 function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { items, remove, clear } = usePropertyCompare();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
   const specs = [
@@ -139,8 +134,15 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
     { key: 'area', label: isRu ? 'Площадь' : 'Area', render: (p: CompareProperty) => p.area_sqm ? `${p.area_sqm} м²` : '—' },
     { key: 'guests', label: isRu ? 'Гости' : 'Guests', render: (p: CompareProperty) => p.max_guests ?? '—' },
     { key: 'price', label: isRu ? 'Цена' : 'Price', render: (p: CompareProperty) => {
-      const price = p.price_per_night || p.price;
-      return price ? formatPrice(price) : '—';
+      // Old snapshots have no reliable intent: never present their nightly amount as a sale.
+      const price = p.mode === 'buy' ? propertySaleAskingPrice(p) : p.mode === 'rent' ? (p.price_per_night || p.price) : null;
+      if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) return isRu ? 'Цена по запросу' : 'Price on request';
+      const intent = p.mode === 'buy' ? (isRu ? 'Покупка' : 'Purchase') : (isRu ? 'Аренда' : 'Rent');
+      const periods: Record<string, string> = isRu ? { night: ' / ночь', day: ' / день', week: ' / неделю', month: ' / месяц', year: ' / год' } : { night: ' / night', day: ' / day', week: ' / week', month: ' / month', year: ' / year' };
+      const period = p.mode === 'rent' ? (periods[p.price_per_night ? 'night' : p.price_period || ''] || '') : '';
+      const currency = (p.mode === 'buy' && p.sale_price != null ? p.sale_currency : p.currency)?.trim().toUpperCase();
+      const currencyLabel = currency && /^[A-Z]{3}$/.test(currency) ? currency : (isRu ? 'валюта не указана' : 'currency unspecified');
+      return `${intent}: ${currency && /^[A-Z]{3}$/.test(currency) ? formatCurrencyAmount(price, currency, false) : price.toLocaleString(isRu ? 'ru-RU' : 'en-US')} ${currencyLabel}${period}`;
     }},
     { key: 'rating', label: isRu ? 'Рейтинг' : 'Rating', render: (p: CompareProperty) => p.rating ? `★ ${p.rating.toFixed(1)}` : '—' },
   ];
@@ -180,9 +182,9 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                         >
                           <X className="w-3 h-3" />
                         </button>
-                        <div
-                          className="cursor-pointer"
-                          onClick={() => { onOpenChange(false); navigate(APP_ROUTES.PROPERTY_DETAIL(p.id)); }}
+                        <button type="button"
+                          className="w-full text-left cursor-pointer"
+                          onClick={() => { onOpenChange(false); navigate(p.mode ? propertyDetailHref(p.id, p.mode, p.guestSearch) : APP_ROUTES.PROPERTY_DETAIL(p.id)); }}
                         >
                           {p.cover_image && (
                             <img src={p.cover_image} alt="" className="w-full aspect-[4/3] rounded-none object-cover mb-2" />
@@ -190,21 +192,21 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                           <p className="font-semibold text-sm line-clamp-2 text-foreground">
                             {isRu ? (p.title_ru || p.title_en) : p.title_en}
                           </p>
-                        </div>
+                        </button>
                       </div>
                     </th>
                   ))}
                   {items.length < MAX_COMPARE && (
                     <th className="p-2 align-top">
-                      <div
-                        className="aspect-[4/3] rounded-none border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={() => { onOpenChange(false); navigate('/property'); }}
+                      <button type="button"
+                        className="w-full aspect-[4/3] rounded-none border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
+                        onClick={() => { onOpenChange(false); const latest = items[items.length - 1]; navigate(latest?.mode ? propertyCatalogHref(latest.mode, latest.guestSearch) : APP_ROUTES.PROPERTY_SEARCH); }}
                       >
                         <div className="text-center text-muted-foreground">
                           <Plus className="w-6 h-6 mx-auto mb-1" />
                           <span className="text-xs">{isRu ? 'Добавить' : 'Add'}</span>
                         </div>
-                      </div>
+                      </button>
                     </th>
                   )}
                 </tr>
@@ -242,7 +244,7 @@ export function CompareButton({ property, variant = 'ghost', size = 'sm', classN
   const { add, remove, isInCompare } = usePropertyCompare();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const inCompare = isInCompare(property.id);
+  const inCompare = isInCompare(property.id, property.mode);
 
   return (
     <Button

@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { Scale, Plus, MoreVertical, Edit, Trash2, Loader2, Star } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { VendorLegalInbox } from '@/components/vendor/VendorLegalInbox';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 
 const serviceTypes = [
@@ -51,7 +52,7 @@ const VendorLegal = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {

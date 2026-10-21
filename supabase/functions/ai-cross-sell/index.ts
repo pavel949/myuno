@@ -1,13 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalOrUser, requireActorRpc } from "../_shared/authz.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Dual-mode: internal secret (cron) OR authenticated user who owns the booking / is staff
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const authedUserId = gate.mode === "user" ? gate.userId : null;
 
   try {
     const { booking_id } = await req.json();
@@ -17,12 +21,16 @@ serve(async (req) => {
       });
     }
 
+    if (authedUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, "actor_can_analyze_booking", { p_booking_id: booking_id });
+      if (denied) return denied;
+    }
     const supabase = createServiceClient();
 
     // Fetch booking details
     const { data: booking, error: bErr } = await supabase
       .from("property_bookings")
-      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency")
+      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency, guest_id")
       .eq("id", booking_id)
       .single();
 
@@ -31,6 +39,7 @@ serve(async (req) => {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Fetch property details for context
     const { data: property } = await supabase

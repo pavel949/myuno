@@ -1,5 +1,7 @@
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface Props {
   priority: number;
@@ -8,6 +10,7 @@ interface Props {
 }
 
 export function DealPriorityStars({ priority, onChange, size = 'sm' }: Props) {
+  const { language } = useLanguage();
   const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
 
   return (
@@ -16,6 +19,8 @@ export function DealPriorityStars({ priority, onChange, size = 'sm' }: Props) {
         <button
           key={level}
           type="button"
+          aria-label={pickLang(language, { ru: `Приоритет ${level}`, en: `Priority ${level}`, th: `ลำดับความสำคัญ ${level}` })}
+          aria-pressed={level === priority}
           onClick={() => onChange?.(priority === level ? 0 : level)}
           disabled={!onChange}
           aria-label={`Set priority ${level}`}

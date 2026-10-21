@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNbSavedSearches } from '@/hooks/useNbSavedSearches';
 import type { OffplanUiFilterState } from '@/lib/offplan/types';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface Props {
   filters: OffplanUiFilterState;
@@ -46,7 +47,7 @@ export function SaveOffplanSearchDialog({ filters, resultCount }: Props) {
   const handleOpen = (next: boolean) => {
     if (next && !user) {
       toast.error(isRu ? 'Войдите, чтобы сохранить поиск' : 'Sign in to save searches');
-      navigate('/auth');
+      redirectToAuth(navigate);
       return;
     }
     if (next) setName(defaultName());

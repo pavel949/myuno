@@ -10,7 +10,7 @@ export const OWNER_BRAND = {
   fullManagement: 'myUNO Full Management',
   domain: 'myuno.app',
   supportEmail: 'support@myuno.app',
-  legalEntity: 'myUNO Pte. Ltd.',
+  legalEntity: 'Toplight Asia Pacific Co., Ltd.',
 } as const;
 
 export const OWNER_REVENUE = {

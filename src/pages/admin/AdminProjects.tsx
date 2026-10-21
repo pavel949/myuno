@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
@@ -67,7 +68,8 @@ import {
   AlertTriangle,
   ShieldCheck,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { PROJECT_REVIEW_FILTERS, PROJECT_STAGE_FILTERS, UNASSIGNED_DEVELOPER_ID, matchesProjectReview, readFilter, updateReviewParams } from '@/lib/admin/reviewFilters';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
@@ -76,10 +78,10 @@ import { AIIntakeDialog } from '@/components/admin/intake/AIIntakeDialog';
 import { ProjectUnitsTab } from '@/components/admin/projects/ProjectUnitsTab';
 import { PHUKET_DISTRICTS, ALL_AMENITIES } from '@/lib/taxonomies';
 
-const PROJECT_STATUS_OPTIONS: { value: ProjectStatus; label: string; labelRu: string; icon: React.ReactNode }[] = [
-  { value: 'offplan', label: 'Off-Plan', labelRu: 'Офф-план', icon: <Building2 className="h-4 w-4" /> },
-  { value: 'under_construction', label: 'Under Construction', labelRu: 'Строится', icon: <HardHat className="h-4 w-4" /> },
-  { value: 'completed', label: 'Completed', labelRu: 'Сдан', icon: <CheckCircle className="h-4 w-4" /> },
+const PROJECT_STATUS_OPTIONS: { value: ProjectStatus; label: string; labelRu: string; labelTh: string; icon: React.ReactNode }[] = [
+  { value: 'offplan', label: 'Off-Plan', labelRu: 'Офф-план', labelTh: 'ขายก่อนก่อสร้าง', icon: <Building2 className="h-4 w-4" /> },
+  { value: 'under_construction', label: 'Under Construction', labelRu: 'Строится', labelTh: 'กำลังก่อสร้าง', icon: <HardHat className="h-4 w-4" /> },
+  { value: 'completed', label: 'Completed', labelRu: 'Сдан', labelTh: 'สร้างเสร็จ', icon: <CheckCircle className="h-4 w-4" /> },
 ];
 
 // Initial empty project form
@@ -105,7 +107,7 @@ export default function AdminProjects() {
   const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { data: projects, isLoading } = useAdminPropertyProjects();
+  const { data: projects, isLoading, error: projectsError, refetch } = useAdminPropertyProjects();
   const { data: developers } = useAdminDevelopers();
   const createProject = useCreatePropertyProject();
   const updateProject = useUpdatePropertyProject();
@@ -133,9 +135,13 @@ export default function AdminProjects() {
     }
   };
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [moderationFilter, setModerationFilter] = useState<'all' | 'orphan' | 'needs_review' | 'pending' | 'approved'>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
+  const statusFilter = readFilter(searchParams.get('stage'), PROJECT_STAGE_FILTERS);
+  const moderationFilter = readFilter(searchParams.get('filter'), PROJECT_REVIEW_FILTERS);
+  const setFilters = (updates: Record<string, string>) => setSearchParams(previous => updateReviewParams(previous, updates), { replace: true });
+  const resetFilters = () => setFilters({ q: '', stage: 'all', filter: 'all' });
+  const hasFilters = !!searchQuery || statusFilter !== 'all' || moderationFilter !== 'all';
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeveloperId, setBulkDeveloperId] = useState<string>('');
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
@@ -145,44 +151,19 @@ export default function AdminProjects() {
   const [isAIIntakeOpen, setIsAIIntakeOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
 
-  const UNASSIGNED_DEV_ID = '00000000-0000-0000-0000-000000000001';
-
-  // Filter projects by status, moderation and search
-  const filteredProjects = useMemo(() => {
-    if (!projects) return [];
-    
-    return projects.filter(p => {
-      if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
-
-      // Moderation filter
-      if (moderationFilter === 'orphan' && p.developer_id !== UNASSIGNED_DEV_ID) return false;
-      if (moderationFilter === 'needs_review' && !p.needs_review) return false;
-      if (moderationFilter === 'pending' && p.is_approved !== false) return false;
-      if (moderationFilter === 'approved' && p.is_approved !== true) return false;
-
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        return (
-          p.name_en.toLowerCase().includes(q) ||
-          p.name_ru.toLowerCase().includes(q) ||
-          p.address?.toLowerCase().includes(q) ||
-          p.district?.toLowerCase().includes(q) ||
-          p.developer_name?.toLowerCase().includes(q)
-        );
-      }
-      
-      return true;
-    });
-  }, [projects, searchQuery, statusFilter, moderationFilter]);
-
-  const moderationCounts = useMemo(() => {
-    const list = projects || [];
-    return {
-      orphan: list.filter(p => p.developer_id === UNASSIGNED_DEV_ID).length,
-      needs_review: list.filter(p => p.needs_review).length,
-      pending: list.filter(p => p.is_approved === false).length,
-    };
-  }, [projects]);
+  const filteredProjects = useMemo(() => (projects || []).filter(project => matchesProjectReview(project, {
+    q: searchQuery, stage: statusFilter, review: moderationFilter,
+  })), [projects, searchQuery, statusFilter, moderationFilter]);
+  const reviewCount = (review: typeof PROJECT_REVIEW_FILTERS[number]) => isLoading || projectsError ? '—'
+    : (projects || []).filter(project => matchesProjectReview(project, { q: searchQuery, stage: statusFilter, review })).length;
+  const reviewLabels = {
+    all: pickLang(language, { en: "All", ru: "Все", th: "ทั้งหมด" }),
+    pending: pickLang(language, { en: "Pending approval", ru: "На модерации", th: "รออนุมัติ" }),
+    needs_review: pickLang(language, { en: "Data review", ru: "Проверить данные", th: "ตรวจสอบข้อมูล" }),
+    orphan: pickLang(language, { en: "No developer", ru: "Без застройщика", th: "ไม่มีผู้พัฒนา" }),
+    stale: pickLang(language, { en: "No updates for 45 days", ru: "Без обновлений 45 дней", th: "ไม่มีการอัปเดต 45 วัน" }),
+    approved: pickLang(language, { en: "Approved", ru: "Одобрено", th: "อนุมัติแล้ว" }),
+  };
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -432,8 +413,8 @@ export default function AdminProjects() {
     <>
       <PageContainer>
         <PageHeader
-          title={isRu ? 'Проекты / ЖК' : 'Projects / Complexes'}
-          subtitle={isRu ? 'Управление жилыми комплексами и проектами' : 'Manage residential complexes and projects'}
+          title={pickLang(language, { en: 'Projects / Complexes', ru: 'Проекты / ЖК', th: 'โครงการ / อาคารชุด' })}
+          subtitle={pickLang(language, { en: 'Manage residential complexes and projects', ru: 'Управление жилыми комплексами и проектами', th: 'จัดการอาคารชุดและโครงการที่อยู่อาศัย' })}
           actions={
             <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={handleEnrichAll} disabled={isEnriching}>
@@ -446,7 +427,7 @@ export default function AdminProjects() {
               </Button>
               <Button onClick={handleOpenCreate}>
                 <Plus className="h-4 w-4 mr-2" />
-                {isRu ? 'Новый проект' : 'New Project'}
+                {pickLang(language, { en: 'New Project', ru: 'Новый проект', th: 'โครงการใหม่' })}
               </Button>
             </div>
           }
@@ -458,31 +439,40 @@ export default function AdminProjects() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isRu ? 'Поиск проектов...' : 'Search projects...'}
+              onChange={(e) => setFilters({ q: e.target.value })}
+              aria-label={pickLang(language, { en: "Search projects", ru: "Поиск проектов", th: "ค้นหาโครงการ" })}
+              placeholder={pickLang(language, { en: 'Search projects...', ru: 'Поиск проектов...', th: 'ค้นหาโครงการ...' })}
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {([
-              { id: 'all', label: isRu ? 'Все' : 'All', count: projects?.length || 0 },
-              { id: 'orphan', label: isRu ? 'Orphan' : 'Orphan', count: moderationCounts.orphan },
-              { id: 'needs_review', label: isRu ? 'Нужна ревизия' : 'Needs review', count: moderationCounts.needs_review },
-              { id: 'pending', label: isRu ? 'На модерации' : 'Pending', count: moderationCounts.pending },
-              { id: 'approved', label: isRu ? 'Одобрено' : 'Approved' },
-            ] as const).map(f => (
-              <Button
-                key={f.id}
-                size="sm"
-                variant={moderationFilter === f.id ? 'default' : 'outline'}
-                onClick={() => setModerationFilter(f.id as typeof moderationFilter)}
-              >
-                {f.label}
-                {'count' in f && f.count !== undefined && (
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">{f.count}</Badge>
-                )}
-              </Button>
-            ))}
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium">{pickLang(language, { en: "Review queue", ru: "Очередь проверки", th: "คิวตรวจสอบ" })}</legend>
+            <div className="flex gap-2 flex-wrap">
+              {PROJECT_REVIEW_FILTERS.map(review => (
+                <Button key={review} size="sm" className="min-h-11" variant={moderationFilter === review ? 'default' : 'outline'}
+                  aria-pressed={moderationFilter === review} onClick={() => setFilters({ filter: review })}>
+                  {reviewLabels[review]}{' '}<span className="ml-2 font-mono">{reviewCount(review)}</span>
+                </Button>
+              ))}
+            </div>
+          </fieldset>
+          <div className="max-w-md space-y-2">
+            <Label htmlFor="project-stage-filter">{pickLang(language, { en: "Construction stage", ru: "Стадия строительства", th: "สถานะการก่อสร้าง" })}</Label>
+            <Select value={statusFilter} onValueChange={stage => setFilters({ stage })}>
+              <SelectTrigger id="project-stage-filter"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{pickLang(language, { en: "All stages", ru: "Все стадии", th: "ทุกสถานะ" })}</SelectItem>
+                {PROJECT_STATUS_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>{pickLang(language, { en: option.label, ru: option.labelRu, th: option.labelTh })}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {pickLang(language, { en: "Approval, activity and missing details are checked separately. Open a project to review it; filtering does not change its status.", ru: "Одобрение, активность и полнота данных проверяются отдельно. Откройте проект для проверки; фильтр не меняет его статус.", th: "การอนุมัติ การใช้งาน และข้อมูลที่ขาดจะตรวจสอบแยกกัน เปิดโครงการเพื่อตรวจสอบ การกรองไม่เปลี่ยนสถานะโครงการ" })}
+          </p>
+          {moderationFilter === 'stale' && <p className="text-sm text-muted-foreground">{pickLang(language, { en: "Approved projects last updated at least 45 days ago.", ru: "Одобренные проекты, не обновлявшиеся 45 дней и более.", th: "โครงการที่อนุมัติแล้วและไม่ได้อัปเดตอย่างน้อย 45 วัน" })}</p>}
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <p role="status">{isLoading ? (pickLang(language, { en: "Loading projects…", ru: "Загрузка проектов…", th: "กำลังโหลดโครงการ…" })) : projectsError ? (pickLang(language, { en: "Count unavailable", ru: "Количество недоступно", th: "ไม่ทราบจำนวน" })) : (pickLang(language, { ru: `Показано: ${filteredProjects.length} из ${projects?.length ?? 0}`, en: `Showing ${filteredProjects.length} of ${projects?.length ?? 0}`, th: `แสดง ${filteredProjects.length} จาก ${projects?.length ?? 0} รายการ` }))}</p>
+            {hasFilters && <Button size="sm" variant="ghost" onClick={resetFilters}>{pickLang(language, { en: "Reset filters", ru: "Сбросить фильтры", th: "ล้างตัวกรอง" })}</Button>}
           </div>
         </div>
 
@@ -519,48 +509,6 @@ export default function AdminProjects() {
           </Card>
         )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold">{projects?.length || 0}</div>
-              <div className="text-sm text-muted-foreground">
-                {isRu ? 'Всего проектов' : 'Total Projects'}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold">
-                {projects?.filter(p => p.is_featured).length || 0}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {isRu ? 'Избранные' : 'Featured'}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold">
-                {projects?.filter(p => !p.address).length || 0}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {isRu ? 'Без адреса' : 'Missing Address'}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold">
-                {projects?.reduce((sum, p) => sum + (p.total_units || 0), 0)}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {isRu ? 'Всего юнитов' : 'Total Units'}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Projects Grid */}
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -568,14 +516,19 @@ export default function AdminProjects() {
               <Skeleton key={i} className="h-48" />
             ))}
           </div>
+        ) : projectsError ? (
+          <Card><CardContent className="p-6" role="alert">
+            <p className="mb-3">{pickLang(language, { en: "Could not load projects. Statuses and counts are unavailable.", ru: "Не удалось загрузить проекты. Статусы и количество недоступны.", th: "โหลดโครงการไม่ได้ จึงไม่ทราบสถานะและจำนวน" })}</p>
+            <Button variant="outline" onClick={() => void refetch()}>{pickLang(language, { en: "Retry", ru: "Повторить", th: "ลองอีกครั้ง" })}</Button>
+          </CardContent></Card>
         ) : filteredProjects.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery 
-                  ? (isRu ? 'Проекты не найдены' : 'No projects found')
-                  : (isRu ? 'Нет проектов. Создайте первый!' : 'No projects yet. Create your first!')
+                {hasFilters
+                  ? (pickLang(language, { en: "No projects found", ru: "Проекты не найдены", th: "ไม่พบโครงการ" }))
+                  : (pickLang(language, { en: "No projects yet. Create your first!", ru: "Нет проектов. Создайте первый!", th: "ยังไม่มีโครงการ สร้างโครงการแรกได้เลย" }))
                 }
               </p>
             </CardContent>
@@ -583,7 +536,7 @@ export default function AdminProjects() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
-              const isOrphan = project.developer_id === UNASSIGNED_DEV_ID;
+              const isOrphan = project.developer_id === UNASSIGNED_DEVELOPER_ID;
               const isSelected = selectedIds.has(project.id);
               return (
               <Card 
@@ -596,6 +549,7 @@ export default function AdminProjects() {
                   <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={isSelected}
+                      aria-label={`${pickLang(language, { en: "Select", ru: "Выбрать", th: "เลือก" })} ${isRu ? project.name_ru : project.name_en}`}
                       onCheckedChange={() => toggleSelect(project.id)}
                       className="bg-background/80"
                     />
@@ -614,20 +568,15 @@ export default function AdminProjects() {
                     )}
                   </div>
                   <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-                    {project.is_featured && <Badge>Featured</Badge>}
+                    {project.is_featured && <Badge>{pickLang(language, { en: "Featured", ru: "Избранный", th: "แนะนำ" })}</Badge>}
                     {isOrphan && (
                       <Badge variant="destructive" className="text-[10px]">
-                        <AlertTriangle className="h-3 w-3 mr-1" />Orphan
+                        <AlertTriangle className="h-3 w-3 mr-1" />{reviewLabels.orphan}
                       </Badge>
                     )}
-                    {project.needs_review && (
+                    {project.needs_review === true && (
                       <Badge className="text-[10px] bg-warning text-warning-foreground border-0">
-                        Review
-                      </Badge>
-                    )}
-                    {project.is_approved === false && (
-                      <Badge variant="outline" className="text-[10px] bg-background">
-                        Pending
+                        {reviewLabels.needs_review}
                       </Badge>
                     )}
                   </div>
@@ -645,11 +594,13 @@ export default function AdminProjects() {
                     </p>
                   ) : (
                     <p className="text-sm text-accent mt-1">
-                      {isRu ? 'Адрес не указан' : 'Address missing'}
+                      {pickLang(language, { en: 'Address missing', ru: 'Адрес не указан', th: 'ไม่มีที่อยู่' })}
                     </p>
                   )}
 
                   <div className="flex flex-wrap gap-2 mt-3">
+                    <Badge variant="outline">{project.is_approved === true ? reviewLabels.approved : project.is_approved === false ? reviewLabels.pending : (pickLang(language, { en: "Approval: unknown", ru: "Одобрение: неизвестно", th: "การอนุมัติ: ไม่ทราบ" }))}</Badge>
+                    <Badge variant="secondary">{project.is_active === true ? (pickLang(language, { en: "Active", ru: "Активен", th: "ใช้งาน" })) : project.is_active === false ? (pickLang(language, { en: "Inactive", ru: "Неактивен", th: "ไม่ใช้งาน" })) : (pickLang(language, { en: "Activity: unknown", ru: "Активность: неизвестно", th: "การใช้งาน: ไม่ทราบ" }))}</Badge>
                     {project.developer_name && (
                       <Badge variant="secondary" className="text-xs">
                         {project.developer_name}
@@ -678,7 +629,7 @@ export default function AdminProjects() {
                   </Button>
                   <Button size="sm" variant="ghost" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
                     <Edit className="h-3.5 w-3.5 mr-1" />
-                    {isRu ? 'Изменить' : 'Edit'}
+                    {pickLang(language, { en: "Review details", ru: "Проверить", th: "ตรวจสอบข้อมูล" })}
                   </Button>
                 </div>
               </Card>
@@ -693,8 +644,8 @@ export default function AdminProjects() {
               <SheetTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
                 {editingProject 
-                  ? (isRu ? 'Редактировать проект' : 'Edit Project')
-                  : (isRu ? 'Новый проект' : 'New Project')
+                  ? (pickLang(language, { en: 'Edit Project', ru: 'Редактировать проект', th: 'แก้ไขโครงการ' }))
+                  : (pickLang(language, { en: 'New Project', ru: 'Новый проект', th: 'โครงการใหม่' }))
                 }
               </SheetTitle>
             </SheetHeader>
@@ -1087,7 +1038,7 @@ export default function AdminProjects() {
             {/* Footer Actions */}
             <div className="sticky bottom-0 border-t bg-background p-4 flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsFormOpen(false)}>
-                {isRu ? 'Отмена' : 'Cancel'}
+                {pickLang(language, { en: "Cancel", ru: "Отмена", th: "ยกเลิก" })}
               </Button>
               <Button 
                 onClick={handleSave}

@@ -1,6 +1,7 @@
 // Deno.serve used (native edge runtime)
-import { createClient } from "../_shared/supabase.ts";
+import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -13,12 +14,22 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: this endpoint is invoked internally (stripe-webhook, confirm-manual-
+    // payment via service-role) OR — potentially — by an end user. It returns
+    // guest PII, amounts, address and a check-in QR, so it must not be an
+    // unauthenticated IDOR. Internal callers pass; user callers must be
+    // authenticated AND own the order/booking (or hold a staff role).
+    const gate = await requireInternalOrUser(req, corsHeaders);
+    if (gate instanceof Response) return gate;
+    const callerUserId = gate.mode === 'user' ? gate.userId : null;
+
     // Rate limiting - public read endpoints (100/min)
     const rateLimitResponse = await withRateLimit(
       req,
       'generate-booking-voucher',
       RATE_LIMITS.publicRead,
-      corsHeaders
+      corsHeaders,
+      callerUserId ?? undefined,
     );
     if (rateLimitResponse) return rateLimitResponse;
 
@@ -29,13 +40,19 @@ Deno.serve(async (req) => {
       throw new Error('orderId or bookingId is required');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    if ((orderId && bookingId) || (!orderId && !bookingId)) return new Response(JSON.stringify({error:'Exactly one booking or order required'}),{status:400,headers:corsHeaders});
+    if (callerUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, 'actor_can_generate_voucher', { p_order_id: orderId ?? null, p_booking_id: bookingId ?? null });
+      if (denied) return denied;
+    }
+    const supabase = createServiceClient();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    if (!supabaseUrl) throw new Error('Service configuration unavailable');
 
     const isRu = language === 'ru';
     let voucherData: any = null;
     let entityType = 'order';
+    let ownerUserId: string | null = null;
 
     // Try fetching as order first
     if (orderId) {
@@ -46,6 +63,7 @@ Deno.serve(async (req) => {
         .single();
 
       if (!orderError && order) {
+        ownerUserId = order.customer_user_id ?? null;
         // Fetch participants
         const { data: participants } = await supabase
           .from('order_participants')
@@ -66,22 +84,23 @@ Deno.serve(async (req) => {
         if (propertyId) {
           const { data } = await supabase
             .from('properties')
-            .select('title, title_en, title_ru, address')
+            .select('title, title_en, title_ru, address, district')
             .eq('id', propertyId)
             .single();
           property = data;
         }
 
+        const orderFallbackLocation = isRu ? 'Адрес уточняется' : 'Address on request';
         voucherData = {
           voucher_number: order.order_number,
           booking_type: order.order_type,
           title: property
-            ? ((isRu ? property.title_ru : property.title_en) || property.title || 'Property')
+            ? ((isRu ? property.title_ru : property.title_en) || property.title || (isRu ? 'Объект' : 'Property'))
             : items?.[0]?.item_name || order.order_type,
           subtitle: items?.map((i: any) => i.item_name).join(', '),
           date: order.start_at?.split('T')[0] || order.metadata?.check_in,
           time: order.start_at?.split('T')[1]?.slice(0, 5) || order.metadata?.time,
-          location: property?.address || order.metadata?.location,
+          location: (property?.address?.trim() || property?.district?.trim() || order.metadata?.location?.trim() || orderFallbackLocation),
           guest_name: participants?.name,
           guests_count: order.metadata?.guests_count || 1,
           amount: order.total_amount,
@@ -100,28 +119,31 @@ Deno.serve(async (req) => {
         .from('property_bookings')
         .select(`
           *,
-          properties(title, title_en, title_ru, address)
+          properties(title, title_en, title_ru, address, district)
         `)
         .eq('id', bookingId)
         .single();
 
       if (!bookingError && booking) {
         entityType = 'property_booking';
+        ownerUserId = (booking as any).guest_id ?? (booking as any).owner_id ?? null;
         const property = (booking as any).properties;
+        const fallbackTitle = isRu ? 'Объект' : 'Property';
+        const fallbackLocation = isRu ? 'Адрес уточняется' : 'Address on request';
 
         voucherData = {
-          voucher_number: booking.booking_code || `BK-${bookingId.slice(0, 8).toUpperCase()}`,
+          voucher_number: `BK-${bookingId.slice(0, 8).toUpperCase()}`,
           booking_type: 'property',
           title: isRu
-            ? (property?.title_ru || property?.title_en || property?.title || 'Property')
-            : (property?.title_en || property?.title || 'Property'),
+            ? (property?.title_ru?.trim() || property?.title_en?.trim() || property?.title?.trim() || fallbackTitle)
+            : (property?.title_en?.trim() || property?.title_ru?.trim() || property?.title?.trim() || fallbackTitle),
           date: booking.check_in,
           time: '14:00',
           end_date: booking.check_out,
           end_time: '11:00',
-          location: property?.address,
+          location: (property?.address?.trim() || property?.district?.trim() || fallbackLocation),
           guest_name: booking.guest_name,
-          guests_count: booking.guests || 1,
+          guests_count: booking.guests_count || 1,
           amount: booking.total_amount,
           currency: booking.currency || 'THB',
           status: booking.status === 'completed' ? 'used' :
@@ -135,6 +157,8 @@ Deno.serve(async (req) => {
     if (!voucherData) {
       throw new Error('Order or booking not found');
     }
+
+
 
     // Generate QR code data - contains verification URL
     const qrCodeData = JSON.stringify({
@@ -158,8 +182,8 @@ Deno.serve(async (req) => {
         const { data } = await supabase.from('orders').select('customer_user_id').eq('id', orderId).single();
         userId = data?.customer_user_id;
       } else if (bookingId) {
-        const { data } = await supabase.from('property_bookings').select('user_id').eq('id', bookingId).single();
-        userId = data?.user_id;
+        const { data } = await supabase.from('property_bookings').select('guest_id, owner_id').eq('id', bookingId).single();
+        userId = data?.guest_id || data?.owner_id;
       }
 
       if (userId) {
@@ -181,6 +205,19 @@ Deno.serve(async (req) => {
           },
         });
       }
+    }
+
+    // Escape all user-derived string fields before they are interpolated into the
+    // voucher HTML below. Fields like guest_name / title / location / subtitle come
+    // from booking/order records and are attacker-influencable, so interpolating
+    // them raw is a stored-XSS vector in the rendered/emailed voucher.
+    const escapeHtml = (v: unknown): string =>
+      String(v ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string),
+      );
+    const vd = voucherData as Record<string, unknown>;
+    for (const k of ['title', 'subtitle', 'date', 'time', 'guest_name', 'location', 'booking_type', 'voucher_number', 'status', 'currency']) {
+      if (typeof vd[k] === 'string') vd[k] = escapeHtml(vd[k]);
     }
 
     // Generate HTML voucher

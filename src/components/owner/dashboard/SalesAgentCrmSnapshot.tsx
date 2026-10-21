@@ -91,7 +91,7 @@ export function SalesAgentCrmSnapshot() {
         <div className="flex items-center gap-2">
           <KanbanSquare className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold">
-            {isRu ? 'Мой CRM' : 'My CRM'}
+            {isRu ? 'Мои клиенты' : 'My CRM'}
           </h3>
           <span className="text-[11px] text-muted-foreground hidden sm:inline">
             {isRu ? '· сводка для агента продаж' : '· sales agent snapshot'}
@@ -104,7 +104,7 @@ export function SalesAgentCrmSnapshot() {
           className="h-7 text-xs gap-1"
           onClick={() => navigate('/owner/crm-dashboard')}
         >
-          {isRu ? 'Открыть CRM' : 'Open CRM'}
+          {isRu ? 'Открыть список клиентов' : 'Open CRM'}
           <ArrowRight className="h-3 w-3" />
         </Button>
       </div>
@@ -127,13 +127,13 @@ export function SalesAgentCrmSnapshot() {
           <SnapshotTile
             icon={<TrendingUp className="h-4 w-4 text-warning" />}
             value={hotDeals.length}
-            label={isRu ? 'Горячие' : 'Hot'}
+            label={isRu ? 'Приоритетные' : 'Hot'}
             onClick={() => navigate('/mc/sales?stage=hot')}
           />
           <SnapshotTile
             icon={<Sparkles className="h-4 w-4 text-success" />}
             value={signals}
-            label={isRu ? 'Сигналы STAYS' : 'STAYS signals'}
+            label={isRu ? 'Сведения по аренде' : 'STAYS signals'}
             onClick={() => navigate('/mc/contacts?source=stays')}
             highlight={signals > 0}
           />

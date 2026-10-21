@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
@@ -59,11 +60,11 @@ export function RoleGuard({
 
   // Redirect to auth if not logged in
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
   // Server-resolved admin always passes
-  if (context?.role === 'admin' || context?.role === 'uno_team') {
+  if (context?.role === 'admin') {
     return <>{children}</>;
   }
 
@@ -74,7 +75,7 @@ export function RoleGuard({
   const serverRole = context?.role;
   const hasAllowedRole = allowedRoles.some(role =>
     role === serverRole ||
-    permissions.includes('*') ||
+    (serverRole !== 'uno_team' && permissions.includes('*')) ||
     permissions.includes(role)
   );
 
@@ -117,7 +118,7 @@ export function withRoleGuard<P extends object>(
  */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['admin', 'uno_team']} fallbackPath="/">
+    <RoleGuard allowedRoles={['admin']} fallbackPath="/">
       {children}
     </RoleGuard>
   );
@@ -128,7 +129,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
  */
 export function StaffGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['staff', 'admin', 'uno_team']} fallbackPath="/">
+    <RoleGuard allowedRoles={['staff', 'admin']} fallbackPath="/">
       {children}
     </RoleGuard>
   );
@@ -183,7 +184,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
   return <>{children}</>;

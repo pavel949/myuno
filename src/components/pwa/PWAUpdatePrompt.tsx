@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { APP_VERSION, forceCleanAllCaches } from '@/lib/appVersion';
+import { fetchAvailableDeployment, getAvailableDeployment, type AvailableDeployment } from '@/lib/appVersion';
 import { UPDATE_AVAILABLE_EVENT } from './VersionWatcher';
 import { logger } from '@/lib/logger';
+import { clearRecoveryReloadRequest, hasRecoveryReloadRequest, RECOVERY_RELOAD_EVENT, reloadAfterUserRecovery, reloadPreservingDrafts } from '@/lib/pwaRecovery';
 
 /**
  * Non-blocking "Update available" prompt. Listens for the
@@ -13,60 +14,108 @@ import { logger } from '@/lib/logger';
  *
  * UX:
  *  - Bottom-right toast card on desktop, bottom strip on mobile.
- *  - "Update now" → unregister SW + clear caches + cache-busting reload.
- *  - "Later" → hidden for the current session (per new version key).
+ *  - "Update now" → recheck availability + clear app-shell caches + reload.
+ *  - "Later" → hidden for this deployment in this session; never reload on its own.
  */
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
-  const [pendingVersion, setPendingVersion] = React.useState<string | null>(null);
+  const [pendingDeployment, setPendingDeployment] = React.useState<AvailableDeployment | null>(null);
+  const [recoveryRequested, setRecoveryRequested] = React.useState(false);
   const [reloading, setReloading] = React.useState(false);
+  const [updateFailed, setUpdateFailed] = React.useState(false);
+  const updatingRef = React.useRef(false);
+  const dismissedRef = React.useRef(new Set<string>());
 
   React.useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ version?: string }>).detail;
-      const v = detail?.version;
-      if (!v || v === APP_VERSION) return;
-
-      const dismissKey = `pwa_update_dismissed_v${v}`;
-      if (sessionStorage.getItem(dismissKey) === 'true') return;
-
-      setPendingVersion(v);
+      if (updatingRef.current) return;
+      const deployment = getAvailableDeployment((e as CustomEvent<unknown>).detail);
+      if (!deployment || dismissedRef.current.has(deployment.key)) return;
+      try {
+        if (sessionStorage.getItem(`pwa_update_dismissed_deployment_${deployment.key}`) === 'true') return;
+      } catch { /* Storage may be unavailable; in-memory dismissal still works. */ }
+      setPendingDeployment(deployment);
     };
-
-    window.addEventListener(UPDATE_AVAILABLE_EVENT, handler as EventListener);
-    return () => window.removeEventListener(UPDATE_AVAILABLE_EVENT, handler as EventListener);
+    const recoveryHandler = (event?: Event) => {
+      const userRequested = (event as CustomEvent<{ userRequested?: boolean }> | undefined)?.detail?.userRequested === true;
+      if (updatingRef.current) return;
+      if (userRequested) dismissedRef.current.delete('recovery');
+      else if (dismissedRef.current.has('recovery')) return;
+      try {
+        if (userRequested) sessionStorage.removeItem('pwa_recovery_dismissed');
+        else if (sessionStorage.getItem('pwa_recovery_dismissed') === 'true') return;
+      } catch { /* The in-memory dismissal still applies. */ }
+      setRecoveryRequested(true);
+    };
+    window.addEventListener(UPDATE_AVAILABLE_EVENT, handler);
+    window.addEventListener(RECOVERY_RELOAD_EVENT, recoveryHandler);
+    if (hasRecoveryReloadRequest()) recoveryHandler();
+    return () => {
+      window.removeEventListener(UPDATE_AVAILABLE_EVENT, handler);
+      window.removeEventListener(RECOVERY_RELOAD_EVENT, recoveryHandler);
+    };
   }, []);
 
   const handleUpdate = async () => {
-    if (!pendingVersion || reloading) return;
+    if ((!pendingDeployment && !recoveryRequested) || updatingRef.current) return;
+    updatingRef.current = true;
     setReloading(true);
+    setUpdateFailed(false);
     try {
-      await forceCleanAllCaches();
+      if (!pendingDeployment) {
+        await reloadAfterUserRecovery();
+        return;
+      }
+      // A previous notification is not evidence that the deployment is still online.
+      const fresh = await fetchAvailableDeployment();
+      if (!fresh || fresh.key !== pendingDeployment.key) {
+        if (fresh) setPendingDeployment(fresh);
+        throw new Error('Deployment changed or is unavailable');
+      }
+      await reloadPreservingDrafts(fresh.key);
     } catch (err) {
-      logger.warn('[PWAUpdatePrompt] cache cleanup failed', err);
+      logger.warn('[PWAUpdatePrompt] update deferred', err);
+      setUpdateFailed(true);
+      setReloading(false);
+      updatingRef.current = false;
     }
-    const url = new URL(window.location.href);
-    url.searchParams.set('_v', pendingVersion);
-    window.location.replace(url.toString());
   };
 
   const handleDismiss = () => {
-    if (!pendingVersion) return;
-    sessionStorage.setItem(`pwa_update_dismissed_v${pendingVersion}`, 'true');
-    setPendingVersion(null);
+    if ((!pendingDeployment && !recoveryRequested) || updatingRef.current) return;
+    if (pendingDeployment) dismissedRef.current.add(pendingDeployment.key);
+    if (recoveryRequested) {
+      dismissedRef.current.add('recovery');
+      clearRecoveryReloadRequest();
+    }
+    try {
+      if (pendingDeployment) sessionStorage.setItem(`pwa_update_dismissed_deployment_${pendingDeployment.key}`, 'true');
+      if (recoveryRequested) sessionStorage.setItem('pwa_recovery_dismissed', 'true');
+    } catch { /* Dismissal must still work when storage is blocked/full. */ }
+    setPendingDeployment(null);
+    setRecoveryRequested(false);
+    setUpdateFailed(false);
   };
 
   const texts = {
     ru: {
       title: 'Доступно обновление',
-      description: 'Новая версия приложения готова. Обновитесь, чтобы получить последние правки.',
+      recoveryTitle: 'Нужна перезагрузка',
+      recoveryDescription: 'Не удалось загрузить часть приложения. Сохраните незавершённые изменения перед перезагрузкой.',
+      reload: 'Перезагрузить',
+      description: 'Доступна новая версия. Сохраните незавершённые изменения перед перезагрузкой.',
+      failed: 'Не удалось подготовить обновление. Страница не перезагружена. Попробуйте ещё раз позже.',
       update: 'Обновить',
       later: 'Позже',
       reloading: 'Обновляем…',
     },
     en: {
       title: 'Update available',
-      description: 'A new version of the app is ready. Reload to get the latest fixes.',
+      recoveryTitle: 'Reload available',
+      recoveryDescription: 'Part of the app could not load. Save unfinished changes before reloading.',
+      reload: 'Reload page',
+      description: 'A new version is ready. Save unfinished changes before reloading.',
+      failed: 'The update could not be prepared. This page has not reloaded. Please try again later.',
       update: 'Update now',
       later: 'Later',
       reloading: 'Updating…',
@@ -74,7 +123,8 @@ export function PWAUpdatePrompt() {
   } as const;
 
   const t = texts[language] ?? texts.en;
-  const visible = !!pendingVersion;
+  const visible = !!pendingDeployment || recoveryRequested;
+  const isRecovery = recoveryRequested && !pendingDeployment;
 
   return (
     <AnimatePresence>
@@ -95,7 +145,7 @@ export function PWAUpdatePrompt() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold text-foreground">{t.title}</h3>
+                  <h3 className="font-semibold text-foreground">{isRecovery ? t.recoveryTitle : t.title}</h3>
                   <button
                     onClick={handleDismiss}
                     className="p-1 rounded-full hover:bg-muted transition-colors"
@@ -105,7 +155,8 @@ export function PWAUpdatePrompt() {
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
-                <p className="text-sm text-muted-foreground mt-0.5">{t.description}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{isRecovery ? t.recoveryDescription : t.description}</p>
+                {updateFailed && <p className="text-sm text-destructive mt-2" role="alert">{t.failed}</p>}
                 <div className="flex items-center gap-2 mt-3">
                   <Button
                     onClick={handleUpdate}
@@ -114,7 +165,7 @@ export function PWAUpdatePrompt() {
                     disabled={reloading}
                   >
                     <RefreshCw className={`w-4 h-4 ${reloading ? 'animate-spin' : ''}`} />
-                    {reloading ? t.reloading : t.update}
+                    {reloading ? t.reloading : isRecovery ? t.reload : t.update}
                   </Button>
                   <Button
                     onClick={handleDismiss}

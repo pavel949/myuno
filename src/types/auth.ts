@@ -29,7 +29,7 @@ export type AppRole =
   | 'partner'
   | 'owner'
   | 'property_owner'  // DB: app_role enum — full property owner with portal access
-  | 'property_manager' // NOTE: not yet in DB app_role enum (property_manager_assignments table used instead)
+  | 'property_manager' // Added to DB app_role enum 2026-06-27 (Taxonomy Spine Wave A.5).
   | 'broker'          // DB: app_role enum — RE broker role
   | 'vendor'
   // Platform operators

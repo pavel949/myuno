@@ -30,6 +30,9 @@ import { useCartToast } from "@/hooks/useCartToast";
 import { PLACEHOLDER_IMAGES } from "@/lib/config/placeholders";
 import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { useReviews } from "@/hooks/useReviews";
+import { ServiceBookingSheet, type BookableService } from "@/components/services/ServiceBookingSheet";
+
+import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
 interface CartService {
   id: string;
@@ -45,10 +48,12 @@ const ServiceProviderDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const returnTo = serviceCatalogueReturnTo(searchParams.get('returnTo'));
   const { showAddedToast } = useCartToast();
+  const [booking, setBooking] = useState<BookableService | null>(null);
 
   // Real DB data
-  const { provider, services, isLoading } = useProviderDetails(id || null);
+  const { provider, services, isLoading } = useProviderDetails(id || null, 'public');
   const { reviews, stats, isLoading: reviewsLoading } = useReviews({
     itemType: "provider",
     itemId: id || "",
@@ -132,14 +137,14 @@ const ServiceProviderDetail = () => {
     return (
       <AppLayout>
         <div className="p-6 text-center space-y-3">
-          <BackButton fallbackPath="/services" />
+          <BackButton fallbackPath={returnTo} />
           <p className="text-lg font-medium">{isRu ? "Мастер не найден" : "Provider not found"}</p>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? "Возможно, профиль удалён или ссылка устарела."
               : "This profile may have been removed or the link is outdated."}
           </p>
-          <Button onClick={() => navigate("/services")}>
+          <Button onClick={() => navigate(returnTo)}>
             {isRu ? "К списку мастеров" : "Browse providers"}
           </Button>
         </div>
@@ -152,7 +157,7 @@ const ServiceProviderDetail = () => {
       <div className="pb-32">
         {/* Header */}
         <div className="relative">
-          <BackButton fallbackPath="/services" variant="overlay" className="absolute top-4 left-4 z-10" />
+          <BackButton fallbackPath={returnTo} variant="overlay" className="absolute top-4 left-4 z-10" />
           <div className="h-32 bg-gradient-to-br from-primary to-primary" />
           <div className="absolute -bottom-12 left-4">
             <div className="relative">
@@ -303,6 +308,15 @@ const ServiceProviderDetail = () => {
                           <p className="font-bold text-primary mt-1">฿{service.price}</p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {id && (
+                            <Button size="sm" variant="outline" className="h-10 px-3" onClick={() => {
+                              const raw = (services ?? []).find((x) => x.id === service.id) as { duration_minutes?: number | null; lead_time_hours?: number | null } | undefined;
+                              setBooking({ id: service.id, providerId: id, name: service.name, price: service.price, durationMinutes: raw?.duration_minutes ?? null, leadTimeHours: raw?.lead_time_hours ?? null });
+                            }}>
+                              <Calendar className="w-4 h-4 mr-1" />
+                              {isRu ? "Записаться" : "Book"}
+                            </Button>
+                          )}
                           {inCart ? (
                             <Button
                               size="sm"
@@ -331,6 +345,7 @@ const ServiceProviderDetail = () => {
               </div>
             )}
           </TabsContent>
+          <ServiceBookingSheet service={booking} open={!!booking} onOpenChange={(o) => !o && setBooking(null)} />
 
           <TabsContent value="about" className="mt-0 px-4 py-4">
             <div className="space-y-4">

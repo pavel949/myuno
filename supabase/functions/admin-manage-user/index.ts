@@ -1,13 +1,11 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,17 +17,10 @@ Deno.serve(async (req) => {
     const callerId = authResult.user.id;
 
     // Admin check via service client
+    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    if (guard) return guard;
     const admin = createServiceClient();
-    const { data: isAdmin } = await admin.rpc("has_role", {
-      _user_id: callerId,
-      _role: "admin",
-    });
-    if (!isAdmin) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Admin role required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const isAdmin = true;
 
     const { action, user_id, role, hard_delete } = await req.json();
 
@@ -177,6 +168,19 @@ Deno.serve(async (req) => {
 
       case "add_role": {
         if (!role) throw new Error("role is required for add_role");
+        // A single admin must not be able to silently mint another platform
+        // admin via this generic endpoint (no second-admin approval exists).
+        // Granting the highest-privilege roles is intentionally not available
+        // here — provision those through a dedicated, audited flow / migration.
+        if (["admin", "uno_team"].includes(role)) {
+          return new Response(
+            JSON.stringify({
+              error: "Forbidden",
+              message: "Granting platform-admin roles is not permitted via this endpoint",
+            }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         const { error } = await admin
           .from("user_roles")
           .upsert({ user_id, role }, { onConflict: "user_id,role" });

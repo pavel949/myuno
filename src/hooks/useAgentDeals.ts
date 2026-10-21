@@ -9,6 +9,16 @@ import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
+/**
+ * Source-of-truth note (resolves the "two pipelines" confusion):
+ * DEAL_STAGES / DEAL_STAGE_LABELS / STAGE_PROBABILITIES below define the **default
+ * pipeline** — the canonical stage vocabulary stored in agent_deals.stage and the
+ * fallback used when a deal has no custom pipeline. Per-company **custom pipelines**
+ * live in the DB (crm_pipelines + crm_pipeline_stages, buy/sell side) and are read
+ * via useDynamicPipelineStages. Rule: when a deal has a pipeline_id, render stages
+ * from the DB pipeline; otherwise fall back to this default. Do not fork a second
+ * hardcoded stage list — extend the DB pipeline instead.
+ */
 export const DEAL_STAGES = [
   'new', 'contacted', 'showing', 'negotiation', 'contract', 'closed_won', 'closed_lost',
 ] as const;

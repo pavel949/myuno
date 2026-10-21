@@ -11,7 +11,7 @@
  * (then devmod_status = pending and devmod-apply runs). After submit → /developer-portal/pending.
  */
 import { useState, useRef } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 
 import { APP_ROUTES } from '@/lib/config/routes';
+import { logger } from '@/lib/logger';
 import { Building2, ChevronRight, ChevronLeft, Upload, ExternalLink, CheckCircle } from 'lucide-react';
 
 // ── Schemas ─────────────────────────────────────────────────────────────
@@ -77,12 +78,22 @@ export default function DeveloperOnboarding() {
   const [pendingDeveloperId, setPendingDeveloperId] = useState<string | null>(null);
   const [creatingDeveloperRow, setCreatingDeveloperRow] = useState(false);
 
-  const [step, setStep] = useState(1);
+  // Seed the initial step from the `:step` route param so deep-links work — most
+  // importantly Stripe Connect's refresh_url (.../onboarding/3), which otherwise
+  // dropped the user back to step 1 and silently broke the retry. Clamp to range.
+  const { step: stepParam } = useParams<{ step: string }>();
+  const [step, setStep] = useState(() => {
+    const n = Number(stepParam);
+    return Number.isInteger(n) && n >= 1 && n <= TOTAL_STEPS ? n : 1;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const [stripeStarted, setStripeStarted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Guards against a rapid double-submit racing two `developers` INSERTs before
+  // React state (pendingDeveloperId) has propagated.
+  const creatingRef = useRef(false);
 
   // Accumulated form data across steps
   const [step1Data, setStep1Data] = useState<Step1Data>({
@@ -210,9 +221,12 @@ export default function DeveloperOnboarding() {
       if (updateErr) throw updateErr;
 
       // 2. Edge function: developer_users owner row, notifies admin (Telegram + email).
-      await supabase.functions.invoke('devmod-apply', {
+      // The DB update above is the source of truth (status is already 'pending'),
+      // so a failure here must not block navigation — just log it for follow-up.
+      const { error: applyErr } = await supabase.functions.invoke('devmod-apply', {
         body: { developer_id: developerId },
       });
+      if (applyErr) logger.warn('devmod-apply invoke failed', applyErr);
 
       qc.invalidateQueries({ queryKey: ['developer-profile'] });
       navigate(APP_ROUTES.DEVELOPER_PORTAL_PENDING);
@@ -231,6 +245,8 @@ export default function DeveloperOnboarding() {
 
     let id = developerId;
     if (!id) {
+      if (creatingRef.current) return;
+      creatingRef.current = true;
       setCreatingDeveloperRow(true);
       try {
         const slugBase =
@@ -264,10 +280,16 @@ export default function DeveloperOnboarding() {
         }
         await qc.invalidateQueries({ queryKey: ['developer-profile'] });
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Не удалось создать профиль застройщика');
+        const code = (err as { code?: string })?.code;
+        toast.error(
+          code === '23505'
+            ? 'Профиль застройщика уже существует — обновите страницу.'
+            : err instanceof Error ? err.message : 'Не удалось создать профиль застройщика',
+        );
         return;
       } finally {
         setCreatingDeveloperRow(false);
+        creatingRef.current = false;
       }
     }
     if (!id) {

@@ -11,9 +11,9 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const cardVariants: Record<CardVariant, string> = {
   surface: "bg-muted/30 dark:bg-muted/10 rounded-none",
-  content: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-2)]",
-  interactive: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-2)] hover:[box-shadow:var(--shadow-elevation-3)] transition-all duration-150 cursor-pointer",
-  elevated: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-4)]",
+  content: "bg-card border border-border rounded-none",
+  interactive: "bg-card border border-border rounded-none hover:bg-muted/40 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
+  elevated: "bg-card border border-border rounded-none [box-shadow:var(--shadow-elevation-4)]",
 };
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(

@@ -16,6 +16,12 @@ export const APP_ROUTES = {
 
   // ── Discovery & Navigation ──
   DISCOVER: '/discover',
+  DISCOVER_SITUATIONS: '/discover/situations',
+  /** Goal-first entry pages (Phuket One-Stop IA). Mounted under /discover. */
+  GOAL_STAY: '/discover/stay',
+  GOAL_LIVE: '/discover/live',
+  GOAL_BUY: '/discover/buy',
+  GOAL_SERVICES: '/discover/services',
   NAVIGATOR: '/navigator',
   MAP: '/map',
   SEARCH: '/search',
@@ -66,6 +72,9 @@ export const APP_ROUTES = {
   BECOME_PARTNER: '/become-partner',
   PARTNER_STATUS: '/partner/status',
 
+  // ── Ecosystem (breadth catalogue, secondary entry from Landing) ──
+  ECOSYSTEM: '/ecosystem',
+
   // ── B2B landing pages (public marketing) ──
   FOR_OWNERS: '/for-owners',
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
@@ -95,9 +104,11 @@ export const APP_ROUTES = {
   PROPERTY_MAP: '/property/map',
   PROPERTY_CONSULTATION: '/property/consultation',
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
+  COMPLEX_DETAIL: (id: string) => `/property/complex/${id}`,
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
+  PROPERTY_COMPANIES: '/property/companies',
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',
@@ -336,6 +347,19 @@ export const APP_ROUTES = {
   // ── Delivery ──
   DELIVERY: '/delivery',
 
+  // ── Thai Business / Local Services (feature_flag:thai_business_layer) ──
+  /** Public B2B acquisition landing — invites Thai businesses to partner. */
+  THAI_BUSINESS_PARTNER: '/thai-business',
+  THAI_SERVICES: '/thai-services',
+  THAI_SERVICES_DETAIL: (id: string) => `/thai-services/${id}`,
+  THAI_MY_BOOKINGS: '/thai-services/my-bookings',
+  /** B2B owner dashboard (inside VendorLayout). */
+  VENDOR_THAI_BUSINESS: '/vendor/thai-business',
+  /** Admin moderation queue. */
+  ADMIN_THAI_BUSINESS: '/admin/thai-business',
+  /** Public Russian landing per business (standalone, custom SEO). */
+  THAI_LANDING: (slug: string) => `/ts/${slug}`,
+
   // ── Market ──
   MARKET: '/market',
   MARKET_CATEGORIES: '/market/categories',
@@ -424,7 +448,8 @@ export const APP_ROUTES = {
   MC_PROPERTIES: '/mc/properties',
   MC_PROPERTY_DETAIL: (id: string) => `/mc/properties/${id}`,
   MC_PROPERTY_EDIT: (id: string) => `/mc/properties/${id}/editor`,
-  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/manage`,
+  /** @deprecated PropertyManage was consolidated into PropertyEditor — alias kept for back-compat. */
+  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/editor`,
   MC_PROPERTY_SETUP: (id: string) => `/mc/properties/${id}/setup`,
   MC_PROPERTY_GUIDEBOOK: (id: string) => `/mc/properties/${id}/guidebook`,
   MC_PROPERTY_PORTAL: (id: string) => `/mc/properties/${id}/portal-settings`,
@@ -432,6 +457,7 @@ export const APP_ROUTES = {
   MC_COMPLEXES: '/mc/complexes',
   MC_PROJECTS: '/mc/projects',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
+  MC_TODAY: '/mc/today',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
   MC_CONTACT_DETAIL: (id: string) => `/mc/contacts/${id}`,
@@ -446,6 +472,7 @@ export const APP_ROUTES = {
   MC_FINANCE: '/mc/finance',
   MC_FINANCIALS: '/mc/financials',
   MC_STAFF: '/mc/staff',
+  MC_ANALYTICS: '/mc/analytics',
   MC_REPORTS: '/mc/reports',
   MC_BUDGET: '/mc/budget',
   MC_FINANCE_PLANNING: '/mc/finance/planning',

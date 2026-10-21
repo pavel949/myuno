@@ -18,6 +18,7 @@
  *  └───────────────────────────────────────────────┘
  */
 import React from 'react';
+import { pickLang } from '@/lib/i18n/pickLang';
 import {
   Shield,
   AlertTriangle,
@@ -52,15 +53,18 @@ import {
 
 interface Props {
   projectId: string;
+  /** Public project pages never display drafts or authoring actions, including to admins. */
+  publicView?: boolean;
   /** Pre-known flag from caller; otherwise read from report */
   isBrokered?: boolean;
 }
 
-export function ClearViewReport({ projectId, isBrokered }: Props) {
+export function ClearViewReport({ projectId, isBrokered, publicView = false }: Props) {
   const { user } = useAuth();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: report, isLoading } = useDueDiligenceReport(projectId);
+  const { data: sourceReport, isLoading, isError } = useDueDiligenceReport(projectId, { publishedOnly: publicView });
+  const report = publicView && !sourceReport?.is_published ? null : sourceReport;
   const { data: access } = useClearViewAccess(projectId);
   const { data: isProjectDeveloper = false } = useIsProjectDeveloper(projectId);
   const generate = useGenerateDueDiligence();
@@ -98,7 +102,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
 
   const brokered = isBrokered ?? report?.is_brokered_project ?? false;
   const hasFullAccess = isAdmin || isProjectDeveloper || (access?.hasAccess ?? false);
-  const ownerView = !isAdmin && isProjectDeveloper;
+  const ownerView = !publicView && !isAdmin && isProjectDeveloper;
 
   return (
     <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
@@ -125,7 +129,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
             )}
           </div>
         </div>
-        {isAdmin && (
+        {isAdmin && !publicView && (
           <div className="flex gap-2">
             {report && (
               <Button
@@ -202,13 +206,13 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
 
       {!isLoading && !report && (
         <div className="text-sm text-muted-foreground">
-          {isAdmin
+          {isAdmin && !publicView
             ? isRu
               ? 'Отчёт ещё не сгенерирован. Нажмите «Сгенерировать».'
               : 'No report yet. Click Generate.'
-            : isRu
-              ? 'ClearView отчёт для этого проекта в подготовке.'
-              : 'ClearView report for this project is in preparation.'}
+            : pickLang(language, isError
+              ? { ru: 'Не удалось загрузить опубликованный отчёт ClearView.', en: 'The published ClearView report could not be loaded.', th: 'ไม่สามารถโหลดรายงาน ClearView ที่เผยแพร่ได้' }
+              : { ru: 'Опубликованный отчёт ClearView пока недоступен.', en: 'No published ClearView report is available yet.', th: 'ยังไม่มีรายงาน ClearView ที่เผยแพร่' })}
         </div>
       )}
 

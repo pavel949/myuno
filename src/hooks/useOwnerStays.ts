@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { PROPERTY_BOOKING_RELEASE_FILTER } from '@/lib/propertyInventory';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -31,7 +32,7 @@ export function useOwnerStays(propertyId: string | undefined) {
         .select('id, property_id, check_in, check_out, status, notes, created_at')
         .eq('property_id', propertyId)
         .eq('source', 'owner_stay')
-        .neq('status', 'cancelled')
+        .not('status', 'in', PROPERTY_BOOKING_RELEASE_FILTER)
         .order('check_in', { ascending: false });
       if (error) throw error;
       return (data || []) as OwnerStay[];
@@ -42,16 +43,11 @@ export function useOwnerStays(propertyId: string | undefined) {
   // Check date availability
   const checkAvailability = async (checkIn: string, checkOut: string): Promise<boolean> => {
     if (!propertyId) return false;
-    const { data, error } = await supabase
-      .from('property_bookings')
-      .select('id')
-      .eq('property_id', propertyId)
-      .neq('status', 'cancelled')
-      .lt('check_in', checkOut)
-      .gt('check_out', checkIn)
-      .limit(1);
+    const { data, error } = await supabase.rpc('check_property_dates_available', {
+      p_property_id: propertyId, p_check_in: checkIn, p_check_out: checkOut,
+    });
     if (error) throw error;
-    return !data || data.length === 0;
+    return data === true;
   };
 
   const createStay = useMutation({

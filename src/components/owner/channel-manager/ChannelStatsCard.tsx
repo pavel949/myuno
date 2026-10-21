@@ -7,11 +7,15 @@ interface ChannelStatsCardProps {
   label: string;
   value: number;
   color: string;
+  onClick?: () => void;
 }
 
-export function ChannelStatsCard({ icon, label, value, color }: ChannelStatsCardProps) {
+export function ChannelStatsCard({ icon, label, value, color, onClick }: ChannelStatsCardProps) {
   return (
-    <Card>
+    <Card
+      onClick={onClick}
+      className={cn(onClick && 'cursor-pointer hover:bg-muted/50 transition-colors')}
+    >
       <CardContent className="pt-4 pb-3">
         <div className={cn("w-10 h-10 rounded-none flex items-center justify-center mb-2", color)}>
           {icon}

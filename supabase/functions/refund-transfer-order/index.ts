@@ -1,99 +1,55 @@
-// Refund a transfer order via Stripe.
-// Idempotent: skips if order is not Stripe-paid or already refunded.
-// Called from confirm-transfer-operator (reject flow) and admin tools.
-import Stripe from "https://esm.sh/stripe@18.5.0";
+// Restrictive containment: no refund writer until atomic reconciliation is approved.
+// Internal ingress remains separate from customer/provider authorization.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
+import { requireInternalSecret } from "../_shared/internal-secret.ts";
 
-const sb = () => createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const reply = (status: number, error: string) => new Response(
+  JSON.stringify({ error, needs_reconciliation: status === 409 }),
+  { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
 );
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const denied = requireInternalSecret(req, corsHeaders);
+  if (denied) return denied;
+  if (req.method !== "POST") return reply(405, "Method not allowed");
+
+  let body: unknown;
+  try { body = await req.json(); } catch { return reply(400, "Invalid payload"); }
+  if (!body || typeof body !== "object" || Array.isArray(body)) return reply(400, "Invalid payload");
+  const payload = body as Record<string, unknown>;
+  if (Object.keys(payload).some(key => !["order_id", "reason"].includes(key)) ||
+      typeof payload.order_id !== "string" || !UUID.test(payload.order_id) ||
+      (payload.reason !== undefined && (typeof payload.reason !== "string" || payload.reason.length > 240))) {
+    return reply(400, "Invalid payload");
+  }
+
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return reply(503, "Refund service unavailable");
   try {
-    const { order_id, reason } = await req.json();
-    if (!order_id) {
-      return new Response(JSON.stringify({ error: "order_id required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const client = createClient(url, key);
+    const { data: order, error: orderError } = await client.from("orders")
+      .select("id, order_type, status").eq("id", payload.order_id).single();
+    if (orderError) return reply(503, "Order could not be verified");
+    if (!order) return reply(404, "Order not found");
+    if (order.order_type !== "transfer") return reply(403, "Transfer order required");
 
-    const { data: order } = await sb()
-      .from("orders")
-      .select("id, total_amount, currency, status, metadata")
-      .eq("id", order_id)
-      .single();
-    if (!order) {
-      return new Response(JSON.stringify({ error: "Order not found" }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const meta = (order.metadata || {}) as Record<string, unknown>;
-    if (meta.refunded_at) {
-      return new Response(JSON.stringify({ success: true, already_refunded: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Read the actual schema, not the removed stripe_payment_intent_id column.
+    // A failed/missing/ambiguous payment must never become a manual refund.
+    const { data: payments, error: paymentError } = await client.from("payment_intents")
+      .select("id, method, status, provider_ref, amount, currency")
+      .eq("order_id", payload.order_id).limit(2);
+    if (paymentError) return reply(503, "Payment could not be verified");
+    if (!payments || payments.length !== 1) return reply(409, "Payment requires reconciliation");
 
-    const { data: pi } = await sb()
-      .from("payment_intents")
-      .select("stripe_payment_intent_id, status")
-      .eq("order_id", order_id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!pi?.stripe_payment_intent_id) {
-      // Cash / concierge — nothing to refund automatically.
-      await sb().from("orders").update({
-        metadata: { ...meta, refunded_at: new Date().toISOString(), refund_method: "manual", refund_reason: reason || null },
-      }).eq("id", order_id);
-      return new Response(JSON.stringify({ success: true, manual: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      return new Response(JSON.stringify({ error: "Stripe not configured" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const refund = await stripe.refunds.create({
-      payment_intent: pi.stripe_payment_intent_id,
-      reason: "requested_by_customer",
-      metadata: { order_id, transfer_reject_reason: String(reason || "operator_reject").slice(0, 240) },
-    });
-
-    await sb().from("orders").update({
-      status: "refunded",
-      metadata: { ...meta, refunded_at: new Date().toISOString(), refund_method: "stripe", refund_id: refund.id, refund_reason: reason || null },
-    }).eq("id", order_id);
-
-    // Audit trail: record the status transition to 'refunded'.
-    await sb().from("order_status_history").insert({
-      order_id,
-      from_status: order.status || null,
-      to_status: "refunded",
-      reason: `Stripe refund ${refund.id}: ${String(reason || "operator_reject")}`,
-    });
-
-    // TODO(ledger): no reversing-ledger RPC exists yet (only record_ledger_entries
-    // for forward postings). Until a `reverse_ledger_entries`/refund RPC is added,
-    // the double-entry trail is NOT reversed here. The Stripe `charge.refunded`
-    // webhook flips order/payment_intent status but also does not post a reversal,
-    // so reconciliation must account for refunded orders separately.
-
-    return new Response(JSON.stringify({ success: true, refund_id: refund.id, status: refund.status }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    console.error("[refund-transfer-order]", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Neither order metadata nor payment status proves a completed reversal.
+    // No approved atomic reversal writer exists yet: fail before Stripe or DML.
+    // Do not restore legacy manual-success markers or irreversible refund calls.
+    return reply(409, "Canonical refund reconciliation is required");
+  } catch {
+    return reply(503, "Refund verification unavailable");
   }
 });

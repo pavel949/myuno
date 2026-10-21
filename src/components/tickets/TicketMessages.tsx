@@ -10,6 +10,7 @@ import { ru } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import type { TicketMessage } from '@/hooks/useTickets';
 import { cn } from '@/lib/utils';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface TicketMessagesProps {
   ticketId: string;
@@ -196,15 +197,20 @@ export function TicketMessages({
                 }
               }}
             />
-            <Button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              size="icon"
-              className="shrink-0"
-              aria-label="Отправить"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col gap-1 shrink-0">
+              <Button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                size="icon"
+                aria-label="Отправить"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+              <VoiceInputButton
+                variant="outline"
+                onTranscript={(text) => setNewMessage((prev) => appendTranscript(prev, text))}
+              />
+            </div>
           </div>
         </div>
       )}

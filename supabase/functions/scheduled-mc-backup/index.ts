@@ -6,6 +6,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Exact totals prevent an API row cap from masquerading as end-of-data.
+// A stable ID order makes range boundaries deterministic for unchanged data.
+type BackupPage<T> = { data: T[] | null; error: unknown; count: number | null };
+type BackupQuery<T> = { range(from: number, to: number): PromiseLike<BackupPage<T>> };
+async function readAll<T>(buildQuery: () => BackupQuery<T>) {
+  const data: T[] = [];
+  let expected: number | null = null;
+  while (true) {
+    const page = await buildQuery().range(data.length, data.length + 499);
+    if (page.error) return { data: null, error: page.error };
+    if (!Array.isArray(page.data) || !Number.isInteger(page.count) || page.count === null || page.count < 0
+      || (expected !== null && page.count !== expected)) {
+      return { data: null, error: new Error('Backup source count unavailable or changed') };
+    }
+    expected = page.count;
+    if (page.data.length === 0 && data.length < expected) {
+      return { data: null, error: new Error('Backup source ended before its exact total') };
+    }
+    data.push(...page.data);
+    if (data.length === expected) return { data, error: null };
+    if (data.length > expected) return { data: null, error: new Error('Backup source exceeded its exact total') };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,10 +43,10 @@ Deno.serve(async (req) => {
     const sb = createServiceClient();
 
     // Find all companies with auto backup enabled
-    const { data: companies, error: compErr } = await sb
+    const { data: companies, error: compErr } = await readAll(() => sb
       .from('management_companies')
-      .select('id, name_en, backup_settings')
-      .not('backup_settings', 'is', null);
+      .select('id, name_en, backup_settings', { count: 'exact' })
+      .not('backup_settings', 'is', null).order('id'));
 
     if (compErr) throw compErr;
 
@@ -50,22 +74,35 @@ Deno.serve(async (req) => {
       };
 
       const [props, contacts, deals, reports] = await Promise.all([
-        sb.from('properties').select('*').eq('management_company_id', company.id),
-        sb.from('crm_contacts').select('*').eq('company_id', company.id),
-        sb.from('agent_deals').select('*').eq('company_id', company.id),
-        sb.from('owner_reports').select('*').eq('company_id', company.id),
+        readAll(() => sb.from('properties').select('*', { count: 'exact' }).eq('management_company_id', company.id).order('id')),
+        readAll(() => sb.from('crm_contacts').select('*', { count: 'exact' }).eq('company_id', company.id).order('id')),
+        readAll(() => sb.from('agent_deals').select('*', { count: 'exact' }).eq('company_id', company.id).order('id')),
+        readAll(() => sb.from('owner_reports').select('*', { count: 'exact' }).eq('company_id', company.id).order('id')),
       ]);
+
+      // A missing relation or denied query is not an empty dataset. Never publish
+      // a partial backup or advance its success timestamp.
+      if ([props, contacts, deals, reports].some(result => result.error)) {
+        console.error(`Backup collection failed for ${company.id}`);
+        results.push({ company_id: company.id, status: 'error', tables: 0 });
+        continue;
+      }
 
       // Finance: pulled from property_financials via this company's properties
       // (mc_finance_transactions does not exist — financial data lives per-property).
       const propertyIds = (props.data || []).map((p: { id: string }) => p.id);
       let financeRows: unknown[] = [];
       if (propertyIds.length > 0) {
-        const { data: txs } = await sb
+        const { data: txs, error: financeError } = await readAll(() => sb
           .from('property_financials')
-          .select('*')
+          .select('*', { count: 'exact' })
           .in('property_id', propertyIds)
-          .order('transaction_date', { ascending: false });
+          .order('transaction_date', { ascending: false }).order('id'));
+        if (financeError) {
+          console.error(`Backup finance collection failed for ${company.id}`);
+          results.push({ company_id: company.id, status: 'error', tables: 0 });
+          continue;
+        }
         financeRows = txs || [];
       }
 
@@ -90,7 +127,7 @@ Deno.serve(async (req) => {
       }
 
       // Update last backup timestamp
-      await sb
+      const { error: timestampError } = await sb
         .from('management_companies')
         .update({
           backup_settings: {
@@ -99,6 +136,12 @@ Deno.serve(async (req) => {
           },
         })
         .eq('id', company.id);
+
+      if (timestampError) {
+        console.error(`Backup timestamp update failed for ${company.id}`);
+        results.push({ company_id: company.id, status: 'error', tables: 0 });
+        continue;
+      }
 
       const tableCount = Object.values(allData).filter(v => Array.isArray(v)).length;
       results.push({ company_id: company.id, status: 'ok', tables: tableCount });
@@ -119,3 +162,4 @@ Deno.serve(async (req) => {
     });
   }
 });
+

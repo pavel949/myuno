@@ -1,4 +1,6 @@
 import { createClient } from '../_shared/supabase.ts';
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
+import { propertyOrderHoldsInventory } from '../_shared/property-inventory.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -220,7 +222,7 @@ async function findOverlappingOrder(
     .is('deleted_at', null);
 
   const overlapping = (orders || []).find((o: any) => {
-    if (o.status === 'cancelled') return false;
+    if (!propertyOrderHoldsInventory(o.status)) return false;
     if (excludeOrderId && o.id === excludeOrderId) return false;
     const oStart = new Date(o.start_at).getTime();
     const oEnd = new Date(o.end_at).getTime();
@@ -384,7 +386,13 @@ async function syncCalendar(
   
   try {
     console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
-    
+
+    // SSRF guard: ical_url is user-supplied DB data.
+    const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+    if (!ssrf.allowed) {
+      throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+    }
+
     const response = await fetch(calendar.ical_url, {
       headers: { 'User-Agent': 'UNO Calendar Sync/2.0' },
     });
@@ -420,7 +428,8 @@ async function syncCalendar(
     const newEventIds = new Set(events.map(e => e.uid));
 
     // Soft-delete orders that no longer exist in external calendar
-    const toDelete = calendarOrders.filter((o: any) =>
+    // Never wipe all bookings when the feed came back empty (outage / bad response).
+    const toDelete = events.length === 0 ? [] : calendarOrders.filter((o: any) =>
       o.metadata?.external_id && !newEventIds.has(o.metadata.external_id)
     );
     const eventsRemoved = toDelete.length;

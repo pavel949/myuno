@@ -27,6 +27,8 @@ interface ActiveCompanyContextValue {
   /** Switch to a different company — invalidates all cached data */
   setActiveCompanyId: (id: string) => void;
   isLoading: boolean;
+  error: Error | null;
+  refetch: () => unknown;
 }
 
 const ActiveCompanyContext = createContext<ActiveCompanyContextValue>({
@@ -34,6 +36,8 @@ const ActiveCompanyContext = createContext<ActiveCompanyContextValue>({
   activeCompany: null,
   setActiveCompanyId: () => {},
   isLoading: true,
+  error: null,
+  refetch: () => {},
 });
 
 const STORAGE_KEY = 'uno-active-company-id';
@@ -58,7 +62,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
     try { return localStorage.getItem(STORAGE_KEY); } catch { /* ignored */ return null; }
   });
 
-  const { data: companies = [], isLoading } = useQuery({
+  const { data: companies = [], isLoading, error, refetch } = useQuery({
     queryKey: ['user-companies', user?.id],
     queryFn: async (): Promise<UserCompanyMembership[]> => {
       if (!user) return [];
@@ -113,7 +117,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
 
   return React.createElement(
     ActiveCompanyContext.Provider,
-    { value: { companies, activeCompany, setActiveCompanyId, isLoading } },
+    { value: { companies, activeCompany, setActiveCompanyId, isLoading, error, refetch } },
     children
   );
 }

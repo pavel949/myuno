@@ -10,7 +10,8 @@ import { FileText, Calendar, Download, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
-import type { PropertyReport } from '@/hooks/usePropertyReports';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+import { useGeneratePdf, type PropertyReport } from '@/hooks/usePropertyReports';
 
 interface Props {
   propertyId: string;
@@ -19,9 +20,11 @@ interface Props {
 export function OwnerReportsTab({ propertyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { format: formatMoney } = useCityCurrency();
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
+  const generatePdf = useGeneratePdf();
 
-  const { data: reports, isLoading } = useQuery({
+  const { data: reports, isLoading, error, refetch } = useQuery({
     queryKey: ['owner-transparency-reports', propertyId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,6 +64,13 @@ export function OwnerReportsTab({ propertyId }: Props) {
 
   if (isLoading) {
     return <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-none" />)}</div>;
+  }
+
+  if (error) {
+    return <div role="alert" className="space-y-3 py-4 text-sm text-destructive">
+      <p>{isRu ? 'Не удалось загрузить отчёты' : 'Could not load reports'}</p>
+      <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div>;
   }
 
   if (!reports?.length) {
@@ -104,16 +114,16 @@ export function OwnerReportsTab({ propertyId }: Props) {
                 <div className="grid grid-cols-3 gap-3 pt-2 border-t mt-2">
                   <div>
                     <p className="text-[10px] text-muted-foreground">{isRu ? 'Доход' : 'Income'}</p>
-                    <p className="text-sm font-medium text-success">฿{Number(data.income?.total || 0).toLocaleString()}</p>
+                    <p className="text-sm font-medium text-success">{formatMoney(Number(data.income?.total || 0))}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground">{isRu ? 'Расходы' : 'Expenses'}</p>
-                    <p className="text-sm font-medium text-destructive">฿{Number(data.expenses?.total || 0).toLocaleString()}</p>
+                    <p className="text-sm font-medium text-destructive">{formatMoney(Number(data.expenses?.total || 0))}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-muted-foreground">{isRu ? 'Чистый' : 'Net'}</p>
                     <p className={`text-sm font-medium ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      ฿{netIncome.toLocaleString()}
+                      {formatMoney(netIncome)}
                     </p>
                   </div>
                 </div>
@@ -123,6 +133,16 @@ export function OwnerReportsTab({ propertyId }: Props) {
                 <Button variant="outline" size="sm" className="flex-1 h-8" onClick={() => setViewReport(report)}>
                   <Eye className="h-3.5 w-3.5 mr-1" />
                   {isRu ? 'Подробнее' : 'Details'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  disabled={generatePdf.isPending}
+                  onClick={() => generatePdf.mutate({ report, language: isRu ? 'ru' : 'en' })}
+                >
+                  <Download className="h-3.5 w-3.5 mr-1" />
+                  PDF
                 </Button>
               </div>
             </CardContent>

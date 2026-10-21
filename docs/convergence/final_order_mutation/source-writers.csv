@@ -1,0 +1,66 @@
+path,line,table,operation,disposition,boundary
+src/hooks/useConciergeAdvance.ts,78,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useOrders.ts,179,payment_intents,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useOrders.ts,288,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useOrders.ts,387,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useOwnerStays.ts,62,property_bookings,insert,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useOwnerStays.ts,91,property_bookings,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,226,orders,insert,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,263,order_items,insert,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,282,orders,delete,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,289,order_participants,insert,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,426,orders,update,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,443,order_participants,upsert,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,469,orders,update,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/usePropertyBookings.ts,493,orders,update,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/hooks/useVendor.ts,650,bookings,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/pages/BookingDetail.tsx,170,bookings,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/pages/admin/AdminTransfers.tsx,222,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/pages/guest/GuestTripDetail.tsx,523,property_bookings,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/pages/operate/OperatorTransfers.tsx,87,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/pages/owner/MCBookingsPage.tsx,190,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/components/admin/finance/ManualPaymentForm.tsx,61,orders,insert,PROVEN BYPASS,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/components/admin/operations/AdminOrderDetailSheet.tsx,78,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+src/components/admin/operations/OperationsManualPaymentsTab.tsx,730,orders,update,LEGACY,Client direct writer; current RLS/trigger/ACL matrix determines effective authority.
+supabase/functions/_shared/checkout-handler.ts,223,orders,insert,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,241,order_items,insert,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,245,orders,delete,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,254,order_addresses,insert,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,283,order_participants,insert,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,319,payment_intents,insert,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/_shared/checkout-handler.ts,382,payment_intents,update,INTERNAL ONLY,Authenticated builder; vertical price authority requires independent proof.
+supabase/functions/cleanup-abandoned-orders/index.ts,62,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/confirm-manual-payment/index.ts,124,orders,update,PROVEN BYPASS,Admin ingress; non-atomic settlement remains.
+supabase/functions/confirm-transfer-operator/index.ts,133,orders,update,PROVEN BYPASS,Terminal resurrection fixed/deployed; financial authority remains blocking.
+supabase/functions/confirm-transfer-operator/index.ts,191,orders,update,PROVEN BYPASS,Terminal resurrection fixed/deployed; financial authority remains blocking.
+supabase/functions/create-checkout/index.ts,145,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/create-property-deposit-checkout/index.ts,341,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/create-yacht-checkout/index.ts,203,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/e2e-mark-paid/index.ts,63,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/e2e-mark-paid/index.ts,74,payment_intents,insert,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/escalate-stale-transfers/index.ts,96,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-scheduled-sync/index.ts,323,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-scheduled-sync/index.ts,329,orders,insert,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-scheduled-sync/index.ts,338,order_items,insert,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-scheduled-sync/index.ts,356,order_participants,insert,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-scheduled-sync/index.ts,439,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-sync/index.ts,149,property_bookings,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-sync/index.ts,175,property_bookings,upsert,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/ical-sync/index.ts,298,property_bookings,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/notify-transfer-booking/index.ts,261,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/refund-transfer-order/index.ts,59,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/refund-transfer-order/index.ts,85,orders,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/restaurant-order-notifications/index.ts,85,bookings,update,UNKNOWN,Actor/object/state contract not completely verified.
+supabase/functions/stripe-webhook/index.ts,160,orders,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,188,payment_intents,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,442,bookings,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,619,orders,insert,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,723,orders,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,733,payment_intents,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,837,orders,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,848,payment_intents,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,904,bookings,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,942,orders,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,980,orders,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/stripe-webhook/index.ts,989,payment_intents,update,INTERNAL ONLY,Verified signature; state/retry/refund/expiry gaps still blocking.
+supabase/functions/_archive/expire-manual-payments/index.ts,46,orders,update,LEGACY,"Archived source, deployment parity unknown."

@@ -15,15 +15,15 @@ import { MiniAppHero } from '@/components/miniapp/MiniAppHero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { UniversalFilter, type FilterConfig, type FilterValues } from '@/components/filters/UniversalFilter';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { BackButton } from '@/components/uno/BackButton';
-import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER, PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import { SEOHead } from '@/components/seo';
 import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
 import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/UnifiedCatalogMap';
@@ -35,6 +35,8 @@ export interface MiniAppCategory {
   id: string;
   labelEn: string;
   labelRu: string;
+  /** Thai label; falls back to English when absent. */
+  labelTh?: string;
   icon?: string;
 }
 
@@ -42,6 +44,8 @@ export interface QuickFilterOption {
   id: string;
   labelEn: string;
   labelRu: string;
+  /** Thai label; falls back to English when absent. */
+  labelTh?: string;
   icon?: string;
 }
 
@@ -97,6 +101,7 @@ export interface MiniAppLayoutProps {
   children: ReactNode;
   showBottomNav?: boolean;
   contentClassName?: string;
+  pageWidth?: 'default' | 'catalogue';
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
   showEcosystemHint?: boolean;
@@ -133,7 +138,7 @@ function MiniappMode({
   heroGradientFrom = 'from-primary/20',
   heroGradientVia = 'via-primary/10',
   heroGradientTo = 'to-background',
-  showHero = true,
+  showHero = false,
   searchValue = '',
   onSearchChange,
   searchPlaceholder,
@@ -161,10 +166,11 @@ function MiniappMode({
   children,
   showBottomNav = true,
   contentClassName,
+  pageWidth = 'default',
   quickActions,
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
-  showEcosystemHint = true,
+  showEcosystemHint = false,
   seoTitle,
   seoDescription,
   seoImage,
@@ -220,15 +226,6 @@ function MiniappMode({
 
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
-
-    actions.push(
-      <GlobalPreferencesControls
-        key="global-prefs"
-        size="sm"
-        themeVariant="dropdown"
-        className="mr-0.5 shrink-0"
-      />,
-    );
 
     if (mapToggleEnabled) {
       actions.push(
@@ -325,7 +322,7 @@ function MiniappMode({
 
   const categoryItems: FilterRibbonItem[] = categories.map((cat) => ({
     id: cat.id,
-    label: language === 'ru' ? cat.labelRu : cat.labelEn,
+    label: pickLang(language, { ru: cat.labelRu, en: cat.labelEn, th: cat.labelTh }),
     emoji: cat.icon,
   }));
 
@@ -334,7 +331,7 @@ function MiniappMode({
   const hasStickySubHeader = stickySubHeader || hasQuickFilters || hasCategories;
 
   return (
-    <AppLayout showBottomNav={showBottomNav} showHeader={false} className="max-w-full min-w-0">
+    <AppLayout usePageContainer={false} showBottomNav={showBottomNav} showHeader className="max-w-full min-w-0">
       {(seoTitle || seoDescription) && (
         <SEOHead
           title={seoTitle}
@@ -343,8 +340,10 @@ function MiniappMode({
           noindex={seoNoindex}
         />
       )}
-      <div className="sticky top-0 z-40">
+      {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
+      <div className="relative">
         <UnifiedHeader
+          containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}
           title={title}
           subtitle={subtitle}
           showBack
@@ -381,7 +380,7 @@ function MiniappMode({
                       return (
                         <FilterChip
                           key={`${section.id}-${opt.id}`}
-                          label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                          label={pickLang(language, { ru: opt.labelRu, en: opt.labelEn, th: opt.labelTh })}
                           icon={opt.icon}
                           isActive={isActive}
                           onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
@@ -399,7 +398,7 @@ function MiniappMode({
 
       <div
         className={cn(
-          ECOSYSTEM_PAGE_CONTAINER,
+          pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER,
           'pb-4 md:pb-8',
           ECOSYSTEM_MAIN_SPACING,
           showBottomNav && 'pb-24 md:pb-8',
@@ -428,7 +427,7 @@ function MiniappMode({
                 return (
                   <FilterChip
                     key={`${section.id}-${opt.id}`}
-                    label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                    label={pickLang(language, { ru: opt.labelRu, en: opt.labelEn, th: opt.labelTh })}
                     icon={opt.icon}
                     isActive={isActive}
                     onToggle={() => handleQuickFilterToggle(section.id, opt.id)}

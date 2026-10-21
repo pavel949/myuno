@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
-  Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
+  Menu, Bell, CreditCard, Briefcase, Construction, Crown,
   LineChart, Eye, Zap,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -39,69 +39,77 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useOwnerType } from '@/hooks/useOwnerType';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   descEn: string;
   descRu: string;
+  descTh: string;
   icon: React.ComponentType<{ className?: string }>;
   path: string;
 }>> = {
   vendor: {
-    labelEn: 'Switch to Provider',
-    labelRu: 'Панель провайдера',
+    labelEn: 'Provider workspace',
+    labelRu: 'Кабинет поставщика',
+    labelTh: 'พื้นที่ผู้ให้บริการ',
     descEn: 'Manage your services',
     descRu: 'Управление услугами',
+    descTh: 'จัดการบริการของคุณ',
     icon: Store,
     path: '/vendor',
   },
   owner: {
-    labelEn: 'Property owner',
-    labelRu: 'Кабинет собственника',
-    descEn: 'Your own properties & bookings',
-    descRu: 'Личные объекты: брони и сервисы',
+    labelEn: 'Property management',
+    labelRu: 'Управление жильём',
+    labelTh: 'จัดการที่พัก',
+    descEn: 'Manage your own properties',
+    descRu: 'Управление своими объектами',
+    descTh: 'จัดการที่พักของคุณ',
     icon: Building2,
-    // /owner redirects to /mc — point directly to avoid an extra hop.
+    // Self-managed default; managed owners use their existing owner portal below.
     path: '/mc',
   },
   admin: {
-    labelEn: 'Admin Panel',
-    labelRu: 'Панель админа',
+    labelEn: 'Administration',
+    labelRu: 'Администрирование',
+    labelTh: 'ผู้ดูแลระบบ',
     descEn: 'Platform administration',
-    descRu: 'Администрирование',
+    descRu: 'Управление платформой',
+    descTh: 'จัดการแพลตฟอร์ม',
     icon: Shield,
     path: '/admin',
   },
   uno_team: {
-    labelEn: 'Team Dashboard',
+    labelEn: 'myUNO team',
     labelRu: 'Команда myUNO',
-    descEn: 'Support & operations',
-    descRu: 'Поддержка и операции',
+    labelTh: 'ทีม myUNO',
+    descEn: 'Team tasks and support',
+    descRu: 'Задачи команды и поддержка',
+    descTh: 'งานทีมและการช่วยเหลือ',
     icon: Headphones,
     path: '/team',
   },
-  staff: {
-    labelEn: 'Staff workspace',
-    labelRu: 'Сотрудник',
-    descEn: 'Internal staff tools',
-    descRu: 'Внутренние инструменты',
-    icon: UserCog,
-    path: '/staff',
-  },
   property_manager: {
-    labelEn: 'Management company (MC)',
-    labelRu: 'Управляющая компания (УК)',
-    descEn: 'MC dashboard for client properties',
-    descRu: 'Панель компании — объекты клиентов',
+    labelEn: 'Property management company',
+    labelRu: 'Управляющая компания',
+    labelTh: 'บริษัทจัดการที่พัก',
+    descEn: 'Manage client properties',
+    descRu: 'Управление объектами клиентов',
+    descTh: 'จัดการที่พักของลูกค้า',
     icon: Briefcase,
     path: '/mc',
   },
   investor: {
-    labelEn: 'Investor workspace',
-    labelRu: 'Кабинет инвестора',
-    descEn: 'Capital & portfolio tools',
-    descRu: 'Капитал и портфель',
+    labelEn: 'Investor portfolio',
+    labelRu: 'Портфель инвестора',
+    labelTh: 'พอร์ตการลงทุน',
+    descEn: 'Your investments and portfolio',
+    descRu: 'Инвестиции и портфель',
+    descTh: 'การลงทุนและพอร์ตของคุณ',
     icon: LineChart,
     // /investor route does not exist — investor dashboard lives under /invest/dashboard.
     path: APP_ROUTES.INVEST_DASHBOARD,
@@ -109,7 +117,7 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
 };
 
 /** Platform / staff roles shown first in the switcher */
-const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'staff', 'investor'];
+const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'investor'];
 /** Business / workspace roles */
 const WORKSPACE_ROLE_ORDER: AppRole[] = ['vendor', 'owner', 'property_manager'];
 
@@ -120,13 +128,18 @@ function orderSwitchable(roles: AppRole[], order: AppRole[]): AppRole[] {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function UserAvatarMenu() {
+export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, signOut } = useAuth();
   const { availableRoles, switchContext } = useUserContext();
   const { unreadCount } = useNotifications();
   const { isAdmin } = useIsAdmin();
+  const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
+  const roleConfig = (role: AppRole) => role === 'owner' && isMCPortal
+    ? { ...ROLE_SWITCH_CONFIG.owner!, path: '/my-property', labelEn: 'Owner portal', labelRu: 'Кабинет собственника', labelTh: 'พอร์ทัลเจ้าของ', descEn: 'Your managed properties and reports', descRu: 'Объекты под управлением и отчёты', descTh: 'ที่พักที่มีผู้จัดการและรายงาน' }
+    : ROLE_SWITCH_CONFIG[role];
+  const roleLabel = (config: NonNullable<ReturnType<typeof roleConfig>>) => pickLang(language, { en: config.labelEn, ru: config.labelRu, th: config.labelTh });
   const { enter: enterViewAs } = usePlatformViewAs();
   const isRu = language === 'ru';
 
@@ -138,9 +151,9 @@ export function UserAvatarMenu() {
   const switchableRoles = useMemo(
     () =>
       availableRoles.filter(
-        (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
+        (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && !(r === 'owner' && ownerTypeLoading) && ROLE_SWITCH_CONFIG[r]
       ),
-    [availableRoles]
+    [availableRoles, ownerTypeLoading]
   );
 
   const platformRoles = useMemo(
@@ -172,7 +185,7 @@ export function UserAvatarMenu() {
   const initials = userName.charAt(0).toUpperCase();
 
   const handleRoleSwitch = async (role: AppRole) => {
-    const config = ROLE_SWITCH_CONFIG[role];
+    const config = roleConfig(role);
     if (!config) return;
     try { localStorage.setItem('myuno:lastOperateRole', role); } catch { /* ignore */ }
     await switchContext({ role });
@@ -188,7 +201,7 @@ export function UserAvatarMenu() {
     setViewAsError(null);
     const q = viewAsQuery.trim();
     if (!q) {
-      setViewAsError(isRu ? 'Введите email или ID пользователя' : 'Enter user email or UUID');
+      setViewAsError(pickLang(language, { ru: 'Введите email или ID пользователя', en: 'Enter user email or UUID', th: 'กรอกอีเมลหรือ UUID ผู้ใช้' }));
       return;
     }
     setViewAsBusy(true);
@@ -204,7 +217,7 @@ export function UserAvatarMenu() {
           .maybeSingle();
         if (error) throw error;
         if (!data?.id) {
-          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          setViewAsError(pickLang(language, { ru: 'Пользователь не найден', en: 'User not found', th: 'ไม่พบผู้ใช้' }));
           return;
         }
         targetId = data.id;
@@ -217,7 +230,7 @@ export function UserAvatarMenu() {
           .maybeSingle();
         if (error) throw error;
         if (!data?.id) {
-          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          setViewAsError(pickLang(language, { ru: 'Пользователь не найден', en: 'User not found', th: 'ไม่พบผู้ใช้' }));
           return;
         }
         targetId = data.id;
@@ -225,7 +238,7 @@ export function UserAvatarMenu() {
       }
 
       if (targetId === user.id) {
-        setViewAsError(isRu ? 'Это ваш аккаунт' : 'That is your own account');
+        setViewAsError(pickLang(language, { ru: 'Это ваш аккаунт', en: 'That is your own account', th: 'นี่คือบัญชีของคุณ' }));
         return;
       }
 
@@ -241,7 +254,7 @@ export function UserAvatarMenu() {
 
   const renderRoleItems = (roles: AppRole[]) =>
     roles.map((role) => {
-      const config = ROLE_SWITCH_CONFIG[role]!;
+      const config = roleConfig(role)!;
       const Icon = config.icon;
       return (
         <DropdownMenuItem
@@ -252,10 +265,10 @@ export function UserAvatarMenu() {
           <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">
-              {isRu ? config.labelRu : config.labelEn}
+              {roleLabel(config)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isRu ? config.descRu : config.descEn}
+              {pickLang(language, { en: config.descEn, ru: config.descRu, th: config.descTh })}
             </p>
           </div>
         </DropdownMenuItem>
@@ -264,20 +277,20 @@ export function UserAvatarMenu() {
 
   // Primary nav items
   const primaryItems = [
-    { icon: Heart, labelEn: 'Favorites', labelRu: 'Избранное', path: '/favorites' },
-    { icon: ShoppingBag, labelEn: 'Bookings & Orders', labelRu: 'Заказы и брони', path: '/bookings' },
+    { icon: Heart, labelEn: 'Favorites', labelRu: 'Избранное', labelTh: 'รายการโปรด', path: '/favorites' },
+    { icon: ShoppingBag, labelEn: 'Bookings & Orders', labelRu: 'Заказы и брони', labelTh: 'การจองและคำสั่งซื้อ', path: '/bookings' },
     {
-      icon: Bell, labelEn: 'Notifications', labelRu: 'Уведомления', path: '/notifications',
+      icon: Bell, labelEn: 'Notifications', labelRu: 'Уведомления', labelTh: 'การแจ้งเตือน', path: '/notifications',
       badge: unreadCount > 0 ? unreadCount : undefined,
     },
-    { icon: User, labelEn: 'Profile', labelRu: 'Профиль', path: '/account' },
+    { icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์', path: '/account' },
   ];
 
   // Secondary items
   const secondaryItems = [
-    { icon: Settings, labelEn: 'Settings', labelRu: 'Настройки', path: '/profile/settings' },
-    { icon: CreditCard, labelEn: 'Wallet & Payments', labelRu: 'Кошелёк и оплата', path: '/wallet' },
-    { icon: HelpCircle, labelEn: 'Help Center', labelRu: 'Центр помощи', path: '/support' },
+    { icon: Settings, labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', path: '/profile/settings' },
+    { icon: CreditCard, labelEn: 'Wallet & Payments', labelRu: 'Кошелёк и оплата', labelTh: 'กระเป๋าเงินและการชำระเงิน', path: '/wallet' },
+    { icon: HelpCircle, labelEn: 'Help Center', labelRu: 'Центр помощи', labelTh: 'ศูนย์ช่วยเหลือ', path: '/support' },
   ];
 
   return (
@@ -285,14 +298,16 @@ export function UserAvatarMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          aria-label={pickLang(language, { ru: 'Меню аккаунта', en: 'Account menu', th: 'เมนูบัญชี' })}
           className={cn(
             "flex items-center gap-2 h-10 pl-3 pr-1.5 rounded-full",
+            compact && "h-11 w-11 justify-center p-0 md:w-auto md:pl-3 md:pr-1.5",
             "border border-border/60 bg-background hover:shadow-md",
             "transition-all duration-200 cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
         >
-          <Menu className="w-4 h-4 text-foreground/70" />
+          <Menu className={cn("w-4 h-4 text-foreground/70", compact && "hidden md:block")} />
           <div className="relative">
             <Avatar className="h-7 w-7">
               <AvatarImage src={avatarUrl} alt={userName} />
@@ -314,7 +329,7 @@ export function UserAvatarMenu() {
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
             {quickOperateRole && ROLE_SWITCH_CONFIG[quickOperateRole] && (() => {
-              const cfg = ROLE_SWITCH_CONFIG[quickOperateRole]!;
+              const cfg = roleConfig(quickOperateRole)!;
               const Icon = cfg.icon;
               return (
                 <DropdownMenuItem
@@ -324,11 +339,11 @@ export function UserAvatarMenu() {
                   <Zap className="w-5 h-5 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">
-                      {isRu ? 'Перейти в рабочую панель' : 'Jump to workspace'}
+                      {pickLang(language, { ru: 'Перейти в рабочую панель', en: 'Jump to workspace', th: 'ไปยังพื้นที่ทำงาน' })}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       <Icon className="w-3 h-3 inline mr-1 align-text-bottom" />
-                      {isRu ? cfg.labelRu : cfg.labelEn}
+                      {roleLabel(cfg)}
                     </p>
                   </div>
                 </DropdownMenuItem>
@@ -337,7 +352,7 @@ export function UserAvatarMenu() {
             {platformRoles.length > 0 && (
               <>
                 <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {isRu ? 'Платформа' : 'Platform'}
+                  {pickLang(language, { ru: 'Платформа', en: 'Platform', th: 'แพลตฟอร์ม' })}
                 </DropdownMenuLabel>
                 {renderRoleItems(platformRoles)}
               </>
@@ -345,7 +360,7 @@ export function UserAvatarMenu() {
             {workspaceRoles.length > 0 && (
               <>
                 <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {isRu ? 'Рабочие пространства' : 'Workspaces'}
+                  {pickLang(language, { ru: 'Рабочие пространства', en: 'Workspaces', th: 'พื้นที่ทำงาน' })}
                 </DropdownMenuLabel>
                 {renderRoleItems(workspaceRoles)}
               </>
@@ -361,12 +376,10 @@ export function UserAvatarMenu() {
                 <Eye className="w-5 h-5 text-accent dark:text-accent flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    {isRu ? 'Просмотр от имени пользователя' : 'View as user (audit)'}
+                    {pickLang(language, { ru: 'Просмотр от имени пользователя', en: 'View as user (audit)', th: 'ดูในนามผู้ใช้ (ตรวจสอบ)' })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {isRu
-                      ? 'Запись в журнале; права не меняются'
-                      : 'Logged for audit; permissions stay yours'}
+                    {pickLang(language, { ru: 'Запись в журнале; права не меняются', en: 'Logged for audit; permissions stay yours', th: 'บันทึกเพื่อการตรวจสอบ สิทธิ์ยังคงเป็นของคุณ' })}
                   </p>
                 </div>
               </DropdownMenuItem>
@@ -380,10 +393,10 @@ export function UserAvatarMenu() {
                 <Crown className="w-5 h-5 text-primary flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    {isRu ? 'Newbuilds Console' : 'Newbuilds Console'}
+                    {pickLang(language, { ru: 'Newbuilds Console', en: 'Newbuilds Console', th: 'จัดการโครงการใหม่' })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {isRu ? 'Ignatev Estate — застройщики, проекты, документы' : 'Ignatev Estate — developers, projects, docs'}
+                    {pickLang(language, { ru: 'Ignatev Estate — застройщики, проекты, документы', en: 'Ignatev Estate — developers, projects, docs', th: 'Ignatev Estate — ผู้พัฒนา โครงการ เอกสาร' })}
                   </p>
                 </div>
               </DropdownMenuItem>
@@ -396,12 +409,10 @@ export function UserAvatarMenu() {
               <Construction className="w-5 h-5 text-foreground/70 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">
-                  {isRu ? 'Портал застройщика' : 'Developer portal'}
+                  {pickLang(language, { ru: 'Кабинет застройщика', en: 'Property developer portal', th: 'พอร์ทัลผู้พัฒนาอสังหาริมทรัพย์' })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {isRu
-                    ? 'Кабинет застройщика: проекты, лиды, аналитика'
-                    : 'Developer workspace: projects, leads, analytics'}
+                  {pickLang(language, { ru: 'Проекты недвижимости, заявки и аналитика', en: 'Property projects, leads and analytics', th: 'โครงการอสังหาริมทรัพย์ ลูกค้าและการวิเคราะห์' })}
                 </p>
               </div>
             </DropdownMenuItem>
@@ -419,7 +430,7 @@ export function UserAvatarMenu() {
             >
               <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
               <span className="text-sm font-medium text-foreground flex-1">
-                {isRu ? item.labelRu : item.labelEn}
+                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
               </span>
               {'badge' in item && item.badge && (
                 <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
@@ -443,7 +454,7 @@ export function UserAvatarMenu() {
             >
               <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-foreground/80">
-                {isRu ? item.labelRu : item.labelEn}
+                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
               </span>
             </DropdownMenuItem>
           );
@@ -459,10 +470,10 @@ export function UserAvatarMenu() {
           <Gift className="w-5 h-5 text-primary flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">
-              {isRu ? 'Пригласить друга' : 'Invite & Earn'}
+              {pickLang(language, { ru: 'Пригласить друга', en: 'Invite & Earn', th: 'ชวนเพื่อนและรับโบนัส' })}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Получите бонус за каждого друга' : 'Earn bonus for every referral'}
+              {pickLang(language, { ru: 'Получите бонус за каждого друга', en: 'Earn bonus for every referral', th: 'รับโบนัสเมื่อแนะนำเพื่อน' })}
             </p>
           </div>
         </DropdownMenuItem>
@@ -475,7 +486,7 @@ export function UserAvatarMenu() {
           className="flex items-center gap-3 px-4 py-3 cursor-pointer text-foreground/70 hover:text-foreground focus:bg-muted/50"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          <span className="text-sm">{isRu ? 'Выйти' : 'Log out'}</span>
+          <span className="text-sm">{pickLang(language, { ru: 'Выйти', en: 'Log out', th: 'ออกจากระบบ' })}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -483,16 +494,14 @@ export function UserAvatarMenu() {
     <Dialog open={viewAsOpen} onOpenChange={setViewAsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isRu ? 'Просмотр от имени пользователя' : 'View as user'}</DialogTitle>
+          <DialogTitle>{pickLang(language, { ru: 'Просмотр от имени пользователя', en: 'View as user', th: 'ดูในนามผู้ใช้' })}</DialogTitle>
           <DialogDescription>
-            {isRu
-              ? 'Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются.'
-              : 'Enter profile email or UUID. This is audited; RLS still applies to your admin session.'}
+            {pickLang(language, { ru: 'Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются.', en: 'Enter profile email or UUID. This is audited; RLS still applies to your admin session.', th: 'กรอกอีเมลโปรไฟล์หรือ UUID การดำเนินการนี้มีบันทึกตรวจสอบ และ RLS ยังคงใช้กับเซสชันผู้ดูแลระบบของคุณ' })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 py-2">
           <Input
-            placeholder={isRu ? 'email или UUID' : 'email or user UUID'}
+            placeholder={pickLang(language, { ru: 'email или UUID', en: 'email or user UUID', th: 'อีเมลหรือ UUID ผู้ใช้' })}
             value={viewAsQuery}
             onChange={(e) => {
               setViewAsQuery(e.target.value);
@@ -510,10 +519,10 @@ export function UserAvatarMenu() {
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" type="button" onClick={() => setViewAsOpen(false)} disabled={viewAsBusy}>
-            {isRu ? 'Отмена' : 'Cancel'}
+            {pickLang(language, { ru: 'Отмена', en: 'Cancel', th: 'ยกเลิก' })}
           </Button>
           <Button type="button" onClick={() => void handleViewAsSubmit()} disabled={viewAsBusy}>
-            {viewAsBusy ? '…' : isRu ? 'Начать' : 'Start'}
+            {viewAsBusy ? '…' : pickLang(language, { ru: 'Начать', en: 'Start', th: 'เริ่ม' })}
           </Button>
         </DialogFooter>
       </DialogContent>

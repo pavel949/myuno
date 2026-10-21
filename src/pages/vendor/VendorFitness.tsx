@@ -49,6 +49,7 @@ import {
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import { VendorLocationField } from '@/components/vendor/VendorLocationField';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const gymTypes = [
   { value: 'gym', label: 'Gym', labelRu: 'Тренажёрный зал' },
@@ -121,7 +122,7 @@ const VendorFitness = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

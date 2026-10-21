@@ -1,5 +1,6 @@
+import '@/styles/public-commerce.css';
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   MapPin, Star, BedDouble, Bath, Users, Maximize,
   Share2, Loader2, Home, Sofa, Building2, Shield,
@@ -7,7 +8,7 @@ import {
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { PropertyShareSheet } from '@/components/property/PropertyShareSheet';
-import { CompareButton, type CompareProperty } from '@/components/property/PropertyCompare';
+import { CompareButton, PropertyCompareTrigger, type CompareProperty } from '@/components/property/PropertyCompare';
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -17,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
+import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -50,11 +53,24 @@ import {
   PropertyHeroFacts,
 } from '@/components/property/detail';
 import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
-import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
+import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
 import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
+import {
+  mediaAlt,
+  mediaCaption,
+  usePropertyMedia,
+  type MediaLocale,
+} from '@/hooks/usePropertyListingQuality';
+import { PropertyAmenitiesSection } from '@/components/property/PropertyAmenitiesSection';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { PropertySleepingArrangements } from '@/components/property/PropertySleepingArrangements';
+import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatings';
+import { StayRulesSection } from '@/components/property/StayRulesSection';
+import { RoomCategoryOffers } from '@/components/property/RoomCategoryOffers';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -76,19 +92,25 @@ const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+  const multiUnitEnabled = useFeatureFlag('multi_unit_properties');
 
 
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [guestCount, setGuestCount] = useState(2);
+  const [editedDates, setEditedDates] = useState<{ id?: string; value?: DateRange }>();
+  const [editedGuests, setEditedGuests] = useState<{ id?: string; value: number }>();
 
-  const { availability } = usePropertyAvailabilityManagement(id);
+  const { data: mediaItems = [] } = usePropertyMedia(id);
+  const availabilityQuery = usePropertyUnavailableDates(id);
+  const availability = useMemo(() => (availabilityQuery.data ?? []).map(entry => ({
+    date: entry.date, status: entry.kind,
+  })), [availabilityQuery.data]);
   const unavailableDates = useMemo(
     () =>
       new Set(
@@ -104,6 +126,12 @@ export default function PropertyDetail() {
 
   const { data: property, isLoading } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
+  const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
+  const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
+  const dateRange = editedDates?.id === id ? editedDates.value : initialGuestContext.dateRange;
+  const guestCount = editedGuests?.id === id ? editedGuests.value : initialGuestContext.guests;
+  const setDateRange = (value: DateRange | undefined) => setEditedDates({ id, value });
+  const setGuestCount = (value: number) => setEditedGuests({ id, value });
 
   const includedServices = useMemo(() => {
     if (!rentalTerms?.included_services) return [];
@@ -137,11 +165,12 @@ export default function PropertyDetail() {
     );
   }
 
-  // Loose extension for property fields not yet in generated DB types
+  // Loose extension for property fields not yet in generated DB types.
+  // `rooms`, `beds` and the stay-rule fields now live on the Property model
+  // (see useProperties.ts) — keep only what is still untyped here.
   type GuestExtraFee = { name?: string; amount?: number; per?: string };
   type PropertyExt = {
     tenancy_modes?: string[] | null;
-    beds?: number | null;
     title_deed_type?: string | null;
     escrow_offered?: boolean | null;
     installment_plan?: { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
@@ -151,17 +180,28 @@ export default function PropertyDetail() {
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
 
-  const images = (property.images && property.images.length > 0)
+  // Structured gallery (property_media) wins over the legacy images array; the
+  // legacy array stays as a fallback for listings not migrated yet.
+  const mediaLocale: MediaLocale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
+  const legacyImages = (property.images && property.images.length > 0)
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
+  const photoMedia = mediaItems.filter((m) => m.kind === 'photo' || m.kind === 'image');
+  const galleryMedia = photoMedia.length > 0 ? photoMedia : [];
+  const images = galleryMedia.length > 0 ? galleryMedia.map((m) => m.url) : legacyImages;
+  const galleryFallbackAlt = ((isRu ? property.title_ru : property.title_en) || '') as string;
+  const imageCaptions = galleryMedia.map((m) => mediaCaption(m, mediaLocale));
+  const imageAlts = galleryMedia.map((m) => mediaAlt(m, mediaLocale, galleryFallbackAlt));
   const amenities = property.amenities || [];
+
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   // City-aware currency: prefer listing-level currency, else current city default, else USD.
   const listingCurrency =
     ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
-  const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
-  const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+  const isSaleListing = propertyDetailMode(property, searchParams.get('mode')) === 'buy';
+  const salePrice = propertySaleAskingPrice(property);
+  const salePriceLabel = salePrice != null ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request');
 
   // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
   // explicitly set, respect it; otherwise fall back to legacy nightly-price
@@ -196,6 +236,7 @@ export default function PropertyDetail() {
   };
 
   const handleDateSheetConfirm = () => {
+    if (!availabilityQuery.isSuccess || availabilityQuery.isError) return;
     setDateSheetOpen(false);
     if (dateRange?.from && dateRange?.to) {
       const params = new URLSearchParams({
@@ -204,6 +245,16 @@ export default function PropertyDetail() {
         guests: guestCount.toString(),
       });
       navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
+    }
+  };
+
+  const handleViewPricing = () => {
+    const panel = document.getElementById('property-pricing');
+    if (panel && panel.getClientRects().length > 0) {
+      panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      panel.focus({ preventScroll: true });
+    } else {
+      setDateSheetOpen(true);
     }
   };
 
@@ -227,41 +278,94 @@ export default function PropertyDetail() {
           address: property.district || undefined,
         })}
       />
-      <div className="pb-28">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-0 py-3 bg-background/95 border-b border-border/30">
+      <div className="public-commerce public-commerce--property pb-28">
+        {/* Property identity and secondary actions */}
+        <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
           <BackButton fallbackPath="/property" variant="default" size="md" />
-          <div className="flex items-center gap-1">
+          {/* Title */}
+          <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
+            <h1 className="public-commerce-title text-foreground break-words">
+              {propertyTitle}
+            </h1>
+            {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
+            <PropertyHeroFacts
+              bedrooms={property.bedrooms}
+              beds={propertyExt.beds ?? null}
+              bathrooms={property.bathrooms}
+              maxGuests={property.max_guests || rentalTerms?.max_guests}
+            />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
+              {property.rating != null && property.rating > 0 && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-primary fill-primary" />
+                    <span className="font-semibold">{property.rating}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    · {property.review_count || 0} {isRu ? 'отзывов' : 'reviews'}
+                  </span>
+                </>
+              )}
+              <GuestFavoriteBadge
+                rating={property.rating}
+                reviewsCount={property.review_count}
+                variant="inline"
+              />
+              {property.is_verified && (
+                <span className="flex items-center gap-1 text-primary">
+                  · <Shield className="w-3.5 h-3.5" />
+                  <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
+                </span>
+              )}
+              <span className="text-muted-foreground">
+                · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 ml-auto">
             <PropertyShareSheet
               title={isRu ? (property.title_ru || property.title_en) : property.title_en}
               image={images[0]}
               district={property.district}
             >
-              <Button variant="ghost" size="sm" className="gap-2 text-sm">
+              <Button variant="ghost" size="sm" className="gap-2 text-sm" aria-label={isRu ? 'Поделиться' : 'Share'}>
                 <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">{isRu ? 'Поделиться' : 'Share'}</span>
               </Button>
             </PropertyShareSheet>
-            <CompareButton
-              property={{
-                id: id || '',
-                title_en: property.title_en,
-                title_ru: property.title_ru,
-                cover_image: property.cover_image,
-                property_type: property.property_type,
-                district: property.district,
-                bedrooms: property.bedrooms,
-                bathrooms: property.bathrooms,
-                area_sqm: property.area_sqm,
-                max_guests: property.max_guests || rentalTerms?.max_guests,
-                price: property.price,
-                price_per_night: rentalTerms?.price_per_night || property.price,
-                price_period: property.price_period,
-                rating: property.rating,
-                amenities: property.amenities,
-              } as CompareProperty}
-            />
-            <PropertyPdfButton property={{ ...property, price_per_night: rentalTerms?.price_per_night }} />
+            <details className="relative">
+              <summary className="cursor-pointer list-none px-3 py-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{isRu ? 'Ещё' : 'More'}</summary>
+              <div className="absolute right-0 top-full z-30 flex flex-col items-start gap-1 border border-border bg-background p-2 shadow-md min-w-40">
+                <CompareButton className="[&>span]:inline min-h-11"
+                  property={{
+                    id: id || '',
+                    title_en: property.title_en,
+                    title_ru: property.title_ru,
+                    cover_image: property.cover_image,
+                    property_type: property.property_type,
+                    district: property.district,
+                    bedrooms: property.bedrooms,
+                    bathrooms: property.bathrooms,
+                    area_sqm: property.area_sqm,
+                    max_guests: property.max_guests || rentalTerms?.max_guests,
+                    mode: isSaleListing ? 'buy' : 'rent',
+                    guestSearch: propertyDetailHref(id || '', isSaleListing ? 'buy' : 'rent', searchParams.toString()).split('?')[1],
+                    listing_type: property.listing_type,
+                    sale_price: property.sale_price,
+                    currency: property.currency,
+                    sale_currency: (property as typeof property & { sale_currency?: string | null }).sale_currency,
+                    price: property.price,
+                    price_per_night: rentalTerms?.price_per_night || property.price_per_night,
+                    price_period: property.price_period,
+                    rating: property.rating,
+                    amenities: property.amenities,
+                  } as CompareProperty}
+                />
+                <PropertyPdfButton className="[&>span]:inline min-h-11" property={{ ...property, price_per_night: rentalTerms?.price_per_night }} />
+                <PropertyCompareTrigger />
+              </div>
+            </details>
             <FavoriteButton
               itemType="property"
               itemId={id || 'prop-1'}
@@ -280,7 +384,7 @@ export default function PropertyDetail() {
         {/* Image Gallery */}
         <PropertyDetailGallery
           images={images}
-          alt={(isRu ? property.title_ru : property.title_en) || ''}
+          alt={galleryFallbackAlt}
           onOpenLightbox={openLightbox}
         />
 
@@ -288,53 +392,13 @@ export default function PropertyDetail() {
         <div className="px-4 md:px-0 py-6 lg:py-10">
           <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
             <article className="space-y-6 min-w-0">
-              {/* Title */}
-              <div>
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
-                  {isRu ? property.title_ru : property.title_en}
-                </h1>
-                {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
-                <PropertyHeroFacts
-                  bedrooms={property.bedrooms}
-                  beds={propertyExt.beds ?? null}
-                  bathrooms={property.bathrooms}
-                  maxGuests={property.max_guests || rentalTerms?.max_guests}
-                />
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
-                  {property.rating && (
-                    <>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-primary fill-primary" />
-                        <span className="font-semibold">{property.rating}</span>
-                      </div>
-                      <span className="text-muted-foreground">
-                        · {property.review_count || 0} {isRu ? 'отзывов' : 'reviews'}
-                      </span>
-                    </>
-                  )}
-                  <GuestFavoriteBadge
-                    rating={property.rating}
-                    reviewsCount={property.review_count}
-                    variant="inline"
-                  />
-                  {property.is_verified && (
-                    <span className="flex items-center gap-1 text-primary">
-                      · <Shield className="w-3.5 h-3.5" />
-                      <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
-                    </span>
-                  )}
-                  <span className="text-muted-foreground">
-                    · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
-                  </span>
-                </div>
-              </div>
 
               {isSaleListing && (
                 <>
                   <Separator />
                   <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
                     <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
-                    <p className="text-2xl font-bold tracking-tight">{formatPrice(salePrice)}</p>
+                    <p className="text-2xl font-bold tracking-tight">{salePriceLabel}</p>
                     {ownershipLabel && (
                       <p className="text-sm text-muted-foreground">{ownershipLabel}</p>
                     )}
@@ -372,6 +436,11 @@ export default function PropertyDetail() {
               })()}
 
               <Separator />
+
+              {multiUnitEnabled && !isSaleListing && id && (
+                <RoomCategoryOffers propertyId={id} dateRange={dateRange} guests={guestCount}
+                  onDateRangeChange={setDateRange} onGuestsChange={setGuestCount} />
+              )}
 
               <PropertyDetailHighlights
                 propertyType={property.property_type}
@@ -420,10 +489,36 @@ export default function PropertyDetail() {
                 />
               </div>
 
+              {/* Structured amenities (catalogue-backed, grouped by category) */}
+              <Separator />
+              <PropertyAmenitiesSection
+                propertyId={id}
+                fallbackAmenities={amenities as string[]}
+              />
+
+              {/* Sleeping arrangements from structured rooms data.
+                  Both blocks self-hide when data is missing; the boundary keeps a
+                  malformed jsonb payload from taking the whole page down. */}
+              <ErrorBoundary fallback={null}>
+                <PropertySleepingArrangements rooms={propertyExt?.rooms ?? null} />
+              </ErrorBoundary>
+
+              {/* Booking-window rules */}
+              <ErrorBoundary fallback={null}>
+                <StayRulesSection
+                  minStayNights={rentalTerms?.min_stay_nights ?? propertyExt?.min_stay_nights ?? null}
+                  maxStayNights={rentalTerms?.max_stay_nights ?? propertyExt?.max_stay_nights ?? null}
+                  advanceNoticeHours={rentalTerms?.advance_notice_hours ?? propertyExt?.advance_notice_hours ?? null}
+                  preparationDays={rentalTerms?.preparation_days ?? propertyExt?.preparation_days ?? null}
+                  bookingWindowMonths={rentalTerms?.booking_window_months ?? propertyExt?.booking_window_months ?? null}
+                />
+              </ErrorBoundary>
+
+
               {property.project && (
                 <>
                   <Separator />
-                  <ProjectInfoCard project={property.project} />
+                  <ProjectInfoCard project={property.project} mode={isSaleListing ? 'buy' : 'rent'} />
                 </>
               )}
 
@@ -529,6 +624,7 @@ export default function PropertyDetail() {
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
+                    onViewPricing={!isSaleListing && !isLongStayOnly ? handleViewPricing : undefined}
                   />
                   <GuestAssuranceCard compact className="lg:hidden mt-2" />
                 </>
@@ -555,7 +651,7 @@ export default function PropertyDetail() {
                       end: rentalTerms.quiet_hours_end,
                     }}
                     children={{
-                      friendly: rentalTerms.children_friendly || false,
+                      friendly: rentalTerms.children_friendly,
                       hasCrib: rentalTerms.has_crib,
                       hasHighChair: rentalTerms.has_high_chair,
                     }}
@@ -570,6 +666,7 @@ export default function PropertyDetail() {
               )}
 
               <Separator />
+              <PropertyReviewRatings propertyId={id} />
               <ReviewsSection
                 itemType="property"
                 itemId={id || ''}
@@ -600,6 +697,8 @@ export default function PropertyDetail() {
 
             {/* Sidebar — sticky on desktop */}
             <aside
+              id="property-pricing"
+              tabIndex={-1}
               className={cn(
                 'hidden lg:flex lg:flex-col gap-4 w-full',
                 'lg:sticky lg:top-[4.75rem] xl:top-[5.25rem] lg:self-start lg:z-10',
@@ -612,7 +711,7 @@ export default function PropertyDetail() {
                     {isSaleListing ? (
                       <>
                         <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
-                        <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
+                        <p className="text-2xl font-bold">{salePriceLabel}</p>
                       </>
                     ) : (
                       <>
@@ -667,6 +766,8 @@ export default function PropertyDetail() {
               ) : (
                 <div className="flex flex-col gap-3 w-full min-w-0">
                   <PropertyBookingCard
+                    key={id}
+                    initialGuestContext={initialGuestContext}
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight}
                     rentalTerms={rentalTerms}
@@ -718,7 +819,8 @@ export default function PropertyDetail() {
         <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
-          salePrice={salePrice}
+          isLongStayOnly={isLongStayOnly}
+          salePrice={salePrice ?? 0}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}
           titleEn={property.title_en}
@@ -740,7 +842,10 @@ export default function PropertyDetail() {
           onGuestCountChange={setGuestCount}
           maxGuests={rentalTerms?.max_guests || 10}
           minStayNights={rentalTerms?.min_stay_nights}
-          availability={availability as any}
+          availability={availability}
+          availabilityReady={availabilityQuery.isSuccess && !availabilityQuery.isError}
+          availabilityError={availabilityQuery.isError}
+          onRetryAvailability={() => { void availabilityQuery.refetch(); }}
           unavailableDates={unavailableDates}
           onConfirm={handleDateSheetConfirm}
         />
@@ -754,6 +859,8 @@ export default function PropertyDetail() {
       {/* Photo Lightbox */}
       <PhotoLightbox
         images={images}
+        captions={imageCaptions.length > 0 ? imageCaptions : undefined}
+        alts={imageAlts.length > 0 ? imageAlts : undefined}
         initialIndex={lightboxIndex}
         open={showAllPhotos}
         onClose={() => setShowAllPhotos(false)}

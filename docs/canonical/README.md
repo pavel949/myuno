@@ -1,12 +1,21 @@
 # myUNO · Canonical Documents
 
-> **Версия канона:** v1.20.0 (2026-04-23) — **M10 · Full canonical conformance audit**: автоматизированный sweep всей кодовой базы против 10 канонов + ARCHITECTURE_V2 §13. Результат **7/11 green · 3/11 yellow · 1/11 red**. 2 critical findings блокируют закрытие финального gate M9: **CV-1** (нет таблиц `clearview_*`) и **SEG-1** (нет канонических колонок `roles_stack`/`primary_role`/`lifecycle_phase` в `profiles`). 17 warnings → backlog M11.1–M11.11. Сильные стороны: validate-semantic 0/0, RLS 392/392 (100%), wallet zero-update RLS, 4-layer i18n guard, AuditMarker на money-screens. См. полный отчёт: [`audits/M10-full-canon-conformance-2026-04-23.md`](./audits/M10-full-canon-conformance-2026-04-23.md). Bump app → 3.52.0.
-> **Предыдущее:** v1.19.2 — M9.7c Fuzzy near-match guard для uiStrings (Damerau-Levenshtein ≤1 + variants + whitelist). v1.19.0 — M9.7 ESLint canonical guard.
+> **Authority model updated 2026-10-17.**
 >
-> **Источник правды.** Эти документы определяют все продуктовые, контентные и инженерные решения. При расхождении кода/UI с документами правится **код**, а не документ.
+> Root [PROJECT.md](../../PROJECT.md) is the repository product/engineering constitution. [AGENTS.md](../../AGENTS.md) is the concise execution supplement. Documents in this directory are specialized durable contracts and must not contradict PROJECT.md.
 >
-> **Перед каноном:** [`/PROJECT.md`](../../PROJECT.md) — стратегия (цель, монетизация, моаты, KPI).
-> **Перед изменением архитектуры:** [`architecture/OVERVIEW.md`](./architecture/OVERVIEW.md) — карта зависимостей и decision tree.
+> Older milestone/version prose below is retained as historical canonical-index context; it is not evidence that an old audit state is still current. Current implementation state must be verified from source and current convergence evidence.
+
+## Start here
+
+| Need | Read |
+|---|---|
+| Product identity, sources of truth, P0, governance | [PROJECT.md](../../PROJECT.md) |
+| AI/engineering hard rules | [AGENTS.md](../../AGENTS.md) |
+| One Operational Reality / convergence | [MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md](./MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md) |
+| Operating Spaces | [OPERATING_SPACES_DESIGN.md](./OPERATING_SPACES_DESIGN.md) |
+| Documentation authority model | [docs/README.md](../README.md) |
+
 
 ---
 
@@ -61,6 +70,7 @@
 |---|---|
 | [phuket-proptech-market](./research/phuket-proptech-market.md) | Рынок proptech на Пхукете: $1.25B, 30k STR-листингов, конкуренты |
 | [myuno-taxonomy-canonical](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
+| [no-budget-growth-playbook](./research/no-budget-growth-playbook.md) | Операционный плейбук органического роста: карта built-активов, barbell-таргетинг 4 аудиторий, no-budget каналы, 90-дневный спринт + путь к Y1 |
 
 ## ✅ Audits / вехи (`audits/`)
 

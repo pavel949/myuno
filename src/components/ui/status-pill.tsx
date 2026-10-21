@@ -33,20 +33,29 @@ interface StatusPillProps extends React.HTMLAttributes<HTMLSpanElement>, Variant
 }
 
 export const StatusPill = React.forwardRef<HTMLSpanElement, StatusPillProps>(
-  ({ status, dot = true, className, children, ...props }, ref) => (
-    <span ref={ref} className={cn(statusPillVariants({ status }), className)} {...props}>
+  ({ status, dot = true, className, children, 'aria-label': ariaLabel, ...props }, ref) => (
+    <span
+      ref={ref}
+      role="img"
+      aria-label={ariaLabel ?? String(children ?? status ?? '')}
+      className={cn(statusPillVariants({ status }), className)}
+      {...props}
+    >
       {dot && (
-        <span className={cn(
-          'w-1.5 h-1.5 rounded-full',
-          status === 'active' && 'bg-success',
-          status === 'warning' && 'bg-warning',
-          status === 'danger' && 'bg-destructive',
-          status === 'info' && 'bg-info',
-          status === 'pending' && 'bg-accent-amber',
-          status === 'inactive' && 'bg-muted-foreground',
-          status === 'premium' && 'bg-primary',
-          (!status || status === 'default') && 'bg-muted-foreground',
-        )} />
+        <span
+          aria-hidden="true"
+          className={cn(
+            'w-1.5 h-1.5 rounded-full',
+            status === 'active' && 'bg-success',
+            status === 'warning' && 'bg-warning',
+            status === 'danger' && 'bg-destructive',
+            status === 'info' && 'bg-info',
+            status === 'pending' && 'bg-accent-amber',
+            status === 'inactive' && 'bg-muted-foreground',
+            status === 'premium' && 'bg-primary',
+            (!status || status === 'default') && 'bg-muted-foreground',
+          )}
+        />
       )}
       {children}
     </span>

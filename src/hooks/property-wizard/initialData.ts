@@ -1,3 +1,4 @@
+import { MANAGED_PROPERTY_DRAFT_FIELDS } from '@/lib/managedPropertyDraftFields';
 import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import type { AssetClass, OwnershipData, PropertyFormData } from './types';
 
@@ -75,6 +76,7 @@ export const initialFormData: PropertyFormData = {
 
 export const initialOwnershipData: OwnershipData = {
   ownership_type: 'own',
+  owner_contact_id: null,
   actual_owner_email: '',
   actual_owner_name: '',
   actual_owner_phone: '',
@@ -88,6 +90,9 @@ export const initialOwnershipData: OwnershipData = {
 
 export function mapPropertyToFormData(property: any): PropertyFormData {
   return {
+    // Keep existing catalogue fields that newer form sections edit (media,
+    // guest fees, hotel details). Explicit normalization below still wins.
+    ...Object.fromEntries(MANAGED_PROPERTY_DRAFT_FIELDS.filter(key => property[key] !== undefined).map(key => [key, property[key]])),
     asset_class: (property.asset_class as AssetClass) || 'residential',
     title: property.title_en || property.title || '',
     title_ru: property.title_ru || '',

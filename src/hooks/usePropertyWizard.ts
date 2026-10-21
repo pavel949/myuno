@@ -1,11 +1,14 @@
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useTeamPermissions } from '@/hooks/useTeamPermissions';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { readPropertyCreationScope } from '@/lib/propertyAuthoring';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import {
-  useCreateOwnerProperty,
   useOwnerProperty,
   useUpdateOwnerProperty,
 } from '@/hooks/usePropertyCare';
@@ -43,13 +46,32 @@ const errorLog = createErrorHandler('usePropertyWizard');
 export function usePropertyWizard() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { activeCompany, isLoading: companyLoading, error: companyError, refetch: retryCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id || null;
+  const { canAccess, isLoading: permissionsLoading } = useTeamPermissions();
+  const authoringCapabilities = useMemo(() => ({ pricing: !companyId || (!permissionsLoading && canAccess('pricing', 'edit')), bookings: !companyId || (!permissionsLoading && canAccess('bookings', 'edit')) }), [companyId, permissionsLoading, canAccess]);
+  const submitLock = useRef(false);
+  const actorScope = `${user?.id || ''}:${companyId || ''}`;
+  const actorScopeRef = useRef(actorScope);
+  actorScopeRef.current = actorScope;
+  useEffect(() => { submitLock.current = false; }, [actorScope]);
+  const [operatingSpaceId, setOperatingSpaceId] = useState<string | null>(null);
+  useEffect(() => setOperatingSpaceId(null), [companyId]);
+  const resumeDraftId = searchParams.get('draft');
+  const onDraftCreated = useCallback((id: string) => {
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('draft', id); next.delete('cloneFrom'); return next; }, { replace: true });
+  }, [setSearchParams]);
+  const creationScope = useQuery({
+    queryKey: ['property-creation-scope', user?.id, companyId],
+    enabled: !!user && !!companyId,
+    queryFn: ({ signal }) => readPropertyCreationScope(companyId!, signal),
+  });
   const isRu = language === 'ru';
 
   const cloneFromId = searchParams.get('cloneFrom');
-  const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined);
+  const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined, { authoring: true });
 
-  const createProperty = useCreateOwnerProperty();
   const updateProperty = useUpdateOwnerProperty();
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
@@ -61,16 +83,18 @@ export function usePropertyWizard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdPropertyId, setCreatedPropertyId] = useState<string>();
   const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
+  const [createdApprovalStatus, setCreatedApprovalStatus] = useState<'draft' | 'pending'>('draft');
 
   // Draft persistence — load/save/auto-save/beforeunload
   const draft = usePropertyWizardDraft({
-    userId: user?.id,
+    userId: !companyLoading && !companyError ? user?.id : undefined,
     cloneFromId,
     formData,
     setFormData,
     ownershipData,
     activeOrgId,
-    isRu,
+    isRu, language,
+    companyId, operatingSpaceId, resumeDraftId, onDraftCreated, capabilities: authoringCapabilities,
   });
 
   const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
@@ -114,8 +138,9 @@ export function usePropertyWizard() {
   }, [isRu]);
 
   const validateStep = useCallback((stepId: string): boolean => {
-    return validateWizardStep({ stepId, formData, ownershipData, isRu });
-  }, [formData, ownershipData, isRu]);
+    if (companyId && stepId === 'pricing' && (!authoringCapabilities.pricing || !authoringCapabilities.bookings)) return true;
+    return validateWizardStep({ stepId, formData, ownershipData: companyId ? initialOwnershipData : ownershipData, isRu });
+  }, [companyId, authoringCapabilities, formData, ownershipData, isRu]);
 
   const buildPropertyPayload = useCallback(
     (approvalStatus: 'draft' | 'pending') =>
@@ -125,17 +150,26 @@ export function usePropertyWizard() {
 
   // Submit property
   const handleSubmit = useCallback(async () => {
+    if (submitLock.current) return;
+    submitLock.current = true;
+    const submissionScope = actorScope;
     try {
-      const isOnBehalf = ownershipData.ownership_type !== 'own';
+      const isOnBehalf = !companyId && ownershipData.ownership_type !== 'own';
       const approvalStatus = formData.platform_listed ? 'pending' : 'draft';
       const submitPayload = buildPropertyPayload(approvalStatus);
 
-      const property = draft.draftPropertyId
-        ? await updateProperty.mutateAsync({ id: draft.draftPropertyId, ...submitPayload } as any)
-        : await createProperty.mutateAsync(submitPayload as any);
+      // Share the in-flight draft save so blur/autosave/Submit cannot create
+      // parallel property shells. Review is a separate checked transition.
+      const savedDraft = await draft.persistDraft(true);
+      if (!savedDraft || actorScopeRef.current !== submissionScope) return;
+      const property = approvalStatus === 'pending'
+        ? await updateProperty.mutateAsync({ id: savedDraft.id, ...(companyId ? {} : submitPayload), is_active: false, _authoring: true, _expectedUpdatedAt: savedDraft.updated_at, _submitForReview: true } as never)
+        : savedDraft;
+
+      if (actorScopeRef.current !== submissionScope) return;
 
       // Save documents
-      if (property?.id) {
+      if (property?.id && !companyId) {
         const userId = (await supabase.auth.getUser()).data.user?.id;
 
         if (ownershipData.management_document_url) {
@@ -165,33 +199,56 @@ export function usePropertyWizard() {
         }
       }
 
-      // Auto-create CRM owner contact when managing on behalf
+      // Link property to a CRM owner contact when managing on behalf.
+      // Priority: (1) reuse the contact the wizard was launched from, (2) reuse an
+      // existing contact with the same email, (3) create a new one. This prevents
+      // duplicate owner contacts when adding a property from an owner's card.
       if (isOnBehalf && property?.id && ownershipData.actual_owner_name.trim()) {
         try {
           const userId = (await supabase.auth.getUser()).data.user?.id;
-          const nameParts = ownershipData.actual_owner_name.trim().split(/\s+/);
-          const firstName = nameParts[0] || '';
-          const lastName = nameParts.slice(1).join(' ') || '';
+          let ownerContactId: string | null = ownershipData.owner_contact_id || null;
 
-          const { data: newContact } = await typedFrom('crm_contacts').insert({
-            company_id: activeOrgId,
-            contact_type: 'owner',
-            first_name: firstName,
-            last_name: lastName,
-            email: ownershipData.actual_owner_email || null,
-            phone: ownershipData.actual_owner_phone || null,
-            source: 'property_wizard',
-            lifecycle_stage: 'customer',
-            created_by: userId,
-          }).select('id').single();
+          if (!ownerContactId && activeOrgId && ownershipData.actual_owner_email.trim()) {
+            const { data: existing } = await typedFrom('crm_contacts')
+              .select('id')
+              .eq('company_id', activeOrgId)
+              .eq('email', ownershipData.actual_owner_email.trim())
+              .limit(1)
+              .maybeSingle();
+            if (existing?.id) ownerContactId = existing.id;
+          }
 
-          if (newContact?.id) {
+          if (!ownerContactId) {
+            const nameParts = ownershipData.actual_owner_name.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            const { data: newContact } = await typedFrom('crm_contacts').insert({
+              company_id: activeOrgId,
+              contact_type: 'owner',
+              first_name: firstName,
+              last_name: lastName,
+              email: ownershipData.actual_owner_email || null,
+              phone: ownershipData.actual_owner_phone || null,
+              source: 'property_wizard',
+              lifecycle_stage: 'customer',
+              created_by: userId,
+            }).select('id').single();
+            ownerContactId = newContact?.id ?? null;
+          }
+
+          if (ownerContactId) {
             await typedFrom('properties').update({
-              owner_contact_id: newContact.id,
+              owner_contact_id: ownerContactId,
             }).eq('id', property.id);
           }
         } catch (error: unknown) {
-          errorLog.silent(error, 'auto_create_owner_contact');
+          // Surface this — an unlinked property silently drops out of owner
+          // accounts, CRM and statement reporting (see MC UX audit).
+          errorLog.error(error, 'link_owner_contact');
+          toast.error(isRu
+            ? 'Объект создан, но не удалось связать его с собственником в CRM. Свяжите вручную на карточке объекта.'
+            : 'Property created, but linking it to the owner in CRM failed. Link it manually on the property card.');
         }
       }
 
@@ -210,18 +267,21 @@ export function usePropertyWizard() {
         }
       }
 
+      if (actorScopeRef.current !== submissionScope) return;
       draft.clearDraft();
       draft.resetDraftSnapshot();
 
+      setCreatedApprovalStatus(approvalStatus);
       setCreatedPropertyId(property?.id);
       setCreatedPropertyTitle(formData.title || formData.title_ru);
       setShowSuccess(true);
     } catch (error: unknown) {
+      if (actorScopeRef.current !== submissionScope) return;
       errorLog.error(error, 'submit_property');
       const msg = error instanceof Error ? error.message : String(error);
       toast.error(isRu ? `Ошибка сохранения: ${msg}` : `Error saving: ${msg}`);
-    }
-  }, [activeOrgId, buildPropertyPayload, createProperty, draft, formData, isRu, ownershipData, sendInvite, updateProperty]);
+    } finally { if (actorScopeRef.current === submissionScope) submitLock.current = false; }
+  }, [actorScope, activeOrgId, companyId, buildPropertyPayload, draft, formData, isRu, ownershipData, sendInvite, updateProperty]);
 
   // Preview data for live preview
   const previewData = useMemo(() => ({
@@ -260,6 +320,7 @@ export function usePropertyWizard() {
   }, [draft]);
 
   const resetForm = useCallback(() => {
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('draft'); return next; }, { replace: true });
     setFormData(initialFormData);
     setOwnershipData(initialOwnershipData);
     setSelectedProject(null);
@@ -268,7 +329,7 @@ export function usePropertyWizard() {
     setCreatedPropertyId(undefined);
     setCreatedPropertyTitle(undefined);
     draft.clearDraft();
-  }, [draft]);
+  }, [draft, setSearchParams]);
 
   return {
     formData,
@@ -278,12 +339,21 @@ export function usePropertyWizard() {
     showSuccess,
     createdPropertyId,
     createdPropertyTitle,
+    createdApprovalStatus,
+    creationScope,
+    companyLoading, companyError, retryCompany,
+    managedCreation: !!companyId,
+    authoringCapabilities,
+    operatingSpaces: creationScope.data?.spaces || [],
+    operatingSpaceId,
+    setOperatingSpaceId,
+    draftLoadError: draft.draftLoadError,
     isLoadingSource,
     isLoadingDraft: draft.isLoadingDraft,
     cloneFromId,
     sourceProperty,
     previewData,
-    isSubmitting: createProperty.isPending,
+    isSubmitting: updateProperty.isPending || draft.isSavingDraft,
     isSavingDraft: draft.isSavingDraft,
     saveState: draft.saveState,
     hasUnsavedChanges: draft.hasUnsavedChanges,

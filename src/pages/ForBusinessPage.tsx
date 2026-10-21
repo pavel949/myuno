@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,8 +21,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { LandingChrome } from '@/components/landings';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CONTENT_ANCHOR, MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
+import { cn } from '@/lib/utils';
 import {
   Building2, Languages, Globe, CalendarCheck, ShieldCheck, Megaphone,
   Banknote, Users, Sparkles, ArrowRight, Send,
@@ -223,9 +224,9 @@ const BUSINESS_TYPES: Array<{ value: string; label: Tri }> = [
 // ── UI string bundles (RU / EN / TH) ───────────────────────────────────────
 const UI = {
   metaTitle: {
-    ru: 'myUNO для бизнеса Пхукета — Foreign-Ready услуги | myUNO',
-    en: 'myUNO for Phuket Business — Foreign-Ready services | myUNO',
-    th: 'myUNO สำหรับธุรกิจภูเก็ต — บริการ Foreign-Ready | myUNO',
+    ru: 'Бизнес в Таиланде: регистрация, налоги и сопровождение | myUNO',
+    en: 'Business in Thailand: company formation, tax and support | myUNO',
+    th: 'ธุรกิจในประเทศไทย: จดทะเบียน ภาษี และการดูแล | myUNO',
   },
   metaDesc: {
     ru: 'Подготовим ваш ресторан, салон, клинику или венье к работе с иностранцами: меню, сайт, бронирование, маркетинг, капитал, реструктуризация, визы и дистрибуция через myUNO.',
@@ -238,14 +239,14 @@ const UI = {
     th: 'สำหรับธุรกิจท้องถิ่นภูเก็ต',
   },
   heroTitle: {
-    ru: 'Готовим ваш бизнес к иностранному клиенту',
-    en: 'Get your business foreign-ready',
-    th: 'เตรียมธุรกิจของคุณให้พร้อมรับลูกค้าต่างชาติ',
+    ru: 'Открыть и вести бизнес в Таиланде',
+    en: 'Start and run a business in Thailand',
+    th: 'เริ่มต้นและดำเนินธุรกิจในประเทศไทย',
   },
   heroDesc: {
-    ru: 'Меню, сайты, бронирование, маркетинг, капитал, визы и дистрибуция — один партнёр на весь цикл.',
-    en: 'Menus, websites, bookings, marketing, capital, visas and distribution — one partner end-to-end.',
-    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย — พาร์ทเนอร์เดียวครบวงจร',
+    ru: 'Регистрация компании, налоги, бухгалтерия и развитие бизнеса. Выберите задачу и подходящий маршрут обращения.',
+    en: 'Company formation, tax, accounting and business growth. Choose your task and the relevant consultation route.',
+    th: 'จดทะเบียนบริษัท ภาษี บัญชี และการเติบโตของธุรกิจ เลือกงานและช่องทางปรึกษาที่เหมาะสม',
   },
   ctaInquiry: { ru: 'Оставить заявку', en: 'Send inquiry', th: 'ส่งคำขอ' },
   ctaPartner: {
@@ -375,7 +376,7 @@ export default function ForBusinessPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout usePageContainer={false}>
       <Helmet>
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
@@ -390,11 +391,11 @@ export default function ForBusinessPage() {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <LandingChrome isRu={isRu} />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+        <section className="relative overflow-hidden py-10 md:py-16">
+
+          <div className={PUBLIC_CONTENT_LAYOUT.business}>
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -405,34 +406,51 @@ export default function ForBusinessPage() {
                 <Building2 className="w-3.5 h-3.5" />
                 {t(UI.heroBadge)}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-4">
                 {t(UI.heroTitle)}
               </h1>
               <p className="text-muted-foreground text-base md:text-lg mb-8">
                 {t(UI.heroDesc)}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={scrollToForm}>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+                <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={scrollToForm}>
                   {t(UI.ctaInquiry)}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
                   {t(UI.ctaPartner)}
                 </Button>
               </div>
             </motion.div>
           </div>
+          </div>
+        </section>
+
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`} aria-labelledby="business-start-title">
+          <h2 id="business-start-title" className="text-2xl font-display mb-6">{t({ru:'С чего начнём?',en:'What do you need?',th:'คุณต้องการความช่วยเหลือเรื่องใด?'})}</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              {href:'/legal/company',title:{ru:'Регистрация компании',en:'Company formation',th:'จดทะเบียนบริษัท'},description:{ru:'Структура владения, документы и порядок регистрации.',en:'Ownership structure, documents and registration process.',th:'โครงสร้างผู้ถือหุ้น เอกสาร และขั้นตอนจดทะเบียน'}},
+              {href:'/legal/tax',title:{ru:'Налоговое сопровождение',en:'Tax support',th:'การดูแลด้านภาษี'},description:{ru:'Налоговая ситуация и отчётность; уточните задачи по бухгалтерскому сопровождению.',en:'Tax situation and reporting; discuss your accounting support requirements.',th:'สถานะภาษี การรายงาน และการดูแลต่อเนื่อง'}},
+              {href:'/legal',title:{ru:'Юридическое сопровождение',en:'Legal support',th:'บริการด้านกฎหมาย'},description:{ru:'Выберите специалиста и обсудите вашу задачу.',en:'Choose a specialist and discuss your requirements.',th:'เลือกผู้เชี่ยวชาญและปรึกษาความต้องการของคุณ'}},
+            ].map(item=><Link key={item.href} to={item.href} className="group min-w-0 border border-border bg-card p-6 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <h3 className="text-lg leading-snug mb-2">{t(item.title)}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t(item.description)}</p>
+              <ArrowRight aria-hidden className="mt-4 h-5 w-5" />
+            </Link>)}
+          </div>
+          <p className="mt-5 text-sm text-muted-foreground">{t({ru:'Заявки на этой странице относятся к коммерческим услугам myUNO. Они не являются официальным обращением по защите прав предпринимателей.',en:'Requests on this page concern myUNO commercial services. They are not formal submissions to a business rights representative.',th:'คำขอในหน้านี้เกี่ยวกับบริการเชิงพาณิชย์ของ myUNO ไม่ใช่คำร้องอย่างเป็นทางการด้านการคุ้มครองสิทธิผู้ประกอบการ'})}</p>
         </section>
 
         {/* Services menu */}
-        <section className="max-w-6xl mx-auto px-4 pb-12">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`}>
           <h2 className="text-2xl md:text-3xl font-display font-semibold mb-2 text-center">
             {t(UI.servicesTitle)}
           </h2>
           <p className="text-center text-muted-foreground mb-8 text-sm">
             {t(UI.servicesHint)}
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 min-[1440px]:grid-cols-4 gap-5">
             {SERVICES.map((s, i) => {
               const isOn = selected.has(s.key);
               const title = t(s.title);
@@ -452,7 +470,7 @@ export default function ForBusinessPage() {
                     <CardContent className="pt-5 pb-5 flex flex-col gap-3">
                       <div className="flex items-start justify-between gap-2">
                         <s.icon className="w-8 h-8 text-primary" />
-                        <Checkbox checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
+                        <Checkbox className="min-h-4" checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
                       </div>
                       <div>
                         <h3 className="font-display font-semibold text-base mb-1">
@@ -479,7 +497,7 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Inquiry form */}
-        <section id="b2b-inquiry-form" className="max-w-2xl mx-auto px-4 pb-20 pt-4">
+        <section id="b2b-inquiry-form" className={cn(PUBLIC_CONTENT_LAYOUT.marketing, 'max-w-2xl pb-20 pt-4', PUBLIC_CONTENT_ANCHOR)}>
           <Card className="border-border/80">
             <CardContent className="pt-6">
               <h2 className="text-xl md:text-2xl font-display font-semibold mb-1">
@@ -555,7 +573,7 @@ export default function ForBusinessPage() {
                     placeholder={t(UI.notePh)}
                   />
                 </div>
-                <Button type="submit" size="lg" className="w-full gap-2" disabled={submitting}>
+                <Button type="submit" size="lg" className={cn('w-full', MARKETING_ACTION_BUTTON)} disabled={submitting}>
                   <Send className="w-4 h-4" />
                   {submitting ? t(UI.sending) : t(UI.send)}
                 </Button>

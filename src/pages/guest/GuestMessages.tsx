@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { cn } from '@/lib/utils';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function GuestMessages() {
   const { language } = useLanguage();
@@ -38,7 +39,7 @@ export default function GuestMessages() {
                 : 'Log in to chat with property owners'}
             </p>
           </div>
-          <Button onClick={() => navigate('/auth')} className="gap-2">
+          <Button onClick={() => redirectToAuth(navigate)} className="gap-2">
             <LogIn className="w-4 h-4" />
             {isRu ? 'Войти' : 'Log in'}
           </Button>

@@ -5,6 +5,7 @@
 import { createClient } from '../_shared/supabase.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -159,7 +160,13 @@ Deno.serve(async (req) => {
     for (const calendar of calendars || []) {
       try {
         console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
-        
+
+        // SSRF guard: ical_url is user-supplied DB data.
+        const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+        if (!ssrf.allowed) {
+          throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+        }
+
         // Fetch iCal content
         const response = await fetch(calendar.ical_url, {
           headers: {

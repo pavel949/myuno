@@ -50,6 +50,7 @@ import {
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const salonTypes = [
   { value: 'beauty_salon', label: 'Beauty Salon', labelRu: 'Салон красоты' },
@@ -118,7 +119,7 @@ const VendorBeauty = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

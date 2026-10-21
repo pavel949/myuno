@@ -23,14 +23,11 @@
 //   - /admin/transfer-operators page → «Send test notification» button.
 
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 interface DeliveryResult {
   channel: "whatsapp";
@@ -87,6 +84,7 @@ async function sendWhatsApp(to: string, role: "operator" | "admin"): Promise<Del
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -96,19 +94,10 @@ Deno.serve(async (req) => {
     if (authResult instanceof Response) return authResult;
     const callerId = authResult.user.id;
 
+    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    if (guard) return guard;
     const admin = createServiceClient();
-
-    // Caller must be admin or uno_team
-    const [{ data: isAdmin }, { data: isTeam }] = await Promise.all([
-      admin.rpc("has_role", { _user_id: callerId, _role: "admin" }),
-      admin.rpc("has_role", { _user_id: callerId, _role: "uno_team" }),
-    ]);
-    if (!isAdmin && !isTeam) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Admin or uno_team role required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const isAdmin = true;
 
     // Lookup primary operator
     const { data: opRow } = await admin

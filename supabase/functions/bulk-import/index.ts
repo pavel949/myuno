@@ -1,6 +1,8 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 
 
 // Allowed tables for bulk import - synchronized with src/lib/providerIdMapping.ts
@@ -62,6 +64,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    const denied = await requireActorRpc(req, corsHeaders, 'actor_has_platform_admin');
+    if (denied) return denied;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
@@ -95,7 +101,7 @@ Deno.serve(async (req) => {
       throw new Error('Authorization check failed');
     }
 
-    const allowedRoles = ['admin', 'staff', 'uno_team'];
+    const allowedRoles = ['admin'];
     const hasAccess = (roles ?? []).some((r: { role: string }) => allowedRoles.includes(r.role));
     if (!hasAccess) {
       throw new Error('Admin access required');

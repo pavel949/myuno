@@ -27,6 +27,8 @@ export interface PricingRules {
   lastMinuteDiscount?: number;   // % off
   lastMinuteDays?: number;       // threshold in days
   seasonalPricing?: SeasonalPricingRule[];
+  /** Per-date nightly price overrides keyed by YYYY-MM-DD (highest priority). */
+  dateOverrides?: Record<string, number>;
   depositAmount?: number;
   depositCurrency?: string;
   paymentPolicy?: string;
@@ -153,7 +155,9 @@ export function calculatePricing(
   for (let i = 0; i < nights; i++) {
     const day = new Date(checkInDate);
     day.setDate(day.getDate() + i);
-    subtotal += getEffectiveNightlyRate(day, basePrice, rules.seasonalPricing);
+    const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    const override = rules.dateOverrides?.[key];
+    subtotal += override && override > 0 ? override : getEffectiveNightlyRate(day, basePrice, rules.seasonalPricing);
   }
   const nightlyRate = Math.round(subtotal / nights); // average for display
   const seasonalAdjustment = subtotal - (basePrice * nights);

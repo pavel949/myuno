@@ -16,7 +16,7 @@ import { MarketplaceProduct, MarketplaceSubcategory } from '@/types/marketplace'
 import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
@@ -329,9 +329,9 @@ const MarketCategoryPage = () => {
           checkoutPath="/market/checkout" 
         />
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default MarketCategoryPage;
+const AvailableMarketCategoryPage = withMarketAvailability(MarketCategoryPage);
+export default AvailableMarketCategoryPage;

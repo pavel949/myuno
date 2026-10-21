@@ -6,6 +6,7 @@ import { typedFrom, type TeamMemberPermissionRow } from '@/lib/untypedTables';
 
 export const MODULES = [
   { key: 'properties', labelEn: 'Properties', labelRu: 'Объекты' },
+  { key: 'pricing', labelEn: 'Tariffs', labelRu: 'Тарифы' },
   { key: 'finance', labelEn: 'Finance', labelRu: 'Финансы' },
   { key: 'crm', labelEn: 'CRM & Sales', labelRu: 'CRM и продажи' },
   { key: 'tasks', labelEn: 'Tasks', labelRu: 'Задачи' },

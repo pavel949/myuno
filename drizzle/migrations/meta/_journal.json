@@ -1,0 +1,258 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791278165681,
+      "tag": "0000_expose_price_period_in_public_property_view",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791279443520,
+      "tag": "0001_restrict_lead_scores_and_project_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791279957242,
+      "tag": "0002_tighten_cleaning_and_project_docs",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791280108959,
+      "tag": "0003_fix_reconciliation_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791280181699,
+      "tag": "0004_property_bookings_external_id_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791280226517,
+      "tag": "0005_order_booking_sync_adopt_and_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791282482450,
+      "tag": "0006_harden_money_functions_and_provider_org_links",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791283028338,
+      "tag": "0007_restrict_provider_org_links_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791283134679,
+      "tag": "0008_fix_credit_cashback_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791283180850,
+      "tag": "0009_fix_credit_cashback_wallet_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791283586686,
+      "tag": "0010_tighten_rls_warnings",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791407355288,
+      "tag": "0011_fix_commission_percent_units",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791407455148,
+      "tag": "0012_fix_order_booking_sync_guest_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791408452675,
+      "tag": "0013_get_property_date_prices",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791408563391,
+      "tag": "0014_public_read_active_rate_seasons",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791408608551,
+      "tag": "0015_rate_seasons_public_read_definer",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792189851156,
+      "tag": "0016_multi_unit_properties_categories_rate_plans",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792195705329,
+      "tag": "0017_fix_property_media_anon_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792195845754,
+      "tag": "0018_align_room_assignment_statuses",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792196665836,
+      "tag": "0019_canonical_inventory_status_predicate",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792196765030,
+      "tag": "0020_preserve_property_booking_lifecycle_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792204780205,
+      "tag": "0021_operating_spaces_shadow_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792206089550,
+      "tag": "0022_operating_scope_resolver",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792207383639,
+      "tag": "0023_operating_security_ceilings",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792210444468,
+      "tag": "0024_operating_cutover_blockers",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792210683028,
+      "tag": "0025_delegation_company_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792211431260,
+      "tag": "0026_public_catalog_projection_extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792211595774,
+      "tag": "0027_close_authenticated_private_property_reads",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792214826129,
+      "tag": "0028_uno_team_private_helpers",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792214876680,
+      "tag": "0029_uno_team_private_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792215011902,
+      "tag": "0030_preserve_juristic_platform_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792215066320,
+      "tag": "0031_checked_onboarding_private_capability",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792217219893,
+      "tag": "0032_catalog_notification_private_boundaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792220430026,
+      "tag": "0033_restrict_unchecked_wallet_mutations",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792230265662,
+      "tag": "0034_public_resort_catalog_projection",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792402098320,
+      "tag": "0035_restore_anon_execute_public_read_rpcs",
+      "breakpoints": true
+    }
+  ]
+}

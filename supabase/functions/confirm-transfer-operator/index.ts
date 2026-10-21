@@ -97,13 +97,21 @@ Deno.serve(async (req) => {
 
     const { data: order, error: fetchErr } = await sb()
       .from('orders')
-      .select('id, order_number, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
+      .select('id, order_number, order_type, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
       .eq('id', orderId)
       .single();
 
     if (fetchErr || !order) {
       return new Response(JSON.stringify({ error: 'Order not found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // A signed operational link cannot resurrect a terminal order or mutate
+    // another vertical. Unproved financial authority remains a separate blocker.
+    if (order.order_type !== 'transfer' || !['pending', 'confirmed'].includes(order.status)) {
+      return new Response(JSON.stringify({ error: 'Transfer transition not allowed' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -121,16 +129,23 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      const { data: rejUpd } = await sb()
+      const { data: rejUpd, error: rejectUpdateError } = await sb()
         .from('orders')
         .update({ status: 'cancelled' })
         .eq('id', orderId)
-        .not('status', 'in', '(cancelled,refunded)')
+        .in('status', ['pending', 'confirmed'])
+        .eq('order_type', 'transfer')
         .select('id');
 
+      if (rejectUpdateError) {
+        console.error('[reject] atomic update failed', rejectUpdateError);
+        return new Response(JSON.stringify({ error: 'Update failed' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       if (!rejUpd || rejUpd.length === 0) {
-        return new Response(JSON.stringify({ success: true, already_cancelled: true, order_number: order.order_number }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'Transfer changed; reload before retrying' }), {
+          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
@@ -182,7 +197,8 @@ Deno.serve(async (req) => {
       .from('orders')
       .update({ status: 'confirmed' })
       .eq('id', orderId)
-      .neq('status', 'confirmed')
+      .eq('status', 'pending')
+      .eq('order_type', 'transfer')
       .select('id');
 
     if (updErr) {
@@ -192,9 +208,9 @@ Deno.serve(async (req) => {
       });
     }
     if (!updated || updated.length === 0) {
-      // Someone else confirmed between our SELECT and UPDATE — treat as success, skip side effects.
-      return new Response(JSON.stringify({ success: true, already_confirmed: true, order_number: order.order_number }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      // A lost conditional update proves no outcome; a competing cancellation may have won.
+      return new Response(JSON.stringify({ error: 'Transfer changed; reload before retrying' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 

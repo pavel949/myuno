@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils';
 import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
 import { useBuyNow } from '@/hooks/useBuyNow';
 import { MarketplaceProduct } from '@/types/marketplace';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -502,9 +502,9 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </PageContainer>
-      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
 
-export default ProductDetailPage;
+const AvailableProductDetailPage = withMarketAvailability(ProductDetailPage);
+export default AvailableProductDetailPage;

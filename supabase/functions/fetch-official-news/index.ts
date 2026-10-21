@@ -3,12 +3,10 @@
 // Triggered manually or via pg_cron. Upserts into public.official_news.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { getCorsHeaders } from '../_shared/cors.ts';
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 interface SourceCfg {
   source: string;
@@ -84,7 +82,20 @@ async function translateBatch(lovableKey: string, rows: PendingRow[]): Promise<R
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  // This endpoint drives Firecrawl + LLM calls (cost). Allow it for pg_cron /
+  // service-role callers (internal secret), otherwise require an authenticated
+  // user and rate-limit them. Closes the anonymous-internet key-drain vector
+  // while keeping both the cron schedule and the manual "refresh" button working.
+  const internal = requireInternalSecret(req, corsHeaders);
+  if (internal !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    const rl = await withRateLimit(req, 'fetch-official-news', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+    if (rl) return rl;
+  }
 
   try {
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');

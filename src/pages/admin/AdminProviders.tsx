@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { parseProviderFilter, parseQueuePage, type ProviderFilter } from '@/lib/adminDashboardQueues';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, Provider } from '@/hooks/useAdmin';
@@ -90,7 +92,6 @@ export default function AdminProviders() {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { providers, isLoading: providersLoading, createProvider, updateProvider, deleteProvider } = useAdminProviders();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -99,15 +100,18 @@ export default function AdminProviders() {
 
   // URL-persisted filter + search so navigating away (provider detail
   // page) and back keeps the admin's view intact. Same search-params
-  // hook also drives the legacy `?action=new` open-on-load behaviour
-  // wired in the useEffect below.
+  // hook also drives one-shot `?action=new` and `?edit=id` dialog commands.
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
-  const filter = (searchParams.get('filter') as 'all' | 'active' | 'verified' | 'inactive') || 'all';
+  const filter = parseProviderFilter(searchParams);
+  const page = parseQueuePage(searchParams, 'provider_page');
+  const { providers, totalCount, isLoading: providersLoading, isFetching: providersFetching, error: providersError, createProvider, updateProvider, deleteProvider, refetch: refetchProviders } = useAdminProviders({filter,search:searchQuery,page,actorId:user?.id,enabled:isAdmin&&!adminLoading&&!authLoading,editId:searchParams.get('edit')});
+  const setPage = (value: number) => setSearchParams(previous => {const next=new URLSearchParams(previous);if(value===0)next.delete('provider_page');else next.set('provider_page',String(value));return next;});
   const setSearchQuery = (val: string) => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
+        next.delete('provider_page');
         if (val) next.set('q', val);
         else next.delete('q');
         return next;
@@ -115,15 +119,16 @@ export default function AdminProviders() {
       { replace: true },
     );
   };
-  const setFilter = (val: 'all' | 'active' | 'verified' | 'inactive') => {
+  const setFilter = (val: ProviderFilter) => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
+        next.delete('provider_page');
         if (val === 'all') next.delete('filter');
         else next.set('filter', val);
         return next;
       },
-      { replace: true },
+      { replace: false },
     );
   };
 
@@ -149,13 +154,6 @@ export default function AdminProviders() {
 
   const isRussian = language === 'ru';
 
-  // Open dialog if action=new in URL
-  useEffect(() => {
-    if (searchParams.get('action') === 'new') {
-      setIsDialogOpen(true);
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate(APP_ROUTES.AUTH);
@@ -168,7 +166,7 @@ export default function AdminProviders() {
     }
   }, [isAdmin, adminLoading, user, navigate]);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       name: '',
       description_en: '',
@@ -188,9 +186,9 @@ export default function AdminProviders() {
       service_domains: [],
     });
     setEditingProvider(null);
-  };
+  }, []);
 
-  const openEditDialog = (provider: Provider) => {
+  const openEditDialog = useCallback((provider: Provider) => {
     setEditingProvider(provider);
     setFormData({
       name: provider.name || '',
@@ -212,7 +210,35 @@ export default function AdminProviders() {
       service_domains: (provider as any).service_domains || [],
     });
     setIsDialogOpen(true);
-  };
+  }, []);
+
+  // Consume one-shot dialog commands only after the existing admin gate and
+  // exact editor read is ready. A URL ID selects a row but never authorizes it.
+  useEffect(() => {
+    if (authLoading || adminLoading || !user || !isAdmin || providersLoading) return;
+    const editId = searchParams.get('edit');
+    const createNew = searchParams.get('action') === 'new';
+    if (editId === null && !createNew) return;
+
+    if (editId !== null) {
+      // Cached rows are not the completed result of an in-flight refresh.
+      if (providersFetching) return;
+      const provider = providers.find(item => item.id === editId);
+      if (providersError) toast.error(isRussian ? 'Не удалось загрузить провайдеров. Попробуйте ещё раз.' : 'Could not load providers. Please try again.');
+      else if (provider) openEditDialog(provider);
+      else toast.error(isRussian ? 'Провайдер не найден или недоступен' : 'Provider not found or unavailable');
+    } else {
+      resetForm();
+      setIsDialogOpen(true);
+    }
+
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete('edit');
+      if (createNew) next.delete('action');
+      return next;
+    }, { replace: true });
+  }, [authLoading, adminLoading, user, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.business_category) {
@@ -273,16 +299,9 @@ export default function AdminProviders() {
     }
   };
 
-  const filteredProviders = providers.filter(p => {
-    const matchesSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.business_category?.toLowerCase().includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
-    if (filter === 'active') return p.is_active;
-    if (filter === 'verified') return p.is_verified;
-    if (filter === 'inactive') return !p.is_active;
-    return true;
-  });
+  // The server applies the literal search and status before pagination/count.
+  // Do not re-filter a page with a different client-side text predicate.
+  const filteredProviders = providers;
 
   const handleExportCsv = () => {
     if (filteredProviders.length === 0) {
@@ -377,6 +396,7 @@ export default function AdminProviders() {
             { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
             { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
             { key: 'verified' as const, labelEn: 'Verified', labelRu: 'Верифицированные' },
+            { key: 'unverified' as const, labelEn: 'Unverified', labelRu: 'Не проверены' },
             { key: 'inactive' as const, labelEn: 'Inactive', labelRu: 'Неактивные' },
           ]).map(f => (
             <Button
@@ -386,33 +406,42 @@ export default function AdminProviders() {
               onClick={() => setFilter(f.key)}
             >
               {isRussian ? f.labelRu : f.labelEn}
-              {f.key !== 'all' && (
+              {f.key === filter && !providersLoading && !providersError && totalCount != null && (
                 <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
-                  {f.key === 'active' ? providers.filter(p => p.is_active).length :
-                   f.key === 'verified' ? providers.filter(p => p.is_verified).length :
-                   providers.filter(p => !p.is_active).length}
+                  {totalCount}
                 </Badge>
               )}
             </Button>
           ))}
         </div>
+        {!providersLoading && !providersError && <div className="mb-4 flex flex-wrap items-center gap-3">
+          <p role="status">{pickLang(language,{en:'Matching providers',ru:'Подходящие поставщики',th:'ผู้ให้บริการที่ตรงกัน'})}: {totalCount ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+          <Button variant="outline" disabled={page===0||providersFetching} onClick={()=>setPage(page-1)}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+          <Button variant="outline" disabled={providersFetching||totalCount==null||(page+1)*50>=totalCount} onClick={()=>setPage(page+1)}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+        </div>}
 
         {/* Providers List */}
+        {providersError && <div role="alert" className="mb-4 border border-destructive p-4 space-y-3">
+          <p>{providers.length > 0
+            ? pickLang(language, {en:'Provider refresh failed. Previously loaded records below may be out of date; current counts are unavailable.',ru:'Не удалось обновить список. Ниже ранее загруженные данные, которые могли устареть; актуальные счётчики недоступны.',th:'รีเฟรชผู้ให้บริการไม่สำเร็จ ข้อมูลที่โหลดไว้ก่อนหน้านี้ด้านล่างอาจล้าสมัย จำนวนปัจจุบันไม่พร้อมใช้งาน'})
+            : pickLang(language, {en:'Could not load providers. Counts and results are unavailable.',ru:'Не удалось загрузить поставщиков. Счётчики и результаты недоступны.',th:'โหลดผู้ให้บริการไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน'})}</p>
+          <Button variant="outline" disabled={providersFetching} onClick={()=>refetchProviders()}>{pickLang(language,{en:'Retry',ru:'Повторить',th:'ลองอีกครั้ง'})}</Button>
+        </div>}
         {providersLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-24" />
             ))}
           </div>
-        ) : filteredProviders.length === 0 ? (
+        ) : providersError && filteredProviders.length === 0 ? null : filteredProviders.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="font-medium mb-1">
-                {isRussian ? 'Нет провайдеров' : 'No providers'}
+                {filter!=='all'||searchQuery ? pickLang(language,{en:'No matching providers',ru:'Нет подходящих поставщиков',th:'ไม่มีผู้ให้บริการที่ตรงกัน'}) : (isRussian ? 'Нет провайдеров' : 'No providers')}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {isRussian ? 'Добавьте первого провайдера' : 'Add your first provider'}
+                {filter!=='all'||searchQuery ? pickLang(language,{en:'Change or clear the filters.',ru:'Измените или сбросьте фильтры.',th:'เปลี่ยนหรือล้างตัวกรอง'}) : (isRussian ? 'Добавьте первого провайдера' : 'Add your first provider')}
               </p>
               <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />

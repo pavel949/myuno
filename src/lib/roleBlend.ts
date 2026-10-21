@@ -157,21 +157,3 @@ export function blendClusters(
  * downstream imports migrate. Reads straight from SSOT.
  */
 export const CLUSTERS = CLUSTER_CATALOG;
-
-// Signal seed data per role — shown when real DB data is loading
-export const SIGNAL_SEED: Record<UserPersona, { lead: string; leadRu: string; value: string; tail: string; tailRu: string; state: 'live' | 'warn' | 'active' }> = {
-  tourist:                 { lead: 'Transfer',           leadRu: 'Трансфер',           value: '08:40',        tail: 'HKT → Kata · confirmed',              tailRu: 'HKT → Ката · подтверждён',           state: 'live'   },
-  resident:                { lead: 'Visa',               leadRu: 'Виза',               value: '48 days',      tail: 'Non-Imm O · extension available',     tailRu: 'Non-Imm O · доступно продление',     state: 'warn'   },
-  property_owner:          { lead: 'Property',           leadRu: 'Объект',             value: 'Occupied',     tail: 'Guest check-out 14:00',               tailRu: 'Гость выезжает в 14:00',             state: 'live'   },
-  investor:                { lead: 'Portfolio',          leadRu: 'Портфель',           value: '฿ 24.8M',      tail: '2 deals in progress',                 tailRu: '2 сделки в работе',                  state: 'active' },
-  real_estate_developer:   { lead: 'Project',            leadRu: 'Проект',             value: '42 / 120',     tail: 'Phase I closes Friday',               tailRu: 'Фаза I закрывается в пятницу',       state: 'live'   },
-  local_services_provider: { lead: 'Today',              leadRu: 'Сегодня',            value: '6 bookings',   tail: '฿ 18,900 · 3 awaiting reply',         tailRu: '฿ 18 900 · 3 ждут ответа',           state: 'active' },
-  family:                  { lead: 'School',             leadRu: 'Школа',              value: 'Term 2',       tail: 'Next event Thursday',                 tailRu: 'Ближайшее событие — четверг',        state: 'active' },
-  couple:                  { lead: 'Booking',            leadRu: 'Бронь',              value: 'Tonight',      tail: 'Suay · 19:00 · 2 guests',             tailRu: 'Suay · 19:00 · 2 гостя',             state: 'live'   },
-  nightlife:               { lead: 'Tonight',            leadRu: 'Сегодня вечером',    value: 'Illuzion',     tail: 'Patong · doors 22:00',                tailRu: 'Патонг · вход с 22:00',              state: 'live'   },
-  active:                  { lead: 'Session',            leadRu: 'Тренировка',         value: '07:00',        tail: 'Muay Thai · Tiger Gym',               tailRu: 'Муай-тай · Tiger Gym',               state: 'live'   },
-  business:                { lead: 'Company',            leadRu: 'Компания',           value: 'Active',       tail: 'Annual renewal in 45 days',           tailRu: 'Ежегодное продление через 45 дней',  state: 'warn'   },
-  nomad:                   { lead: 'Data plan',          leadRu: 'Тариф',              value: '12 GB',        tail: 'AIS · top-up available',              tailRu: 'AIS · доступно пополнение',          state: 'active' },
-  pet_owner:               { lead: 'Vet visit',          leadRu: 'Приём ветеринара',   value: 'Fri 15:00',    tail: 'Dr. Amara · Phuket Animal Hospital',  tailRu: 'Д-р Амара · Phuket Animal Hospital', state: 'active' },
-  relocation:              { lead: 'Visa',               leadRu: 'Виза',               value: 'In review',    tail: 'Siam Legal · documents in 3 days',    tailRu: 'Siam Legal · документы через 3 дня', state: 'warn'   },
-};

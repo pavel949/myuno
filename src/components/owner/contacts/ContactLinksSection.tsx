@@ -10,6 +10,7 @@ import {
   useDeleteCrmContactLink,
 } from '@/hooks/useCrmContactLinks';
 import { cn } from '@/lib/utils';
+import { safeLinkHref } from '@/lib/sanitize';
 
 interface ContactLinksSectionProps {
   contactId: string;
@@ -65,7 +66,7 @@ export function ContactLinksSection({ contactId, companyId }: ContactLinksSectio
           {links.map((link) => (
             <li key={link.id} className="group flex items-center gap-2 py-1">
               <a
-                href={link.url}
+                href={safeLinkHref(link.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 min-w-0 flex items-center gap-1.5 text-sm text-primary hover:underline truncate"

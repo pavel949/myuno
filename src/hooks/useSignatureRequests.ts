@@ -52,7 +52,6 @@ export interface SignatureSigner {
   signed_at: string | null;
   declined_at: string | null;
   decline_reason: string | null;
-  access_token: string | null;
   notified_at: string | null;
   reminder_count: number;
   created_at: string;

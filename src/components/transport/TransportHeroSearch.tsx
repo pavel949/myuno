@@ -39,26 +39,20 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
   const today = new Date();
 
   return (
-    <section className="relative bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] overflow-hidden">
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-        backgroundSize: '32px 32px'
-      }} />
-
+    <section className="public-transport-search relative border-b border-border bg-background text-foreground">
       <div className="relative max-w-5xl mx-auto px-4 pt-8 pb-10 md:pt-12 md:pb-14">
         {/* Title */}
         <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
+          <h2 className="public-commerce-title text-foreground">
             {isRu ? 'Аренда транспорта' : 'Vehicle Rental'}
-          </h1>
-          <p className="text-white/85 text-base md:text-lg mt-2 leading-snug max-w-2xl">
+          </h2>
+          <p className="text-muted-foreground text-base md:text-lg mt-2 leading-snug max-w-2xl">
             {isRu ? 'Проверенные автомобили и мотоциклы на Пхукете' : 'Verified cars & bikes in Phuket'}
           </p>
         </div>
 
         {/* Search Card */}
-        <div className="bg-card rounded-none p-4 md:p-6 shadow-2xl shadow-black/20">
+        <div className="bg-card border border-border rounded-none p-4 md:p-6">
           {/* Main search row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}

@@ -90,7 +90,7 @@ export default function PricingPage() {
                 {isRu ? 'Тарифы и комиссии' : 'Pricing and fees'}
               </h1>
               <p className="text-[11.5px] text-muted-foreground">
-                {isRu ? 'Оператор: myUNO Pte. Ltd.' : 'Operator: myUNO Pte. Ltd.'}
+                {isRu ? 'Оператор: Toplight Asia Pacific Co., Ltd.' : 'Operator: Toplight Asia Pacific Co., Ltd.'}
               </p>
             </div>
           </div>

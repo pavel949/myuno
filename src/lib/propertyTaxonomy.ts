@@ -1,3 +1,4 @@
+import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 /**
  * @module PropertyTaxonomy
  * @deprecated Import from '@/lib/taxonomies' instead of this file directly.
@@ -15,6 +16,9 @@ import {
 } from '@/lib/propertyAttributeRegistry';
 
 // ============= PROPERTY TYPES =============
+// Single source of truth for property types across the app (marketplace vertical
+// specs, owner/vendor wizards, cards). Superset that covers both residential and
+// land/commercial listings — keep snake_case-free `id`s aligned with the DB.
 export const PROPERTY_TYPES = [
   { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: '🏡', popular: true },
   { id: 'condo', labelEn: 'Condo', labelRu: 'Кондо', icon: '🏢', popular: true },
@@ -24,6 +28,8 @@ export const PROPERTY_TYPES = [
   { id: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус', icon: '🌆', popular: false },
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия', icon: '🛏️', popular: true },
   { id: 'bungalow', labelEn: 'Bungalow', labelRu: 'Бунгало', icon: '🌴', popular: false },
+  { id: 'land', labelEn: 'Land plot', labelRu: 'Участок', icon: '🏞️', popular: false },
+  { id: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерческая', icon: '🏪', popular: false },
 ] as const;
 
 // ============= PHUKET DISTRICTS =============
@@ -122,6 +128,7 @@ export const PROPERTY_HIGHLIGHTS = HIGHLIGHT_UI_ITEMS;
 
 // ============= VIEW TYPES =============
 export const VIEW_TYPES = [
+  { id: 'panoramic', labelEn: 'Panoramic view', labelRu: 'Панорамный вид', icon: '🌅' },
   { id: 'sea', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊' },
   { id: 'ocean', labelEn: 'Ocean View', labelRu: 'Вид на океан', icon: '🌅' },
   { id: 'pool', labelEn: 'Pool View', labelRu: 'Вид на бассейн', icon: '🏊' },
@@ -314,6 +321,17 @@ export function normalizeDistrictId(id: string): string {
   return DISTRICT_ALIASES[trimmed] || trimmed.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
 }
 
+/** Read compatibility for public rows stored with historical district labels. */
+export function districtFilterAliases(value: string): string[] {
+  const raw = value.trim();
+  if (!raw) return [];
+  const canonical = normalizeDistrictId(raw);
+  const label = PHUKET_DISTRICTS.find(district => district.id === canonical)?.labelEn;
+  return [...new Set([canonical, raw, ...(label ? [label] : []),
+    ...Object.entries(DISTRICT_ALIASES).filter(([, id]) => id === canonical).map(([alias]) => alias),
+  ])];
+}
+
 /**
  * Normalize property type ID
  * @example normalizePropertyType('Villa') => 'villa'
@@ -395,7 +413,13 @@ export function getExtraServiceLabel(id: string, lang: 'en' | 'ru' = 'en'): stri
 export function getHighlightLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
   const normalized = normalizeHighlightId(id);
   const highlight = PROPERTY_HIGHLIGHTS.find(h => h.id === normalized);
-  return highlight ? (lang === 'ru' ? highlight.labelRu : highlight.labelEn) : id;
+  if (highlight) return lang === 'ru' ? highlight.labelRu : highlight.labelEn;
+  // Existing property editors also persist amenity/feature IDs in highlights.
+  // Resolve their existing labels without changing or inventing property facts.
+  const amenityLabel = getAmenityLabel(id, lang);
+  if (amenityLabel !== id) return amenityLabel;
+  const feature = PROPERTY_FEATURE_MAP.get(normalized);
+  return feature ? (lang === 'ru' ? feature.labelRu : feature.labelEn) : id;
 }
 
 export function getViewTypeLabel(id: string, lang: 'en' | 'ru' = 'en'): string {

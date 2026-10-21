@@ -1,6 +1,6 @@
 /**
  * PropertyMapView — Airbnb-style map with price markers
- * Uses Google Maps (Maps JavaScript API). Requires VITE_GOOGLE_MAPS_API_KEY.
+ * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
  *
  * Marker click opens an InfoWindow mini-card showing photo, title, price and
  * trust signals (TrustStrip) so users can validate listings without leaving
@@ -23,6 +23,16 @@ import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const DEFAULT_ZOOM = 10.5;
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
+
+// Google Maps renders markers on a canvas/overlay outside the CSS cascade, so
+// `hsl(var(--token))` does not resolve. Use literal hex values mirroring the
+// design tokens (src/styles/tokens.css): primary navy, cream background, ink.
+const MARKER_COLORS = {
+  primary: '#0A2240',
+  primaryForeground: '#F7F5F1',
+  background: '#F7F5F1',
+  foreground: '#1C1916',
+} as const;
 
 interface PropertyMapViewProps {
   properties: Property[];
@@ -180,7 +190,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               position={{ lat: property.lat!, lng: property.lng! }}
               label={{
                 text: priceLabel,
-                color: isActive ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))',
+                color: isActive ? MARKER_COLORS.primaryForeground : MARKER_COLORS.foreground,
                 fontWeight: isActive ? '700' : '600',
                 fontSize: isActive ? '13px' : '12px',
               }}
@@ -189,9 +199,9 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                   ? {
                       path: google.maps.SymbolPath.CIRCLE,
                       scale: 22,
-                      fillColor: 'hsl(var(--primary))',
+                      fillColor: MARKER_COLORS.primary,
                       fillOpacity: 1,
-                      strokeColor: 'hsl(var(--background))',
+                      strokeColor: MARKER_COLORS.background,
                       strokeWeight: 3,
                     }
                   : undefined

@@ -10,19 +10,41 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { IconGrid } from './IconGrid';
 
+export const PERSONAL_GRID_DEFAULT_LIMIT = 8;
+
 export interface PersonalGridProps {
   limit?: number;
   activeSituationCode?: string;
 }
 
+/**
+ * Ids of the services PersonalGrid would render for the current role/personas.
+ * Used by sibling sections (cluster mini-app grids) to avoid showing the same
+ * tile twice on one page.
+ */
+export function usePersonalGridServiceIds(
+  limit: number = PERSONAL_GRID_DEFAULT_LIMIT,
+  activeSituationCode?: string,
+): string[] {
+  const { effectivePersonas } = useUserPersonas();
+  const role = useLifeOSRole();
+
+  return useMemo(
+    () =>
+      rankServices(AVAILABLE_SERVICES, { role, personas: effectivePersonas, activeSituationCode })
+        .slice(0, limit)
+        .map((s) => s.id),
+    [role, effectivePersonas, activeSituationCode, limit],
+  );
+}
+
 export const PersonalGrid: React.FC<PersonalGridProps> = ({
-  limit = 8,
+  limit = PERSONAL_GRID_DEFAULT_LIMIT,
   activeSituationCode,
 }) => {
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
 
   const ranked = useMemo(
     () =>
@@ -36,12 +58,8 @@ export const PersonalGrid: React.FC<PersonalGridProps> = ({
 
   return (
     <IconGrid
-      title={isRu ? 'Для вас сейчас' : 'For you now'}
-      caption={
-        isRu
-          ? 'Подобрано под вашу роль и предпочтения'
-          : 'Tuned to your role and preferences'
-      }
+      title={t('discover.forYouNow')}
+      caption={t('discover.forYouNowCaption')}
       services={ranked}
       showCategoryCaption
     />

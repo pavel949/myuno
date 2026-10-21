@@ -12,11 +12,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Check, BarChart3, Users, Sparkles, CalendarRange, Wallet, FileText } from 'lucide-react';
+import { ArrowRight, BarChart3, Users, Sparkles, CalendarRange, Wallet, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OwnerReferralCard } from '@/components/referral/OwnerReferralCard';
-import { useAuth } from '@/contexts/AuthContext';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CONTENT_ANCHOR } from '@/design-system/ecosystemLayout';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
@@ -24,7 +24,7 @@ import {
 const FEATURES = [
   { icon: BarChart3,    ru: 'Отчёты собственнику', en: 'Owner reports', descRu: 'PDF и онлайн P&L каждый месяц.',         descEn: 'Monthly P&L, PDF + online.' },
   { icon: Users,        ru: 'Гости и заявки',      en: 'Guests & inbox', descRu: 'Чат, заявки, отзывы — в одном окне.', descEn: 'Chat, leads, reviews in one inbox.' },
-  { icon: Sparkles,     ru: 'Уборка и check-in',   en: 'Cleaning & check-in', descRu: 'Задачи команде, чек-листы.',  descEn: 'Team tasks, checklists.' },
+  { icon: Sparkles,     ru: 'Уборка и заселение',   en: 'Cleaning & check-in', descRu: 'Задачи команде, чек-листы.',  descEn: 'Team tasks, checklists.' },
   { icon: Wallet,       ru: 'Финансы',             en: 'Finance', descRu: 'Доходы, расходы, выплаты собственнику.', descEn: 'Income, expenses, owner payouts.' },
   { icon: CalendarRange,ru: 'Каналы и iCal',       en: 'Channels & iCal', descRu: 'Airbnb, Booking, VRBO — синхрон.',descEn: 'Airbnb, Booking, VRBO sync.' },
   { icon: FileText,     ru: 'Договоры и документы',en: 'Contracts & docs', descRu: 'Хранилище, подписи, налоги.', descEn: 'Vault, e-sign, tax filings.' },
@@ -81,13 +81,13 @@ const FAQ = [
   {
     qRu: 'Сколько стоит и как работает оплата?',
     qEn: 'How much does it cost and how is it billed?',
-    aRu: 'Self-Service: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Full Management: 30% от выручки, удерживается из выплат, ежемесячный отчёт без скрытых комиссий.',
+    aRu: 'Самостоятельное управление: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Полное управление: 30% от выручки, удерживается из выплат, ежемесячный отчёт без скрытых комиссий.',
     aEn: 'Self-Service: flat $199–399/mo subscription, monthly card billing. Full Management: 30% of revenue netted from payouts, monthly statement, no hidden fees.',
   },
   {
     qRu: 'Что если у меня 1–2 объекта?',
     qEn: 'What if I only have 1–2 properties?',
-    aRu: 'Подойдёт Self-Service Starter ($199) или Full Management. У УК с 5+ объектами условия лучше — см. отдельную страницу.',
+    aRu: 'Подойдёт самостоятельное управление по тарифу Starter ($199) или полное управление. У УК с 5+ объектами условия лучше — см. отдельную страницу.',
     aEn: 'Self-Service Starter ($199) or Full Management both fit. Companies with 5+ properties get better terms on the dedicated MC page.',
   },
   {
@@ -112,7 +112,6 @@ const FAQ = [
 
 const ForOwnersPage: React.FC = () => {
   const { language } = useLanguage();
-  const { user } = useAuth();
   const isRu = language === 'ru';
 
   const title = isRu ? 'Собственникам недвижимости и малым УК — myUNO' : 'For owners & small management companies — myUNO';
@@ -121,23 +120,23 @@ const ForOwnersPage: React.FC = () => {
     : 'Manage your Phuket property yourself with myUNO PMS or hand it over to us. Reports, guests, cleaning, finance — one workspace.';
 
   return (
-    <AppLayout>
+    <AppLayout usePageContainer={false}>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href="https://www.myuno.app/for-owners" />
       </Helmet>
 
-      <div className="px-4 pt-8 pb-24 md:px-6 md:pt-12 max-w-3xl mx-auto">
+      <div className={`${PUBLIC_CONTENT_LAYOUT.marketing} pt-8 pb-24 md:pt-12 lg:pt-16`}>
         {/* HERO */}
-        <header className="mb-12">
+        <header className="mb-10 md:mb-14 max-w-4xl">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
             {isRu ? 'Для собственников и УК' : 'For owners & MCs'}
           </p>
-          <h1 className="text-[32px] sm:text-[42px] font-serif font-semibold leading-[1.05] tracking-[-0.02em] text-foreground">
+          <h1 className="text-h1 md:text-display font-display text-foreground">
             {isRu ? 'Ваша недвижимость — под контролем.' : 'Your property — under control.'}
           </h1>
-          <p className="mt-4 text-[15px] sm:text-[16px] text-muted-foreground leading-[1.55] max-w-2xl">
+          <p className="mt-5 text-body-lg text-muted-foreground max-w-2xl">
             {isRu
               ? 'Сдавайте сами через myUNO PMS — или передайте нам в полное управление. Отчёты, гости, уборка, финансы и каналы — в одном кабинете.'
               : 'Self-manage with myUNO PMS — or hand it over for full management. Reports, guests, cleaning, finance and channels in one workspace.'}
@@ -161,47 +160,47 @@ const ForOwnersPage: React.FC = () => {
         </header>
 
         {/* TWO PATHS */}
-        <section id="paths" className="mb-14 scroll-mt-24">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+        <section id="paths" className={`mb-14 ${PUBLIC_CONTENT_ANCHOR}`}>
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Два пути' : 'Two paths'}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <article className="border border-border p-6 bg-card">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
+            <article className="flex h-full flex-col border border-border p-6 lg:p-8 bg-card">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Передать нам' : 'Hand over'}
               </p>
-              <h3 className="text-[20px] font-serif font-semibold text-foreground leading-tight">
-                {isRu ? 'Full Management · 70 / 30' : 'Full Management · 70 / 30'}
+              <h3 className="text-h3 font-display text-foreground">
+                {isRu ? 'Полное управление · 70 / 30' : 'Full Management · 70 / 30'}
               </h3>
-              <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
+              <p className="mt-4 mb-6 text-body-lg text-muted-foreground max-w-prose">
                 {isRu
                   ? 'Мы находим гостей, убираем, встречаем, ведём финансы и отправляем отчёт раз в месяц. Вы получаете 70% выручки.'
                   : 'We find guests, clean, check-in, run finance and send a monthly statement. You keep 70% of revenue.'}
               </p>
               <Link
                 to="/owner/management-landing"
-                className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-medium hover:opacity-90 transition-opacity min-h-[44px]"
+                className="mt-auto self-start inline-flex items-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-base font-medium hover:opacity-90 transition-opacity min-h-[44px]"
               >
                 {isRu ? 'Оставить заявку' : 'Request a call'}
                 <ArrowRight className="w-4 h-4" strokeWidth={2} />
               </Link>
             </article>
 
-            <article className="border border-border p-6 bg-card">
+            <article className="flex h-full flex-col border border-border p-6 lg:p-8 bg-card">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Управлять самому' : 'Self-manage'}
               </p>
-              <h3 className="text-[20px] font-serif font-semibold text-foreground leading-tight">
+              <h3 className="text-h3 font-display text-foreground">
                 {isRu ? 'myUNO PMS · от $25 / объект' : 'myUNO PMS · from $25 / property'}
               </h3>
-              <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
+              <p className="mt-4 mb-6 text-body-lg text-muted-foreground max-w-prose">
                 {isRu
                   ? 'Календарь, iCal, финансы, отчёты, channel manager. Подписка по тарифу — без процента с выручки.'
                   : 'Calendar, iCal, finance, reports, channel manager. Flat subscription — no revenue share.'}
               </p>
               <Link
                 to="/mc/onboarding"
-                className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 border border-border text-foreground text-[13px] font-medium hover:border-primary hover:text-primary transition-colors min-h-[44px]"
+                className="mt-auto self-start inline-flex items-center gap-2 px-5 py-3 border border-border text-foreground text-base font-medium hover:border-primary hover:text-primary transition-colors min-h-[44px]"
               >
                 {isRu ? 'Открыть кабинет' : 'Open dashboard'}
                 <ArrowRight className="w-4 h-4" strokeWidth={2} />
@@ -212,18 +211,18 @@ const ForOwnersPage: React.FC = () => {
 
         {/* WHAT YOU GET */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Что вы получаете' : 'What you get'}
           </h2>
-          <ul className="divide-y divide-border">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
             {FEATURES.map((f) => {
               const Icon = f.icon;
               return (
-                <li key={f.en} className="flex items-start gap-4 py-4">
+                <li key={f.en} className="flex items-start gap-4 border-t border-border pt-5">
                   <Icon className="w-5 h-5 text-primary shrink-0 mt-0.5" strokeWidth={1.75} />
                   <div className="flex-1">
-                    <div className="text-[15px] font-medium text-foreground">{isRu ? f.ru : f.en}</div>
-                    <div className="text-[13px] text-muted-foreground mt-0.5">{isRu ? f.descRu : f.descEn}</div>
+                    <div className="text-base font-medium text-foreground">{isRu ? f.ru : f.en}</div>
+                    <div className="text-body text-muted-foreground mt-2">{isRu ? f.descRu : f.descEn}</div>
                   </div>
                 </li>
               );
@@ -233,7 +232,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* PRICING */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Тарифы' : 'Pricing'}
           </h2>
           <div className="space-y-3">
@@ -247,7 +246,7 @@ const ForOwnersPage: React.FC = () => {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-[15px] font-semibold text-foreground">{p.name}</span>
+                    <span className="text-[15px] font-semibold text-foreground">{isRu && p.kind === 'full' ? 'Полное управление' : p.name}</span>
                     {p.primary && (
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
                         {isRu ? 'рекомендуем' : 'recommended'}
@@ -280,24 +279,24 @@ const ForOwnersPage: React.FC = () => {
 
         {/* REFERRAL */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Пригласить' : 'Invite'}
           </h2>
           <OwnerReferralCard />
         </section>
 
         {/* FAQ */}
-        <section className="mb-14">
+        <section className="mb-14 max-w-3xl">
           <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-4 border-b border-border">
             {isRu ? 'Частые вопросы' : 'FAQ'}
           </h2>
           <Accordion type="single" collapsible className="divide-y divide-border">
             {FAQ.map((item, idx) => (
               <AccordionItem key={idx} value={`faq-${idx}`} className="border-b-0 border-t-0">
-                <AccordionTrigger className="text-[14.5px] font-medium text-foreground py-4 hover:no-underline">
+                <AccordionTrigger className="text-base font-medium text-foreground py-4 hover:no-underline">
                   {isRu ? item.qRu : item.qEn}
                 </AccordionTrigger>
-                <AccordionContent className="text-[13.5px] text-muted-foreground leading-relaxed pb-4">
+                <AccordionContent className="text-body-lg text-muted-foreground pb-4 max-w-prose">
                   {isRu ? item.aRu : item.aEn}
                 </AccordionContent>
               </AccordionItem>

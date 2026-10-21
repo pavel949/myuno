@@ -38,6 +38,7 @@ import { LoyaltyStatusCard } from "@/components/wallet/LoyaltyStatusCard";
 import { AchievementsCard } from "@/components/wallet/AchievementsCard";
 import { PaymentMethodsSection } from "@/components/wallet/PaymentMethodsSection";
 import { SpendingInsights } from "@/components/wallet/SpendingInsights";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface WalletData {
   id: string;
@@ -89,7 +90,7 @@ const Wallet = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/auth");
+      redirectToAuth(navigate);
       return;
     }
 

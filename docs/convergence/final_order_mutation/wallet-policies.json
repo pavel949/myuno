@@ -1,0 +1,40 @@
+{
+  "rows": [
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Only service role can insert transactions",
+      "qual": null,
+      "roles": "{public}",
+      "tablename": "wallet_transactions",
+      "with_check": "false"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view strictly own wallet transactions",
+      "qual": "(auth.uid() = user_id)",
+      "roles": "{public}",
+      "tablename": "wallet_transactions",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can create their own wallet",
+      "qual": null,
+      "roles": "{public}",
+      "tablename": "wallets",
+      "with_check": "(auth.uid() = user_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view their own wallet",
+      "qual": "(auth.uid() = user_id)",
+      "roles": "{public}",
+      "tablename": "wallets",
+      "with_check": null
+    }
+  ]
+}

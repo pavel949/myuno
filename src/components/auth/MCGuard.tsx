@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
@@ -14,7 +15,7 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 export function MCGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: contextLoading, isAdminMode } = useResolvedContext();
+  const { context, isLoading: contextLoading } = useResolvedContext();
   const { companies, activeCompany, isLoading: companiesLoading } = useActiveCompany();
 
   if (authLoading || contextLoading || companiesLoading) {
@@ -26,11 +27,11 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
   // Server-resolved admin access
-  if (isAdminMode || context?.role === 'admin' || context?.role === 'uno_team') {
+  if (context?.role === 'admin') {
     return <>{children}</>;
   }
 

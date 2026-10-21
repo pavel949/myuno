@@ -146,6 +146,28 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [language]);
 
+  // Preload the other two dictionaries on idle so the FIRST switch to another
+  // language is instant (no dynamic-import lag). RU is bundled eagerly; EN/TH
+  // are code-split, so without this the initial toggle would show a brief flash.
+  useEffect(() => {
+    const preloadOthers = () => {
+      void loadI18n('en');
+      void loadI18n('th');
+    };
+    const ric = (window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    }).requestIdleCallback;
+    if (typeof ric === 'function') {
+      const id = ric(preloadOthers, { timeout: 3000 });
+      return () => {
+        const cic = (window as unknown as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+        if (typeof cic === 'function') cic(id);
+      };
+    }
+    const t = setTimeout(preloadOthers, 1500);
+    return () => clearTimeout(t);
+  }, []);
+
   // Load translations from DB with caching
   useEffect(() => {
     let cancelled = false;

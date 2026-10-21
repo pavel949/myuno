@@ -71,7 +71,9 @@ export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
         exit="exit"
         variants={variants}
         transition={reduceMotion ? reducedMotionTransition : pageTransition}
-        className="min-h-full w-full min-w-0 will-change-transform"
+        // Persistent will-change:transform makes fixed BottomBar relative to the full
+        // route height instead of the viewport, hiding it below long mobile pages.
+        className="min-h-full w-full min-w-0"
       >
         {children}
       </motion.div>

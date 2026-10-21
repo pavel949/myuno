@@ -99,6 +99,15 @@
 
 ## 3. БЛОКИ РАБОТ (по приоритету)
 
+### 🏪 THAI BUSINESS LAYER (Local Services) — флаг `feature_flag:thai_business_layer` (ON с GA 2026-06-24)
+**Статус:** GA — включён (флаг в `system_settings` остаётся kill-switch'ем: `{"enabled": false}` выключает модуль без редеплоя)
+- B2B self-serve кабинет тайского бизнеса (`/vendor/thai-business`) + B2C каталог (`/thai-services`) + лендинги (`/ts/:slug`)
+- Dedicated tables `thai_businesses` / `thai_business_services` / `thai_bookings` / `thai_chats` / `thai_chat_messages` / `thai_business_reviews`
+- Авто-перевод RU↔TH/EN: поля бизнеса/услуг — клиентский вызов `ai-translate`; чат — edge `thai-chat-send` (хранит оригинал + перевод)
+- Edge functions: `thai-chat-send`, `thai-notify` (WhatsApp/email через `_shared`)
+- Owner авторизуется через существующий `vendor` app_role; модерация в `/admin/thai-business`
+- Подробности: `src/pages/thaiServices/README.md`
+
 ### 🏠 STAYS (Property Management)
 **Статус:** ~80% готово
 - `src/pages/owner/` — 80+ страниц PM dashboard
@@ -130,9 +139,13 @@
 ### Базы данных
 | Роль | Supabase project ref | URL | Кто пишет |
 |---|---|---|---|
-| **PRIMARY (prod)** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
+| **PRIMARY (prod) — Lovable Cloud** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
 | **MIRROR (опц.)** | `erfwtoavipwjqmylpizt` | standalone | Только ручной экспорт через `scripts/` |
 | ~~PEYLAA~~ | мигрирована в PRIMARY | `slug=peylaa-phuket-marriott` | Frontend через стандартный supabase client |
+
+⚠️ **Единственная production-БД проекта — `kakkwibljrjsawxgnupk` (Lovable Cloud, managed Supabase).** Это та БД, которую использует myuno.app (реальные пользователи и платежи), и она же зашита как fallback `VITE_SUPABASE_URL` в `vite.config.ts`. Миграции применяются через Lovable Cloud, а не вручную.
+
+> 🛑 **Для AI-агентов:** Supabase MCP в этих сессиях НЕ имеет доступа к prod-проекту `kakkwibljrjsawxgnupk`. Он показывает другой проект — `hueotfhvvbxaijccmhnc` («myUNO - Main DB») — это **НЕ** production. Никогда не применяй миграции/DDL к `hueotfhvvbxaijccmhnc`, считая его боевым. Миграции коммить в `supabase/migrations/` и применять через Lovable Cloud.
 
 ⚠️ **Все записи (CRM, лиды, бронирования, юзеры, платежи) идут в `kakkwibljrjsawxgnupk`.** Локальная разработка использует **ту же** production-БД — отдельного staging нет. Тестовые данные помечайте маркерами.
 

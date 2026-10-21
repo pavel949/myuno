@@ -33,7 +33,7 @@ interface FastTrackBookingPayload {
   addon_ids: string[];
 }
 
-async function sendWhatsAppNotification(payload: FastTrackBookingPayload, bookingId: string): Promise<void> {
+async function sendWhatsAppNotification(payload: FastTrackBookingPayload, bookingId: string, adminWhatsApp: string): Promise<void> {
   try {
     const dirLabel = payload.direction === 'arrival' ? '✈️ Прилёт' : '🛫 Вылет';
     const passengerNames = payload.passengers.map(p => `${p.first_name} ${p.last_name}`).join(', ');
@@ -57,7 +57,7 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
 
 🔗 ID: ${bookingId}`;
 
-    console.info('[WhatsApp] Fast Track notification for:', ADMIN_WHATSAPP);
+    console.info('[WhatsApp] Fast Track notification for:', adminWhatsApp);
     console.info('[WhatsApp] Message:', message);
 
     // Try UltraMsg if configured
@@ -70,7 +70,7 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           token: ultraMsgToken,
-          to: `+${ADMIN_WHATSAPP}`,
+          to: `+${adminWhatsApp}`,
           body: message,
         }),
       });
@@ -120,7 +120,11 @@ Deno.serve(async (req) => {
         total_price: payload.total_price,
         currency: payload.currency,
         airport_code: 'HKT',
-        status: 'pending',
+        // 'draft' is the table's canonical initial state — the status CHECK
+        // constraint (draft|paid|confirmed|assigned|in_progress|completed|
+        // cancelled|no_show) does NOT allow 'pending', so inserting it threw a
+        // check_violation and silently broke every fast-track booking.
+        status: 'draft',
       })
       .select('id')
       .single();
@@ -172,8 +176,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 4. Send WhatsApp (non-blocking)
-    sendWhatsAppNotification(payload, bookingId).catch(err =>
+    // 4. Send WhatsApp (non-blocking). ADMIN_WHATSAPP is handler-scoped, so it
+    // must be passed in — referencing it from the module-level helper threw a
+    // ReferenceError that silently swallowed every admin WhatsApp alert.
+    sendWhatsAppNotification(payload, bookingId, ADMIN_WHATSAPP).catch(err =>
       console.error('[WhatsApp] Failed:', err)
     );
 

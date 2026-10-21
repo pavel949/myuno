@@ -27,6 +27,8 @@ export interface UnifiedProperty {
   bathrooms: number | null;
   price_per_night: number | null;
   currency: string;
+  /** Actual properties.currency for display; legacy currency remains unchanged. */
+  record_currency?: string | null;
   source: 'owned' | 'managed' | 'company';
   complex_id: string | null;
   project_id: string | null;
@@ -46,7 +48,7 @@ function useCompanyProperties() {
   const companyId = activeCompany?.company_id;
 
   return useQuery({
-    queryKey: ['company-properties', companyId],
+    queryKey: ['company-properties', user?.id, companyId],
     queryFn: async () => {
       if (!companyId) return [];
       const { data, error } = await supabase
@@ -70,9 +72,9 @@ export function useMyProperties() {
   const isOwner = hasRole('owner');
   const isManager = hasRole('property_manager');
 
-  const { data: ownedRaw, isLoading: ownedLoading } = useOwnerProperties();
-  const { properties: managedRaw, isLoading: managedLoading } = useAssignedProperties();
-  const { data: companyRaw, isLoading: companyLoading } = useCompanyProperties();
+  const { data: ownedRaw, isLoading: ownedLoading, error: ownedError, refetch: refetchOwned } = useOwnerProperties();
+  const { properties: managedRaw, isLoading: managedLoading, error: managedError, refetch: refetchManaged } = useAssignedProperties();
+  const { data: companyRaw, isLoading: companyLoading, error: companyError, refetch: refetchCompany } = useCompanyProperties();
 
   // When an active MC is selected, only show properties belonging to that MC
   const isInMCMode = !!activeCompanyId;
@@ -96,6 +98,7 @@ export function useMyProperties() {
         bathrooms: p.bathrooms ?? null,
         price_per_night: p.price_per_night ?? null,
         currency: p.deposit_currency || 'THB',
+        record_currency: p.currency ?? null,
         source: 'owned' as const,
         complex_id: p.complex_id || null,
         project_id: p.project_id || null,
@@ -121,6 +124,7 @@ export function useMyProperties() {
       bathrooms: p.bathrooms,
       price_per_night: p.price_per_night,
       currency: p.currency,
+      record_currency: p.record_currency ?? null,
       source: 'managed' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
@@ -147,6 +151,7 @@ export function useMyProperties() {
       bathrooms: p.bathrooms ?? null,
       price_per_night: p.price_per_night ?? null,
       currency: p.deposit_currency || p.currency || 'THB',
+      record_currency: p.currency ?? null,
       source: 'company' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
@@ -202,6 +207,8 @@ export function useMyProperties() {
     allProperties,
     activeProperties,
     accessRole,
+    error: ownedError || managedError || companyError,
+    refetch: () => Promise.all([refetchOwned(), refetchManaged(), refetchCompany()]),
     isLoading: ownedLoading || managedLoading || companyLoading,
     isOwner,
     isManager,

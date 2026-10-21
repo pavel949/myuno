@@ -1,5 +1,10 @@
+import { PublishedPropertyRevisionQueue } from '@/components/admin/PublishedPropertyRevisionQueue';
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { moderationReturnPath } from '@/lib/moderationReviewRoutes';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ACTIVITY_FILTERS, PROPERTY_APPROVAL_FILTERS, matchesPropertyReview, readFilter, updateReviewParams } from '@/lib/admin/reviewFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,6 +17,9 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
+import { RealEstateDomainHealthPanel } from '@/components/admin/RealEstateDomainHealthPanel';
+import { PropertyProjectBulkLinkPanel } from '@/components/admin/PropertyProjectBulkLinkPanel';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +35,9 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
-import { Building2, Plus, Loader2, Search } from 'lucide-react';
+import { Building2, Plus, Loader2, Search, CalendarClock } from 'lucide-react';
+import { PropertyStayRulesPanel } from '@/components/admin/PropertyStayRulesPanel';
+
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
 
@@ -41,21 +51,21 @@ function useIsManagementCompanyId(id: string) {
 
 export default function AdminProperties() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { code: cityCurrencyCode } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
-  const [filterProviderId, setFilterProviderId] = useState<string>(searchParams.get('provider') || '');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending' | 'approved' | 'draft' | 'rejected'>(
-    searchParams.get('status') === 'pending' ? 'pending' : 'all'
-  );
-  
-  // Auto-detect if filter ID is an MC to search both provider_id and management_company_id
-  const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
+  const filterProviderId = searchParams.get('provider') || '';
+  const searchQuery = searchParams.get('q') || '';
+  const filter = readFilter(searchParams.get('activity'), ACTIVITY_FILTERS);
+  const approvalFilter = readFilter(searchParams.get('status'), PROPERTY_APPROVAL_FILTERS);
+  const setFilters = (updates: Record<string, string>) => setSearchParams(previous => updateReviewParams(previous, updates), { replace: true });
+  const resetFilters = () => setFilters({ provider: '', q: '', activity: 'all', status: 'all' });
+
+  const { properties, isLoading: propertiesLoading, error: propertiesError, refetch, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined, undefined, searchParams.get('edit') || undefined);
   const { data: mcs } = useManagementCompanies();
   
   // Redirect to unified property creation wizard instead of opening dialog
@@ -68,23 +78,44 @@ export default function AdminProperties() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<VendorProperty | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveUnconfirmed, setSaveUnconfirmed] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
   const lastUsedProviderRef = React.useRef<string>('');
+  const dismissedEditRef = React.useRef<string | null>(null);
+  const previousEditRef = React.useRef<string | null>(null);
   const isSelectedMC = useIsManagementCompanyId(selectedProviderId);
 
   const isRussian = language === 'ru';
 
+  const openEditSheet = useCallback((property: VendorProperty) => {
+    dismissedEditRef.current = null;
+    setSaveUnconfirmed(false);
+    setEditingProperty(property);
+    // Prefer management_company_id if set, then provider_id
+    const entityId = (property as any).management_company_id || property.provider_id || '';
+    setSelectedProviderId(entityId);
+    setIsSheetOpen(true);
+  }, []);
+
   // Handle edit query param
   React.useEffect(() => {
     const editId = searchParams.get('edit');
-    if (editId && properties.length > 0) {
+    if (previousEditRef.current !== editId) {
+      if (previousEditRef.current) {
+        setIsSheetOpen(false);
+        setEditingProperty(null);
+      }
+      previousEditRef.current = editId;
+      dismissedEditRef.current = null;
+    }
+    if (editId && dismissedEditRef.current !== editId && properties.length > 0 && (!isSheetOpen || editingProperty?.id !== editId)) {
       const property = properties.find(p => p.id === editId);
       if (property) {
         openEditSheet(property);
       }
     }
-  }, [searchParams, properties]);
+  }, [searchParams, properties, isSheetOpen, editingProperty?.id, openEditSheet]);
 
   React.useEffect(() => {
     if (!authLoading && !user) {
@@ -98,15 +129,8 @@ export default function AdminProperties() {
     }
   }, [isAdmin, adminLoading, user, navigate]);
 
-  const openEditSheet = useCallback((property: VendorProperty) => {
-    setEditingProperty(property);
-    // Prefer management_company_id if set, then provider_id
-    const entityId = (property as any).management_company_id || property.provider_id || '';
-    setSelectedProviderId(entityId);
-    setIsSheetOpen(true);
-  }, []);
-
   const openNewSheet = useCallback(() => {
+    setSaveUnconfirmed(false);
     setEditingProperty(null);
     // Use filter provider, or last used provider, or empty
     const defaultProvider = filterProviderId || lastUsedProviderRef.current || '';
@@ -119,13 +143,21 @@ export default function AdminProperties() {
     if (selectedProviderId) {
       lastUsedProviderRef.current = selectedProviderId;
     }
+    dismissedEditRef.current = searchParams.get('edit');
     setIsSheetOpen(false);
     setEditingProperty(null);
     // Don't reset selectedProviderId — it'll be set fresh on next open
-    if (searchParams.has('edit')) {
-      navigate('/admin/properties', { replace: true });
+    const returnPath = moderationReturnPath(searchParams.get('return'));
+    if (returnPath) {
+      navigate(returnPath, { replace: true });
+    } else if (searchParams.has('edit')) {
+      setSearchParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.delete('edit');
+        return next;
+      }, { replace: true });
     }
-  }, [navigate, searchParams, selectedProviderId]);
+  }, [searchParams, setSearchParams, selectedProviderId, navigate]);
 
   // Convert VendorProperty to CanonicalPropertyFormData for editing
   const getInitialFormData = useCallback((): CanonicalPropertyFormData => {
@@ -234,17 +266,18 @@ export default function AdminProperties() {
 
   const handleSubmit = async (data: CanonicalPropertyFormData) => {
     if (!data.title_en && !data.title) {
-      toast.error(isRussian ? 'Введите название' : 'Enter title');
+      toast.error(pickLang(language, { en: "Enter title", ru: "Введите название", th: "กรุณาระบุชื่อ" }));
       return;
     }
     
     const entityId = data.provider_id || selectedProviderId;
     if (!entityId) {
-      toast.error(isRussian ? 'Выберите провайдера или УК' : 'Select provider or PM company');
+      toast.error(pickLang(language, { en: "Select provider or PM company", ru: "Выберите провайдера или УК", th: "เลือกผู้ให้บริการหรือบริษัทจัดการ" }));
       return;
     }
 
     setIsSubmitting(true);
+    setSaveUnconfirmed(false);
     try {
       const listingModes = data.listing_modes || [];
       if (listingModes.length === 0) {
@@ -295,7 +328,7 @@ export default function AdminProperties() {
         is_featured: data.is_featured,
         is_verified: data.is_verified,
         approval_status: data.approval_status,
-        rejection_reason: data.rejection_reason || undefined,
+        rejection_reason: data.approval_status === 'rejected' ? data.rejection_reason?.trim() || null : null,
         commission_rate: data.commission_rate,
         notes: data.notes || undefined,
         pets_allowed: data.pets_allowed,
@@ -354,17 +387,20 @@ export default function AdminProperties() {
       };
 
       if (editingProperty) {
-        const { error } = await updateProperty(editingProperty.id, propertyData);
+        const { error } = await updateProperty(editingProperty.id, propertyData, editingProperty.updated_at);
         if (error) throw error;
-        toast.success(isRussian ? 'Объект обновлён' : 'Property updated');
+        toast.success(pickLang(language, { en: "Property updated", ru: "Объект обновлён", th: "อัปเดตที่พักแล้ว" }));
       } else {
         const { error } = await createProperty(propertyData);
         if (error) throw error;
-        toast.success(isRussian ? 'Объект создан' : 'Property created');
+        toast.success(pickLang(language, { en: "Property created", ru: "Объект создан", th: "สร้างที่พักแล้ว" }));
       }
 
+      queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
       closeSheet();
     } catch (error) {
+      setSaveUnconfirmed(true);
       errorLog.error(error, 'save_property');
     } finally {
       setIsSubmitting(false);
@@ -375,33 +411,24 @@ export default function AdminProperties() {
     try {
       const { error } = await deleteProperty(propertyId);
       if (error) throw error;
-      toast.success(isRussian ? 'Объект удалён' : 'Property deleted');
+      toast.success(pickLang(language, { en: "Property deleted", ru: "Объект удалён", th: "ลบที่พักแล้ว" }));
       setDeleteConfirmId(null);
     } catch (error) {
       errorLog.error(error, 'delete_property');
     }
   };
 
-  // Filter properties by search query and status
-  const filteredProperties = properties.filter(p => {
-    const matchesSearch = !searchQuery || 
-      p.title_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.title_ru?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.internal_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.district?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.address?.toLowerCase().includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
-    if (filter === 'active') return p.is_active;
-    if (filter === 'inactive') return !p.is_active;
-    // Approval status filter
-    const status = (p as any).approval_status || 'pending';
-    if (approvalFilter !== 'all' && status !== approvalFilter) return false;
-    return true;
-  });
-
-  const pendingCount = properties.filter(p => (p as any).approval_status === 'pending').length;
-  const approvedCount = properties.filter(p => (p as any).approval_status === 'approved').length;
-  const draftCount = properties.filter(p => (p as any).approval_status === 'draft').length;
+  const filteredProperties = properties.filter(p => matchesPropertyReview(p, { q: searchQuery, activity: filter, status: approvalFilter }));
+  // Counts describe the current search/provider/activity, before the moderation choice.
+  const approvalCount = (status: typeof PROPERTY_APPROVAL_FILTERS[number]) => propertiesLoading || propertiesError ? '—'
+    : properties.filter(p => matchesPropertyReview(p, { q: searchQuery, activity: filter, status })).length;
+  const hasFilters = !!filterProviderId || !!searchQuery || filter !== 'all' || approvalFilter !== 'all';
+  const approvalLabels = {
+    pending: pickLang(language, { en: "Pending approval", ru: "На модерации", th: "รออนุมัติ" }),
+    draft: pickLang(language, { en: "Draft", ru: "Черновик", th: "ฉบับร่าง" }),
+    rejected: pickLang(language, { en: "Rejected", ru: "Отклонено", th: "ไม่อนุมัติ" }),
+    approved: pickLang(language, { en: "Approved", ru: "Одобрено", th: "อนุมัติแล้ว" }),
+  };
 
   if (authLoading || adminLoading) {
     return (
@@ -424,22 +451,32 @@ export default function AdminProperties() {
     <>
       <PageContainer>
         <PageHeader 
-          title={isRussian ? 'Управление недвижимостью' : 'Property Management'}
+          title={pickLang(language, { en: "Property Management", ru: "Управление недвижимостью", th: "จัดการที่พัก" })}
           showBack
         />
 
+        {/* Domain structure health: developer -> project -> unit */}
+        <div className="mb-4">
+          <RealEstateDomainHealthPanel />
+          <PropertyProjectBulkLinkPanel />
+        </div>
+
+        <PublishedPropertyRevisionQueue />
+
         {/* Search & Add */}
+
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={isRussian ? 'Поиск по названию, району...' : 'Search by title, district...'}
+              placeholder={pickLang(language, { en: "Search by title, district...", ru: "Поиск по названию, району...", th: "ค้นหาด้วยชื่อหรือย่าน..." })}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setFilters({ q: e.target.value })}
+              aria-label={pickLang(language, { en: "Search properties", ru: "Поиск объектов", th: "ค้นหาที่พัก" })}
               className="pl-9"
             />
           </div>
-          <Button onClick={openNewSheet}>
+          <Button onClick={openNewSheet} aria-label={pickLang(language, { en: "Add property", ru: "Добавить объект", th: "เพิ่มที่พัก" })}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -448,66 +485,53 @@ export default function AdminProperties() {
         <div className="mb-3">
           <ProviderSelector
             value={filterProviderId}
-            onChange={setFilterProviderId}
-            label={isRussian ? 'Фильтр по провайдеру / УК' : 'Filter by provider / PM'}
+            onChange={value => setFilters({ provider: value })}
+            label={pickLang(language, { en: "Filter by provider / PM", ru: "Фильтр по провайдеру / УК", th: "กรองตามผู้ให้บริการ / บริษัทจัดการ" })}
           />
         </div>
 
-        {/* Status Filter Chips */}
-        <div className="flex gap-2 mb-2 flex-wrap">
-          {([
-            { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
-            { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
-            { key: 'inactive' as const, labelEn: 'Inactive', labelRu: 'Неактивные' },
-          ]).map(f => (
-            <Button
-              key={f.key}
-              variant={filter === f.key ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter(f.key)}
-            >
-              {isRussian ? f.labelRu : f.labelEn}
-              {f.key !== 'all' && (
-                <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
-                  {f.key === 'active' 
-                    ? properties.filter(p => p.is_active).length 
-                    : properties.filter(p => !p.is_active).length}
-                </Badge>
-              )}
-            </Button>
-          ))}
-          <Badge variant="outline" className="ml-auto self-center">
-            {filteredProperties.length} / {properties.length}
-          </Badge>
+        <div className="mb-4 space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {pickLang(language, { en: "Approval and activity are separate settings. Open a property to review its details before changing its status.", ru: "Модерация и активность — разные настройки. Откройте объект, чтобы проверить данные перед изменением статуса.", th: "การอนุมัติและการใช้งานเป็นคนละการตั้งค่า เปิดที่พักเพื่อตรวจสอบข้อมูลก่อนเปลี่ยนสถานะ" })}
+          </p>
+          <fieldset>
+            <legend className="text-sm font-medium mb-2">{pickLang(language, { en: "Approval", ru: "Модерация", th: "การอนุมัติ" })}</legend>
+            <div className="flex flex-wrap gap-2">
+              {PROPERTY_APPROVAL_FILTERS.map(status => (
+                <Button key={status} size="sm" className="min-h-11" variant={approvalFilter === status ? 'default' : 'outline'}
+                  aria-pressed={approvalFilter === status} onClick={() => setFilters({ status })}>
+                  {status === 'all' ? (pickLang(language, { en: "All", ru: "Все", th: "ทั้งหมด" })) : approvalLabels[status]}
+                  {' '}<span className="ml-2 font-mono">{approvalCount(status)}</span>
+                </Button>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-2">{pickLang(language, { en: "Activity", ru: "Активность", th: "การใช้งาน" })}</legend>
+            <div className="flex flex-wrap gap-2">
+              {ACTIVITY_FILTERS.map(activity => (
+                <Button key={activity} size="sm" className="min-h-11" variant={filter === activity ? 'default' : 'outline'}
+                  aria-pressed={filter === activity} onClick={() => setFilters({ activity })}>
+                  {activity === 'all' ? (pickLang(language, { en: "Any", ru: "Любая", th: "ทั้งหมด" })) : activity === 'active' ? (pickLang(language, { en: "Active", ru: "Активные", th: "ใช้งาน" })) : (pickLang(language, { en: "Inactive", ru: "Неактивные", th: "ไม่ใช้งาน" }))}
+                </Button>
+              ))}
+            </div>
+          </fieldset>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <p role="status">{propertiesLoading ? (pickLang(language, { en: "Loading properties…", ru: "Загрузка объектов…", th: "กำลังโหลดที่พัก…" })) : propertiesError ? (pickLang(language, { en: "Count unavailable", ru: "Количество недоступно", th: "ไม่ทราบจำนวน" })) : (pickLang(language, { ru: `Показано: ${filteredProperties.length} из ${properties.length}`, en: `Showing ${filteredProperties.length} of ${properties.length}`, th: `แสดง ${filteredProperties.length} จาก ${properties.length} รายการ` }))}</p>
+            {hasFilters && <Button size="sm" variant="ghost" onClick={resetFilters}>{pickLang(language, { en: "Reset filters", ru: "Сбросить фильтры", th: "ล้างตัวกรอง" })}</Button>}
+          </div>
         </div>
 
-        {/* Approval / Moderation Filter */}
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {([
-            { key: 'all' as const, labelEn: 'All statuses', labelRu: 'Все статусы', count: properties.length },
-            { key: 'pending' as const, labelEn: '⏳ Pending', labelRu: '⏳ На модерации', count: pendingCount },
-            { key: 'approved' as const, labelEn: '✅ Approved', labelRu: '✅ Одобрено', count: approvedCount },
-            { key: 'draft' as const, labelEn: '📝 Draft', labelRu: '📝 Черновик', count: draftCount },
-          ]).map(f => (
-            <Button
-              key={f.key}
-              variant={approvalFilter === f.key ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setApprovalFilter(f.key)}
-              className={f.key === 'pending' && pendingCount > 0 && approvalFilter !== 'pending' ? 'border-accent/40 text-accent dark:text-accent' : ''}
-            >
-              {isRussian ? f.labelRu : f.labelEn}
-              {f.key !== 'all' && (
-                <Badge 
-                  variant={f.key === 'pending' && f.count > 0 ? 'destructive' : 'secondary'} 
-                  className="ml-1.5 h-5 px-1.5 text-xs"
-                >
-                  {f.count}
-                </Badge>
-              )}
-            </Button>
-          ))}
-        </div>
+        {searchParams.has('edit') && !propertiesLoading && !propertiesError && !properties.some(property => property.id === searchParams.get('edit')) && (
+          <div role="alert" className="mb-4 rounded-none border p-4 space-y-3">
+            <p>{pickLang(language, { en: "This property is unavailable in the loaded list. Refresh the data or return to the queue.", ru: "Объект недоступен в загруженном списке. Обновите данные или вернитесь в очередь.", th: "ไม่พบที่พักนี้ในรายการที่โหลด โปรดรีเฟรชข้อมูลหรือกลับไปยังคิว" })}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => void refetch()}>{pickLang(language, { en: "Refresh", ru: "Обновить", th: "รีเฟรช" })}</Button>
+              {moderationReturnPath(searchParams.get('return')) && <Button variant="outline" onClick={closeSheet}>{pickLang(language, { en: "Return to queue", ru: "Вернуться в очередь", th: "กลับไปยังคิว" })}</Button>}
+            </div>
+          </div>
+        )}
 
         {/* Properties List */}
         {propertiesLoading ? (
@@ -516,19 +540,24 @@ export default function AdminProperties() {
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
+        ) : propertiesError ? (
+          <Card><CardContent className="p-6" role="alert">
+            <p className="mb-3">{pickLang(language, { en: "Could not load properties. Statuses and counts are unavailable.", ru: "Не удалось загрузить объекты. Статусы и количество недоступны.", th: "โหลดที่พักไม่ได้ จึงไม่ทราบสถานะและจำนวน" })}</p>
+            <Button variant="outline" onClick={() => void refetch()}>{pickLang(language, { en: "Retry", ru: "Повторить", th: "ลองอีกครั้ง" })}</Button>
+          </CardContent></Card>
         ) : filteredProperties.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="font-medium mb-1">
-                {isRussian ? 'Нет объектов' : 'No properties'}
+                {hasFilters ? (pickLang(language, { en: "No matching properties", ru: "Нет совпадений", th: "ไม่พบที่พักที่ตรงกัน" })) : (pickLang(language, { en: "No properties", ru: "Нет объектов", th: "ไม่มีที่พัก" }))}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {isRussian ? 'Добавьте недвижимость' : 'Add properties'}
+                {hasFilters ? (pickLang(language, { en: "Change or reset your filters.", ru: "Измените или сбросьте фильтры.", th: "เปลี่ยนหรือล้างตัวกรอง" })) : (pickLang(language, { en: "Add properties", ru: "Добавьте недвижимость", th: "เพิ่มที่พัก" }))}
               </p>
-              <Button onClick={openNewSheet}>
+              <Button onClick={hasFilters ? resetFilters : openNewSheet}>
                 <Plus className="h-4 w-4 mr-2" />
-                {isRussian ? 'Добавить' : 'Add Property'}
+                {hasFilters ? (pickLang(language, { en: "Reset filters", ru: "Сбросить фильтры", th: "ล้างตัวกรอง" })) : (pickLang(language, { en: "Add Property", ru: "Добавить", th: "เพิ่มที่พัก" }))}
               </Button>
             </CardContent>
           </Card>
@@ -539,8 +568,12 @@ export default function AdminProperties() {
               const mc = mcId ? (mcs || []).find(c => c.id === mcId) : null;
               const mcName = mc ? (isRussian ? mc.name_ru : mc.name_en) : null;
               return (
+                <div key={property.id} className="space-y-1">
+                  <div className="flex flex-wrap gap-2 text-xs" aria-label={pickLang(language, { en: "Property statuses", ru: "Статусы объекта", th: "สถานะที่พัก" })}>
+                    <Badge variant="outline">{approvalLabels[property.approval_status as keyof typeof approvalLabels] || (pickLang(language, { en: "Approval: unknown", ru: "Модерация: неизвестно", th: "การอนุมัติ: ไม่ทราบ" }))}</Badge>
+                    <Badge variant="secondary">{property.is_active === true ? (pickLang(language, { en: "Active", ru: "Активен", th: "ใช้งาน" })) : property.is_active === false ? (pickLang(language, { en: "Inactive", ru: "Неактивен", th: "ไม่ใช้งาน" })) : (pickLang(language, { en: "Activity: unknown", ru: "Активность: неизвестно", th: "การใช้งาน: ไม่ทราบ" }))}</Badge>
+                  </div>
                 <PropertyCard
-                  key={property.id}
                   property={property}
                   variant="list"
                   mode="admin"
@@ -548,26 +581,33 @@ export default function AdminProperties() {
                   onView={() => openEditSheet(property)}
                   onEdit={() => openEditSheet(property)}
                   onDelete={() => setDeleteConfirmId(property.id)}
-                  showApprovalStatus
+                  showApprovalStatus={false}
                   showInstantBadge
                 />
+                </div>
               );
             })}
           </div>
         )}
 
         {/* Canonical Property Form Sheet */}
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto max-h-screen flex flex-col">
-            <SheetHeader>
+        <Sheet open={isSheetOpen} onOpenChange={open => { if (!open) closeSheet(); }}>
+          <SheetContent
+            className="flex h-dvh max-h-dvh w-full flex-col overflow-hidden p-4 sm:max-w-2xl sm:p-6 [&>button]:z-30"
+            closeLabel={pickLang(language, { en: "Close editor", ru: "Закрыть редактор", th: "ปิดหน้าต่างแก้ไข" })}
+          >
+            <SheetHeader className="relative z-20 shrink-0 bg-background pr-10">
               <SheetTitle>
                 {editingProperty 
-                  ? (isRussian ? 'Редактировать объект' : 'Edit Property')
-                  : (isRussian ? 'Новый объект' : 'New Property')}
+                  ? (pickLang(language, { en: "Edit Property", ru: "Редактировать объект", th: "แก้ไขที่พัก" }))
+                  : (pickLang(language, { en: "New Property", ru: "Новый объект", th: "ที่พักใหม่" }))}
               </SheetTitle>
             </SheetHeader>
             
-            <div className="mt-6 flex-1 overflow-y-auto min-h-0">
+            {saveUnconfirmed && <p role="alert" className="shrink-0 border border-destructive p-3 text-sm">
+              {pickLang(language, { en: "Save was not confirmed. Close the editor, refresh the list and reopen the property before trying again.", ru: "Сохранение не подтверждено. Закройте редактор, обновите список и откройте объект снова перед повторной попыткой.", th: "ยังยืนยันการบันทึกไม่ได้ โปรดปิดหน้าต่างแก้ไข รีเฟรชรายการ แล้วเปิดที่พักอีกครั้งก่อนลองใหม่" })}
+            </p>}
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
               <CanonicalPropertyForm
                 key={editingProperty?.id || 'new'}
                 initialData={getInitialFormData()}
@@ -575,15 +615,26 @@ export default function AdminProperties() {
                 onCancel={closeSheet}
                 isSubmitting={isSubmitting}
                 mode="admin"
+                layout="contained"
+                mediaModalLayer="above-sheet"
+                propertyId={editingProperty?.id}
+                extraTabs={editingProperty?.id ? [{
+                  id: 'stay-rules',
+                  icon: CalendarClock,
+                  labelEn: 'Stay rules',
+                  labelRu: 'Условия аренды',
+                  content: <PropertyStayRulesPanel propertyId={editingProperty.id} />,
+                }] : []}
                 providerSelector={
                   <ProviderSelector
                     value={selectedProviderId}
                     onChange={setSelectedProviderId}
-                    label={isRussian ? 'Привязать к провайдеру' : 'Assign to Provider'}
+                    label={pickLang(language, { en: "Assign to Provider", ru: "Привязать к провайдеру", th: "กำหนดผู้ให้บริการ" })}
                     required
                   />
                 }
               />
+
             </div>
           </SheetContent>
         </Sheet>
@@ -592,19 +643,17 @@ export default function AdminProperties() {
         <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{isRussian ? 'Удалить объект?' : 'Delete property?'}</DialogTitle>
+              <DialogTitle>{pickLang(language, { en: "Delete property?", ru: "Удалить объект?", th: "ลบที่พักหรือไม่" })}</DialogTitle>
             </DialogHeader>
             <p className="text-muted-foreground">
-              {isRussian 
-                ? 'Это действие нельзя отменить.'
-                : 'This action cannot be undone.'}
+              {pickLang(language, { en: "This action cannot be undone.", ru: "Это действие нельзя отменить.", th: "การดำเนินการนี้ไม่สามารถย้อนกลับได้" })}
             </p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
-                {isRussian ? 'Отмена' : 'Cancel'}
+                {pickLang(language, { en: "Cancel", ru: "Отмена", th: "ยกเลิก" })}
               </Button>
               <Button variant="destructive" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
-                {isRussian ? 'Удалить' : 'Delete'}
+                {pickLang(language, { en: "Delete", ru: "Удалить", th: "ลบ" })}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { propertySearchHref } from '@/lib/propertySearchQuery';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
 import {
   CalendarClock,
@@ -143,7 +144,7 @@ function getActiveTab(pathname: string, search: string): string {
     pathname.startsWith(APP_ROUTES.PROPERTY_MAP) ||
     pathname.startsWith(APP_ROUTES.PROPERTY_CONSULTATION);
 
-  if (isBrowse || isLegacyPropertySearch) {
+  if (isBrowse || isLegacyPropertySearch || pathname.startsWith('/property/complex/')) {
     const params = new URLSearchParams(search);
     if (params.get('mode') === 'buy') return 'buy';
     if (params.get('tenancy') === 'long') return 'rent_long';
@@ -236,7 +237,17 @@ export function PropertyHubTabs() {
           <button
             key={tab.id}
             type="button"
-            onClick={() => navigate(tab.path)}
+            onClick={() => {
+              if (tab.path.startsWith(`${APP_ROUTES.PROPERTY_BROWSE}?`)) {
+                const target = new URLSearchParams(tab.path.split('?')[1]);
+                const params = new URLSearchParams(location.search);
+                // Explicit tab choice replaces mode/intent, but keeps the user's criteria.
+                params.delete('intent');
+                params.delete('quick');
+                target.forEach((value, key) => params.set(key, value));
+                navigate(propertySearchHref(params.toString()));
+              } else navigate(tab.path);
+            }}
             className={cn(
               'shrink-0 snap-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] sm:text-sm font-medium whitespace-nowrap transition-all leading-none',
               isActive
@@ -282,14 +293,11 @@ export default function PropertyHub() {
   /**
    * Single AppLayout/NavShell for the whole /property/* tree. Nested AppLayout
    * in child routes was rendering a second SideRail (duplicate left chrome).
-   * Immerse browse + search: custom sticky header; /property/my: no global top bar.
+   * Public browse/search keep the shared header; local search bars stick beneath it.
+   * /property/my retains its private immersive layout.
    */
-  const isBrowseImmersive =
-    p === APP_ROUTES.PROPERTY_BROWSE || p === `${APP_ROUTES.PROPERTY_BROWSE}/`;
   const hideGlobalTopBar =
-    isBrowseImmersive ||
-    p.startsWith('/property/my') ||
-    p === APP_ROUTES.PROPERTY_SEARCH;
+    p.startsWith('/property/my');
 
   let title: string | undefined;
   if (!hideGlobalTopBar) {
@@ -331,9 +339,10 @@ export default function PropertyHub() {
       title={title}
       showHeader={!hideGlobalTopBar}
       showBottomNav={showBottomNav}
+      usePageContainer={p !== APP_ROUTES.PROPERTY_SEARCH && p !== `${APP_ROUTES.PROPERTY_SEARCH}/`}
     >
       <CompareProvider>
-        {!hideOuterTabs && <PropertyHubTabs />}
+        {!hideOuterTabs && p !== APP_ROUTES.PROPERTY_SEARCH && <PropertyHubTabs />}
         <OffplanHubToolsStrip />
         <Outlet />
       </CompareProvider>

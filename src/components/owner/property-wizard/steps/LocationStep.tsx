@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +14,12 @@ import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
 interface LocationStepProps {
+  catalogueOnly?: boolean;
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
 }
 
-export function LocationStep({ formData, updateFormData }: LocationStepProps) {
+export function LocationStep({ formData, updateFormData, catalogueOnly = false }: LocationStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [showEditAddress, setShowEditAddress] = useState(false);
@@ -183,8 +185,8 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
         </CardContent>
       </Card>
 
-      {/* Smart Lock / Access Code */}
-      <Card>
+      {/* Access credentials are a separate operational authority. */}
+      {catalogueOnly ? <p className="text-sm text-muted-foreground">{pickLang(language, { en: 'Access codes and other private operational details cannot be entered in a catalogue draft. Use the separately authorized operational workflow.', ru: 'Коды доступа и другие закрытые эксплуатационные данные нельзя вводить в черновик объявления. Для них нужен отдельный уполномоченный рабочий процесс.', th: 'ไม่สามารถกรอกรหัสเข้าที่พักหรือข้อมูลปฏิบัติงานส่วนตัวในฉบับร่างประกาศได้ โปรดใช้ขั้นตอนปฏิบัติงานที่ได้รับสิทธิ์แยกต่างหาก' })}</p> : <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Lock className="h-4 w-4" />
@@ -201,6 +203,7 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
               </span>
             </Label>
             <Input
+              aria-label={isRu ? 'Код доступа' : 'Access code'}
               type="password"
               value={formData.lock_code || ''}
               onChange={(e) => updateFormData({ lock_code: e.target.value })}
@@ -214,7 +217,7 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
               : 'The code is stored securely and only visible to managers. Guests cannot see this field.'}
           </p>
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   );
 }

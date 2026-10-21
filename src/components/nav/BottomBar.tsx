@@ -10,20 +10,17 @@
  *  - Optional Apps launcher button (consumer roles only).
  */
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
 import { prefetchRoute as prefetchRouteChunk } from '@/lib/prefetchRoute';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { useUserPersonas } from '@/hooks/useUserPersonas';
-import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
-import { GUEST_NAV_PRO_SHELL } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
@@ -59,27 +56,12 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       return () => window.removeEventListener('navigator:open-apps-drawer', handler);
     }, []);
 
-    // Phase A5: feature-flagged swap of guest nav to Gosuslugi-style /me hub.
-    const meHubEnabled = useFeatureFlag('me_shell_v1', false);
-    // Wave 13 (M13.A): pro-shell tabbar (Home · Operate · Wallet · Me) for
-    // guest users with at least one professional persona active.
-    const proShellEnabled = useFeatureFlag('pro_shell_tabbar_v1', false);
-    const { personas } = useUserPersonas();
-    
     if (FULLSCREEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
 
-    const PRO_PERSONAS = new Set([
-      'property_owner', 'investor', 'real_estate_developer',
-      'local_services_provider',
-    ]);
-    const hasProPersona = personas.some(p => PRO_PERSONAS.has(p));
-    const navItems: NavItem[] =
-      role === 'guest' && proShellEnabled && hasProPersona
-        ? GUEST_NAV_PRO_SHELL
-        : role === 'guest' && meHubEnabled
-          ? GUEST_NAV_ME_HUB
-          : PRIMARY_NAV[role];
-    const showAppsButton = shouldShowAppsLauncher(role);
+    // Browsing has one stable navigation, regardless of saved personas or
+    // optional hub experiments. Operational routes retain their role-specific bar.
+    const navItems: NavItem[] = PRIMARY_NAV[role];
+    const showAppsButton = shouldShowAppsLauncher(role) && role !== 'guest';
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       const settings = getFeedbackSettings();
@@ -109,11 +91,12 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       : totalCols === 3 ? 'grid-cols-3'
       : 'grid-cols-5';
 
-    const renderItem = ({ path, icon: Icon, labelEn, labelRu, exact }: NavItem) => {
-      const active = isActive({ path, icon: Icon, labelEn, labelRu, exact });
-      const label = language === 'ru' ? labelRu : labelEn;
+    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, mobileLabelRu, exact }: NavItem) => {
+      const active = isActive({ path, icon: Icon, labelEn, labelRu, labelTh, exact });
+      const label = pickLang(language, { ru: labelRu, en: labelEn, th: labelTh });
+      const mobileLabel = language === 'ru' ? mobileLabelRu ?? label : label;
       return (
-        <NavLink
+        <Link
           key={path}
           to={path}
           onClick={handleNavClick}
@@ -122,6 +105,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           onTouchStart={() => handlePrefetch(path)}
           onFocus={() => handlePrefetch(path)}
           aria-label={label}
+          aria-current={active ? 'page' : undefined}
           className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
         >
           {active && (
@@ -141,12 +125,13 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           <span
             className={cn(
               'text-[10px] leading-none',
+              mobileLabelRu && 'whitespace-nowrap',
               active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
             )}
           >
-            {label}
+            {mobileLabel}
           </span>
-        </NavLink>
+        </Link>
       );
     };
 
@@ -180,14 +165,14 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
                   handleNavClick(e);
                   setAppsOpen(true);
                 }}
-                aria-label={language === 'ru' ? 'Все сервисы' : 'All apps'}
+                aria-label={pickLang(language, { ru: 'Все сервисы', en: 'All apps', th: 'บริการทั้งหมด' })}
                 className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
               >
                 <div className="w-10 h-10 rounded-none flex items-center justify-center bg-primary/10 border border-primary/25">
                   <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />
                 </div>
                 <span className="text-[10px] font-medium text-muted-foreground/80 leading-none">
-                  {language === 'ru' ? 'Сервисы' : 'Apps'}
+                  {pickLang(language, { ru: 'Сервисы', en: 'Apps', th: 'บริการ' })}
                 </span>
               </button>
             )}

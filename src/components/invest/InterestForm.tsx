@@ -25,6 +25,7 @@ import {
   Loader2,
   LogIn
 } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface InterestFormProps {
   projectId: string;
@@ -62,7 +63,7 @@ export function InterestForm({
     e.preventDefault();
     
     if (!user) {
-      navigate('/auth', { state: { from: `/invest/${projectId}` } });
+      redirectToAuth(navigate, { from: `/invest/${projectId}` });
       return;
     }
 
@@ -134,7 +135,7 @@ export function InterestForm({
                 : 'Sign in to express interest in this project'
               }
             </p>
-            <Button onClick={() => navigate('/auth', { state: { from: `/invest/${projectId}` } })}>
+            <Button onClick={() => redirectToAuth(navigate, { from: `/invest/${projectId}` })}>
               <LogIn className="h-4 w-4 mr-2" />
               {isRu ? 'Войти' : 'Sign In'}
             </Button>
@@ -143,10 +144,11 @@ export function InterestForm({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Interest type */}
             <div className="space-y-3">
-              <Label>{isRu ? 'Тип запроса' : 'Request Type'}</Label>
-              <RadioGroup 
-                value={interestType} 
+              <Label id="if-request-type-label">{isRu ? 'Тип запроса' : 'Request Type'}</Label>
+              <RadioGroup
+                value={interestType}
                 onValueChange={(v) => setInterestType(v as any)}
+                aria-labelledby="if-request-type-label"
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">

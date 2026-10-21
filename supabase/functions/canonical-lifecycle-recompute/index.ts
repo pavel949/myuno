@@ -22,6 +22,7 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireInternalSecret } from "../_shared/internal-secret.ts";
 import {
   resolveLifecycleStage,
   type LifecycleSignals,
@@ -187,6 +188,9 @@ Deno.serve(async (req: Request) => {
   if (!SUPABASE_URL || !SERVICE_ROLE) {
     return jsonResponse({ error: "service_role_missing" }, 500);
   }
+
+  const denied = requireInternalSecret(req, corsHeaders);
+  if (denied) return denied;
 
   let body: RecomputeRequest;
   try {

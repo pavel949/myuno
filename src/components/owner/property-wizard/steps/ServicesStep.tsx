@@ -28,11 +28,12 @@ interface ServicesData {
 }
 
 interface ServicesStepProps {
+  canEditPricing?: boolean;
   data: ServicesData;
   onChange: (updates: Partial<ServicesData>) => void;
 }
 
-export const ServicesStep = memo(function ServicesStep({ data, onChange }: ServicesStepProps) {
+export const ServicesStep = memo(function ServicesStep({ data, onChange, canEditPricing = true }: ServicesStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -50,6 +51,7 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
           <div className="flex items-center justify-between">
             <Label>{isRu ? 'Уборка включена' : 'Cleaning included'}</Label>
             <Switch
+              disabled={!canEditPricing}
               checked={data.cleaning_included ?? false}
               onCheckedChange={v => onChange({ cleaning_included: v })}
             />
@@ -71,7 +73,8 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
               <Label className="text-xs">{isRu ? 'Допол. уборка (฿)' : 'Extra cleaning (฿)'}</Label>
               <Input
                 type="number"
-                value={data.extra_cleaning_price ?? ''}
+                disabled={!canEditPricing}
+              value={data.extra_cleaning_price ?? ''}
                 onChange={e => onChange({ extra_cleaning_price: e.target.value ? Number(e.target.value) : undefined })}
               />
             </div>
@@ -81,7 +84,8 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
               <Label className="text-xs">{isRu ? 'Смена белья (฿)' : 'Linen change (฿)'}</Label>
               <Input
                 type="number"
-                value={data.linen_change_price ?? ''}
+                disabled={!canEditPricing}
+              value={data.linen_change_price ?? ''}
                 onChange={e => onChange({ linen_change_price: e.target.value ? Number(e.target.value) : undefined })}
               />
             </div>
@@ -113,6 +117,7 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
             <Label className="text-xs">{isRu ? 'Ранний заезд (฿)' : 'Early check-in (฿)'}</Label>
             <Input
               type="number"
+              disabled={!canEditPricing}
               value={data.early_checkin_price ?? ''}
               onChange={e => onChange({ early_checkin_price: e.target.value ? Number(e.target.value) : undefined })}
             />
@@ -121,6 +126,7 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
             <Label className="text-xs">{isRu ? 'Поздний выезд (฿)' : 'Late checkout (฿)'}</Label>
             <Input
               type="number"
+              disabled={!canEditPricing}
               value={data.late_checkout_price ?? ''}
               onChange={e => onChange({ late_checkout_price: e.target.value ? Number(e.target.value) : undefined })}
             />
@@ -174,7 +180,8 @@ export const ServicesStep = memo(function ServicesStep({ data, onChange }: Servi
                 <Label className="text-xs">{isRu ? 'Аэропорт (฿)' : 'Airport (฿)'}</Label>
                 <Input
                   type="number"
-                  value={data.transfer_airport_price ?? ''}
+                  disabled={!canEditPricing}
+              value={data.transfer_airport_price ?? ''}
                   onChange={e => onChange({ transfer_airport_price: e.target.value ? Number(e.target.value) : undefined })}
                 />
               </div>

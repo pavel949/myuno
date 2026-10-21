@@ -207,6 +207,41 @@ export function useOwnerAccounts() {
   });
 }
 
+export interface UnlinkedProperty {
+  id: string;
+  name: string;
+}
+
+/**
+ * Properties managed by this MC that have NO `owner_contact_id` link.
+ * These silently drop out of owner accounts, CRM and statement reporting,
+ * so the Owners page surfaces them for remediation (see MC UX audit).
+ */
+export function useUnlinkedProperties() {
+  const { activeCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id;
+
+  return useQuery({
+    queryKey: ['unlinked-properties', companyId],
+    queryFn: async (): Promise<UnlinkedProperty[]> => {
+      if (!companyId) return [];
+      const { data, error } = await supabase
+        .from('properties')
+        .select('id, title_en, title_ru')
+        .eq('management_company_id', companyId)
+        .is('owner_contact_id', null)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map(p => ({
+        id: p.id,
+        name: p.title_en || p.title_ru || 'Unnamed',
+      }));
+    },
+    enabled: !!companyId,
+  });
+}
+
 /** Fetch detailed financial data for a single owner's properties — scoped by MC */
 export function useOwnerAccountDetail(contactId: string | null) {
   const { activeCompany } = useActiveCompany();

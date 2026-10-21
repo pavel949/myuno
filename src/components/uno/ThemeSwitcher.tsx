@@ -50,6 +50,9 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            type="button"
+            aria-label={language === 'ru' ? `Тема: ${currentTheme.label}` : `Theme: ${currentTheme.label}`}
+            title={language === 'ru' ? 'Оформление' : 'Appearance'}
             className={cn(
               "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",

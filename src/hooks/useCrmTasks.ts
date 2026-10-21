@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from './useAgentDeals';
 import { CRM_TASK_ACTIVE_STATUSES } from '@/lib/tasks/taskStatus';
 import { toast } from 'sonner';
@@ -25,11 +26,12 @@ export interface CrmTask {
 }
 
 export function useCrmTasks(filters?: { status?: string; assigned_to?: string; due_today?: boolean }) {
+  const { user } = useAuth();
   const { data: company } = useMyCompanyId();
   const companyId = company?.company_id;
 
   return useQuery({
-    queryKey: ['crm-tasks', companyId, filters],
+    queryKey: ['crm-tasks', user?.id, companyId, filters],
     queryFn: async () => {
       let q = supabase
         .from('crm_tasks')
@@ -59,7 +61,7 @@ export function useCrmTasks(filters?: { status?: string; assigned_to?: string; d
       if (error) throw error;
       return (data || []) as unknown as CrmTask[];
     },
-    enabled: !!companyId,
+    enabled: !!user?.id && !!companyId,
   });
 }
 

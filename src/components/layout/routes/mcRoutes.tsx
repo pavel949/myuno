@@ -36,10 +36,15 @@ export const mcRoutes = (
     <Route path="properties/:id/setup" element={<LazyPage><Pages.PropertyQuickSetup /></LazyPage>} />
     <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
     <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
-    <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />
+    {/* PropertyManage (sectioned hub) consolidated into PropertyEditor — the
+        canonical editor (shared CanonicalPropertyForm, MCLayout shell). The hub
+        spawned its own shell and its dashboard deep-links used a ?tab= scheme it
+        never read. Redirect keeps every existing /manage link working. */}
+    <Route path="properties/:id/manage" element={<Navigate to="../editor" replace />} />
     <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
     <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
     <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
+    <Route path="today" element={<LazyPage><Pages.PmsTodayPage /></LazyPage>} />
     <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
     <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
     <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
@@ -59,6 +64,7 @@ export const mcRoutes = (
     <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
     <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
     <Route path="team" element={<Navigate to="/mc/staff" replace />} />
+    <Route path="analytics" element={<LazyPage><Pages.AnalyticsPage /></LazyPage>} />
     <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
     <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
     <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
@@ -111,6 +117,7 @@ export const mcRoutes = (
     <Route path="vendor-acquisition" element={<LazyPage><Pages.AdminVendorProspects /></LazyPage>} />
     <Route path="vault" element={<LazyPage><Pages.OwnerVaultPage /></LazyPage>} />
     <Route path="rates" element={<LazyPage><Pages.RateManagementPage /></LazyPage>} />
+    <Route path="structure" element={<LazyPage><Pages.PropertyStructurePage /></LazyPage>} />
     <Route path="reviews-management" element={<LazyPage><Pages.ReviewsManagementPage /></LazyPage>} />
     <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
     <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />

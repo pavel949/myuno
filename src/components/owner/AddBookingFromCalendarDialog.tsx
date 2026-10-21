@@ -1,3 +1,5 @@
+import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
+import { parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, bangkokTodayISO } from '@/lib/hotelDates';
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
@@ -12,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { format, differenceInDays, addDays, eachDayOfInterval } from 'date-fns';
+import { format, differenceInCalendarDays, addDays, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { 
   CalendarIcon, User, Phone, Mail, Users, Banknote, AlertTriangle, 
@@ -112,11 +114,9 @@ const isRu = language === 'ru';
     if (!checkIn || !checkOut || !bookings) return [];
     
     return bookings.filter(booking => {
-      const bookingStart = new Date(booking.check_in);
-      const bookingEnd = new Date(booking.check_out);
-      
-      // Check if booking overlaps with selected range
-      return bookingStart < checkOut && bookingEnd > checkIn;
+      return propertyOrderHoldsInventory(booking.status) && civilStaysOverlap(booking, {
+        check_in: civilDateKey(checkIn), check_out: civilDateKey(checkOut),
+      });
     });
   }, [checkIn, checkOut, bookings]);
   
@@ -134,7 +134,7 @@ const isRu = language === 'ru';
   }, [checkIn, checkOut, availability]);
   
   const hasConflicts = conflictingBookings.length > 0 || blockedDatesInRange.length > 0;
-  const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
+  const nights = checkIn && checkOut ? differenceInCalendarDays(checkOut, checkIn) : 0;
   
   // Calculate price per night
   const pricePerNight = useMemo(() => {
@@ -151,8 +151,9 @@ const isRu = language === 'ru';
     
     // Add booked dates
     bookings?.forEach(booking => {
-      const start = new Date(booking.check_in);
-      const end = new Date(booking.check_out);
+      if (!propertyOrderHoldsInventory(booking.status)) return;
+      const start = parseCivilDate(booking.check_in);
+      const end = parseCivilDate(booking.check_out);
       let current = start;
       while (current < end) {
         disabled.push(new Date(current));
@@ -252,7 +253,7 @@ const isRu = language === 'ru';
     setIsSubmitting(true);
     
     try {
-      await createBooking({
+      const booking = await createBooking({
         property_id: propertyId,
         check_in: format(checkIn, 'yyyy-MM-dd'),
         check_out: format(checkOut, 'yyyy-MM-dd'),
@@ -270,12 +271,25 @@ const isRu = language === 'ru';
         documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
-      toast(isRu ? 'Бронирование создано' : 'Booking Created', {
-        description: guestName 
-          ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
-          : `${nights} ${isRu ? 'ночей' : 'nights'}`,
-      });
-      
+      if (booking.preparation?.status === 'needs_attention') {
+        toast.warning(isRu ? 'Запись о бронировании сохранена. Подготовка требует внимания' : 'Booking record saved. Preparation needs attention', {
+          description: isRu
+            ? booking.preparation.guestDetailsUnconfirmed
+              ? 'Данные гостя не удалось подтвердить. Проверьте карточку и задачи. Не создавайте бронирование повторно.'
+              : 'Не удалось подтвердить создание всех задач подготовки. Проверьте задачи перед добавлением недостающих. Не создавайте бронирование повторно.'
+            : booking.preparation.guestDetailsUnconfirmed
+              ? 'Guest details could not be confirmed. Review the booking and tasks. Do not create the booking again.'
+              : 'Some preparation tasks could not be confirmed. Review tasks before adding missing ones. Do not create the booking again.',
+          duration: 12000,
+        });
+      } else {
+        toast(isRu ? 'Запись о бронировании сохранена' : 'Booking record saved', {
+          description: guestName
+            ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
+            : `${nights} ${isRu ? 'ночей' : 'nights'}`,
+        });
+      }
+
       onSuccess?.();
       onOpenChange(false);
       resetForm();
@@ -362,7 +376,7 @@ const isRu = language === 'ru';
                     }}
                     disabled={(date) => {
                       // Disable past dates
-                      if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+                      if (civilDateKey(date) < bangkokTodayISO()) return true;
                       // Disable already booked dates
                       return disabledDates.some(d => 
                         format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
@@ -404,12 +418,12 @@ const isRu = language === 'ru';
                       setShowCheckOutPicker(false);
                     }}
                     disabled={(date) => {
-                      // Disable dates before check-in
-                      if (checkIn && date <= checkIn) return true;
-                      // Disable already booked dates
-                      return disabledDates.some(d => 
-                        format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                      );
+                      // Departure is not an occupied night; inspect only the stay nights.
+                      if (!checkIn) return false;
+                      if (civilDateKey(date) <= civilDateKey(checkIn)) return true;
+                      const requested = { check_in: civilDateKey(checkIn), check_out: civilDateKey(date) };
+                      return bookings?.some(b => civilStaysOverlap(b, requested)) ||
+                        disabledDates.some(d => stayOccupiesDate(requested, civilDateKey(d)));
                     }}
                     locale={isRu ? ru : undefined}
                     initialFocus

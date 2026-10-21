@@ -1,189 +1,142 @@
-# myUNO · Phuket Super-App for Foreigners
+# myUNO
 
-> **Доверенная цифровая инфраструктура для жизни и инвестиций иностранца на Пхукете.**
-> Один аккаунт, одна база, одно окно — от трансфера из аэропорта до сделки с недвижимостью на $5M.
+> **Destination Property, Services & Living Operating System**
+>
+> Production core for Homes, PMS/Operations, Services Marketplace, Concierge, CRM, Owners, Agents and Finance.
 
-[![Status](https://img.shields.io/badge/status-active%20development-0A2240)](./PROJECT.md)
-[![Version](https://img.shields.io/badge/app-v3.55.5-D96B1A)](./src/lib/appVersion.ts)
-[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%206%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
-[![Domain](https://img.shields.io/badge/domain-myuno.app-08101E)](https://myuno.app)
+## Start here
 
----
+**Read [PROJECT.md](./PROJECT.md) first.** It is the repository constitution for product, architecture, canonical domain ownership, UX, P0 priorities and change governance.
 
-## What it is
+For AI/Codex/Lovable execution rules, then read [AGENTS.md](./AGENTS.md).
 
-**myUNO** — суперапп уровня государственного сервисного портала для русскоязычных и англоязычных иностранцев на Пхукете. Платформа охватывает 55+ микро-приложений (59 в реестре `src/lib/appRegistry.ts`) в шести surface-кластерах жизни (Arrive · Live · Manage · Invest · Legal · Build), объединённых единым AI-консьержем, общим CRM и канонической базой данных.
+### Canonical reading order
 
-**Маховик одного клиента:**
+1. [PROJECT.md](./PROJECT.md) — product & engineering constitution; highest-level authority.
+2. [AGENTS.md](./AGENTS.md) — concise AI/engineering execution invariants.
+3. [Connected Product Blueprint](./docs/canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md) — One Operational Reality and convergence.
+4. [Operating Spaces Design](./docs/canonical/OPERATING_SPACES_DESIGN.md) — Management Company → Operating Space scope.
+5. [Canonical docs index](./docs/canonical/README.md) — specialized product/data/design contracts.
+6. [Documentation guide](./docs/README.md) — canonical vs evidence vs historical documents.
 
+## What myUNO is
+
+myUNO connects three customer entry points:
+
+```text
+HOMES                 SERVICES                CONCIERGE
+Rent / Buy            Structured              Exceptional /
+                      Marketplace              high-touch
+     \                   |                    /
+      └────────────── shared identity / CRM ──┘
+                           |
+                  Operations / Finance
 ```
-ТУРИСТ → АРЕНДАТОР → ПОКУПАТЕЛЬ → СОБСТВЕННИК → РЕФЕРРЕР
+
+The system follows **One Operational Reality**: different surfaces project the same canonical property, booking, payment, person, service and accounting facts instead of creating parallel copies.
+
+### Target operating acceptance
+
+The current P0 is to operate:
+
+```text
+Ignatev Estate
+├── Layantara — resort portfolio
+└── Condominiums — distributed managed units
 ```
 
-Один CAC — четыре денежных события на 24–36 месяцах. Главный финансовый KPI — GMV сделок с недвижимостью; все остальные вертикали прогревают и удерживают пользователя на пути к этой сделке.
+with secure team isolation, founder consolidated oversight, and one Layantara booking proven from quote through checkout and P&L.
 
-**Два продукта-ядра:**
+This is an acceptance target, not evidence that Spaces are populated/enforced or that live booking, payment and P&L acceptance has passed. Reconcile progress with current source and dated verification; preserve accepted gates rather than restarting the roadmap.
 
-| Продукт | Домен | Назначение |
-|---------|-------|------------|
-| **myUNO** | [`myuno.app`](https://myuno.app) | Единая точка входа, AI-консьерж, все вертикали, витрина новостроек, аренда |
-| **myUNO Invest** | [`invest.myuno.app`](https://invest.myuno.app) | CRM сделок, DueDiligence AI, ClearView™ рейтинги, аналитика для HNW |
+## Core domain boundaries
 
----
+| Domain | Canonical authority |
+|---|---|
+| Physical property | `properties` / canonical property graph |
+| Rental inventory | `property_bookings` + canonical blocks |
+| Commercial order | `orders` |
+| Service request/booking | `service_orders` |
+| Payment-provider state | verified writers / `payment_intents` where applicable |
+| Accounting | `ledger_entries` |
+| Operational scope | Management Company + Operating Space |
+| Relationship | unified CRM/person model |
+| Public discovery | safe allowlisted projections |
 
-## Документация — порядок чтения
+Do not merge `service_orders` into `orders` merely for neatness. Do not infer that an `orders` success means property inventory was reserved.
 
-> При расхождении кода/UI с документами правится **код**, а не документ.
+## Product surfaces
 
-### 1 · Стратегический источник истины
+This is the product map, not an implementation/readiness matrix. A route or source file alone does not prove operational readiness; use PROJECT.md and the relevant current acceptance evidence.
 
-**[`/PROJECT.md`](./PROJECT.md)** — Master document v2.3. Чем является платформа, как устроена монетизация, кто аудитория, восемь моатов (включая ClearView), 13-строчная таблица сделок, Y1 target $1M, дизайн-стандарты, 5-тест для новых фич. **Отменяет все предыдущие версии и роадмапы.**
+- **Homes** — Rent / Buy discovery, project portal, home/unit detail, availability/terms, quote, booking/enquiry.
+- **Services Marketplace** — REQUEST / BOOK / BOOK+PAY structured services.
+- **Concierge** — human escalation for exceptional requests; not a replacement for working Marketplace.
+- **PMS / Operations** — Today, Calendar, Bookings, Properties, Housekeeping, Maintenance, Rates, Inventory, Finance.
+- **Agent Workspace** — authorized inventory, availability, pricing, markup, quote and booking/request.
+- **Owner** — occupancy, finance, statements, payouts, maintenance and documents.
+- **CRM** — one relationship history across property + services.
 
-### 2 · Канонические документы (`docs/canonical/`)
+## Technology
 
-| # | Документ | О чём |
-|---|----------|-------|
-| 01 | [Segmentation Framework](./docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация · 25 персон · 10 кластеров · CRM-поля |
-| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | Каталог услуг (тэги lifecycle/role/cluster). Target: 16 кат × 230 услуг; runtime SSOT `src/lib/catalog/taxonomy.ts` = 14 кат / ~69 услуг + DB |
-| 03 | [Tone of Voice](./docs/canonical/03-tone-of-voice.md) | Голос бренда: спокойная уверенность, продаём доверие |
-| 04 | [Implementation Protocol](./docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
-| 05 | [Visual Design System](./docs/canonical/05-visual-design-system.md) | Цвет, типографика, сетка, компоненты, кластеры |
-| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий оценки · AAA–CCC (7 grades + unrated) · моат #8 |
-| 07 | [Information Architecture](./docs/canonical/07-information-architecture.md) | URL-структура · субдомены · навигация · cross-domain SSO |
-| 08 | [AI Prompts Library](./docs/canonical/08-ai-prompts-library.md) | Канонические system prompts для всех AI-агентов |
-| 09 | [Data Schema](./docs/canonical/09-data-schema.md) | Таблицы · enums · RLS · FK · naming conventions Supabase |
+- React 18 + TypeScript + Vite
+- Tailwind + shadcn/ui
+- Supabase: Postgres, Auth, Storage, Edge Functions
+- TanStack Query
+- Stripe where applicable
+- PWA / Capacitor
+- Vitest / Testing Library / Playwright
+- Vercel production deployment
 
-### 3 · Архитектура (`docs/canonical/architecture/`)
+See current source/package manifests for exact versions; do not treat README version numbers as runtime truth.
 
-| Документ | О чём |
-|----------|-------|
-| [ARCHITECTURE_V2](./docs/canonical/architecture/ARCHITECTURE_V2.md) | Roles · clusters · surfaces · agents · hard rules |
-| [FEASIBILITY](./docs/canonical/architecture/FEASIBILITY.md) | Migration path и per-role implementation status |
-
-Индекс канона: [`docs/canonical/README.md`](./docs/canonical/README.md) · История: [`docs/canonical/CHANGELOG.md`](./docs/canonical/CHANGELOG.md).
-
-### 4 · Операционные референсы
-
-| Документ | О чём |
-|----------|-------|
-| [`CLAUDE.md`](./CLAUDE.md) | Инструкции для AI-ассистентов — обязательно к прочтению до любой задачи |
-| [`DESIGN.md`](./DESIGN.md) | Design tokens — цвета, шрифты, spacing, motion |
-| [`docs/ENVIRONMENT.md`](./docs/ENVIRONMENT.md) | Окружения, БД, ключи (источник истины) |
-| [`docs/CONVENTIONS.md`](./docs/CONVENTIONS.md) | Коды, нейминг, паттерны |
-| [`docs/EDGE_FUNCTIONS.md`](./docs/EDGE_FUNCTIONS.md) | Реестр Edge Functions (Deno 2.0) |
-| [`supabase/functions/_docs/API_REFERENCE.md`](./supabase/functions/_docs/API_REFERENCE.md) | Полный API-референс |
-
----
-
-## Tech Stack
-
-| Слой | Технологии |
-|------|------------|
-| **Frontend** | React 18 · TypeScript 5.9 · Vite 6 (SWC) · React Router 6 · TanStack Query 5 |
-| **UI** | Tailwind CSS 3.4 · shadcn/ui · Radix UI · Framer Motion |
-| **Forms** | React Hook Form 7 · Zod |
-| **Backend** | Supabase (Postgres · Auth · Storage · Edge Functions on Deno 2.0) |
-| **Payments** | Stripe (Checkout · Connect · Subscriptions) |
-| **Maps** | Google Maps (`@react-google-maps/api`) |
-| **Messaging** | UltraMSG (WhatsApp) · Telegram Bot · Resend (email) |
-| **Mobile** | PWA (`vite-plugin-pwa`) · Capacitor (iOS/Android) |
-| **Quality** | Vitest · Testing Library · Playwright · Sentry |
-
-**Шрифты (DS 2.1):** Source Serif 4 (display) · Geist (body/UI) · IBM Plex Mono (data/numerics, `tnum`).
-**Палитра (light default — civic infrastructure):** bg `#F7F5F1` (cream) · foreground `#1C1916` (ink) · primary `#0A2240` (navy) · accent `#D96B1A` (orange, ≤3% экрана). Dark theme — opt-in для admin/MC. Подробнее — [`DESIGN.md`](./DESIGN.md).
-
----
-
-## Quick Start
+## Local development
 
 ```bash
-git clone <YOUR_GIT_URL>
+git clone <repo-url>
 cd myuno
 npm install
-cp .env.example .env   # заполнить значения (см. docs/ENVIRONMENT.md)
-npm run dev            # localhost:8080
+cp .env.example .env
+npm run dev
 ```
 
-Команды:
+Common checks:
 
 ```bash
-npm run dev       # dev server
-npm run build     # production build
-npm run preview   # preview production at localhost:4173
-npm run lint      # ESLint
+npm run build
+npm run lint
+npm test
 ```
 
----
+Use only scripts that actually exist in the current `package.json`; inspect it before assuming a command.
 
-## Структура проекта
+## Production safety
 
-```
-.
-├── PROJECT.md                  ← strategic source of truth (read first)
-├── CLAUDE.md                   ← AI assistant instructions
-├── DESIGN.md                   ← design tokens reference
-├── README.md                   ← this file
-│
-├── docs/
-│   ├── canonical/              ← operational source of truth (01–09 + architecture/)
-│   ├── ENVIRONMENT.md          ← envs, DBs, keys
-│   ├── CONVENTIONS.md
-│   └── …                       ← topic-specific docs
-│
-├── src/
-│   ├── pages/                  ← 557 pages by vertical
-│   ├── components/             ← ~998 components / 90 domains
-│   ├── hooks/                  ← 429 custom hooks
-│   ├── contexts/               ← 15 global providers
-│   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
-│   ├── lib/                    ← utilities · taxonomies · adapters
-│   ├── design-system/          ← tokens · component docs
-│   └── i18n/                   ← RU/EN translations
-│
-├── supabase/
-│   ├── functions/              ← Edge Functions (Deno 2.0)
-│   └── migrations/             ← SQL migrations (DO NOT EDIT)
-│
-└── archive/                    ← frozen historical context (do not reference)
+There is no assumption of an isolated staging database. Preview/local tooling may point at production-backed infrastructure.
+
+- Never use production business mutations as QA.
+- Use synthetic/stubbed UI tests and isolated PostgreSQL fixtures for security/data work.
+- Never edit already-applied migrations.
+- Use forward migrations and security-preserving rollbacks.
+- Critical money/inventory/RLS/schema changes require explicit GO/NO-GO.
+
+## Documentation model
+
+```text
+PROJECT.md                  normative constitution
+AGENTS.md                   concise execution rules
+docs/canonical/             durable specialized contracts
+docs/convergence/           implementation evidence / audits
+docs/hardening/rollback/    security-preserving rollback artifacts
+archive/                    historical only
 ```
 
----
-
-## Окружения
-
-| Окружение | URL | База данных |
-|-----------|-----|-------------|
-| **Production** | [myuno.app](https://myuno.app) · [www.myuno.app](https://www.myuno.app) | Supabase `kakkwibljrjsawxgnupk` |
-| **Preview** | [uno-connect-hub.lovable.app](https://uno-connect-hub.lovable.app) | Та же PRIMARY DB |
-| **Local** | `localhost:8080` | Та же PRIMARY DB |
-
-⚠️ Отдельного staging нет — все три окружения работают с одной production БД. Тестовые данные помечайте `[TEST]` / `source='smoke_test'` / `*@myuno.test`.
-
----
-
-## User surfaces
-
-| Surface | Маршрут | Назначение |
-|---------|---------|------------|
-| Home | `/` | LifeOS — ситуационные шорткаты |
-| Discover | `/discover` | Хаб сервисов по жизненным контекстам |
-| Operate | `/operate` | Управление активами для собственников и УК |
-| Wallet | `/wallet` | Платежи, подписки, история |
-| Me | `/account` | Профиль, бронирования, настройки |
-| Admin | `/admin` | Платформенное управление (контент, заказы, AI) |
-
-Кластеры (colour-locked): **Arrive · Live · Manage · Invest · Legal · Build**.
-
----
+Convergence/audit documents are evidence, not permanent architectural authority. When a rule becomes durable, promote it into canonical documentation.
 
 ## Deployment
 
-- **Production:** Vercel auto-deploy с `main` ветки.
-- **Edge Functions:** Supabase auto-deploy при пуше в `supabase/functions/`.
-- **Lovable preview:** обновляется автоматически.
+Production is deployed through Vercel from the repository's production branch/configuration. Supabase Edge Functions and database changes are production-sensitive. Verify current deployment configuration before changing release behavior.
 
----
+## Ownership
 
-## License & ownership
-
-Proprietary · © Ignatev Group · All rights reserved. Контакт: Pavel Ignatev.
+Proprietary · Ignatev Group · Phuket, Thailand.

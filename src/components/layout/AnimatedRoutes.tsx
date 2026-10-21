@@ -34,6 +34,7 @@ import ForBusinessSkeleton from '@/components/landings/ForBusinessSkeleton';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
 import { adminRoutes } from './routes/adminRoutes';
 import { mcRoutes } from './routes/mcRoutes';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { propertyHubRoutes } from './routes/propertyHubRoutes';
 
 const NewbuildsContextOutlet = () => (
@@ -55,12 +56,15 @@ const LifeFlowAlias = () => {
 // (~30 home components + persona logic) and we don't want to block first
 // paint on /auth, /property/:id, deep links, etc.
 import Auth from '@/pages/Auth';
+import OAuthConsent from '@/pages/OAuthConsent';
 import NotFound from '@/pages/NotFound';
 import Unsubscribe from '@/pages/Unsubscribe';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
-const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
+// WelcomeLanding stays imported indirectly via EcosystemPage (/ecosystem route).
+const Landing = React.lazy(() => import('@/pages/Landing'));
+const EcosystemPage = React.lazy(() => import('@/pages/EcosystemPage'));
 
 
 // All lazy page imports from centralized registry
@@ -82,12 +86,15 @@ const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'
 // Magnet visual-builder landings (`/l/:slug`)
 const MagnetLandingPage = React.lazy(() => import('@/pages/landings/MagnetLandingPage'));
 
-// Home router: guests see marketing landing, authed users see Index
+// Home router: guests see the trust-first Landing, authed users see Index.
+// WelcomeLanding (breadth-first) is preserved and reachable at /ecosystem
+// via EcosystemPage. To roll back to the old guest homepage, swap
+// <Landing /> back to <WelcomeLanding /> here.
 const HomeRouter = () => {
   const { user, isLoading } = useAuth();
   if (isLoading) return <LoadingState />;
   if (!user) {
-    return <WelcomeLanding />;
+    return <Landing />;
   }
   return <Index />;
 };
@@ -123,11 +130,15 @@ const LazyPage = ({ children }: { children: React.ReactNode }) => (
 
 const AdminRouteLayout = () => (
   <AdminGuard>
-    <AdminLayout>
-      <Suspense fallback={<LoadingState />}>
-        <Outlet />
-      </Suspense>
-    </AdminLayout>
+    {/* ActiveCompanyProvider lets admins act inside an MC context (house MC) —
+        powers the CompanySwitcher and the lead→deal bridge target company. */}
+    <ActiveCompanyProvider>
+      <AdminLayout>
+        <Suspense fallback={<LoadingState />}>
+          <Outlet />
+        </Suspense>
+      </AdminLayout>
+    </ActiveCompanyProvider>
   </AdminGuard>
 );
 
@@ -164,7 +175,7 @@ const safeImport = (loader: () => Promise<unknown>) => {
 const prefetchRoutes = () => {
   if (typeof window === 'undefined') return;
   const run = () => {
-    safeImport(() => import('@/pages/property/PropertyIndex'));
+    safeImport(() => import('@/pages/property/PropertySearchPage'));
     safeImport(() => import('@/pages/restaurants/RestaurantsIndex'));
     safeImport(() => import('@/pages/experiences/ExperiencesIndex'));
     safeImport(() => import('@/pages/beauty/BeautySpaIndex'));
@@ -190,6 +201,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Core ── */}
         <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+        <Route path="/home" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+
+        {/* Secondary breadth catalogue — reached from Landing «Explore the ecosystem». */}
+        <Route path={APP_ROUTES.ECOSYSTEM} element={<PageTransition><Suspense fallback={<LoadingState />}><EcosystemPage /></Suspense></PageTransition>} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
         <Route path="/join" element={<LazyPage><Pages.JoinInvite /></LazyPage>} />
         <Route path="/invite" element={<Navigate to="/join" replace />} />
@@ -213,11 +228,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
         <Route path="/auth/setup-password" element={<LazyPage><Pages.SetupPassword /></LazyPage>} />
+        <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
         
         {/* ── User ── */}
         {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
             /navigator, /catalog, /categories — все редиректят на /discover. */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
+        {["stay","live","buy","services"].map((g) => (
+          <Route key={g} path={`${APP_ROUTES.DISCOVER}/${g}`} element={<LazyPage><Pages.GoalEntryPage goal={g} /></LazyPage>} />
+        ))}
+        <Route path={APP_ROUTES.DISCOVER_SITUATIONS} element={<LazyPage><Pages.SituationNavigator /></LazyPage>} />
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NAVIGATOR} element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
         <Route path="/catalog" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
@@ -306,8 +326,6 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── Stage 4: Unified Outreach Hub ── */}
         <Route path="/outreach" element={<LazyPage><Pages.OutreachHub /></LazyPage>} />
-        {/* Legacy entry: /mc/sequences → /outreach?audience=guest */}
-        <Route path="/mc/sequences" element={<Navigate to="/outreach?audience=guest" replace />} />
         
         {/* ── Beauty & Spa ── */}
         <Route path={APP_ROUTES.BEAUTY} element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
@@ -323,7 +341,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         <Route
           path={APP_ROUTES.STAYS_SEARCH}
-          element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+          element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'short' }} />}
         />
 
         {/* ── Property Hub (child routes extracted to ./routes/propertyHubRoutes) ── */}
@@ -371,6 +389,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Newbuilds (Premium New Developments) ── */}
         {/* Project microsite — standalone, no app shell, custom SEO */}
         <Route path="/p/:slug" element={<LazyPage><Pages.ProjectMicrosite /></LazyPage>} />
+        {/* Thai business landing — standalone Russian microsite per business */}
+        <Route path="/ts/:slug" element={<LazyPage><Pages.ThaiBusinessLanding /></LazyPage>} />
+        {/* Thai business B2B acquisition landing — standalone, TH/EN/RU, lead form */}
+        <Route path={APP_ROUTES.THAI_BUSINESS_PARTNER} element={<LazyPage><Pages.ThaiBusinessPartner /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
@@ -530,9 +552,6 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_CALCULATOR} element={<LazyPage><Pages.InvestmentCalculatorPage /></LazyPage>} />
         {/* Wave 2: unified tools hub (ClearView + Calculator + Advisory + DD) */}
         <Route path={APP_ROUTES.INVEST_TOOLS} element={<LazyPage><Pages.InvestmentToolsHub /></LazyPage>} />
-        {/* Wave 2: canonical ClearView landing + apply (previously unmounted → 404) */}
-        <Route path={APP_ROUTES.CLEARVIEW} element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.CLEARVIEW_APPLY} element={<LazyPage><Pages.ClearViewApplyPage /></LazyPage>} />
         {/* Wave 2: /invest/clearview alias → canonical /property/clearview */}
         <Route path="/invest/clearview" element={<Navigate to={APP_ROUTES.CLEARVIEW} replace />} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
@@ -544,7 +563,6 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Legacy: /invest/:id → /invest/project/:id */}
         <Route path="/invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy aliases */}
-        <Route path={APP_ROUTES.INVEST_CLUSTER} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         <Route path="/invest-hub" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         
         {/* ── Knowledge ── */}
@@ -687,6 +705,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/welcome" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
+        {/* ── Thai Business / Local Services (B2C) — gated in-page by feature flag ── */}
+        <Route path={APP_ROUTES.THAI_SERVICES} element={<LazyPage><Pages.ThaiServicesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.THAI_MY_BOOKINGS} element={<LazyPage><AuthGuard><Pages.ThaiMyBookings /></AuthGuard></LazyPage>} />
+        <Route path="/thai-services/:id" element={<LazyPage><Pages.ThaiBusinessDetail /></LazyPage>} />
+
         {/* ── Provider/Vendor ── */}
         <Route path="/provider/onboarding" element={<Navigate to="/become-partner" replace />} />
         <Route path="/vendor/join" element={<LazyPage><Pages.VendorLanding /></LazyPage>} />
@@ -696,6 +719,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor" element={<Pages.VendorDashboard />} />
           <Route path="/vendor/bookings" element={<Pages.VendorBookings />} />
           <Route path="/vendor/services" element={<Pages.VendorServices />} />
+          <Route path="/vendor/service-desk" element={<Pages.VendorServiceDesk />} />
           <Route path="/vendor/analytics" element={<Pages.VendorAnalytics />} />
           <Route path="/vendor/payouts" element={<Pages.VendorPayouts />} />
           <Route path="/vendor/properties" element={<Pages.VendorProperties />} />
@@ -715,6 +739,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/legal" element={<Pages.VendorLegal />} />
           <Route path="/vendor/pets" element={<Pages.VendorPets />} />
           <Route path="/vendor/cleaning" element={<Pages.VendorCleaning />} />
+          <Route path="/vendor/thai-business" element={<Pages.VendorThaiBusiness />} />
           <Route path="/vendor/babysitters" element={<Pages.VendorBabysitters />} />
           <Route path="/vendor/flowers" element={<Pages.VendorFlowers />} />
           <Route path="/vendor/pharmacy" element={<Pages.VendorPharmacy />} />
@@ -760,8 +785,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/setup" element={<Navigate to="/mc/setup" replace />} />
         <Route path="/owner/portfolio" element={<Navigate to="/mc/portfolio" replace />} />
         <Route path="/owner/finance" element={<Navigate to="/mc/finance" replace />} />
-        <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
-        <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
+        <Route path="/owner/service-request" element={<Navigate to={{ pathname: "/mc/service-request", search: location.search, hash: location.hash }} replace />} />
+        <Route path="/owner/inspection" element={<Navigate to={{ pathname: "/mc/inspection", search: location.search, hash: location.hash }} replace />} />
         <Route path={APP_ROUTES.OWNER_MANAGEMENT_LANDING} element={<LazyPage><Pages.OwnerManagementLanding /></LazyPage>} />
         <Route path={APP_ROUTES.STOREFRONT_DEMO} element={<LazyPage><Pages.StorefrontDemoLanding /></LazyPage>} />
         <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />

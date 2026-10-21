@@ -13,12 +13,24 @@ interface PhotoLightboxProps {
   initialIndex?: number;
   open: boolean;
   onClose: () => void;
+  /** Optional per-image captions (same order as `images`), Airbnb-style. */
+  captions?: Array<string | null | undefined>;
+  /** Optional per-image alt text; falls back to the caption, then a generic label. */
+  alts?: Array<string | null | undefined>;
 }
 
-export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: PhotoLightboxProps) {
+export function PhotoLightbox({
+  images,
+  initialIndex = 0,
+  open,
+  onClose,
+  captions,
+  alts,
+}: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const { language } = useLanguage();
   const isRu = language === 'ru';
+
 
   useEffect(() => {
     if (open) setCurrentIndex(initialIndex);
@@ -78,10 +90,15 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         {/* Image */}
         <img
           src={images[currentIndex]}
-          alt={`${isRu ? 'Фото' : 'Photo'} ${currentIndex + 1}`}
+          alt={
+            alts?.[currentIndex] ||
+            captions?.[currentIndex] ||
+            `${isRu ? 'Фото' : 'Photo'} ${currentIndex + 1}`
+          }
           className="max-h-full max-w-full object-contain select-none"
           draggable={false}
         />
+
 
         {/* Next button */}
         {currentIndex < images.length - 1 && (
@@ -95,7 +112,13 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         )}
       </div>
 
+      {/* Caption for the current photo (room tag / description) */}
+      {captions?.[currentIndex] && (
+        <p className="px-6 pt-3 text-center text-sm text-white/80">{captions[currentIndex]}</p>
+      )}
+
       {/* Thumbnail strip */}
+
       <div className="px-4 py-3 overflow-x-auto scrollbar-hide touch-pan-y">
         <div className="flex gap-2 justify-center">
           {images.map((img, i) => (

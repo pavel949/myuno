@@ -4,6 +4,8 @@
 // finance reports from being polluted by technical sync records.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
+import { propertyBookingHoldsInventory } from "../_shared/property-inventory.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -253,6 +255,12 @@ Deno.serve(async (req) => {
     for (const calendar of calendars || []) {
       try {
         console.info(`Fetching iCal: ${calendar.name}`);
+        // SSRF guard: ical_url is user-supplied DB data — block loopback,
+        // private ranges and cloud-metadata targets before fetching.
+        const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+        if (!ssrf.allowed) {
+          throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+        }
         const response = await fetch(calendar.ical_url, {
           headers: { 'User-Agent': 'UNO Calendar Sync/1.0' },
         });
@@ -263,10 +271,11 @@ Deno.serve(async (req) => {
         console.info(`Parsed ${events.length} events from ${calendar.name}`);
 
         // Existing bookings from this calendar
-        const { data: existingBookings } = await supabase
+        const { data: existingBookings, error: existingError } = await supabase
           .from('property_bookings')
-          .select('id, external_id')
+          .select('id, external_id, status')
           .eq('source_calendar_id', calendar.id);
+        if (existingError) throw new Error(`Load bookings failed: ${existingError.message}`);
 
         const existingIdMap = new Map<string, string>();
         for (const b of existingBookings || []) {
@@ -275,10 +284,15 @@ Deno.serve(async (req) => {
 
         const newEventIds = new Set(events.map((e) => e.uid));
 
-        // Cancel bookings that disappeared from external feed
-        const toCancel = (existingBookings || []).filter(
-          (b: any) => b.external_id && !newEventIds.has(b.external_id),
-        );
+        // Cancel bookings that disappeared from the feed — only ones not already
+        // cancelled, and never wipe everything when the feed came back empty.
+        const active = (existingBookings || []).filter((b: { status: string | null }) => propertyBookingHoldsInventory(b.status));
+        const toCancel = events.length === 0 && active.length > 0
+          ? []
+          : active.filter((b: { external_id: string | null }) => b.external_id && !newEventIds.has(b.external_id));
+        if (events.length === 0 && active.length > 0) {
+          console.warn(`Empty feed for ${calendar.name}; skipped cancelling ${active.length} bookings`);
+        }
         if (toCancel.length > 0) {
           await supabase
             .from('property_bookings')

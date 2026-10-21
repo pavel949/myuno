@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import type { ElementType } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addDays, format, isPast, isToday, isTomorrow, parseISO, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
   ArrowRight,
+  AlertCircle,
   BriefcaseBusiness,
   CalendarCheck2,
   CircleDollarSign,
@@ -45,15 +46,14 @@ interface OverviewItem {
 
 interface OverviewBlockProps {
   title: string;
-  subtitle: string;
   icon: ElementType;
   items: OverviewItem[];
   summary: string;
-  nextAction: string;
   ctaLabel: string;
   ctaHref: string;
-  emptyText: string;
   isLoading?: boolean;
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
 function getUrgencyMeta(urgency: OverviewUrgency, isRu: boolean) {
@@ -70,7 +70,7 @@ function getUrgencyMeta(urgency: OverviewUrgency, isRu: boolean) {
       };
     default:
       return {
-        label: isRu ? 'Ближайшее' : 'Upcoming',
+        label: isRu ? 'Ближайшие события' : 'Upcoming',
         className: 'border-primary/30 bg-primary/10 text-primary',
       };
   }
@@ -83,105 +83,78 @@ function formatDateLabel(date: Date, isRu: boolean) {
   return format(date, 'dd MMM', { locale: isRu ? ru : undefined });
 }
 
-function OverviewBlock({
+export function OverviewBlock({
   title,
-  subtitle,
   icon: Icon,
   items,
   summary,
-  nextAction,
   ctaLabel,
   ctaHref,
-  emptyText,
   isLoading = false,
+  hasError = false,
+  onRetry,
 }: OverviewBlockProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  if (isLoading) {
-    return (
-      <Card className="h-full">
-        <CardHeader className="space-y-3 pb-3">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-4 w-full" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-16 w-full rounded-none" />
-          <Skeleton className="h-16 w-full rounded-none" />
-          <Skeleton className="h-10 w-full rounded-none" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="h-full border-primary/10">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Icon className="h-4 w-4 text-primary" />
-              {title}
-              <Badge variant="secondary" className="text-[10px]">
-                {items.length}
-              </Badge>
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-1">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {isRu ? 'Что произошло' : 'What happened'}
-          </p>
-          <p className="text-sm leading-6">{summary}</p>
-        </div>
-
-        <div className="space-y-2">
-          {items.length > 0 ? items.map((item) => {
-            const ItemIcon = item.icon;
-            const urgency = getUrgencyMeta(item.urgency, isRu);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.href || ctaHref)}
-                className="flex w-full items-start gap-3 rounded-none border bg-card p-3 text-left transition-colors hover:bg-muted/50"
-              >
-                <div className="rounded-none bg-muted p-2">
-                  <ItemIcon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    <Badge variant="outline" className={cn('shrink-0 text-[10px]', urgency.className)}>
-                      {urgency.label}
-                    </Badge>
-                  </div>
-                  <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-                  <p className="text-xs text-muted-foreground">{item.detail}</p>
-                </div>
-              </button>
-            );
-          }) : (
-            <div className="rounded-none border border-dashed p-4 text-sm text-muted-foreground">
-              {emptyText}
-            </div>
+    <Card className="min-w-0 border-border shadow-none">
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="flex items-center gap-2 font-sans text-body font-medium">
+          <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <span className="min-w-0">{title}</span>
+          {!hasError && !isLoading && items.length > 0 && (
+            <Badge variant="secondary" className="ml-auto font-mono text-caption">{items.length}</Badge>
           )}
-        </div>
-
-        <div className="space-y-2 rounded-none bg-muted/40 p-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {isRu ? 'Следующее действие' : 'Next action'}
-          </p>
-          <p className="text-sm text-foreground">{nextAction}</p>
-          <Button variant="outline" className="w-full justify-between" onClick={() => navigate(ctaHref)}>
-            {ctaLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 p-4 pt-0">
+        {hasError ? (
+          <div role="alert" className="space-y-2">
+            <p className="flex items-start gap-2 text-body-sm text-destructive">
+              <AlertCircle className="mt-1 h-4 w-4 shrink-0" aria-hidden />
+              {isRu ? 'Не удалось загрузить данные. Проверьте раздел или повторите попытку.' : 'Could not load data. Open the section or try again.'}
+            </p>
+            {onRetry && <Button variant="secondary" onClick={onRetry}>{isRu ? 'Повторить' : 'Retry'}</Button>}
+          </div>
+        ) : isLoading ? (
+          <div role="status" aria-label={isRu ? `Загрузка: ${title}` : `Loading: ${title}`} className="space-y-2 py-1">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ) : (
+          <>
+            <p className="text-body-sm leading-relaxed text-muted-foreground">{summary}</p>
+            {items.length > 0 && <div className="space-y-2">
+              {items.map((item) => {
+                const ItemIcon = item.icon;
+                const urgency = getUrgencyMeta(item.urgency, isRu);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navigate(item.href || ctaHref)}
+                    className="flex min-h-11 w-full items-start gap-2 border bg-card p-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <ItemIcon className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="break-words text-body-sm font-medium">{item.title}</p>
+                        <Badge variant="outline" className={cn('shrink-0 text-caption', urgency.className)}>{urgency.label}</Badge>
+                      </div>
+                      <p className="break-words text-caption text-muted-foreground">{item.subtitle}</p>
+                      <p className="text-caption text-muted-foreground">{item.detail}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>}
+          </>
+        )}
+        <Button asChild variant="ghost" className="h-auto min-h-11 w-full justify-between gap-3 border-t px-0 py-3 text-body-sm">
+          <Link to={ctaHref}><span className="whitespace-normal text-left">{ctaLabel}</span><ArrowRight className="h-4 w-4" aria-hidden /></Link>
+        </Button>
       </CardContent>
     </Card>
   );
@@ -196,14 +169,14 @@ export function OverviewSection() {
   const upcomingWindow = addDays(today, 7);
 
   const { activeProperties } = useMyProperties();
-  const { activeBookings, upcomingBookings, isLoading: bookingsLoading } = useAllPropertyBookings();
-  const { data: crmTasks = [], isLoading: crmLoading } = useCrmTasks({ status: 'active' });
-  const { tasks: opsTasks = [], isLoading: opsLoading } = useOperationalTasks({
+  const { activeBookings, upcomingBookings, isLoading: bookingsLoading, error: bookingsError, refetch: retryBookings } = useAllPropertyBookings();
+  const { data: crmTasks = [], isLoading: crmLoading, isError: crmError, refetch: retryCrm } = useCrmTasks({ status: 'active' });
+  const { tasks: opsTasks = [], isLoading: opsLoading, error: opsError, refetch: retryOps } = useOperationalTasks({
     propertyId: selectedPropertyId || undefined,
     status: ['pending', 'in_progress'],
   });
-  const { data: financials = [], isLoading: financialsLoading } = usePropertyFinancialsFull(selectedPropertyId || undefined);
-  const { data: dayItems = [], isLoading: briefingLoading } = useDayBriefing();
+  const { data: financials = [], isLoading: financialsLoading, isError: financialsError, refetch: retryFinancials } = usePropertyFinancialsFull(selectedPropertyId || undefined);
+  const { data: dayItems = [], isLoading: briefingLoading, isError: briefingError, refetch: retryBriefing } = useDayBriefing();
 
   const propertyMap = useMemo(() => {
     return new Map(
@@ -301,7 +274,7 @@ export function OverviewSection() {
         return {
           id: `ops-${task.id}`,
           title: task.title,
-          subtitle: `${propertyName} · ${t('Operations', 'Операции')}`,
+          subtitle: `${propertyName} · ${t('Operations', 'Обслуживание объектов')}`,
           dueDate: due,
           href: APP_ROUTES.MC_TASKS,
           icon: Wrench,
@@ -336,7 +309,7 @@ export function OverviewSection() {
     if (!taskItems.length) {
       return t(
         'No overdue or near-term tasks are in the queue.',
-        'Нет просроченных или ближайших задач в очереди.',
+        'Просроченных и предстоящих задач нет.',
       );
     }
 
@@ -360,7 +333,7 @@ export function OverviewSection() {
           title: item.description || item.category || t('Payment item', 'Финансовая операция'),
           subtitle: item.property
             ? (isRu ? item.property.title_ru || item.property.title : item.property.title)
-            : t('Portfolio', 'Портфель'),
+            : t('Portfolio', 'Объекты'),
           urgency: (isPast(dueDate) && !isToday(dueDate) ? 'overdue' : isToday(dueDate) ? 'today' : 'upcoming') as OverviewUrgency,
           detail: `${formatDateLabel(dueDate, isRu)} · ${Number(item.amount || 0).toLocaleString()} ${item.currency || 'THB'}`,
           href: APP_ROUTES.MC_FINANCIALS,
@@ -401,11 +374,11 @@ export function OverviewSection() {
           ? `${item.meta.propertyName}${item.meta?.dueTime ? ` · ${t('Time', 'Время')}: ${item.meta.dueTime}` : ''}`
           : item.meta?.dueTime
             ? `${t('Time', 'Время')}: ${item.meta.dueTime}`
-            : t('Scheduled CRM activity', 'Запланированная CRM-активность'),
+            : t('Scheduled CRM activity', 'Запланированные действия с клиентами'),
         urgency: item.sectionOrder <= 2 ? 'today' : 'upcoming',
         detail: item.sectionOrder <= 2
-          ? t('Scheduled for today in CRM.', 'Запланировано на сегодня в CRM.')
-          : t('Upcoming follow-up from CRM schedule.', 'Ближайшее касание из CRM-расписания.'),
+          ? t('Scheduled for today in CRM.', 'Запланировано на сегодня.')
+          : t('Upcoming follow-up from CRM schedule.', 'Ближайшее запланированное действие с клиентом.'),
         href: item.href || APP_ROUTES.MC_SALES,
         icon: BriefcaseBusiness,
       }));
@@ -415,7 +388,7 @@ export function OverviewSection() {
     if (!crmReminderItems.length) {
       return t(
         'No CRM meetings or follow-ups are scheduled right now.',
-        'Сейчас нет запланированных CRM-встреч или follow-up активностей.',
+        'Нет запланированных встреч и напоминаний по клиентам.',
       );
     }
 
@@ -424,7 +397,7 @@ export function OverviewSection() {
 
     return t(
       `${todayCount} CRM touchpoints today and ${upcomingCount} upcoming follow-ups are scheduled.`,
-      `${todayCount} CRM-касаний на сегодня и ${upcomingCount} ближайших follow-up уже стоят в расписании.`,
+      `${todayCount} действий с клиентами сегодня и ${upcomingCount} ближайших напоминаний.`,
     );
   }, [crmReminderItems, t]);
 
@@ -433,85 +406,61 @@ export function OverviewSection() {
       <div className="space-y-1 px-1">
         <div className="flex items-center gap-2">
           <CalendarCheck2 className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {t('Overview', 'Обзор')}
+          <h2 className="font-sans text-body font-medium text-foreground">
+            {t('Today and upcoming', 'Сегодня и ближайшие дни')}
           </h2>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {selectedPropertyId
-            ? t(
-              `Daily control tower for ${propertyMap.get(selectedPropertyId) || 'selected property'}.`,
-              `Ежедневный control tower по объекту ${propertyMap.get(selectedPropertyId) || 'из фильтра'}.`,
-            )
-            : t(
-              'Daily control tower for stays, tasks, cash and CRM follow-ups.',
-              'Ежедневный control tower по заездам, задачам, деньгам и CRM follow-up.',
-            )}
-        </p>
+        {selectedPropertyId && <p className="text-body-sm text-muted-foreground">
+          {propertyMap.get(selectedPropertyId) || t('Selected property', 'Выбранный объект')}
+        </p>}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <OverviewBlock
           title={t('Stays', 'Заезды и выезды')}
-          subtitle={t('Current and upcoming guest movements', 'Текущие и ближайшие движения гостей')}
           icon={CalendarCheck2}
           items={stayItems}
           summary={staySummary}
-          nextAction={t(
-            'Open Calendar and confirm arrivals, departures and cleaning handoffs.',
-            'Откройте календарь и подтвердите заезды, выезды и передачи на уборку.',
-          )}
           ctaLabel={t('Open calendar', 'Открыть календарь')}
           ctaHref={APP_ROUTES.MC_CALENDAR}
-          emptyText={t('No check-ins or check-outs need attention yet.', 'Пока нет заездов или выездов, требующих внимания.')}
+          hasError={!!bookingsError}
+          onRetry={() => { void retryBookings(); }}
           isLoading={bookingsLoading}
         />
 
         <OverviewBlock
           title={t('Tasks', 'Задачи')}
-          subtitle={t('Business and operational workload', 'Бизнес- и операционная нагрузка')}
           icon={ListTodo}
           items={taskItems}
           summary={taskSummary}
-          nextAction={t(
-            'Open Tasks hub to reassign overdue work and confirm today priorities.',
-            'Откройте hub задач, чтобы перераспределить просроченное и подтвердить приоритеты на сегодня.',
-          )}
           ctaLabel={t('Open tasks', 'Открыть задачи')}
           ctaHref={APP_ROUTES.MC_TASKS}
-          emptyText={t('No urgent tasks are blocking the day.', 'Сейчас нет срочных задач, блокирующих день.')}
+          hasError={crmError || !!opsError}
+          onRetry={() => { void retryCrm(); void retryOps(); }}
           isLoading={crmLoading || opsLoading}
         />
 
         <OverviewBlock
-          title={t('Finance', 'Финансы')}
-          subtitle={t('Overdue and upcoming cash items', 'Просроченные и ближайшие денежные позиции')}
+          title={t('Finance', 'Финансовый отчёт')}
           icon={Wallet}
           items={financeItems}
           summary={financeSummary}
-          nextAction={t(
-            'Open Financials to clear overdue items and review expected cash movement.',
-            'Откройте финансы, чтобы закрыть просрочки и проверить ожидаемое движение денег.',
-          )}
-          ctaLabel={t('Open financials', 'Открыть финансы')}
+          ctaLabel={t('Open financials', 'Открыть финансовый отчёт')}
           ctaHref={APP_ROUTES.MC_FINANCIALS}
-          emptyText={t('No pending finance items need action right now.', 'Сейчас нет финансовых позиций, требующих действия.')}
+          hasError={financialsError}
+          onRetry={() => { void retryFinancials(); }}
           isLoading={financialsLoading}
         />
 
         <OverviewBlock
           title={t('CRM Reminders', 'CRM-напоминания')}
-          subtitle={t('Meetings, follow-ups and scheduled touches', 'Встречи, follow-up и запланированные касания')}
           icon={Clock3}
           items={crmReminderItems}
           summary={crmReminderSummary}
-          nextAction={t(
-            'Open CRM dashboard to review follow-ups, meetings and client next steps.',
-            'Откройте CRM dashboard, чтобы проверить follow-up, встречи и следующие шаги по клиентам.',
-          )}
-          ctaLabel={t('Open CRM', 'Открыть CRM')}
+          ctaLabel={t('Open CRM', 'Открыть список клиентов')}
           ctaHref={APP_ROUTES.MC_SALES}
-          emptyText={t('No CRM reminders are queued at the moment.', 'Сейчас нет CRM-напоминаний в очереди.')}
+          hasError={briefingError}
+          onRetry={() => { void retryBriefing(); }}
           isLoading={briefingLoading}
         />
       </div>

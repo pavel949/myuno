@@ -7,7 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet-async';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { LandingChrome } from '@/components/landings';
+import { LandingChrome, LandingContainer } from '@/components/landings';
+import { MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
 import {
   Building2, BarChart3, Users, Calendar, FileText,
   MessageSquare, Shield, Zap, Check, ArrowRight,
@@ -146,7 +147,7 @@ const ForManagementCompanies: React.FC = () => {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout usePageContainer={false} showHeader={false}>
       <Helmet>
         <title>{isRu ? 'myUNO для управляющих компаний | PMS SaaS' : 'myUNO for Management Companies | PMS SaaS'}</title>
         <meta name="description" content={isRu
@@ -155,41 +156,41 @@ const ForManagementCompanies: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <LandingChrome isRu={isRu} />
+        <LandingChrome isRu={isRu} variant="marketing" />
         {/* Hero */}
-        <section className="relative overflow-hidden py-20 md:py-32 px-4">
+        <section className="relative overflow-hidden py-20 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
-          <div className="relative max-w-5xl mx-auto text-center">
+          <LandingContainer variant="marketing" className="relative text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge variant="secondary" className="mb-6 text-sm px-4 py-1">
                 {isRu ? '🏢 Для управляющих компаний Пхукета' : '🏢 For Phuket Property Managers'}
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              <h1 className="text-h1 md:text-display font-display mb-6">
                 {isRu
                   ? <>Управляйте объектами.<br />Автоматизируйте отчёты.<br /><span className="text-primary">Масштабируйтесь.</span></>
                   : <>Manage Properties.<br />Automate Reports.<br /><span className="text-primary">Scale.</span></>}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+              <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto mb-8">
                 {isRu
                   ? 'myUNO — платформа, которую мы создали для своей управляющей компании. Теперь она доступна вам. Проверена на реальных объектах.'
                   : 'myUNO is the platform we built for our own management company. Now available for yours. Battle-tested on real properties.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className="gap-2">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
+                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
                   <Zap className="w-5 h-5" />
                   {isRu ? 'Попробовать бесплатно' : 'Start Free Trial'}
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
                   {isRu ? 'Посмотреть тарифы' : 'View Pricing'}
                 </Button>
               </div>
             </motion.div>
-          </div>
+          </LandingContainer>
         </section>
 
         {/* Core capabilities */}
         <section className="py-12 border-y border-border/50">
-          <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <LandingContainer variant="marketing" className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { value: 'PMS', labelEn: 'Bookings, calendar, channel sync', labelRu: 'Брони, календарь, синхронизация каналов' },
               { value: 'CRM', labelEn: 'Owners, guests, leads in one place', labelRu: 'Собственники, гости и лиды в одном месте' },
@@ -197,17 +198,17 @@ const ForManagementCompanies: React.FC = () => {
               { value: 'Ops', labelEn: 'Tasks, cleaning, maintenance', labelRu: 'Задачи, уборка, обслуживание' },
             ].map((stat) => (
               <div key={stat.value}>
-                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
+                <div className="text-2xl md:text-h2 font-display text-primary">{stat.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{isRu ? stat.labelRu : stat.labelEn}</div>
               </div>
             ))}
-          </div>
+          </LandingContainer>
         </section>
 
         {/* Modules deep-dive */}
-        <section className="py-20 px-4 bg-muted/20">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+        <section className="py-20 bg-muted/20">
+          <LandingContainer variant="marketing">
+            <h2 className="text-h2 font-display text-center mb-4">
               {isRu ? 'Что именно делает платформа' : 'What the platform actually does'}
             </h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -217,8 +218,8 @@ const ForManagementCompanies: React.FC = () => {
             </p>
 
             {/* Sticky module nav */}
-            <div className="sticky top-14 z-20 -mx-4 mb-10 bg-muted border-y border-border/50">
-              <div className="max-w-6xl mx-auto px-4 flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+            <div className="sticky top-14 z-20 mb-10 bg-muted border-y border-border/50">
+              <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
                 {modules.map((m) => (
                   <a
                     key={m.id}
@@ -251,10 +252,10 @@ const ForManagementCompanies: React.FC = () => {
                       <Badge variant="outline" className="mb-3 text-primary border-primary/30">
                         {m.badge}
                       </Badge>
-                      <h3 className="text-2xl md:text-4xl font-bold mb-3 tracking-tight break-words hyphens-auto">
+                      <h3 className="text-h3 font-display mb-3 break-words hyphens-auto">
                         {isRu ? m.titleRu : m.titleEn}
                       </h3>
-                      <p className="text-base md:text-lg text-muted-foreground max-w-3xl">
+                      <p className="text-body-lg text-muted-foreground max-w-3xl">
                         {isRu ? m.leadRu : m.leadEn}
                       </p>
                     </div>
@@ -278,13 +279,13 @@ const ForManagementCompanies: React.FC = () => {
               ))}
             </div>
 
-          </div>
+          </LandingContainer>
         </section>
 
         {/* Features Grid */}
-        <section className="py-20 px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">
+        <section className="py-20">
+          <LandingContainer variant="marketing">
+            <h2 className="text-h2 font-display text-center mb-4">
               {isRu ? 'Всё что нужно УК в одной платформе' : 'Everything a PM Needs in One Platform'}
             </h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -298,20 +299,20 @@ const ForManagementCompanies: React.FC = () => {
                   <Card className="h-full hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <f.icon className="w-8 h-8 text-primary mb-3" />
-                      <h3 className="font-semibold mb-2">{isRu ? f.titleRu : f.titleEn}</h3>
+                      <h3 className="text-h3 font-display mb-2">{isRu ? f.titleRu : f.titleEn}</h3>
                       <p className="text-sm text-muted-foreground">{isRu ? f.descRu : f.descEn}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
         {/* How it works */}
-        <section className="py-20 px-4 bg-muted/30">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
+        <section className="py-20 bg-muted/30">
+          <LandingContainer variant="marketing">
+            <h2 className="text-h2 font-display text-center mb-12">
               {isRu ? 'Начните за 15 минут' : 'Get Started in 15 Minutes'}
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -324,18 +325,18 @@ const ForManagementCompanies: React.FC = () => {
                   <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     {s.step}
                   </div>
-                  <h3 className="font-semibold mb-2">{isRu ? s.titleRu : s.titleEn}</h3>
+                  <h3 className="text-h3 font-display mb-2">{isRu ? s.titleRu : s.titleEn}</h3>
                   <p className="text-sm text-muted-foreground">{isRu ? s.descRu : s.descEn}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="py-20 px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">
+        <section id="pricing" className="py-20">
+          <LandingContainer variant="marketing">
+            <h2 className="text-h2 font-display text-center mb-4">
               {isRu ? 'Прозрачные тарифы' : 'Transparent Pricing'}
             </h2>
             <p className="text-center text-muted-foreground mb-12">
@@ -359,7 +360,7 @@ const ForManagementCompanies: React.FC = () => {
                       <span className="text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
                     </div>
                     <Button
-                      className="w-full mb-6 gap-2"
+                      className={`w-full mb-6 ${MARKETING_ACTION_BUTTON}`}
                       variant={tier.popular ? 'default' : 'outline'}
                       onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true&tier=' + tier.id)}
                     >
@@ -378,13 +379,13 @@ const ForManagementCompanies: React.FC = () => {
                 </Card>
               ))}
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
         {/* CTA */}
-        <section className="py-20 px-4 bg-primary/5">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">
+        <section className="py-20 bg-primary/5">
+          <LandingContainer variant="marketing" className="text-center">
+            <h2 className="text-h2 font-display mb-4">
               {isRu ? 'Готовы упростить управление?' : 'Ready to Simplify Management?'}
             </h2>
             <p className="text-muted-foreground mb-8">
@@ -392,17 +393,17 @@ const ForManagementCompanies: React.FC = () => {
                 ? 'Мы сами используем myUNO каждый день. Присоединяйтесь к растущему сообществу УК Пхукета.'
                 : 'We use myUNO every day ourselves. Join the growing community of Phuket property managers.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className="gap-2">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
+              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
                 <Zap className="w-5 h-5" />
                 {isRu ? 'Начать 14-дневный триал' : 'Start 14-Day Trial'}
               </Button>
-              <Button size="lg" variant="outline" onClick={() => window.open('https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank')}>
+              <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => window.open('https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank')}>
                 <MessageSquare className="w-5 h-5 mr-2" />
                 {isRu ? 'Связаться в WhatsApp' : 'Chat on WhatsApp'}
               </Button>
             </div>
-          </div>
+          </LandingContainer>
         </section>
 
         {/* Footer */}

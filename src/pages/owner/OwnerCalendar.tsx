@@ -1,12 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { bangkokTodayDate } from '@/lib/hotelDates';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { accessiblePropertySelection } from '@/lib/owner/propertyNavigation';
 import { AirbnbCalendarGrid } from '@/components/owner/AirbnbCalendarGrid';
 import { MultiPropertyTimeline } from '@/components/owner/MultiPropertyTimeline';
 import { CalendarTodayTasks } from '@/components/owner/CalendarTodayTasks';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
-import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
 import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDialog';
 import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromCalendarDialog';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { usePropertyComplexes } from '@/hooks/usePropertyComplexes';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 type ViewMode = 'single' | 'multi';
 
@@ -26,16 +28,25 @@ export default function OwnerCalendar() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
-  const [selectedPropertyId, setSelectedPropertyId] = useState('');
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const requestedProperty = params.get('property');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
   // Default to multi on desktop (checked via initial window width)
   const [viewMode, setViewMode] = useState<ViewMode>(() => 
-    typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
+    requestedProperty !== null ? 'single' : typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
   );
   
   const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const selectedPropertyId = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, 'first');
+  const setSelectedPropertyId = (id: string) => {
+    if (!allProperties.some(p => p.property_id === id)) return;
+    const next = new URLSearchParams(params);
+    next.set('property', id);
+    setParams(next);
+  };
   const { data: complexes } = usePropertyComplexes();
   const { data: projects } = usePropertyProjects();
 
@@ -75,12 +86,6 @@ export default function OwnerCalendar() {
     })), [allProperties]
   );
 
-  useEffect(() => {
-    if (allProperties.length && !selectedPropertyId) {
-      setSelectedPropertyId(allProperties[0].property_id);
-    }
-  }, [allProperties, selectedPropertyId]);
-
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
@@ -91,65 +96,67 @@ export default function OwnerCalendar() {
         <p className="text-muted-foreground mb-6">
           {isRu ? 'Войдите, чтобы просмотреть календарь' : 'Sign in to view the calendar'}
         </p>
-        <Button onClick={() => navigate('/auth')}>
+        <Button onClick={() => redirectToAuth(navigate)}>
           {isRu ? 'Войти' : 'Sign In'}
         </Button>
       </div>
     );
   }
 
-  const isMulti = viewMode === 'multi';
+  if (requestedProperty !== null && !selectedPropertyId) {
+    return <div className="p-4 space-y-3">
+      <h1 className="font-display text-h3">{isRu ? 'Календарь бронирований' : 'Booking Calendar'}</h1>
+      <p role="status">{propertiesLoading ? (isRu ? 'Загрузка объектов…' : 'Loading properties…')
+        : (isRu ? 'Объект недоступен. Выберите объект из своего списка.' : 'This property is unavailable. Choose a property from your list.')}</p>
+      {!propertiesLoading && <Button variant="outline" onClick={() => navigate('/mc/properties')}>{isRu ? 'К объектам' : 'Browse properties'}</Button>}
+    </div>;
+  }
+
+  // A property deep link always opens that property's view, including history navigation.
+  const isMulti = requestedProperty === null && viewMode === 'multi';
 
   return (
-    <div className="p-4 pb-24 space-y-4 w-full min-w-0 max-w-full">
-      {/* View Mode Toggle */}
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">
-            {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {isRu 
-              ? 'Управление бронированиями, задачами и доступностью объектов' 
-              : 'Manage bookings, tasks and property availability'}
-          </p>
-        </div>
-        {allProperties.length > 1 && (
-          <div className="flex items-center gap-1 bg-muted rounded-none p-0.5">
-            <button
-              onClick={() => setViewMode('multi')}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-medium transition-colors",
-                isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              {isRu ? 'Все объекты' : 'All'}
-            </button>
-            <button
-              onClick={() => setViewMode('single')}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-medium transition-colors",
-                !isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <List className="h-3.5 w-3.5" />
-              {isRu ? 'По одному' : 'Single'}
-            </button>
-          </div>
+    <div className="p-4 pb-24 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
+      <header className="space-y-3">
+        <h1 className="font-display text-h3 break-words">
+          {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
+        </h1>
+        {!isMulti && (
+          <Button className="w-full sm:w-auto min-h-11" disabled={!selectedPropertyId}
+            onClick={() => setShowAddBookingDialog(true)}>
+            <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+            {isRu ? 'Добавить бронирование' : 'Add Booking'}
+          </Button>
         )}
-      </div>
+      </header>
+      {allProperties.length > 1 && (
+        <div className="grid grid-cols-2 gap-1 border-b border-border pb-3" role="group"
+          aria-label={isRu ? 'Режим календаря' : 'Calendar view'}>
+          <Button variant="ghost" aria-pressed={isMulti} onClick={() => { const next = new URLSearchParams(params); next.delete('property'); setParams(next); setViewMode('multi'); }}
+            className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
+            <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {isRu ? 'Все объекты' : 'Portfolio'}
+          </Button>
+          <Button variant="ghost" aria-pressed={!isMulti} onClick={() => { if (selectedPropertyId) setSelectedPropertyId(selectedPropertyId); else setViewMode('single'); }}
+            className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', !isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
+            <List className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {isRu ? 'Один объект' : 'Single property'}
+          </Button>
+        </div>
+      )}
 
       {isMulti ? (
         /* Multi-property timeline view */
-        <div className="space-y-3">
+        <div className="space-y-3 min-w-0 max-w-full">
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {isRu ? `Объектов в календаре: ${filteredProperties.length}` : `Properties in calendar: ${filteredProperties.length}`}
+          </p>
           {/* Project / Complex filter */}
           {groupOptions.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger className="h-8 text-xs w-auto min-w-[160px]">
+                <SelectTrigger className="min-h-11 text-sm w-full min-w-0" aria-label={isRu ? 'Проект или комплекс' : 'Project or complex'}>
                   <SelectValue placeholder={isRu ? 'Все проекты' : 'All projects'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,6 +171,14 @@ export default function OwnerCalendar() {
               </Select>
             </div>
           )}
+          {selectedGroupId !== 'all' && (
+            <p className="text-sm text-muted-foreground break-words" aria-live="polite">
+              {isRu ? 'Фильтр: ' : 'Filter: '}
+              {selectedGroupId === 'no-group'
+                ? (isRu ? 'Без проекта' : 'No project')
+                : groupOptions.find(g => g.id === selectedGroupId)?.label}
+            </p>
+          )}
           <MultiPropertyTimeline
             properties={filteredProperties}
             isLoading={propertiesLoading}
@@ -173,40 +188,47 @@ export default function OwnerCalendar() {
       ) : (
         /* Single property view */
         <>
-          {/* Property Selector */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              {isRu ? 'Выберите объект' : 'Select Property'}
+          <section className="space-y-2 border-y border-border py-3" aria-label={isRu ? 'Объект календаря' : 'Calendar property'}>
+            <label className="text-sm font-medium" htmlFor="calendar-property">
+              {isRu ? 'Объект' : 'Property'}
+            </label>
+            {propertiesLoading ? (
+              <div className="h-11 bg-muted animate-pulse" />
+            ) : propertyRefs.length ? (
+              <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+                <SelectTrigger id="calendar-property" className="min-h-11 w-full min-w-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyRefs.map(p => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {isRu && p.title_ru ? p.title_ru : p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm text-muted-foreground">{isRu ? 'Нет объектов' : 'No properties'}</p>
+            )}
+            <p className="text-sm break-words text-muted-foreground" aria-live="polite">
+              {propertyRefs.find(p => p.id === selectedPropertyId) && (
+                isRu ? propertyRefs.find(p => p.id === selectedPropertyId)?.title_ru || propertyRefs.find(p => p.id === selectedPropertyId)?.title
+                  : propertyRefs.find(p => p.id === selectedPropertyId)?.title
+              )}
             </p>
-            <PropertyThumbnailSelector
-              properties={propertyRefs}
-              selectedId={selectedPropertyId}
-              onSelect={setSelectedPropertyId}
-              isLoading={propertiesLoading}
-            />
-          </div>
-          
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              onClick={() => setShowAddBookingDialog(true)}
-              variant="default"
-              className="gap-2"
-              disabled={!selectedPropertyId}
-            >
-              <CalendarPlus className="h-4 w-4" />
-              {isRu ? 'Бронирование' : 'Add Booking'}
+            <Button variant="outline" className="min-h-11" disabled={!selectedPropertyId}
+              onClick={() => setShowCreateTaskDialog(true)}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {isRu ? 'Добавить задачу' : 'Add Task'}
             </Button>
-            <Button 
-              onClick={() => setShowCreateTaskDialog(true)}
-              variant="outline"
-              className="gap-2"
-              disabled={!selectedPropertyId}
-            >
-              <Plus className="h-4 w-4" />
-              {isRu ? 'Задача' : 'Add Task'}
-            </Button>
-          </div>
+          </section>
+
+          {selectedPropertyId && <Button variant="outline" onClick={() => {
+            const returnTo = new URLSearchParams(params);
+            returnTo.set('property', selectedPropertyId);
+            const next = new URLSearchParams({ property: selectedPropertyId, returnTo: location.pathname + '?' + returnTo.toString() });
+            navigate('/mc/rates?' + next.toString());
+          }}>{isRu ? 'Тарифы объекта' : 'Property rates'}</Button>}
 
           {/* Calendar + today’s tasks: full-width grid on large screens */}
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">
@@ -246,7 +268,7 @@ export default function OwnerCalendar() {
         onOpenChange={setShowCreateTaskDialog}
         properties={propertyRefs}
         defaultPropertyId={selectedPropertyId}
-        defaultDate={new Date()}
+        defaultDate={bangkokTodayDate()}
       />
 
       {selectedPropertyId && (
@@ -254,7 +276,7 @@ export default function OwnerCalendar() {
           open={showAddBookingDialog}
           onOpenChange={setShowAddBookingDialog}
           propertyId={selectedPropertyId}
-          initialDate={new Date()}
+          initialDate={bangkokTodayDate()}
           onSuccess={() => setShowAddBookingDialog(false)}
         />
       )}
