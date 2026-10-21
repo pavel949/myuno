@@ -1,5 +1,7 @@
 # myUNO
 
+> **Application identity (2026-10-21):** React/Vite myUNO App, repository `pavel949/myuno`. `pavel949/myUNO-final` is a separate Next.js application. Both require the same verified 39-villa Layantara catalogue and tariffs. [Current data, publication status and remaining parity work](docs/LAYANTARA_APPLICATION_PARITY.md).
+
 > **Destination Property, Services & Living Operating System**
 >
 > Production core for Homes, PMS/Operations, Services Marketplace, Concierge, CRM, Owners, Agents and Finance.
