@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def declared_fixture_output(source):
     """Resolve supported static declarations with the CI default temporary root."""
-    literal = re.search(r"(?m)^\s*const output\s*=\s*'([^']+)'\s*;", source)
+    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.HOME_GALLERY_OUTPUT\s*\|\|\s*)?'([^']+)'\s*;", source)
     if literal:
         return literal.group(1)
     portable = re.search(
@@ -59,16 +59,16 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
     def run_suite(self, fixtures, timeout=3):
         return runner.run_suite(fixtures, self.root / 'evidence', timeout, sys.executable)
 
-    def test_all_twenty_original_fixtures_have_their_own_output(self):
+    def test_all_fixtures_have_their_own_output(self):
         expected = (
             'employee-invite-ui complex-authoring-ui home-preferences-ui property-editor-ui '
             'admin-review-queues moderation-queue-ui ui-backlog-salvage pms-dashboard-ui '
             'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui trip-planner-ui '
             'unified-property-search-ui bookings-list-ui pms-detail-ui calendar-ui today-ui '
-            'property-browse-ui home-search-ui guest-complex-ui'
+            'property-browse-ui home-search-ui homepage-galleries-ui guest-complex-ui'
         ).split()
         self.assertEqual([name for name, _ in runner.FIXTURE_SPECS], expected)
-        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 20)
+        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 21)
         self.assertEqual(runner.MAX_WORKERS, 2)
         self.assertEqual(runner.FIXTURE_TIMEOUT_SECONDS, 180)
         for name, output in runner.FIXTURE_SPECS:

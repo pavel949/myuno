@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Building2, MapPin, Search } from 'lucide-react';
+import { HorizontalRail } from './HorizontalRail';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePublicPropertyProjects, type PropertyProject } from '@/hooks/usePropertyProjects';
@@ -67,6 +68,7 @@ function ProjectCard({ project, mode, propertyType, language, queryKey, onCount,
     if (count.isSuccess) onCount(project.id, queryKey, count.data?.total ?? 0);
     else if (count.isError) onCount(project.id, queryKey, null);
   }, [count.data?.total, count.isError, count.isSuccess, onCount, project.id, queryKey]);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
   const isRu = language === 'ru';
   const lang = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
   const name = (isRu ? project.name_ru : project.name_en) || project.name_en || project.name_ru;
@@ -82,7 +84,7 @@ function ProjectCard({ project, mode, propertyType, language, queryKey, onCount,
     <article hidden={hidden} className="home-project-card">
       <Link to={href} className="home-project-card-link" aria-label={`${name} — ${copy.open[lang]}`}>
         <div className="home-project-card-image">
-          {image ? <img src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[lang]}</span></div>}
+          {image && failedImage !== image ? <img onError={() => setFailedImage(image)} src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[lang]}</span></div>}
         </div>
         <div className="home-project-card-copy">
           {location && <p className="home-project-location"><MapPin size={15} aria-hidden="true" />{getDistrictLabel(location, isRu ? 'ru' : 'en')}</p>}
@@ -182,9 +184,9 @@ export function HomeProjectGallery() {
 
       {isLoading ? <p className="home-project-state" role="status">{copy.loading[lang]}</p> : isError ? <div className="home-project-state" role="alert"><p>{copy.error[lang]}</p><button type="button" onClick={() => refetch()}>{copy.retry[lang]}</button></div> : filtered.length === 0 || inventoryReady && visibleResults.length === 0 ? <p className="home-project-state" role="status">{copy.noProjects[lang]}</p> : <>
         <p className="home-project-result-count">{visibleResults.length} {copy.resultCount[lang]}</p>
-        <div className="home-project-grid">
+        <HorizontalRail label={copy.title[lang]}>
           {filtered.map((project) => <ProjectCard key={project.id} project={project} mode={mode} propertyType={propertyType} language={language} queryKey={countKey} onCount={reportCount} hidden={Boolean(propertyType && countsForFilter[project.id] === 0)} />)}
-        </div>
+        </HorizontalRail>
       </>}
     </section>
   );

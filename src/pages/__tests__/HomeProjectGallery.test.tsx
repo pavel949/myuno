@@ -63,3 +63,12 @@ it('hides complexes without published homes matching the selected type', () => {
   expect(screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' })).toBeVisible();
   expect(screen.queryByRole('link', { name: 'Rawai Residence — Explore community' })).toBeNull();
 });
+
+it('keeps the community link usable when stored media fails', () => {
+  state.projects[0].cover_image = 'https://example.invalid/missing.jpg' as never;
+  const { container } = show();
+  fireEvent.error(container.querySelector('img')!);
+  expect(container.querySelector('img')).toBeNull();
+  expect(screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' })).toBeVisible();
+  state.projects[0].cover_image = null;
+});

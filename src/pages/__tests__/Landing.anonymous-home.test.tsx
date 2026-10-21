@@ -14,6 +14,7 @@ vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <sm
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeDiscoverySearch', () => ({ HomeDiscoverySearch: ({ showGuestsInline }: { showGuestsInline?: boolean }) => <form aria-label="Property search" data-guests-inline={String(showGuestsInline === true)} /> }));
 vi.mock('@/components/home/HomeProjectGallery', () => ({ HomeProjectGallery: () => <section aria-label="Project gallery">Public project gallery</section> }));
+vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
 vi.mock('@/hooks/usePrefetch', () => ({ usePrefetchRoute: () => ({ prefetchRoute: vi.fn() }) }));
