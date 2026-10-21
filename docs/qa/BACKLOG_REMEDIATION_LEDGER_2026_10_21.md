@@ -268,3 +268,73 @@ No full screen-reader/accessibility or all701 route patterns acceptance is claim
 No permissions changed or denied operation retried. Main remains fb4b944; no merge
 or Lovable production publication occurred. All previous denial/server/permission/
 contract gates remain as recorded above.
+
+## 20:17 UTC frozen aggregate check
+
+Final frozen local candidate:
+`cee449e29930151e472236731116817d964d5749` (runtimee1bd57792, last commit QA only).
+Final TypeScript build-mode validation completed PASS at20:17 UTC with no errors.
+Production build with localhost synthetic Supabase configuration is running;
+no deployment is requested by this build. After verified generated-file cleanup,
+one full native-PostgreSQL/default-timeout aggregate run is planned. Other heavy
+local workloads and Vite/browser processes will remain stopped for that run.
+No old full result is replaced, no external draft/merge/Publish retry is authorized.
+
+## 20:55 UTC frozen aggregate terminal checks and browser failures
+
+Exact local candidate `cee449e29930151e472236731116817d964d5749`:
+TypeScript build-mode PASS; production build PASS (3m34s, localhost dummy config);
+ESLint PASS (0 errors, 2426 warnings); full isolated native-PostgreSQL suite PASS
+4054/4054 tests, 308/308 files, 1118.50 seconds, no OOM/kill. Original default
+assertion deadlines and one worker were retained. This supersedes no historical
+RED record and is not remote combined CI or production acceptance.
+
+The following 24-group browser run is not green: admin-review-queues reached the
+original 180-second fixture cap after 9/12 recorded passing contexts and steady
+screenshot progress (113 images, latest 1.33 seconds before kill). No product
+assertion failure is established. A proposed semantic-ready navigation check
+replaces repeated networkidle quiet waits while retaining all cases/assertions
+and the same cap. services-framework failed immediately because its newly merged
+QA builder still calls the Tailwind v3 PostCSS API against v4; a compatible actual
+v4 builder is being prepared without changing product assertions. Remaining
+browser groups are still running; no complete browser PASS claim is made.
+
+Separate company types/build, prepared auth WIP recovery/mobile tests and local
+E2E target-guard runtime tests remain queued behind this fixed two-slot browser
+phase. Real Auth/API/RLS/Edge/DB transaction loops remain NOT TESTED: Docker is
+available, but no authoritative replayable schema/seed/pinned isolated stack is
+established. Historic migration replay limitations are documented, not measured
+again; no live migration, account, payment, booking or permission action occurred.
+All previously denied external actions remain stopped pending applicable approval.
+
+### Terminal browser result and bounded QA follow-up
+
+Original frozen-cee browser suite finished **21 PASS / 3 FAIL groups**. The three
+failures are admin-review-queues (exit124,180.046s), services-framework
+(exit1,2.949s, obsolete v3 PostCSS builder), homepage-galleries
+(exit124,180.105s). Its original result/status and failed-fixture directories were
+preserved separately before any rerun. Gallery screenshots cover all15 data
+frames plus later states, but absent final results do not certify those cases.
+No actual product assertion failure is established from these two timeouts.
+
+Local QA-only follow-up `3ae3de4d530e851d556f89538ad1e8e9056cc7ba`
+changes admin navigation to exact route+localized heading readiness and uses the
+existing real v4 application-CSS compiler for services-framework. Runtime source,
+all matrices/assertions and180-second cap remain unchanged. Runtime verification
+is now running; this local-only commit is neither remote CI nor release approval.
+Fresh21:00 UTC GitHub read confirms mainfb4b944 and31 open PRs, heads unchanged.
+
+Admin semantic-readiness retry at3ae remained FAIL: exit124/180.024s with11
+recorded contexts and no assertion exception before termination. The original cap
+was retained. This follow-up did not establish complete12-context acceptance;
+no third unchanged retry or blanket environment-cause claim is authorized by this
+result. Framework and gallery follow-up remain in progress sequentially.
+
+Services-framework follow-up completed PASS64/64 in138.105s under the original
+180s cap with real v4 application CSS. Fresh mobile admin-services empty state was
+individually viewed: heading/search/empty-state/action bounds are readable and
+within390px. This is a synthetic component fixture, not live provider operations.
+Admin remains FAIL11/12 partial (original9/12); last Thai430 state completed near
+cap and Thai1280 unfinished. No product assertion exception or proved stall.
+Gallery semantic-readiness QA commit `a96d2e1f71ee40049e36dae0dbb4633b298c5fc1`
+adds explicit18-case completion and incremental evidence; sole rerun is active.
