@@ -76,6 +76,18 @@ describe('guest complex catalog boundaries', () => {
 });
 
 describe('managed residential complex public boundary', () => {
+  it('keeps property-type filtering and cache identity when browsing a managed complex', async () => {
+    const { result, rerender } = renderHook(({ propertyType }) => usePropertiesByComplex('managed', 24, { mode: 'rent', propertyType }), {
+      wrapper: Wrapper, initialProps: { propertyType: 'villa' },
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.eq).toHaveBeenCalledWith('complex_id', 'managed');
+    expect(mock.eq).toHaveBeenCalledWith('property_type', 'villa');
+    rerender({ propertyType: 'condo' });
+    await waitFor(() => expect(mock.eq).toHaveBeenCalledWith('property_type', 'condo'));
+    expect(mock.from).toHaveBeenCalledTimes(2);
+    expect(mock.or).toHaveBeenCalledWith('listing_type.eq.rent,listing_modes.cs.{rent}');
+  });
   it('uses the managed complex FK, with public eligibility and exact counts', async () => {
     const { result } = renderHook(() => usePropertiesByComplex('managed', 24, { mode: 'buy', managementCompanyId: 'operator' }), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -84,7 +96,7 @@ describe('managed residential complex public boundary', () => {
     expect(mock.eq).not.toHaveBeenCalledWith('project_id', expect.anything());
     expect(mock.eq).toHaveBeenCalledWith('management_company_id', 'operator');
     expect(mock.or).toHaveBeenCalledWith('is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}');
-    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0)');
+    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0,or(listing_modes.is.null,listing_modes.not.cs.{rent}))');
     expect(mock.select.mock.calls[0][1]).toEqual({ count: 'exact' });
   });
   it('actually selects and returns complex_id through the public unit-detail query', async () => {
