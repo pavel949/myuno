@@ -23,8 +23,6 @@ export function DealPriorityStars({ priority, onChange, size = 'sm' }: Props) {
           aria-pressed={level === priority}
           onClick={() => onChange?.(priority === level ? 0 : level)}
           disabled={!onChange}
-          aria-label={`Set priority ${level}`}
-          aria-pressed={level <= priority}
           className={cn(
             'transition-colors',
             onChange ? 'cursor-pointer hover:text-warning' : 'cursor-default',
