@@ -43,6 +43,8 @@ interface CurrencyContextType {
   getCurrencySymbol: (code: string) => string;
   isLoading: boolean;
   lastUpdated: string | null;
+  referenceRates: Partial<Record<Currency, { rate: number; updatedAt: string }>>;
+  ratesError: boolean;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -58,6 +60,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [rates, setRates] = useState<Record<Currency, number>>(fallbackRates);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [referenceRates, setReferenceRates] = useState<CurrencyContextType['referenceRates']>({});
+  const [ratesError, setRatesError] = useState(false);
 
   // Load rates from database
   const loadRates = useCallback(async () => {
@@ -66,18 +70,23 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         .rpc('get_all_currency_rates');
 
       if (error) throw error;
+      setRatesError(false);
 
       if (data && typeof data === 'object') {
         const ratesData = data as Record<string, { rate: number; updated_at: string }>;
         const newRates: Record<Currency, number> = { ...fallbackRates };
         let latestUpdate: string | null = null;
+        const validated: CurrencyContextType['referenceRates'] = {};
 
         Object.entries(ratesData).forEach(([code, info]) => {
-          if (code in currencyMeta) {
+          if (Object.prototype.hasOwnProperty.call(currencyMeta, code)) {
             // Only accept a valid positive numeric rate; a null/0/NaN rate would
             // poison every converted price. Keep the previous/fallback otherwise.
             if (typeof info?.rate === 'number' && Number.isFinite(info.rate) && info.rate > 0) {
               newRates[code as Currency] = info.rate;
+              if (typeof info.updated_at === 'string' && Number.isFinite(Date.parse(info.updated_at))) {
+                validated[code as Currency] = { rate: info.rate, updatedAt: info.updated_at };
+              }
             }
             if (info?.updated_at && (!latestUpdate || info.updated_at > latestUpdate)) {
               latestUpdate = info.updated_at;
@@ -87,8 +96,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
         setRates(newRates);
         setLastUpdated(latestUpdate);
+        setReferenceRates(validated);
+      } else {
+        setReferenceRates({});
       }
     } catch (error) {
+      setRatesError(true);
+      setReferenceRates({});
       errorLog.silent(error, 'load_currency_rates');
       // Keep using fallback rates
     } finally {
@@ -160,9 +174,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     currency, setCurrency, currencyInfo, currencies,
     formatPrice, convertPrice, getCurrencySymbol: getCurrencySymbolFn,
-    isLoading, lastUpdated,
+    isLoading, lastUpdated, referenceRates, ratesError,
   }), [currency, setCurrency, currencyInfo, currencies, formatPrice, convertPrice,
-       getCurrencySymbolFn, isLoading, lastUpdated]);
+       getCurrencySymbolFn, isLoading, lastUpdated, referenceRates, ratesError]);
 
   return (
     <CurrencyContext.Provider value={value}>
