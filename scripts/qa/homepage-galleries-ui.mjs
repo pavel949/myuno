@@ -1,6 +1,6 @@
 // Real anonymous Landing, public navigation, search and cards. Synthetic data only; no backend.
 import { build } from 'esbuild';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -8,6 +8,7 @@ const root = process.cwd();
 const output =
   process.env.HOME_GALLERY_OUTPUT || '/tmp/browser/homepage-galleries-isolated';
 await mkdir(output, { recursive: true });
+await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
   'home-fixture': `
     const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';

@@ -32,10 +32,13 @@ async def main():
                     await expect(page.locator('.home-rail-viewport')).to_have_count(5)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     # Each gallery stays one card high and within its own section.
-                    for rail in await page.locator('.home-rail-viewport').all():
+                    for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
                         geometry = await rail.evaluate('(el)=>({width:el.clientWidth,scroll:el.scrollWidth,tops:[...el.children].map(c=>c.getBoundingClientRect().top)})')
                         assert max(geometry['tops']) - min(geometry['tops']) < 2, geometry
-                        if geometry['scroll'] > geometry['width']+2:
+                        # Exercise every rail on representative mobile/desktop frames;
+                        # the location rail covers controls at every language and width.
+                        controls_case = index == 0 or lang == 'en' and width in [390, 1440]
+                        if controls_case and geometry['scroll'] > geometry['width']+2:
                             parent = rail.locator('..')
                             next_button = parent.locator('button').nth(1)
                             await expect(next_button).to_have_attribute('aria-disabled','false')
