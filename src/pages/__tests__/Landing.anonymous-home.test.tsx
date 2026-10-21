@@ -13,6 +13,7 @@ vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <small>Existing legal footer</small> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeDiscoverySearch', () => ({ HomeDiscoverySearch: ({ showGuestsInline }: { showGuestsInline?: boolean }) => <form aria-label="Property search" data-guests-inline={String(showGuestsInline === true)} /> }));
+vi.mock('@/components/home/HomeProjectGallery', () => ({ HomeProjectGallery: () => <section aria-label="Project gallery">Public project gallery</section> }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
 vi.mock('@/hooks/usePrefetch', () => ({ usePrefetchRoute: () => ({ prefetchRoute: vi.fn() }) }));
@@ -57,6 +58,7 @@ it.each([
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
  expect(screen.getByRole('form', { name: 'Property search' })).toBeVisible();
+ expect(screen.getByText('Public project gallery')).toBeVisible();
  expect(screen.getByRole('form', { name: 'Property search' })).toHaveAttribute('data-guests-inline', 'true');
  expect(screen.getByRole('heading', { name: language === 'ru' ? 'Где остановиться' : language === 'th' ? 'ที่พักสำหรับคุณ' : 'Places to stay' })).toBeVisible();
  expect(screen.getByRole('heading', { name: 'Layantara Villas' })).toBeVisible();
