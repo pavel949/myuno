@@ -227,3 +227,44 @@ is made. Actual-App10-case responsive empty/error checks are still in progress.
 The independent source review GO is limited to local verification, not release.
 Nonblocking observed telemetry slug mismatch bangtao/naiharn versus canonical
 bang-tao/nai-harn is recorded for correction before final combined acceptance.
+
+## 20:16 UTC local aggregate and current screen matrix
+
+Local prepared UI candidate is now
+`cee449e29930151e472236731116817d964d5749`, runtimee1bd57792 plus QA-only
+notes. It remains local only; no alternative external PR/push bypass. It includes
+prepared UI/telemetry/content/services/reference-FX candidates in addition to the
+frozen dependency/homepage base, excludes all denied auth/company/PR8/PR51 work
+and critical backend activation. Independent source review found no substantive
+conflict-resolution defect. Its nonblocking canonical telemetry path mismatch
+was reproduced with19 PASS/2 FAIL, corrected21/21; consent/default-off gates stay.
+
+| Current aggregate check | Result | Scope / limitation |
+| --- | --- | --- |
+| Locked strict-peer install | PASS |1155 packages |
+| Types at36f runtime | PASS | Latest guard-onlye1bd repeat pending |
+| Focused tests at36f | PASS165/165 |10 files, original assertions/timeouts |
+| Actual App responsive states | PASS10/10 | Five widths320–1920 x empty/error; synthetic localhost GET, no writes |
+| Shared primitives | PASS32/32 |RU/EN, eight widths, light/dark, nested controls/validation/focus; actual components, synthetic fixture |
+| Runner contract | PASS13/13 |24 distinct fixture outputs retained |
+| Latest build / full aggregate | NOT TESTED yet | Sequential next; no retry-until-green |
+| Live auth/roles/PMS writes/provider orders/payment | NOT TESTED | No production customer operations allowed; deployed contract/permission gates |
+
+Eight fresh representative states from the new run were individually viewed and
+accepted:homepage320, search entry390, optional criteria390, calendar768,
+results390, services-error390, shared form320, dark long dialog320. A numbered
+inline-style audit with exact screenshots/manifest was delivered to user Library;
+private Library identities are not included in this repository. Remaining UX
+risks include dense existing refinement results and real approved district assets.
+Static service-request estimates are not certified live provider prices.
+
+Product Design index/audit/framework and user-context preflight were read after
+the skill became available; preflight has no saved context. Its cross-package
+critical-overrides reference could not be read; no full plugin-compliance claim.
+Dedicated cloud-browser controls are unavailable in this execution environment.
+Authorized Playwright/system Chromium captured current actual app/components.
+No full screen-reader/accessibility or all701 route patterns acceptance is claimed.
+
+No permissions changed or denied operation retried. Main remains fb4b944; no merge
+or Lovable production publication occurred. All previous denial/server/permission/
+contract gates remain as recorded above.
