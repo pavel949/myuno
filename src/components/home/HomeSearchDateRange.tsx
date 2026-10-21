@@ -95,7 +95,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     ) : (
       <Popover open={open} onOpenChange={changeOpen}>
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-        <PopoverContent align="start" collisionPadding={12} className="w-auto max-w-[calc(100vw-24px)] p-0" aria-labelledby={titleId} aria-describedby={hintId}>
+        <PopoverContent align="start" collisionPadding={12} className="z-[130] w-auto max-w-[calc(100vw-24px)] p-0" aria-labelledby={titleId} aria-describedby={hintId}>
           <h3 id={titleId} className="px-3 pt-3 font-medium">{title}</h3>
           {calendar}
         </PopoverContent>
