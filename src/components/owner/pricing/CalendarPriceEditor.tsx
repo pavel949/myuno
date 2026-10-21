@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { addDays, addMonths, startOfMonth, startOfWeek, format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useAuth } from '@/contexts/AuthContext';
+import { useCalendarPrices } from '@/hooks/useCalendarPrices';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRoomCategories } from '@/hooks/useRoomCategories';
 import { useStaysUnifiedCalendar } from '@/hooks/useStaysUnifiedCalendar';
 import { supabase } from '@/integrations/supabase/client';
 import { bangkokTodayISO, civilDateKey, parseCivilDate, toBangkokDateKey } from '@/lib/hotelDates';
-import { inclusivePriceRange, parseCalendarPrice, priceRangeSnapshot, type CalendarPriceRow } from '@/lib/owner/calendarPricing';
+import { inclusivePriceRange, parseCalendarPrice, priceRangeSnapshot } from '@/lib/owner/calendarPricing';
 import type { UnifiedProperty } from '@/hooks/useMyProperties';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,6 @@ import { toast } from 'sonner';
 
 /** Edits the same dated price sources consumed by checkout. Occupancy is read-only. */
 export function CalendarPriceEditor({ property }: { property: UnifiedProperty }) {
-  const { user } = useAuth();
   const { language } = useLanguage();
   const t = (en: string, russian: string) => language === 'ru' ? russian : en;
   const [params] = useSearchParams();
@@ -39,23 +38,8 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
   const safeThrough = toBangkokDateKey(through) || end;
   const rangeFrom = safeFrom < start ? safeFrom : start;
   const rangeEnd = civilDateKey(addDays(parseCivilDate(safeThrough > end ? safeThrough : end), 1));
-  const rows = useQuery({
-    queryKey: ['calendar-pricing', user?.id, property.property_id, category, rangeFrom, rangeEnd],
-    enabled: !!user && !!property.property_id,
-    staleTime: 0, gcTime: 0,
-    queryFn: async (): Promise<CalendarPriceRow[]> => {
-      const { data, error } = await supabase.rpc('get_property_calendar_prices', {
-        p_property_id: property.property_id, p_category_id: category || null,
-        p_from: rangeFrom, p_to: rangeEnd,
-      });
-      if (error) throw error;
-      if (!Array.isArray(data)) throw new Error('Invalid calendar price response');
-      return data.map(row => {
-        if (!row || typeof row !== 'object' || Array.isArray(row) || typeof row.date !== 'string' || (row.price_override !== null && typeof row.price_override !== 'number')) throw new Error('Invalid calendar price row');
-        return row as CalendarPriceRow;
-      });
-    },
-  });
+  const rows = useCalendarPrices(property.property_id, category || null, rangeFrom, rangeEnd);
+
   async function save() {
     setSaving(true);
     try {

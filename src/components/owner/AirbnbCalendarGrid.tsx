@@ -1,3 +1,4 @@
+import { useCalendarPrices } from '@/hooks/useCalendarPrices';
 import { useSearchParams } from 'react-router-dom';
 import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan, toBangkokDateKey } from '@/lib/hotelDates';
 import { useState, useMemo, useCallback } from 'react';
@@ -52,6 +53,10 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   const { availability } = usePropertyAvailabilityManagement(propertyId);
   const { data: rentalTerms } = usePropertyRentalTerms(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
+  const datedPrices = useCalendarPrices(propertyId, null,
+    civilDateKey(startOfWeek(startOfMonth(currentMonth), {weekStartsOn:1})),
+    civilDateKey(addDays(endOfWeek(endOfMonth(currentMonth), {weekStartsOn:1}),1)));
+  const datedPriceMap = useMemo(() => new Map((datedPrices.data || []).map(row => [row.date, row])), [datedPrices.data]);
 
   const basePrice = rentalTerms?.price_per_night ?? 0;
   const seasonalPricing = useMemo(() => {
@@ -181,6 +186,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   return (
     <>
       <div className="space-y-2 w-full min-w-0">
+        {datedPrices.isError && <p role="alert" className="text-sm text-destructive">{isRu ? 'Не удалось загрузить цены. Обновите календарь.' : 'Prices could not be loaded. Reload the calendar.'}</p>}
         {/* Month navigation */}
         <div className="flex items-center justify-between gap-1 min-w-0" role="group" aria-label={isRu ? 'Месяц календаря' : 'Calendar month'}>
           <Button variant="ghost" size="icon" aria-label={isRu ? 'Предыдущий месяц' : 'Previous month'} onClick={() => setCurrentMonth(m => subMonths(m, 1))}>
@@ -215,13 +221,14 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                     const inMonth = isSameMonth(day, currentMonth);
                     const today = civilDateKey(day) === bangkokTodayISO();
                     const avail = availabilityMap.get(dateKey);
-                    const isBlocked = avail?.status === 'blocked';
-                    const priceOverride = avail?.priceOverride;
+                    const datedPrice = datedPriceMap.get(dateKey);
+                    const isBlocked = (datedPrice?.status ?? avail?.status) === 'blocked';
+                    const priceOverride = datedPrice?.price_override ?? avail?.priceOverride;
                     const dayTasks = taskMap.get(dateKey) || [];
 
                     // Effective nightly price: override > seasonal > base
-                    const effectivePrice = priceOverride
-                      ?? (basePrice ? getEffectiveNightlyRate(day, basePrice, seasonalPricing) : 0);
+                    const effectivePrice = datedPrices.isError ? 0 : (priceOverride
+                      ?? (basePrice ? getEffectiveNightlyRate(day, basePrice, seasonalPricing) : 0));
                     const isOverride = priceOverride !== undefined && priceOverride !== null;
                     const isSeasonalDelta = !isOverride && basePrice > 0 && effectivePrice !== basePrice;
 
