@@ -171,15 +171,11 @@ const queryClient = useQueryClient();
       const orderId = result.order_id!;
       const orderNumber = result.order_number!;
 
-      // create_order_atomic always records the payment_intent as 'pending'.
-      // When the caller already captured the funds (e.g. wallet debit), reflect
-      // that by marking the intent as succeeded so the order is persisted as paid.
+      // Payment state is server-authoritative. Browser code must never promote
+      // payment_intents to succeeded. A caller claiming "paid" without a verified
+      // server-side settlement path is rejected instead of creating false paid truth.
       if (input.payment?.status === 'paid') {
-        const { error: intentError } = await supabase
-          .from('payment_intents')
-          .update({ status: 'succeeded' })
-          .eq('order_id', orderId);
-        if (intentError) errorLog.silent(intentError, 'mark_payment_succeeded');
+        throw new Error('payment_requires_verified_server_settlement');
       }
 
       // Create notification for customer. The order is already created at this
