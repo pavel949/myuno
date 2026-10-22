@@ -46,7 +46,9 @@ async function fetchBouquets(options: UseBouquetsOptions): Promise<Bouquet[]> {
 
   const { data, error } = await query;
 
-  if (error) throw error;
+  // PostgREST failures can be plain objects; preserve the hook's Error contract
+  // without exposing backend diagnostics through a public catalogue error.
+  if (error) throw error instanceof Error ? error : new Error('Failed to load bouquets');
 
   return (data as unknown as Bouquet[]) || [];
 }

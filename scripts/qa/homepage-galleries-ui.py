@@ -76,8 +76,48 @@ async def main():
                         await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                         await page.wait_for_timeout(120)
                         assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
+                    # One entry; optional criteria appear only after selecting intent.
+                    await expect(page.locator('.home-hero input')).to_have_count(0)
+                    await page.locator('.home-search-entry-button').click()
+                    await expect(page.get_by_role('dialog')).to_be_visible()
+                    await page.locator('.home-search-intents button').nth(0).click()
+                    await expect(page.locator('.home-search-sheet h2')).to_be_focused()
+                    await page.locator('.home-search-back').click()
+                    await expect(page.locator('.home-search-sheet h2')).to_be_focused()
+                    await page.locator('.home-search-intents button').nth(0).click()
+                    await expect(page.locator('.home-search-sheet select')).to_have_count(0)
+                    await page.locator('.home-search-sheet .home-search-submit').click()
+                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent&tenancy=short')
+                    await page.keyboard.press('Escape')
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await expect(page.locator('.home-search-entry-button')).to_be_focused()
+                    await page.locator('.home-search-entry-button').click()
+                    await page.locator('.home-search-intents button').nth(1).click()
+                    duration = page.locator('.home-search-sheet .home-search-duration')
+                    await expect(duration).to_be_visible()
+                    await expect(duration.locator('button').nth(2)).to_have_attribute('aria-pressed', 'true')
+                    await expect(page.locator('.home-search-sheet .home-search-refine')).to_have_attribute('aria-expanded', 'false')
+                    if lang == 'ru' and width in [390, 768, 1440]:
+                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-yearly-visible.png'))
+                    await duration.locator('button').nth(1).focus()
+                    await page.keyboard.press('Enter')
+                    await expect(duration.locator('button').nth(1)).to_have_attribute('aria-pressed', 'true')
+                    await expect(duration.locator('button').nth(1)).to_be_focused()
+                    await page.locator('.home-search-sheet .home-search-submit').click()
+                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent&tenancy=medium')
+                    if lang == 'ru' and width in [390, 768, 1440]:
+                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-monthly-selected.png'))
+                    await page.keyboard.press('Escape')
+                    await expect(page.locator('.home-search-entry-button')).to_be_focused()
+                    await page.locator('.home-search-entry-button').click()
+                    await page.locator('.home-search-intents button').nth(2).click()
+                    await expect(page.locator('.home-search-sheet .home-search-dates')).to_have_count(0)
+                    await page.locator('.home-search-sheet .home-search-submit').click()
+                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=buy')
+                    await page.keyboard.press('Escape')
                     # Complex filters preserve typed inventory + rent/buy detail intents.
                     projects = page.locator('.home-projects')
+                    await projects.locator('summary').click()
                     await projects.locator('input[type=search]').fill('Fixture community 1' if lang!='ru' else 'Тестовый комплекс 1')
                     await expect(projects.locator('article:visible')).to_have_count(1)
                     await projects.locator('input[type=search]').fill('no-match')
@@ -93,7 +133,7 @@ async def main():
                     assert 'mode=buy&propertyType=condo' in await projects.locator('article a').first.get_attribute('href')
                     await projects.locator('select').nth(1).select_option('')
                     # Exercise actual card CTAs and verify the committed public destination.
-                    for selector, prefix in [('.home-locations a', '/property/search?'),
+                    for selector, prefix in [('.home-location-card', '/area/'),
                                              ('.home-project-card-link', '/property/complex/'),
                                              ('.home-home-card a', '/property/home-')]:
                         link = page.locator(selector).first
@@ -110,6 +150,8 @@ async def main():
                         assert href.startswith(prefix), href
                         await link.click()
                         await expect(page.get_by_test_id('location')).to_have_text(href)
+                    await projects.locator('.home-project-mode button').nth(0).click()
+                    await projects.locator('details').evaluate('(el)=>el.open=false')
                     await page.locator('.home-rail-viewport').evaluate_all('(rows)=>rows.forEach(row=>row.scrollLeft=0)')
                     await page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                     await page.locator('.home-hero').scroll_into_view_if_needed()
@@ -128,7 +170,7 @@ async def main():
             if state=='error':
                 await expect(page.get_by_role('alert')).to_have_count(5)
                 await page.get_by_role('button',name='Try again').first.click()
-                assert await page.evaluate('window.fixtureRetries') == 1
+                assert await page.evaluate('window.fixtureRetries') == 2
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
                 await expect(page.get_by_text('No published experiences yet. Check back later.')).to_be_visible()

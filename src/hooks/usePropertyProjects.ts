@@ -112,16 +112,15 @@ export function useAdminPropertyProjects() {
 export const GUEST_PROJECT_COLUMNS = 'id,name_en,name_ru,description_en,description_ru,address,district,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active';
 
 /** Public, allowlisted project collection for guest discovery surfaces. */
-export function usePublicPropertyProjects(limit = 24) {
+export function usePublicPropertyProjects(limit = 24, district?: string) {
   return useQuery({
-    queryKey: ['public-property-projects', limit],
+    queryKey: district ? ['public-property-projects', limit, district] : ['public-property-projects', limit],
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await createProjectCatalogQuery(GUEST_PROJECT_COLUMNS)
-        .eq('is_active', true)
-        .order('name_en')
-        .limit(limit);
+      let query = createProjectCatalogQuery(GUEST_PROJECT_COLUMNS).eq('is_active', true);
+      if (district) query = query.eq('district', district);
+      const { data, error } = await query.order('name_en').limit(limit);
 
       if (error) throw error;
       return (data as unknown as PropertyProject[]).map((p) => withNormalizedProjectAmenities(p));

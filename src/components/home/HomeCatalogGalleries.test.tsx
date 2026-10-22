@@ -78,7 +78,7 @@ const show = () =>
 it('keeps successful empty catalogues distinct from errors and category requests', () => {
   show();
   expect(
-    screen.getByText('No areas in the published catalog yet.'),
+    screen.getByRole('link', { name: /Kamala/ }),
   ).toBeVisible();
   expect(
     screen.getByText('No published experiences yet. Check back later.'),
@@ -101,7 +101,7 @@ it('shows failures with retry and never reports failed reads as empty supply', (
   expect(screen.getAllByRole('alert')).toHaveLength(4);
   expect(screen.queryByText(/No published/)).toBeNull();
   fireEvent.click(screen.getAllByRole('button', { name: 'Try again' })[0]);
-  expect(state.retry).toHaveBeenCalledOnce();
+  expect(state.retry).toHaveBeenCalledTimes(2);
 });
 it('shows loading separately', () => {
   state.loading = true;
@@ -139,7 +139,7 @@ it('renders only supplied records, deduplicates districts and preserves public d
   show();
   expect(screen.getByRole('link', { name: /Rawai/ })).toHaveAttribute(
     'href',
-    '/property/search?mode=rent&district=rawai',
+    '/area/rawai',
   );
   expect(screen.getByRole('link', { name: /Catalog tour/ })).toHaveAttribute(
     'href',
@@ -155,7 +155,7 @@ it('renders only supplied records, deduplicates districts and preserves public d
   );
   expect(screen.queryByText('Unpublished shop')).toBeNull();
   expect(document.querySelector('img')).toBeNull();
-  expect(screen.queryByText(/rating|available|popular/i)).toBeNull();
+  expect(screen.queryByText(/rating|available units|popular/i)).toBeNull();
 });
 it.each(['ru', 'th'])(
   'localizes empty and navigation states in %s',
@@ -181,4 +181,27 @@ it('replaces a failed stored photograph with the neutral media state', () => {
   fireEvent.error(image);
   expect(document.querySelector('img')).toBeNull();
   expect(screen.getByRole('link', { name: /Catalog tour/ })).toBeVisible();
+});
+
+it('resolves canonical district separators to existing area guides without inventing slugs', () => {
+  state.projects = [{ district: 'cherng_talay', name_en: 'Published Cherng Talay project' }, { district: 'Bang Tao', name_en: 'Published Bang Tao project' }, { district: 'unknown_district', name_en: 'Unknown' }];
+  show();
+  expect(screen.getByRole('link', { name: /Cherng Talay/ })).toHaveAttribute('href', '/area/cherngtalay');
+  expect(screen.getByRole('link', { name: /Bang Tao/ })).toHaveAttribute('href', '/area/bang-tao');
+  expect(screen.queryByRole('link', { name: /Unknown/ })).toBeNull();
+});
+
+it('keeps Kamala, Surin and Bang Tao discoverable even without catalog photos', () => {
+  show();
+  const areaLinks = Array.from(document.querySelectorAll('.home-location-card')).map(link => link.getAttribute('href'));
+  expect(areaLinks).toEqual(['/area/kamala', '/area/surin', '/area/bang-tao']);
+  expect(screen.getAllByText('Area photograph not available yet')).toHaveLength(3);
+  expect(screen.queryByText(/available units|popular|rating/i)).toBeNull();
+});
+
+it('does not relabel a stock catalog illustration as an area photograph', () => {
+  state.projects = [{ district: 'Surin', name_en: 'Published Surin community', cover_image: 'https://images.unsplash.com/photo-example' }];
+  show();
+  expect(document.querySelector('.home-locations img')).toBeNull();
+  expect(screen.getByRole('link', { name: /Published Surin community/ })).toHaveAttribute('href', '/area/surin');
 });

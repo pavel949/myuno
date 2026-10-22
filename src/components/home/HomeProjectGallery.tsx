@@ -155,7 +155,7 @@ export function HomeProjectGallery() {
         <Link className="home-text-link" to={APP_ROUTES.OFFPLAN}>{isRu ? 'Все проекты' : language === 'th' ? 'ทุกโครงการ' : 'All projects'}<ArrowRight size={18} aria-hidden="true" /></Link>
       </div>
 
-      <div className="home-project-filters" aria-label={isRu ? 'Фильтры комплексов' : language === 'th' ? 'ตัวกรองโครงการ' : 'Community filters'}>
+      <details className="home-project-refinements"><summary>{isRu ? 'Уточнить комплексы' : language === 'th' ? 'กรองโครงการ' : 'Refine communities'}</summary><div className="home-project-filters" aria-label={isRu ? 'Фильтры комплексов' : language === 'th' ? 'ตัวกรองโครงการ' : 'Community filters'}>
         <label className="home-project-search">
           <span className="home-field-label">{copy.search[lang]}</span>
           <span className="home-project-search-control"><Search size={17} aria-hidden="true" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={isRu ? 'Например, Лаян' : language === 'th' ? 'เช่น ลายัน' : 'For example, Layan'} /></span>
@@ -182,6 +182,7 @@ export function HomeProjectGallery() {
         </div>
       </div>
 
+      </details>
       {isLoading ? <p className="home-project-state" role="status">{copy.loading[lang]}</p> : isError ? <div className="home-project-state" role="alert"><p>{copy.error[lang]}</p><button type="button" onClick={() => refetch()}>{copy.retry[lang]}</button></div> : filtered.length === 0 || inventoryReady && visibleResults.length === 0 ? <p className="home-project-state" role="status">{copy.noProjects[lang]}</p> : <>
         <p className="home-project-result-count">{visibleResults.length} {copy.resultCount[lang]}</p>
         <HorizontalRail label={copy.title[lang]}>

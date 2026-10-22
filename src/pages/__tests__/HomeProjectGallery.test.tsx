@@ -39,6 +39,8 @@ it('shows public complex portals with live listing counts and supports area and 
   const layanLink = screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' });
   expect(layanLink).toHaveAttribute('href', '/property/complex/layan?mode=rent');
 
+  expect(document.querySelector('details')).not.toHaveAttribute('open');
+  fireEvent.click(screen.getByText('Refine communities'));
   fireEvent.change(screen.getByLabelText('Area'), { target: { value: 'rawai' } });
   expect(screen.getByRole('link', { name: 'Rawai Residence — Explore community' })).toBeVisible();
   expect(screen.queryByRole('link', { name: 'Layan Garden Homes — Explore community' })).toBeNull();
@@ -51,6 +53,7 @@ it('shows public complex portals with live listing counts and supports area and 
 
 it('updates the displayed count when guests switch between rent and purchase', () => {
   show();
+  fireEvent.click(screen.getByText('Refine communities'));
   fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
   const layanLink = screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' });
   expect(layanLink).toHaveAttribute('href', '/property/complex/layan?mode=buy');
@@ -59,6 +62,7 @@ it('updates the displayed count when guests switch between rent and purchase', (
 
 it('hides complexes without published homes matching the selected type', () => {
   show();
+  fireEvent.click(screen.getByText('Refine communities'));
   fireEvent.change(screen.getByLabelText('Home type'), { target: { value: 'villa' } });
   expect(screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' })).toBeVisible();
   expect(screen.queryByRole('link', { name: 'Rawai Residence — Explore community' })).toBeNull();

@@ -12,7 +12,7 @@ vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: () => <heade
 vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <small>Existing legal footer</small> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
-vi.mock('@/components/home/HomeDiscoverySearch', () => ({ HomeDiscoverySearch: ({ showGuestsInline }: { showGuestsInline?: boolean }) => <form aria-label="Property search" data-guests-inline={String(showGuestsInline === true)} /> }));
+vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button> }));
 vi.mock('@/components/home/HomeProjectGallery', () => ({ HomeProjectGallery: () => <section aria-label="Project gallery">Public project gallery</section> }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
@@ -58,11 +58,10 @@ it.each([
  show();
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
- expect(screen.getByRole('form', { name: 'Property search' })).toBeVisible();
+ expect(screen.getByRole('button', { name: 'Unified home search' })).toBeVisible();
  expect(screen.getByText('Public project gallery')).toBeVisible();
- expect(screen.getByRole('form', { name: 'Property search' })).toHaveAttribute('data-guests-inline', 'true');
- expect(screen.getByRole('heading', { name: language === 'ru' ? 'Где остановиться' : language === 'th' ? 'ที่พักสำหรับคุณ' : 'Places to stay' })).toBeVisible();
- expect(screen.getByRole('heading', { name: 'Layantara Villas' })).toBeVisible();
+ expect(screen.getByRole('heading', { name: language === 'ru' ? 'Найдите свой дом' : language === 'th' ? 'ที่พักสำหรับคุณ' : 'Find your home' })).toBeVisible();
+ expect(screen.queryByRole('heading', { name: 'Layantara Villas' })).toBeNull();
  const bar = screen.getByRole('navigation', { name });
  const links = within(bar).getAllByRole('link');
  expect(links.map(link => link.getAttribute('aria-label'))).toEqual(labels);

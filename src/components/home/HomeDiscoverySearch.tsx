@@ -11,7 +11,7 @@ import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, showGuestsInline = false, initialParams, onSearch }: { rentalOnly?: boolean; hideModeSwitch?: boolean; showGuestsInline?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
+export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, showGuestsInline = false, initialParams, onSearch, progressive = false }: { rentalOnly?: boolean; hideModeSwitch?: boolean; showGuestsInline?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void; progressive?: boolean }) {
   const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
@@ -31,6 +31,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   const [tenancy, setTenancy] = useState<string>(initial.tenancy);
   const today = bangkokTodayISO();
   const [dateError, setDateError] = useState(false);
+  const [showRefinements, setShowRefinements] = useState(!progressive);
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,7 +85,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           </span>
         </label>
       )}
-      <div className="home-search-type">
+      {showRefinements && <><div className="home-search-type">
         <span className="home-field-label">{t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}</span>
         <Select value={propertyType || '__all'} onValueChange={value => setPropertyType(value === '__all' ? '' : value)} disabled={typesLoading}>
           <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}><SelectValue /></SelectTrigger>
@@ -120,8 +121,10 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           </SelectContent>
         </Select>
       </div>
+      </>}
       <button type="submit" className="home-search-submit">{t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}<ArrowRight size={18} aria-hidden="true" /></button>
-      <details className="home-search-secondary">
+      {progressive && <button type="button" className="home-search-refine" aria-expanded={showRefinements} onClick={() => setShowRefinements(value => !value)}>{t({ ru: showRefinements ? 'Скрыть уточнения' : 'Уточнить поиск', en: showRefinements ? 'Hide refinements' : 'Refine search', th: showRefinements ? 'ซ่อนตัวกรอง' : 'ปรับการค้นหา' })}</button>}
+      {showRefinements && <details className="home-search-secondary">
         <summary>{t({ ru: mode === 'rent' && !showGuestsInline ? 'Название и гости' : 'Название объекта', en: mode === 'rent' && !showGuestsInline ? 'Name and guests' : 'Property name', th: mode === 'rent' && !showGuestsInline ? 'ชื่อที่พักและผู้เข้าพัก' : 'ชื่อที่พัก' })}</summary>
         <div className="home-search-secondary-fields">
           <label className="home-search-query" htmlFor={queryId}>
@@ -136,7 +139,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
             </span></label>
           )}
         </div>
-      </details>
+      </details>}
       {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
     </form>
   );
