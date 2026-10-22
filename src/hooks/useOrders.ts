@@ -91,6 +91,12 @@ const queryClient = useQueryClient();
         return { success: false, error: 'not_authenticated' };
       }
 
+      // Browser callers cannot assert that money was received. Paid state must
+      // come from a verified server-side payment/settlement writer.
+      if (input.payment?.status === 'paid') {
+        throw new Error('payment_requires_verified_server_settlement');
+      }
+
       const startAt = input.start_at 
         ? (input.start_at instanceof Date ? input.start_at.toISOString() : input.start_at)
         : null;
@@ -170,13 +176,6 @@ const queryClient = useQueryClient();
 
       const orderId = result.order_id!;
       const orderNumber = result.order_number!;
-
-      // Payment state is server-authoritative. Browser code must never promote
-      // payment_intents to succeeded. A caller claiming "paid" without a verified
-      // server-side settlement path is rejected instead of creating false paid truth.
-      if (input.payment?.status === 'paid') {
-        throw new Error('payment_requires_verified_server_settlement');
-      }
 
       // Create notification for customer. The order is already created at this
       // point, so a notification failure must NOT bubble up and make the caller
