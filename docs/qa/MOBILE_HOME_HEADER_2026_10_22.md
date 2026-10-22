@@ -30,3 +30,13 @@ synthetic catalog/context adapters and denied backend/external requests. It does
 not certify live catalog, authentication, assistant service or production release.
 Representative screenshots were inspected. Full repository suite and production
 publication are not claimed by these local checks.
+
+CI follow-up: run `39864026848` on `67cc974e` passed 3949 unit tests and
+all 22 PMS fixture groups, but enforcement correctly failed on nine header
+gutter cases and one admin shell case. The mobile overlay retains the existing
+24px gutter contract. Keyboard tests now observe the existing real-dialog
+readiness contract before Escape, preserving dismissal and focus assertions;
+the local menu sequence reproduced a premature Escape before this observation.
+The UI matrices print failed rows in addition to saving their evidence, so an
+artifact-transfer outage does not hide the failing case from the job log.
+These follow-up changes require their own current-head CI before merge.

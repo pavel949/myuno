@@ -3,6 +3,7 @@ import asyncio, json, sys
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
+from dialog_readiness import wait_for_dialog_ready
 
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [768, 1920] if '--wide' in sys.argv else [320, 360, 390, 430, 1440]
@@ -72,6 +73,7 @@ async def main():
                         assert await page.evaluate('document.documentElement.classList.contains("dark")')
                         await expect(dialog).to_be_visible()
                         await page.screenshot(animations='disabled', path=str(OUTPUT/f'{lang}-{width}-{reduced}-menu.png'))
+                        await wait_for_dialog_ready(page, dialog, keyboard=True)
                         await page.keyboard.press('Escape')
                         await expect(dialog).to_have_count(0)
                         await expect(menu).to_be_focused()
