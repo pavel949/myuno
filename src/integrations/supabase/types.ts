@@ -37061,7 +37061,7 @@ export type Database = {
       }
       get_property_calendar_prices: {
         Args: {
-          p_category_id: string | null
+          p_category_id: string
           p_from: string
           p_property_id: string
           p_to: string
@@ -37381,7 +37381,7 @@ export type Database = {
       }
       set_property_calendar_price: {
         Args: {
-          p_category_id: string | null
+          p_category_id: string
           p_currency: string
           p_expected: Json
           p_from: string
