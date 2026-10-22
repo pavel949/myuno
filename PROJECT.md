@@ -19,7 +19,7 @@ It connects trusted property/service supply, local execution, distribution, cust
 **Living is an experience/surface category over canonical domains, not a separate domain model.**
 
 ## 02. What myUNO is not
-Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is a UX/workflow donor only. **One Operational Reality** is the product.
+Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is an independently maintained Next.js application; this repository is the React/Vite myUNO App. Both must represent the same verified Layantara catalogue and tariffs. See [application identity and parity](docs/LAYANTARA_APPLICATION_PARITY.md). Older donor-only wording is superseded by the owner's 2026-10-21 decision. **One Operational Reality** is the product.
 
 ## 03. Current strategic objective
 Production operational convergence:
