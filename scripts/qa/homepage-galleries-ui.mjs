@@ -18,13 +18,14 @@ const virtual = {
   `,
   '@/contexts/LanguageContext': `import{lang}from'home-fixture';export const useLanguage=()=>({language:lang,setLanguage:()=>{}});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
-  '@/contexts/CurrencyContext': `export const useCurrency=()=>({currency:'THB',formatPrice:(n)=>'฿'+n.toLocaleString('en'),setCurrency:()=>{}});`,
-  '@/components/uno/GlobalPreferencesControls': `import React from'react';export const GlobalPreferencesControls=()=> <button type="button" aria-label="Language">EN</button>;`,
+  '@/contexts/CurrencyContext': `export const currencies=[];export const useCurrency=()=>({currency:'THB',formatPrice:(n)=>'฿'+n.toLocaleString('en'),setCurrency:()=>{}});`,
+  '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',setTheme:t=>{window.fixtureTheme=t;document.documentElement.classList.toggle('dark',t==='dark')}});`,
   '@/components/layout/UserAvatarMenu': `export const UserAvatarMenu=()=>null;`,
   '@/components/market/MiniCart': `export const MiniCart=()=>null;`,
   '@/components/layout/AllAppsDrawer': `export const AllAppsDrawer=()=>null;`,
   '@/components/concierge/ConciergeHelpSheet': `export const ConciergeHelpSheet=()=>null;`,
   '@/components/seo/SEOHead': `export const SEOHead=()=>null;`,
+  '@/hooks/usePWAInstall': `export const usePWAInstall=()=>({canInstall:false,isInstalled:false,isIOS:false,install:()=>{}});`,
   '@/hooks/usePrefetch': `export const usePrefetchRoute=()=>({prefetchRoute:()=>{}});`,
   '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
   '@/hooks/useUserCollections': `export const useUserCollections=()=>({isInCollection:()=>false,toggleCollection:()=>{}});`,
@@ -59,7 +60,7 @@ if (snapshotArg) {
 }
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'${root}/src/pages/Landing.tsx';function Fixture(){const loc=useLocation();return <><Landing/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'${root}/src/pages/Landing.tsx';import{UnifiedChatFAB}from'${root}/src/components/chat/UnifiedChatFAB.tsx';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
     loader: 'tsx',
     resolveDir: root,
   },
@@ -72,6 +73,7 @@ const result = await build({
   define: {
     'process.env.NODE_ENV': '"production"',
     'import.meta.env.DEV': 'false',
+    'import.meta.env.VITE_SUPABASE_URL': '"http://127.0.0.1:54321"',
   },
   plugins: [
     {

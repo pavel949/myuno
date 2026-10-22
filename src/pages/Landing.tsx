@@ -81,18 +81,16 @@ export default function Landing() {
           src={hero} alt="" loading="eager" width="1920" height="1080"
         />
         <div className="home-hero-shade" aria-hidden="true" />
-        <ConsumerHeader overlay />
+        <ConsumerHeader overlay headerActions={motionEnabled && motionStarted && (
+          <button type="button" aria-label={t({ ru: motionPaused ? 'Включить движение' : 'Остановить движение', en: motionPaused ? 'Resume motion' : 'Pause motion', th: motionPaused ? 'เปิดภาพเคลื่อนไหว' : 'หยุดภาพเคลื่อนไหว' })} aria-pressed={motionPaused} onClick={() => setMotionPaused(v => !v)} className="home-motion-control">
+            {motionPaused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
+          </button>
+        )} />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
           <p>{t(copy.lead)}</p>
         </div>
         <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
-        {motionEnabled && motionStarted && <div className="home-hero-bottom home-container">
-          <button type="button" aria-pressed={motionPaused} onClick={() => setMotionPaused(v => !v)} className="home-motion-control">
-            {motionPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-            {t({ ru: motionPaused ? 'Включить движение' : 'Остановить движение', en: motionPaused ? 'Resume motion' : 'Pause motion', th: motionPaused ? 'เปิดภาพเคลื่อนไหว' : 'หยุดภาพเคลื่อนไหว' })}
-          </button>
-        </div>}
       </section>
       <HomeLocationGallery />
       <section className="home-properties home-container" aria-labelledby="home-stays-title">

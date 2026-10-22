@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,7 +7,7 @@ const language = vi.hoisted(() => ({ current: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({ language: language.current }),
 }));
-vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: () => null }));
+vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: ({ headerActions }: { headerActions?: ReactNode }) => <>{headerActions}</> }));
 vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => null }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
