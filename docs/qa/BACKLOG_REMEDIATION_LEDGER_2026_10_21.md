@@ -338,3 +338,25 @@ Admin remains FAIL11/12 partial (original9/12); last Thai430 state completed nea
 cap and Thai1280 unfinished. No product assertion exception or proved stall.
 Gallery semantic-readiness QA commit `a96d2e1f71ee40049e36dae0dbb4633b298c5fc1`
 adds explicit18-case completion and incremental evidence; sole rerun is active.
+
+Gallery follow-up terminal PASS18/18 in157.230s, original180s cap, exact local
+a96d2e1f71ee40049e36dae0dbb4633b298c5fc1. Explicit18-case gate includes all15
+RU/EN/TH x320/390/768/1440/1920 data cases and empty/error/loading. No matrix,
+interaction assertion or cap was removed. This is21 original passing groups plus
+2 passing corrected follow-ups; **not an all24-green single-head suite**. Admin
+stillFAIL. UI Vite stopped; only exact known generated MCP diff restored, clean
+frozen UI worktree. Next finite auth WIP verification started sequentially; its
+commit/push denial remains in effect and no source is transferred elsewhere.
+
+### Auth WIP finite follow-up (not committed/pushed)
+
+Initial50focused and27browser cases passed. Two additional recovery lifecycle
+regressions reproduced2FAIL/6PASS: duplicate native submissions sent2 reset calls,
+and late success after unmount emitted a toast. The same ForgotPassword file now
+uses a synchronous in-flight ref and mounted guards; API/redirect/validation and
+server access rules are unchanged. Final52focused/6files and affected27browser
+cases PASS, runner13PASS, narrowlint0errors13warnings. Types/build remain pending.
+A build briefly overlapped typecheck after a process-name-only check missed tsc's
+MainThread name; build was paused and ownership/cleanup checked. No resource-
+isolated benchmark or completed types/build result is claimed. Current code is
+still local WIP under the existing auth commit/push denial; no source copied.
