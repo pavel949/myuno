@@ -215,6 +215,7 @@ async def exercise_queue(page, language, width):
         await expect(button).to_be_disabled()
 
     await tab(page, labels['pending']).click()
+    await expect_committed_route(page, INITIAL_ROUTE, prefix + '-pending-tab')
     await expect(tab(page, labels['pending'])).to_have_attribute('aria-selected', 'true')
     await kind.select_option('property')
     await expect(rows).to_have_count(2)

@@ -178,7 +178,8 @@ describe('contained admin property editor', () => {
     expect(page.container.querySelector('[data-property-form-scroll]')).not.toHaveClass('overflow-y-auto');
     page.unmount();
     render(<CloudStoragePicker open onOpenChange={vi.fn()} />);
-    expect(screen.getByRole('dialog')).toHaveClass('z-50');
+    // Shared dialogs now sit above navigation (100) and sheets (121).
+    expect(screen.getByRole('dialog')).toHaveClass('z-[131]');
     expect(screen.getByRole('dialog')).not.toHaveClass('z-[140]');
   });
 

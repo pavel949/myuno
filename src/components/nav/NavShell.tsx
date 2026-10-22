@@ -24,6 +24,8 @@ import {
   resolveNavRole,
   type NavRoleKey,
 } from '@/lib/nav/navigationModel';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { canvasFromPath } from '@/types/canvas';
 
 interface NavShellProps {
@@ -58,6 +60,9 @@ export function NavShell({
   children,
 }: NavShellProps) {
   const location = useLocation();
+  const mainId = React.useId();
+  const { language } = useLanguage();
+  const skipLink = <a href={`#${mainId}`} onClick={(event) => { event.preventDefault(); document.getElementById(mainId)?.focus(); }} className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring">{pickLang(language, { ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>;
   const resolvedRole: NavRoleKey =
     role ?? resolveNavRole({ activeRole, isMCPortal, pathname: location.pathname });
   const canvas = canvasFromPath(location.pathname);
@@ -75,14 +80,15 @@ export function NavShell({
     return (
       <NavShellContext.Provider value={{ active: true }}>
         <SidebarProvider>
-          <div data-canvas={canvas} className={cn('flex min-h-screen w-full bg-background', className)}>
+          <div data-canvas={canvas} className={cn('flex min-h-dvh min-w-0 w-full bg-background', renderHeader && '[--shell-header-height:3.5rem] lg:[--shell-header-height:4rem]', className)}>
+            {skipLink}
             <SideRail role={resolvedRole} badges={badges} />
             <SidebarInset className="flex min-w-0 flex-1 flex-col">
               {renderHeader && <TopBar role={resolvedRole} title={title} />}
-              <main
+              <main id={mainId} tabIndex={-1}
                 className={cn(
-                  'flex-1 w-full',
-                  renderBottomBar && 'pb-24 md:pb-4',
+                  'flex-1 min-w-0 w-full',
+                  renderBottomBar && 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-4',
                   contentClassName,
                 )}
               >
@@ -100,12 +106,13 @@ export function NavShell({
   // Consumer shell: no sidebar, just header + content + bottom-bar.
   return (
     <NavShellContext.Provider value={{ active: true }}>
-      <div data-canvas={canvas} className={cn('flex min-h-screen flex-col bg-background', className)}>
+      <div data-canvas={canvas} className={cn('flex min-h-dvh min-w-0 flex-col bg-background', renderHeader && '[--shell-header-height:var(--consumer-header-height)]', className)}>
+        {skipLink}
         {renderHeader && <TopBar role={resolvedRole} title={title} />}
-        <main
+        <main id={mainId} tabIndex={-1}
           className={cn(
-            'flex-1 w-full',
-            renderBottomBar && 'pb-24 md:pb-4',
+            'flex-1 min-w-0 w-full',
+            renderBottomBar && 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-4',
             contentClassName,
           )}
         >

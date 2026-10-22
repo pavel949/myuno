@@ -38,15 +38,15 @@ export function PageTabs<T extends string>({
     >
       <div
         className={cn(
-          'overflow-x-auto scrollbar-none -mx-[var(--page-padding-x)] px-[var(--page-padding-x)]',
-          sticky && 'sticky top-0 z-20 bg-background/85 py-2 border-b border-border/40',
+          'overflow-x-auto overscroll-x-contain py-1 scrollbar-none -mx-[var(--page-padding-x)] px-[var(--page-padding-x)]',
+          sticky && 'sticky top-[var(--shell-header-height,0px)] z-20 bg-background/85 py-2 border-b border-border/40',
         )}
       >
-        <TabsList className="inline-flex w-auto">
+        <TabsList className="inline-flex h-auto min-h-11 w-max min-w-full justify-start">
           {tabs.map((t) => {
             const Icon = t.icon;
             return (
-              <TabsTrigger key={t.value} value={t.value} className="gap-1.5">
+              <TabsTrigger key={t.value} value={t.value} className="min-h-11 flex-none gap-1.5 whitespace-nowrap">
                 {Icon && <Icon className="w-4 h-4" />}
                 <span>{t.label}</span>
                 {t.badge !== undefined && t.badge !== 0 && (

@@ -124,9 +124,9 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           </div>
           <span
             className={cn(
-              'text-[10px] leading-none',
+              'max-w-full px-0.5 text-center text-[11px] leading-tight',
               mobileLabelRu && 'whitespace-nowrap',
-              active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
+              active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground',
             )}
           >
             {mobileLabel}

@@ -30,7 +30,7 @@ export function LoadingState({
 }: LoadingStateProps) {
   if (variant === 'inline') {
     return (
-      <div className={cn('flex items-center justify-center gap-2 py-6', className)}>
+      <div role="status" aria-busy="true" aria-label={message} className={cn('flex items-center justify-center gap-2 py-6', className)}>
         <LoadingSpinner size="sm" />
         {message && <span className="text-sm text-muted-foreground">{message}</span>}
       </div>
@@ -40,7 +40,7 @@ export function LoadingState({
   if (variant === 'skeleton') {
     if (layout === 'grid' || layout === 'cards') {
       return (
-        <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4', className)}>
+        <div role="status" aria-busy="true" aria-label={message} className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4', className)}>
           {Array.from({ length: rows }).map((_, i) => (
             <Skeleton key={i} className="h-40 w-full" />
           ))}
@@ -48,7 +48,7 @@ export function LoadingState({
       );
     }
     return (
-      <div className={cn('space-y-3', className)}>
+      <div role="status" aria-busy="true" aria-label={message} className={cn('space-y-3', className)}>
         {Array.from({ length: rows }).map((_, i) => (
           <Skeleton key={i} className="h-16 w-full" />
         ))}
@@ -58,6 +58,7 @@ export function LoadingState({
 
   return (
     <div
+      role="status" aria-busy="true" aria-label={message}
       className={cn(
         'min-h-[60vh] flex flex-col items-center justify-center gap-4 p-8',
         className,

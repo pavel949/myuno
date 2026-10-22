@@ -4,9 +4,12 @@
  * Responsive: on mobile, secondary actions collapse into an overflow menu.
  */
 import React, { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -58,6 +61,8 @@ export function PageHeader({
   variant,
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const label = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { isMobile } = useBreakpoint();
   // Backwards-compat: legacy `variant="sticky"` maps to `sticky={true}`.
   const isSticky = sticky || variant === 'sticky';
@@ -65,7 +70,7 @@ export function PageHeader({
   const isActionArray = Array.isArray(actions);
   const actionList = isActionArray ? (actions as PageAction[]) : [];
   const visibleActions = isMobile
-    ? actionList.filter((a) => !a.mobileHidden && a.variant === 'primary')
+    ? actionList.filter((a) => !(a.mobileHidden ?? a.variant !== 'primary'))
     : actionList;
   const overflowActions = isMobile
     ? actionList.filter((a) => a.mobileHidden ?? a.variant !== 'primary')
@@ -75,22 +80,22 @@ export function PageHeader({
     <header
       className={cn(
         'mb-[var(--section-gap)]',
-        isSticky && 'sticky top-0 z-30 -mx-[var(--page-padding-x)] px-[var(--page-padding-x)] py-3 bg-background/85 border-b border-border/40',
+        isSticky && 'sticky top-[var(--shell-header-height,0px)] z-30 -mx-[var(--page-padding-x)] px-[var(--page-padding-x)] py-3 bg-background/85 border-b border-border/40',
         className,
       )}
     >
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
+        <nav aria-label={label('Навигация', 'Breadcrumb', 'เส้นทางนำทาง')} className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           {breadcrumbs.map((bc, i) => (
             <React.Fragment key={i}>
               {i > 0 && <ChevronRight className="w-3 h-3 opacity-50" />}
               {bc.href ? (
-                <button
-                  onClick={() => navigate(bc.href!)}
+                <Link
+                  to={bc.href}
                   className="hover:text-foreground transition-colors truncate max-w-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {bc.label}
-                </button>
+                </Link>
               ) : (
                 <span className="truncate max-w-[120px]">{bc.label}</span>
               )}
@@ -104,9 +109,10 @@ export function PageHeader({
           {showBack && (
             <button
               onClick={() => navigate(fallbackPath)}
-              aria-label="Back"
+              type="button"
+              aria-label={label('Назад', 'Back', 'กลับ')}
               className={cn(
-                'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
+                'flex items-center justify-center rounded-none bg-secondary/80 text-foreground',
                 'hover:bg-secondary transition-all touch-manipulation flex-shrink-0',
                 'h-[var(--touch-target)] w-[var(--touch-target)]',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
@@ -125,26 +131,28 @@ export function PageHeader({
               )}
             </div>
             {subtitle && (
-              <p className="mt-1 text-sm md:text-base text-muted-foreground">{subtitle}</p>
+              <p className="mt-1 break-words text-sm md:text-base text-muted-foreground">{subtitle}</p>
             )}
           </div>
         </div>
 
         {actions && (
-          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 sm:max-w-[50%]">
             {!isActionArray && actions}
             {isActionArray && (
               <>
                 {visibleActions.map((a, i) => {
                   const Icon = a.icon;
                   return (
-                    <button
+                    <Button
+                      type="button"
+                      variant={a.variant === 'primary' ? 'default' : 'secondary'}
                       key={i}
                       onClick={a.onClick}
                       aria-label={a.label}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all ',
-                        'h-[var(--touch-target)] px-3',
+                        'h-auto min-h-[var(--touch-target)] max-w-full px-3 py-2',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         a.variant === 'primary'
                           ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
@@ -152,17 +160,18 @@ export function PageHeader({
                       )}
                     >
                       {Icon && <Icon className="w-4 h-4" />}
-                      <span className="hidden sm:inline">{a.label}</span>
-                    </button>
+                      <span className="whitespace-normal break-words text-left leading-snug">{a.label}</span>
+                    </Button>
                   );
                 })}
                 {overflowActions.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        aria-label="More actions"
+                        type="button"
+                        aria-label={label('Другие действия', 'More actions', 'การดำเนินการเพิ่มเติม')}
                         className={cn(
-                          'flex items-center justify-center rounded-full bg-secondary/80 text-foreground',
+                          'flex items-center justify-center rounded-none bg-secondary/80 text-foreground',
                           'hover:bg-secondary transition-all ',
                           'h-[var(--touch-target)] w-[var(--touch-target)]',
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',

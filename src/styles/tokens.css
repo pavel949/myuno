@@ -114,7 +114,7 @@
   --border:               30  6% 90%;       /* border-strong */
   --border-strong:        30  6% 90%;
   --border-subtle:        30  8% 96%;
-  --input:                30  6% 90%;
+  --input:                30  6% 52%;       /* control boundary: 3.37:1 against cream */
   --ring:                 213 73% 15%;      /* navy */
 
   --success-foreground:   0   0% 100%;
@@ -445,7 +445,7 @@ html:not([lang]) {
   --border:               216 18% 27%;
   --border-strong:        216 18% 36%;
   --border-subtle:        216 18% 21%;
-  --input:                216 18% 36%;
+  --input:                216 18% 44%;      /* control boundary: 3.34:1 against navy */
   --ring:                 22 79% 47%;      /* orange ring for focus on dark */
 
   --sidebar-background:   214 78%  9%;

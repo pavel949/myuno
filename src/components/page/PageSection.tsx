@@ -44,7 +44,7 @@ export function PageSection({
   return (
     <section className={cn('mb-[var(--section-gap)]', className)}>
       {(title || action) && (
-        <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5 min-w-0">
             {Icon && (
               <div className={cn(s.box, 'bg-primary/10 flex-shrink-0')}>
@@ -53,7 +53,7 @@ export function PageSection({
             )}
             <div className="min-w-0">
               {title && (
-                <h2 className={cn(s.title, 'font-display text-foreground truncate')}>{title}</h2>
+                <h2 className={cn(s.title, 'font-display text-foreground break-words')}>{title}</h2>
               )}
               {subtitle && (
                 <p className={cn(s.subtitle, 'text-muted-foreground')}>{subtitle}</p>
@@ -62,8 +62,9 @@ export function PageSection({
           </div>
           {action && (
             <button
+              type="button"
               onClick={action.onClick}
-              className="flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-hover transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex min-h-11 max-w-full items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-hover transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {action.label}
               <ChevronRight className="w-3.5 h-3.5" />

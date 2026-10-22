@@ -65,10 +65,10 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
             'admin-review-queues moderation-queue-ui ui-backlog-salvage pms-dashboard-ui '
             'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui trip-planner-ui '
             'unified-property-search-ui bookings-list-ui pms-detail-ui calendar-ui today-ui '
-            'property-browse-ui home-search-ui homepage-galleries-ui guest-complex-ui'
+            'property-browse-ui home-search-ui homepage-galleries-ui guest-complex-ui shared-surfaces-ui'
         ).split()
         self.assertEqual([name for name, _ in runner.FIXTURE_SPECS], expected)
-        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 21)
+        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 22)
         self.assertEqual(runner.MAX_WORKERS, 2)
         self.assertEqual(runner.FIXTURE_TIMEOUT_SECONDS, 180)
         for name, output in runner.FIXTURE_SPECS:

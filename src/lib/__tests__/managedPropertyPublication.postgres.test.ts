@@ -556,14 +556,16 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   expect((await as(U.admin,tx=>tx`SELECT actor_employee_task_capability_ceiling(${external},'edit') AS allowed`))[0].allowed).toBe(true);
   expect((await as(U.team,tx=>tx`SELECT actor_employee_task_capability_ceiling(${external},'edit') AS allowed`))[0].allowed).toBe(false);
  });
- it.each(sensitiveTables)('denies raw %s operations to content-only staff without opening legacy portal policies', async table => {
+ // Isolate each privilege assertion instead of charging four independent RLS
+ // query plans to one 5s test budget. Keep the default timeout and every denial.
+ it.each(sensitiveTables.flatMap(table => ['select', 'insert', 'update', 'delete'].map(operation => [table, operation] as const)))('denies raw %s %s to content-only staff without opening legacy portal policies', async (table, operation) => {
   const key=await create(U.staff);
   const row={property_id:key,payload:'private',owner_user_id:U.owner,sender_id:U.staff,sender_role:'mc',inspector_id:U.staff,uploaded_by:U.staff};
   await sql`INSERT INTO ${sql(table)} ${sql(row)}`;
-  expect(await as(U.staff,tx=>tx`SELECT id FROM ${tx(table)} WHERE property_id=${key}`)).toHaveLength(0);
-  await expect(as(U.staff,tx=>tx`INSERT INTO ${tx(table)} ${tx(row)}`)).rejects.toThrow(/row-level/);
-  expect(await as(U.staff,tx=>tx`UPDATE ${tx(table)} SET payload='forged' WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
-  expect(await as(U.staff,tx=>tx`DELETE FROM ${tx(table)} WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
+  if (operation === 'select') expect(await as(U.staff,tx=>tx`SELECT id FROM ${tx(table)} WHERE property_id=${key}`)).toHaveLength(0);
+  if (operation === 'insert') await expect(as(U.staff,tx=>tx`INSERT INTO ${tx(table)} ${tx(row)}`)).rejects.toThrow(/row-level/);
+  if (operation === 'update') expect(await as(U.staff,tx=>tx`UPDATE ${tx(table)} SET payload='forged' WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
+  if (operation === 'delete') expect(await as(U.staff,tx=>tx`DELETE FROM ${tx(table)} WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
  });
  it('preserves existing operational manager checks, rejects reparenting and does not repair reversed portal grants', async () => {
   const key=await property();const outside=await property();
