@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-22 · Authorized sitemap, metadata and monitoring tranche
+- [ ] First correct the four broken child sitemaps using the existing public catalogue contract; verify without publishing.
+- [ ] Give housing and services distinct accurate search titles/descriptions using existing page metadata.
+- [ ] Record prior three-function deployment evidence and UNKNOWN Auth redirect coverage, with exact read-only manual checks for both setup-password URLs; invitations stay disabled.
+- [ ] Diagnose the remaining Project monitoring finding and minimally correct only a reproduced cause with isolated regressions.
+- [ ] Record commands, outcomes, changed files and source HEAD; no publication, production business writes, Auth changes or invitation activation. Audience selection and regular-booking assessment are deferred.
+
 ## 2026-10-17 · Connected-system continuation (GitHub verification)
 - [x] Reconcile actual plans and current architecture against source and SELECT-only Lovable catalog; distinguish tables from storage buckets and historical audit findings.
 - [x] Correct PMS status/date/turnover, category/plan persistence confirmation and guest cache refresh, data-entry draft lifecycle, and browse/map/filter/pagination continuity.
