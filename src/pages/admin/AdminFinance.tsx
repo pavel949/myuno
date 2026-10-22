@@ -6,7 +6,6 @@ import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab'
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
 import { AdminPromotionsTab } from '@/components/admin/finance/AdminPromotionsTab';
 import { ReconciliationStatus } from '@/components/admin/finance/ReconciliationStatus';
-import { ManualPaymentForm } from '@/components/admin/finance/ManualPaymentForm';
 import { PayoutManager } from '@/components/admin/PayoutManager';
 import { PageShell, PageHeader } from '@/components/page';
 
@@ -19,10 +18,7 @@ export default function AdminFinance() {
         title={t('admin.finance.title')}
         subtitle={t('admin.finance.subtitle')}
         actions={
-          <div className="flex items-center gap-2">
-            <ReconciliationStatus compact />
-            <ManualPaymentForm />
-          </div>
+          <ReconciliationStatus compact />
         }
       />
 
