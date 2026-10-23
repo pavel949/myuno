@@ -2,12 +2,12 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RoleGuard } from './RoleGuard';
 import { MCGuard } from './MCGuard';
 import { InvestorGuard } from './InvestorGuard';
-const fixture=vi.hoisted(()=>({rpc:vi.fn(),companies:[{company_id:'company-a'}] as Array<{company_id:string}>}));
-vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:{id:'actor-a'},isLoading:false})}));
+const fixture=vi.hoisted(()=>({actor:'actor-a' as string|null,rpc:vi.fn(),companies:[{company_id:'company-a',role:'owner'}] as Array<{company_id:string;role?:string}>}));
+vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:fixture.actor?{id:fixture.actor}:null,isLoading:false})}));
 vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:fixture.rpc}}));
 vi.mock('@/hooks/useActiveCompany',()=>({useActiveCompany:()=>({companies:fixture.companies,activeCompany:fixture.companies[0]??null,isLoading:false})}));
@@ -15,24 +15,68 @@ vi.mock('./AccessDenied',()=>({AccessDenied:()=> <p role="alert">Access denied</
 const context={mode:'admin',entity_id:null,role:'admin',permissions:['*'],resolved_at:'2026-10-23T00:00:00Z'};
 let client:QueryClient;
 let finish:(value:{data:typeof context|null;error:{message:string}|null})=>void=()=>{};
-beforeEach(()=>{vi.useFakeTimers();fixture.companies=[{company_id:'company-a'}];fixture.rpc.mockReset();fixture.rpc.mockImplementation(()=>new Promise(resolve=>{finish=resolve;}));client=new QueryClient({defaultOptions:{queries:{retry:false,gcTime:Infinity}}});client.setQueryData(['resolved-context','actor-a'],context);});
+const modalDescriptors = ['showModal','close'].map(name => [name,Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype,name)] as const);
+beforeAll(()=>{
+ Object.defineProperty(HTMLDialogElement.prototype,'showModal',{configurable:true,value:function(){this.setAttribute('open','');}});
+ Object.defineProperty(HTMLDialogElement.prototype,'close',{configurable:true,value:function(){this.removeAttribute('open');}});
+});
+afterAll(()=>{for(const[name,descriptor]of modalDescriptors){if(descriptor)Object.defineProperty(HTMLDialogElement.prototype,name,descriptor);else Reflect.deleteProperty(HTMLDialogElement.prototype,name);}});
+beforeEach(()=>{fixture.actor='actor-a';vi.useFakeTimers();fixture.companies=[{company_id:'company-a'}];fixture.rpc.mockReset();fixture.rpc.mockImplementation(()=>new Promise(resolve=>{finish=resolve;}));client=new QueryClient({defaultOptions:{queries:{retry:false,gcTime:Infinity}}});client.setQueryData(['resolved-context','actor-a'],context);});
 afterEach(()=>{client.clear();vi.useRealTimers();});
 function Location(){return <p data-testid="location">{useLocation().pathname}</p>;}
+function Draft(){const[value,setValue]=React.useState('');return <input aria-label="Unsaved draft" value={value} onChange={event=>setValue(event.target.value)}/>;}
 function mount(){return render(<QueryClientProvider client={client}><MemoryRouter><RoleGuard allowedRoles={['admin']}><p>Protected page</p></RoleGuard></MemoryRouter></QueryClientProvider>);}
 async function startVerification(){await act(async()=>{void client.invalidateQueries({queryKey:['resolved-context','actor-a']});await vi.advanceTimersByTimeAsync(1);});}
 describe('actual resolved-context query verification boundary',()=>{
+ it('preserves a same-identity draft across repeated successful checks while never exposing it pending',async()=>{
+  render(<QueryClientProvider client={client}><MemoryRouter><RoleGuard allowedRoles={['admin']}><Draft/></RoleGuard></MemoryRouter></QueryClientProvider>);
+  const input=screen.getByRole('textbox',{name:'Unsaved draft'});fireEvent.change(input,{target:{value:'not saved'}});
+  for(let i=0;i<2;i++){
+   await startVerification();expect(input).not.toBeVisible();expect(input.closest('[inert]')).toBeTruthy();
+   await act(async()=>{finish({data:{...context,resolved_at:String(i)},error:null});await vi.advanceTimersByTimeAsync(2);});
+   expect(screen.getByRole('textbox')).toBe(input);expect(input).toHaveValue('not saved');expect(input).toBeVisible();
+  }
+ });
+ it('drops a previous actor immediately and ignores its late response',async()=>{
+  const tree=()=> <QueryClientProvider client={client}><MemoryRouter><RoleGuard allowedRoles={['admin']}><Draft/></RoleGuard></MemoryRouter></QueryClientProvider>;
+  const view=render(tree());fireEvent.change(screen.getByRole('textbox'),{target:{value:'actor A private draft'}});
+  await startVerification();const finishA=finish;fixture.actor='actor-b';view.rerender(tree());
+  expect(screen.queryByLabelText('Unsaved draft')).toBeNull();const finishB=finish;
+  await act(async()=>{finishA({data:context,error:null});await vi.advanceTimersByTimeAsync(2);});expect(screen.queryByLabelText('Unsaved draft')).toBeNull();
+  await act(async()=>{finishB({data:{...context,role:'user',permissions:[]},error:null});await vi.advanceTimersByTimeAsync(2);});
+  expect(screen.getByText('Access denied')).toBeVisible();expect(screen.queryByLabelText('Unsaved draft')).toBeNull();
+ });
+ it('drops a draft after verified revocation rather than revealing cached privilege',async()=>{
+  render(<QueryClientProvider client={client}><MemoryRouter><RoleGuard allowedRoles={['admin']}><Draft/></RoleGuard></MemoryRouter></QueryClientProvider>);
+  await startVerification();await act(async()=>{finish({data:{...context,role:'user',permissions:[]},error:null});await vi.advanceTimersByTimeAsync(2);});
+  expect(screen.getByText('Access denied')).toBeVisible();expect(screen.queryByLabelText('Unsaved draft')).toBeNull();
+ });
+
+ it('discards form state on a same-company membership-role change',()=>{
+  fixture.companies=[{company_id:'company-a',role:'owner'}];
+  const tree=()=> <QueryClientProvider client={client}><MemoryRouter><MCGuard><Draft/></MCGuard></MemoryRouter></QueryClientProvider>;
+  const view=render(tree());const original=screen.getByRole('textbox');fireEvent.change(original,{target:{value:'owner-only draft'}});
+  fixture.companies=[{company_id:'company-a',role:'staff'}];view.rerender(tree());
+  expect(screen.getByRole('textbox')).not.toBe(original);expect(screen.getByRole('textbox')).toHaveValue('');
+ });
+ it('unmounts safely during rechecks when native modal quarantine is unavailable',async()=>{
+  const descriptor=Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype,'showModal');
+  Object.defineProperty(HTMLDialogElement.prototype,'showModal',{configurable:true,value:undefined});
+  try {mount();await startVerification();expect(screen.queryByText('Protected page')).toBeNull();}
+  finally {if(descriptor)Object.defineProperty(HTMLDialogElement.prototype,'showModal',descriptor);}
+ });
  it('never grants cached admin while a real background verification is unresolved, including after its deadline',async()=>{
   mount();expect(screen.getByText('Protected page')).toBeTruthy();await startVerification();expect(fixture.rpc).toHaveBeenCalledTimes(1);
-  expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
-  await act(async()=>{await vi.advanceTimersByTimeAsync(12001);});expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');
+  expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.getByRole('status')).toBeTruthy();
+  await act(async()=>{await vi.advanceTimersByTimeAsync(12001);});expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');
  });
  it('starts a fresh deadline for each verification after a previously successful shell',async()=>{
   mount();await act(async()=>{await vi.advanceTimersByTimeAsync(20000);});await startVerification();
-  expect(screen.queryByText('Protected page')).toBeNull();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
+  expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
   await act(async()=>{finish({data:context,error:null});await vi.advanceTimersByTimeAsync(1);await vi.advanceTimersByTimeAsync(1);});
   expect(screen.getByText('Protected page')).toBeTruthy();
   await act(async()=>{await vi.advanceTimersByTimeAsync(20000);});await startVerification();expect(fixture.rpc).toHaveBeenCalledTimes(2);
-  expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();expect(screen.queryByText('Protected page')).toBeNull();
+  expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();expect(screen.queryByText('Protected page')).not.toBeVisible();
  });
  it('does not treat cached data plus a failed verification as authority and retries the real query',async()=>{
   mount();await startVerification();
@@ -44,7 +88,7 @@ describe('actual resolved-context query verification boundary',()=>{
  });
  it.each([['MC',MCGuard,'/mc/onboarding'],['Investor',InvestorGuard,'/invest']] as const)('%s also blocks cached authority during verification and distinguishes failure from ordinary denial',async(_name,Guard,destination)=>{
   render(<QueryClientProvider client={client}><MemoryRouter><Location/><Guard><p>Protected page</p></Guard></MemoryRouter></QueryClientProvider>);
-  expect(screen.getByText('Protected page')).toBeTruthy();await startVerification();expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
+  expect(screen.getByText('Protected page')).toBeTruthy();await startVerification();expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.getByRole('status')).toBeTruthy();
   await act(async()=>{finish({data:null,error:{message:'Synthetic verification failed'}});await vi.advanceTimersByTimeAsync(1);});
   expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Protected page')).toBeNull();
   expect(screen.getByRole('button',{name:'Retry'}).style.minHeight).toBe('44px');fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});
