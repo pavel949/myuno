@@ -11,12 +11,12 @@ export const P23_SMB: PersonaLanding = {
   slug: 'smb',
   status: 'live',
   h1: { ru: 'Локальный малый бизнес на Пхукете', en: 'Local small business in Phuket' },
-  subtitle: { ru: 'Кафе, спа, школы, прокат — получите витрину, бронирование, CRM и поток клиентов в одном инструменте.', en: 'Cafés, spas, schools, rentals — get a storefront, bookings, CRM and client flow in one tool.' },
+  subtitle: { ru: 'Кафе, спа, школы, прокат — получите витрину, бронирование, CRM и поток клиентов в одном инструменте.', en: 'Cafés, spas, schools, rentals, get a storefront, bookings, CRM and client flow in one tool.' },
   pains: [
     { ru: 'Нет нормального online-присутствия, кроме Google Maps.', en: 'No proper online presence beyond Google Maps.' },
     { ru: 'CRM на коленке: Excel, WhatsApp, бумажные записи.', en: 'CRM held together by Excel, WhatsApp and paper notes.' },
     { ru: 'Сложно принимать online-оплату от иностранцев.', en: 'Hard to accept online payments from foreigners.' },
-    { ru: 'Нет ресурса на маркетинг — нужны клиенты «под ключ».', en: 'No bandwidth for marketing — you need turnkey clients.' },
+    { ru: 'Нет ресурса на маркетинг — нужны клиенты «под ключ».', en: 'No bandwidth for marketing, you need turnkey clients.' },
   ],
   services: [
     { slug: 'storefront', label: { ru: 'Заявка поставщика', en: 'Provider application', th: 'ใบสมัครผู้ให้บริการ' }, oneLiner: { ru: 'Укажите сведения о себе или компании и своих услугах.', en: 'Provide your individual or company details and services.', th: 'ระบุข้อมูลส่วนตัวหรือบริษัทและบริการของคุณ' }, href: '/vendor/onboarding' },
@@ -25,13 +25,13 @@ export const P23_SMB: PersonaLanding = {
     { slug: 'leads', label: { ru: 'Поток клиентов', en: 'Client flow' }, oneLiner: { ru: 'AI-консьерж рекомендует вас гостям и резидентам.', en: 'AI concierge recommends you to guests and residents.' }, href: '/pricing' },
   ],
   faq: [
-    { q: { ru: 'Подходит, если у меня уже есть Line/IG?', en: 'Useful if I already use Line / IG?' }, a: { ru: 'Да — myUNO добавляет англоязычных гостей и резидентов острова, без замены ваших каналов.', en: 'Yes — myUNO adds English-speaking guests and residents, without replacing your channels.' } },
-    { q: { ru: 'Сколько это стоит?', en: 'What does it cost?' }, a: { ru: 'Базовая витрина бесплатна. Платформа удерживает стандартную комиссию с заказов через myUNO — актуальная ставка на /vendor/billing.', en: 'Basic storefront is free. The platform retains its standard commission on orders via myUNO — current rate on /vendor/billing.' } },
+    { q: { ru: 'Подходит, если у меня уже есть Line/IG?', en: 'Useful if I already use Line / IG?' }, a: { ru: 'Да — myUNO добавляет англоязычных гостей и резидентов острова, без замены ваших каналов.', en: 'Yes, myUNO adds English-speaking guests and residents, without replacing your channels.' } },
+    { q: { ru: 'Сколько это стоит?', en: 'What does it cost?' }, a: { ru: 'Базовая витрина бесплатна. Платформа удерживает стандартную комиссию с заказов через myUNO — актуальная ставка на /vendor/billing.', en: 'Basic storefront is free. The platform retains its standard commission on orders via myUNO, current rate on /vendor/billing.' } },
   ],
   primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application', th: 'เริ่มสมัครเป็นผู้ให้บริการ' }, href: '/vendor/onboarding' },
   secondaryCta: { label: { ru: 'Тарифы', en: 'Pricing' }, href: '/pricing' },
   seo: {
-    metaTitle: { ru: 'SMB на Пхукете: витрина, CRM, оплата — myUNO', en: 'Phuket SMB: storefront, CRM, payments — myUNO' },
+    metaTitle: { ru: 'SMB на Пхукете: витрина, CRM, оплата — myUNO', en: 'Phuket SMB: storefront, CRM, payments, myUNO' },
     metaDescription: { ru: 'Локальный малый бизнес на Пхукете: брендированная витрина, lite-CRM, online-оплата и поток клиентов через AI-консьерж.', en: 'Phuket small business: branded storefront, lite CRM, online payments and client flow via AI concierge.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/smb',

@@ -8,7 +8,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const STEPS = [
-  { icon: Building2, labelEn: 'Off-plan & resale deals', labelRu: 'Новостройки и resale', descEn: 'Curated AAA–CCCB projects only', descRu: 'Только AAA–CCCB по ClearView™', path: APP_ROUTES.LANDING_NEW_DEVELOPMENTS, color: 'primary' },
+  { icon: Building2, labelEn: 'Off-plan & resale deals', labelRu: 'Новостройки и resale', descEn: 'Curated AAA-CCCB projects only', descRu: 'Только AAA–CCCB по ClearView™', path: APP_ROUTES.LANDING_NEW_DEVELOPMENTS, color: 'primary' },
   { icon: BarChart3, labelEn: 'ClearView™ ratings', labelRu: 'Рейтинги ClearView™', descEn: '8-criteria honest scoring', descRu: 'Честная оценка по 8 критериям', path: '/newbuilds', color: 'cluster-invest' },
   { icon: ShieldCheck, labelEn: 'Due diligence', labelRu: 'Due diligence', descEn: 'Developer, title, escrow checks', descRu: 'Девелопер, титул, эскроу', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
   { icon: FileText, labelEn: 'Tax & structuring', labelRu: 'Налоги и структура', descEn: 'Personal vs company ownership', descRu: 'На себя vs через компанию', path: '/tax', color: 'cluster-legal' },
@@ -18,8 +18,8 @@ const STEPS = [
 
 const STATS = [
   { numRu: '$2M+', numEn: '$2M+', labelEn: 'Min ticket', labelRu: 'Минимальный чек' },
-  { numRu: '6–8%', numEn: '6–8%', labelEn: 'Target yield', labelRu: 'Целевая доходность' },
-  { numRu: 'AAA–CCC', numEn: 'AAA–CCC', labelEn: 'ClearView™ scale', labelRu: 'Шкала ClearView™' },
+  { numRu: '6-8%', numEn: '6-8%', labelEn: 'Target yield', labelRu: 'Целевая доходность' },
+  { numRu: 'AAA-CCC', numEn: 'AAA-CCC', labelEn: 'ClearView™ scale', labelRu: 'Шкала ClearView™' },
 ];
 
 export default function InvestorLandingPage() {
@@ -31,13 +31,13 @@ export default function InvestorLandingPage() {
   return (
     <>
       <SEOHead
-        title={t ? 'Инвестиции в Пхукет — портфель $2M+ · myUNO' : 'Phuket investments — $2M+ portfolio · myUNO'}
+        title={t ? 'Инвестиции в Пхукет — портфель $2M+ · myUNO' : 'Phuket investments, $2M+ portfolio · myUNO'}
         description={t ? 'Капитальный консалтинг для инвесторов от $2M. Off-plan, resale, due diligence, ClearView™ рейтинги, налоговое структурирование.' : 'Capital advisory for investors from $2M. Off-plan, resale, due diligence, ClearView™ ratings, tax structuring.'}
         url="https://www.myuno.app/for/investor"
       />
       <LandingLayout
         icon={TrendingUp}
-        title={t ? 'Инвесторы — Пхукет' : 'Investors — Phuket'}
+        title={t ? 'Инвесторы — Пхукет' : 'Investors, Phuket'}
         subtitle={t ? 'Капитальный консалтинг от $2M. Только проверенные проекты, прозрачная экономика, честные рейтинги.' : 'Capital advisory from $2M. Vetted projects only, transparent economics, honest ratings.'}
         gradient="from-primary via-cluster-invest to-accent"
         heroCta={{ label: t ? 'Получить портфель' : 'Request portfolio', onClick: () => window.open(whatsappUrl, '_blank') }}

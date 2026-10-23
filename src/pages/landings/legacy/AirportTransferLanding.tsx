@@ -27,7 +27,7 @@ export default function AirportTransferLanding() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Трансфер из аэропорта Пхукета — Фиксированная цена' : 'Phuket Airport Transfer — Fixed Price, Verified Drivers'}</title>
+        <title>{isRu ? 'Трансфер из аэропорта Пхукета — Фиксированная цена' : 'Phuket Airport Transfer, Fixed Price, Verified Drivers'}</title>
         <meta name="description" content={isRu
           ? 'Закажите трансфер из аэропорта Пхукета. Фиксированная цена, проверенные водители, встреча в аэропорту.'
           : 'Book your Phuket airport transfer. Fixed price, verified drivers, meet & greet at arrival.'
@@ -222,12 +222,12 @@ export default function AirportTransferLanding() {
                   solution: isRu ? 'Все водители говорят на EN или RU' : 'All drivers speak EN or RU',
                 },
                 {
-                  problem: isRu ? 'Никто не встречает — ищете сами' : 'Nobody meets you — you\'re on your own',
+                  problem: isRu ? 'Никто не встречает — ищете сами' : 'Nobody meets you, you\'re on your own',
                   solution: isRu ? 'Водитель с табличкой у выхода' : 'Driver with a name sign at the exit',
                 },
                 {
                   problem: isRu ? 'Нет места для чемоданов' : 'No space for luggage',
-                  solution: isRu ? 'Минивэн или седан — под ваш багаж' : 'Minivan or sedan — fits your luggage',
+                  solution: isRu ? 'Минивэн или седан — под ваш багаж' : 'Minivan or sedan, fits your luggage',
                 },
               ].map(({ problem, solution }) => (
                 <div key={problem} className="flex gap-3">
@@ -272,7 +272,7 @@ export default function AirportTransferLanding() {
                 title: isRu ? 'Получите подтверждение' : 'Get instant confirmation',
                 desc: isRu
                   ? 'Водитель и цена — сразу. Без ожидания.'
-                  : 'Driver and price — instantly. No waiting.',
+                  : 'Driver and price, instantly. No waiting.',
               },
               {
                 step: '3',
@@ -315,7 +315,7 @@ export default function AirportTransferLanding() {
             <p className="text-sm text-muted-foreground text-center mt-1.5 mb-5">
               {isRu
                 ? 'Закажите сейчас — оплатите при встрече.'
-                : 'Book now — pay when you arrive.'
+                : 'Book now, pay when you arrive.'
               }
             </p>
             <Button

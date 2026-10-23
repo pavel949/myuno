@@ -9,17 +9,17 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Calendar, labelEn: 'Calendar & channels', labelRu: 'Календарь и каналы', descEn: 'Airbnb, Booking, Agoda — single inbox', descRu: 'Airbnb, Booking, Agoda — один календарь', path: '/mc/calendar', color: 'primary' },
+  { icon: Calendar, labelEn: 'Calendar & channels', labelRu: 'Календарь и каналы', descEn: 'Airbnb, Booking, Agoda, single inbox', descRu: 'Airbnb, Booking, Agoda — один календарь', path: '/mc/calendar', color: 'primary' },
   { icon: Users, labelEn: 'Guest experience', labelRu: 'Гость и сервис', descEn: 'AI-chat RU/EN, lifecycle messaging', descRu: 'AI-чат RU/EN, lifecycle-рассылки', path: '/mc/guests', color: 'accent-cyan' },
   { icon: Wrench, labelEn: 'Cleaning & maintenance', labelRu: 'Уборка и техника', descEn: 'Auto-tasks, preventive schedule', descRu: 'Авто-задачи, профилактика', path: '/mc/operations', color: 'cluster-arrive' },
   { icon: Receipt, labelEn: 'Owner P&L', labelRu: 'Отчёт собственнику', descEn: 'Monthly statement, tax-ready', descRu: 'Ежемесячный отчёт, готовый для налогов', path: '/mc/financials', color: 'cluster-invest' },
   { icon: BarChart3, labelEn: 'Dynamic pricing', labelRu: 'Динамические цены', descEn: 'Season + override, channel sync', descRu: 'Сезон + ручное, синк по каналам', path: '/mc/pricing', color: 'accent-amber' },
-  { icon: ClipboardCheck, labelEn: 'Portfolio health', labelRu: 'Здоровье портфеля', descEn: '8 checks per property, 0–100%', descRu: '8 проверок по объекту, 0–100%', path: '/mc/health', color: 'cluster-manage' },
+  { icon: ClipboardCheck, labelEn: 'Portfolio health', labelRu: 'Здоровье портфеля', descEn: '8 checks per property, 0-100%', descRu: '8 проверок по объекту, 0–100%', path: '/mc/health', color: 'cluster-manage' },
 ];
 
 const STATS = [
   { numRu: '$25/мес', numEn: '$25/mo', labelEn: 'PMS per property', labelRu: 'PMS за объект' },
-  { numRu: '10–15%', numEn: '10–15%', labelEn: 'Management fee', labelRu: 'Комиссия PM' },
+  { numRu: '10-15%', numEn: '10-15%', labelEn: 'Management fee', labelRu: 'Комиссия PM' },
   { numRu: '24/7', numEn: '24/7', labelEn: 'Guest support', labelRu: 'Поддержка гостей' },
 ];
 
@@ -37,7 +37,7 @@ export default function ManageSurfaceLandingPage() {
       <LandingLayout
         icon={Building2}
         title={t ? 'Управление недвижимостью' : 'Manage your property'}
-        subtitle={t ? 'PMS, channel manager, гости, уборка и отчёты — один продукт вместо пяти подрядчиков' : 'PMS, channel manager, guests, cleaning and reports — one product instead of five vendors'}
+        subtitle={t ? 'PMS, channel manager, гости, уборка и отчёты — один продукт вместо пяти подрядчиков' : 'PMS, channel manager, guests, cleaning and reports, one product instead of five vendors'}
         gradient="from-cluster-manage via-primary to-accent"
         heroCta={{ label: t ? 'Завести объект' : 'Add a property', onClick: () => navigate('/owner/onboarding') }}
         whatsappUrl={whatsappUrl}

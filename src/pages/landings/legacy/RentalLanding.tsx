@@ -25,10 +25,10 @@ export default function RentalLanding() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Аренда жилья на Пхукете — Проверенные объекты' : 'Phuket Long-Term Rentals — Verified Listings'}</title>
+        <title>{isRu ? 'Аренда жилья на Пхукете — Проверенные объекты' : 'Phuket Long-Term Rentals, Verified Listings'}</title>
         <meta name="description" content={isRu
           ? 'Аренда квартир и вилл на Пхукете на 1–12 месяцев. Проверенные собственники, реальные цены, прозрачные депозиты.'
-          : 'Rent apartments and villas in Phuket for 1–12 months. Verified owners, real prices, transparent deposits.'
+          : 'Rent apartments and villas in Phuket for 1-12 months. Verified owners, real prices, transparent deposits.'
         } />
       </Helmet>
 
@@ -116,7 +116,7 @@ export default function RentalLanding() {
                 {isRu ? 'Смотреть проверенные объекты' : 'View Verified Rentals'}
               </Button>
               <p className="text-center text-xs text-muted-foreground mt-2.5">
-                {isRu ? 'Аренда от 1 до 12 месяцев · Виллы, кондо, дома' : '1–12 month rentals · Villas, condos, houses'}
+                {isRu ? 'Аренда от 1 до 12 месяцев · Виллы, кондо, дома' : '1-12 month rentals · Villas, condos, houses'}
               </p>
             </motion.div>
           </div>
@@ -135,7 +135,7 @@ export default function RentalLanding() {
                 title: isRu ? 'Долгосрочная аренда' : 'Mid & long-term rentals',
                 desc: isRu
                   ? 'Объекты для проживания от 1 месяца. Виллы, кондо, дома — от собственников и проверенных агентов.'
-                  : 'Properties for stays of 1 month and longer. Villas, condos, houses — from owners and verified agents.',
+                  : 'Properties for stays of 1 month and longer. Villas, condos, houses, from owners and verified agents.',
               },
               {
                 icon: Users,
@@ -149,7 +149,7 @@ export default function RentalLanding() {
                 title: isRu ? 'Прозрачные условия' : 'Transparent terms',
                 desc: isRu
                   ? 'Депозит, стоимость коммунальных услуг и правила дома — всё указано до бронирования.'
-                  : 'Deposit, utility costs, and house rules — everything is stated upfront before you commit.',
+                  : 'Deposit, utility costs, and house rules, everything is stated upfront before you commit.',
               },
               {
                 icon: ShieldCheck,
@@ -258,7 +258,7 @@ export default function RentalLanding() {
                 title: isRu ? 'Оформите аренду через UNO' : 'Secure your rental via UNO',
                 desc: isRu
                   ? 'Договор, депозит и заселение — всё фиксируется в системе.'
-                  : 'Contract, deposit, and move-in — everything is recorded in the system.',
+                  : 'Contract, deposit, and move-in, everything is recorded in the system.',
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="flex gap-4 items-start">
@@ -309,7 +309,7 @@ export default function RentalLanding() {
           <p className="text-center text-[11px] text-muted-foreground mt-5 leading-relaxed max-w-xs mx-auto">
             {isRu
               ? 'Ваша аренда сохраняется в аккаунте myUNO. История договоров, продление и контакты — в одном месте.'
-              : 'Your rental is saved in your myUNO account. Contract history, renewals, and contacts — all in one place.'
+              : 'Your rental is saved in your myUNO account. Contract history, renewals, and contacts, all in one place.'
             }
           </p>
         </section>
