@@ -50,7 +50,7 @@ function actualRoutes() {
 }
 function Navigation(){const navigate=Router.useNavigate();return <><button onClick={()=>navigate('/admin/properties')}>Properties</button><button onClick={()=>navigate(-1)}>Back</button><button onClick={()=>navigate(1)}>Forward</button></>;}
 beforeEach(()=>{state.error=null;state.retry.mockReset();for(const key of Object.keys(pages))delete pages[key];layoutMounts=0;layoutUnmounts=0;state.auth={user:{id:'actor-a'},isLoading:false};state.resolved={context:{role:'admin'},isLoading:false,permissions:['*']};});
-afterEach(()=>vi.restoreAllMocks());
+afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();});
 describe('stable source loading boundaries',()=>{
  it('does not remount children or repeat mount work after the first animation frame',async()=>{
   let frame:FrameRequestCallback=()=>{};vi.spyOn(window,'requestAnimationFrame').mockImplementation(callback=>{frame=callback;return 1;});
@@ -85,6 +85,16 @@ describe('stable source loading boundaries',()=>{
   render(<Router.MemoryRouter><RoleGuard allowedRoles={['admin']}><p>Private</p></RoleGuard></Router.MemoryRouter>);
   expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Access denied')).toBeNull();expect(screen.queryByText('Private')).toBeNull();
   fireEvent.click(screen.getByRole('button',{name:'Retry'}));expect(state.retry).toHaveBeenCalledTimes(1);
+ });
+ it.each(['auth','context'])('does not let the 12-second deadline admit cached admin while %s remains pending',async(kind)=>{
+  vi.useFakeTimers();state.auth.isLoading=kind==='auth';state.resolved.isLoading=kind==='context';
+  const view=render(<Router.MemoryRouter><RoleGuard allowedRoles={['admin']}><p>Private</p></RoleGuard></Router.MemoryRouter>);
+  expect(screen.queryByText('Private')).toBeNull();
+  await act(async()=>{vi.advanceTimersByTime(12001);});
+  expect(screen.queryByText('Private')).toBeNull();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');
+  state.auth={user:{id:'actor-b'},isLoading:true};
+  view.rerender(<Router.MemoryRouter><RoleGuard allowedRoles={['admin']}><p>Private</p></RoleGuard></Router.MemoryRouter>);
+  expect(screen.queryByText('Private')).toBeNull();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
  });
  it('uses intentional spinner dimensions and a shared full-page auth pending status',()=>{
   const view=render(<LoadingSpinner size="lg"/>);expect(view.container.querySelector('svg')?.style.width).toBe('48px');

@@ -9,7 +9,7 @@ import { AccessDenied } from './AccessDenied';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 
-/** Stop blocking the shell if Supabase/React Query never settles (offline, hung RPC). */
+/** Replace an unbounded spinner with recovery if a current check never settles. */
 const ROLE_GUARD_MAX_WAIT_MS = 12_000;
 
 interface RoleGuardProps {
@@ -41,36 +41,43 @@ export function RoleGuard({
 
   const { language } = useLanguage();
 
-  const [waitDeadlinePassed, setWaitDeadlinePassed] = useState(false);
+  const actorId = user?.id ?? null;
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const [deadline, setDeadline] = useState({ actorId, expired: false });
+  const waitDeadlinePassed = deadline.actorId === actorId && deadline.expired;
 
   useEffect(() => {
-    setWaitDeadlinePassed(false);
-    const id = window.setTimeout(() => setWaitDeadlinePassed(true), ROLE_GUARD_MAX_WAIT_MS);
+    setDeadline({ actorId, expired: false });
+    const id = window.setTimeout(() => setDeadline({ actorId, expired: true }), ROLE_GUARD_MAX_WAIT_MS);
     return () => window.clearTimeout(id);
-  }, [user?.id]);
+  }, [actorId, retryAttempt]);
 
   const contextReady = !resolvedLoading;
   const authReady = !authLoading;
   const allReady = authReady && contextReady;
 
-  // Show loading while checking auth/context, unless we hit the deadline (then fall through with best-effort roles)
-  if (!allReady && !waitDeadlinePassed) {
-    return <LoadingState />;
-  }
+  const verificationUnavailable = () => <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
+    <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
+    <button type="button" className="underline underline-offset-4" onClick={() => {
+      // A role query cannot restart an unresolved authentication bootstrap.
+      if (authLoading) { window.location.reload(); return; }
+      setRetryAttempt(value => value + 1);
+      void retryContext();
+    }}>
+      {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
+    </button>
+  </div>;
+
+  // A deadline bounds the spinner, never authorization. Cached context cannot
+  // admit protected children while the current auth/context check is pending.
+  if (!allReady) return waitDeadlinePassed ? verificationUnavailable() : <LoadingState />;
 
   // Redirect to auth if not logged in
   if (!user) {
     return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
-  if (resolvedError) {
-    return <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
-      <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
-      <button type="button" className="underline underline-offset-4" onClick={() => { void retryContext(); }}>
-        {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
-      </button>
-    </div>;
-  }
+  if (resolvedError) return verificationUnavailable();
 
   // Server-resolved admin always passes
   if (context?.role === 'admin') {
