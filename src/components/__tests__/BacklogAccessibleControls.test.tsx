@@ -7,8 +7,9 @@ import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import ResetPassword from '@/pages/auth/ResetPassword';
 
 const state = vi.hoisted(() => ({
-  language: 'en', saved: false, toggleWishlist: vi.fn(), updateUser: vi.fn(),
+  language: 'en', saved: false, toggleWishlist: vi.fn(), updateUser: vi.fn(), signOut: vi.fn(),
 }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ signOut: state.signOut }) }));
 vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({
     language: state.language,
@@ -74,6 +75,7 @@ describe.each(labels)('$language accessible controls', labels => {
     fireEvent.click(screen.getByRole('button', { name: labels.hide }));
     expect(document.querySelector('input[name="new-password"]')).toHaveAttribute('type', 'password');
     expect(state.updateUser).not.toHaveBeenCalled();
+    expect(state.signOut).not.toHaveBeenCalled();
   });
 });
 
