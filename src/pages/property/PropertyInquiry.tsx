@@ -114,8 +114,9 @@ export default function PropertyInquiry() {
   const checkOutParam = searchParams.get('checkOut');
   const guestsParam = searchParams.get('guests');
 
-  const checkIn = checkInParam ? parseISO(checkInParam) : null;
-  const checkOut = checkOutParam ? parseISO(checkOutParam) : null;
+  // Stable civil-date inputs: a price response must not start the same read again.
+  const checkIn = useMemo(() => checkInParam ? parseISO(checkInParam) : null, [checkInParam]);
+  const checkOut = useMemo(() => checkOutParam ? parseISO(checkOutParam) : null, [checkOutParam]);
   const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
 
   const hasDates = checkIn && checkOut;
@@ -153,9 +154,17 @@ export default function PropertyInquiry() {
   });
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedStatus, setSubmittedStatus] = useState<'pending' | 'confirmed' | 'cancelled'>('pending');
-  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
+  // A distinct context token also distinguishes A → B → A navigation while
+  // the first A request is still in flight. It never changes the durable RPC identity.
+  const requestContext = useMemo(() => ({ actorId: user?.id, propertyId: id, checkInParam, checkOutParam, guestsParam }),
+    [user?.id, id, checkInParam, checkOutParam, guestsParam]);
+  const currentRequestContext = useRef(requestContext);
+  currentRequestContext.current = requestContext;
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const [submittingContext, setSubmittingContext] = useState<typeof requestContext | null>(null);
+  const isSubmitting = submittingContext === requestContext;
+  const [submitted, setSubmitted] = useState<{ context: typeof requestContext; orderId: string; status: 'pending' | 'confirmed' | 'cancelled' } | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
   // Default 'split' preserves the legacy behavior (charge prepay only).
@@ -352,8 +361,8 @@ export default function PropertyInquiry() {
   };
 
   // Show confirmation screen after a successful viewing request submission.
-  if (submittedOrderId) {
-    return <InquiryConfirmation orderId={submittedOrderId} status={submittedStatus} />;
+  if (submitted?.context === requestContext) {
+    return <InquiryConfirmation orderId={submitted.orderId} status={submitted.status} />;
   }
 
   // If no dates, prompt the user to go back
@@ -820,6 +829,8 @@ export default function PropertyInquiry() {
               disabled={isSubmitting}
               onClick={async () => {
                 if (isSubmitting) return;
+                const attemptContext = requestContext;
+                const isCurrentAttempt = () => mounted.current && currentRequestContext.current === attemptContext;
 
                 // Strict e-mail validation: confirmations and voucher emails are
                 // sent to this address, so a typo means a silently lost booking.
@@ -846,17 +857,17 @@ export default function PropertyInquiry() {
                     paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return;
                   }
-                  setIsSubmitting(true);
+                  setSubmittingContext(attemptContext);
                   try {
                     await depositPaymentRef.current.submit();
                   } finally {
-                    setIsSubmitting(false);
+                    if (isCurrentAttempt()) setSubmittingContext(null);
                   }
                   return;
                 }
 
                 // === REQUEST BOOKING PATH ===
-                setIsSubmitting(true);
+                setSubmittingContext(attemptContext);
                 try {
                   const result = await reserveProperty(supabase, user!.id, {
                     property_id: id!,
@@ -870,6 +881,9 @@ export default function PropertyInquiry() {
                     total_amount: pricing.total,
                     currency: listingCurrency,
                   });
+                  // A committed old request remains recoverable in My bookings,
+                  // but cannot acknowledge a different actor/property/date selection.
+                  if (!isCurrentAttempt()) return;
                   if (result.success && result.order.id) {
                     if (draftKey) {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
@@ -877,8 +891,7 @@ export default function PropertyInquiry() {
                     toast.success(isRu
                       ? 'Бронирование сохранено. Откройте его актуальный статус.'
                       : 'Reservation saved. Open its current status.');
-                    setSubmittedStatus(result.order.status);
-                    setSubmittedOrderId(result.order.id);
+                    setSubmitted({ context: attemptContext, status: result.order.status, orderId: result.order.id });
                   } else {
                     // Never display acceptance without a complete checked acknowledgement.
                     toast.error(
@@ -888,9 +901,10 @@ export default function PropertyInquiry() {
                     );
                   }
                 } catch (err) {
+                  if (!isCurrentAttempt()) return;
                   toast.error(isRu ? 'Сохранение не подтверждено. Повторите запрос: его идентификатор сохранён.' : 'Save not confirmed. Retry the request: its identity has been retained.');
                 } finally {
-                  setIsSubmitting(false);
+                  if (isCurrentAttempt()) setSubmittingContext(null);
                 }
               }}
             >
