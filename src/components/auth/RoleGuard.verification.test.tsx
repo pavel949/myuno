@@ -38,7 +38,7 @@ describe('actual resolved-context query verification boundary',()=>{
   mount();await startVerification();
   await act(async()=>{finish({data:null,error:{message:'Synthetic verification failed'}});await vi.advanceTimersByTimeAsync(1);await vi.advanceTimersByTimeAsync(1);});
   expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Access denied')).toBeNull();
-  fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});expect(fixture.rpc).toHaveBeenCalledTimes(2);
+  expect(screen.getByRole('button',{name:'Retry'}).style.minHeight).toBe('44px');fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});expect(fixture.rpc).toHaveBeenCalledTimes(2);
   expect(screen.queryByText('Protected page')).toBeNull();
   await act(async()=>{finish({data:context,error:null});await vi.advanceTimersByTimeAsync(1);await vi.advanceTimersByTimeAsync(1);});expect(screen.getByText('Protected page')).toBeTruthy();
  });
@@ -47,7 +47,7 @@ describe('actual resolved-context query verification boundary',()=>{
   expect(screen.getByText('Protected page')).toBeTruthy();await startVerification();expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
   await act(async()=>{finish({data:null,error:{message:'Synthetic verification failed'}});await vi.advanceTimersByTimeAsync(1);});
   expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Protected page')).toBeNull();
-  fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});
+  expect(screen.getByRole('button',{name:'Retry'}).style.minHeight).toBe('44px');fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});
   fixture.companies=[];await act(async()=>{finish({data:{...context,mode:'user',role:'user',permissions:[]},error:null});await vi.advanceTimersByTimeAsync(1);});
   expect(screen.queryByText('Protected page')).toBeNull();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByTestId('location').textContent).toBe(destination);
  });

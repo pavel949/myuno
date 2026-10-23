@@ -59,7 +59,7 @@ export function RoleGuard({
 
   const verificationUnavailable = () => <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
     <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
-    <button type="button" className="underline underline-offset-4" onClick={() => {
+    <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => {
       // A role query cannot restart an unresolved authentication bootstrap.
       if (authLoading) { window.location.reload(); return; }
       setRetryAttempt(value => value + 1);
