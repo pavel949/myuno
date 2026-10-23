@@ -74,7 +74,9 @@ export const queryKeys = {
   user: {
     all: ['user'] as const,
     profile: (userId: string) => ['profile', userId] as const,
+    // Invalidation prefix only; roleRows owns the canonical cached row shape.
     roles: (userId: string) => ['user-roles', userId] as const,
+    roleRows: (userId: string | undefined) => ['user-roles', userId, 'rows-v1'] as const,
     context: (userId: string) => ['user-active-context', userId] as const,
     wallet: (userId: string) => ['wallet', userId] as const,
   },

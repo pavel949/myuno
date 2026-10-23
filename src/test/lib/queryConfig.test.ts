@@ -43,6 +43,7 @@ describe('queryConfig', () => {
       expect(queryKeys.user.all).toEqual(['user']);
       expect(queryKeys.user.profile('123')).toEqual(['profile', '123']);
       expect(queryKeys.user.roles('456')).toEqual(['user-roles', '456']);
+      expect(queryKeys.user.roleRows('456')).toEqual(['user-roles', '456', 'rows-v1']);
     });
 
     it('generates property query keys correctly', () => {

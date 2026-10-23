@@ -71,9 +71,13 @@ function AdminToday() {
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
-  const { roles, isLoading } = useUserRoles();
+  const { roles, isLoading, isFetching, error, refetch } = useUserRoles();
   const safeRoles = roles || [];
   if (isLoading) return <PageShell width="full"><p role="status">{pickLang(language, { en: 'Checking access…', ru: 'Проверка доступа…', th: 'กำลังตรวจสอบสิทธิ์…' })}</p></PageShell>;
+  if (error) return <PageShell><div role="alert">
+    <p>{pickLang(language, { en: 'Access could not be verified. Please retry the check.', ru: 'Не удалось проверить доступ. Повторите проверку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ โปรดลองอีกครั้ง' })}</p>
+    <Button variant="outline" className="mt-3" disabled={isFetching} onClick={() => { void refetch(); }}>{pickLang(language, { en: 'Retry access check', ru: 'Повторить проверку доступа', th: 'ตรวจสอบสิทธิ์อีกครั้ง' })}</Button>
+  </div></PageShell>;
   if (safeRoles.some(role => role.role === 'admin')) return <AdminToday />;
   if (safeRoles.some(role => role.role === 'staff' || role.role === 'uno_team')) return <AdminStaffOverview />;
   return <PageShell><p role="alert">{pickLang(language, { en: 'Platform administrator access is required.', ru: 'Требуется доступ администратора платформы.', th: 'ต้องมีสิทธิ์ผู้ดูแลแพลตฟอร์ม' })}</p></PageShell>;
