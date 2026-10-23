@@ -47,7 +47,7 @@ function App() {
   </MemoryRouter>;
 }
 async function submit() {
-  const button = await screen.findByRole('button', { name: 'Request to book', exact: true });
+  const button = await screen.findByRole('button', { name: 'Request to book' });
   await act(async () => fireEvent.click(button));
 }
 beforeEach(() => {
@@ -83,7 +83,7 @@ describe('PropertyInquiry request context', () => {
     const old = deferred<ReturnType<typeof reply>>(), current = deferred<ReturnType<typeof reply>>();
     fixture.reserve.mockReturnValueOnce(old.promise).mockReturnValueOnce(current.promise);
     render(<App />); await submit(); fireEvent.click(screen.getByRole('button', { name: 'Home B' }));
-    const newButton = screen.getByRole('button', { name: 'Request to book', exact: true });
+    const newButton = screen.getByRole('button', { name: 'Request to book' });
     expect(newButton).toBeEnabled(); fireEvent.click(newButton); expect(fixture.reserve).toHaveBeenCalledTimes(2);
     await act(async () => old.resolve(reply('old-order')));
     expect(newButton).toBeDisabled(); expect(fixture.success).not.toHaveBeenCalled();
@@ -104,7 +104,7 @@ describe('PropertyInquiry request context', () => {
   it('fetches date prices once per date context, without a response-triggered render loop', async () => {
     fixture.rpc.mockResolvedValueOnce({ data: [], error: null });
     render(<App />);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Request to book', exact: true })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Request to book' })).toBeEnabled());
     await act(async () => {});
     expect(fixture.rpc).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Other dates' }));
