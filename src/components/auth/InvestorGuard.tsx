@@ -2,7 +2,9 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
-import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 /**
  * Investor workspace guard — gates investor-only surfaces (`/capital`,
@@ -24,19 +26,25 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
  */
 export function InvestorGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: contextLoading } = useResolvedContext();
+  const { context, isLoading: contextLoading, isVerifying, error, refetch } = useResolvedContext();
 
-  if (authLoading || contextLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+  if (authLoading || contextLoading || isVerifying) {
+    return <LoadingState />;
   }
 
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  if (error) {
+    return <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
+      <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => { void refetch(); }}>
+        {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
+      </button>
+    </div>;
   }
 
   const serverRole = context?.role ?? null;

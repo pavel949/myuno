@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
-import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
-/** Stop blocking the shell if Supabase/React Query never settles (offline, hung RPC). */
+/** Replace an unbounded spinner with recovery if a current check never settles. */
 const ROLE_GUARD_MAX_WAIT_MS = 12_000;
 
 interface RoleGuardProps {
@@ -35,33 +37,48 @@ export function RoleGuard({
 }: RoleGuardProps) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: resolvedLoading, permissions } = useResolvedContext();
+  const { context, isLoading: resolvedLoading, isVerifying: contextVerifying, permissions, error: resolvedError, refetch: retryContext } = useResolvedContext();
 
-  const [waitDeadlinePassed, setWaitDeadlinePassed] = useState(false);
+  const { language } = useLanguage();
 
-  useEffect(() => {
-    setWaitDeadlinePassed(false);
-    const id = window.setTimeout(() => setWaitDeadlinePassed(true), ROLE_GUARD_MAX_WAIT_MS);
-    return () => window.clearTimeout(id);
-  }, [user?.id]);
-
-  const contextReady = !resolvedLoading;
+  const actorId = user?.id ?? null;
+  const contextReady = !resolvedLoading && !contextVerifying;
   const authReady = !authLoading;
   const allReady = authReady && contextReady;
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const verification = useMemo(() => ({ actorId, pending: !allReady, retryAttempt }), [actorId, allReady, retryAttempt]);
+  const [deadline, setDeadline] = useState({ verification, expired: false });
+  const waitDeadlinePassed = deadline.verification === verification && deadline.expired;
 
-  // Show loading while checking auth/context, unless we hit the deadline (then fall through with best-effort roles)
-  if (!allReady && !waitDeadlinePassed) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    setDeadline({ verification, expired: false });
+    if (!verification.pending) return;
+    const id = window.setTimeout(() => setDeadline({ verification, expired: true }), ROLE_GUARD_MAX_WAIT_MS);
+    return () => window.clearTimeout(id);
+  }, [verification]);
+
+  const verificationUnavailable = () => <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
+    <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
+    <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => {
+      // A role query cannot restart an unresolved authentication bootstrap.
+      if (authLoading) { window.location.reload(); return; }
+      setRetryAttempt(value => value + 1);
+      void retryContext();
+    }}>
+      {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
+    </button>
+  </div>;
+
+  // A deadline bounds the spinner, never authorization. Cached context cannot
+  // admit protected children while the current auth/context check is pending.
+  if (!allReady) return waitDeadlinePassed ? verificationUnavailable() : <LoadingState />;
 
   // Redirect to auth if not logged in
   if (!user) {
     return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
+
+  if (resolvedError) return verificationUnavailable();
 
   // Server-resolved admin always passes
   if (context?.role === 'admin') {
@@ -176,11 +193,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!user) {

@@ -1,3 +1,4 @@
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -461,11 +462,7 @@ export default function Auth() {
     </div>;
   }
   if (authLoading || user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   const stepIndicator = (

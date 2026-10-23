@@ -1,3 +1,4 @@
+vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
