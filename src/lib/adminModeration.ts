@@ -159,3 +159,22 @@ export async function updateModerationItem({ id, type, approve, expectedUpdatedA
   }
   return data;
 }
+
+export type ModerationDetailType = Exclude<ModerationType, 'property'>;
+export interface ModerationDetail {
+  id: string; type: ModerationDetailType; name_en: string | null; name_ru: string | null;
+  description_en: string | null; description_ru: string | null; images: string[];
+  price: number | null; currency: string | null; approval_status: string | null;
+  is_active: boolean | null; updated_at: string | null;
+}
+/** Exact persisted content through existing RLS; never a privileged/public fallback. */
+export async function fetchModerationDetail(type: ModerationDetailType, id: string): Promise<ModerationDetail> {
+  const table = type === 'listing' ? 'listings' : type === 'service' ? 'services' : type === 'product' ? 'marketplace_products' : null;
+  if (!table || !id) throw new Error('Invalid moderation identity');
+  const {data,error}=await supabase.from(table)
+    .select('id,name_en,name_ru,description_en,description_ru,images,price,currency,approval_status,is_active,updated_at')
+    .eq('id',id).single();
+  if(error) throw error;
+  if(!data || data.id!==id) throw new Error('Exact moderation record unavailable');
+  return {...data,type,images:Array.isArray(data.images)?data.images.filter((url):url is string=>typeof url==='string'):[]};
+}

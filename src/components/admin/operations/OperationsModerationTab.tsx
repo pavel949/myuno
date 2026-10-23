@@ -1,6 +1,7 @@
+import { ModerationDetailDialog } from './ModerationDetailDialog';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { ManagedComplexReviewQueue } from '@/components/admin/operations/ManagedComplexReviewQueue';
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,6 +32,8 @@ const categoryOf = (item: ModerationItem) => item.vertical || item.category || '
 export function OperationsModerationTab() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const reviewButton=useRef<HTMLButtonElement|null>(null);
+  const [detail,setDetail]=useState<{id:string;type:'listing'|'service'|'product';actorId:string}|null>(null);
   const isRussian = language === 'ru';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -114,6 +117,7 @@ export function OperationsModerationTab() {
 
   return (
     <Card className="min-w-0">
+      <ModerationDetailDialog selection={detail} onClose={()=>{setDetail(null);void refetch();}} onReturnFocus={()=>reviewButton.current?.focus()} />
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg"><ShieldCheck className="h-5 w-5 shrink-0" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</CardTitle>
         <p className="text-sm text-muted-foreground">{label([
@@ -181,12 +185,12 @@ export function OperationsModerationTab() {
                       <div><dt className="text-xs text-muted-foreground">{label(["Approval status", "Статус проверки", "สถานะการอนุมัติ"])}</dt><dd>{approval}{tab === 'inactive' && ` · ${label(["Inactive", "Неактивно", "ไม่ใช้งาน"])}`}</dd></div>
                     </dl>
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" className="min-h-11" disabled={!destination.review} onClick={() => destination.review && navigate(destination.review)}><Eye className="h-4 w-4 mr-2" />{label(["Review", "Проверить", "ตรวจสอบ"])}</Button>
+                      <Button variant="outline" className="min-h-11" onClick={event => {reviewButton.current=event.currentTarget;if(destination.review)navigate(destination.review);else if(item.type!=='property' && user)setDetail({id:item.id,type:item.type,actorId:user.id});}}><Eye className="h-4 w-4 mr-2" />{label(["Review", "Проверить", "ตรวจสอบ"])}</Button>
                       {destination.collection && <Button variant="outline" className="min-h-11 whitespace-normal h-auto py-2" onClick={() => navigate(destination.collection!)}>{collectionLabel(item)}</Button>}
                       <Button variant="ghost" className="min-h-11 text-success" aria-label={`${(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}: ${name}`} onClick={() => reviewAction(item, true)} disabled={mutation.isPending || isFetching || tab === 'draft'}><ThumbsUp className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}</Button>
                       <Button variant="ghost" className="min-h-11 text-destructive" aria-label={`${(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}: ${name}`} onClick={() => reviewAction(item, false)} disabled={mutation.isPending || isFetching || tab === 'draft'}><ThumbsDown className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}</Button>
                     </div>
-                    {!destination.review && <p className="text-xs text-muted-foreground">{label(["Direct item review is not available for this type. Use the catalog if available; opening it does not approve or publish the item.", "Прямой просмотр записи для этого типа недоступен. Используйте каталог, если ссылка доступна; переход не одобряет и не публикует запись.", "รายการประเภทนี้ยังไม่มีหน้าตรวจสอบโดยตรง โปรดใช้แคตตาล็อกหากมี การเปิดแคตตาล็อกไม่ใช่การอนุมัติหรือเผยแพร่รายการ"])}</p>}
+
                   </article>;
                 })}
                 {filtered.length === 0 && !unavailable && <p className="py-6 text-center text-muted-foreground">{hasFilters ? label(["No matching items", "Ничего не найдено", "ไม่พบรายการที่ตรงกัน"]) : tab === 'pending' ? label(["No pending items", "Нет записей на проверке", "ไม่มีรายการรอตรวจสอบ"]) : label(["No inactive items", "Нет неактивных записей", "ไม่มีรายการที่ไม่ใช้งาน"])}</p>}
