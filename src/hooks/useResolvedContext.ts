@@ -34,7 +34,7 @@ export function useResolvedContext() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: resolved, isLoading, error, refetch } = useQuery({
+  const { data: resolved, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ['resolved-context', user?.id],
     queryFn: async (): Promise<ResolvedContext> => {
       if (!user?.id) throw new Error('Not authenticated');
@@ -133,6 +133,7 @@ export function useResolvedContext() {
     isSwitching: switchMode.isPending,
     
     isLoading,
+    isVerifying: !!user?.id && isFetching,
     error,
     refetch,
   };

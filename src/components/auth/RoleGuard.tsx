@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,24 +37,25 @@ export function RoleGuard({
 }: RoleGuardProps) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: resolvedLoading, permissions, error: resolvedError, refetch: retryContext } = useResolvedContext();
+  const { context, isLoading: resolvedLoading, isVerifying: contextVerifying, permissions, error: resolvedError, refetch: retryContext } = useResolvedContext();
 
   const { language } = useLanguage();
 
   const actorId = user?.id ?? null;
-  const [retryAttempt, setRetryAttempt] = useState(0);
-  const [deadline, setDeadline] = useState({ actorId, expired: false });
-  const waitDeadlinePassed = deadline.actorId === actorId && deadline.expired;
-
-  useEffect(() => {
-    setDeadline({ actorId, expired: false });
-    const id = window.setTimeout(() => setDeadline({ actorId, expired: true }), ROLE_GUARD_MAX_WAIT_MS);
-    return () => window.clearTimeout(id);
-  }, [actorId, retryAttempt]);
-
-  const contextReady = !resolvedLoading;
+  const contextReady = !resolvedLoading && !contextVerifying;
   const authReady = !authLoading;
   const allReady = authReady && contextReady;
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const verification = useMemo(() => ({ actorId, pending: !allReady, retryAttempt }), [actorId, allReady, retryAttempt]);
+  const [deadline, setDeadline] = useState({ verification, expired: false });
+  const waitDeadlinePassed = deadline.verification === verification && deadline.expired;
+
+  useEffect(() => {
+    setDeadline({ verification, expired: false });
+    if (!verification.pending) return;
+    const id = window.setTimeout(() => setDeadline({ verification, expired: true }), ROLE_GUARD_MAX_WAIT_MS);
+    return () => window.clearTimeout(id);
+  }, [verification]);
 
   const verificationUnavailable = () => <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
     <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>

@@ -1,3 +1,4 @@
+vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
 /**
  * Security regression test for InvestorGuard (P5 hardening — Sprint 1 Phase 0).
  *
@@ -19,7 +20,7 @@ vi.mock('@/hooks/useResolvedContext', () => ({
   useResolvedContext: () => contextMock(),
 }));
 vi.mock('@/components/uno/LoadingSpinner', () => ({
-  LoadingSpinner: () => <div data-testid="spinner" />,
+  LoadingState: () => <div data-testid="spinner" />,
 }));
 
 const renderGuard = () =>
