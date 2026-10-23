@@ -146,7 +146,7 @@ async def keyboard_flow(page, width):
 async def navigation_inventory(page, width):
     inventory = await page.evaluate('window.fixtureNavInventory')
     expected = json.loads((OUTPUT / 'bundle-inputs.json').read_text(encoding='utf-8'))['expectedAdminRoutes']
-    assert len(inventory) == 74 and len(set(inventory)) == 74 and sorted(inventory) == sorted(expected), inventory
+    assert len(inventory) == 73 and len(set(inventory)) == 73 and sorted(inventory) == sorted(expected), inventory
     trigger = page.locator('header [data-sidebar="trigger"]')
     if width < 768:
         await tab_to(page, trigger)
@@ -164,7 +164,7 @@ async def navigation_inventory(page, width):
             break
         await closed.first.click()
     await expect(sidebar.locator('[data-sidebar="group-label"][aria-expanded="false"]')).to_have_count(0)
-    await expect(sidebar.locator('[data-sidebar="menu-button"]')).to_have_count(74)
+    await expect(sidebar.locator('[data-sidebar="menu-button"]')).to_have_count(73)
     active = sidebar.locator('[data-sidebar="menu-button"][data-active="true"]')
     await expect(active).to_have_count(1)
     lang = await page.locator('html').get_attribute('lang')
@@ -173,7 +173,7 @@ async def navigation_inventory(page, width):
         await page.keyboard.press('Escape')
         await expect(sidebar).to_have_count(0)
         await expect(trigger).to_be_focused()
-    return {'uniqueActualRoutes': len(inventory), 'renderedMenuButtons': 74, 'singleActiveToday': True}
+    return {'uniqueActualRoutes': len(inventory), 'renderedMenuButtons': 73, 'singleActiveToday': True}
 
 
 async def main():

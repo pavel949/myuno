@@ -242,6 +242,9 @@ jobs:
           done
           # Two isolated browsers at most; every fixture retains its 180s limit.
           python3 scripts/qa/browser_fixture_runner.py
+          timeout 180s node scripts/qa/admin-tools-ui.mjs
+          timeout 180s python3 scripts/qa/admin-tools-ui.py /tmp/browser/admin-tools-isolated
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-tools-isolated/results.json 14
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

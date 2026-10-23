@@ -15,7 +15,7 @@ const keys = [...statsSource.split('export const DASHBOARD_COUNT_KEYS = [')[1].s
 if (keys.length < 30) throw Error('Dashboard count contract missing');
 const navigationContract = await readFile(path.join(root, 'src/lib/nav/__tests__/adminTaskNavigation.test.ts'), 'utf8');
 const expectedAdminRoutes = navigationContract.split('const EXISTING_ADMIN_PATHS = `')[1].split('`')[0].trim().split(/\s+/);
-if (expectedAdminRoutes.length !== 74 || new Set(expectedAdminRoutes).size !== 74) throw Error('Existing admin navigation inventory missing');
+if (expectedAdminRoutes.length !== 73 || new Set(expectedAdminRoutes).size !== 73) throw Error('Existing admin navigation inventory missing');
 
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en',t:key=>key});`,

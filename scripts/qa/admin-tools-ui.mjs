@@ -8,7 +8,7 @@ import postcssImport from 'postcss-import';
 import tailwind from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 const root=process.cwd();
-const output=process.env.ADMIN_TOOLS_OUTPUT||'/tmp/myuno-admin-tools';
+const output=process.env.ADMIN_TOOLS_OUTPUT||'/tmp/browser/admin-tools-isolated';
 await mkdir(output,{recursive:true});
 const virtual={
  '@/contexts/LanguageContext':`export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en',t:key=>key});`,

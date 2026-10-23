@@ -5,6 +5,7 @@ import json
 import pathlib
 import sys
 import threading
+import shutil
 from playwright.sync_api import sync_playwright, expect
 
 output = pathlib.Path(sys.argv[1]).resolve()
@@ -16,7 +17,7 @@ base = f'http://127.0.0.1:{server.server_port}'
 results, errors, blocked = [], [], []
 try:
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path='/usr/bin/chromium', headless=True, args=['--no-sandbox'])
+        browser = p.chromium.launch(executable_path=shutil.which('chromium'), headless=True, args=['--no-sandbox'])
         for width in [390, 1440]:
             page = browser.new_page(viewport={'width': width, 'height': 900}, reduced_motion='reduce')
             page.on('pageerror', lambda e: errors.append(str(e)))
@@ -84,6 +85,7 @@ try:
     assert not errors, errors
     assert not blocked, blocked
     (output / 'browser-results.json').write_text(json.dumps({'result': 'PASS', 'environment': 'actual components and canonical CSS; synthetic auth/query/SDK boundaries; no production writes', 'scenarios': results, 'errors': errors, 'blocked': blocked}, indent=2))
+    (output / 'results.json').write_text(json.dumps([{'scenario': result, 'result': 'PASS'} for result in results], indent=2))
     print(f'PASS {len(results)} browser scenarios')
 finally:
     server.shutdown()
