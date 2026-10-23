@@ -5,7 +5,7 @@
  * Отправляет заявку в edge-функцию submit-help-request, которая
  * сохраняет её в `help_requests` и рассылает алерт менеджеру.
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Loader2, CheckCircle2, ShieldCheck, Clock } from 'lucide-react';
 import {
   Sheet,
@@ -78,6 +78,7 @@ export function ConciergeHelpSheet({
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const [subject, setSubject] = useState(initialSubject ?? '');
   const [message, setMessage] = useState('');
@@ -161,7 +162,24 @@ export function ConciergeHelpSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        className="max-h-[92vh] overflow-y-auto"
+        onOpenAutoFocus={() => {
+          // This controlled sheet has callers outside a SheetTrigger. Capture
+          // their focus before Radix moves it into the dialog.
+          returnFocusRef.current = document.activeElement instanceof HTMLElement
+            ? document.activeElement : null;
+        }}
+        onCloseAutoFocus={(event) => {
+          const opener = returnFocusRef.current;
+          returnFocusRef.current = null;
+          if (opener?.isConnected) {
+            event.preventDefault();
+            opener.focus({ preventScroll: true });
+          }
+        }}
+      >
         <SheetHeader className="text-left">
           <SheetTitle>
             {isRu ? 'Чем помочь?' : 'How can we help?'} · {topicLabel}

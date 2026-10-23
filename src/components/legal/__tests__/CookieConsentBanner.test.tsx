@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { CookieConsentBanner } from '../CookieConsentBanner';
+import { hasCookieConsent, subscribeCookieConsent } from '@/lib/cookieConsent';
 const state = vi.hoisted(() => ({ language: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => state }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
@@ -28,7 +29,18 @@ it('keeps consent above navigation, scrollable on short screens, and preserves r
  expect(screen.getByRole('button', { name: 'บันทึกการตั้งค่า' })).toBeInTheDocument();
  state.language = 'en';
  rerender(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
+ const changed = vi.fn();
+ const unsubscribe = subscribeCookieConsent(changed);
  fireEvent.click(screen.getByRole('button', { name: 'Dismiss cookie consent banner' }));
+ expect(changed).toHaveBeenCalledTimes(1);
+ expect(hasCookieConsent('analytics')).toBe(false);
+ localStorage.setItem('myuno-cookie-consent', JSON.stringify({ analytics: true }));
+ window.dispatchEvent(new StorageEvent('storage', { key: 'myuno-cookie-consent' }));
+ expect(hasCookieConsent('analytics')).toBe(true);
+ localStorage.setItem('myuno-cookie-consent', JSON.stringify({ essential: true, analytics: false, functional: false, marketing: false }));
+ window.dispatchEvent(new StorageEvent('storage', { key: 'myuno-cookie-consent' }));
+ expect(hasCookieConsent('analytics')).toBe(false);
+ unsubscribe();
  expect(document.querySelector('[data-cookie-consent-banner]')).toBeNull();
  expect(JSON.parse(localStorage.getItem('myuno-cookie-consent')!)).toMatchObject({ essential: true, analytics: false, functional: false, marketing: false });
 });

@@ -50,14 +50,15 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
       <Calendar
         mode="range"
         locale={locale}
+        today={parseCivilDate(today)}
         showOutsideDays={false}
-        initialFocus
+        autoFocus
         defaultMonth={checkIn ? parseCivilDate(checkIn) : parseCivilDate(today)}
         selected={{ from: checkIn ? parseCivilDate(checkIn) : undefined, to: checkOut ? parseCivilDate(checkOut) : undefined }}
         numberOfMonths={1}
-        fromDate={parseCivilDate(today)}
+        startMonth={parseCivilDate(today)}
         disabled={date => civilDateKey(date) < today}
-        onDayClick={(date, modifiers) => {
+        onSelect={(_range, date, modifiers) => {
           if (modifiers.disabled) return;
           const value = civilDateKey(date);
           if (!selectingEnd || !checkIn || value <= checkIn) {
@@ -69,7 +70,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
           }
         }}
         className="mx-auto w-fit px-0"
-        classNames={{ head_cell: 'w-11 text-muted-foreground font-normal text-xs', cell: 'h-11 w-11 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent', day: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
+        classNames={{ weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
       />
       <div className="flex justify-between border-t p-3">
         <Button type="button" variant="ghost" onClick={() => { onChange('', ''); setSelectingEnd(false); }}>

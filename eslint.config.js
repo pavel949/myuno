@@ -173,7 +173,12 @@ export default tseslint.config(
       "jsx-a11y": jsxA11y,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // Keep the established Hooks policy during the v7 package upgrade.
+      // v7's recommended preset additionally adopts 15 React Compiler rules;
+      // that is a separate migration, especially for actor-lifetime guards.
+      // Supported custom configuration: eslint-plugin-react-hooks@7.0.1 README.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       ...JSX_A11Y_WARN_RULES,
       "@typescript-eslint/no-unused-vars": "off",

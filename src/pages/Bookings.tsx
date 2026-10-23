@@ -466,7 +466,7 @@ export default function Bookings() {
 
   // Stable ref so the realtime subscribe callback (captured once per channel)
   // can always reach the latest resync without resubscribing the channel.
-  const resyncRef = useRef<typeof resync>();
+  const resyncRef = useRef<typeof resync>(undefined);
   useEffect(() => {
     resyncRef.current = resync;
   }, [resync]);

@@ -12,6 +12,7 @@ import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from "../_shared/authz.ts";
+import { vendorOutreachEligible } from "../_shared/vendor-outreach-eligibility.ts";
 
 
 interface OutreachContact {
@@ -227,7 +228,8 @@ async function sendEmail(
 async function processOutreach(
   supabase: ReturnType<typeof createServiceClient>,
   contacts: OutreachContact[],
-  sequence: number
+  sequence: number,
+  companyId: string,
 ): Promise<OutreachResult[]> {
   const results: OutreachResult[] = [];
 
@@ -240,8 +242,16 @@ async function processOutreach(
       continue;
     }
 
+    // A due log is historical evidence, not current consent. Fail closed before
+    // AI generation, delivery, logging or contact-status changes.
+    if (!(await vendorOutreachEligible(supabase, contact.id, companyId, channel, (channel === "email" ? contact.email : contact.phone) || ""))) continue;
+
     // Generate personalized message
     const message = await generatePersonalizedMessage(contact, sequence, channel);
+
+    // Generation can take time: consent or the destination may have changed.
+    // Recheck again immediately before the external delivery boundary.
+    if (!(await vendorOutreachEligible(supabase, contact.id, companyId, channel, (channel === "email" ? contact.email : contact.phone) || ""))) continue;
 
     let success = false;
     let error: string | undefined;
@@ -379,7 +389,7 @@ Deno.serve(async (req) => {
 
     console.info(`[Outreach] Processing ${contacts.length} contacts (sequence ${sequence})`);
 
-    const results = await processOutreach(supabase, contacts, sequence);
+    const results = await processOutreach(supabase, contacts, sequence, houseCompanyId);
     const successful = results.filter(r => r.success).length;
 
     return new Response(

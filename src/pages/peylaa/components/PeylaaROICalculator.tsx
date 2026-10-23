@@ -21,7 +21,7 @@ export function PeylaaROICalculator({ onGetConsultation }: Props) {
       presets={PEYLAA_PRESETS}
       camFeePerSqmMonthly={120}
       currencySymbol="฿"
-      disclaimer="Расчёт носит ознакомительный характер. Фактическая доходность зависит от рыночных условий. Данные CBRE: средняя доходность branded residences Пхукета — 6–8% gross."
+      disclaimer="Расчёт зависит от введённых данных и допущений. Он не подтверждает фактическую доходность и не гарантирует будущие результаты."
       onGetConsultation={onGetConsultation}
     />
   );

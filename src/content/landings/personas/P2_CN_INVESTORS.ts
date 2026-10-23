@@ -21,17 +21,17 @@ export const P2_CN_INVESTORS: PersonaLanding = {
   services: [
     { slug: 'mandarin-concierge', label: { ru: 'Mandarin-консьерж', en: 'Mandarin concierge' }, oneLiner: { ru: 'Сопровождение на просмотрах и сделках.', en: 'Support at viewings and closings.' }, href: '/contact' },
     { slug: 'usdt-payment', label: { ru: 'Оплата USDT/CNY', en: 'USDT / CNY payment' }, oneLiner: { ru: 'Бронирование без SWIFT-задержек.', en: 'Booking without SWIFT delays.' }, href: '/property/offplan' },
-    { slug: 'scout-trip', label: { ru: 'Scout-trip 3 дня', en: 'Scout trip — 3 days' }, oneLiner: { ru: 'Отель, трансфер, 6–8 объектов.', en: 'Hotel, transfer, 6–8 properties.' }, href: '/property/mandate' },
+    { slug: 'scout-trip', label: { ru: 'Scout-trip 3 дня', en: 'Scout trip, 3 days' }, oneLiner: { ru: 'Отель, трансфер, 6–8 объектов.', en: 'Hotel, transfer, 6-8 properties.' }, href: '/property/mandate' },
     { slug: 'condo-catalog', label: { ru: 'Каталог кондо', en: 'Condo catalogue' }, oneLiner: { ru: 'Foreign quota verified, ROI-расчёт.', en: 'Foreign quota verified, ROI included.' }, href: '/property/offplan' },
   ],
   faq: [
     { q: { ru: 'Как платить из Китая?', en: 'How do I pay from China?' }, a: { ru: 'USDT, Hong Kong wire или через Singapore-аккаунт. Оформим под вашу схему.', en: 'USDT, Hong Kong wire or via a Singapore account. We structure to fit you.' } },
-    { q: { ru: 'Можно купить freehold?', en: 'Can foreigners buy freehold?' }, a: { ru: 'Да — кондо в пределах 49% foreign quota. Виллы — leasehold 30+30+30.', en: 'Yes — condos within the 49% foreign quota. Villas — leasehold 30+30+30.' } },
+    { q: { ru: 'Можно купить freehold?', en: 'Can foreigners buy freehold?' }, a: { ru: 'Да — кондо в пределах 49% foreign quota. Виллы — leasehold 30+30+30.', en: 'Yes, condos within the 49% foreign quota. Villas, leasehold 30+30+30.' } },
   ],
   primaryCta: { label: { ru: 'Запросить scout-trip', en: 'Request scout trip' }, href: '/property/mandate?source=cn' },
   secondaryCta: { label: { ru: 'Каталог кондо', en: 'Condo catalogue' }, href: '/property/offplan' },
   seo: {
-    metaTitle: { ru: 'Пхукет для китайских инвесторов: scout-trip, USDT — myUNO', en: 'Phuket for Chinese investors: scout trip, USDT — myUNO' },
+    metaTitle: { ru: 'Пхукет для китайских инвесторов: scout-trip, USDT — myUNO', en: 'Phuket for Chinese investors: scout trip, USDT, myUNO' },
     metaDescription: { ru: 'Кондо и виллы на Пхукете для гостей из Китая. Mandarin-консьерж, оплата USDT/CNY, проверенный foreign quota и ROI.', en: 'Condos and villas in Phuket for Chinese guests. Mandarin concierge, USDT/CNY payment, verified foreign quota and ROI.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/cn-investors',

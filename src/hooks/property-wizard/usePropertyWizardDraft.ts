@@ -52,8 +52,8 @@ export function usePropertyWizardDraft({
 
   const actorScope = `${userId || ''}:${companyId || ''}`;
   const scopeRef = useRef(actorScope);
-  const draftIdRef = useRef<string>();
-  const updatedAtRef = useRef<string>();
+  const draftIdRef = useRef<string>(undefined);
+  const updatedAtRef = useRef<string>(undefined);
   const needsFullSaveRef = useRef(false);
   const savingRef = useRef<Promise<OwnerProperty | null> | null>(null);
   const [draftLoadError, setDraftLoadError] = useState<string | null>(null);
