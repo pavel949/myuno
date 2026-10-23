@@ -125,6 +125,9 @@ async def keyboard_flow(page, width):
         settings = page.get_by_role('dialog')
         await expect(settings).to_be_visible()
         await expect(settings.get_by_test_id('global-preferences-controls')).to_be_visible()
+        menu_proof['preferencesReady'] = await wait_for_dialog_ready(
+            page, settings, keyboard=True,
+            failure_path=OUTPUT / f'keyboard-preferences-{width}-readiness')
         await page.keyboard.press('Escape')
         await expect(settings).to_have_count(0)
         await expect(preferences).to_be_focused()
@@ -226,6 +229,9 @@ async def main():
             await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{state}-{row["outcome"]}.png'), full_page=True)
             await context.close()
         await browser.close()
+    for row in rows:
+        if row['outcome'] != 'PASS':
+            print(json.dumps(row, ensure_ascii=False), flush=True)
     assert len(rows) == 18 and all(row['outcome'] == 'PASS' for row in rows), {'completed': len(rows), 'failed': sum(row['outcome'] != 'PASS' for row in rows)}
 
 

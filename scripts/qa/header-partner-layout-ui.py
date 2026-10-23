@@ -121,6 +121,9 @@ async def main():
             await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{surface}-{state}-{row["outcome"]}.png'),full_page=True)
             await context.close()
         await browser.close()
+    for result in results:
+        if result['outcome'] != 'PASS':
+            print(json.dumps(result, ensure_ascii=False), flush=True)
     assert len(results)==60 and all(x['outcome']=='PASS' for x in results), {'completed':len(results),'failed':sum(x['outcome']!='PASS' for x in results)}
 
 

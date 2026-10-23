@@ -53,7 +53,7 @@ export function LanguageSwitcher({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="min-w-[140px] bg-popover border border-border [box-shadow:var(--shadow-elevation-3)] z-50"
+          className="min-w-[140px] bg-popover border border-border [box-shadow:var(--shadow-elevation-3)]"
         >
           {languages.map((lang) => (
             <DropdownMenuItem
