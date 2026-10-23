@@ -107,6 +107,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
 
   // Sync availability from full array (replaces all)
   const syncAvailability = async (entries: AvailabilityEntry[]) => {
+    if (!propertyId) throw new Error('Property ID required');
     // Filter only non-available entries (we don't need to store 'available' status)
     const entriesToSave = entries.filter(e => 
       e.status !== 'available' || 
@@ -116,11 +117,12 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
 
     if (entriesToSave.length === 0) {
       // Clear all if nothing to save
-      await supabase
+      const { error } = await supabase
         .from('property_availability')
         .delete()
         .eq('property_id', propertyId);
-      
+      if (error) throw error;
+      // Zero rows is a valid repeat of an already-completed clear.
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
       return;
     }

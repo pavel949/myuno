@@ -76,10 +76,15 @@ export function useMaintenanceSchedules(propertyId?: string) {
 
   const markCompleted = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await typedFrom('property_maintenance_schedules')
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await typedFrom('property_maintenance_schedules')
         .update({ last_completed_at: new Date().toISOString() })
-        .eq('id', id);
+        .eq('id', id)
+        .select('id, last_completed_at')
+        .maybeSingle();
       if (error) throw error;
+      if (!data || data.id !== id || !data.last_completed_at) throw new Error('Maintenance completion was not confirmed. Refresh and retry.');
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
@@ -99,10 +104,15 @@ export function useMaintenanceSchedules(propertyId?: string) {
       notes?: string | null;
     }) => {
       const { id, ...fields } = updates;
-      const { error } = await typedFrom('property_maintenance_schedules')
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await typedFrom('property_maintenance_schedules')
         .update(fields)
-        .eq('id', id);
+        .eq('id', id)
+        .select('id')
+        .maybeSingle();
       if (error) throw error;
+      if (!data || data.id !== id) throw new Error('Maintenance update was not confirmed. Refresh and retry.');
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
@@ -113,10 +123,15 @@ export function useMaintenanceSchedules(propertyId?: string) {
 
   const deleteSchedule = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await typedFrom('property_maintenance_schedules')
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await typedFrom('property_maintenance_schedules')
         .update({ is_active: false })
-        .eq('id', id);
+        .eq('id', id)
+        .select('id, is_active')
+        .maybeSingle();
       if (error) throw error;
+      if (!data || data.id !== id || data.is_active !== false) throw new Error('Maintenance removal was not confirmed. Refresh and retry.');
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
