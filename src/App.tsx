@@ -55,9 +55,8 @@ const queryClient = new QueryClient({
 // ── Composed provider tree ──
 // Order matters: each provider can use contexts from providers above it.
 // Critical providers needed for first paint (auth, theme, language, currency,
-// query) wrap the whole app; non-critical ones (maps, storefront, hints,
-// install prompt, life-situation) are mounted via DeferredProviders after
-// first paint to keep TTI low.
+// query) wrap the whole app. Secondary wrappers also stay stable from the
+// first render so mounting their effects cannot remount the router.
 const QueryProviders = composeProviders([
   ThemeProvider,
   MaintenanceProvider,
@@ -83,24 +82,11 @@ const DeferredProviders = composeProviders([
   HintProvider,
 ]);
 
-/**
- * Mounts secondary providers after first paint. Until then, children render
- * inside null-context fallbacks (each provider's `useX()` hook handles the
- * undefined-context case). Cuts ~5 wrappers and several module evaluations
- * out of the initial render path.
+/** Stable wrappers from first render keep AppContent/router state mounted.
+ * Provider modules are already imported eagerly; expensive provider effects may
+ * schedule their own work without inserting a new ancestor around the app.
  */
 function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    // Wait one paint frame so the initial Index render commits before we
-    // evaluate ~5 extra provider modules (GoogleMaps loader, etc.). All
-    // routes that consume these providers are lazy-loaded — their chunks
-    // can't arrive sooner than the next frame, so the gap is invisible.
-    const raf = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  if (!mounted) return <>{children}</>;
   return <DeferredProviders>{children}</DeferredProviders>;
 }
 

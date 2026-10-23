@@ -134,7 +134,7 @@ const AdminRouteLayout = () => (
         powers the CompanySwitcher and the lead→deal bridge target company. */}
     <ActiveCompanyProvider>
       <AdminLayout>
-        <Suspense fallback={<LoadingState />}>
+        <Suspense fallback={<LoadingState scope="content" />}>
           <Outlet />
         </Suspense>
       </AdminLayout>
@@ -145,7 +145,7 @@ const AdminRouteLayout = () => (
 const VendorRouteLayout = () => (
   <VendorGuard>
     <VendorLayout>
-      <Suspense fallback={<LoadingState />}>
+      <Suspense fallback={<LoadingState scope="content" />}>
         <Outlet />
       </Suspense>
     </VendorLayout>
@@ -155,7 +155,7 @@ const VendorRouteLayout = () => (
 const GuestRouteLayout = () => (
   <AuthGuard>
     <GuestLayout>
-      <Suspense fallback={<LoadingState />}>
+      <Suspense fallback={<LoadingState scope="content" />}>
         <Outlet />
       </Suspense>
     </GuestLayout>
@@ -197,7 +197,7 @@ export const AnimatedRoutes: React.FC = () => {
     <>
       <ScrollToTop />
       <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
+        <Routes location={location}>
         {/* ── Core ── */}
         <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
