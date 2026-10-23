@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { queryKeys } from '@/lib/queryConfig';
 import { 
   type AppRole, 
   ROLE_METADATA, 
@@ -50,8 +51,8 @@ export function useUserRoles() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: roles, isLoading } = useQuery({
-    queryKey: ['user-roles', user?.id],
+  const { data: roles, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: queryKeys.user.roleRows(user?.id),
     queryFn: async () => {
       if (!user?.id) return [];
       
@@ -117,6 +118,9 @@ export function useUserRoles() {
     activeRoles,
     switchableRoles,
     isLoading,
+    isFetching,
+    error,
+    refetch,
     hasRole,
     addRole: addRole.mutateAsync,
     removeRole: removeRole.mutateAsync,

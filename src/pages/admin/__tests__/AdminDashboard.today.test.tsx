@@ -5,11 +5,11 @@ import AdminDashboard from '../AdminDashboard';
 import type { DashboardStats } from '@/hooks/useAdminDashboardStats';
 
 const mocks = vi.hoisted(() => ({
-  roles: [{ role: 'admin' }], checking: false,
+  roles: [{ role: 'admin' }], checking: false, roleError: null as Error | null, retryRoles: vi.fn(async () => {}),
   stats: vi.fn(), invalidate: vi.fn(async (_options: { queryKey: string[] }) => {}),
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-vi.mock('@/hooks/useUserRoles', () => ({ useUserRoles: () => ({ roles: mocks.roles, isLoading: mocks.checking }) }));
+vi.mock('@/hooks/useUserRoles', () => ({ useUserRoles: () => ({ roles: mocks.roles, isLoading: mocks.checking, error: mocks.roleError, refetch: mocks.retryRoles, isFetching: false }) }));
 vi.mock('@/hooks/useAdminDashboardStats', () => ({ useAdminDashboardStats: mocks.stats }));
 vi.mock('@tanstack/react-query', async original => ({ ...await original<typeof import('@tanstack/react-query')>(),
   useQueryClient: () => ({ invalidateQueries: mocks.invalidate }), useIsFetching: () => 0,
@@ -26,7 +26,7 @@ function stats() {
     sourceErrors: {}, sourceUpdatedAt: { pendingOrders: Date.now() }, ordersCreatedBefore: '2026-10-19T00:00:00.000Z' } as DashboardStats;
 }
 const mount = () => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AdminDashboard /></MemoryRouter>);
-beforeEach(() => { vi.clearAllMocks(); mocks.roles = [{ role: 'admin' }]; mocks.checking = false; mocks.stats.mockReturnValue({ data: stats(), isLoading: false, isError: false, isFetching: false }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.roles = [{ role: 'admin' }]; mocks.checking = false; mocks.roleError = null; mocks.stats.mockReturnValue({ data: stats(), isLoading: false, isError: false, isFetching: false }); });
 afterEach(cleanup);
 
 describe('platform Today workspace', () => {
@@ -74,6 +74,12 @@ describe('platform Today workspace', () => {
     mocks.roles = [{ role }]; mount();
     expect(screen.getByText('Existing staff workspace')).toBeInTheDocument();
     expect(mocks.stats).not.toHaveBeenCalled();
+  });
+  it('shows a retryable verification failure rather than denying permission or reading cached privileged data', () => {
+    mocks.roleError = new Error('Synthetic role read failure'); mount();
+    expect(screen.getByRole('alert')).toHaveTextContent('Access could not be verified');
+    expect(screen.queryByText('Platform administrator access is required.')).not.toBeInTheDocument();
+    expect(mocks.stats).not.toHaveBeenCalled(); fireEvent.click(screen.getByRole('button', { name: 'Retry access check' })); expect(mocks.retryRoles).toHaveBeenCalledTimes(1);
   });
   it('does not mount platform reads before role resolution or for missing permission', () => {
     mocks.checking = true; mount();
