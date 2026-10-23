@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Save, Building2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { readAdminSystemSettings, saveAdminSystemSettings } from "@/lib/adminSystemSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Surface } from "@/components/ui/surface";
 import { Button } from "@/components/ui/button";
@@ -86,9 +87,9 @@ const EMPTY: FormValues = {
   org_email: "",
   org_street_address: "",
   org_postal_code: "",
-  org_locality: "Phuket",
-  org_region: "Phuket",
-  org_country: "TH",
+  org_locality: "",
+  org_region: "",
+  org_country: "",
   org_latitude: "",
   org_longitude: "",
   org_opening_hours: "",
@@ -98,7 +99,7 @@ const valueToString = (raw: unknown): string => {
   if (raw === null || raw === undefined) return "";
   if (typeof raw === "string") return raw;
   if (typeof raw === "number") return String(raw);
-  return "";
+  throw new Error("Organization setting value could not be verified.");
 };
 
 const stringToJson = (
@@ -136,6 +137,16 @@ const DESCRIPTIONS: Record<keyof FormValues, string> = {
 export function OrgProfileEditor() {
   const { language } = useLanguage();
   const isRu = language === "ru";
+  const { user } = useAuth();
+  const actorId = user?.id ?? null;
+  const actor = useRef(actorId); actor.current = actorId;
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const [loadedFor, setLoadedFor] = useState<string | null>(null);
+  const [loadErrorFor, setLoadErrorFor] = useState<string | null>(null);
+  const [needsReload, setNeedsReload] = useState(false);
+  const [reload, setReload] = useState(0);
+
 
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>(
@@ -146,39 +157,26 @@ export function OrgProfileEditor() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const { data, error } = await supabase
-        .from("system_settings")
-        .select("key, value")
-        .in("key", FIELD_KEYS as unknown as string[]);
-
-      if (cancelled) return;
-      if (error) {
-        toast.error(
-          isRu
-            ? `Не удалось загрузить настройки: ${error.message}`
-            : `Failed to load: ${error.message}`,
-        );
-        setLoading(false);
-        return;
-      }
-
-      const next: FormValues = { ...EMPTY };
-      for (const row of data ?? []) {
-        const key = row.key as keyof FormValues;
-        if (key in EMPTY) {
-          const str = valueToString(row.value);
-          if (str !== "") next[key] = str;
+    setLoading(true); setLoadedFor(null); setLoadErrorFor(null); setNeedsReload(false); setSaving(false); setErrors({});
+    if (!actorId) { setLoading(false); return; }
+    const assertCurrent = () => { if (cancelled || actor.current !== actorId || !alive.current) throw new Error('Settings account changed.'); };
+    void (async () => {
+      try {
+        const data = await readAdminSystemSettings(FIELD_KEYS, assertCurrent);
+        const next: FormValues = { ...EMPTY };
+        for (const row of data) {
+          const key = row.key as keyof FormValues;
+          if (key in EMPTY) next[key] = valueToString(row.value);
         }
+        assertCurrent(); setValues(next); setLoadedFor(actorId);
+      } catch {
+        if (!cancelled && actor.current === actorId && alive.current) setLoadErrorFor(actorId);
+      } finally {
+        if (!cancelled && actor.current === actorId && alive.current) setLoading(false);
       }
-      setValues(next);
-      setLoading(false);
     })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isRu]);
+    return () => { cancelled = true; };
+  }, [actorId, reload]);
 
   const update = (key: keyof FormValues, value: string) => {
     setValues((v) => ({ ...v, [key]: value }));
@@ -186,6 +184,9 @@ export function OrgProfileEditor() {
   };
 
   const onSave = async () => {
+    if (!actorId || loadedFor !== actorId || loadErrorFor === actorId || needsReload || saving) return;
+    const expected = actorId;
+    const assertCurrent = () => { if (!alive.current || actor.current !== expected) throw new Error('Settings account changed.'); };
     const parsed = schema.safeParse(values);
     if (!parsed.success) {
       const fieldErrors: Partial<Record<keyof FormValues, string>> = {};
@@ -208,34 +209,24 @@ export function OrgProfileEditor() {
         description: DESCRIPTIONS[key],
       }));
 
-      const { error } = await supabase
-        .from("system_settings")
-        .upsert(rows, { onConflict: "key" });
-
-      if (error) throw error;
+      await saveAdminSystemSettings(rows, assertCurrent);
+      assertCurrent();
       toast.success(
         isRu ? "Профиль организации сохранён" : "Organization profile saved",
       );
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      toast.error(
-        isRu ? `Ошибка сохранения: ${message}` : `Save failed: ${message}`,
-      );
+    } catch {
+      if (alive.current && actor.current === expected) {
+        setNeedsReload(true);
+        toast.error(isRu ? 'Сохранение не подтверждено. Загрузите настройки заново.' : 'Save not confirmed. Reload settings before retrying.');
+      }
     } finally {
-      setSaving(false);
+      if (alive.current && actor.current === expected) setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <Surface variant="card" padding="md" radius="lg">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {isRu ? "Загрузка…" : "Loading…"}
-        </div>
-      </Surface>
-    );
-  }
+  if (!actorId) return <p role="alert">{isRu ? 'Войдите для управления настройками.' : 'Sign in to manage settings.'}</p>;
+  if (loadErrorFor === actorId) return <div role="alert"><p>{isRu ? 'Профиль организации недоступен. Несохранённые значения не загружены.' : 'Organization settings are unavailable. No editable defaults have been substituted.'}</p><Button onClick={() => setReload(value => value + 1)}>{isRu ? 'Повторить загрузку' : 'Reload settings'}</Button></div>;
+  if (loading || loadedFor !== actorId) return <Surface variant="card" padding="md" radius="lg"><p role="status" className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{isRu ? 'Загрузка…' : 'Loading…'}</p></Surface>;
 
   const field = (
     key: keyof FormValues,
@@ -279,6 +270,7 @@ export function OrgProfileEditor() {
         </div>
       </div>
 
+      {needsReload && <div role="alert"><p>{isRu ? 'Сохранение не подтверждено. Сначала загрузите настройки заново.' : 'Save not confirmed. Reload settings before retrying.'}</p><Button onClick={() => setReload(value => value + 1)}>{isRu ? 'Повторить загрузку' : 'Reload settings'}</Button></div>}
       <Separator />
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -333,7 +325,7 @@ export function OrgProfileEditor() {
       </section>
 
       <div className="flex justify-end">
-        <Button onClick={onSave} disabled={saving} className="gap-2">
+        <Button onClick={onSave} disabled={saving || needsReload} className="gap-2">
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
