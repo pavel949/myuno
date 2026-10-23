@@ -23,7 +23,7 @@ const isRu = language === 'ru';
 
   const [step, setStep] = useState<'form' | 'transition'>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const redirectTimer = useRef<ReturnType<typeof setTimeout>>();
+  const redirectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Cancel a pending auto-redirect when the modal closes or unmounts, so closing
   // within 3s doesn't fire openGrabApp() and hijack navigation.

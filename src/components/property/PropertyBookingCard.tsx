@@ -80,7 +80,7 @@ export function PropertyBookingCard({
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { isDesktop } = useBreakpoint();
-  const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>();
+  const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
   const availabilityQuery = usePropertyUnavailableDates(propertyId);

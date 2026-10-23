@@ -36,7 +36,7 @@ export function LocationProjectSearch({
   const [addressResults, setAddressResults] = useState<Array<{ address: string; lat: number; lng: number }>>([]);
   const [searching, setSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const matchingProjects = useMemo(() => {
     if (!query.trim() || query.length < 2) return [];
