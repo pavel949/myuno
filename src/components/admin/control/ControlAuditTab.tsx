@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuditLogs, formatAuditAction, formatEntityType } from '@/hooks/useAuditLogs';
+import { useAuditLogs, formatAuditAction, formatEntityType, type AuditLog } from '@/hooks/useAuditLogs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ import {
 import { format } from 'date-fns';
 
 const ENTITY_TYPE_OPTIONS = [
-  { value: '', label: 'All' },
+  { value: 'all', label: 'All' },
   { value: 'provider', label: 'Provider' },
   { value: 'service', label: 'Service' },
   { value: 'property', label: 'Property' },
@@ -45,12 +45,12 @@ export function ControlAuditTab() {
   const isRu = language === 'ru';
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [entityTypeFilter, setEntityTypeFilter] = useState('');
+  const [entityTypeFilter, setEntityTypeFilter] = useState('all');
   const [offset, setOffset] = useState(0);
-  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  const { data, isLoading } = useAuditLogs({
-    entityType: entityTypeFilter || undefined,
+  const { data, isLoading, isError, isFetching, refetch } = useAuditLogs({
+    entityType: entityTypeFilter === 'all' ? undefined : entityTypeFilter,
     action: searchQuery || undefined,
     limit: LIMIT,
     offset,
@@ -78,6 +78,11 @@ export function ControlAuditTab() {
     );
   }
 
+  if (isError) return <div role="alert" className="space-y-3">
+    <p>{isRu ? 'Не удалось загрузить аудит. Количество записей неизвестно.' : 'Could not load the audit log. The entry count is unknown.'}</p>
+    <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </div>;
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -97,6 +102,7 @@ export function ControlAuditTab() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            aria-label={isRu ? 'Поиск по действию' : 'Search by action'}
             placeholder={isRu ? 'Поиск по действию...' : 'Search by action...'}
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setOffset(0); }}
@@ -107,7 +113,7 @@ export function ControlAuditTab() {
           value={entityTypeFilter} 
           onValueChange={(v) => { setEntityTypeFilter(v); setOffset(0); }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger aria-label={isRu ? 'Тип сущности' : 'Entity type'} className="w-full sm:w-[180px]">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue placeholder={isRu ? 'Тип сущности' : 'Entity Type'} />
           </SelectTrigger>
@@ -138,12 +144,14 @@ export function ControlAuditTab() {
               {logs.map((log) => {
                 const actionInfo = formatAuditAction(log.action);
                 return (
-                  <div 
-                    key={log.id} 
-                    className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                  <button
+                    key={log.id}
+                    type="button"
+                    aria-label={`${isRu ? 'Открыть запись аудита' : 'Open audit entry'}: ${log.action}`}
+                    className="block w-full p-4 text-left hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                     onClick={() => setSelectedLog(log)}
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <Badge className={actionInfo.color}>
@@ -162,7 +170,7 @@ export function ControlAuditTab() {
                           {log.action}
                         </p>
                       </div>
-                      <div className="text-right text-sm shrink-0">
+                      <div className="max-w-full break-words text-sm sm:text-right">
                         <div className="flex items-center gap-1 text-muted-foreground">
                           <User className="h-3 w-3" />
                           <span>{log.admin_name || log.admin_email || 'Admin'}</span>
@@ -173,7 +181,7 @@ export function ControlAuditTab() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -194,6 +202,7 @@ export function ControlAuditTab() {
               variant="outline"
               size="sm"
               onClick={handlePrevPage}
+              aria-label={isRu ? 'Предыдущая страница' : 'Previous page'}
               disabled={offset === 0}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -202,6 +211,7 @@ export function ControlAuditTab() {
               variant="outline"
               size="sm"
               onClick={handleNextPage}
+              aria-label={isRu ? 'Следующая страница' : 'Next page'}
               disabled={offset + LIMIT >= total}
             >
               <ChevronRight className="h-4 w-4" />
@@ -224,7 +234,7 @@ export function ControlAuditTab() {
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4">
                 {/* Meta */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm break-words">
                   <div>
                     <span className="text-muted-foreground">{isRu ? 'Действие:' : 'Action:'}</span>
                     <p className="font-medium">{selectedLog.action}</p>

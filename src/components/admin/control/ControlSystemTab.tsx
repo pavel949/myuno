@@ -1,9 +1,8 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Settings, Globe, FileText, Database, ExternalLink, Key } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { GoogleMapsStatusCard } from '@/components/admin/GoogleMapsStatusCard';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 
@@ -18,7 +17,6 @@ const systemSections = [
 export function ControlSystemTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
@@ -34,23 +32,19 @@ export function ControlSystemTab() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {systemSections.map((section) => (
-              <Card 
-                key={section.key}
-                className="cursor-pointer hover:shadow-md transition-shadow group"
-                onClick={() => navigate(section.path)}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <section.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{isRussian ? section.labelRu : section.label}</p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Открыть' : 'Open'}>
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link key={section.key} to={section.path} className="min-w-0 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Card className="h-full hover:bg-muted/50 transition-colors">
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-none bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <section.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0 break-words">
+                      <p className="font-medium">{isRussian ? section.labelRu : section.label}</p>
+                    </div>
+                    <ExternalLink aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </CardContent>

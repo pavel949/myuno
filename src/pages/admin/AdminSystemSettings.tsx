@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
@@ -11,8 +11,6 @@ import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
 import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
-import { pickLang } from '@/lib/i18n/pickLang';
 
 interface QuickLink {
   icon: React.ElementType;
@@ -38,7 +36,6 @@ const quickLinks: QuickLink[] = [
 export default function AdminSystemSettings() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const navigate = useNavigate();
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
@@ -49,50 +46,44 @@ export default function AdminSystemSettings() {
         size="lg"
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border p-4">
-        <p className="text-sm">{pickLang(language, { en: 'Site availability controls', ru: 'Управление доступностью сайта', th: 'การควบคุมการเปิดใช้งานเว็บไซต์' })}</p>
-        <LaunchSwitch variant="compact" />
-      </div>
-
       {/* Quick Links Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
         {quickLinks.map((link) => (
-          <Surface
+          <Link
             key={link.path}
-            variant="card"
-            padding="sm"
-            radius="lg"
-            className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-2"
-            onClick={() => navigate(link.path)}
+            to={link.path}
+            className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <link.icon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium truncate">
-              {isRu ? link.labelRu : link.label}
-            </span>
-          </Surface>
+            <Surface variant="card" padding="sm" radius="lg" className="h-full min-h-11 hover:bg-muted/50 transition-colors flex items-center gap-2">
+              <link.icon aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="text-sm font-medium whitespace-normal break-words">
+                {isRu ? link.labelRu : link.label}
+              </span>
+            </Surface>
+          </Link>
         ))}
       </div>
 
       {/* Tabs for System, Audit, Logs */}
       <Tabs defaultValue="system" className="w-full">
-        <TabsList>
-          <TabsTrigger value="system" className="gap-1.5">
+        <TabsList aria-label={isRu ? 'Разделы настроек системы' : 'System settings sections'} className="w-full h-auto flex-wrap justify-start">
+          <TabsTrigger value="system" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <Settings className="h-4 w-4" />
             {isRu ? 'Система' : 'System'}
           </TabsTrigger>
-          <TabsTrigger value="audit" className="gap-1.5">
+          <TabsTrigger value="audit" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <History className="h-4 w-4" />
             {isRu ? 'Аудит' : 'Audit'}
           </TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1.5">
+          <TabsTrigger value="logs" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <FileText className="h-4 w-4" />
             {isRu ? 'Логи' : 'Logs'}
           </TabsTrigger>
-          <TabsTrigger value="flags" className="gap-1.5">
+          <TabsTrigger value="flags" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <Flag className="h-4 w-4" />
             {isRu ? 'Флаги' : 'Flags'}
           </TabsTrigger>
-          <TabsTrigger value="org" className="gap-1.5">
+          <TabsTrigger value="org" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <Building2 className="h-4 w-4" />
             {isRu ? 'Организация' : 'Organization'}
           </TabsTrigger>

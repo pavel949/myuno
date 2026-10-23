@@ -27,7 +27,7 @@ export function ControlLogsTab() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
 
-  const { data, isLoading, isFetching, refetch } = useAuditLogs({ limit: RECENT_LIMIT });
+  const { data, isLoading, isFetching, isError, refetch } = useAuditLogs({ limit: RECENT_LIMIT });
 
   const logs = data?.logs || [];
 
@@ -35,11 +35,11 @@ export function ControlLogsTab() {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               {isRu ? 'Последние действия' : 'Recent activity'}
-              {!isLoading && logs.length > 0 && (
+              {!isLoading && !isError && logs.length > 0 && (
                 <Badge variant="outline" className="ml-2 font-mono text-xs">
                   {logs.length}
                 </Badge>
@@ -64,7 +64,12 @@ export function ControlLogsTab() {
         </CardHeader>
 
         <CardContent>
-          {isLoading ? (
+          {isError ? (
+            <div role="alert" className="space-y-3">
+              <p>{isRu ? 'Не удалось загрузить журнал. Количество записей неизвестно.' : 'Could not load activity. The entry count is unknown.'}</p>
+              <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+            </div>
+          ) : isLoading ? (
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-14 w-full" />

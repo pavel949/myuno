@@ -131,8 +131,8 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     expect(paths).toEqual([
       APP_ROUTES.TEAM,
       APP_ROUTES.TEAM_CONTENT,
-      APP_ROUTES.ADMIN_MODERATION,
-      APP_ROUTES.ADMIN_CRM,
+      '/team/moderation',
+      '/team/leads',
       APP_ROUTES.PROFILE,
     ]);
   });

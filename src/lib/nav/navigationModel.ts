@@ -380,7 +380,6 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
       { path: '/admin/yachts',             labelEn: 'Yachts',             labelRu: 'Яхты',                      icon: Ship },
       { path: '/admin/water-activities',   labelEn: 'Water activities',   labelRu: 'Водные активности',         icon: Waves },
       { path: '/admin/experiences',        labelEn: 'Experiences',        labelRu: 'Впечатления',               icon: Star },
-      { path: '/admin/activities',         labelEn: 'Activities',         labelRu: 'Активности',                icon: Compass },
       { path: '/admin/events',             labelEn: 'Events',             labelRu: 'События',                   icon: CalendarDays },
       { path: '/admin/education',          labelEn: 'Education',          labelRu: 'Образование',               icon: GraduationCap },
       { path: '/admin/legal',              labelEn: 'Legal',              labelRu: 'Юридические',               icon: Scale },
@@ -440,7 +439,7 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
       { path: '/admin/ai-ops',             labelEn: 'AI ops',             labelRu: 'AI-операции',               icon: Zap },
       { path: '/admin/ai-knowledge',       labelEn: 'AI knowledge',       labelRu: 'AI-знания',                 icon: BookOpen },
       { path: '/admin/qa-test-runner',     labelEn: 'QA runner',          labelRu: 'QA-тесты',                  icon: ListChecks },
-      { path: '/admin/master-catalog',     labelEn: 'Master catalog',     labelRu: 'Мастер-каталог',            icon: Layers },
+      { path: '/admin/master-catalog',     labelEn: 'Category structure', labelRu: 'Структура категорий',            icon: Layers },
       { path: '/admin/taxonomy',           labelEn: 'Taxonomy',           labelRu: 'Таксономия',                icon: Tag },
       { path: '/admin/lookups',            labelEn: 'Lookups',            labelRu: 'Справочники',               icon: BookOpen },
       { path: '/admin/official-news',      labelEn: 'Official news',      labelRu: 'Официальные новости',       icon: Newspaper },
@@ -473,7 +472,7 @@ const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({
   ...(item.path === '/admin/review' ? { badgeKey: 'pendingContent' as const } : {}),
 }));
 const adminSecondary: SidebarNavItem[] = [
-  { path: '/admin/finance', labelEn: 'Reports', labelRu: 'Отчёты', labelTh: 'รายงาน', icon: BarChart3 },
+  { path: '/admin/finance', labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', icon: BarChart3 },
   { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
 ];
 const adminGroupThai: Record<string, string> = {
@@ -487,7 +486,7 @@ const adminGroupThai: Record<string, string> = {
 };
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
-  { labelEn: 'Reports & settings', labelRu: 'Отчёты и настройки', labelTh: 'รายงานและการตั้งค่า', defaultOpen: true, items: adminSecondary },
+  { labelEn: 'Finance & settings', labelRu: 'Финансы и настройки', labelTh: 'การเงินและการตั้งค่า', defaultOpen: true, items: adminSecondary },
   ...ADMIN_SIDEBAR_SOURCE.map(group => ({
     ...group,
     labelTh: adminGroupThai[group.labelEn] ?? group.labelTh,
