@@ -5,6 +5,7 @@ import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const root = process.cwd();
+const cssOrigin = process.env.HOME_GALLERY_CSS_ORIGIN || 'http://localhost:8080';
 const output =
   process.env.HOME_GALLERY_OUTPUT || '/tmp/browser/homepage-galleries-isolated';
 await mkdir(output, { recursive: true });
@@ -36,6 +37,7 @@ const virtual = {
   '@/hooks/useExperiences': `import{rows,loading,error,retry}from'home-fixture';export const useExperiences=()=>({experiences:rows.map((p,i)=>({id:'experience-'+i,title_en:'Fixture island tour '+(i+1),title_ru:'Тестовый тур '+(i+1),images:[]})),isLoading:loading,error:error?new Error('Fixture error'):null,refetch:retry});`,
   '@/hooks/useServiceMarketplace': `import{rows,loading,error,retry}from'home-fixture';export const useMarketplaceServices=()=>({data:rows.map((p,i)=>({id:'service-'+i,provider_id:'provider-'+i,name_en:'Fixture home service '+(i+1),name_ru:'Тестовая услуга '+(i+1),images:[],provider:{name:'Fixture provider '+(i+1)}})),isLoading:loading,isError:error,refetch:retry});`,
   '@/hooks/useBouquets': `import{rows,loading,error,retry}from'home-fixture';export const useBouquets=()=>({bouquets:rows.slice(0,2).map((p,i)=>({id:'bouquet-'+i,name_en:'Fixture bouquet '+(i+1),name_ru:'Тестовый букет '+(i+1),shop:{name_en:'Fixture florist',name_ru:'Тестовый флорист'}})),isLoading:loading,error:error?new Error('Fixture error'):null,refetch:retry});`,
+  '@/lib/catalog/useCatalogFromDB': `import{state,loading,error,retry}from'home-fixture';const leaf=(id,path,en,ru,th)=>({id,path,status:'available',labelEn:en,labelRu:ru,labelTh:th});const rows=[{id:'cat-leisure',services:[leaf('flowers','/flowers','Flowers','Цветы','ดอกไม้')]},{id:'cat-transport',services:[leaf('vehicle','/transport','Cars & bikes','Авто и байки','รถยนต์และมอเตอร์ไซค์')]},{id:'cat-tourism',services:[leaf('yacht','/yachts','Yachts','Яхты','เรือยอชต์')]},{id:'cat-home-services',labelEn:'Home services',labelRu:'Услуги для дома',labelTh:'บริการสำหรับบ้าน',services:[leaf('services','/services','All home services','Все услуги для дома','บริการสำหรับบ้าน')]}];export const useCatalogFromDB=()=>({categories:state==='data'?rows:[],isFromDB:state==='data',isLoading:loading,error:error?new Error('Fixture error'):null,refetch:retry});`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database forbidden')}});`,
 };
 // Optional ephemeral, allowlisted public-catalog snapshot for local visual QA.
@@ -58,6 +60,7 @@ if (snapshotArg) {
   virtual['@/hooks/useBouquets'] =
     `import{catalog}from'home-fixture';export const useBouquets=()=>({bouquets:catalog.flowers,isLoading:false,error:null,refetch:()=>{}});`;
 }
+if(snapshotArg) virtual['@/lib/catalog/useCatalogFromDB'] = `import{catalog}from'home-fixture';export const useCatalogFromDB=()=>({categories:catalog.categories||[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`;
 const result = await build({
   stdin: {
     contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'${root}/src/pages/Landing.tsx';import{UnifiedChatFAB}from'${root}/src/components/chat/UnifiedChatFAB.tsx';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
@@ -114,7 +117,7 @@ if (
 const css = await Promise.all(
   ['/src/index.css?direct', '/src/styles/cinematic-home.css?direct'].map(
     async (file) => {
-      const r = await fetch('http://localhost:8080' + file);
+      const r = await fetch(cssOrigin + file);
       if (!r.ok) throw Error('Missing CSS ' + file);
       return r.text();
     },

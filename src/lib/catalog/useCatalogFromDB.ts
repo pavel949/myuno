@@ -118,6 +118,7 @@ interface DBClusterLifeSituationRow {
 }
 
 export interface UseCatalogFromDBResult {
+  refetch: () => Promise<unknown>;
   /** Source of truth flag — true when live DB data is rendered, false on fallback. */
   isFromDB: boolean;
   isLoading: boolean;
@@ -201,6 +202,7 @@ function adaptCategoryRow(
   const childRows = childrenByParent.get(row.id) ?? [];
   return {
     id: row.slug as CategoryEntry['id'],
+    status: row.status == null ? undefined : row.status as ServiceEntry['status'],
     clusterId,
     sortOrder: row.sort_order ?? undefined,
     labelRu: row.name_ru || staticMatch?.labelRu || row.name_en,
@@ -303,6 +305,7 @@ export function useCatalogFromDB(): UseCatalogFromDBResult {
   // Static fallback shape
   if (!query.data || query.isError) {
     return {
+      refetch: query.refetch,
       isFromDB: false,
       isLoading: query.isLoading,
       error: (query.error as Error | null) ?? null,
@@ -338,6 +341,7 @@ export function useCatalogFromDB(): UseCatalogFromDBResult {
   // If DB returned no top-level categories — keep static for safety.
   if (categories.length === 0) {
     return {
+      refetch: query.refetch,
       isFromDB: false,
       isLoading: false,
       error: null,
@@ -393,6 +397,7 @@ export function useCatalogFromDB(): UseCatalogFromDBResult {
 
   return {
     isFromDB: true,
+    refetch: query.refetch,
     isLoading: false,
     error: null,
     clusters: clustersWithLife,

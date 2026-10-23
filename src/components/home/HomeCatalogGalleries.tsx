@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, ImageOff, Wrench } from 'lucide-react';
+import { ArrowRight, Compass, ImageOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { usePublicPropertyProjects } from '@/hooks/usePropertyProjects';
 import { useExperiences } from '@/hooks/useExperiences';
-import { useBouquets } from '@/hooks/useBouquets';
-import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { LIVE_AREA_SLUGS } from '@/content/landings/areaLandings';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { HorizontalRail } from './HorizontalRail';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { homeServiceCategories } from './homeServiceCategories';
 
 export function CatalogState({
   loading,
@@ -203,176 +203,38 @@ export function HomeExperienceGallery() {
   );
 }
 
+function ServiceCategoryArt({ image }: { image: string }) {
+  const [failed, setFailed] = useState(false);
+  return <div className="home-service-category-art" aria-hidden="true">
+    {failed ? <ImageOff size={36} /> : <img src={image} alt="" width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} />}
+  </div>;
+}
+
 export function HomeServiceGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
-  const services = useMarketplaceServices();
-  const flowers = useBouquets();
-  const offerings = services.data ?? [];
-  const bouquets = flowers.bouquets.filter((item) => item.shop).slice(0, 4);
-  const title = t({
-    ru: 'Помощь в повседневных делах',
-    en: 'Everyday life, taken care of',
-    th: 'บริการสำหรับชีวิตประจำวัน',
-  });
-  return (
-    <section
-      className="home-catalog home-services home-container"
-      aria-labelledby="home-services-title"
-    >
-      <div className="home-section-heading">
-        <div>
-          <h2 id="home-services-title">{title}</h2>
-          <p className="home-section-lead">
-            {t({
-              ru: 'Опубликованные услуги. Условия и время уточняйте у исполнителя.',
-              en: 'Published services. Check details and timing with the provider.',
-              th: 'บริการที่เผยแพร่ ตรวจสอบรายละเอียดและเวลากับผู้ให้บริการ',
-            })}
-          </p>
-        </div>
-        <Link className="home-text-link" to={R.SERVICES}>
-          {t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
-          <ArrowRight size={18} aria-hidden="true" />
+  const catalog = useCatalogFromDB();
+  // The shared catalog's static fallback is useful for app navigation, but is
+  // not evidence of a live category. Keep loading/error/empty explicit here.
+  const categories = catalog.isFromDB ? homeServiceCategories(catalog.categories) : [];
+  const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
+  return <section className="home-catalog home-services home-container" aria-labelledby="home-services-title">
+    <div className="home-section-heading"><div>
+      <h2 id="home-services-title">{title}</h2>
+      <p className="home-section-lead">{t({ ru: 'Начните с категории — варианты и условия найдёте внутри.', en: 'Start with a category, then explore options and details.', th: 'เริ่มจากหมวดหมู่ แล้วดูตัวเลือกและรายละเอียด' })}</p>
+    </div></div>
+    {catalog.isLoading || catalog.error || !categories.length ? <CatalogState
+      loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
+      empty={{ ru: 'Пока нет категорий услуг для просмотра. Загляните позже.', en: 'No service categories to explore yet. Check back later.', th: 'ยังไม่มีหมวดหมู่บริการให้เลือก โปรดกลับมาดูอีกครั้ง' }}
+    /> : <HorizontalRail label={t({ ru: 'Категории услуг', en: 'Service categories', th: 'หมวดหมู่บริการ' })} compact>
+      {categories.map(category => <article className="home-service-category-card" key={category.id}>
+        <Link to={category.path}>
+          <ServiceCategoryArt image={category.image} />
+          <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3>
+            <span>{t({ ru: 'Открыть категорию', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
+          </div>
         </Link>
-      </div>
-      {services.isLoading || services.isError ? (
-        <CatalogState
-          label={t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}
-          loading={services.isLoading}
-          error={services.isError}
-          retry={services.refetch}
-          empty={{ en: '', ru: '', th: '' }}
-        />
-      ) : null}
-      {!services.isLoading &&
-        !services.isError &&
-        !offerings.length &&
-        bouquets.length > 0 && (
-          <p className="home-section-lead" role="status">
-            {t({
-              ru: 'Других опубликованных услуг пока нет. Ниже — букеты из каталога.',
-              en: 'No other published services yet. Explore bouquets from the catalog below.',
-              th: 'ยังไม่มีบริการอื่นที่เผยแพร่ ดูช่อดอกไม้จากรายการด้านล่าง',
-            })}
-          </p>
-        )}
-      {flowers.isLoading || flowers.error ? (
-        <CatalogState
-          label={t({ ru: 'Цветы', en: 'Flowers', th: 'ดอกไม้' })}
-          loading={flowers.isLoading}
-          error={Boolean(flowers.error)}
-          retry={flowers.refetch}
-          empty={{ en: '', ru: '', th: '' }}
-        />
-      ) : null}
-      {!services.isLoading &&
-      !services.isError &&
-      !flowers.isLoading &&
-      !flowers.error &&
-      !offerings.length &&
-      !bouquets.length ? (
-        <CatalogState
-          loading={false}
-          error={false}
-          retry={services.refetch}
-          empty={{
-            ru: 'Опубликованных услуг и букетов пока нет. В разделе услуг можно оставить заявку на помощь по дому.',
-            en: 'No published services or bouquets yet. You can request help with your home in Services.',
-            th: 'ยังไม่มีบริการหรือช่อดอกไม้ที่เผยแพร่ คุณสามารถส่งคำขอบริการสำหรับบ้านได้ในหน้าบริการ',
-          }}
-        />
-      ) : null}
-      {offerings.length || bouquets.length ? (
-        <HorizontalRail label={title}>
-          {offerings.slice(0, 6).map((item) => (
-            <article className="home-catalog-card" key={item.id}>
-              <Link
-                to={`${R.SERVICE_PROVIDER(item.provider_id)}?${new URLSearchParams({ returnTo: '/' })}`}
-              >
-                <CatalogPhoto image={item.images?.[0]} />
-                <div className="home-catalog-copy">
-                  <Wrench size={18} aria-hidden="true" />
-                  <h3>
-                    {(language === 'ru' ? item.name_ru : item.name_en) ||
-                      item.name_en}
-                  </h3>
-                  {item.provider?.name && <p>{item.provider.name}</p>}
-                  <span>
-                    {t({
-                      ru: 'Посмотреть услугу',
-                      en: 'Explore service',
-                      th: 'ดูบริการ',
-                    })}
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
-            </article>
-          ))}
-          {bouquets.map((item) => (
-            <article className="home-catalog-card" key={item.id}>
-              <Link to={R.BOUQUET_DETAIL(item.id)}>
-                <CatalogPhoto image={item.image || item.images?.[0]} />
-                <div className="home-catalog-copy">
-                  <h3>
-                    {(language === 'ru' ? item.name_ru : item.name_en) ||
-                      item.name_en}
-                  </h3>
-                  <p>
-                    {(language === 'ru'
-                      ? item.shop?.name_ru
-                      : item.shop?.name_en) || item.shop?.name_en}
-                  </p>
-                  <span>
-                    {t({
-                      ru: 'Посмотреть букет',
-                      en: 'Explore bouquet',
-                      th: 'ดูช่อดอกไม้',
-                    })}
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
-            </article>
-          ))}
-        </HorizontalRail>
-      ) : null}
-      <nav
-        className="home-service-categories"
-        aria-label={t({
-          ru: 'Категории услуг',
-          en: 'Service categories',
-          th: 'หมวดหมู่บริการ',
-        })}
-      >
-        <Link to={R.FLOWERS}>
-          {t({ ru: 'Цветы', en: 'Flowers', th: 'ดอกไม้' })}
-        </Link>
-        <Link to={R.SERVICES}>
-          {t({
-            ru: 'Помощь по дому',
-            en: 'Home services',
-            th: 'บริการสำหรับบ้าน',
-          })}
-        </Link>
-        <Link to={`${R.SERVICES}?category=ac`}>
-          {t({
-            ru: 'Кондиционеры',
-            en: 'Air conditioning',
-            th: 'เครื่องปรับอากาศ',
-          })}
-        </Link>
-        <Link to={`${R.SERVICES}?category=plumbing`}>
-          {t({ ru: 'Сантехника', en: 'Plumbing', th: 'ประปา' })}
-        </Link>
-        <Link to={`${R.SERVICES}?category=electrical`}>
-          {t({ ru: 'Электрика', en: 'Electrical', th: 'ไฟฟ้า' })}
-        </Link>
-        <Link to={`${R.SERVICES}?q=water`}>
-          {t({ ru: 'Вода', en: 'Water', th: 'น้ำ' })}
-        </Link>
-      </nav>
-    </section>
-  );
+      </article>)}
+    </HorizontalRail>}
+  </section>;
 }
