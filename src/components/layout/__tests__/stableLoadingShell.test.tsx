@@ -74,7 +74,7 @@ describe('stable source loading boundaries',()=>{
  });
  it('keeps route-level lazy pending inside the retained shell instead of taking the viewport',async()=>{
   let finish:(value:{default:React.ComponentType})=>void=()=>{};
-  pages.AdminProperties=React.lazy(()=>new Promise(resolve=>{finish=resolve;}));
+  pages.AdminProperties=React.lazy(()=>new Promise<{default:React.ComponentType}>(resolve=>{finish=resolve;}));
   const Routes=actualRoutes();render(<Router.MemoryRouter initialEntries={['/admin']}><Navigation/><Routes/></Router.MemoryRouter>);
   await screen.findByText('AdminDashboard');fireEvent.click(screen.getByText('Properties'));
   const pending=await screen.findByRole('status');expect(pending.getAttribute('data-loading-scope')).toBe('content');expect(pending.style.minHeight).toBe('12rem');expect(layoutMounts).toBe(1);
