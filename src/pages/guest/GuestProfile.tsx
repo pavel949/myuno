@@ -87,7 +87,7 @@ const OrderItem: React.FC<{
     completed: 'text-success bg-success/10 dark:bg-success/30',
     confirmed: 'text-primary bg-primary/10 dark:bg-primary/30',
     pending: 'text-accent bg-accent/10 dark:bg-accent/30',
-    cancelled: 'text-red-600 bg-red-50 dark:bg-red-950/30',
+    cancelled: 'text-destructive bg-destructive dark:bg-destructive/30',
   };
   
   return (

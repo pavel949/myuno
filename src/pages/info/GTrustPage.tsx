@@ -266,7 +266,7 @@ const GTrustPage = () => {
     { range: "90-100%", label: isRu ? "Превосходно" : isTh ? "ยอดเยี่ยม" : "Excellent", color: "text-success", bg: "bg-success" },
     { range: "75-89%", label: isRu ? "Отлично" : isTh ? "ดีมาก" : "Great", color: "text-primary", bg: "bg-primary" },
     { range: "60-74%", label: isRu ? "Хорошо" : isTh ? "ดี" : "Good", color: "text-accent", bg: "bg-accent" },
-    { range: "<60%", label: isRu ? "Требует улучшения" : isTh ? "ต้องปรับปรุง" : "Needs Improvement", color: "text-red-600", bg: "bg-red-500" }
+    { range: "<60%", label: isRu ? "Требует улучшения" : isTh ? "ต้องปรับปรุง" : "Needs Improvement", color: "text-destructive", bg: "bg-destructive" }
   ];
 
   const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ className?: string }>, title: string }) => (

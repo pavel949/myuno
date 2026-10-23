@@ -126,7 +126,7 @@ export default function DepositRiskQuizPage() {
                   ? "border-destructive/40"
                   : verdict === "medium"
                   ? "border-accent/40"
-                  : "border-emerald-500/40"
+                  : "border-success/40"
               }
             >
               <CardContent className="p-4 text-center space-y-3">
@@ -135,7 +135,7 @@ export default function DepositRiskQuizPage() {
                 ) : verdict === "medium" ? (
                   <AlertTriangle className="w-10 h-10 mx-auto text-accent" />
                 ) : (
-                  <ShieldCheck className="w-10 h-10 mx-auto text-emerald-500" />
+                  <ShieldCheck className="w-10 h-10 mx-auto text-success" />
                 )}
                 <p className="text-3xl font-bold tabular-nums">
                   {riskScore}<span className="text-base text-muted-foreground">/100</span>

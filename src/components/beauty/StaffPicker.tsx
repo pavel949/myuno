@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Clock, Award, Check } from 'lucide-react';
+import { Star, Clock, Award, Check, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -89,7 +89,7 @@ export function StaffPicker({
                   <Check className="w-6 h-6 text-primary" />
                 )}
                 {selectedId && (
-                  <span className="text-2xl">👤</span>
+                  <User className="w-6 h-6 text-muted-foreground" />
                 )}
               </div>
               <p className="font-medium text-sm">
@@ -218,7 +218,7 @@ export function StaffPickerInline({
           'w-12 h-12 rounded-full flex items-center justify-center',
           !selectedId ? 'bg-primary text-primary-foreground' : 'bg-muted'
         )}>
-          <span className="text-lg">👤</span>
+          <User className="w-5 h-5" />
         </div>
         <span className="text-xs font-medium">
           {isRu ? 'Любой' : 'Any'}

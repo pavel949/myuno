@@ -266,7 +266,7 @@ export function MCCLandingBuilderTab() {
               </TabsContent>
 
               <TabsContent value="blocks" className="mt-4 space-y-3">
-                <div className="flex flex-wrap gap-1.5 p-3 border border-dashed rounded">
+                <div className="flex flex-wrap gap-1.5 p-3 border border-dashed rounded-none">
                   <span className="text-xs text-muted-foreground self-center mr-1">{isRu ? 'Добавить блок:' : 'Add block:'}</span>
                   {BLOCK_TYPES.map((bt) => (
                     <Button

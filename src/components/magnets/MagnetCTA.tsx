@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import { z } from 'zod';
 
 export type MagnetContext = {
@@ -177,7 +177,7 @@ export function MagnetDialog({
 
         {submitted ? (
           <div className="py-6 text-center space-y-3">
-            <div className="text-2xl">✅</div>
+            <CheckCircle2 className="h-8 w-8 mx-auto text-success" />
             <p className="text-sm text-muted-foreground">
               Письмо уже летит к вам. Если не пришло за 2 минуты — проверьте спам или напишите нам в
               WhatsApp.

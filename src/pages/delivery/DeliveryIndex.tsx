@@ -21,7 +21,7 @@ const deliveryTypes = [
     descEn: '1-2 hours',
     descRu: '1-2 часа',
     priceFrom: 150,
-    color: 'from-accent to-red-500',
+    color: 'from-accent to-destructive',
     isPopular: true,
   },
   {

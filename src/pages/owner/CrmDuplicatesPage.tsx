@@ -210,6 +210,8 @@ function DuplicateGroupCard({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedKeep(i)}
+                  aria-label={isRu ? 'Оставить этот контакт' : 'Keep this contact'}
+                  aria-pressed={selectedKeep === i}
                   className={cn('shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-colors', selectedKeep === i ? 'border-success bg-success text-white' : 'border-muted-foreground/30')}
                 >
                   {selectedKeep === i && <CheckCircle className="h-3 w-3" />}

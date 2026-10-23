@@ -22,7 +22,7 @@ const UNIT_TYPES = ['studio', '1br', '2br', '3br', 'penthouse', 'villa', 'townho
 const STATUS_COLORS: Record<string, string> = {
   available: 'bg-success/10 text-success border-success/40',
   reserved: 'bg-accent/10 text-accent border-accent/40',
-  sold: 'bg-red-500/10 text-red-600 border-red-200',
+  sold: 'bg-destructive/10 text-destructive border-destructive',
   held: 'bg-primary/10 text-primary border-primary/40',
 };
 

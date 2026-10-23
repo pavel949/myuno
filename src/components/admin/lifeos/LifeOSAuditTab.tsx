@@ -209,7 +209,7 @@ export function LifeOSAuditTab() {
                       <TableCell>
                         <Badge 
                           variant="outline" 
-                          className={cn(ACTION_COLORS[log.action] || 'bg-gray-100')}
+                          className={cn(ACTION_COLORS[log.action] || 'bg-muted')}
                         >
                           {log.action}
                         </Badge>

@@ -34,7 +34,7 @@ type ImportMode = 'spreadsheet' | 'url' | 'ai';
 
 // Supported OTA platforms
 const OTA_PLATFORMS = [
-  { id: 'airbnb', name: 'Airbnb', icon: '🏠', color: 'bg-red-100 text-red-800' },
+  { id: 'airbnb', name: 'Airbnb', icon: '🏠', color: 'bg-destructive text-destructive' },
   { id: 'booking', name: 'Booking.com', icon: '🏨', color: 'bg-primary/10 text-primary' },
   { id: 'vrbo', name: 'VRBO', icon: '🏡', color: 'bg-primary/10 text-primary' },
   { id: 'expedia', name: 'Expedia', icon: '✈️', color: 'bg-accent/10 text-accent' },
@@ -761,10 +761,11 @@ export default function OwnerPropertyImport() {
                         )}
                       </CardDescription>
                     </div>
-                    <a 
-                      href={url} 
-                      target="_blank" 
+                    <a
+                      href={url}
+                      target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={isRu ? 'Открыть' : 'Open'}
                       className="text-muted-foreground hover:text-primary"
                     >
                       <ExternalLink className="h-5 w-5" />

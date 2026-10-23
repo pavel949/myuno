@@ -50,7 +50,7 @@ const WELCOME_SERVICES: WelcomeService[] = [
   {
     id: 'restaurants',
     icon: UtensilsCrossed,
-    gradient: 'from-accent to-red-500',
+    gradient: 'from-accent to-destructive',
     path: '/restaurants',
     labelEn: 'Restaurants',
     labelRu: 'Рестораны',

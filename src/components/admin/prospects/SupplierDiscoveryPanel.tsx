@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, Loader2, CheckCircle2, Globe, Phone, Mail, MapPin, Star, ShieldCheck, ShieldAlert, MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, Globe, Phone, Mail, MapPin, Star, ShieldCheck, ShieldAlert, MessageCircle, Instagram, Facebook, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VERTICALS = [
@@ -135,7 +135,9 @@ export function SupplierDiscoveryPanel() {
             <TooltipContent>
               <div className="text-xs space-y-0.5">
                 {s.verification_flags.map((f, i) => (
-                  <div key={i}>⚠️ {f.replace(/_/g, ' ')}</div>
+                  <div key={i} className="flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3 text-warning" /> {f.replace(/_/g, ' ')}
+                  </div>
                 ))}
               </div>
             </TooltipContent>
@@ -147,12 +149,12 @@ export function SupplierDiscoveryPanel() {
   };
 
   const getQualityPills = (qs: QualitySignals) => {
-    const pills: { label: string; ok: boolean }[] = [
+    const pills: { label: ReactNode; ok: boolean }[] = [
       { label: '🇷🇺 RU', ok: qs.has_russian_content },
       { label: 'WA', ok: qs.has_whatsapp },
       { label: '🌐', ok: qs.has_professional_website },
       { label: '📅', ok: qs.has_online_booking },
-      { label: '⭐', ok: qs.has_recent_reviews },
+      { label: <Star className="h-3 w-3 text-accent fill-accent" />, ok: qs.has_recent_reviews },
     ];
     return (
       <div className="flex gap-1 flex-wrap">

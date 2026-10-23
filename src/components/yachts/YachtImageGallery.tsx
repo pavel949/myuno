@@ -57,10 +57,10 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
       </div>
 
       <div className="absolute top-4 right-4 flex gap-2">
-        <button className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
+        <button aria-label={language === 'ru' ? 'Поделиться' : 'Share'} className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
           <Share2 className="w-5 h-5" />
         </button>
-        <button className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
+        <button aria-label={language === 'ru' ? 'В избранное' : 'Add to favorites'} className="w-10 h-10 rounded-full bg-background/70 flex items-center justify-center text-foreground">
           <Heart className="w-5 h-5" />
         </button>
       </div>
@@ -71,7 +71,8 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
             <button
               key={idx}
               onClick={() => emblaApi?.scrollTo(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${idx === currentImage ? 'bg-white w-4' : 'bg-white/50'}`}
+              aria-label={language === 'ru' ? `Фото ${idx + 1}` : `Image ${idx + 1}`}
+              className={`w-2 h-2 rounded-full transition-all ${idx === currentImage ? 'bg-card w-4' : 'bg-white/50'}`}
             />
           ))}
           {images.length > 10 && <span className="text-white/70 text-xs ml-1">+{images.length - 10}</span>}

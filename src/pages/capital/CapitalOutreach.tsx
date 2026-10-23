@@ -12,7 +12,7 @@ import { CHANNEL_LABELS, type ResponseType } from '@/types/capital';
 const REACTION_BUTTONS: { type: ResponseType; label: string; icon: typeof Check; color: string }[] = [
   { type: 'interested', label: 'Интересно', icon: Check, color: 'bg-success/20 text-success hover:bg-success/30' },
   { type: 'not_now', label: 'Не сейчас', icon: Clock, color: 'bg-accent/20 text-accent hover:bg-accent/30' },
-  { type: 'declined', label: 'Отказ', icon: X, color: 'bg-red-500/20 text-red-400 hover:bg-red-500/30' },
+  { type: 'declined', label: 'Отказ', icon: X, color: 'bg-destructive/20 text-destructive hover:bg-destructive/30' },
   { type: 'no_response', label: 'Нет ответа', icon: MinusCircle, color: 'bg-slate-500/20 text-slate-400 hover:bg-slate-500/30' },
 ];
 

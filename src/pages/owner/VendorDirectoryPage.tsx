@@ -221,6 +221,8 @@ function VendorCard({ vendor, isRu, onClick, onFavorite }: { vendor: OwnerVendor
               <p className="font-semibold text-sm truncate">{isRu && vendor.name_ru ? vendor.name_ru : vendor.name}</p>
               <button
                 onClick={e => { e.stopPropagation(); onFavorite(); }}
+                aria-label={vendor.is_favorite ? (isRu ? 'Убрать из избранного' : 'Remove from favorites') : (isRu ? 'В избранное' : 'Add to favorites')}
+                aria-pressed={!!vendor.is_favorite}
                 className="shrink-0"
               >
                 <Heart className={`h-4 w-4 ${vendor.is_favorite ? 'text-destructive fill-destructive' : 'text-muted-foreground/30'}`} />

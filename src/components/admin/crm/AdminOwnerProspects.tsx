@@ -20,7 +20,7 @@ const statusColors: Record<string, string> = {
   contacted: 'bg-accent/10 text-accent',
   interested: 'bg-primary/10 text-primary',
   converted: 'bg-success/10 text-success',
-  lost: 'bg-red-100 text-red-800',
+  lost: 'bg-destructive text-destructive',
 };
 
 export function AdminOwnerProspects() {

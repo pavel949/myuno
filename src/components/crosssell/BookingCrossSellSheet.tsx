@@ -36,7 +36,7 @@ const SERVICE_GRADIENTS: Record<string, string> = {
   grocery: 'from-success to-success',
   flowers: 'from-accent to-accent',
   cleaning: 'from-success to-primary',
-  restaurant: 'from-accent to-red-500',
+  restaurant: 'from-accent to-destructive',
   babysitter: 'from-primary to-primary',
   yacht: 'from-primary to-primary',
   experience: 'from-accent to-accent',

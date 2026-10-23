@@ -46,7 +46,7 @@ const typeLabels: Record<CartItem['type'], { en: string; ru: string }> = {
 };
 
 const typeColors: Record<CartItem['type'], string> = {
-  food: 'from-accent to-red-500',
+  food: 'from-accent to-destructive',
   flowers: 'from-accent to-accent',
   service: 'from-slate-500 to-zinc-600',
   product: 'from-primary to-primary',

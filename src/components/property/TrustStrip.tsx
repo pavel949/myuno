@@ -29,15 +29,15 @@ export interface TrustStripProps {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  low: 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10',
-  medium: 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10',
-  high: 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10',
+  low: 'border-success/40 text-success dark:text-success bg-success/10',
+  medium: 'border-warning/40 text-warning dark:text-warning bg-warning/10',
+  high: 'border-destructive/40 text-destructive dark:text-destructive bg-destructive/10',
 };
 
 const REC_COLORS: Record<string, string> = {
-  BUY: 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10',
-  WATCH: 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10',
-  AVOID: 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10',
+  BUY: 'border-success/40 text-success dark:text-success bg-success/10',
+  WATCH: 'border-warning/40 text-warning dark:text-warning bg-warning/10',
+  AVOID: 'border-destructive/40 text-destructive dark:text-destructive bg-destructive/10',
 };
 
 interface ChipProps {
@@ -90,7 +90,7 @@ export function TrustStrip({
         icon={FileCheck}
         label={label}
         tooltip={tooltip}
-        className={isPremium ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10' : undefined}
+        className={isPremium ? 'border-success/40 text-success dark:text-success bg-success/10' : undefined}
       />,
     );
   }
@@ -169,10 +169,10 @@ export function TrustStrip({
     const left = Math.max(foreignQuota.available, 0);
     const pct = left / foreignQuota.total;
     const cls = pct > 0.4
-      ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
+      ? 'border-success/40 text-success dark:text-success bg-success/10'
       : pct > 0.15
-      ? 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10'
-      : 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10';
+      ? 'border-warning/40 text-warning dark:text-warning bg-warning/10'
+      : 'border-destructive/40 text-destructive dark:text-destructive bg-destructive/10';
     chips.push(
       <Chip
         key="quota"

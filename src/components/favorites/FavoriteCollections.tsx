@@ -40,7 +40,7 @@ interface Collection {
 }
 
 const defaultCollections: Collection[] = [
-  { id: 'all', name: 'Все избранное', icon: 'heart', color: 'from-red-500 to-accent', count: 0 },
+  { id: 'all', name: 'Все избранное', icon: 'heart', color: 'from-destructive to-accent', count: 0 },
   { id: 'places', name: 'Места', icon: 'map-pin', color: 'from-primary to-primary', count: 0 },
   { id: 'food', name: 'Еда', icon: 'utensils', color: 'from-accent to-accent', count: 0 },
   { id: 'stay', name: 'Жильё', icon: 'home', color: 'from-success to-success', count: 0 },

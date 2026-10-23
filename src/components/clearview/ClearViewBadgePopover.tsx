@@ -69,10 +69,10 @@ export function ClearViewBadgePopover({ projectId, detailHref, isRu = false, ...
   const rec = gradeToRecommendation((grade as ClearViewGrade | null) ?? null);
   const recCls = rec
     ? rec === 'BUY'
-      ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
+      ? 'border-success/40 text-success dark:text-success bg-success/10'
       : rec === 'WATCH'
-        ? 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10'
-        : 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10'
+        ? 'border-warning/40 text-warning dark:text-warning bg-warning/10'
+        : 'border-destructive/40 text-destructive dark:text-destructive bg-destructive/10'
     : '';
   const tk = gradeTokenClass((grade as ClearViewGrade | null) ?? null);
 

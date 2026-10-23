@@ -142,6 +142,8 @@ export default function OwnerSetupWizard() {
             <button
               key={s.id}
               onClick={() => setCurrentStep(idx)}
+              aria-label={isRu ? s.titleRu : s.titleEn}
+              aria-current={idx === currentStep ? 'step' : undefined}
               className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all",
                 idx === currentStep && "bg-primary text-primary-foreground scale-110",

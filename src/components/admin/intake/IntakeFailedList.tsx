@@ -86,13 +86,13 @@ export function IntakeFailedList({
                       variant={meta.tone === 'destructive' ? 'destructive' : 'secondary'}
                       className={cn(
                         'text-[10px] uppercase tracking-wide',
-                        meta.tone === 'warning' && 'bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20',
+                        meta.tone === 'warning' && 'bg-warning/15 text-warning dark:text-warning hover:bg-warning/20',
                       )}
                     >
                       {isRu ? meta.ru : meta.en}
                     </Badge>
                     {err?.table && (
-                      <code className="text-[10px] px-1.5 py-0.5 bg-muted rounded">
+                      <code className="text-[10px] px-1.5 py-0.5 bg-muted rounded-none">
                         {err.table}
                       </code>
                     )}

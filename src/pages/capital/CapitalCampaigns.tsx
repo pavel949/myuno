@@ -83,7 +83,7 @@ export default function CapitalCampaigns() {
                   {c.status === 'paused' && (
                     <Button size="sm" variant="outline" onClick={() => handleStatusChange(c.id, 'active')}>Продолжить</Button>
                   )}
-                  <Button size="sm" variant="ghost" className="text-red-400" onClick={() => deleteCampaign.mutate(c.id)}>
+                  <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteCampaign.mutate(c.id)}>
                     Удалить
                   </Button>
                 </div>

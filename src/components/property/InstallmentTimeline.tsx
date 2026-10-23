@@ -56,7 +56,7 @@ export function InstallmentTimeline({
         </div>
         {!valid && (
           <span
-            className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+            className="inline-flex items-center gap-1 text-xs text-warning dark:text-warning"
             title={isRu ? `Сумма платежей = ${total}%` : `Sum = ${total}%`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />

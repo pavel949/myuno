@@ -61,7 +61,7 @@ export function ScoreBreakdown({
     if (score >= 85) return 'bg-success';
     if (score >= 70) return 'bg-accent';
     if (score >= 50) return 'bg-accent';
-    return 'bg-red-500';
+    return 'bg-destructive';
   };
 
   return (

@@ -295,7 +295,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             type="button"
             onClick={() => { setQuery(''); setResults([]); setOpen(false); setActiveIdx(-1); }}
             aria-label="Clear"
-            className="absolute right-2 p-1 rounded hover:bg-muted"
+            className="absolute right-2 p-1 rounded-none hover:bg-muted"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>

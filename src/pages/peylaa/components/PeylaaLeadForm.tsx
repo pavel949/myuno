@@ -74,7 +74,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
           <h3 className="text-lg font-bold text-white">
             {submitted ? 'Заявка отправлена!' : 'Получить консультацию'}
           </h3>
-          <button onClick={onClose} className="text-white/40 hover:text-white">
+          <button onClick={onClose} aria-label="Close" className="text-white/40 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>

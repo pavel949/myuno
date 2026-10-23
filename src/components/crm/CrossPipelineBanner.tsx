@@ -37,7 +37,7 @@ const PIPELINE_META: Record<CrmSourceTable, {
     labelEn: 'MC CRM',  labelRu: 'CRM Управляющей',
     icon: Building2,
     href: (id) => `/mc/contacts/${id}`,
-    tone: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    tone: 'bg-success/10 text-success dark:text-success border-success/30',
   },
   capital_contacts: {
     labelEn: 'Capital', labelRu: 'Capital',
@@ -49,7 +49,7 @@ const PIPELINE_META: Record<CrmSourceTable, {
     labelEn: 'Vendor outreach', labelRu: 'Аутрич вендоров',
     icon: Store,
     href: (id) => `/admin/vendor-prospects?id=${id}`,
-    tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    tone: 'bg-warning/10 text-warning dark:text-warning border-warning/30',
   },
 };
 

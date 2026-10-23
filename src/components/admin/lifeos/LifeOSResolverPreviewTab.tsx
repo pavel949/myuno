@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, CheckCircle2, Eye, Layers, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Eye, Layers, Phone, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ROLES: { value: LifeOSRole; label: string }[] = [
@@ -285,7 +285,9 @@ export function LifeOSResolverPreviewTab() {
                 </p>
                 <div className="flex items-center justify-center gap-4">
                   <Badge variant="outline">🤖 Concierge Chat</Badge>
-                  <Badge variant="outline">📞 Phone Support</Badge>
+                  <Badge variant="outline" className="gap-1">
+                    <Phone className="w-3 h-3" /> Phone Support
+                  </Badge>
                   <Badge variant="outline">📂 Explore Catalog</Badge>
                 </div>
               </CardContent>

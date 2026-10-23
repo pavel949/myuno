@@ -241,7 +241,9 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
           {isRu ? 'Ваш день' : 'Your Day'}
           <Badge variant="secondary" className="text-xs">{totalCount}</Badge>
           {birthdayCount > 0 && (
-            <span className="text-sm">🎂 {birthdayCount}</span>
+            <span className="flex items-center gap-1 text-sm">
+              <Cake className="h-4 w-4" /> {birthdayCount}
+            </span>
           )}
         </h3>
       </div>
@@ -306,7 +308,9 @@ function BirthdayCards({ items, isRu, onNavigate }: { items: DayItem[]; isRu: bo
               <div className="min-w-0 w-full">
                 <p className="text-sm font-medium truncate">{item.title}</p>
                 {isToday ? (
-                  <p className="text-xs text-accent-foreground font-medium">🎂 {isRu ? 'Сегодня!' : 'Today!'}</p>
+                  <p className="flex items-center justify-center gap-1 text-xs text-accent-foreground font-medium">
+                    <Cake className="h-3 w-3" /> {isRu ? 'Сегодня!' : 'Today!'}
+                  </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                 )}

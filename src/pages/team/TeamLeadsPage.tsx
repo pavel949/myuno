@@ -103,7 +103,7 @@ export default function TeamLeadsPage() {
             <p className="text-xl font-bold">{stats.pending}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Новые' : 'New'}</p>
           </Card>
-          <Card className="p-3 text-center bg-red-50 dark:bg-red-950/30 border-red-200">
+          <Card className="p-3 text-center bg-destructive dark:bg-destructive/30 border-destructive">
             <p className="text-xl font-bold">{stats.overdue}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Просрочено' : 'Overdue'}</p>
           </Card>
@@ -183,7 +183,7 @@ export default function TeamLeadsPage() {
                   
                   return (
                     <Card key={lead.id} className={cn(
-                      sla.isOverdue && lead.status === 'pending' && 'border-red-300 bg-red-50/50 dark:border-red-700 dark:bg-red-950/20'
+                      sla.isOverdue && lead.status === 'pending' && 'border-destructive bg-destructive/50 dark:border-destructive dark:bg-destructive/20'
                     )}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">

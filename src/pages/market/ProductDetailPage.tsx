@@ -245,7 +245,7 @@ const ProductDetailPage = () => {
               </Badge>
             )}
             {discount > 0 && (
-              <Badge className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 shadow-lg">
+              <Badge className="bg-destructive text-white text-xs font-bold px-2.5 py-1 shadow-lg">
                 -{discount}%
               </Badge>
             )}

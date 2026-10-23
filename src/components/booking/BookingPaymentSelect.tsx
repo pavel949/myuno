@@ -49,7 +49,7 @@ export interface BookingPaymentSelectProps {
 
 const brandColors: Record<string, string> = {
   visa: 'from-primary to-primary',
-  mastercard: 'from-accent to-red-600',
+  mastercard: 'from-accent to-destructive',
   mir: 'from-success to-success',
   amex: 'from-gray-600 to-gray-800',
   default: 'from-gray-500 to-gray-700',

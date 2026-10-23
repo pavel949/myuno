@@ -13,7 +13,7 @@ import { Trophy, Medal, Award, Sparkles, TrendingUp, Calendar, Clock } from 'luc
 import { useAuth } from '@/contexts/AuthContext';
 
 const RANK_ICONS = [Trophy, Medal, Award];
-const RANK_COLORS = ['text-accent', 'text-gray-400', 'text-accent'];
+const RANK_COLORS = ['text-accent', 'text-muted-foreground', 'text-accent'];
 
 interface LeaderboardProps {
   className?: string;

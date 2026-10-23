@@ -36,14 +36,14 @@ const AUDIENCE_LABELS: Record<OutreachAudience, { ru: string; icon: typeof Users
 
 const STATUS_BADGE: Record<string, string> = {
   queued: 'bg-slate-500/20 text-slate-400',
-  sending: 'bg-amber-500/20 text-amber-400',
+  sending: 'bg-warning/20 text-warning',
   sent: 'bg-success/20 text-success',
   delivered: 'bg-success/20 text-success',
   opened: 'bg-primary/20 text-primary',
   clicked: 'bg-primary/30 text-primary',
-  replied: 'bg-emerald-500/20 text-emerald-400',
-  failed: 'bg-red-500/20 text-red-400',
-  bounced: 'bg-red-500/20 text-red-400',
+  replied: 'bg-success/20 text-success',
+  failed: 'bg-destructive/20 text-destructive',
+  bounced: 'bg-destructive/20 text-destructive',
 };
 
 export default function OutreachHub() {
@@ -151,7 +151,7 @@ function AudiencePanel({ audience }: { audience: OutreachAudience }) {
                 {audienceCampaigns.slice(0, 8).map((c) => (
                   <li
                     key={c.id}
-                    className="flex items-center justify-between text-xs border border-border/40 rounded p-2"
+                    className="flex items-center justify-between text-xs border border-border/40 rounded-none p-2"
                   >
                     <span className="truncate font-medium">{c.name}</span>
                     <Badge variant="outline" className="text-[10px]">
@@ -213,7 +213,7 @@ function AudiencePanel({ audience }: { audience: OutreachAudience }) {
                 {templates.map((t) => (
                   <div
                     key={t.id}
-                    className="border border-border/40 rounded p-2 text-xs space-y-1"
+                    className="border border-border/40 rounded-none p-2 text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium truncate">{t.name}</span>

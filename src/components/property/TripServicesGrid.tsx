@@ -96,7 +96,7 @@ const TRIP_SERVICES: TripService[] = [
     labelRu: 'Рестораны',
     descEn: 'Book a table',
     descRu: 'Забронировать столик',
-    gradient: 'from-accent to-red-500',
+    gradient: 'from-accent to-destructive',
     priority: 7,
   },
   {

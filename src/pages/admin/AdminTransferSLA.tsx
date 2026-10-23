@@ -182,7 +182,7 @@ export default function AdminTransferSLA() {
 }
 
 function StatCard({ label, value, tone, icon }: { label: string; value: number; tone?: 'ok' | 'warn' | 'bad'; icon?: React.ReactNode }) {
-  const toneCls = tone === 'ok' ? 'text-green-600' : tone === 'warn' ? 'text-amber-600' : tone === 'bad' ? 'text-destructive' : '';
+  const toneCls = tone === 'ok' ? 'text-green-600' : tone === 'warn' ? 'text-warning' : tone === 'bad' ? 'text-destructive' : '';
   return (
     <Card className="p-4">
       <div className="text-xs text-muted-foreground flex items-center gap-1">{icon}{label}</div>

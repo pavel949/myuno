@@ -21,7 +21,7 @@ const STATUS_CONFIG = {
   open: { labelEn: 'Open', labelRu: 'Открыт', color: 'bg-accent/10 text-accent dark:bg-accent dark:text-muted-foreground' },
   in_progress: { labelEn: 'In Progress', labelRu: 'В работе', color: 'bg-primary/10 text-primary dark:bg-primary dark:text-muted-foreground' },
   resolved: { labelEn: 'Resolved', labelRu: 'Решён', color: 'bg-success/10 text-success dark:bg-success dark:text-muted-foreground' },
-  closed: { labelEn: 'Closed', labelRu: 'Закрыт', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  closed: { labelEn: 'Closed', labelRu: 'Закрыт', color: 'bg-muted text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
 };
 
 interface SupportTicket {

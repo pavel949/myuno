@@ -151,7 +151,7 @@ export function ContextualCTA({
                     <div className="text-[13.5px] text-foreground truncate">{action.label}</div>
                     {isLoading ? (
                       <div
-                        className="mt-1 h-3 w-24 rounded bg-muted animate-pulse"
+                        className="mt-1 h-3 w-24 rounded-none bg-muted animate-pulse"
                         aria-label="Loading match count"
                       />
                     ) : (

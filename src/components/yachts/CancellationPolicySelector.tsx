@@ -106,10 +106,10 @@ export function CancellationPolicySelector({
         };
       case 'super_strict':
         return {
-          border: 'border-red-200 dark:border-red-800',
-          bg: 'bg-red-50/50 dark:bg-red-950/20',
-          badge: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-          icon: <AlertCircle className="h-4 w-4 text-red-600" />,
+          border: 'border-destructive dark:border-destructive',
+          bg: 'bg-destructive/50 dark:bg-destructive/20',
+          badge: 'bg-destructive text-destructive dark:bg-destructive/50 dark:text-destructive',
+          icon: <AlertCircle className="h-4 w-4 text-destructive" />,
         };
       default:
         return {
