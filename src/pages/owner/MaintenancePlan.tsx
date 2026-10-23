@@ -15,7 +15,7 @@ export default function MaintenancePlan() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<MaintenanceSchedule | null>(null);
 
-  const { data: schedules = [], isLoading, addSchedule, markCompleted, updateSchedule, deleteSchedule } = useMaintenanceSchedules();
+  const { data: schedules = [], isLoading, error, refetch, addSchedule, markCompleted, updateSchedule, deleteSchedule } = useMaintenanceSchedules();
   const { data: properties = [] } = useOwnerProperties();
 
   const { overdue, upcoming, onTrack } = useMemo(() => {
@@ -38,6 +38,16 @@ export default function MaintenancePlan() {
     : 100;
 
   const propList = (properties as any[]).map((p: any) => ({ id: p.id, title: p.title_en || p.title_ru || p.title || '' }));
+
+  if (error) {
+    return (
+      <div className="space-y-3 pb-24" role="alert">
+        <h1 className="text-xl font-bold">{isRu ? 'План обслуживания' : 'Maintenance Plan'}</h1>
+        <p>{isRu ? 'Не удалось загрузить расписания обслуживания' : 'Unable to load maintenance schedules'}</p>
+        <Button variant="outline" onClick={() => { void refetch(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>
+    );
+  }
 
   const cardProps = (s: MaintenanceSchedule) => ({
     key: s.id,
