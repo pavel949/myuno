@@ -1,10 +1,11 @@
+import { SEOHead } from '@/components/seo/SEOHead';
 import '@/styles/public-commerce.css';
 /**
  * PropertySearchPage — Full catalog grid with filters
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
 import { pickLang } from '@/lib/i18n/pickLang';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -32,7 +33,6 @@ import { PropertySortSelect, PropertySortKey } from '@/components/property/Prope
 import { PropertyCompareTrigger } from '@/components/property/PropertyCompare';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
-import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { differenceInDays, format } from 'date-fns';
 import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailability';
 import '@/styles/property-search.css';
@@ -41,6 +41,8 @@ import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecos
 const FILTER_TITLES_TH: Record<string, string> = {'priceLevel': 'ระดับราคา', 'bedrooms': 'ห้องนอน', 'areaAtLeast': 'พื้นที่', 'instantBooking': 'การจอง', 'viewType': 'วิว', 'furnishingLevel': 'เฟอร์นิเจอร์', 'poolType': 'สระว่ายน้ำ', 'parkingType': 'ที่จอดรถ', 'ownershipForm': 'กรรมสิทธิ์', 'amenities': 'สิ่งอำนวยความสะดวก', 'highlights': 'จุดเด่น'};
 const FEATURE_LABELS_TH: Record<string, string> = {'beachfront': 'ติดชายหาด', 'walk_to_beach': 'เดินไปชายหาดได้', 'sea_view': 'วิวทะเล', 'private_pool': 'สระว่ายน้ำส่วนตัว', 'pool': 'สระว่ายน้ำ', 'washer': 'เครื่องซักผ้า', 'pet_friendly': 'อนุญาตให้นำสัตว์เลี้ยงเข้าพัก', 'kid_friendly': 'เหมาะสำหรับเด็ก', 'parking': 'ที่จอดรถ', 'wifi': 'WiFi', 'luxury': 'หรูหรา', 'air_conditioning': 'เครื่องปรับอากาศ', 'gym': 'ห้องออกกำลังกาย', 'jacuzzi': 'อ่างจากุซซี่'};
 const QUICK_FEATURE_IDS = ['walk_to_beach', 'private_pool', 'sea_view'];
+
+const PropertyMapView = lazy(() => import('@/components/property/PropertyMapView').then(module => ({ default: module.PropertyMapView })));
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
@@ -264,6 +266,7 @@ export default function PropertySearchPage() {
 
   return (
     <div data-property-mode={propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search property-discovery min-h-screen bg-background')}>
+      <SEOHead title={text('Жильё на Пхукете', 'Homes in Phuket', 'ที่พักในภูเก็ต')} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
           <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
           <p className="text-body-sm text-muted-foreground">{text('Введите название объекта или выберите параметры ниже и нажмите «Найти жильё».', 'Enter a property name or choose your criteria below, then select “Find a home”.', 'กรอกชื่อที่พักหรือเลือกเงื่อนไขด้านล่าง แล้วกด “ค้นหาที่พัก”')}</p>
@@ -356,6 +359,7 @@ export default function PropertySearchPage() {
         {/* Existing map/list state and callbacks share the same filtered properties. */}
         {showMap && (
           <div className="property-discovery-map-panel mb-4">
+            <Suspense fallback={<div role="status" className="min-h-64 p-4">{text('Загрузка карты…', 'Loading map…', 'กำลังโหลดแผนที่…')}</div>}>
             <PropertyMapView
               properties={properties}
               hoveredProperty={hoveredProperty}
@@ -366,6 +370,7 @@ export default function PropertySearchPage() {
               nights={nights > 0 ? nights : undefined}
               className="property-discovery-map"
             />
+            </Suspense>
           </div>
         )}
 

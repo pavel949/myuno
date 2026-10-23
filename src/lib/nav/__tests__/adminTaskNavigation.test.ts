@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { ADMIN_NAV, SIDEBAR_NAV, getActiveBottomBarItem, getWorkspaceDrawerGroups } from '../navigationModel';
 
 // The pre-redesign admin rail plus its existing Review destination. This guards
-// specialist access when regrouping the five everyday destinations.
+// specialist access when regrouping the five everyday destinations. The duplicate
+// Activities editor keeps its route, while Water activities is its sole rail entry.
 const EXISTING_ADMIN_PATHS = `
 /admin/add /admin /admin/inbox /admin/catalog /admin/operations /admin/crm
 /admin/providers /admin/transfer-operators /admin/partner-applications
 /admin/restaurants /admin/salons /admin/clinics /admin/gyms /admin/vehicles
 /admin/transfers /admin/yachts /admin/water-activities /admin/experiences
-/admin/activities /admin/events /admin/education /admin/legal /admin/insurance
+/admin/events /admin/education /admin/legal /admin/insurance
 /admin/pharmacies /admin/stores /admin/pets /admin/cleaning /admin/babysitters
 /admin/flowers /admin/consultations /admin/properties /admin/projects
 /admin/newbuilds /admin/developers /admin/pm-companies /admin/mc-dashboard
@@ -36,10 +38,12 @@ describe('task-first platform navigation', () => {
     }
   });
 
-  it('retains every specialist route exactly once, with reports and settings secondary', () => {
+  it('retains specialist destinations once, with finance and settings secondary', () => {
     const paths = SIDEBAR_NAV.admin.flatMap(group => group.items.map(item => item.path));
     expect([...paths].sort()).toEqual(EXISTING_ADMIN_PATHS);
     expect(new Set(paths).size).toBe(paths.length);
+    // Duplicate water editor is hidden from the rail, not removed: legacy action=new survives.
+    expect(readFileSync('src/components/layout/routes/adminRoutes.tsx','utf8')).toContain('path="/admin/activities" element={<Pages.AdminActivities />}');
     expect(SIDEBAR_NAV.admin[1].items.map(item => item.path)).toEqual(['/admin/finance', '/admin/settings']);
     expect(SIDEBAR_NAV.admin.slice(2).every(group => !group.defaultOpen)).toBe(true);
     expect(SIDEBAR_NAV.admin.every(group => group.labelTh)).toBe(true);

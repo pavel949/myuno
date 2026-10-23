@@ -49,7 +49,9 @@ jobs:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 
       - name: Unit and isolated PostgreSQL tests
-        run: npm test -- --maxWorkers=2
+        run: |
+          npm test -- --maxWorkers=2
+          node --test scripts/qa/lighthouse-evidence.test.mjs
         env:
           E28_JIT_PROFILE: "1"
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs

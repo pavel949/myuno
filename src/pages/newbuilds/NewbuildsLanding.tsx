@@ -1,3 +1,6 @@
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { SEOHead } from '@/components/seo/SEOHead';
 /**
  * /newbuilds — Themed hub: tools & CTAs. Canonical catalog lives at /property/offplan.
  */
@@ -45,6 +48,7 @@ const TOOL_CARDS: ToolCard[] = [
 ];
 
 export default function NewbuildsLanding() {
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { data: allProjects, isLoading } = useOffplanProjects();
   const projects = allProjects || [];
@@ -67,6 +71,7 @@ export default function NewbuildsLanding() {
 
   return (
     <NewbuildsLayout>
+      <SEOHead title={pickLang(language, { ru: 'Новостройки Пхукета', en: 'Phuket new builds', th: 'โครงการใหม่ในภูเก็ต' })} description={pickLang(language, { ru: 'Сравните опубликованные проекты и изучите условия покупки недвижимости на Пхукете.', en: 'Compare published projects and explore property purchase terms in Phuket.', th: 'เปรียบเทียบโครงการที่ประกาศและศึกษาข้อมูลการซื้ออสังหาริมทรัพย์ในภูเก็ต' })} />
       <div className="min-h-screen bg-background">
         <header className="relative border-b border-border px-4 py-8 md:py-14 nb-blueprint overflow-hidden">
           <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4">

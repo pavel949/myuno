@@ -1,3 +1,4 @@
+import { SEOHead } from '@/components/seo/SEOHead';
 import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -73,6 +74,8 @@ export default function LegalServicesIndex() {
   }, [legalServices, searchQuery, selectedCategory, filterValues, isRu]);
 
   return (
+    <>
+      <SEOHead title={isRu ? 'Юридические услуги на Пхукете' : 'Legal services in Phuket'} description={isRu ? 'Смотрите опубликованные юридические, визовые, налоговые и бухгалтерские услуги на Пхукете.' : 'Browse published legal, visa, tax and accounting services in Phuket.'} />
     <MiniAppLayout
       title={t('legal.businessTitle')}
       subtitle={`${filteredProviders.length} ${t('legal.providers')}`}
@@ -152,5 +155,6 @@ export default function LegalServicesIndex() {
         </>
       )}
     </MiniAppLayout>
+    </>
   );
 }

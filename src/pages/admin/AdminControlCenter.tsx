@@ -1,74 +1,25 @@
-import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Shield, BarChart3, DollarSign, Settings, FileText, History } from 'lucide-react';
-import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
-import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
-import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
-import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
-import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
-import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
-import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
+import { Users, Wallet, Settings } from 'lucide-react';
 import { PageShell, PageHeader } from '@/components/page';
 
+/** Compatibility entry: canonical screens own each function, without duplicate tabs. */
 export default function AdminControlCenter() {
   const { language } = useLanguage();
-  const isRussian = language === 'ru';
-  const [activeTab, setActiveTab] = useState('users');
-
-  const tabs = [
-    { id: 'users', label: isRussian ? 'Пользователи' : 'Users', icon: Users },
-    { id: 'roles', label: isRussian ? 'Роли' : 'Roles', icon: Shield },
-    { id: 'analytics', label: isRussian ? 'Аналитика' : 'Analytics', icon: BarChart3 },
-    { id: 'finance', label: isRussian ? 'Финансы' : 'Finance', icon: DollarSign },
-    { id: 'audit', label: isRussian ? 'Аудит' : 'Audit', icon: History },
-    { id: 'system', label: isRussian ? 'Система' : 'System', icon: Settings },
-    { id: 'logs', label: isRussian ? 'Логи' : 'Logs', icon: FileText },
+  const isRu = language === 'ru';
+  const destinations = [
+    { path: '/admin/users', icon: Users, title: isRu ? 'Пользователи и доступ' : 'Users & access', description: isRu ? 'Пользователи, роли и RBAC' : 'Users, roles and RBAC' },
+    { path: '/admin/finance', icon: Wallet, title: isRu ? 'Финансы и аналитика' : 'Finance & analytics', description: isRu ? 'Транзакции, аналитика, продвижение и выплаты' : 'Transactions, analytics, promotions and payouts' },
+    { path: '/admin/settings', icon: Settings, title: isRu ? 'Настройки системы' : 'System settings', description: isRu ? 'Конфигурация, аудит, журнал, флаги и организация' : 'Configuration, audit, activity log, flags and organization' },
   ];
-
-  return (
-    <PageShell width="wide">
-      <PageHeader
-        title={isRussian ? 'Центр управления' : 'Control Center'}
-        subtitle={isRussian ? 'Пользователи, аналитика, настройки системы' : 'Users, analytics, system settings'}
-      />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              className="gap-2 data-[state=active]:bg-background"
-            >
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="users" className="mt-4">
-          <ControlUsersTab />
-        </TabsContent>
-        <TabsContent value="roles" className="mt-4">
-          <ControlRolesTab />
-        </TabsContent>
-        <TabsContent value="analytics" className="mt-4">
-          <ControlAnalyticsTab />
-        </TabsContent>
-        <TabsContent value="finance" className="mt-4">
-          <ControlFinanceTab />
-        </TabsContent>
-        <TabsContent value="system" className="mt-4">
-          <ControlSystemTab />
-        </TabsContent>
-        <TabsContent value="audit" className="mt-4">
-          <ControlAuditTab />
-        </TabsContent>
-        <TabsContent value="logs" className="mt-4">
-          <ControlLogsTab />
-        </TabsContent>
-      </Tabs>
-    </PageShell>
-  );
+  return <PageShell width="wide">
+    <PageHeader title={isRu ? 'Центр управления' : 'Control Center'} subtitle={isRu ? 'Выберите раздел управления платформой' : 'Choose a platform administration section'} />
+    <nav aria-label={isRu ? 'Разделы управления платформой' : 'Platform administration sections'} className="grid gap-4 md:grid-cols-3">
+      {destinations.map(item => <Link key={item.path} to={item.path} className="min-w-0 border border-border p-4 space-y-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <item.icon aria-hidden="true" className="h-5 w-5" />
+        <h2 className="font-semibold">{item.title}</h2>
+        <p className="text-sm text-muted-foreground break-words">{item.description}</p>
+      </Link>)}
+    </nav>
+  </PageShell>;
 }

@@ -115,8 +115,8 @@ export const ADMIN_NAV: NavItem[] = [
 export const TEAM_NAV: NavItem[] = [
   { path: APP_ROUTES.TEAM,             icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', exact: true },
   { path: APP_ROUTES.TEAM_CONTENT,     icon: FileText,        labelEn: 'Content',   labelRu: 'Контент' },
-  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck,       labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: APP_ROUTES.ADMIN_CRM,        icon: Users,           labelEn: 'CRM',       labelRu: 'CRM' },
+  { path: '/team/moderation',          icon: FileCheck,       labelEn: 'Moderation', labelRu: 'Модерация' },
+  { path: '/team/leads',               icon: Users,           labelEn: 'Leads',     labelRu: 'Лиды' },
   { path: APP_ROUTES.PROFILE,          icon: User,            labelEn: 'Profile',   labelRu: 'Профиль' },
 ];
 

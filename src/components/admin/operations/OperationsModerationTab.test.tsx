@@ -7,11 +7,11 @@ import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { OperationsModerationTab } from './OperationsModerationTab';
 import type { ModerationItem, ModerationQueue } from '@/lib/adminModeration';
 
-const state = vi.hoisted(() => ({ language: 'en', fetch: vi.fn(), success: vi.fn(), error: vi.fn(), response: null as null | Record<string, unknown>, pending: null as null | Promise<unknown>, filters: [] as unknown[][], writes: [] as Array<{ table: string; value: unknown; id?: string }> }));
+const state = vi.hoisted(() => ({ language: 'en', fetch: vi.fn(), detail: vi.fn(), success: vi.fn(), error: vi.fn(), response: null as null | Record<string, unknown>, pending: null as null | Promise<unknown>, filters: [] as unknown[][], writes: [] as Array<{ table: string; value: unknown; id?: string }> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/lib/adminModeration', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/adminModeration')>();
-  return { ...actual, fetchModerationQueue: (options: unknown) => state.fetch(options), fetchModerationCategoryOptions: (source: ModerationItem['type']) => source === 'product' ? Promise.resolve(['supplies', 'retired-category']) : actual.fetchModerationCategoryOptions(source) };
+  return { ...actual, fetchModerationDetail: (type: string,id: string) => state.detail(type,id), fetchModerationQueue: (options: unknown) => state.fetch(options), fetchModerationCategoryOptions: (source: ModerationItem['type']) => source === 'product' ? Promise.resolve(['supplies', 'retired-category']) : actual.fetchModerationCategoryOptions(source) };
 });
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn(), isTypingKey: () => false }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
@@ -128,10 +128,21 @@ describe('source-specific review pages', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await waitFor(() => expect(state.fetch.mock.calls.length).toBeGreaterThan(1));
   });
+  it('opens the exact listing content without leaving the filtered queue', async()=>{
+    state.detail.mockResolvedValue({id:'clinic-id',type:'listing',name_en:'Persisted clinic content',description_en:'Saved description',images:[],price:null,currency:null,is_active:false,approval_status:'pending',updated_at:'revision'});
+    mount();await ready();
+    fireEvent.click(screen.getAllByRole('button',{name:'Review'})[0]);
+    expect(await screen.findByText('Persisted clinic content')).toBeInTheDocument();
+    expect(state.detail).toHaveBeenCalledWith('listing','clinic-id');
+    expect(state.writes).toEqual([]);
+    fireEvent.keyDown(screen.getByRole('dialog'),{key:'Escape'});
+    await waitFor(()=>expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(()=>expect(state.fetch.mock.calls.length).toBeGreaterThan(1));
+    expect(screen.getAllByRole('button',{name:'Review'})[0]).toHaveFocus();
+  });
   it('does not imply source catalogs are record review or publish them on navigation', async () => {
     mount(); await ready();
-    expect(screen.getAllByRole('button', { name: 'Review' })[0]).toBeDisabled();
-    expect(screen.getAllByText(/Direct item review is not available/, { exact: false })[0]).toBeVisible();
+    expect(screen.getAllByRole('button', { name: 'Review' })[0]).toBeEnabled();
     fireEvent.click(screen.getAllByRole('button', { name: 'Open category catalog' })[0]);
     await waitFor(() => expect(screen.getByTestId('route').textContent).toBe('/admin/clinics'));
     expect(state.writes).toEqual([]);

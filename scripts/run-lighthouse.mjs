@@ -26,7 +26,7 @@ function runLhci(configFile, label) {
     console.log(`\n▶ Lighthouse CI (${label}) — config: ${configFile}`);
     const child = spawn(
       "npx",
-      ["--yes", "@lhci/cli@0.14.x", "autorun", `--config=${configFile}`],
+      ["--yes", "@lhci/cli@0.14.0", "autorun", `--config=${configFile}`],
       {
         stdio: "inherit",
         shell: process.platform === "win32",

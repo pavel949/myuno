@@ -84,8 +84,8 @@ export function GoogleMapsStatusCard() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success(isRu ? 'Ключ синхронизирован! Перезагрузите страницу.' : 'Key synced! Please reload the page.');
-    } catch (err: any) {
-      toast.error(err.message || 'Sync failed');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Sync failed');
     } finally {
       setSyncing(false);
     }
@@ -147,16 +147,16 @@ export function GoogleMapsStatusCard() {
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {hasKey ? (
               <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : (
               <span className="h-4 w-4 flex-shrink-0 text-muted-foreground">—</span>
             )}
             <span className="text-muted-foreground">{isRu ? 'Фронтенд ключ:' : 'Frontend key:'}</span>
-            <span className="font-medium truncate">{keyLabel} {keyHint}</span>
+            <span className="min-w-0 font-medium break-words">{keyLabel} {keyHint}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {!hasKey ? (
               <CheckCircle2 className="h-4 w-4 text-success dark:text-success flex-shrink-0" />
             ) : loadError ? (
@@ -167,9 +167,9 @@ export function GoogleMapsStatusCard() {
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
             )}
             <span className="text-muted-foreground">{isRu ? 'Карта:' : 'Map:'}</span>
-            <span className="font-medium truncate">{scriptLabel}</span>
+            <span className="min-w-0 font-medium break-words">{scriptLabel}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {geocodeStatus === 'running' ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
             ) : geocodeStatus === 'ok' ? (
@@ -180,17 +180,17 @@ export function GoogleMapsStatusCard() {
               <span className="h-4 w-4 flex-shrink-0 text-muted-foreground">—</span>
             )}
             <span className="text-muted-foreground">{isRu ? 'Геокодинг:' : 'Geocoding:'}</span>
-            <span className="font-medium truncate">{geocodeLabel}</span>
+            <span className="min-w-0 font-medium break-words">{geocodeLabel}</span>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {!hasKey && (
             <Button
               variant="default"
               size="sm"
               onClick={syncKey}
               disabled={syncing}
-              className="gap-2"
+              className="min-h-11 h-auto max-w-full gap-2 whitespace-normal py-2 text-left"
             >
               {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               {isRu ? 'Синхронизировать ключ' : 'Sync key from backend'}
@@ -202,7 +202,7 @@ export function GoogleMapsStatusCard() {
             size="sm"
             onClick={() => runValidation()}
             disabled={geocodeStatus === 'running'}
-            className="gap-2"
+            className="min-h-11 h-auto max-w-full gap-2 whitespace-normal py-2 text-left"
             aria-label={isRu ? 'Проверить геокодинг' : 'Test geocoding'}
           >
             {geocodeStatus === 'running' ? (

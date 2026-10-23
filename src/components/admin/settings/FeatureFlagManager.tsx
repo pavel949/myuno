@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminFeatureFlags, useToggleFeatureFlag } from '@/hooks/useFeatureFlags';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,15 +13,19 @@ import { Loader2 } from 'lucide-react';
 export function FeatureFlagManager() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { flags, isLoading } = useAdminFeatureFlags();
+  const { user } = useAuth();
+  const actor = useRef(user?.id); actor.current = user?.id;
+  const { flags, isLoading, isFetching, error, refetch } = useAdminFeatureFlags();
+  const [failedFor, setFailedFor] = useState<string | null>(null);
   const toggle = useToggleFeatureFlag();
 
-  const handleToggle = (flagKey: string, currentEnabled: boolean) => {
+  const handleToggle = (flagKey: string, currentEnabled: boolean, rolloutPct: number) => {
+    const expected = user?.id;
     toggle.mutate(
-      { flagKey, enabled: !currentEnabled },
+      { flagKey, enabled: !currentEnabled, rolloutPct },
       {
-        onSuccess: () => toast.success(isRu ? 'Флаг обновлён' : 'Flag updated'),
-        onError: (err: Error) => toast.error(err.message),
+        onSuccess: () => { if (actor.current === expected) { setFailedFor(null); toast.success(isRu ? 'Настройка флага сохранена и проверена' : 'Flag setting saved and verified'); } },
+        onError: () => { if (actor.current === expected && expected) { setFailedFor(expected); toast.error(isRu ? 'Сохранение не подтверждено. Загрузите настройки заново.' : 'Save not confirmed. Reload settings before retrying.'); } },
       }
     );
   };
@@ -33,6 +39,10 @@ export function FeatureFlagManager() {
       </div>
     );
   }
+
+  if (!user) return <p role="alert">{isRu ? 'Войдите для управления настройками.' : 'Sign in to manage settings.'}</p>;
+  const reload = async () => { const expected = user.id; const result = await refetch(); if (actor.current === expected && !result.error) setFailedFor(null); };
+  if (error) return <div role="alert"><p>{isRu ? 'Настройки флагов недоступны.' : 'Feature flag settings are unavailable.'}</p><Button disabled={isFetching} onClick={() => void reload()}>{isRu ? 'Повторить загрузку' : 'Reload settings'}</Button></div>;
 
   // Group flags by category
   const groups: Record<string, typeof flags> = {};
@@ -49,6 +59,8 @@ export function FeatureFlagManager() {
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">{isRu ? 'Общие настройки платформы. Запрошенное состояние не отменяет ограничения сборки и доступа.' : 'Platform-wide settings. Requested state does not override build or access gates.'}</p>
+      {failedFor === user.id && <div role="alert"><p>{isRu ? 'Сохранение не подтверждено. Сначала загрузите настройки заново.' : 'Save not confirmed. Reload settings before retrying.'}</p><Button disabled={isFetching} onClick={() => void reload()}>{isRu ? 'Повторить загрузку' : 'Reload settings'}</Button></div>}
       {Object.entries(groups).map(([category, groupFlags]) => (
         <div key={category}>
           <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">{category}</h3>
@@ -69,11 +81,13 @@ export function FeatureFlagManager() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">{flag.description}</p>
+                    <p className="text-xs">{isRu ? 'Действует для вашего аккаунта' : 'Effective for your account'}: {flag.effectiveEnabled ? (isRu ? 'Вкл.' : 'On') : (isRu ? 'Выкл.' : 'Off')}</p>
                   </div>
                   <Switch
+                    aria-label={`${isRu ? 'Запрошенное состояние' : 'Requested state'}: ${flag.key}`}
                     checked={flag.enabled}
-                    onCheckedChange={() => handleToggle(flag.key, flag.enabled)}
-                    disabled={toggle.isPending}
+                    onCheckedChange={() => handleToggle(flag.key, flag.enabled, flag.rolloutPct)}
+                    disabled={toggle.isPending || isFetching || failedFor === user.id}
                   />
                 </CardContent>
               </Card>

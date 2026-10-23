@@ -6,6 +6,7 @@ import { Shield, Users, Star, Store, Building2, UserCog, Headphones } from 'luci
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 const roleConfigs = [
   { key: 'admin', label: 'Admin', labelRu: 'Администратор', icon: Shield, color: 'bg-destructive' },
@@ -21,7 +22,7 @@ export function ControlRolesTab() {
   const isRussian = language === 'ru';
 
   // Single query — fetch all role assignments, count in JS (1 DB call instead of 6)
-  const { data: roleCounts, isLoading } = useQuery({
+  const { data: roleCounts, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin-role-counts'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,6 +37,11 @@ export function ControlRolesTab() {
       }, {});
     },
   });
+
+  if (isError) return <div role="alert" className="space-y-3">
+    <p>{isRussian ? 'Не удалось загрузить роли. Количество назначений неизвестно.' : 'Could not load roles. Assignment counts are unknown.'}</p>
+    <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>{isRussian ? 'Повторить' : 'Retry'}</Button>
+  </div>;
 
   return (
     <div className="space-y-4">
@@ -53,13 +59,13 @@ export function ControlRolesTab() {
               const count = roleCounts?.[role.key] || 0;
               
               return (
-                <Card key={role.key} className="cursor-pointer hover:shadow-md transition-shadow">
+                <Card key={role.key} className="min-w-0">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <div className={`h-10 w-10 rounded-none ${role.color} flex items-center justify-center`}>
                         <Icon className="h-5 w-5 text-white" />
                       </div>
-                      <div className="flex-1">
+                      <div className="min-w-0 flex-1 break-words">
                         <p className="font-medium">{isRussian ? role.labelRu : role.label}</p>
                         {isLoading ? (
                           <Skeleton className="h-4 w-16 mt-1" />

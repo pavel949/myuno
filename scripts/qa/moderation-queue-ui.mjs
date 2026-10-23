@@ -63,6 +63,14 @@ const virtual = {
       row('fixture-product-a','product','Local coffee','Местный кофе','groceries',{approval_status:'draft'}),
       row('fixture-product-b','product','Beach towel','Пляжное полотенце','accessories',{approval_status:null,created_at:null}),
     ];
+    export async function fetchModerationDetail(type,id){
+      if(!['listing','service','product'].includes(type)||typeof id!=='string')throw Error('Invalid exact detail identity');
+      const item=items.find(row=>row.type===type&&row.id===id);
+      if(!item)throw Error('Exact synthetic detail unavailable');
+      window.fixtureDetailReads.push({type,id});
+      return {...item,description_en:'Persisted synthetic '+type+' detail: '+id,description_ru:'Persisted synthetic '+type+' detail: '+id,
+        price:null,currency:null,is_active:false,images:[]};
+    }
     const unknown=()=>({listing:null,property:null,service:null,product:null});
     export async function fetchModerationCategoryOptions(source){
       const categories={listing:['restaurant','clinic','yacht'],property:['villa','apartment'],product:['groceries','accessories','books'],service:[]};
@@ -153,7 +161,7 @@ const bundle = await build({
       import {OperationsModerationTab} from '${root}/src/components/admin/operations/OperationsModerationTab.tsx';
       import {AdminOperationalAlerts} from '${root}/src/components/admin/dashboard/AdminOperationalAlerts.tsx';
       import {AdminKPIGrid} from '${root}/src/components/admin/dashboard/AdminKPIGrid.tsx';
-      window.fixtureWrites=0;window.fixtureDataCalls=0;window.fixtureClientCalls=0;window.fixtureReadCalls=0;window.fixtureReadOptions=[];window.fixtureNetworkCalls=0;window.fixtureDashboardReads=0;window.fixtureAnalyticsReads=0;
+      window.fixtureWrites=0;window.fixtureDataCalls=0;window.fixtureClientCalls=0;window.fixtureReadCalls=0;window.fixtureReadOptions=[];window.fixtureDetailReads=[];window.fixtureNetworkCalls=0;window.fixtureDashboardReads=0;window.fixtureAnalyticsReads=0;
       const denyNetwork=()=>{window.fixtureNetworkCalls++;throw Error('Network forbidden in isolated moderation fixture');};
       window.fetch=denyNetwork;window.XMLHttpRequest=class{constructor(){denyNetwork();}};window.WebSocket=class{constructor(){denyNetwork();}};
       document.documentElement.lang=new URLSearchParams(location.search).get('lang')||'en';
@@ -208,6 +216,9 @@ for (const component of ['AdminOperationalAlerts', 'AdminKPIGrid']) {
   if (!realInputs.some(input => input.endsWith('/' + component + '.tsx'))) {
     throw Error('The real dashboard component is missing from the fixture: ' + component);
   }
+}
+if (!realInputs.some(input=>input.endsWith('/ModerationDetailDialog.tsx'))) {
+  throw Error('The actual read-only moderation detail dialog is missing');
 }
 if (!Object.keys(bundle.metafile.inputs).includes('fixture:@/lib/adminModeration')) {
   throw Error('The moderation component did not use the isolated helper read boundary');
