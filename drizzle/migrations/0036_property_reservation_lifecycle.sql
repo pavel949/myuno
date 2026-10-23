@@ -135,6 +135,12 @@ END $preflight$;
 
 -- Not an exposed Data API schema. Receipts are request deduplication only;
 -- orders/property_bookings remain the commercial/inventory authorities.
+-- PostgREST upsert(property_id,external_id) cannot infer the older source-
+-- partial iCal index. Keep the existing global external-id constraint intact;
+-- this additive non-partial index supports the existing import writer without
+-- permitting a same-UID upsert to move another property's inventory.
+CREATE UNIQUE INDEX property_lifecycle_import_identity ON public.property_bookings(property_id,external_id);
+
 CREATE SCHEMA pms_commands;
 REVOKE ALL ON SCHEMA pms_commands FROM PUBLIC, anon, authenticated, service_role;
 CREATE TABLE pms_commands.manual_booking_receipts (
@@ -142,16 +148,34 @@ CREATE TABLE pms_commands.manual_booking_receipts (
   actor_id uuid NOT NULL,
   property_id uuid NOT NULL REFERENCES public.properties(id),
   order_id uuid NOT NULL REFERENCES public.orders(id),
-  command_kind text NOT NULL DEFAULT 'create' CHECK(command_kind IN ('create','change')),
+  command_kind text NOT NULL DEFAULT 'create' CHECK(command_kind IN ('create','change','payment_gate')),
   executing boolean NOT NULL DEFAULT false,
   transaction_id bigint NOT NULL DEFAULT txid_current(),
   payload jsonb NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX property_lifecycle_one_create ON pms_commands.manual_booking_receipts(order_id) WHERE command_kind='create';
+CREATE UNIQUE INDEX property_lifecycle_payment_gate ON pms_commands.manual_booking_receipts(order_id) WHERE command_kind='payment_gate';
 CREATE INDEX property_lifecycle_order_commands ON pms_commands.manual_booking_receipts(order_id);
 ALTER TABLE pms_commands.manual_booking_receipts ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON pms_commands.manual_booking_receipts FROM PUBLIC, anon, authenticated, service_role;
+
+-- Historical external sessions can exist without a local payment row. Only a
+-- separately reviewed reconciliation manifest may certify a legacy revision.
+-- No application/service role can mint this evidence; population is a distinct
+-- controlled activation step, never inferred from missing financial records.
+CREATE TABLE pms_commands.legacy_unpaid_reconciliation (
+  order_id uuid PRIMARY KEY REFERENCES public.orders(id),
+  property_id uuid NOT NULL REFERENCES public.properties(id),
+  booking_id uuid NOT NULL REFERENCES public.property_bookings(id),
+  expected_updated_at timestamptz NOT NULL,
+  evidence_sha256 text NOT NULL CHECK(evidence_sha256 ~ '^[0-9a-f]{64}$'),
+  evidence_reference text NOT NULL CHECK(length(btrim(evidence_reference))>0),
+  reviewed_by uuid NOT NULL,
+  reviewed_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+ALTER TABLE pms_commands.legacy_unpaid_reconciliation ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON pms_commands.legacy_unpaid_reconciliation FROM PUBLIC,anon,authenticated,service_role;
 
 CREATE FUNCTION pms_commands.create_manual_property_booking(p_request_id uuid, p_property_id uuid, p_input jsonb, p_guest boolean DEFAULT false)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $command$
@@ -404,12 +428,159 @@ END $$;
 REVOKE ALL ON FUNCTION public.list_property_reservations_checked(uuid[],date,date) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.list_property_reservations_checked(uuid[],date,date) TO authenticated;
 
+-- Minimal read-only revision for a legacy row before its first checked change.
+-- It does not claim that the inventory or financial state is adoptable.
+CREATE FUNCTION public.read_property_booking_revision_checked(p_order_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE saved public.orders%ROWTYPE; prop public.properties%ROWTYPE; linked uuid;
+BEGIN
+  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not_authenticated' USING ERRCODE='42501'; END IF;
+  SELECT resource_id INTO linked FROM public.order_items WHERE order_id=p_order_id AND item_type='property';
+  SELECT * INTO prop FROM public.properties WHERE id=linked;
+  SELECT * INTO saved FROM public.orders WHERE id=p_order_id AND vertical='property' AND deleted_at IS NULL;
+  IF saved.id IS NULL OR saved.updated_at IS NULL OR (SELECT count(*) FROM public.order_items WHERE order_id=p_order_id)<>1
+    OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=auth.uid()
+      OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)
+      OR (saved.customer_user_id=auth.uid() AND EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create' AND (payload->>'guest_mode')::boolean IS TRUE))) IS TRUE THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
+  END IF;
+  RETURN jsonb_build_object('order_id',saved.id,'updated_at',saved.updated_at);
+END $$;
+REVOKE ALL ON FUNCTION public.read_property_booking_revision_checked(uuid) FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.read_property_booking_revision_checked(uuid) TO authenticated;
+
 CREATE FUNCTION public.create_property_reservation_checked(p_request_id uuid,p_property_id uuid,p_input jsonb)
 RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$
  SELECT pms_commands.create_manual_property_booking(p_request_id,p_property_id,p_input,true)
 $$;
 REVOKE ALL ON FUNCTION public.create_property_reservation_checked(uuid,uuid,jsonb) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.create_property_reservation_checked(uuid,uuid,jsonb) TO authenticated;
+
+-- Known legacy financial/autocreate hooks must not invent paid income or a
+-- second stay for the checked unpaid cohort. Unknown definitions fail preflight.
+DO $legacy_hooks$
+DECLARE definition text; body_hash text;
+BEGIN
+  IF to_regprocedure('public.create_financial_from_booking()') IS NOT NULL THEN
+    SELECT pg_get_functiondef(oid),md5(prosrc) INTO definition,body_hash FROM pg_proc WHERE oid='public.create_financial_from_booking()'::regprocedure;
+    IF body_hash<>'ae00d05a916624fc9707b9679118b4a5' THEN RAISE EXCEPTION 'legacy_create_financial_from_booking_drift'; END IF;
+    definition:=replace(definition,E'BEGIN\n',E'BEGIN\n  IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE command_kind=''create'' AND (order_id=NEW.order_id OR order_id::text=NEW.external_id)) THEN RETURN NEW; END IF;\n');
+    EXECUTE definition;
+  END IF;
+  IF to_regprocedure('public.create_property_booking_from_order()') IS NOT NULL THEN
+    SELECT pg_get_functiondef(oid),md5(prosrc) INTO definition,body_hash FROM pg_proc WHERE oid='public.create_property_booking_from_order()'::regprocedure;
+    IF body_hash<>'63242aa5cb4af0660140f43d71cc42f2' THEN RAISE EXCEPTION 'legacy_create_property_booking_from_order_drift'; END IF;
+    definition:=replace(definition,E'BEGIN\n',E'BEGIN\n  IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE command_kind=''create'' AND order_id=NEW.id) THEN RETURN NEW; END IF;\n');
+    EXECUTE definition;
+  END IF;
+  IF to_regprocedure('public.guard_orders_protected_columns()') IS NOT NULL THEN
+    SELECT pg_get_functiondef(oid),md5(prosrc) INTO definition,body_hash FROM pg_proc WHERE oid='public.guard_orders_protected_columns()'::regprocedure;
+    IF body_hash<>'792ed07509c76867decde4f997ca04c1' THEN RAISE EXCEPTION 'legacy_guard_orders_protected_columns_drift'; END IF;
+    definition:=replace(definition,E'BEGIN\n',E'BEGIN\n  IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE command_kind IN (''create'',''change'') AND order_id=NEW.id AND executing AND actor_id=auth.uid() AND transaction_id=txid_current()) THEN RETURN NEW; END IF;\n');
+    EXECUTE definition;
+  END IF;
+  IF to_regprocedure('public.trg_release_availability_on_order_cancel()') IS NOT NULL THEN
+    SELECT pg_get_functiondef(oid),md5(prosrc) INTO definition,body_hash FROM pg_proc WHERE oid='public.trg_release_availability_on_order_cancel()'::regprocedure;
+    IF body_hash<>'ca4e3c5d9b311cc6820a1e7d81911e4e' THEN RAISE EXCEPTION 'legacy_availability_release_drift'; END IF;
+    definition:=replace(definition,E'BEGIN\n',E'BEGIN\n  IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE command_kind=''create'' AND order_id=NEW.id) THEN RETURN NEW; END IF;\n');
+    EXECUTE definition;
+  END IF;
+END $legacy_hooks$;
+
+-- Checked legacy adoption is an internal part of ONE mutation transaction.
+-- Never locate/adopt inventory by dates. Require an exact canonical item and an
+-- explicit order_id/external_id link, then revalidate under property/order locks.
+CREATE FUNCTION pms_commands.adopt_unpaid_property_booking(p_order_id uuid,p_expected_updated_at timestamptz)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid:=auth.uid(); prop public.properties%ROWTYPE; saved public.orders%ROWTYPE;
+  item public.order_items%ROWTYPE; hold public.property_bookings%ROWTYPE; guest public.order_participants%ROWTYPE;
+  linked uuid; stamp text;
+BEGIN
+  IF actor IS NULL THEN RAISE EXCEPTION 'not_authenticated' USING ERRCODE='42501'; END IF;
+  SELECT resource_id INTO linked FROM public.order_items WHERE order_id=p_order_id AND item_type='property';
+  IF linked IS NULL OR (SELECT count(*) FROM public.order_items WHERE order_id=p_order_id)<>1 THEN
+    RAISE EXCEPTION 'legacy_reservation_ambiguous' USING ERRCODE='42501';
+  END IF;
+  SELECT * INTO prop FROM public.properties WHERE id=linked FOR UPDATE;
+  IF NOT FOUND OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
+    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)) IS TRUE THEN
+    RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
+  END IF;
+  SELECT * INTO saved FROM public.orders WHERE id=p_order_id FOR UPDATE;
+  -- A concurrent checked adoption already serialized this order. The caller
+  -- rechecks current authorization, receipt and CAS; do not adopt twice.
+  IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create') THEN RETURN; END IF;
+  IF saved.id IS NULL OR saved.vertical IS DISTINCT FROM 'property' OR saved.order_type IS DISTINCT FROM 'property'
+    OR saved.deleted_at IS NOT NULL OR saved.status::text NOT IN ('pending','confirmed')
+    OR (saved.source_company_id IS NOT NULL AND saved.source_company_id IS DISTINCT FROM prop.management_company_id)
+    OR (saved.provider_org_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.org_members WHERE org_id=saved.provider_org_id AND user_id=prop.owner_id))
+    OR (saved.metadata IS NOT NULL AND jsonb_typeof(saved.metadata)<>'object') THEN
+    RAISE EXCEPTION 'legacy_reservation_ambiguous' USING ERRCODE='42501';
+  END IF;
+  IF saved.updated_at IS DISTINCT FROM p_expected_updated_at THEN RAISE EXCEPTION 'stale_reservation' USING ERRCODE='40001'; END IF;
+  SELECT * INTO item FROM public.order_items WHERE order_id=p_order_id;
+  SELECT * INTO guest FROM public.order_participants WHERE order_id=p_order_id AND role='guest';
+  SELECT * INTO hold FROM public.property_bookings WHERE order_id=p_order_id OR external_id=p_order_id::text FOR UPDATE;
+  IF item.resource_id IS DISTINCT FROM prop.id OR item.item_type IS DISTINCT FROM 'property'
+    OR item.product_id IS NOT NULL OR (item.provider_org_id IS NOT NULL AND item.provider_org_id IS DISTINCT FROM saved.provider_org_id)
+    OR item.qty IS DISTINCT FROM 1 OR item.start_at IS DISTINCT FROM saved.start_at OR item.end_at IS DISTINCT FROM saved.end_at
+    OR item.amount IS DISTINCT FROM saved.total_amount OR item.unit_price IS DISTINCT FROM saved.total_amount
+    OR (item.metadata?'property_id' AND item.metadata->>'property_id' IS DISTINCT FROM prop.id::text)
+    OR saved.start_at IS NULL OR saved.end_at IS NULL OR saved.end_at<=saved.start_at
+    OR saved.currency IS NULL OR saved.currency !~ '^[A-Z]{3}$'
+    OR saved.total_amount IS NULL OR saved.total_amount<0 OR saved.total_amount::text IN ('NaN','Infinity','-Infinity')
+    OR (SELECT count(*) FROM public.order_participants WHERE order_id=p_order_id AND role='guest')<>1
+    OR NULLIF(btrim(guest.name),'') IS NULL
+    OR (SELECT count(*) FROM public.property_bookings WHERE order_id=p_order_id OR external_id=p_order_id::text)<>1
+    OR hold.property_id IS DISTINCT FROM prop.id OR hold.owner_id IS DISTINCT FROM prop.owner_id
+    OR (hold.order_id IS NOT NULL AND hold.order_id<>p_order_id)
+    OR (hold.external_id IS NOT NULL AND hold.external_id<>p_order_id::text)
+    OR hold.check_in IS DISTINCT FROM (saved.start_at AT TIME ZONE 'Asia/Bangkok')::date
+    OR hold.check_out IS DISTINCT FROM (saved.end_at AT TIME ZONE 'Asia/Bangkok')::date
+    OR hold.status IS DISTINCT FROM saved.status::text
+    OR hold.total_amount IS DISTINCT FROM saved.total_amount OR hold.currency IS DISTINCT FROM saved.currency
+    OR hold.guest_name IS DISTINCT FROM guest.name OR hold.guest_phone IS DISTINCT FROM guest.phone OR hold.guest_email IS DISTINCT FROM guest.email
+    OR hold.guests_count IS DISTINCT FROM COALESCE((saved.metadata->>'guests_count')::integer,1) THEN
+    RAISE EXCEPTION 'legacy_reservation_ambiguous' USING ERRCODE='42501';
+  END IF;
+  -- A pending/failed/unknown payment attempt still needs reconciliation: it may
+  -- have crossed an external side-effect boundary. No inference from 'unpaid'.
+  IF saved.paid_at IS NOT NULL OR saved.metadata ?| ARRAY['stripe_session_id','manual_payment','payment_channel','payment_intent_id','payment_status','source_calendar_id']
+    OR hold.source_calendar_id IS NOT NULL OR hold.deposit_paid_at IS NOT NULL OR hold.deposit_stripe_session_id IS NOT NULL
+    OR hold.refund_status IS NOT NULL OR hold.refund_processed_at IS NOT NULL OR COALESCE(hold.refund_amount,0)<>0
+    OR EXISTS(SELECT 1 FROM public.payment_intents WHERE order_id=p_order_id)
+    OR EXISTS(SELECT 1 FROM public.manual_payment_requests WHERE order_id=p_order_id)
+    OR EXISTS(SELECT 1 FROM public.ledger_entries WHERE order_id=p_order_id)
+    OR EXISTS(SELECT 1 FROM public.property_financials WHERE reference_type='booking' AND reference_id=hold.id)
+    OR EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='payment_gate') THEN
+    RAISE EXCEPTION 'reservation_requires_reconciliation' USING ERRCODE='42501';
+  END IF;
+  IF NOT EXISTS(SELECT 1 FROM pms_commands.legacy_unpaid_reconciliation e
+    WHERE e.order_id=saved.id AND e.property_id=prop.id AND e.booking_id=hold.id
+      AND e.expected_updated_at=saved.updated_at) THEN
+    RAISE EXCEPTION 'legacy_external_payment_reconciliation_required' USING ERRCODE='42501';
+  END IF;
+  IF EXISTS(SELECT 1 FROM public.property_availability a WHERE a.property_id=prop.id AND a.status='booked'
+    AND a.date>=hold.check_in AND a.date<hold.check_out
+    AND NOT COALESCE((a.booking_id=hold.id OR (a.booking_id IS NULL AND a.note IN ('Locked by order '||p_order_id::text,'order '||p_order_id::text))),false)) THEN
+    RAISE EXCEPTION 'legacy_availability_ambiguous' USING ERRCODE='42501';
+  END IF;
+  stamp:='Checked unpaid property adoption '||p_order_id::text;
+  INSERT INTO pms_commands.manual_booking_receipts(request_id,actor_id,property_id,order_id,payload,executing)
+    VALUES(p_order_id,actor,prop.id,p_order_id,jsonb_build_object('guest_mode',false,'adopted',true,
+      'original_updated_at',saved.updated_at,'original_customer_user_id',saved.customer_user_id),true);
+  -- Only normalize a missing external link where the explicit order_id is
+  -- already proven. Never replace an import/channel identity or financial row.
+  UPDATE public.property_bookings SET external_id=p_order_id::text WHERE id=hold.id AND external_id IS NULL;
+  INSERT INTO public.order_status_history(order_id,from_status,to_status,actor_user_id,reason)
+    VALUES(p_order_id,saved.status,saved.status,actor,stamp);
+  IF (SELECT count(*) FROM public.order_status_history WHERE order_id=p_order_id AND reason=stamp
+    AND actor_user_id=actor AND from_status::text=saved.status::text AND to_status::text=saved.status::text)<>1 THEN
+    RAISE EXCEPTION 'reservation_audit_not_committed' USING ERRCODE='40001';
+  END IF;
+  UPDATE pms_commands.manual_booking_receipts SET executing=false WHERE request_id=p_order_id;
+END $$;
+REVOKE ALL ON FUNCTION pms_commands.adopt_unpaid_property_booking(uuid,timestamptz) FROM PUBLIC,anon,authenticated,service_role;
 
 CREATE FUNCTION pms_commands.change_property_booking(p_request_id uuid,p_order_id uuid,p_expected_updated_at timestamptz,p_patch jsonb)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
@@ -420,13 +591,16 @@ DECLARE actor uuid:=auth.uid(); intent pms_commands.manual_booking_receipts%ROWT
 BEGIN
   IF actor IS NULL THEN RAISE EXCEPTION 'not_authenticated' USING ERRCODE='42501'; END IF;
   IF p_request_id IS NULL OR p_expected_updated_at IS NULL OR jsonb_typeof(p_patch) IS DISTINCT FROM 'object'
-    OR p_patch='{}'::jsonb OR EXISTS(SELECT 1 FROM jsonb_object_keys(p_patch) key WHERE key NOT IN
+    OR p_patch='{}'::jsonb OR (p_patch?'guest_name' AND NULLIF(btrim(p_patch->>'guest_name'),'') IS NULL) OR EXISTS(SELECT 1 FROM jsonb_object_keys(p_patch) key WHERE key NOT IN
       ('status','check_in','check_out','check_in_time','check_out_time','guest_name','guest_phone','guest_email','guests_count','total_amount','currency','notes')) THEN
     RAISE EXCEPTION 'invalid_reservation_change' USING ERRCODE='22023';
   END IF;
-  SELECT * INTO intent FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create';
-  IF NOT FOUND THEN RAISE EXCEPTION 'reservation_contract_unavailable' USING ERRCODE='42501'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended(p_request_id::text,0));
+  SELECT * INTO intent FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create';
+  IF NOT FOUND THEN
+    PERFORM pms_commands.adopt_unpaid_property_booking(p_order_id,p_expected_updated_at);
+    SELECT * INTO intent FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create';
+  END IF;
   SELECT * INTO prop FROM public.properties WHERE id=intent.property_id FOR UPDATE;
   SELECT * INTO saved FROM public.orders WHERE id=p_order_id FOR UPDATE;
   operator := COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
@@ -466,7 +640,7 @@ BEGIN
   denomination := COALESCE(p_patch->>'currency',saved.currency);
   guest_count := COALESCE((p_patch->>'guests_count')::integer,(saved.metadata->>'guests_count')::integer,1);
   IF new_amount IS NULL OR new_amount::text IN ('NaN','Infinity','-Infinity') OR new_amount<0 OR new_amount>100000000
-    OR denomination !~ '^[A-Z]{3}$' OR guest_count<1 THEN RAISE EXCEPTION 'invalid_amount' USING ERRCODE='22023'; END IF;
+    OR denomination IS NULL OR denomination !~ '^[A-Z]{3}$' OR guest_count<1 THEN RAISE EXCEPTION 'invalid_amount' USING ERRCODE='22023'; END IF;
   IF new_status<>'cancelled' AND EXISTS(SELECT 1 FROM public.property_availability WHERE property_id=prop.id AND status='blocked' AND date>=arrival AND date<departure) THEN
     RAISE EXCEPTION 'property_dates_blocked' USING ERRCODE='23P01';
   END IF;
@@ -478,7 +652,7 @@ BEGIN
     email=CASE WHEN p_patch?'guest_email' THEN p_patch->>'guest_email' ELSE email END WHERE order_id=p_order_id AND role='guest';
   UPDATE public.orders SET status=new_status::public.order_status,start_at=starts,end_at=ends,total_amount=new_amount,currency=denomination,
     notes=CASE WHEN p_patch?'notes' THEN p_patch->>'notes' ELSE notes END,
-    metadata=metadata||jsonb_build_object('guests_count',guest_count,'check_in_time',arrival_time,'check_out_time',departure_time),updated_at=clock_timestamp()
+    metadata=COALESCE(metadata,'{}'::jsonb)||jsonb_build_object('guests_count',guest_count,'check_in_time',arrival_time,'check_out_time',departure_time),updated_at=clock_timestamp()
     WHERE id=p_order_id;
   UPDATE public.order_items SET start_at=starts,end_at=ends,amount=new_amount,unit_price=new_amount WHERE order_id=p_order_id;
   -- Re-touch after item/participant changes, using the existing registered bridge.
@@ -488,6 +662,15 @@ BEGIN
   IF (SELECT count(*) FROM public.order_status_history WHERE order_id=p_order_id AND from_status::text=saved.status::text
     AND to_status::text=new_status AND actor_user_id=actor AND reason='Checked unpaid property change '||p_request_id::text)<>1 THEN
     RAISE EXCEPTION 'reservation_audit_not_committed' USING ERRCODE='40001';
+  END IF;
+  -- Retire only explicitly owned legacy booked markers. Manual blocks,
+  -- pricing overrides and another reservation's markers are never released.
+  IF new_status='cancelled' OR arrival IS DISTINCT FROM (saved.start_at AT TIME ZONE 'Asia/Bangkok')::date
+    OR departure IS DISTINCT FROM (saved.end_at AT TIME ZONE 'Asia/Bangkok')::date THEN
+    UPDATE public.property_availability a SET status='available',note=NULL,booking_id=NULL,updated_at=clock_timestamp()
+      WHERE a.property_id=prop.id AND a.status='booked'
+        AND (a.booking_id IN (SELECT id FROM public.property_bookings WHERE external_id=p_order_id::text)
+          OR (a.booking_id IS NULL AND a.note IN ('Locked by order '||p_order_id::text,'order '||p_order_id::text)));
   END IF;
   UPDATE pms_commands.manual_booking_receipts SET executing=false WHERE request_id=p_request_id;
   result := pms_commands.read_property_booking(p_order_id,false);
@@ -555,11 +738,29 @@ CREATE TRIGGER zz_property_inventory_command_only BEFORE INSERT OR UPDATE OR DEL
 -- Do not use editable order metadata as cohort authority.
 CREATE FUNCTION public.property_checkout_allowed_checked(p_order_id uuid) RETURNS boolean
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE saved public.orders%ROWTYPE; linked uuid;
 BEGIN
+  SELECT * INTO saved FROM public.orders WHERE id=p_order_id;
+  IF saved.id IS NULL OR saved.deleted_at IS NOT NULL THEN RETURN false; END IF;
+  IF saved.vertical='property' THEN
+    SELECT resource_id INTO linked FROM public.order_items WHERE order_id=p_order_id AND item_type='property';
+    IF linked IS NULL OR saved.customer_user_id IS NULL OR (SELECT count(*) FROM public.order_items WHERE order_id=p_order_id)<>1 THEN
+      RAISE EXCEPTION 'reservation_requires_reconciliation' USING ERRCODE='42501';
+    END IF;
+    PERFORM 1 FROM public.properties WHERE id=linked FOR UPDATE;
+  END IF;
+  SELECT * INTO saved FROM public.orders WHERE id=p_order_id FOR UPDATE;
   IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create') THEN
     RAISE EXCEPTION 'property_payment_activation_required' USING ERRCODE='42501';
   END IF;
-  RETURN EXISTS(SELECT 1 FROM public.orders WHERE id=p_order_id AND deleted_at IS NULL);
+  IF saved.vertical='property' THEN
+    -- Durable exclusion BEFORE external work; not proof of payment. Adoption
+    -- cannot race a previously eligible Checkout whose response is still pending.
+    INSERT INTO pms_commands.manual_booking_receipts(request_id,actor_id,property_id,order_id,command_kind,payload)
+      VALUES(gen_random_uuid(),saved.customer_user_id,linked,saved.id,'payment_gate','{"external_outcome":"unknown"}'::jsonb)
+      ON CONFLICT(order_id) WHERE command_kind='payment_gate' DO NOTHING;
+  END IF;
+  RETURN saved.id IS NOT NULL AND saved.deleted_at IS NULL;
 END $$;
 REVOKE ALL ON FUNCTION public.property_checkout_allowed_checked(uuid) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.property_checkout_allowed_checked(uuid) TO service_role;
@@ -569,6 +770,9 @@ GRANT EXECUTE ON FUNCTION public.property_checkout_allowed_checked(uuid) TO serv
 CREATE FUNCTION pms_commands.refuse_unpaid_cohort_payment() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 BEGIN
+  -- Serialize before inspecting receipts: a concurrent adoption may commit while
+  -- a financial writer waits on this order. Recheck after the wait, not before.
+  PERFORM 1 FROM public.orders WHERE id=NEW.order_id OR (TG_OP='UPDATE' AND id=OLD.order_id) ORDER BY id FOR UPDATE;
   IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE (order_id=NEW.order_id OR (TG_OP='UPDATE' AND order_id=OLD.order_id)) AND command_kind='create') THEN
     RAISE EXCEPTION 'property_payment_activation_required' USING ERRCODE='42501';
   END IF;
@@ -577,8 +781,30 @@ END $$;
 REVOKE ALL ON FUNCTION pms_commands.refuse_unpaid_cohort_payment() FROM PUBLIC,anon,authenticated,service_role;
 CREATE TRIGGER property_unpaid_cohort_payment BEFORE INSERT OR UPDATE ON public.payment_intents
   FOR EACH ROW EXECUTE FUNCTION pms_commands.refuse_unpaid_cohort_payment();
+CREATE TRIGGER property_unpaid_cohort_ledger BEFORE INSERT OR UPDATE ON public.ledger_entries
+  FOR EACH ROW EXECUTE FUNCTION pms_commands.refuse_unpaid_cohort_payment();
 CREATE TRIGGER property_unpaid_cohort_manual_payment BEFORE INSERT OR UPDATE ON public.manual_payment_requests
   FOR EACH ROW EXECUTE FUNCTION pms_commands.refuse_unpaid_cohort_payment();
+
+CREATE FUNCTION pms_commands.refuse_unpaid_booking_income() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE linked uuid;
+BEGIN
+  FOR linked IN SELECT DISTINCT COALESCE(b.order_id,o.id) FROM public.property_bookings b
+    LEFT JOIN public.orders o ON o.id::text=b.external_id
+    WHERE (NEW.reference_type='booking' AND b.id=NEW.reference_id)
+      OR (TG_OP='UPDATE' AND OLD.reference_type='booking' AND b.id=OLD.reference_id)
+  LOOP
+    PERFORM 1 FROM public.orders WHERE id=linked FOR UPDATE;
+    IF EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=linked AND command_kind='create') THEN
+      RAISE EXCEPTION 'property_payment_activation_required' USING ERRCODE='42501';
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION pms_commands.refuse_unpaid_booking_income() FROM PUBLIC,anon,authenticated,service_role;
+CREATE TRIGGER property_unpaid_cohort_income BEFORE INSERT OR UPDATE ON public.property_financials
+  FOR EACH ROW EXECUTE FUNCTION pms_commands.refuse_unpaid_booking_income();
 
 -- Retain the accepted explicit-link/Bangkok bridge, but never acknowledge an
 -- overlapping order while merely writing a reconciliation alert.

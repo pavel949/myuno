@@ -30,7 +30,7 @@ financial triggers or imported inventory writers. Confirm those dependencies in
 a representative isolated copy before approving activation. Preserve the backup
 and existing source deployment so the frontend can be rolled back independently.
 
-No live backfill is included. Historical/paid orders are outside this new cohort.
+No live backfill is included. Exact-linked unpaid legacy orders may transition only with a private independently reviewed reconciliation manifest bound to their revision/property/hold. Paid, unknown-payment and unverified legacy records stay contained. No production manifest is populated.
 New-cohort payment intents fail closed deliberately. Do not activate alongside a
 frontend that still advertises instant payment for this cohort. Existing unrelated
 paid flows are not certified by this milestone.
@@ -47,3 +47,13 @@ existing records, checked readers, strict overlap propagation, payment refusal
 and write guards. It does not reopen legacy bypasses or delete evidence. Recovery
 requires diagnosis and separately reviewed forward repair, not a blind migration
 rerun (0036 creates named functions/tables and is intentionally not rerunnable).
+
+## Legacy reconciliation evidence boundary
+
+Existing payment_intents, manual_payment_requests, ledger_entries and property_financials
+record local attempts/accounting; none can prove absence of an older unrecorded external
+session. Private command receipts prove only commands that crossed the new boundary.
+The private reconciliation table therefore stores reviewed evidence and exact revision
+binding only, not payment, inventory or order truth. It has no application/service grants
+or public minting function. An independently reviewed manifest is a controlled activation
+prerequisite; this patch neither manufactures nor imports production proof.

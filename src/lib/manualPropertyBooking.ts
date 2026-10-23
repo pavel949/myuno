@@ -111,7 +111,17 @@ export async function executePropertyBookingChange(client: unknown, actorId: str
     const command = await identity(actorId, { operation: 'change', orderId, patch }, async () => {
       if (expectedUpdatedAt) return expectedUpdatedAt;
       const { data, error } = await (client as Transport).rpc('read_property_reservation_checked', { p_order_id: orderId });
-      if (error) throw error;
+      if (error) {
+        const rejection = error as {code?:string;message?:string};
+        // Only the exact server receipt-missing rejection permits a legacy
+        // revision read. Missing RPC/network/permission errors never fall back.
+        if (rejection.code !== '42501' || rejection.message !== 'reservation_contract_unavailable') throw error;
+        const legacy = await (client as Transport).rpc('read_property_booking_revision_checked', {p_order_id:orderId});
+        if (legacy.error) throw legacy.error;
+        const revision = legacy.data as {order_id?:string;updated_at?:string}|null;
+        if (revision?.order_id !== orderId || !revision.updated_at || !Number.isFinite(Date.parse(revision.updated_at))) throw new Error('Booking revision unavailable');
+        return revision.updated_at;
+      }
       return readPropertyBookingReply(data, orderId).order.updated_at;
     });
     const { data, error } = await (client as Transport).rpc('change_property_booking', {

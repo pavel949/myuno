@@ -92,4 +92,17 @@ describe('checked booking command acknowledgements', () => {
     expect(rpc.mock.calls[1][1].p_request_id).not.toBe(rejected.p_request_id);expect(rpc.mock.calls[1][1].p_expected_updated_at).toBe('2030-02-01T00:00:00Z');
   });
 
+  it('a cold legacy action obtains an authorized revision only after the exact receipt-missing rejection',async()=>{
+    const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'42501',message:'reservation_contract_unavailable'}})
+      .mockResolvedValueOnce({data:{order_id:orderId,updated_at:version},error:null}).mockResolvedValueOnce({data:reply(orderId,'cancelled'),error:null});
+    await executePropertyBookingChange({rpc},'actor',orderId,{status:'cancelled'});
+    expect(rpc.mock.calls.map(call=>call[0])).toEqual(['read_property_reservation_checked','read_property_booking_revision_checked','change_property_booking']);
+    expect(rpc.mock.calls[2][1].p_expected_updated_at).toBe(version);
+  });
+  it('legacy revision denial never submits a change or uses raw table fallback',async()=>{
+    const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'42501',message:'reservation_contract_unavailable'}})
+      .mockResolvedValueOnce({data:null,error:Error('forbidden')});
+    await expect(executePropertyBookingChange({rpc},'actor',orderId,{status:'cancelled'})).rejects.toThrow('forbidden');expect(rpc).toHaveBeenCalledTimes(2);
+  });
+
 });

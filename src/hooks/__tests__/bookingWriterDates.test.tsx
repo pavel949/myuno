@@ -3,9 +3,9 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { civilStaysOverlap, occupiedCivilDates, stayOccupiesDate } from '@/lib/hotelDates';
-const state = vi.hoisted(() => ({ calls: [] as {name:string; args:Record<string,unknown>}[], failure:'', malformed:false, missingRevision:false, reader:null as null|(()=>Promise<unknown>), allowRead:false, actor:'actor', reservations:[] as unknown[], checkedError:'' }));
+const state = vi.hoisted(() => ({ calls: [] as {name:string; args:Record<string,unknown>}[], failure:'', malformed:false, missingRevision:false, reader:null as null|(()=>Promise<unknown>), allowRead:false, actor:'actor', reservations:[] as unknown[], checkedError:'', loadedBookings:[] as unknown[] }));
 vi.mock('@tanstack/react-query', () => ({
-  useQuery: (options:{queryFn:()=>Promise<unknown>}) => {state.reader=options.queryFn;return {data:[],isLoading:false};},
+  useQuery: (options:{queryFn:()=>Promise<unknown>}) => {state.reader=options.queryFn;return {data:state.loadedBookings,isLoading:false};},
   useMutation: ({mutationFn}:{mutationFn:(input:unknown)=>Promise<unknown>}) => ({mutateAsync:mutationFn}),
   useQueryClient:()=>({invalidateQueries:vi.fn()}),
 }));
@@ -25,7 +25,7 @@ vi.mock('@/integrations/supabase/client',()=>({supabase:{
     return {error:null,data:{success:true,replayed:false,order:{id,status:patch.status||'pending',start_at:'2030-01-09T17:30:00Z',end_at:'2030-01-11T17:00:00Z',updated_at:state.missingRevision?null:'2030-01-01T00:00:00Z'},order_items:[{item_type:'property',resource_id:'home'}],order_participants:[{role:'guest',name:'Stored guest'}]}};
   },
 }}));
-beforeEach(()=>{vi.stubGlobal('crypto',webcrypto);localStorage.clear();state.calls=[];state.failure='';state.malformed=false;state.missingRevision=false;state.allowRead=false;state.actor='actor';state.reservations=[];state.checkedError='';state.reader=null;});
+beforeEach(()=>{vi.stubGlobal('crypto',webcrypto);localStorage.clear();state.calls=[];state.failure='';state.malformed=false;state.missingRevision=false;state.allowRead=false;state.actor='actor';state.reservations=[];state.checkedError='';state.reader=null;state.loadedBookings=[];});
 afterEach(()=>vi.unstubAllGlobals());
 const stay={property_id:'home',check_in:'2030-01-10',check_out:'2030-01-12',status:'pending'};
 it('maps acknowledged instants to Bangkok days and sends civil dates unchanged to the checked writer',async()=>{
@@ -97,4 +97,12 @@ it.each(['denied','malformed','foreign resource'])('PMS checked %s cannot become
  else state.reservations=[kind==='malformed'?{success:true}:{...checkedRow,order_items:[{item_type:'property',resource_id:'foreign'}]}];
  renderHook(()=>usePropertyBookings('home'));
  await expect(state.reader!()).rejects.toThrow();
+});
+
+it('a loaded historical PMS record submits its opaque raw-read revision directly for checked adoption, without a legacy checked-read failure',async()=>{
+ const revision='2030-01-01T00:00:00.123456Z';state.loadedBookings=[{id:'historical',updated_at:revision}];
+ const {result}=renderHook(()=>usePropertyBookings('home'));
+ await result.current.updateBooking({id:'historical',status:'confirmed'});
+ expect(state.calls.map(call=>call.name)).toEqual(['change_property_booking']);
+ expect(state.calls[0].args).toMatchObject({p_order_id:'historical',p_expected_updated_at:revision,p_patch:{status:'confirmed'}});
 });
