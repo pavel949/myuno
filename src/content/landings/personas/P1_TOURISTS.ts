@@ -16,7 +16,7 @@ export const P1_TOURISTS: PersonaLanding = {
   },
   subtitle: {
     ru: 'Трансфер из аэропорта, eSIM, аренда виллы, экскурсии и многоязычная поддержка (EN/RU/TH) — в одном приложении.',
-    en: 'Airport transfer, eSIM, villa rental, tours and multilingual support (EN/RU/TH) — in one app.',
+    en: 'Airport transfer, eSIM, villa rental, tours and multilingual support (EN/RU/TH), in one app.',
   },
   pains: [
     {
@@ -45,7 +45,7 @@ export const P1_TOURISTS: PersonaLanding = {
     },
     {
       slug: 'esim',
-      label: { ru: 'eSIM на 7–30 дней', en: 'eSIM 7–30 days' },
+      label: { ru: 'eSIM на 7–30 дней', en: 'eSIM 7-30 days' },
       oneLiner: { ru: '4G по всему острову, активация в приложении.', en: '4G across the island, in-app activation.' },
       href: '/sim',
     },
@@ -58,7 +58,7 @@ export const P1_TOURISTS: PersonaLanding = {
     {
       slug: 'tours',
       label: { ru: 'Экскурсии и активности', en: 'Tours & activities' },
-      oneLiner: { ru: 'Острова, кулинарные, дайвинг — без зазывал.', en: 'Islands, cooking, diving — without street touts.' },
+      oneLiner: { ru: 'Острова, кулинарные, дайвинг — без зазывал.', en: 'Islands, cooking, diving, without street touts.' },
       href: '/tours',
     },
   ],
@@ -74,14 +74,14 @@ export const P1_TOURISTS: PersonaLanding = {
       q: { ru: 'Что делать, если потерял документы?', en: 'What if I lose my documents?' },
       a: {
         ru: 'Напишите в чат — мы соединим с консульством и поможем составить заявление в туристическую полицию.',
-        en: 'Message us in chat — we’ll connect you to the consulate and help file a tourist police report.',
+        en: 'Message us in chat, we’ll connect you to the consulate and help file a tourist police report.',
       },
     },
     {
       q: { ru: 'Безопасно ли арендовать байк?', en: 'Is renting a scooter safe?' },
       a: {
         ru: 'Только при наличии международных прав категории A и шлема. Без прав — штраф 500–2 000 THB.',
-        en: 'Only with an international licence (cat. A) and a helmet. Without — fines 500–2,000 THB.',
+        en: 'Only with an international licence (cat. A) and a helmet. Without, fines 500-2,000 THB.',
       },
     },
   ],
@@ -97,7 +97,7 @@ export const P1_TOURISTS: PersonaLanding = {
   seo: {
     metaTitle: {
       ru: 'Пхукет для туристов: трансфер, eSIM, виллы, экскурсии — myUNO',
-      en: 'Phuket for travellers: transfer, eSIM, villas, tours — myUNO',
+      en: 'Phuket for travellers: transfer, eSIM, villas, tours, myUNO',
     },
     metaDescription: {
       ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Многоязычная поддержка (EN/RU/TH), оплата в THB. Без посредников у стойки.',

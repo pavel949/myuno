@@ -5,64 +5,7 @@ import { Cookie, X, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logger } from '@/lib/logger';
-
-const CONSENT_KEY = 'myuno-cookie-consent';
-const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
-
-interface CookiePreferences {
-  essential: boolean; // always true
-  analytics: boolean;
-  functional: boolean;
-  marketing: boolean;
-  timestamp: string;
-}
-
-// Module-level session flag — guards against repeat-show if storage is unavailable
-// (private mode, blocked cookies, sandboxed iframe, quota errors).
-let inMemoryConsent: CookiePreferences | null = null;
-
-function readCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.split('; ').find((row) => row.startsWith(name + '='));
-  return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
-}
-
-function writeCookie(name: string, value: string) {
-  if (typeof document === 'undefined') return;
-  try {
-    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${CONSENT_COOKIE_MAX_AGE}; SameSite=Lax`;
-  } catch {
-    /* ignore */
-  }
-}
-
-function getStoredConsent(): CookiePreferences | null {
-  if (inMemoryConsent) return inMemoryConsent;
-  // localStorage first
-  try {
-    const stored = localStorage.getItem(CONSENT_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as CookiePreferences;
-      inMemoryConsent = parsed;
-      return parsed;
-    }
-  } catch {
-    /* fall through to cookie */
-  }
-  // Cookie fallback (works even if localStorage is blocked)
-  const cookieVal = readCookie(CONSENT_KEY);
-  if (cookieVal) {
-    try {
-      const parsed = JSON.parse(cookieVal) as CookiePreferences;
-      inMemoryConsent = parsed;
-      return parsed;
-    } catch {
-      /* ignore */
-    }
-  }
-  return null;
-}
+import { getStoredConsent, saveCookieConsent, type CookiePreferences } from '@/lib/cookieConsent';
 
 export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieConsentBanner(_props, ref) {
   const { language } = useLanguage();
@@ -108,17 +51,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
   }, []);
 
   const saveConsent = useCallback((prefs: CookiePreferences) => {
-    const final = { ...prefs, essential: true, timestamp: new Date().toISOString() };
-    // 1) In-memory (always succeeds, guarantees no re-show this session)
-    inMemoryConsent = final;
-    // 2) localStorage (preferred for cross-tab persistence)
-    try {
-      localStorage.setItem(CONSENT_KEY, JSON.stringify(final));
-    } catch (error) {
-      logger.warn('Failed to persist cookie consent to localStorage, falling back to cookie', error);
-    }
-    // 3) Cookie fallback (works when localStorage is blocked / sandboxed)
-    writeCookie(CONSENT_KEY, JSON.stringify(final));
+    saveCookieConsent(prefs);
     setVisible(false);
   }, []);
 
@@ -243,9 +176,3 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
   );
 });
 
-/** Utility to check if user consented to a specific category */
-export function hasCookieConsent(category: 'analytics' | 'functional' | 'marketing'): boolean {
-  const consent = getStoredConsent();
-  if (!consent) return false;
-  return consent[category] === true;
-}

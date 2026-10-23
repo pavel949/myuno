@@ -507,7 +507,7 @@ export default function OffplanIndex() {
         )}
 
         <div className="rounded-none bg-gradient-to-br from-primary/10 to-primary/5 p-4 border border-primary/20 mt-6">
-          <h3 className="font-semibold mb-2">{isRu ? 'Хотите привлечь инвестиции?' : 'Want to raise investment?'}</h3>
+          <h3 className="font-semibold mb-2">{isRu ? 'Разместить проект на myUNO?' : 'List your project with myUNO?'}</h3>
           <p className="text-sm text-muted-foreground mb-3">
             {isRu ? 'Разместите свой проект на платформе myUNO' : 'List your project on the myUNO platform'}
           </p>

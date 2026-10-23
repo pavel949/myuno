@@ -19,7 +19,10 @@ function choose(label: string, option: string) {
   fireEvent.click(screen.getByRole('option', { name: option }));
 }
 function openDates() { fireEvent.click(screen.getByRole('button', { name: 'Даты проживания' })); }
-function day(value: string) { return within(screen.getByRole('dialog')).getByRole('gridcell', { name: value }); }
+function day(value: string) {
+  // v9 correctly separates the grid cell from its interactive day button.
+  return screen.getByRole('dialog').querySelector<HTMLButtonElement>(`[data-day="2026-10-${value.padStart(2, '0')}"] button`)!;
+}
 
 describe('Home discovery themed controls and catalogue handoff', () => {
   beforeEach(() => {
@@ -151,6 +154,7 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     openDates();
     expect(day('18')).toBeDisabled();
     expect(day('19')).not.toBeDisabled();
+    expect(day('19').closest('td')).toHaveClass('bg-accent');
     fireEvent.click(day('20'));
     fireEvent.click(day('20'));
     expect(screen.getByText('Выберите дату выезда')).toBeVisible();
@@ -186,12 +190,12 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     expect(start.tagName).toBe('BUTTON');
     expect(start).toHaveAttribute('type', 'button');
     fireEvent.click(start, { detail: 0 }); // Enter/Space activate the native button with detail=0.
-    expect(day('20')).toHaveAttribute('aria-selected', 'true');
-    expect(day('20')).toHaveClass('bg-primary');
+    expect(day('20').closest('td')).toHaveAttribute('aria-selected', 'true');
+    expect(day('20').closest('td')).toHaveClass('bg-primary');
     fireEvent.click(day('25'), { detail: 0 });
     openDates();
-    expect(day('22')).toHaveClass('aria-selected:bg-accent');
-    expect(day('25')).toHaveClass('day-range-end');
+    expect(day('22').closest('td')).toHaveClass('aria-selected:bg-accent');
+    expect(day('25').closest('td')).toHaveClass('day-range-end');
   });
   it.each(['en', 'th'])('localizes picker instructions and headings in %s', language => {
     state.language = language;

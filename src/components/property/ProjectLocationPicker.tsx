@@ -177,7 +177,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
   // Search: Google addresses + property projects (debounced)
   const [addressResults, setAddressResults] = useState<Array<{ address: string; lat: number; lng: number }>>([]);
   const [searching, setSearching] = useState(false);
-  const searchDebounce = useRef<ReturnType<typeof setTimeout>>();
+  const searchDebounce = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const matchingProjects = useMemo(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) return [];

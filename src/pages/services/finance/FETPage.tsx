@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 /**
  * FET / Foreign-Quota Wizard — landing + free check
  *
@@ -75,7 +76,7 @@ export default function FETPage() {
     setResult(evaluate(amt, country, hasFet === "yes"));
   };
 
-  const verdictIcon: Record<Verdict, JSX.Element> = {
+  const verdictIcon: Record<Verdict, ReactElement> = {
     ok: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
     warn: <AlertTriangle className="h-5 w-5 text-amber-500" />,
     block: <AlertTriangle className="h-5 w-5 text-red-500" />,

@@ -16,13 +16,13 @@ export const P3_EU_GUESTS: PersonaLanding = {
   },
   subtitle: {
     ru: 'Long-stay виллы, EUR/SEPA-оплата, частные трансферы и сервис на английском — без посредников.',
-    en: 'Long-stay villas, EUR/SEPA payments, private transfers and English-speaking service — no middlemen.',
+    en: 'Long-stay villas, EUR/SEPA payments, private transfers and English-speaking service, no middlemen.',
   },
   pains: [
     { ru: 'Сложно найти виллу, которая принимает SEPA или карту EUR.', en: 'Hard to find a villa accepting SEPA or EUR card payments.' },
     { ru: 'Туроператоры предлагают пакетные туры, а вы хотите гибкости.', en: 'Tour operators push packages, but you want flexibility.' },
     { ru: 'Нужен трансфер бизнес-класса, а не общий шаттл.', en: 'You need a business-class transfer, not a shared shuttle.' },
-    { ru: 'Хочется wellness-режима: йога, fine dining, дайвинг — без беготни.', en: 'You want a wellness routine: yoga, fine dining, diving — without chaos.' },
+    { ru: 'Хочется wellness-режима: йога, fine dining, дайвинг — без беготни.', en: 'You want a wellness routine: yoga, fine dining, diving, without chaos.' },
   ],
   services: [
     { slug: 'long-stay-villas', label: { ru: 'Long-stay виллы', en: 'Long-stay villas' }, oneLiner: { ru: 'От 14 ночей, прямые контракты с владельцами.', en: 'From 14 nights, direct owner contracts.' }, href: '/property/rent' },
@@ -31,13 +31,13 @@ export const P3_EU_GUESTS: PersonaLanding = {
     { slug: 'dining', label: { ru: 'Fine dining', en: 'Fine dining' }, oneLiner: { ru: 'Бронирование Michelin-recommended ресторанов.', en: 'Bookings at Michelin-recommended restaurants.' }, href: '/cluster/lifestyle' },
   ],
   faq: [
-    { q: { ru: 'Можно платить в EUR?', en: 'Can I pay in EUR?' }, a: { ru: 'Да — SEPA, EUR-карта или Wise. Курс фиксируется на день оплаты.', en: 'Yes — SEPA, EUR card or Wise. Rate locked on payment day.' } },
-    { q: { ru: 'Поддерживаете long-stay (1–3 месяца)?', en: 'Do you support long-stay (1–3 months)?' }, a: { ru: 'Да, со скидкой 20–35% от nightly rate. Контракт на английском.', en: 'Yes, with a 20–35% discount on nightly rate. English contract.' } },
+    { q: { ru: 'Можно платить в EUR?', en: 'Can I pay in EUR?' }, a: { ru: 'Да — SEPA, EUR-карта или Wise. Курс фиксируется на день оплаты.', en: 'Yes, SEPA, EUR card or Wise. Rate locked on payment day.' } },
+    { q: { ru: 'Поддерживаете long-stay (1–3 месяца)?', en: 'Do you support long-stay (1-3 months)?' }, a: { ru: 'Да, со скидкой 20–35% от nightly rate. Контракт на английском.', en: 'Yes, with a 20-35% discount on nightly rate. English contract.' } },
   ],
   primaryCta: { label: { ru: 'Подобрать виллу', en: 'Find a villa' }, href: '/property/rent' },
   secondaryCta: { label: { ru: 'Связаться с консьержем', en: 'Talk to concierge' }, href: '/contact' },
   seo: {
-    metaTitle: { ru: 'Пхукет для европейцев: long-stay виллы, EUR-оплата — myUNO', en: 'Phuket for Europeans: long-stay villas, EUR payment — myUNO' },
+    metaTitle: { ru: 'Пхукет для европейцев: long-stay виллы, EUR-оплата — myUNO', en: 'Phuket for Europeans: long-stay villas, EUR payment, myUNO' },
     metaDescription: { ru: 'Long-stay виллы с прямой арендой, оплата EUR/SEPA, private transfer и wellness без турагентов. Английский сервис на Пхукете.', en: 'Long-stay villas with direct rental, EUR/SEPA payment, private transfer and wellness without tour operators. English service in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/eu-guests',

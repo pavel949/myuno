@@ -1,3 +1,4 @@
+import { PublicTelemetry } from '@/components/analytics/PublicTelemetry';
 /**
  * @module App
  * @description Root application component for myUNO SuperApp.
@@ -137,6 +138,7 @@ function AppContent() {
         <VersionWatcher />
         <LegalComplianceModal />
         <BrowserRouter>
+          <PublicTelemetry />
           {/*
             Coming Soon gate retired 2026-06-18 — site is fully public.
             Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,

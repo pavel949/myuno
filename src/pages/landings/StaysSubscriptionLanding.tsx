@@ -17,8 +17,8 @@ const FEATURES: Array<{ icon: typeof Calendar; text: L<{ t: string; d: string }>
     icon: Calendar,
     text: {
       ru: { t: 'Единый календарь', d: 'Airbnb, Booking, прямые брони — в одной таймлайне. iCal-синхронизация.' },
-      en: { t: 'Unified calendar', d: 'Airbnb, Booking, direct bookings — one timeline. iCal sync.' },
-      th: { t: 'ปฏิทินรวม', d: 'Airbnb, Booking และจองตรง — ในไทม์ไลน์เดียว ซิงค์ iCal' },
+      en: { t: 'Unified calendar', d: 'Airbnb, Booking, direct bookings, one timeline. iCal sync.' },
+      th: { t: 'ปฏิทินรวม', d: 'Airbnb, Booking และจองตรง, ในไทม์ไลน์เดียว ซิงค์ iCal' },
     },
   },
   {
@@ -50,8 +50,8 @@ const FEATURES: Array<{ icon: typeof Calendar; text: L<{ t: string; d: string }>
 const UI = {
   title: {
     ru: 'STAYS — PMS для управляющих компаний за $25 в месяц',
-    en: 'STAYS — PMS for management companies at $25/month',
-    th: 'STAYS — ระบบ PMS สำหรับบริษัทบริหารทรัพย์สิน เพียง $25/เดือน',
+    en: 'STAYS, PMS for management companies at $25/month',
+    th: 'STAYS, ระบบ PMS สำหรับบริษัทบริหารทรัพย์สิน เพียง $25/เดือน',
   },
   desc: {
     ru: 'Полноценная система управления арендой по цене кофе. $25 за объект в месяц. Никаких сетапов и долгосрочных контрактов.',
@@ -65,8 +65,8 @@ const UI = {
   },
   sub: {
     ru: 'Управляйте 5, 50 или 500 объектами в одной системе. Календарь, финансы, гости, команда — без Excel.',
-    en: 'Run 5, 50 or 500 properties in one system. Calendar, finance, guests, team — no Excel.',
-    th: 'บริหาร 5, 50 หรือ 500 ทรัพย์สินในระบบเดียว ปฏิทิน การเงิน แขก ทีมงาน — ไม่ต้องใช้ Excel',
+    en: 'Run 5, 50 or 500 properties in one system. Calendar, finance, guests, team, no Excel.',
+    th: 'บริหาร 5, 50 หรือ 500 ทรัพย์สินในระบบเดียว ปฏิทิน การเงิน แขก ทีมงาน, ไม่ต้องใช้ Excel',
   },
   pricing: {
     ru: 'за объект в месяц · отмена в любой момент',
@@ -82,8 +82,8 @@ const UI = {
   },
   bullets: {
     ru: ['Без сетапа: создаёте аккаунт — и работаете.', 'Без долгосрочных контрактов — оплата помесячно.', 'Бесплатная миграция данных при подключении от 10 объектов.'],
-    en: ['No setup fee — sign up and start.', 'Month-to-month, no long-term contracts.', 'Free data migration for portfolios of 10+ properties.'],
-    th: ['ไม่มีค่าติดตั้ง — สมัครและเริ่มใช้ได้เลย', 'ชำระรายเดือน ไม่มีสัญญาระยะยาว', 'ย้ายข้อมูลฟรีสำหรับพอร์ตโฟลิโอ 10+ ทรัพย์สิน'],
+    en: ['No setup fee, sign up and start.', 'Month-to-month, no long-term contracts.', 'Free data migration for portfolios of 10+ properties.'],
+    th: ['ไม่มีค่าติดตั้ง, สมัครและเริ่มใช้ได้เลย', 'ชำระรายเดือน ไม่มีสัญญาระยะยาว', 'ย้ายข้อมูลฟรีสำหรับพอร์ตโฟลิโอ 10+ ทรัพย์สิน'],
   },
 };
 

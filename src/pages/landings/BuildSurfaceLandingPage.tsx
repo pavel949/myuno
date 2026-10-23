@@ -9,7 +9,7 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const STEPS = [
-  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Chanote / Nor Sor 3 Gor — clean title only', descRu: 'Chanote / Nor Sor 3 Gor — только чистый титул', path: '/property/browse?type=land', color: 'primary', external: false },
+  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Chanote / Nor Sor 3 Gor, clean title only', descRu: 'Chanote / Nor Sor 3 Gor — только чистый титул', path: '/property/browse?type=land', color: 'primary', external: false },
   { icon: FileSignature, labelEn: 'Title & ownership', labelRu: 'Титул и оформление', descEn: 'Thai company, lease 30+30+30, due diligence', descRu: 'Тайская компания, lease 30+30+30, due diligence', path: APP_ROUTES.LEGAL, color: 'accent-purple', external: false },
   { icon: Ruler, labelEn: 'Architect & permits', labelRu: 'Архитектор и разрешения', descEn: 'EIA, building permit, utility hookup', descRu: 'EIA, building permit, подключение коммуникаций', path: APP_ROUTES.LEGAL, color: 'cluster-arrive', external: true },
   { icon: Hammer, labelEn: 'Build & contractor', labelRu: 'Строительство и подрядчик', descEn: 'Vetted contractors, milestone escrow', descRu: 'Проверенные подрядчики, эскроу по этапам', path: APP_ROUTES.LEGAL, color: 'accent-amber', external: true },
@@ -18,8 +18,8 @@ const STEPS = [
 ];
 
 const STATS = [
-  { numRu: '฿35–60K', numEn: '฿35–60K', labelEn: 'THB / sqm build', labelRu: 'Стройка ฿/м²' },
-  { numRu: '14–18 мес', numEn: '14–18 mo', labelEn: 'Villa cycle', labelRu: 'Цикл виллы' },
+  { numRu: '฿35-60K', numEn: '฿35-60K', labelEn: 'THB / sqm build', labelRu: 'Стройка ฿/м²' },
+  { numRu: '14–18 мес', numEn: '14-18 mo', labelEn: 'Villa cycle', labelRu: 'Цикл виллы' },
   { numRu: '5% / сделка', numEn: '5% / deal', labelEn: 'Land commission', labelRu: 'Комиссия по земле' },
 ];
 
@@ -54,7 +54,7 @@ export default function BuildSurfaceLandingPage() {
 
         <div className="px-4 py-6 max-w-lg mx-auto space-y-3">
           <h2 className="text-xl font-bold font-display text-foreground mb-4 text-center">
-            {t ? 'Этапы — от земли до ключей' : 'Stages — from land to keys'}
+            {t ? 'Этапы — от земли до ключей' : 'Stages, from land to keys'}
           </h2>
           {STEPS.map((s, i) => {
             const Icon = s.icon;

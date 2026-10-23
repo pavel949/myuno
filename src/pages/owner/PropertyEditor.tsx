@@ -226,7 +226,7 @@ export default function PropertyEditor() {
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   useEffect(() => { savingRef.current = false; setRevisionSaveBlocked(false); setRevisionSaving(false); }, [actorScope]);
-  const savedVersionRef = useRef<string>();
+  const savedVersionRef = useRef<string>(undefined);
   const updateProperty = useUpdateOwnerProperty();
   const autosaveProperty = useUpdateOwnerProperty();
   const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(property && !managedEmployee ? id : undefined);
@@ -244,7 +244,7 @@ export default function PropertyEditor() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'unsaved' | 'error'>('idle');
   const lastSavedSnapshotRef = useRef('');
-  const hydratedIdRef = useRef<string>();
+  const hydratedIdRef = useRef<string>(undefined);
   const latestSnapshotRef = useRef('');
   latestSnapshotRef.current = formData ? JSON.stringify({ formData, rooms, utilitiesData, servicesData }) : '';
 
