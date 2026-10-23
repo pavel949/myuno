@@ -37,7 +37,8 @@
 | WhatsApp/Telegram (UltraMSG) — роутинг лидов, посты | `_shared/whatsapp.ts`, `notify-lead-whatsapp`, `publish-telegram-post`, `magnet-submit` | live |
 | Exit-intent захват | `src/components/leads/ExitIntentModal.tsx` | live |
 | Feature-flags (постепенный rollout) | `src/lib/featureFlags.ts` | live |
-| Аффилиат-программа с трекингом комиссий | — | **gap** |
+| **Provider-to-provider (B2B) рефералка** — поставщик рекомендует платформу коллеге, при верификации приведённого получает **скидку на комиссию** | `provider_referral_settings` / `provider_referral_rewards`, триггер `process_provider_referral_on_verify`, helper в `calculate_order_commission`, RPC `get_my_provider_referral_overview`, `ProviderReferralCard` в `VendorDashboard` (флаг `PROVIDER_REFERRAL`) | live (added) |
+| Аффилиат-программа с трекингом комиссий (consumer/agent payout) | — | **gap** |
 | Viral-loop (share-to-unlock, геймификация рефералов) | — | **gap** |
 | Web-push | — | **gap** |
 | Явные acquisition-страницы `/for/*` | частично (persona-конфиги есть) | **gap** |
