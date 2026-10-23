@@ -60,11 +60,11 @@ describe('one residential results surface', () => {
     expect(screen.getByTestId('property-results-grid').className).toBe(columns);
     expect(screen.getAllByTestId('synthetic-property-card')).toHaveLength(1);
   });
-  it('keeps the existing map and list in separate responsive regions with identical filtered homes', () => {
+  it('keeps the existing map and list in separate responsive regions with identical filtered homes', async () => {
     state.properties = [{ id: 'synthetic-map-home', title_en: 'Synthetic map home', listing_type: 'rent', monthly_rent: 1000 }];
     const view = mount('/property/search?view=map&source=wide-layout');
     const regions = view.container.querySelector('.property-discovery-results--map');
-    expect(regions).toContainElement(screen.getByTestId('existing-map-boundary'));
+    expect(regions).toContainElement(await screen.findByTestId('existing-map-boundary'));
     expect(regions).toContainElement(screen.getByTestId('property-results-grid'));
     expect(screen.getByTestId('existing-map-boundary')).toHaveAttribute('data-property-count', '1');
     expect(screen.getByTestId('existing-map-boundary')).toHaveClass('property-discovery-map');
