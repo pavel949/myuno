@@ -206,32 +206,7 @@ export default function PartnerApplicationsAdmin() {
     setIsProcessing(true);
     try {
       if (newStatus === 'approved' || newStatus === 'rejected') {
-        const { data, error } = await supabase.functions.invoke('approve-partner-application', {
-          body: {
-            application_id: selectedApp.id,
-            action: newStatus === 'approved' ? 'approve' : 'reject',
-            rejection_reason: newStatus === 'rejected' ? rejectionReason : undefined,
-          },
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-
-        const patch: Partial<PartnerApplication> = {
-          status: newStatus,
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-          ...(newStatus === 'rejected' && rejectionReason ? { rejection_reason: rejectionReason } : {}),
-        };
-        setApplications(prev =>
-          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
-        );
-        toast(language === 'ru' ? 'Успешно' : 'Success', {
-          description: newStatus === 'approved'
-            ? (data?.vendor_granted
-              ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан, письмо отправлено' : 'Application approved, vendor access granted, email sent')
-              : (language === 'ru' ? 'Заявка одобрена (без user_id), письмо отправлено' : 'Application approved (no user_id), email sent'))
-            : (language === 'ru' ? 'Заявка отклонена, письмо отправлено' : 'Application rejected, email sent'),
-        });
+        throw new Error('Partner decisions are paused pending a verified atomic activation contract.');
       } else {
         // reviewing — простая смена статуса, без письма
         const patch = {
@@ -239,13 +214,17 @@ export default function PartnerApplicationsAdmin() {
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
         } satisfies Partial<PartnerApplication>;
-        const { error } = await supabase
+        const { data: saved, error } = await supabase
           .from('partner_applications')
           .update(patch)
-          .eq('id', selectedApp.id);
+          .eq('id', selectedApp.id)
+          .eq('status', 'pending')
+          .select('id, status, reviewed_by, reviewed_at')
+          .maybeSingle();
         if (error) throw error;
+        if (!saved || saved.id !== selectedApp.id || saved.status !== 'reviewing' || saved.reviewed_by !== user.id) throw new Error('Review transition was not confirmed. Refresh before retrying.');
         setApplications(prev =>
-          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
+          prev.map(app => (app.id === selectedApp.id ? { ...app, ...saved } : app)),
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
           description: language === 'ru' ? 'Статус обновлён' : 'Status updated',
@@ -583,6 +562,9 @@ export default function PartnerApplicationsAdmin() {
                   </div>
                 )}
 
+                <p role="status" className="text-sm text-muted-foreground">
+                  {language === 'ru' ? 'Одобрение и отклонение временно приостановлены: атомарная активация партнёра не подтверждена. Решения не сохраняются, письма не отправляются.' : 'Approval and rejection are paused until atomic partner activation is verified. No decision or email is sent.'}
+                </p>
                 {/* Review Info */}
                 {selectedApp.reviewed_at && (
                   <div className="text-sm text-muted-foreground">
@@ -610,14 +592,14 @@ export default function PartnerApplicationsAdmin() {
                     <Button 
                       variant="destructive" 
                       onClick={() => openActionDialog('reject')}
-                      disabled={isProcessing}
+                      disabled
                     >
                       <XCircle className="w-4 h-4 mr-2" />
                       {language === 'ru' ? 'Отклонить' : 'Reject'}
                     </Button>
                     <Button 
                       onClick={() => openActionDialog('approve')}
-                      disabled={isProcessing}
+                      disabled
                       className="bg-success hover:bg-success/90"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -677,7 +659,7 @@ export default function PartnerApplicationsAdmin() {
             <Button
               variant={actionType === 'reject' ? 'destructive' : 'default'}
               onClick={() => handleStatusChange(actionType === 'approve' ? 'approved' : 'rejected')}
-              disabled={isProcessing || (actionType === 'reject' && !rejectionReason.trim())}
+              disabled
               className={actionType === 'approve' ? 'bg-success hover:bg-success/90' : ''}
             >
               {isProcessing ? (

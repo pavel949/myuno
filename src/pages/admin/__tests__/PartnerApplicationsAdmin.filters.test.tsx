@@ -49,6 +49,15 @@ describe('partner application queue deep link',()=>{
   });
   it('reaches the older pending record behind1000newer approved applications',async()=>{state.mode='cap';setup();expect(await screen.findByRole('heading',{name:'Older pending fixture'})).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'New approved 0'})).not.toBeInTheDocument();expect(screen.getByText(/^Matching applications:/)).toHaveTextContent('Matching applications: 1');expect(state.write).not.toHaveBeenCalled();});
   it('uses id ordering to paginate equal-created records without overlap',async()=>{state.mode='ties';setup();expect(await screen.findByRole('heading',{name:'Tie application 050'})).toBeInTheDocument();expect(screen.getByRole('heading',{name:'Tie application 001'})).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'Tie application 000'})).not.toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:'Next'}));expect(await screen.findByRole('heading',{name:'Tie application 000'})).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'Tie application 001'})).not.toBeInTheDocument();expect(screen.getByRole('button',{name:'Next'})).toBeDisabled();},15000);
+  it('contains approval and rejection with an explicit reason and no decision writes',async()=>{
+    setup();
+    const heading=await screen.findByRole('heading',{name:'Pending fixture business'});
+    fireEvent.click(heading);
+    expect(await screen.findByText(/Approval and rejection are paused/)).toBeInTheDocument();
+    expect(screen.getByRole('button',{name:'Approve'})).toBeDisabled();
+    expect(screen.getByRole('button',{name:'Reject'})).toBeDisabled();
+    expect(state.write).not.toHaveBeenCalled();
+  });
   it('does not fetch or write without verified admin permission',async()=>{
     state.admin=false;setup();
     expect(await screen.findByRole('heading',{name:'Access Denied'})).toBeInTheDocument();
