@@ -70,9 +70,9 @@ export function useMyProperties() {
   const isOwner = hasRole('owner');
   const isManager = hasRole('property_manager');
 
-  const { data: ownedRaw, isLoading: ownedLoading } = useOwnerProperties();
-  const { properties: managedRaw, isLoading: managedLoading } = useAssignedProperties();
-  const { data: companyRaw, isLoading: companyLoading } = useCompanyProperties();
+  const { data: ownedRaw, isLoading: ownedLoading, error: ownedError, refetch: refetchOwned } = useOwnerProperties();
+  const { properties: managedRaw, isLoading: managedLoading, error: managedError, refetch: refetchManaged } = useAssignedProperties();
+  const { data: companyRaw, isLoading: companyLoading, error: companyError, refetch: refetchCompany } = useCompanyProperties();
 
   // When an active MC is selected, only show properties belonging to that MC
   const isInMCMode = !!activeCompanyId;
@@ -203,8 +203,13 @@ export function useMyProperties() {
     activeProperties,
     accessRole,
     isLoading: ownedLoading || managedLoading || companyLoading,
+    // A failed source must not masquerade as an empty authorized portfolio.
+    error: ownedError || managedError || companyError || null,
+    isError: !!(ownedError || managedError || companyError),
+    refetch: () => Promise.all([refetchOwned(), refetchManaged(), refetchCompany()]),
     isOwner,
     isManager,
     hasProperties: allProperties.length > 0,
   };
 }
+

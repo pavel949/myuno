@@ -21382,6 +21382,7 @@ export type Database = {
       }
       property_management_terms: {
         Row: {
+          accounting_policy: Json | null
           approval_threshold: number | null
           commission_amount: number | null
           commission_base: string
@@ -21404,6 +21405,7 @@ export type Database = {
           valid_until: string | null
         }
         Insert: {
+          accounting_policy?: Json | null
           approval_threshold?: number | null
           commission_amount?: number | null
           commission_base?: string
@@ -21426,6 +21428,7 @@ export type Database = {
           valid_until?: string | null
         }
         Update: {
+          accounting_policy?: Json | null
           approval_threshold?: number | null
           commission_amount?: number | null
           commission_base?: string
@@ -26483,6 +26486,58 @@ export type Database = {
             referencedRelation: "social_content_calendar"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      staff_company_member_links: {
+        Row: {
+          staff_member_id: string
+          company_member_id: string
+          company_id: string
+          linked_by: string
+          linked_at: string
+        }
+        Insert: {
+          staff_member_id: string
+          company_member_id: string
+          company_id: string
+          linked_at?: string
+          linked_by: string
+        }
+        Update: {
+          staff_member_id?: string
+          company_member_id?: string
+          company_id?: string
+          linked_by?: string
+          linked_at?: string
+        }
+        Relationships:
+        [
+          {
+            foreignKeyName: "staff_account_directory_company_fk",
+            columns: [
+              "staff_member_id",
+              "company_id"
+            ],
+            referencedRelation: "staff_members",
+            referencedColumns: [
+              "id",
+              "company_id"
+            ],
+            isOneToOne: true
+          },
+          {
+            foreignKeyName: "staff_account_membership_company_fk",
+            columns: [
+              "company_member_id",
+              "company_id"
+            ],
+            referencedRelation: "management_company_members",
+            referencedColumns: [
+              "id",
+              "company_id"
+            ],
+            isOneToOne: true
+          }
         ]
       }
       staff_members: {
@@ -36547,6 +36602,62 @@ export type Database = {
       }
     }
     Functions: {
+      get_operating_space_setup: {
+        Args: {
+          p_company_id: string
+        }
+        Returns: Json
+      }
+      save_operating_space_checked: {
+        Args: {
+          p_company_id: string
+          p_space_id: string | null
+          p_key: string
+          p_name_en: string
+          p_name_ru: string
+          p_is_active: boolean
+        }
+        Returns: string
+      }
+      delete_operating_space_checked: {
+        Args: {
+          p_company_id: string
+          p_space_id: string
+        }
+        Returns: undefined
+      }
+      set_operating_space_member_checked: {
+        Args: {
+          p_company_id: string
+          p_space_id: string
+          p_company_member_id: string
+          p_is_active: boolean
+        }
+        Returns: undefined
+      }
+      assign_operating_space_properties_checked: {
+        Args: {
+          p_company_id: string
+          p_space_id: string
+          p_property_ids: string[]
+          p_reason: string
+        }
+        Returns: undefined
+      }
+      get_staff_account_setup_checked: {
+        Args: {
+          p_company_id: string
+        }
+        Returns: Json
+      }
+      set_staff_account_link_checked: {
+        Args: {
+          p_company_id: string
+          p_staff_member_id: string
+          p_company_member_id: string | null
+        }
+        Returns: Json
+      }
       actor_booking_ceiling: {
         Args: { p_booking_id: string }
         Returns: boolean

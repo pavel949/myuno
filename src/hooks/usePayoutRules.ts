@@ -1,3 +1,4 @@
+import { configuredPayoutValueIsValid } from '@/lib/managementTermsConfiguration';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -17,7 +18,7 @@ export function usePayoutRules(propertyId?: string) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['payout-rules', propertyId],
+    queryKey: ['payout-rules', propertyId, user?.id],
     enabled: !!user && !!propertyId,
     queryFn: async () => {
       const { data, error } = await from()
@@ -36,6 +37,7 @@ export function useCreatePayoutRule() {
 
   return useMutation({
     mutationFn: async (rule: PayoutRuleInsert) => {
+      if (!configuredPayoutValueIsValid(rule.commission_type, rule.commission_value)) throw new Error('Enter a valid explicit payout value');
       const { data, error } = await from()
         .insert(rule)
         .select()
@@ -56,14 +58,16 @@ export function useUpdatePayoutRule() {
 
   return useMutation({
     mutationFn: async ({ id, propertyId, updates }: { id: string; propertyId: string; updates: PayoutRuleUpdate }) => {
+      if (updates.commission_value !== undefined && !configuredPayoutValueIsValid(updates.commission_type ?? 'fixed', updates.commission_value)) throw new Error('Invalid payout value');
       const { data, error } = await from()
         .update(updates)
         .eq('id', id)
+        .eq('property_id', propertyId)
         .select()
         .single();
 
       if (error) throw error;
-      return { ...(data as PayoutRule), property_id: propertyId };
+      return data as PayoutRule;
     },
     onSuccess: (result: PayoutRule) => {
       queryClient.invalidateQueries({ queryKey: ['payout-rules', result.property_id] });
@@ -78,7 +82,10 @@ export function useDeletePayoutRule() {
     mutationFn: async ({ id, propertyId }: { id: string; propertyId: string }) => {
       const { error } = await from()
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('property_id', propertyId)
+        .select('id, property_id')
+        .single();
 
       if (error) throw error;
       return { id, propertyId };
@@ -114,3 +121,4 @@ export const DEFAULT_ACCOUNTING_POLICY: AccountingPolicy = {
   owner_approval_required_above: null,
   tax_withholding_percent: null,
 };
+

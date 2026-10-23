@@ -56,7 +56,9 @@ jobs:
           for zone in UTC Asia/Bangkok America/Los_Angeles; do
             TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx src/components/onboarding/Coachmarks.test.tsx || exit 1
           done
+          node scripts/qa/configuration-migration-contract.mjs
           node scripts/qa/scheduled-backup-integrity.mjs
+          node --experimental-vm-modules scripts/qa/invite-team-member-integrity.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Production build with synthetic configuration

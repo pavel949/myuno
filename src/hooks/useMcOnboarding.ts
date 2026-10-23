@@ -25,7 +25,7 @@ export const ONBOARDING_STEPS = [
   { key: 'step_first_property', en: 'Add first property', ru: 'Добавить первый объект' },
   { key: 'step_pricing_set', en: 'Set pricing', ru: 'Настроить тарифы' },
   { key: 'step_channel_connected', en: 'Connect channel', ru: 'Подключить канал' },
-  { key: 'step_payment_method', en: 'Payment method', ru: 'Способ оплаты' },
+  { key: 'step_payment_method', en: 'Subscription', ru: 'Подписка' },
   { key: 'step_first_booking', en: 'First booking', ru: 'Первое бронирование' },
 ] as const;
 

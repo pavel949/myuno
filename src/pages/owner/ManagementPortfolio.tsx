@@ -1,4 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Sheet,
   SheetContent,
@@ -39,23 +41,16 @@ import {
   TrendingUp,
   FileCheck,
   ShieldCheck,
-  Zap,
-  CheckSquare,
-  X,
 } from 'lucide-react';
 import {
   useAllManagementTerms,
-  useUpdateManagementTerms,
   ManagementTerms,
-  ExpenseResponsibility,
-  DEFAULT_EXPENSES,
 } from '@/hooks/usePropertyManagementTerms';
 import { ManagementTermsForm } from '@/components/owner/management/ManagementTermsForm';
 import { TermsActivityLog } from '@/components/owner/management/TermsActivityLog';
 import { InlineStatusSelect } from '@/components/owner/management/InlineStatusSelect';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { toast } from 'sonner';
 
 type FilterStatus = 'all' | 'active' | 'draft' | 'pending_approval' | 'archived';
 
@@ -92,10 +87,11 @@ function statusBadge(status: ManagementTerms['status'], isRu: boolean) {
   }
 }
 
-function expensePartyLabel(party: string, isRu: boolean) {
+function expensePartyLabel(party: string | null | undefined, isRu: boolean) {
   if (party === 'owner') return isRu ? 'Собств.' : 'Owner';
   if (party === 'manager') return isRu ? 'УК' : 'Mgr';
-  return isRu ? 'Пополам' : 'Split';
+  if (party === 'split') return isRu ? 'Пополам' : 'Split';
+  return isRu ? 'Не настроено' : 'Not configured';
 }
 
 const FILTER_TABS: { value: FilterStatus; labelEn: string; labelRu: string }[] = [
@@ -106,72 +102,17 @@ const FILTER_TABS: { value: FilterStatus; labelEn: string; labelRu: string }[] =
   { value: 'archived', labelEn: 'Archived', labelRu: 'Архив' },
 ];
 
-/** Bulk presets — same as ManagementTermsForm */
-interface BulkPreset {
-  id: string;
-  labelEn: string;
-  labelRu: string;
-  descEn: string;
-  descRu: string;
-  commission_rate: number;
-  commission_type: 'percent' | 'fixed';
-  commission_base: 'gross' | 'net';
-  expenses: ExpenseResponsibility;
-}
-
-const BULK_PRESETS: BulkPreset[] = [
-  {
-    id: 'standard_70_30',
-    labelEn: 'Standard 70/30',
-    labelRu: 'Стандарт 70/30',
-    descEn: 'Owner 70% / Manager 30% of gross',
-    descRu: 'Собственник 70% / УК 30% от валовой',
-    commission_rate: 30,
-    commission_type: 'percent',
-    commission_base: 'gross',
-    expenses: { cleaning: 'manager', electricity: 'owner', water: 'owner', internet: 'owner', repairs_minor: 'manager', repairs_major: 'owner', cam_fees: 'owner', insurance: 'owner', marketing: 'manager' },
-  },
-  {
-    id: 'premium_80_20',
-    labelEn: 'Premium 80/20',
-    labelRu: 'Премиум 80/20',
-    descEn: 'Owner 80% / Manager 20% of gross',
-    descRu: 'Собственник 80% / УК 20% от валовой',
-    commission_rate: 20,
-    commission_type: 'percent',
-    commission_base: 'gross',
-    expenses: { cleaning: 'owner', electricity: 'owner', water: 'owner', internet: 'owner', repairs_minor: 'split', repairs_major: 'owner', cam_fees: 'owner', insurance: 'owner', marketing: 'split' },
-  },
-  {
-    id: 'full_service',
-    labelEn: 'Full Service',
-    labelRu: 'Полный сервис',
-    descEn: 'Owner 60% / Manager 40% net',
-    descRu: 'Собственник 60% / УК 40% от чистого',
-    commission_rate: 40,
-    commission_type: 'percent',
-    commission_base: 'net',
-    expenses: { cleaning: 'manager', electricity: 'manager', water: 'manager', internet: 'manager', repairs_minor: 'manager', repairs_major: 'split', cam_fees: 'owner', insurance: 'owner', marketing: 'manager' },
-  },
-];
-
 /** Mobile card for a single management terms entry */
 function TermsMobileCard({
   terms,
   isRu,
   onEdit,
   onNavigate,
-  selected,
-  onToggleSelect,
-  bulkMode,
 }: {
   terms: ManagementTerms;
   isRu: boolean;
   onEdit: () => void;
   onNavigate: (path: string) => void;
-  selected: boolean;
-  onToggleSelect: () => void;
-  bulkMode: boolean;
 }) {
   const title = isRu
     ? (terms.property?.title_ru || terms.property?.title_en || '—')
@@ -179,13 +120,10 @@ function TermsMobileCard({
   const isExpired = terms.valid_until && new Date(terms.valid_until) < new Date();
 
   return (
-    <Card className={cn('transition-all', isExpired && 'border-destructive/30', selected && 'ring-2 ring-primary border-primary')}>
+    <Card className={cn('transition-all', isExpired && 'border-destructive/30')}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {bulkMode && (
-              <Checkbox checked={selected} onCheckedChange={onToggleSelect} className="mt-0.5" />
-            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 {isExpired && <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />}
@@ -242,11 +180,11 @@ function TermsMobileCard({
           </div>
           <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Уборка' : 'Cleaning'}</p>
-            <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.cleaning || 'owner', isRu)}</p>
+            <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.cleaning, isRu)}</p>
           </div>
           <div className="p-2 rounded-none bg-muted/50">
             <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Ремонт' : 'Repairs'}</p>
-            <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.repairs_major || 'owner', isRu)}</p>
+            <p className="font-medium">{expensePartyLabel(terms.expense_responsibility?.repairs_major, isRu)}</p>
           </div>
         </div>
       </CardContent>
@@ -255,13 +193,27 @@ function TermsMobileCard({
 }
 
 export default function ManagementPortfolio() {
+  const { user } = useAuth();
+  const { activeCompany, isLoading, isError, refetch } = useActiveCompany();
+  const { language } = useLanguage();
+  if (isError) return <PageContainer><div role="alert" className="space-y-3">
+    <p>{language === 'ru' ? 'Не удалось загрузить компанию' : 'Could not load company'}</p>
+    <Button onClick={() => refetch()}>{language === 'ru' ? 'Повторить' : 'Retry company'}</Button>
+  </div></PageContainer>;
+  if (isLoading) return <PageContainer><div role="status" aria-label={language === 'ru' ? 'Загрузка компании' : 'Loading company'}><Skeleton className="h-32 w-full" /></div></PageContainer>;
+  return user ? <ManagementPortfolioContent key={`${user.id}:${activeCompany?.company_id ?? 'owner'}`} /> : null;
+}
+
+function ManagementPortfolioContent() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  const { data: allTerms, isLoading } = useAllManagementTerms();
-  const updateTerms = useUpdateManagementTerms();
+  const { data: allTerms, isLoading, error, refetch } = useAllManagementTerms();
+  const properties = useMyProperties();
+  const [newPropertyId, setNewPropertyId] = useState('');
+  const availableProperties = properties.allProperties.filter(property => !allTerms?.some(terms => terms.property_id === property.property_id));
 
   const { getValue, setValue } = useUrlFilters();
   const search = getValue('q', '');
@@ -271,11 +223,6 @@ export default function ManagementPortfolio() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedTerms, setSelectedTerms] = useState<ManagementTerms | undefined>(undefined);
-
-  // Bulk selection state
-  const [bulkMode, setBulkMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [bulkApplying, setBulkApplying] = useState(false);
 
   const filtered = useMemo(() => {
     if (!allTerms) return [];
@@ -293,94 +240,22 @@ export default function ManagementPortfolio() {
     setSheetOpen(true);
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.size === filtered.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filtered.map(t => t.id)));
-    }
-  };
-
-  const exitBulkMode = () => {
-    setBulkMode(false);
-    setSelectedIds(new Set());
-  };
-
-  const applyBulkPreset = async (preset: BulkPreset) => {
-    if (selectedIds.size === 0) {
-      toast.warning(isRu ? 'Выберите объекты' : 'Select properties first');
-      return;
-    }
-
-    setBulkApplying(true);
-    let successCount = 0;
-    let errorCount = 0;
-
-    const termsToUpdate = (allTerms || []).filter(t => selectedIds.has(t.id));
-
-    for (const terms of termsToUpdate) {
-      try {
-        await updateTerms.mutateAsync({
-          id: terms.id,
-          updates: {
-            commission_type: preset.commission_type,
-            commission_rate: preset.commission_rate,
-            commission_base: preset.commission_base,
-            revenue_split_owner: 100 - preset.commission_rate,
-            revenue_split_manager: preset.commission_rate,
-            expense_responsibility: { ...preset.expenses },
-          },
-        });
-        successCount++;
-      } catch {
-        errorCount++;
-      }
-    }
-
-    setBulkApplying(false);
-
-    if (successCount > 0) {
-      toast.success(
-        isRu
-          ? `Шаблон "${preset.labelRu}" применён к ${successCount} объектам`
-          : `"${preset.labelEn}" applied to ${successCount} properties`
-      );
-    }
-    if (errorCount > 0) {
-      toast.error(
-        isRu
-          ? `Ошибка для ${errorCount} объектов`
-          : `Failed for ${errorCount} properties`
-      );
-    }
-
-    exitBulkMode();
-  };
-
   const counts = useMemo(() => ({
     active: allTerms?.filter(t => t.status === 'active').length ?? 0,
     pending: allTerms?.filter(t => t.status === 'pending_approval').length ?? 0,
     draft: allTerms?.filter(t => t.status === 'draft').length ?? 0,
     total: allTerms?.length ?? 0,
-    avgCommission: allTerms?.length
-      ? Math.round(
-          (allTerms
-            .filter(t => t.commission_type === 'percent' && t.commission_rate)
-            .reduce((sum, t) => sum + (t.commission_rate || 0), 0) /
-            Math.max(allTerms.filter(t => t.commission_type === 'percent' && t.commission_rate).length, 1))
-        )
-      : 0,
+    avgCommission: (() => {
+      const rates = (allTerms ?? []).filter(t => t.commission_type === 'percent' && typeof t.commission_rate === 'number' && Number.isFinite(t.commission_rate));
+      return rates.length ? Math.round(rates.reduce((sum, t) => sum + (t.commission_rate ?? 0), 0) / rates.length) : null;
+    })(),
     expiredCount: allTerms?.filter(t => t.valid_until && new Date(t.valid_until) < new Date()).length ?? 0,
   }), [allTerms]);
+
+  if (error) return <PageContainer><div role="alert" className="space-y-3">
+    <p>{isRu ? 'Не удалось загрузить условия управления' : 'Could not load management terms'}</p>
+    <Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </div></PageContainer>;
 
   return (
     <PageContainer>
@@ -391,12 +266,28 @@ export default function ManagementPortfolio() {
         fallbackPath="/owner"
       />
 
+      <section className="mb-5 space-y-3">
+        <h2 className="font-medium">{isRu ? 'Новые условия' : 'New terms'}</h2>
+        {properties.error ? <div role="alert">
+          <p>{isRu ? 'Не удалось загрузить доступные объекты' : 'Could not load available properties'}</p>
+          <Button variant="outline" onClick={() => properties.refetch()}>{isRu ? 'Повторить загрузку объектов' : 'Retry properties'}</Button>
+        </div> : properties.isLoading ? <Skeleton className="h-10 w-full" /> : availableProperties.length ? <div className="flex flex-wrap gap-2">
+          <select aria-label={isRu ? 'Объект для новых условий' : 'Property for new terms'} className="min-w-0 w-full sm:w-auto max-w-full rounded-none border bg-background p-2" value={newPropertyId} onChange={event => setNewPropertyId(event.target.value)}>
+            <option value="">{isRu ? 'Выберите объект' : 'Select a property'}</option>
+            {availableProperties.map(property => <option key={property.property_id} value={property.property_id}>{isRu ? property.title_ru || property.title : property.title || property.title_ru}</option>)}
+          </select>
+          <Button disabled={isLoading || !availableProperties.some(property => property.property_id === newPropertyId)} onClick={() => {
+            if (availableProperties.some(property => property.property_id === newPropertyId)) openSheet(newPropertyId);
+          }}>{isRu ? 'Создать условия' : 'Create terms'}</Button>
+        </div> : <p className="text-sm text-muted-foreground">{isRu ? 'Нет объектов без условий. Добавьте объект или измените существующие условия.' : 'No properties without terms. Add a property or edit existing terms.'}</p>}
+      </section>
+
       {/* ── Hub KPI Metrics ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {[
           { icon: Building2, label: isRu ? 'Всего объектов' : 'Total Properties', value: counts.total, color: 'text-foreground', bg: 'bg-muted/50' },
           { icon: CheckCircle2, label: isRu ? 'Активных' : 'Active', value: counts.active, color: 'text-primary', bg: 'bg-primary/8' },
-          { icon: TrendingUp, label: isRu ? 'Ср. комиссия' : 'Avg Commission', value: `${counts.avgCommission}%`, color: 'text-primary', bg: 'bg-primary/8' },
+          { icon: TrendingUp, label: isRu ? 'Ср. комиссия' : 'Avg Commission', value: counts.avgCommission === null ? (isRu ? 'Не настроено' : 'Not configured') : `${counts.avgCommission}%`, color: 'text-primary', bg: 'bg-primary/8' },
           { icon: AlertTriangle, label: isRu ? 'Истекают' : 'Expiring', value: counts.expiredCount, color: counts.expiredCount > 0 ? 'text-destructive' : 'text-muted-foreground', bg: counts.expiredCount > 0 ? 'bg-destructive/8' : 'bg-muted/50' },
         ].map(({ icon: Icon, label, value, color, bg }) => (
           <div key={label} className={cn('rounded-none border p-3', bg)}>
@@ -409,7 +300,7 @@ export default function ManagementPortfolio() {
         ))}
       </div>
 
-      {/* ── Tab Filters + Bulk Mode Toggle ── */}
+      {/* ── Tab Filters ── */}
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide">
           {FILTER_TABS.map(tab => (
@@ -433,80 +324,7 @@ export default function ManagementPortfolio() {
           ))}
         </div>
 
-        {!bulkMode ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0 gap-1.5"
-            onClick={() => setBulkMode(true)}
-            disabled={!allTerms || allTerms.length === 0}
-          >
-            <CheckSquare className="h-3.5 w-3.5" />
-            {isRu ? 'Массово' : 'Bulk'}
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 gap-1.5"
-            onClick={exitBulkMode}
-          >
-            <X className="h-3.5 w-3.5" />
-            {isRu ? 'Отмена' : 'Cancel'}
-          </Button>
-        )}
       </div>
-
-      {/* ── Bulk Action Bar ── */}
-      {bulkMode && (
-        <div className="mb-4 p-3 rounded-none border-2 border-primary/30 bg-primary/5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={selectedIds.size === filtered.length && filtered.length > 0}
-                onCheckedChange={toggleSelectAll}
-              />
-              <span className="text-sm font-medium">
-                {selectedIds.size > 0
-                  ? (isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`)
-                  : (isRu ? 'Выберите объекты' : 'Select properties')}
-              </span>
-            </div>
-            {selectedIds.size > 0 && (
-              <Badge variant="secondary">{selectedIds.size}</Badge>
-            )}
-          </div>
-
-          {selectedIds.size > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                {isRu ? 'Применить шаблон ко всем выбранным:' : 'Apply preset to all selected:'}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {BULK_PRESETS.map(preset => (
-                  <Button
-                    key={preset.id}
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                    disabled={bulkApplying}
-                    onClick={() => applyBulkPreset(preset)}
-                  >
-                    <Zap className="h-3 w-3" />
-                    {isRu ? preset.labelRu : preset.labelEn}
-                    <span className="text-xs text-muted-foreground">
-                      ({100 - preset.commission_rate}/{preset.commission_rate})
-                    </span>
-                  </Button>
-                ))}
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                {isRu ? preset_desc_ru() : preset_desc_en()}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Search ── */}
       <div className="relative mb-4">
@@ -529,9 +347,9 @@ export default function ManagementPortfolio() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <FileCheck className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-          <p className="font-medium">{isRu ? 'Условия не найдены' : 'No terms found'}</p>
+          <p className="font-medium">{search || filterStatus !== 'all' ? (isRu ? 'Нет совпадений по фильтрам' : 'No matching terms') : (isRu ? 'Условия пока не настроены' : 'No terms configured yet')}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Нет объектов с заданными условиями управления' : 'No properties have management terms configured'}
+            {search || filterStatus !== 'all' ? (isRu ? 'Измените поиск или фильтры' : 'Change your search or filters') : (isRu ? 'Выберите доступный объект выше, чтобы настроить условия' : 'Choose an available property above to configure terms')}
           </p>
         </div>
       ) : isMobile ? (
@@ -543,9 +361,6 @@ export default function ManagementPortfolio() {
               isRu={isRu}
               onEdit={() => openSheet(terms.property_id, terms)}
               onNavigate={navigate}
-              selected={selectedIds.has(terms.id)}
-              onToggleSelect={() => toggleSelect(terms.id)}
-              bulkMode={bulkMode}
             />
           ))}
         </div>
@@ -554,14 +369,6 @@ export default function ManagementPortfolio() {
           <Table>
             <TableHeader>
               <TableRow>
-                {bulkMode && (
-                  <TableHead className="w-10">
-                    <Checkbox
-                      checked={selectedIds.size === filtered.length && filtered.length > 0}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  </TableHead>
-                )}
                 <TableHead>{isRu ? 'Объект' : 'Property'}</TableHead>
                 <TableHead>{isRu ? 'Комиссия' : 'Commission'}</TableHead>
                 <TableHead>{isRu ? 'Уборка' : 'Cleaning'}</TableHead>
@@ -577,14 +384,8 @@ export default function ManagementPortfolio() {
                   ? (terms.property?.title_ru || terms.property?.title_en || '—')
                   : (terms.property?.title_en || terms.property?.title_ru || '—');
                 const isExpired = terms.valid_until && new Date(terms.valid_until) < new Date();
-                const isSelected = selectedIds.has(terms.id);
                 return (
-                  <TableRow key={terms.id} className={cn(isExpired && 'bg-destructive/5', isSelected && 'bg-primary/5')}>
-                    {bulkMode && (
-                      <TableCell>
-                        <Checkbox checked={isSelected} onCheckedChange={() => toggleSelect(terms.id)} />
-                      </TableCell>
-                    )}
+                  <TableRow key={terms.id} className={cn(isExpired && 'bg-destructive/5')}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {isExpired && <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />}
@@ -619,10 +420,10 @@ export default function ManagementPortfolio() {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {expensePartyLabel(terms.expense_responsibility?.cleaning || 'owner', isRu)}
+                      {expensePartyLabel(terms.expense_responsibility?.cleaning, isRu)}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {expensePartyLabel(terms.expense_responsibility?.repairs_major || 'owner', isRu)}
+                      {expensePartyLabel(terms.expense_responsibility?.repairs_major, isRu)}
                     </TableCell>
                     <TableCell className="text-sm">
                       {terms.payment_day ? (isRu ? `${terms.payment_day}-е` : `${terms.payment_day}th`) : '—'}
@@ -670,6 +471,7 @@ export default function ManagementPortfolio() {
           {selectedPropertyId && (
             <>
               <ManagementTermsForm
+                key={`${selectedPropertyId}:${selectedTerms?.id ?? 'new'}`}
                 propertyId={selectedPropertyId}
                 existing={selectedTerms}
                 onSaved={() => setSheetOpen(false)}
@@ -688,10 +490,3 @@ export default function ManagementPortfolio() {
   );
 }
 
-function preset_desc_ru() {
-  return 'Шаблон обновит комиссию, базу расчёта и распределение расходов для всех выбранных объектов';
-}
-
-function preset_desc_en() {
-  return 'Preset will update commission, calculation base and expense distribution for all selected properties';
-}

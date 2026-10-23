@@ -26,8 +26,12 @@ async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => P
 beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-uno-team-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath?['-c',`dynamic_library_path=${libPath}`]:[])]);
- run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55443 -c listen_addresses=''${libPath?` -c dynamic_library_path=${libPath}`:''}`,'-w','start']);started=true;
+ // This disposable, tiny catalog fixture measures RLS behavior, not JIT throughput.
+ // Nested policy/subquery plans can cross JIT cost thresholds despite only a few
+ // rows; compiling them adds runner-dependent latency without changing rights.
+ run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55443 -c listen_addresses='' -c jit=off${libPath?` -c dynamic_library_path=${libPath}`:''}`,'-w','start']);started=true;
  sql=postgres({host:directory,port:55443,database:'postgres',username:owner,password:'',max:2,onnotice:()=>{}});
+ expect((await sql`SHOW jit`)[0].jit).toBe('off');
  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/uno-team-live-catalog.sql','utf8'));
  await sql`INSERT INTO user_roles(user_id,role) VALUES (${team},'uno_team'),(${admin},'admin')`;
  await sql`INSERT INTO management_companies(id,operating_spaces_enforced) VALUES (${A},false),(${B},false)`;
@@ -175,3 +179,4 @@ describe('E2.8 exact live-catalog least privilege',()=>{
   }
  });
 });
+
