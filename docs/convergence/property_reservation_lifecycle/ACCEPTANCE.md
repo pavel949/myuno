@@ -127,3 +127,28 @@ preflight and historical reconciliation gates.
 - Independent bounded source review: GO; production activation: NO-GO pending
   independently reviewed historical reconciliation and actual-target preflight.
 - Final typecheck, production build and scoped ESLint passed. Generated version/MCP output excluded from the patch.
+
+## Stage 2 preparation: read-only metadata collector
+
+`preflight.sql` now collects one repeatable-read/read-only snapshot: full-definition
+and body fingerprints (including the four optional legacy financial/autocreate/
+protected-column/release hooks guarded by 0036), actual used enum labels,
+constraints and validation state, index definitions, table owners/ACL/RLS flags,
+and allowlisted migration-journal identities. Missing journals are explicit NULL;
+an unreadable present journal fails. No journal SQL, customer rows, provider
+sessions, reconciliation rows or credentials are selected. The collector does not
+execute migration-journal statements or change privileges.
+
+The registered lifecycle PostgreSQL harness exercises the actual collector with
+0036 applied in its disposable cluster. It checks expected catalogue evidence,
+missing journals, allowlisted journal rows with excluded private/SQL sentinels,
+permission-denied journal reads and server rejection of an injected write
+(SQLSTATE 25006). These checks validate the collector, not target readiness.
+
+Actual target schema/journal/ACL/trigger evidence remains missing. So do reviewed
+historical external-session reconciliation, real Auth/PostgREST/exposed-schema
+acceptance and an identified backup/PITR checkpoint with isolated restore evidence.
+No production preflight, migration or activation was performed. Obtain explicitly
+authorized target evidence, reproduce compatibility and restore in isolation,
+then seek bounded activation approval. The existing coordinated RPC → guarded
+handlers → frontend sequence and restrictive stop remain unchanged.

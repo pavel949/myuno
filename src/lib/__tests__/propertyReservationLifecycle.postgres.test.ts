@@ -136,6 +136,52 @@ beforeEach(async()=>{
  await sql`INSERT INTO owner_properties(id,owner_id,title) VALUES (${room},${actor},'Synthetic owned property')`;
 });
 describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
+ it('read-only preflight collects guarded metadata and safe journal identities without mutating state',async()=>{
+  const collector=readFileSync('docs/convergence/property_reservation_lifecycle/preflight.sql','utf8');
+  const connection=await sql.reserve();
+  const collect=async()=>{
+   try { return (await connection.unsafe(collector).simple()).flatMap(rows=>Array.from(rows)); }
+   catch(error){await connection.unsafe('ROLLBACK');throw error;}
+  };
+  try {
+   const absent=await collect();
+   expect(absent).toContainEqual(expect.objectContaining({transaction_read_only:'on'}));
+   expect(absent).toContainEqual(expect.objectContaining({drizzle_journal:null,drizzle_journal_rows:null,supabase_journal:null,supabase_journal_rows:null}));
+   await connection.unsafe(`CREATE SCHEMA drizzle; CREATE SCHEMA supabase_migrations;
+    CREATE TABLE drizzle.__drizzle_migrations(id int,hash text,created_at bigint,private_note text);
+    INSERT INTO drizzle.__drizzle_migrations VALUES(36,'synthetic-fingerprint',1792719884619,'DO_NOT_EXPORT');
+    CREATE TABLE supabase_migrations.schema_migrations(version text,name text,statements text[]);
+    INSERT INTO supabase_migrations.schema_migrations VALUES('0036','synthetic-lifecycle',ARRAY['DO_NOT_EXPORT']);`);
+   const before=await connection`SELECT count(*)::int count FROM properties`;
+   const rows=await collect();
+   for(const name of ['create_financial_from_booking','create_property_booking_from_order','guard_orders_protected_columns','trg_release_availability_on_order_cancel']){
+    expect(rows).toContainEqual(expect.objectContaining({proname:name,definition_md5:expect.stringMatching(/^[a-f0-9]{32}$/),body_md5:expect.stringMatching(/^[a-f0-9]{32}$/)}));
+   }
+   expect(rows).toContainEqual(expect.objectContaining({enum_name:'order_status',enumlabel:'pending'}));
+   expect(rows).toContainEqual(expect.objectContaining({conname:'property_bookings_no_overlap',contype:'x',convalidated:true,constraint_definition:expect.stringContaining('EXCLUDE')}));
+   expect(rows).toContainEqual(expect.objectContaining({indexname:'property_lifecycle_import_identity',indexdef:expect.stringContaining('UNIQUE INDEX')}));
+   expect(rows).toContainEqual(expect.objectContaining({table_schema:'pms_commands',table_name:'legacy_unpaid_reconciliation',relrowsecurity:true,relacl:expect.anything()}));
+   const journal=rows.find(row=>'drizzle_journal_rows' in row)!;
+   expect(journal.drizzle_journal_rows).toContain('synthetic-fingerprint');
+   expect(journal.supabase_journal_rows).toContain('synthetic-lifecycle');
+   expect(JSON.stringify(rows)).not.toContain('DO_NOT_EXPORT');
+   expect(JSON.stringify(rows)).not.toContain('Synthetic owned property');
+   expect(await connection`SELECT count(*)::int count FROM properties`).toEqual(before);
+   await connection.unsafe('GRANT USAGE ON SCHEMA drizzle,supabase_migrations TO authenticated; SET ROLE authenticated;');
+   try {await expect(collect()).rejects.toMatchObject({code:'42501'});}
+   finally {await connection.unsafe('RESET ROLE');}
+   // Actual server read-only enforcement: a deliberate injected write must fail,
+   // not merely pass a text assertion that the collector contains BEGIN.
+   const negative=collector.replace(/ROLLBACK;\s*$/, 'UPDATE public.properties SET is_active=false; ROLLBACK;');
+   try {await expect(connection.unsafe(negative).simple()).rejects.toMatchObject({code:'25006'});}
+   finally {await connection.unsafe('ROLLBACK');}
+   expect(await connection`SELECT is_active FROM properties WHERE id=${room}`).toEqual([{is_active:true}]);
+  } finally {
+   await connection.unsafe('ROLLBACK');
+   await connection.unsafe('DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA IF EXISTS supabase_migrations CASCADE;');
+   connection.release();
+  }
+ });
  it('guest owns one order and exact canonical hold; guest and manager read the same record',async()=>{
   const created=await reserve();expect(created.order.status).toBe('pending');await grantManager();
   expect((await read(request,operator)).order).toEqual(created.order);
