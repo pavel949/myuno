@@ -106,14 +106,23 @@ export function useGuestServiceOrders() {
 
   const cancelOrder = useMutation({
     mutationFn: async (orderId: string) => {
-      const { error } = await supabase
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabase
         .from('service_orders')
         .update({ status: 'cancelled' })
         .eq('id', orderId)
-        .eq('guest_id', user?.id)
-        .eq('status', 'pending');
-      
+        .eq('guest_id', user.id)
+        .eq('status', 'pending')
+        .select('id, guest_id, status')
+        .maybeSingle();
+
       if (error) throw error;
+      // A denied/stale UPDATE can affect zero rows without a PostgREST error.
+      // Confirm persisted state before showing the cancellation success message.
+      if (!data || data.id !== orderId || data.guest_id !== user.id || data.status !== 'cancelled') {
+        throw new Error('Service cancellation was not confirmed. Refresh the order and try again.');
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-service-orders', user?.id] });
