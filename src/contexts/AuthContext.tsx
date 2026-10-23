@@ -53,9 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const refreshFailureCountRef = useRef(0);
+  const sessionRevisionRef = useRef(0);
   const queryClient = useQueryClient();
 
   const clearStoredAuthSession = useCallback(() => {
+    sessionRevisionRef.current += 1;
     if (typeof window !== 'undefined') {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
@@ -104,15 +106,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const initializeSession = async () => {
+      // The initial snapshot must never override a newer auth event or logout.
+      const revision = sessionRevisionRef.current;
+      const isCurrent = () => isMounted && revision === sessionRevisionRef.current;
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
+        if (!isCurrent()) return;
 
         refreshFailureCountRef.current = 0;
         setSession(session);
         setUser(session?.user ?? null);
       } catch (error) {
-        if (!isMounted) return;
+        if (!isCurrent()) return;
 
         const message = error instanceof Error ? error.message.toLowerCase() : '';
         const shouldResetSession =
@@ -123,9 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (shouldResetSession) {
           clearStoredAuthSession();
+          setIsLoading(false);
         }
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isCurrent()) setIsLoading(false);
       }
     };
 
@@ -135,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (isMounted) {
+          sessionRevisionRef.current += 1;
           refreshFailureCountRef.current = 0;
           setSession(session);
           setUser(session?.user ?? null);
@@ -216,15 +223,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     refreshFailureCountRef.current = 0;
+    sessionRevisionRef.current += 1;
 
     try {
       // Global scope (default) revokes the refresh token server-side so the
       // session is invalidated on the backend, not just in this tab. Critical
       // for a payments app — a local-only signOut leaves the refresh token
       // live and replayable.
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } finally {
       clearStoredAuthSession();
+      setIsLoading(false);
       // Bible-v2 audit B1: drop every cached query so user A's data
       // (wallet, bookings, orders) cannot render to user B on the same tab.
       queryClient.clear();

@@ -10,10 +10,11 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 
-type LinkStatus = 'checking' | 'valid' | 'invalid';
+type LinkStatus = 'checking' | 'valid' | 'invalid' | 'unavailable';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -21,6 +22,8 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [signOutFailed, setSignOutFailed] = useState(false);
+  const signOut = useUiSignOut();
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
   const [linkStatus, setLinkStatus] = useState<LinkStatus>('checking');
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -29,35 +32,41 @@ export default function ResetPassword() {
 
   // When user clicks link in email: Supabase redirects to /auth/reset-password#access_token=...&refresh_token=...&type=recovery
   useEffect(() => {
+    let cancelled = false;
     const applySessionFromEmailLink = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setLinkStatus('valid');
-        return;
-      }
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      const type = hashParams.get('type');
-      if (accessToken && refreshToken && type === 'recovery') {
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        if (error) {
-          setLinkError(error.message);
-          setLinkStatus('invalid');
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (sessionError) throw sessionError;
+        if (session) {
+          setLinkStatus('valid');
           return;
         }
-        // Remove tokens from URL for security
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        setLinkStatus('valid');
-      } else {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
+        if (accessToken && refreshToken && type === 'recovery') {
+          const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (cancelled) return;
+          if (error) throw error;
+          // Remove tokens from URL for security.
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          setLinkStatus('valid');
+        } else {
+          setLinkError(null);
+          setLinkStatus('invalid');
+        }
+      } catch {
+        if (cancelled) return;
+        // A network rejection is not a validated recovery session. Offer the
+        // existing retry-link path instead of leaving an unhandled spinner.
         setLinkError(null);
-        setLinkStatus('invalid');
+        setLinkStatus('unavailable');
       }
     };
-    applySessionFromEmailLink();
+    void applySessionFromEmailLink();
+    return () => { cancelled = true; };
   }, []);
 
   const validateForm = () => {
@@ -100,7 +109,10 @@ export default function ResetPassword() {
             ? 'Пароль успешно изменён'
             : 'Password updated successfully'
         );
-        await supabase.auth.signOut();
+        if (!(await signOut())) {
+          setSignOutFailed(true);
+          return;
+        }
         // Redirect to login so user can sign in with new password
         setTimeout(() => {
           navigate(APP_ROUTES.AUTH, { replace: true });
@@ -140,18 +152,22 @@ export default function ResetPassword() {
                 {language === 'ru' ? 'Проверка ссылки...' : 'Checking link...'}
               </p>
             </div>
-          ) : linkStatus === 'invalid' ? (
+          ) : (linkStatus === 'invalid' || linkStatus === 'unavailable') ? (
             <div className="text-center space-y-6">
               <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
                 <AlertCircle className="w-8 h-8 text-destructive" />
               </div>
               <h1 className="text-2xl font-display font-bold">
-                {language === 'ru' ? 'Недействительная или устаревшая ссылка' : 'Invalid or expired link'}
+                {linkStatus === 'unavailable'
+                  ? (language === 'ru' ? 'Не удалось проверить ссылку' : 'Could not verify link')
+                  : (language === 'ru' ? 'Недействительная или устаревшая ссылка' : 'Invalid or expired link')}
               </h1>
               <p className="text-muted-foreground">
-                {language === 'ru'
-                  ? 'Ссылка для сброса пароля недействительна или уже использована. Запросите новую.'
-                  : 'This password reset link is invalid or has already been used. Request a new one.'}
+                {linkStatus === 'unavailable'
+                  ? (language === 'ru' ? 'Проверка не завершилась. Попробуйте открыть ссылку ещё раз или запросите новую.' : 'The check did not complete. Try opening the link again or request a new one.')
+                  : (language === 'ru'
+                    ? 'Ссылка для сброса пароля недействительна или уже использована. Запросите новую.'
+                    : 'This password reset link is invalid or has already been used. Request a new one.')}
               </p>
               {linkError && (
                 <p className="text-sm text-destructive bg-destructive/10 rounded-none px-3 py-2">
@@ -181,10 +197,18 @@ export default function ResetPassword() {
                 {language === 'ru' ? 'Пароль изменён!' : 'Password updated!'}
               </h1>
               <p className="text-muted-foreground">
-                {language === 'ru'
-                  ? 'Войдите в аккаунт с новым паролем. Перенаправление на страницу входа...'
-                  : 'Sign in with your new password. Redirecting to login...'}
+                {signOutFailed
+                  ? (language === 'ru' ? 'Пароль изменён, но выход из аккаунта не подтверждён. Повторите выход.' : 'Your password was changed, but sign-out was not confirmed. Retry sign-out.')
+                  : (language === 'ru'
+                    ? 'Войдите в аккаунт с новым паролем. Перенаправление на страницу входа...'
+                    : 'Sign in with your new password. Redirecting to login...')}
               </p>
+              {signOutFailed && <PremiumButton disabled={isLoading} onClick={async () => {
+                setIsLoading(true);
+                try {
+                  if (await signOut()) navigate(APP_ROUTES.AUTH, { replace: true });
+                } finally { setIsLoading(false); }
+              }}>{language === 'ru' ? 'Повторить выход' : 'Retry sign-out'}</PremiumButton>}
               <Link to={APP_ROUTES.AUTH}>
                 <PremiumButton variant="outline" className="mt-2 gap-2">
                   <ArrowLeft className="w-4 h-4" />

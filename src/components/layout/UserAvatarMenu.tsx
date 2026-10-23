@@ -33,6 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { usePlatformViewAs } from '@/contexts/PlatformViewAsContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -131,7 +132,8 @@ const UUID_RE =
 export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const signOut = useUiSignOut();
   const { availableRoles, switchContext } = useUserContext();
   const { unreadCount } = useNotifications();
   const { isAdmin } = useIsAdmin();
@@ -193,8 +195,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    if (await signOut()) navigate('/');
   };
 
   const handleViewAsSubmit = async () => {

@@ -5,6 +5,7 @@ import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditC
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { SectionCard } from '@/components/uno/SectionCard';
@@ -21,7 +22,8 @@ import { useProfile } from '@/hooks/useProfile';
 
 export default function Profile() {
   const { t, language } = useLanguage();
-  const { user, isLoading: authLoading, signOut } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const signOut = useUiSignOut();
   const { profile } = useProfile();
   const { activeCompany } = useActiveCompany();
   const { hasRole, isLoading: rolesLoading } = useUserContext();
@@ -49,8 +51,7 @@ export default function Profile() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
-      await signOut();
-      navigate(APP_ROUTES.HOME);
+      if (await signOut()) navigate(APP_ROUTES.HOME);
     } finally {
       setIsLoggingOut(false);
     }
