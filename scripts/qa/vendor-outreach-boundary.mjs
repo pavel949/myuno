@@ -41,7 +41,9 @@ const contacts = [HOUSE, TENANT].map((company_id, index) => ({
   outreach_status: 'not_contacted',
 }));
 
-function harness({ house = { id: HOUSE }, houseError = null, rolesError = null, authThrows = false } = {}) {
+function harness({ house = { id: HOUSE }, houseError = null, rolesError = null, authThrows = false,
+  currentStatus = 'not_contacted', currentError = null, emailOnly = false,
+  suppressed = false, suppressionError = null } = {}) {
   const events = [];
   const reads = [];
   const writes = [];
@@ -67,7 +69,7 @@ function harness({ house = { id: HOUSE }, houseError = null, rolesError = null, 
         let operation = 'select';
         let payload;
         const query = { table, filters, privileged };
-        const complete = () => {
+        const complete = (single = false) => {
           if (operation !== 'select') {
             writes.push({ ...query, operation, payload });
             return { data: [], error: null };
@@ -84,9 +86,22 @@ function harness({ house = { id: HOUSE }, houseError = null, rolesError = null, 
             assert.ok(filters.some(([column, value]) => column === 'slug' && value === 'myuno-house'));
             return { data: house, error: houseError };
           }
+          if (table === 'suppressed_emails') {
+            assert.ok(single, 'suppression lookup uses maybeSingle');
+            assert.ok(filters.some(([column, value]) => column === 'email' && value === contacts[0].email));
+            return { data: suppressed ? { email: contacts[0].email } : null, error: suppressionError };
+          }
           const companyColumn = table === 'crm_contacts' ? 'company_id' : 'crm_contacts.company_id';
           assert.ok(filters.some(([column, value]) => column === companyColumn && value === HOUSE), `${table} must explicitly scope the house company`);
-          const selected = contacts.filter(contact => filters.some(([column, value]) => column === companyColumn && value === contact.company_id));
+          const selected = contacts.map(contact => ({ ...contact, outreach_status: currentStatus,
+            phone: emailOnly ? null : contact.phone,
+          })).filter(contact => filters.some(([column, value]) => column === companyColumn && value === contact.company_id)
+            && filters.every(([column, value]) => !['id', 'contact_type'].includes(column) || contact[column] === value));
+          if (table === 'crm_contacts' && single) {
+            assert.ok(filters.some(([column, value]) => column === 'id' && value === contacts[0].id), 'current contact is ID-bound');
+            assert.ok(filters.some(([column, value]) => column === 'contact_type' && value === 'vendor'), 'current contact is vendor-bound');
+            return { data: selected.length === 1 ? selected[0] : null, error: currentError };
+          }
           return {
             data: table === 'crm_contacts' ? selected : selected.map(contact => ({
               contact_id: contact.id, followup_sequence: 1, crm_contacts: contact,
@@ -108,7 +123,7 @@ function harness({ house = { id: HOUSE }, houseError = null, rolesError = null, 
           limit() { return this; },
           insert(value) { operation = 'insert'; payload = value; return this; },
           update(value) { operation = 'update'; payload = value; return this; },
-          async maybeSingle() { return complete(); },
+          async maybeSingle() { return complete(true); },
           then(onFulfilled, onRejected) { return Promise.resolve().then(complete).then(onFulfilled, onRejected); },
         };
       },
@@ -217,5 +232,22 @@ assert.equal((await preflight.call({ method: 'OPTIONS', headers: {} })).status, 
 assert.equal(preflight.events.length, 0);
 assert.equal(preflight.sends.length, 0);
 passed++;
+
+// Historical follow-up rows never override current consent or suppression.
+for (const options of [
+  { currentStatus: 'opted_out' }, { currentStatus: 'responded' },
+  { currentStatus: 'unsubscribed' }, { currentStatus: 'unknown' },
+  { currentError: { message: 'contact unavailable' } },
+  { emailOnly: true, suppressed: true },
+  { emailOnly: true, suppressionError: { message: 'suppression unavailable' } },
+]) {
+  const h = harness(options);
+  const response = await h.call({ action: 'followup' });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).processed, 0);
+  assert.equal(h.sends.length, 0, 'ineligible contact never reaches transport');
+  assert.equal(h.writes.length, 0, 'ineligible contact never logs or overwrites status');
+  passed++;
+}
 
 console.log(`${passed}/${passed} actual vendor outreach boundary cases passed; real authorization helpers, synthetic SDK/WhatsApp, network forbidden`);
