@@ -50,28 +50,28 @@ const OVERRIDES: OverrideMap = {
   'bang-tao': {
     'passive-investors': {
       intro: {
-        ru: 'Bang Tao — флагманский кластер Laguna с самым прозрачным рынком аренды на Пхукете: лицензированные отельные операторы, гарантированная доходность от застройщиков и ликвидный вторичный рынок.',
-        en: 'Bang Tao is the flagship Laguna cluster — Phuket\'s most transparent rental market with licensed hotel operators, developer rental guarantees and a liquid resale market.',
+        ru: 'Рассматриваете объект в Bang Tao? Начните с опубликованных предложений и условий конкретного проекта. Расчёт доходности требует проверки исходных данных и расходов.',
+        en: 'Considering a property in Bang Tao? Start with published listings and the terms of each project. A return calculation requires verified inputs and costs.',
       },
       reasons: {
         ru: [
-          'Доходность 6–8% годовых в USD за счёт hotel-licensed пулов (Banyan Tree, Angsana, Cassia, Dusit, Avani).',
-          'Самый ликвидный вторичный рынок на острове: средний срок продажи 4–6 месяцев против 9–12 в Kamala/Patong.',
-          'Готовая инфраструктура: Boat Avenue, Porto de Phuket, Blue Tree, UWC школа — премия к арендной ставке +25%.',
+          'Сопоставьте стоимость покупки и подтверждённые расходы по конкретному объекту.',
+          'Уточните условия управления, аренды и возможные ограничения.',
+          'Отделяйте расчётные сценарии от подтверждённых результатов аренды.',
         ],
         en: [
-          '6–8% USD net yield via hotel-licensed pools (Banyan Tree, Angsana, Cassia, Dusit, Avani).',
-          'Most liquid resale market on the island: 4–6 month average sale vs. 9–12 in Kamala/Patong.',
-          'Mature infrastructure — Boat Avenue, Porto de Phuket, Blue Tree, UWC school — adds +25% rental premium.',
+          'Compare the purchase price and documented costs of each property.',
+          'Check the management and rental terms, including any restrictions.',
+          'Distinguish calculated scenarios from verified rental results.',
         ],
       },
       whatsappMessage: {
-        ru: 'Здравствуйте! Рассматриваю инвестиционный объект в Bang Tao. Хочу подборку с ClearView-рейтингом и расчётом доходности.',
-        en: 'Hello! I am considering an investment property in Bang Tao. Please share options with ClearView ratings and yield breakdown.',
+        ru: 'Здравствуйте! Рассматриваю объект в Bang Tao. Прошу прислать опубликованные предложения, условия управления и исходные данные для расчёта расходов.',
+        en: 'Hello! I am considering a property in Bang Tao. Please share published listings, management terms and the inputs needed to calculate costs.',
       },
       whatsappLabel: {
-        ru: 'Запросить инвест-подборку',
-        en: 'Request investor shortlist',
+        ru: 'Обсудить предложения',
+        en: 'Discuss listings',
       },
     },
     snowbirds: {

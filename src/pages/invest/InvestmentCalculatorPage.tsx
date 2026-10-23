@@ -305,8 +305,8 @@ export default function InvestmentCalculatorPage() {
                 </Button>
                 <p className="text-[11px] text-muted-foreground text-center">
                   {t({
-                    ru: 'Расчёт ориентировочный. Не является инвестиционной рекомендацией.',
-                    en: 'Indicative calculation. Not an investment recommendation.',
+                    ru: 'Расчёт зависит от введённых данных и допущений. Он не подтверждает фактическую доходность и не гарантирует будущие результаты.',
+                    en: 'Calculations depend on the supplied inputs and assumptions. They do not establish actual returns or guarantee future results.',
                   })}
                 </p>
               </CardContent>

@@ -97,7 +97,7 @@ export default function DeveloperOverview() {
         </div>
       )}
 
-      {/* Capital Marketplace CTAs — anonymized listings + raise funding */}
+      {/* Deal Room CTAs — anonymised project profiles + project submission */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Link
           to="/invest/submit?intent=raise_capital&category=residential_development"
@@ -105,13 +105,13 @@ export default function DeveloperOverview() {
         >
           <div className="flex items-center gap-2 mb-2">
             <Banknote className="w-4 h-4 text-[hsl(var(--nb-gold))]" />
-            <h3 className="font-semibold text-[hsl(var(--nb-text))]">Привлечь капитал</h3>
+            <h3 className="font-semibold text-[hsl(var(--nb-text))]">Подать проект девелопера</h3>
           </div>
           <p className="text-xs text-[hsl(var(--nb-text-secondary))] mb-3">
-            Подайте проект в анонимизированный investor board. Заявки попадают в Ignatev Capital CRM.
+            Опубликуйте анонимизированный профиль проекта в deal room. Заявки попадают в Ignatev Capital CRM.
           </p>
           <span className="text-xs text-[hsl(var(--nb-gold))] flex items-center gap-1 group-hover:gap-2 transition-all">
-            Подать сделку <ArrowRight className="w-3 h-3" />
+            Подать проект <ArrowRight className="w-3 h-3" />
           </span>
         </Link>
         <Link
