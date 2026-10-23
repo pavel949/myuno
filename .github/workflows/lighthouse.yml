@@ -50,13 +50,22 @@ jobs:
 
       - name: Install Lighthouse CI
         if: steps.gate.outputs.skip != 'true'
-        run: npm install --no-save @lhci/cli@0.14.x
+        run: npm install --prefix "$RUNNER_TEMP/lighthouse-tools" --no-save --ignore-scripts @lhci/cli@0.14.0
+
+      - name: Record observed production identity before audit
+        if: steps.gate.outputs.skip != 'true'
+        run: node scripts/lighthouse-evidence.mjs before
 
       - name: Run Lighthouse CI
         if: steps.gate.outputs.skip != 'true'
-        run: npx lhci autorun --config=lighthouserc${{ matrix.form_factor == 'mobile' && '.mobile' || '' }}.json
+        run: |
+          "$RUNNER_TEMP/lighthouse-tools/node_modules/.bin/lhci" autorun --config=lighthouserc${{ matrix.form_factor == 'mobile' && '.mobile' || '' }}.json
         env:
           LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ github.ref_name }}
+
+      - name: Validate reports and record observed production identity
+        if: always() && steps.gate.outputs.skip != 'true'
+        run: node scripts/lighthouse-evidence.mjs after
 
       - name: Upload reports
         if: always() && steps.gate.outputs.skip != 'true'
@@ -70,4 +79,5 @@ jobs:
             .lighthouseci/links.json
             .lighthouseci/assertion-results.json
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 30
