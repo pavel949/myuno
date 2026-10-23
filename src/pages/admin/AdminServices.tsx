@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,8 @@ import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkey
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { useOnBehalfContext } from '@/hooks/useAdminContentCreation';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
+import { serviceEditorPayload } from '@/lib/services/serviceEditor';
+import { formatServicePrice } from '@/lib/services/formatServicePrice';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -55,7 +57,6 @@ import {
   Search,
   Loader2,
   Clock,
-  Star,
   Building2,
   Copy,
   Image,
@@ -70,18 +71,19 @@ export default function AdminServices() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { providers } = useAdminProviders();
   const { categories } = useAdminCategories();
   const { isOnBehalf } = useOnBehalfContext();
   
   const providerId = searchParams.get('provider') || undefined;
-  const { services, isLoading: servicesLoading, createService, updateService, deleteService } = useAdminServices(providerId);
+  const { services, isLoading: servicesLoading, error: servicesError, refetch: refetchServices, createService, updateService, deleteService } = useAdminServices(providerId);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterProviderId, setFilterProviderId] = useState<string>(providerId || '');
@@ -96,10 +98,12 @@ export default function AdminServices() {
     description_ru: '',
     price: '',
     duration_minutes: '',
-    max_capacity: '1',
+    currency: cityCurrencyCode,
+    lead_time_hours: '2',
+    approval_status: 'approved',
+    booking_flow: 'in_app_request',
     images: [] as string[],
     is_active: true,
-    is_featured: false,
   });
 
   const isRussian = language === 'ru';
@@ -142,16 +146,18 @@ export default function AdminServices() {
       description_ru: '',
       price: '',
       duration_minutes: '',
-      max_capacity: '1',
+      currency: cityCurrencyCode,
+      lead_time_hours: '2',
+      approval_status: 'approved',
+      booking_flow: 'in_app_request',
       images: [],
       is_active: true,
-      is_featured: false,
     });
     setEditingService(null);
   };
 
-  const openEditDialog = (service: Service) => {
-    setEditingService(service);
+  const openEditDialog = (service: Service, duplicate = false) => {
+    setEditingService(duplicate ? null : service);
     // Determine if category_id is actually a subcategory
     const catId = service.category_id || '';
     const cat = categories.find(c => c.id === catId);
@@ -161,16 +167,18 @@ export default function AdminServices() {
       provider_id: service.provider_id,
       category_id: isSubcat ? (cat?.parent_id || '') : catId,
       subcategory_id: isSubcat ? catId : '',
-      name_en: service.name_en || '',
-      name_ru: service.name_ru || '',
+      name_en: `${service.name_en || ''}${duplicate ? ' (copy)' : ''}`,
+      name_ru: service.name_ru ? `${service.name_ru}${duplicate ? ' (копия)' : ''}` : '',
       description_en: service.description_en || '',
       description_ru: service.description_ru || '',
       price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes?.toString() || '',
-      max_capacity: (service as Record<string, unknown>).max_capacity?.toString() || '1',
+      currency: service.currency ?? '',
+      lead_time_hours: service.lead_time_hours?.toString() ?? '',
+      approval_status: service.approval_status ?? 'pending',
+      booking_flow: service.booking_flow ?? 'in_app_request',
       images: service.images || [],
       is_active: service.is_active ?? true,
-      is_featured: ((service as Record<string, unknown>).is_featured as boolean) ?? false,
     });
     setIsDialogOpen(true);
   };
@@ -200,31 +208,23 @@ export default function AdminServices() {
   }, [editingService, isRussian]);
 
   const handleSubmit = async () => {
-    if (!formData.name_en || !formData.price || !formData.provider_id) {
-      toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+    if (submittingRef.current) return;
+    const payload = serviceEditorPayload(formData);
+    if (payload.ok === false) {
+      const messages = {
+        required: isRussian ? 'Укажите поставщика, название и валюту.' : 'Choose a provider, name and currency.',
+        price: isRussian ? 'Укажите корректную неотрицательную цену или оставьте пустой для цены по запросу.' : 'Enter a valid nonnegative price, or leave blank for a quote.',
+        duration: isRussian ? 'Укажите длительность от 1 до 1440 минут. Для мгновенной записи она обязательна.' : 'Duration must be 1–1440 minutes and is required for instant booking.',
+        lead: isRussian ? 'Срок предварительной записи не может быть отрицательным.' : 'Advance notice must be nonnegative.',
+      };
+      toast.error(messages[payload.reason]);
       return;
     }
 
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
-      // Use subcategory if selected, otherwise parent category
-      const finalCategoryId = formData.subcategory_id || formData.category_id || undefined;
-      
-      const serviceData = {
-        provider_id: formData.provider_id,
-        category_id: finalCategoryId,
-        name_en: formData.name_en,
-        name_ru: formData.name_ru || formData.name_en,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
-        price: parseFloat(formData.price),
-        currency: cityCurrencyCode,
-        duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
-        max_capacity: parseInt(formData.max_capacity) || 1,
-        images: formData.images.length > 0 ? formData.images : undefined,
-        is_active: formData.is_active,
-        is_featured: formData.is_featured,
-      };
+      const serviceData = payload.data;
 
       if (editingService) {
         const { error } = await updateService(editingService.id, serviceData);
@@ -242,6 +242,7 @@ export default function AdminServices() {
       console.error('Error saving service:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving service');
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -291,8 +292,8 @@ export default function AdminServices() {
 
   // Form progress tracking
   const { progress, filled, total } = useFormProgress(formData, 
-    ['provider_id', 'name_en', 'price'],
-    ['name_ru', 'description_en', 'description_ru', 'duration_minutes']
+    ['provider_id', 'name_en', 'currency'],
+    ['name_ru', 'description_en', 'description_ru', 'duration_minutes', 'price']
   );
 
   // Hotkeys
@@ -399,6 +400,8 @@ export default function AdminServices() {
               <Skeleton key={i} className="h-24" />
             ))}
           </div>
+        ) : servicesError ? (
+          <Card><CardContent className="space-y-3 p-6"><p role="alert">{isRussian ? 'Не удалось загрузить услуги.' : 'Could not load services.'}</p><Button variant="outline" onClick={() => refetchServices()}>{isRussian ? 'Повторить' : 'Retry'}</Button></CardContent></Card>
         ) : filteredServices.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -426,9 +429,7 @@ export default function AdminServices() {
                         <h3 className="font-medium">
                           {isRussian ? (service.name_ru || service.name_en) : service.name_en}
                         </h3>
-                        {(service as Record<string, unknown>).is_featured && (
-                          <Star className="h-4 w-4 text-warning fill-warning" />
-                        )}
+                        <Badge variant="outline">{service.approval_status === 'approved' ? (isRussian ? 'Одобрена' : 'Approved') : service.approval_status === 'rejected' ? (isRussian ? 'Отклонена' : 'Rejected') : (isRussian ? 'На модерации' : 'In review')}</Badge>
                       </div>
                       
                       {!providerId && (
@@ -446,7 +447,7 @@ export default function AdminServices() {
                       
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">
-                          {curSym}{service.price?.toLocaleString()}
+                          {formatServicePrice(service.price, service.currency, language)}
                         </span>
                         {service.duration_minutes && (
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -473,10 +474,7 @@ export default function AdminServices() {
                           <Edit className="h-4 w-4 mr-2" />
                           {isRussian ? 'Редактировать' : 'Edit'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          openEditDialog(service);
-                          setTimeout(() => handleDuplicate(), 100);
-                        }}>
+                        <DropdownMenuItem onClick={() => openEditDialog(service, true)}>
                           <Copy className="h-4 w-4 mr-2" />
                           {isRussian ? 'Дублировать' : 'Duplicate'}
                         </DropdownMenuItem>
@@ -498,8 +496,8 @@ export default function AdminServices() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-0">
+          <DialogContent className="flex h-[90dvh] max-h-[56rem] flex-col gap-0 overflow-hidden p-0">
+            <DialogHeader className="shrink-0 p-6 pb-0">
               <DialogTitle>
                 {editingService 
                   ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
@@ -507,11 +505,11 @@ export default function AdminServices() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="px-6 pt-2">
+            <div className="shrink-0 px-6 pt-2">
               <ServiceBilingualHint isRu={isRussian} />
             </div>
 
-            <div className="px-6 pt-4">
+            <div className="shrink-0 px-6 pt-4">
               <AdminFormToolbar
                 progress={progress}
                 filled={filled}
@@ -523,7 +521,7 @@ export default function AdminServices() {
               />
             </div>
 
-            <ScrollArea className="max-h-[calc(90vh-240px)] px-6">
+            <ScrollArea className="min-h-0 flex-1 px-6">
               <div className="space-y-6 pb-4">
                 
                 {/* === Provider & Category === */}
@@ -552,7 +550,7 @@ export default function AdminServices() {
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>{isRussian ? 'Категория' : 'Category'}</Label>
                         <Select
@@ -610,18 +608,20 @@ export default function AdminServices() {
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                        <Label htmlFor="service-name_en">{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
                         <Input
+                          id="service-name_en"
                           value={formData.name_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
                           placeholder="Thai Massage"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
+                        <Label htmlFor="service-name_ru">{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
                         <Input
+                          id="service-name_ru"
                           value={formData.name_ru}
                           onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
                           placeholder="Тайский массаж"
@@ -629,18 +629,20 @@ export default function AdminServices() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                        <Label htmlFor="service-description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
                         <Textarea
+                          id="service-description_en"
                           value={formData.description_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                           rows={3}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                        <Label htmlFor="service-description_ru">{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
                         <Textarea
+                          id="service-description_ru"
                           value={formData.description_ru}
                           onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
                           rows={3}
@@ -677,32 +679,38 @@ export default function AdminServices() {
                   icon={<DollarSign className="h-4 w-4" />}
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>{isRussian ? `Цена (${curSym}) *` : `Price (${curSym}) *`}</Label>
+                      <Label htmlFor="service-price">{isRussian ? 'Цена (пусто — по запросу)' : 'Price (blank for a quote)'}</Label>
                       <Input
+                        id="service-price"
                         type="number"
+                        min="0"
                         value={formData.price}
                         onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                         placeholder="1000"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
+                      <Label htmlFor="service-duration">{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
                       <Input
+                        id="service-duration"
                         type="number"
+                        min="1"
+                        max="1440"
                         value={formData.duration_minutes}
                         onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
                         placeholder="60"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
+                      <Label htmlFor="service-currency">{isRussian ? 'Валюта' : 'Currency'}</Label>
                       <Input
-                        type="number"
-                        value={formData.max_capacity}
-                        onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
-                        placeholder="1"
+                        id="service-currency"
+                        value={formData.currency}
+                        onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value.toUpperCase() }))}
+                        maxLength={3}
+                        placeholder="THB"
                       />
                     </div>
                   </div>
@@ -716,6 +724,33 @@ export default function AdminServices() {
                   defaultOpen={false}
                 >
                   <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="service-approval">{isRussian ? 'Публикация' : 'Publication'}</Label>
+                      <Select value={formData.approval_status} onValueChange={approval_status => setFormData(prev => ({ ...prev, approval_status }))}>
+                        <SelectTrigger id="service-approval"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">{isRussian ? 'На проверке' : 'In review'}</SelectItem>
+                          <SelectItem value="approved">{isRussian ? 'Одобрена' : 'Approved'}</SelectItem>
+                          <SelectItem value="rejected">{isRussian ? 'Отклонена' : 'Rejected'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">{isRussian ? 'Для показа клиентам услуга и поставщик должны быть активны и одобрены.' : 'Both service and provider must be active and approved to appear to customers.'}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="service-flow">{isRussian ? 'Способ записи' : 'Booking mode'}</Label>
+                      <Select value={formData.booking_flow} onValueChange={booking_flow => setFormData(prev => ({ ...prev, booking_flow }))}>
+                        <SelectTrigger id="service-flow"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="in_app_request">{isRussian ? 'Заявка с подтверждением исполнителя' : 'Request confirmed by provider'}</SelectItem>
+                          <SelectItem value="instant" disabled>{isRussian ? 'Мгновенная запись — пока недоступна' : 'Instant booking — not available yet'}</SelectItem>
+                          {!['in_app_request', 'instant'].includes(formData.booking_flow) && <SelectItem value={formData.booking_flow}>{isRussian ? 'Ранее настроенный способ' : 'Previously configured mode'}</SelectItem>}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="service-lead">{isRussian ? 'Запись заранее, часов' : 'Advance notice, hours'}</Label>
+                      <Input id="service-lead" type="number" min="0" value={formData.lead_time_hours} onChange={e => setFormData(prev => ({ ...prev, lead_time_hours: e.target.value }))} />
+                    </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>{isRussian ? 'Активна' : 'Active'}</Label>
@@ -729,29 +764,17 @@ export default function AdminServices() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label>{isRussian ? 'Рекомендуемая' : 'Featured'}</Label>
-                        <p className="text-xs text-muted-foreground">
-                          {isRussian ? 'Показывать в топе' : 'Show in featured section'}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={formData.is_featured}
-                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
-                      />
-                    </div>
                   </div>
                 </VendorFormSection>
 
               </div>
             </ScrollArea>
 
-            <DialogFooter className="p-6 pt-0">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border p-4 sm:p-6">
+              <Button className="min-h-11 flex-1 sm:flex-none" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
+              <Button className="min-h-11 flex-1 sm:flex-none" onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isRussian ? 'Сохранить' : 'Save'}
               </Button>

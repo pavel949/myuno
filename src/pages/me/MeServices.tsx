@@ -5,7 +5,8 @@
  */
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import ServicesIndex from '@/pages/services/ServicesIndex';
+import { MyServiceRequests } from '@/components/services/MyServiceRequests';
 
 export default function MeServices() {
-  return <MeShellLayout><ServicesIndex embedded /></MeShellLayout>;
+  return <MeShellLayout><MyServiceRequests /><ServicesIndex embedded /></MeShellLayout>;
 }

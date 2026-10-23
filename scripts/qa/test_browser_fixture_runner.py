@@ -63,7 +63,7 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
         expected = (
             'employee-invite-ui complex-authoring-ui home-preferences-ui property-editor-ui '
             'admin-review-queues moderation-queue-ui ui-backlog-salvage pms-dashboard-ui '
-            'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui trip-planner-ui '
+            'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui services-framework-ui trip-planner-ui '
             'unified-property-search-ui bookings-list-ui pms-detail-ui calendar-ui today-ui '
             'property-browse-ui home-search-ui homepage-galleries-ui guest-complex-ui shared-surfaces-ui'
         ).split()

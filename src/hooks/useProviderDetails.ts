@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProviderDetails {
@@ -28,8 +29,12 @@ export interface ProviderService {
   id: string;
   name_en: string;
   name_ru: string;
-  price?: number;
+  price?: number | null;
   currency: string;
+  duration_minutes?: number | null;
+  lead_time_hours?: number | null;
+  booking_flow?: string | null;
+  availability_mode?: string | null;
   is_active: boolean;
   is_featured?: boolean;
   rating?: number;
@@ -72,6 +77,10 @@ export interface ProviderBooking {
 }
 
 export function useProviderDetails(providerId: string | null, visibility: 'private' | 'public' = 'private') {
+  const { user } = useAuth();
+  const actor = visibility === 'private' ? user?.id : null;
+  const scope = `${visibility}:${providerId ?? ''}:${actor ?? ''}`;
+  const [resultScope, setResultScope] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderDetails | null>(null);
   const [services, setServices] = useState<ProviderService[]>([]);
   const [products, setProducts] = useState<ProviderProduct[]>([]);
@@ -80,8 +89,18 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const generation = useRef(0);
   const fetchProviderDetails = useCallback(async () => {
-    if (!providerId) {
+    const request = ++generation.current;
+    setResultScope(scope);
+    const current = () => request === generation.current;
+    setProvider(null);
+    setServices([]);
+    setProducts([]);
+    setContracts([]);
+    setBookings([]);
+    setError(null);
+    if (!providerId || (visibility === 'private' && !actor)) {
       setProvider(null);
       setServices([]);
       setProducts([]);
@@ -102,6 +121,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
         .eq('id', providerId)
         .maybeSingle();
 
+      if (!current()) return;
       if (providerError) throw providerError;
       
       if (!providerData) {
@@ -119,13 +139,13 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
       // Fetch services
       const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
       const { data: servicesData, error: servicesError } = await serviceQuery
-        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
+        .select('id, name_en, name_ru, price, currency, duration_minutes, lead_time_hours, booking_flow, availability_mode, is_active, category_id, created_at')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
 
-      if (!servicesError) {
-        setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
-      }
+      if (!current()) return;
+      if (servicesError) throw servicesError;
+      setServices(servicesData || []);
 
       if (visibility === 'public') {
         setProducts([]);
@@ -144,6 +164,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
           .order('created_at', { ascending: false })
           .limit(50);
 
+        if (!current()) return;
         if (!productsError) {
           setProducts((productsData || []).map((p) => ({ ...p, stock_quantity: 0 })));
         }
@@ -159,59 +180,45 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
         .eq('entity_id', providerId)
         .order('created_at', { ascending: false });
 
+      if (!current()) return;
       if (!contractsError) {
         setContracts((contractsData || []) as ProviderContract[]);
       }
 
-      // Fetch recent bookings
+      // The same canonical requests shown in the customer and provider desks.
       const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select(`
-          id, 
-          status, 
-          total_amount, 
-          currency, 
-          scheduled_at, 
-          created_at,
-          services:service_id (name_en, name_ru)
-        `)
+        .from('service_orders')
+        .select('id, status, amount, currency, scheduled_at, created_at, service_name, service_name_ru')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false })
         .limit(20);
-
-      if (!bookingsError) {
-        setBookings(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (bookingsData || []).map((b: Record<string, any>) => ({
-            id: b.id,
-            status: b.status,
-            total_amount: b.total_amount,
-            currency: b.currency,
-            scheduled_at: b.scheduled_at,
-            created_at: b.created_at,
-            service_name: b.services?.name_en || b.services?.name_ru,
-          }))
-        );
-      }
+      if (!current()) return;
+      if (bookingsError) throw bookingsError;
+      setBookings((bookingsData || []).map((b) => ({
+        id: b.id, status: b.status, total_amount: b.amount, currency: b.currency,
+        scheduled_at: b.scheduled_at, created_at: b.created_at,
+        service_name: b.service_name || b.service_name_ru,
+      })));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch provider details');
+      if (current()) setError(err instanceof Error ? err.message : 'Failed to fetch provider details');
     } finally {
-      setIsLoading(false);
+      if (current()) setIsLoading(false);
     }
-  }, [providerId, visibility]);
+  }, [providerId, visibility, actor, scope]);
 
   useEffect(() => {
-    fetchProviderDetails();
+    void fetchProviderDetails();
+    return () => { generation.current++; };
   }, [fetchProviderDetails]);
 
   return {
-    provider,
-    services,
-    products,
-    contracts,
-    bookings,
-    isLoading,
-    error,
+    provider: resultScope === scope ? provider : null,
+    services: resultScope === scope ? services : [],
+    products: resultScope === scope ? products : [],
+    contracts: resultScope === scope ? contracts : [],
+    bookings: resultScope === scope ? bookings : [],
+    isLoading: resultScope === scope ? isLoading : !!providerId && (visibility === 'public' || !!actor),
+    error: resultScope === scope ? error : null,
     refetch: fetchProviderDetails,
   };
 }

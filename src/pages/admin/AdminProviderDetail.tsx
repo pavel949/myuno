@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
+import { ProviderServiceDesk } from '@/pages/vendor/VendorServiceDesk';
 import { useProviderDetails } from '@/hooks/useProviderDetails';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +20,6 @@ import {
   ProviderServicesTab,
   ProviderProductsTab,
   ProviderContractsTab,
-  ProviderBookingsTab,
 } from '@/components/admin/provider-detail';
 import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 
@@ -28,10 +29,11 @@ export default function AdminProviderDetail() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const [activeTab, setActiveTab] = useState('overview');
+  const { isAdmin, isLoading: adminLoading } = useAdminCheck();
 
   const { provider, services, products, contracts, bookings, isLoading, error, refetch } = useProviderDetails(id || null);
 
-  if (isLoading) {
+  if (isLoading || adminLoading) {
     return (
       <div className="p-4 md:p-6 space-y-4">
         <Skeleton className="h-8 w-64" />
@@ -43,6 +45,8 @@ export default function AdminProviderDetail() {
     );
   }
 
+  if (!isAdmin) return <p role="alert" className="p-6">{isRussian ? 'Нет доступа к управлению поставщиком.' : 'Provider management access denied.'}</p>;
+
   if (error || !provider) {
     return (
       <div className="p-4 md:p-6">
@@ -50,8 +54,9 @@ export default function AdminProviderDetail() {
           <CardContent className="p-8 text-center">
             <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
             <h3 className="font-medium mb-2">
-              {isRussian ? 'Провайдер не найден' : 'Provider not found'}
+              {error ? (isRussian ? 'Не удалось загрузить поставщика' : 'Could not load provider') : (isRussian ? 'Провайдер не найден' : 'Provider not found')}
             </h3>
+            {error && <Button onClick={() => void refetch()}>{isRussian ? 'Повторить' : 'Retry'}</Button>}
             <BackButton fallbackPath={`${APP_ROUTES.ADMIN}/providers`} variant="default" size="md" />
           </CardContent>
         </Card>
@@ -90,9 +95,9 @@ export default function AdminProviderDetail() {
             <span className="hidden sm:inline">{isRussian ? 'Контракты' : 'Contracts'}</span>
             {contracts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{contracts.length}</Badge>}
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="gap-1">
+          <TabsTrigger value="bookings" aria-label={isRussian ? 'Заказы и график' : 'Requests and hours'} className="gap-1">
             <CalendarCheck className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRussian ? 'Заказы' : 'Bookings'}</span>
+            <span>{isRussian ? 'Заказы и график' : 'Requests and hours'}</span>
             {bookings.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{bookings.length}</Badge>}
           </TabsTrigger>
         </TabsList>
@@ -120,7 +125,7 @@ export default function AdminProviderDetail() {
         </TabsContent>
 
         <TabsContent value="bookings" className="mt-4">
-          <ProviderBookingsTab bookings={bookings} />
+          <ProviderServiceDesk key={provider.id} provider={provider} />
         </TabsContent>
       </Tabs>
     </div>

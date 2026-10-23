@@ -29,6 +29,7 @@ FIXTURE_SPECS = (
     ('mc-workspace-ui', 'mc-workspace-isolated'),
     ('mc-workspace-forms-ui', 'mc-workspace-forms'),
     ('services-discovery-ui', 'services-discovery-isolated'),
+    ('services-framework-ui', 'services-framework-isolated'),
     ('trip-planner-ui', 'trip-planner-isolated'),
     ('unified-property-search-ui', 'unified-property-search-isolated'),
     ('bookings-list-ui', 'bookings-list-isolated'),

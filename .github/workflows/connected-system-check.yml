@@ -242,6 +242,7 @@ jobs:
           done
           # Two isolated browsers at most; every fixture retains its 180s limit.
           python3 scripts/qa/browser_fixture_runner.py
+
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

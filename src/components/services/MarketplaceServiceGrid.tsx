@@ -61,6 +61,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
                     </Link>
                   )}
                   <div className="mt-auto flex flex-col gap-3 border-t border-border pt-3">
+
                     <Button size="sm" className="min-h-11 w-full" onClick={() => setSelected({
                       id: s.id, providerId: s.provider_id, name, price: s.price, currency: s.currency,
                       durationMinutes: s.duration_minutes, leadTimeHours: s.lead_time_hours,

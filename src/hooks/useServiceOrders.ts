@@ -16,7 +16,7 @@ export interface ServiceOrder {
   service_name: string;
   service_name_ru: string | null;
   description: string | null;
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   priority: 'low' | 'normal' | 'high' | 'urgent';
   scheduled_at: string | null;
   started_at: string | null;
@@ -106,17 +106,23 @@ export function useGuestServiceOrders() {
 
   const cancelOrder = useMutation({
     mutationFn: async (orderId: string) => {
-      const { error } = await supabase
+      if (!user?.id) throw new Error('Not authenticated');
+      const { data, error } = await supabase
         .from('service_orders')
         .update({ status: 'cancelled' })
         .eq('id', orderId)
         .eq('guest_id', user?.id)
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .select('id')
+        .single();
       
       if (error) throw error;
+      if (!data) throw new Error('Order changed or access denied');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-service-orders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['provider-service-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['provider-busy'] });
       toast('Заказ отменён');
     },
   });
@@ -163,7 +169,7 @@ export function useGuestServiceOrders() {
     };
   }, [user, refetch]);
 
-  const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status));
+  const activeOrders = orders.filter(o => !['completed', 'cancelled', 'rejected'].includes(o.status));
   const completedOrders = orders.filter(o => o.status === 'completed');
 
   return {

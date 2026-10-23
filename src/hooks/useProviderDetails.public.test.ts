@@ -1,6 +1,7 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest';
 import {renderHook,waitFor} from '@testing-library/react';
 const tables:string[]=[];
+vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:null})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{from:(table:string)=>{
  tables.push(table);
  if(!['public_provider_catalog','public_service_catalog'].includes(table))throw new Error('Private relation forbidden');

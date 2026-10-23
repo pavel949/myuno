@@ -32,12 +32,14 @@ import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { useReviews } from "@/hooks/useReviews";
 import { ServiceBookingSheet, type BookableService } from "@/components/services/ServiceBookingSheet";
 
+import { formatServicePrice } from '@/lib/services/formatServicePrice';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
 interface CartService {
   id: string;
   name: string;
-  price: number;
+  price: number | null;
+  currency: string;
   duration: string;
 }
 
@@ -53,7 +55,7 @@ const ServiceProviderDetail = () => {
   const [booking, setBooking] = useState<BookableService | null>(null);
 
   // Real DB data
-  const { provider, services, isLoading } = useProviderDetails(id || null, 'public');
+  const { provider, services, isLoading, error, refetch } = useProviderDetails(id || null, 'public');
   const { reviews, stats, isLoading: reviewsLoading } = useReviews({
     itemType: "provider",
     itemId: id || "",
@@ -75,8 +77,9 @@ const ServiceProviderDetail = () => {
       (services ?? []).map((s) => ({
         id: s.id,
         name: (isRu ? s.name_ru : s.name_en) || s.name_en,
-        price: Number(s.price ?? 0),
-        duration: "",
+        price: s.price ?? null,
+        currency: s.currency,
+        duration: s.duration_minutes ? `${s.duration_minutes} ${isRu ? "мин" : "min"}` : "",
       })),
     [services, isRu]
   );
@@ -94,13 +97,14 @@ const ServiceProviderDetail = () => {
     items.find((item) => item.id === serviceId && item.type === "service");
 
   const handleAddToCart = (service: CartService) => {
+    if (service.price == null || !service.currency) return;
     const item = {
       id: service.id,
       type: "service" as const,
       name: service.name,
       nameRu: service.name,
       price: service.price,
-      currency: "฿",
+      currency: service.currency,
       providerId: id,
       providerName,
       options: service.duration ? { duration: service.duration } : undefined,
@@ -114,6 +118,11 @@ const ServiceProviderDetail = () => {
   const servicesInCart = items.filter(
     (item) => item.type === "service" && item.providerId === id
   );
+
+  const cartTotals = new Map<string, number>();
+  for (const item of servicesInCart) {
+    cartTotals.set(item.currency, (cartTotals.get(item.currency) ?? 0) + item.price * item.quantity);
+  }
 
   if (isLoading) {
     return (
@@ -131,6 +140,14 @@ const ServiceProviderDetail = () => {
         </div>
       </AppLayout>
     );
+  }
+
+  if (error) {
+    return <AppLayout><div role="alert" className="p-6 space-y-3">
+      <BackButton fallbackPath={returnTo} />
+      <p>{isRu ? 'Не удалось загрузить профиль и услуги.' : 'Could not load the provider and services.'}</p>
+      <Button onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div></AppLayout>;
   }
 
   if (!provider) {
@@ -296,8 +313,8 @@ const ServiceProviderDetail = () => {
                         inCart ? "border-primary bg-primary/5" : "border-border bg-card"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1 break-words">
                           <h3 className="font-medium">{service.name}</h3>
                           {service.duration && (
                             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
@@ -305,13 +322,13 @@ const ServiceProviderDetail = () => {
                               <span>{service.duration}</span>
                             </div>
                           )}
-                          <p className="font-bold text-primary mt-1">฿{service.price}</p>
+                          <p className="font-bold text-primary mt-1">{formatServicePrice(service.price, service.currency, language)}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {id && (
                             <Button size="sm" variant="outline" className="h-10 px-3" onClick={() => {
-                              const raw = (services ?? []).find((x) => x.id === service.id) as { duration_minutes?: number | null; lead_time_hours?: number | null } | undefined;
-                              setBooking({ id: service.id, providerId: id, name: service.name, price: service.price, durationMinutes: raw?.duration_minutes ?? null, leadTimeHours: raw?.lead_time_hours ?? null });
+                              const raw = (services ?? []).find((x) => x.id === service.id) ;
+                              setBooking({ id: service.id, providerId: id, name: service.name, price: service.price, currency: service.currency, durationMinutes: raw?.duration_minutes ?? null, leadTimeHours: raw?.lead_time_hours ?? null });
                             }}>
                               <Calendar className="w-4 h-4 mr-1" />
                               {isRu ? "Записаться" : "Book"}
@@ -331,6 +348,7 @@ const ServiceProviderDetail = () => {
                             <Button
                               size="sm"
                               onClick={() => handleAddToCart(service)}
+                              disabled={service.price == null || !service.currency}
                               className="h-10 px-3"
                             >
                               <Plus className="w-4 h-4 mr-1" />
@@ -434,7 +452,7 @@ const ServiceProviderDetail = () => {
                 : `Services in cart: ${servicesInCart.length}`}
             </span>
             <span className="font-bold text-primary">
-              ฿{servicesInCart.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+              {[...cartTotals].map(([currency, amount]) => formatServicePrice(amount, currency, language)).join(' + ')}
             </span>
           </div>
         )}

@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import type { WeeklyHours, BusyRange } from '@/lib/services/slots';
 import { phuketDateTime } from '@/lib/services/slots';
 
@@ -100,6 +101,7 @@ export function useBusySlots(providerId: string | null | undefined, date: string
 }
 
 export function useCreateServiceOrder() {
+  const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: {
@@ -111,13 +113,14 @@ export function useCreateServiceOrder() {
       guestPhone: string;
       notes: string;
     }) => {
+      if (!user?.id || user.id !== input.guestId) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('service_orders')
         .insert({
           service_id: input.serviceId,
           provider_id: input.providerId,
           scheduled_at: input.scheduledAt.toISOString(),
-          guest_id: input.guestId,
+          guest_id: user.id,
           guest_name: input.guestName || null,
           guest_phone: input.guestPhone || null,
           notes: input.notes || null,
@@ -125,14 +128,17 @@ export function useCreateServiceOrder() {
           service_name: 'pending', // overwritten by validate_service_order trigger
           status: 'pending',
         })
-        .select('id')
+        .select('id,status')
         .single();
       if (error) throw error;
+      if (!data?.id) throw new Error('Service request was not acknowledged');
       return data;
     },
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ['provider-busy', v.providerId] });
       qc.invalidateQueries({ queryKey: ['my-service-orders'] });
+      qc.invalidateQueries({ queryKey: ['guest-service-orders', v.guestId] });
+      qc.invalidateQueries({ queryKey: ['provider-service-orders', v.providerId] });
     },
   });
 }
@@ -166,9 +172,10 @@ export function useMyProvider(userId: string | undefined) {
 }
 
 export function useProviderServicesAdmin(providerId: string | undefined) {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['provider-services-admin', providerId],
-    enabled: !!providerId,
+    queryKey: ['provider-services-admin', providerId, user?.id],
+    enabled: !!providerId && !!user?.id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
@@ -182,9 +189,10 @@ export function useProviderServicesAdmin(providerId: string | undefined) {
 }
 
 export function useProviderOrders(providerId: string | undefined) {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['provider-service-orders', providerId],
-    enabled: !!providerId,
+    queryKey: ['provider-service-orders', providerId, user?.id],
+    enabled: !!providerId && !!user?.id,
     queryFn: async (): Promise<ServiceOrderRow[]> => {
       const { data, error } = await supabase
         .from('service_orders')
