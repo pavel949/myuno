@@ -173,7 +173,10 @@ BEGIN
   SELECT * INTO prop FROM public.properties WHERE id=p_property_id;
   IF NOT FOUND OR NOT ((NOT p_guest AND (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
     OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)))
-    OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved')
+    OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved' AND prop.deleted_at IS NULL
+      AND (prop.listing_type='rent' OR 'rent'=ANY(prop.listing_modes))
+      AND CASE WHEN COALESCE(cardinality(prop.tenancy_modes),0)>0 THEN 'short'=ANY(prop.tenancy_modes)
+        ELSE prop.price_per_night>0 AND prop.price_per_night::text NOT IN ('NaN','Infinity','-Infinity') END)
     OR (p_guest AND EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts r WHERE r.request_id=p_request_id AND r.property_id=p_property_id AND r.actor_id=actor AND r.command_kind='create' AND (r.payload->>'guest_mode')::boolean IS TRUE))) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
   END IF;
@@ -234,7 +237,10 @@ BEGIN
   SELECT * INTO prop FROM public.properties WHERE id=p_property_id FOR UPDATE;
   IF NOT FOUND OR NOT ((NOT p_guest AND (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
     OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)))
-    OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved')
+    OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved' AND prop.deleted_at IS NULL
+      AND (prop.listing_type='rent' OR 'rent'=ANY(prop.listing_modes))
+      AND CASE WHEN COALESCE(cardinality(prop.tenancy_modes),0)>0 THEN 'short'=ANY(prop.tenancy_modes)
+        ELSE prop.price_per_night>0 AND prop.price_per_night::text NOT IN ('NaN','Infinity','-Infinity') END)
     OR (p_guest AND EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts r WHERE r.request_id=p_request_id AND r.property_id=p_property_id AND r.actor_id=actor AND r.command_kind='create' AND (r.payload->>'guest_mode')::boolean IS TRUE))) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
   END IF;

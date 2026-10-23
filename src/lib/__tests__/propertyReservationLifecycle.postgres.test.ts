@@ -77,6 +77,11 @@ beforeAll(async () => {
   await sql.unsafe(`CREATE TRIGGER sync_order_to_property_booking AFTER INSERT OR UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION trg_sync_order_to_property_booking();
     CREATE TRIGGER trg_guard_customer_order_update BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION guard_customer_order_update();
     ALTER TABLE properties ADD approval_status text DEFAULT 'approved';
+    ALTER TABLE properties ADD deleted_at timestamptz;
+    ALTER TABLE properties ADD tenancy_modes text[] DEFAULT ARRAY['short'];
+    ALTER TABLE properties ADD listing_type text DEFAULT 'rent';
+    ALTER TABLE properties ADD listing_modes text[] DEFAULT ARRAY['rent'];
+    ALTER TABLE properties ADD price_per_night numeric DEFAULT 1000;
     CREATE POLICY guest_orders_read ON orders FOR SELECT TO authenticated USING(customer_user_id=auth.uid());
     GRANT SELECT ON orders TO authenticated`);
   await script(forward);
@@ -174,6 +179,72 @@ describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
   await sql`UPDATE properties SET is_active=false WHERE id=${room}`;
   expect((await reserve()).replayed).toBe(true);expect((await read()).order.status).toBe('pending');
   await expect(reserve(uuid(),actor)).rejects.toThrow('forbidden');
+ });
+ it('soft-deleted active/approved supply rejects fresh guest commands but preserves bound receipt recovery',async()=>{
+  await sql`UPDATE properties SET deleted_at=clock_timestamp() WHERE id=${room}`;
+  await expect(reserve()).rejects.toThrow('forbidden');
+  const[empty]=await sql`SELECT (SELECT count(*)::int FROM orders) orders,(SELECT count(*)::int FROM property_bookings) holds,(SELECT count(*)::int FROM pms_commands.manual_booking_receipts) receipts`;
+  expect(empty).toEqual({orders:0,holds:0,receipts:0});
+  await sql`UPDATE properties SET deleted_at=NULL WHERE id=${room}`;
+  const created=await reserve();
+  await sql`UPDATE properties SET deleted_at=clock_timestamp() WHERE id=${room}`;
+  const replay=await reserve();expect(replay.replayed).toBe(true);expect(replay.order).toEqual(created.order);
+  await expect(reserve(uuid(),guest,{check_in:'2026-12-10',check_out:'2026-12-13'})).rejects.toThrow('forbidden');
+  await expect(reserve(request,uuid())).rejects.toThrow('forbidden');
+  expect((await read()).order.id).toBe(created.order.id);
+  const cancelled=await change(created,{status:'cancelled'});expect(cancelled.order.status).toBe('cancelled');
+  expect((await reserve()).order.status).toBe('cancelled');
+ });
+ it.each([['medium'],['long'],['medium','long']])('direct guest RPC rejects explicit unsupported tenancy %j despite a legacy nightly price',async(...modes)=>{
+  await sql`UPDATE properties SET tenancy_modes=${modes}::text[],price_per_night=1000 WHERE id=${room}`;
+  await expect(reserve()).rejects.toThrow('forbidden');
+  const[n]=await sql`SELECT count(*)::int n FROM orders`;expect(n.n).toBe(0);
+ });
+ it('sale-only supply cannot be reserved directly even with stale short-stay and nightly-price fields',async()=>{
+  await sql`UPDATE properties SET listing_type='sale',listing_modes=ARRAY['sale'],tenancy_modes=ARRAY['short'],price_per_night=1000 WHERE id=${room}`;
+  await expect(reserve()).rejects.toThrow('forbidden');
+  await sql`UPDATE properties SET tenancy_modes='{}'::text[] WHERE id=${room}`;await expect(reserve()).rejects.toThrow('forbidden');
+ });
+ it('legitimate legacy nightly rental and mixed rent/sale short stays remain eligible, and mode change preserves receipt recovery',async()=>{
+  await sql`UPDATE properties SET tenancy_modes=NULL WHERE id=${room}`;
+  const created=await reserve();
+  await sql`UPDATE properties SET tenancy_modes=ARRAY['long'],listing_type='sale',listing_modes=ARRAY['sale'] WHERE id=${room}`;
+  expect((await reserve()).order.id).toBe(created.order.id);await expect(reserve(uuid(),guest,{check_in:'2026-12-10',check_out:'2026-12-13'})).rejects.toThrow('forbidden');
+  await change(created,{status:'cancelled'});
+  await sql`UPDATE properties SET tenancy_modes=ARRAY['short'],listing_modes=ARRAY['rent','sale'] WHERE id=${room}`;
+  expect((await reserve(uuid())).order.status).toBe('pending');
+ });
+ it.each(['soft-delete','long-only'])('new guest eligibility is rechecked after waiting for a concurrent %s change',async(kind)=>{
+  const locker=await sql.reserve();let committed=false;
+  await locker.unsafe('BEGIN');await locker`SELECT id FROM properties WHERE id=${room} FOR UPDATE`;
+  const pending=reserve().then(value=>({value,error:null}),error=>({value:null,error}));
+  try{
+   let waiting=false;
+   for(let attempt=0;attempt<100;attempt++){
+    const[row]=await sql`SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%create_property_reservation_checked%') waiting`;
+    if(row.waiting){waiting=true;break;}await new Promise(resolve=>setTimeout(resolve,10));
+   }
+   expect(waiting).toBe(true);
+   if(kind==='soft-delete')await locker`UPDATE properties SET deleted_at=clock_timestamp() WHERE id=${room}`;
+   else await locker`UPDATE properties SET tenancy_modes=ARRAY['long'] WHERE id=${room}`;
+   await locker.unsafe('COMMIT');committed=true;
+   const outcome=await pending;expect(outcome.error?.message).toContain('forbidden');
+   const[n]=await sql`SELECT count(*)::int n FROM orders`;expect(n.n).toBe(0);
+  }finally{if(!committed)await locker.unsafe('ROLLBACK');locker.release();await pending;}
+ });
+ it.each([false,true])('historical unreceipted booking remains readable but checked mutations are intentionally unsupported (paid=%s)',async(paid)=>{
+  const legacy=uuid();
+  await sql`INSERT INTO orders(id,order_type,vertical,customer_user_id,status,start_at,end_at,total_amount,currency,metadata)
+   VALUES(${legacy},'property','property',${actor},'confirmed','2026-11-10T14:00:00+07:00','2026-11-13T12:00:00+07:00',1250,'THB','{"guests_count":1}'::jsonb)`;
+  await sql`INSERT INTO order_participants(order_id,role,name) VALUES(${legacy},'guest','Historical Synthetic Guest')`;
+  await sql`INSERT INTO order_items(order_id,item_type,resource_id,qty,unit_price,amount,start_at,end_at)
+   VALUES(${legacy},'property',${room},1,1250,1250,'2026-11-10T14:00:00+07:00','2026-11-13T12:00:00+07:00')`;
+  if(paid)await sql`INSERT INTO payment_intents(order_id,amount,currency,method,status) VALUES(${legacy},1250,'THB','stripe','succeeded')`;
+  expect(await asActor(actor,tx=>tx`SELECT id FROM orders WHERE id=${legacy}`)).toHaveLength(1);
+  const[row]=await sql`SELECT updated_at::text revision FROM orders WHERE id=${legacy}`;
+  await expect(asActor(actor,tx=>tx`SELECT public.change_property_booking(${uuid()}::uuid,${legacy}::uuid,${row.revision}::text::timestamptz,'{"status":"cancelled"}'::jsonb)`)).rejects.toThrow('reservation_contract_unavailable');
+  const[hold]=await sql`SELECT status FROM property_bookings WHERE external_id=${legacy}`;expect(hold.status).toBe('confirmed');
+  const[order]=await sql`SELECT status::text status FROM orders WHERE id=${legacy}`;expect(order.status).toBe('confirmed');
  });
  it('adjacent half-open stays do not overlap and manual blocked dates prevent a hold',async()=>{
   await reserve();expect((await reserve(uuid(),uuid(),{check_in:'2026-11-13',check_out:'2026-11-14'})).order.status).toBe('pending');

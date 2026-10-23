@@ -21,9 +21,12 @@ Status: source / isolated acceptance. **Not activated in production.**
 | Real card capture/refund and paid/historical lifecycle | NOT IN MILESTONE | No payment/refund completion claim; historical/paid mutations remain fail-closed |
 | Production migration, edge deployment, frontend publication and live acceptance | NOT ACTIVATED | No production writes or deployment performed |
 
-Targeted acceptance: 125 tests passed across ten files, including 22 real
-PostgreSQL/browser scenarios. Additional existing regression: 107 passed across
-eight files. Lint, typecheck and build results are recorded with the final commit
+Initial targeted acceptance: 125 passed across ten files (103 client/handler
+checks and 22 PostgreSQL/browser scenarios). The eligibility correction expands
+the real PostgreSQL/browser suite to 32; all 32 passed on the corrected SQL.
+The unchanged client/handler checks and 107 existing regressions retain their
+previous passing evidence; they are not claimed as newly rerun for this SQL-only
+correction. Lint, typecheck and build results are recorded with the final commit
 report; test counts are not production activation evidence.
 
 ## Reproduction
@@ -69,3 +72,37 @@ infrastructure, not an authentication service or deployable API.
 6. Verify the exact deployed frontend, edge versions and DB migration, then the
    allowed request-only journey. Publication alone does not activate or prove
    the server contract. No live customer booking/payment is authorized here.
+
+## Review correction: eligibility and legacy operational compatibility
+
+New guest creation must match published rental supply, not merely an arbitrary
+active/approved UUID: `deleted_at IS NULL`, canonical rent eligibility
+(`listing_type='rent'` or `listing_modes` contains `rent`), and explicit `short`
+tenancy. Only absent/empty tenancy modes use a finite positive nightly-price
+fallback. Check this again after acquiring the property row lock. A previously
+committed actor/property/intent-bound receipt remains replayable after soft delete,
+unpublishing or rental-mode change, and its guest can still cancel.
+
+**Backward compatibility is NOT complete.** Deploying the new mutation hooks
+unchanged would disable legitimate editing/cancellation of existing unreceipted
+manual bookings, even where the old staff UI allowed those actions. Read retention
+and fail-closed containment are not a replacement transition contract. Do not
+activate these hooks globally until a reviewed, isolated-tested historical
+transition/adoption path is selected, or a separate compatible operational path is
+preserved without restoring unsafe raw/financial writes. No historical backfill,
+adoption or paid cancellation has been implemented or approved here.
+
+| Record cohort | Read | Mutation in this tranche |
+| --- | --- | --- |
+| New receipt-backed guest unpaid request | Checked guest/PMS readers | Create, operator confirm/edit, own guest cancel, operator cancel |
+| New receipt-backed owner/manual unpaid booking | Checked PMS readers | Create, confirm/edit/cancel with object/module rights |
+| Historical unreceipted unpaid manual booking | Existing raw reader retained | **BLOCKED** (`reservation_contract_unavailable`); legitimate staff compatibility is a release blocker |
+| Historical paid/payment-bearing booking | Existing raw reader retained | **BLOCKED**, no refund/payment interlock is certified |
+| Imported/calendar inventory without a canonical receipt-backed order | Existing inventory paths | Not adopted; strict global overlap/block changes need representative writer tests |
+| Checked-in/completed/other terminal fulfilment states | Existing historical reader, where authorized | Not supported by the bounded unpaid command |
+
+The real-PostgreSQL cohort regression explicitly constructs a historical
+order/item/guest/hold, with and without a succeeded payment intent: its existing
+authorized read remains available, the new change command rejects, and both order
+and hold remain confirmed. This proves containment and documents the operational
+regression; it does **not** turn that cohort into a completed journey.
