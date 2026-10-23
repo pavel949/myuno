@@ -1,129 +1,75 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { webcrypto } from 'node:crypto';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
-import { civilStaysOverlap, occupiedCivilDates, stayOccupiesDate, type CivilStay } from '@/lib/hotelDates';
-
-const state = vi.hoisted(() => ({
-  blocked: [] as string[],
-  existing: [] as { id: string; check_in: string; check_out: string }[],
-  boundary: [] as string[],
-  failedTable: '', missingOrder: false,
-}));
+import { civilStaysOverlap, occupiedCivilDates, stayOccupiesDate } from '@/lib/hotelDates';
+const state = vi.hoisted(() => ({ calls: [] as {name:string; args:Record<string,unknown>}[], failure:'', malformed:false, missingRevision:false, reader:null as null|(()=>Promise<unknown>), allowRead:false, actor:'actor', reservations:[] as unknown[], checkedError:'' }));
 vi.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({ data: [], isLoading: false }),
-  useMutation: ({ mutationFn }: { mutationFn: (input: unknown) => Promise<unknown> }) => ({ mutateAsync: mutationFn }),
-  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  useQuery: (options:{queryFn:()=>Promise<unknown>}) => {state.reader=options.queryFn;return {data:[],isLoading:false};},
+  useMutation: ({mutationFn}:{mutationFn:(input:unknown)=>Promise<unknown>}) => ({mutateAsync:mutationFn}),
+  useQueryClient:()=>({invalidateQueries:vi.fn()}),
 }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-user' } }) }));
-vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: null }) }));
-vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefront: null }) }));
-vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: () => { throw Error('Forbidden query'); } }));
-vi.mock('@/integrations/supabase/client', () => {
-  function from(table: string) {
-    const filters: { method: string; field: string; value: unknown }[] = [];
-    const chain = {
-      select: () => chain,
-      eq: (field: string, value: unknown) => add('eq', field, value),
-      is: (field: string, value: unknown) => add('is', field, value),
-      not: (field: string, _operator: string, value: unknown) => add('not', field, value),
-      neq: (field: string, value: unknown) => add('neq', field, value),
-      in: (field: string, value: unknown) => add('in', field, value),
-      gte: (field: string, value: unknown) => add('gte', field, value),
-      gt: (field: string, value: unknown) => add('gt', field, value),
-      lte: (field: string, value: unknown) => add('lte', field, value),
-      lt: (field: string, value: unknown) => add('lt', field, value),
-      single: async () => ({ data: state.missingOrder ? null : { start_at: '2026-10-10T14:00:00Z', end_at: '2026-10-13T12:00:00Z', order_items: [{ resource_id: 'synthetic-home' }] }, error: state.failedTable === 'current' ? new Error('Synthetic read failure') : null }),
-      insert: () => stop('insert'),
-      update: () => stop('update'),
-      then: (resolve: (result: { data: unknown[]; error: Error | null }) => unknown) => {
-        const passes = (field: string, value: string) => filters.filter(f => f.field === field).every(f => {
-          const right = String(f.value);
-          switch (f.method) {
-            case 'gte': return value >= right;
-            case 'gt': return value > right;
-            case 'lte': return value <= right;
-            case 'lt': return value < right;
-            case 'neq': return value !== right;
-            default: return true;
-          }
-        });
-        const data = table === 'property_availability'
-          ? state.blocked.filter(date => passes('date', date)).map(date => ({ date }))
-          : table === 'orders'
-            ? state.existing.filter(b => passes('start_at', `${b.check_in}T14:00:00Z`) && passes('end_at', `${b.check_out}T12:00:00Z`) && passes('id', b.id)).map(b => ({ id: b.id }))
-            : table === 'order_items' ? [{ order_id: 'synthetic-existing' }] : [];
-        return Promise.resolve(resolve({ data, error: state.failedTable === table ? new Error('Synthetic read failure') : null }));
-      },
-    };
-    function add(method: string, field: string, value: unknown) { filters.push({ method, field, value }); return chain; }
-    function stop(operation: string): never {
-      state.boundary.push(`${table}.${operation}`);
-      throw Error('SYNTHETIC_WRITE_BOUNDARY');
-    }
-    return chain;
-  }
-  return { supabase: { from, functions: { invoke: () => { throw Error('Forbidden function'); } } } };
+vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:{id:state.actor}})}));
+vi.mock('@/hooks/useActiveCompany',()=>({useActiveCompany:()=>({activeCompany:null})}));
+vi.mock('@/lib/getAccessiblePropertyIds',()=>({getAccessiblePropertyIds:async()=>({allIds:['home'],ownedIds:[],delegatedIds:[],companyIds:[]})}));
+vi.mock('@/integrations/supabase/client',()=>({supabase:{
+  from:()=>{if(!state.allowRead)throw new Error('RAW_TABLE_ACCESS_FORBIDDEN');const query={select:()=>query,eq:()=>query,is:()=>query,order:()=>query,in:()=>query,then:(resolve:(value:unknown)=>unknown)=>Promise.resolve(resolve({data:[],error:null}))};return query;},
+  functions:{invoke:vi.fn()},
+  rpc:async(name:string,args:Record<string,unknown>)=>{
+    state.calls.push({name,args});
+    if(name==='list_property_reservations_checked')return {data:state.reservations,error:state.checkedError?new Error(state.checkedError):null};
+    if(state.failure) return {data:null,error:new Error(state.failure)};
+    if(state.malformed) return {data:{success:true},error:null};
+    const id=name==='create_manual_property_booking'?args.p_request_id:args.p_order_id;
+    const patch=(args.p_patch||args.p_input||{}) as Record<string,unknown>;
+    return {error:null,data:{success:true,replayed:false,order:{id,status:patch.status||'pending',start_at:'2030-01-09T17:30:00Z',end_at:'2030-01-11T17:00:00Z',updated_at:state.missingRevision?null:'2030-01-01T00:00:00Z'},order_items:[{item_type:'property',resource_id:'home'}],order_participants:[{role:'guest',name:'Stored guest'}]}};
+  },
+}}));
+beforeEach(()=>{vi.stubGlobal('crypto',webcrypto);localStorage.clear();state.calls=[];state.failure='';state.malformed=false;state.missingRevision=false;state.allowRead=false;state.actor='actor';state.reservations=[];state.checkedError='';state.reader=null;});
+afterEach(()=>vi.unstubAllGlobals());
+const stay={property_id:'home',check_in:'2030-01-10',check_out:'2030-01-12',status:'pending'};
+it('maps acknowledged instants to Bangkok days and sends civil dates unchanged to the checked writer',async()=>{
+  const {result}=renderHook(()=>usePropertyBookings('home'));
+  const booking=await result.current.createBooking(stay);
+  expect(booking).toMatchObject({check_in:'2030-01-10',check_out:'2030-01-12',guest_name:'Stored guest',status:'pending'});
+  expect(state.calls).toHaveLength(1);expect(state.calls[0]).toMatchObject({name:'create_manual_property_booking',args:{p_property_id:'home',p_input:{check_in:stay.check_in,check_out:stay.check_out}}});
 });
-
-const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: CivilStay; allowed: boolean }[] = [
-  { label: '10→13 allows subsequent 13→15', stay: { check_in: '2026-10-13', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: true },
-  { label: 'checkout block 13 permits 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-13'], allowed: true },
-  { label: 'occupied block 12 rejects 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-12'], allowed: false },
-  { label: 'one night checks 10, not 11', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-11'], allowed: true },
-  { label: 'one night rejects block 10', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-10'], allowed: false },
-  { label: 'month boundary checkout free', stay: { check_in: '2026-01-31', check_out: '2026-02-01' }, blocked: ['2026-02-01'], allowed: true },
-  { label: 'year boundary occupied block', stay: { check_in: '2026-12-31', check_out: '2027-01-02' }, blocked: ['2027-01-01'], allowed: false },
-  { label: 'leap-day checkout free', stay: { check_in: '2028-02-28', check_out: '2028-02-29' }, blocked: ['2028-02-29'], allowed: true },
-  { label: 'leap night blocked', stay: { check_in: '2028-02-29', check_out: '2028-03-01' }, blocked: ['2028-02-29'], allowed: false },
-  { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
-];
-
-beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; });
-describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
-  it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
-    state.blocked = blocked;
-    state.existing = existing ? [{ ...existing, id: 'synthetic-existing' }] : [];
-    const uiAllowed = !blocked.some(day => stayOccupiesDate(stay, day)) && !(existing && civilStaysOverlap(existing, stay));
-    expect(uiAllowed).toBe(allowed);
-    expect(blocked.some(day => occupiedCivilDates(stay).includes(day))).toBe(blocked.some(day => stayOccupiesDate(stay, day)));
-    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
-      : result.current.updateBooking({ id: 'synthetic-current', ...stay });
-    await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
-    expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
-  });
+it.each([['2030-01-10','2030-01-10'],['2030-01-13','2030-01-10'],['2030-02-30','2030-03-03'],['','2030-01-13']])('rejects invalid complete stay %s → %s before either command',async(check_in,check_out)=>{
+  const {result}=renderHook(()=>usePropertyBookings('home'));
+  await expect(result.current.createBooking({...stay,check_in,check_out})).rejects.toThrow('корректные даты');
+  await expect(result.current.updateBooking({id:'order',check_in,check_out})).rejects.toThrow('корректные даты');
+  expect(state.calls).toEqual([]);
 });
-
-describe.each(['create', 'update'] as const)('%s fails closed before mutation', mode => {
-  it.each(['orders', 'order_items', 'property_availability'])('rejects failed %s availability source', async table => {
-    state.failedTable = table;
-    state.existing = [{ id: 'synthetic-other', check_in: '2026-10-10', check_out: '2026-10-13' }];
-    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const dates = { check_in: '2026-10-11', check_out: '2026-10-14' };
-    // For block-source failure, no earlier overlap should stop the read.
-    if (table === 'property_availability') state.existing = [];
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...dates })
-      : result.current.updateBooking({ id: 'synthetic-current', ...dates });
-    await expect(attempt).rejects.toThrow('Synthetic read failure');
-    expect(state.boundary).toEqual([]);
-  });
-  it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('rejects invalid stay %s → %s', async (check_in, check_out) => {
-    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create' ? result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out })
-      : result.current.updateBooking({ id: 'synthetic-current', check_in, check_out });
-    await expect(attempt).rejects.toThrow(mode === 'update' && !check_in ? 'Booking dates or property unavailable' : 'корректные даты');
-    expect(state.boundary).toEqual([]);
-  });
+it.each(['overlap','blocked dates','not authorized','missing RPC'])('propagates authoritative %s without any raw writer fallback',async failure=>{
+  state.failure=failure;const {result}=renderHook(()=>usePropertyBookings('home'));
+  await expect(result.current.createBooking(stay)).rejects.toThrow(failure);
+  expect(state.calls).toHaveLength(1);
 });
-it.each(['missing', 'error'])('update rejects %s current order before mutation', async outcome => {
-  state.missingOrder = outcome === 'missing'; state.failedTable = outcome === 'error' ? 'current' : '';
-  const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-  await expect(result.current.updateBooking({ id: 'synthetic-current', check_in: '2026-10-11' })).rejects.toThrow();
-  expect(state.boundary).toEqual([]);
+it('reads a missing expected revision then submits date/guest/status changes in one command',async()=>{
+  const {result}=renderHook(()=>usePropertyBookings('home'));
+  await result.current.updateBooking({id:'order',check_in:stay.check_in,check_out:stay.check_out,check_in_time:'23:30',guest_name:'Changed guest',status:'confirmed'});
+  expect(state.calls.map(x=>x.name)).toEqual(['read_property_reservation_checked','change_property_booking']);
+  expect(state.calls[1].args).toMatchObject({p_order_id:'order',p_expected_updated_at:'2030-01-01T00:00:00Z',p_patch:{check_in:stay.check_in,check_out:stay.check_out,check_in_time:'23:30',guest_name:'Changed guest',status:'confirmed'}});
 });
-
+it('delete action is checked cancellation and bulk statuses execute separate checked commands',async()=>{
+  const {result}=renderHook(()=>usePropertyBookings('home'));
+  await result.current.deleteBooking('one');
+  await result.current.bulkUpdateBookings({ids:['two','three'],status:'confirmed'});
+  const commands=state.calls.filter(x=>x.name==='change_property_booking');
+  expect(commands.map(x=>[x.args.p_order_id,x.args.p_patch])).toEqual([['one',{status:'cancelled'}],['two',{status:'confirmed'}],['three',{status:'confirmed'}]]);
+});
+it.each(['malformed','missing revision'])('does not submit transition after %s checked read',async failure=>{
+  state.malformed=failure==='malformed';state.missingRevision=failure==='missing revision';
+  const {result}=renderHook(()=>usePropertyBookings('home'));
+  await expect(result.current.updateBooking({id:'order',status:'confirmed'})).rejects.toThrow('acknowledgement is incomplete');
+  expect(state.calls.map(x=>x.name)).toEqual(['read_property_reservation_checked']);
+});
+it('retains half-open adjacency in the existing civil date predicates',()=>{
+  const first={check_in:'2030-01-10',check_out:'2030-01-12'};
+  expect(civilStaysOverlap(first,{check_in:'2030-01-12',check_out:'2030-01-14'})).toBe(false);
+  expect(stayOccupiesDate(first,'2030-01-12')).toBe(false);
+  expect(occupiedCivilDates(first)).toEqual(['2030-01-10','2030-01-11']);
+});
 describe('timestamp contract ambiguity — evidence, not a new conversion', () => {
   const dateIn = (instant: string, timeZone: string) => new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date(instant));
   it('true Bangkok midnight has a previous UTC date', () => {
@@ -137,4 +83,18 @@ describe('timestamp contract ambiguity — evidence, not a new conversion', () =
     expect(dateIn('2026-10-13T23:00:00Z', 'Asia/Bangkok')).toBe('2026-10-14');
     expect(dateIn('2026-10-13T23:00:00+07:00', 'Asia/Bangkok')).toBe('2026-10-13');
   });
+});
+
+const checkedRow={success:true,replayed:false,order:{id:'new-cohort',status:'pending',start_at:'2030-01-09T17:30:00Z',end_at:'2030-01-11T17:00:00Z',updated_at:'2030-01-01T00:00:00Z',created_at:'2030-01-01T00:00:00Z',total_amount:0,currency:'THB'},order_items:[{item_type:'property',resource_id:'home'}],order_participants:[{role:'guest',name:'Actual stored guest'}]};
+it.each(['owner','manager'])('PMS %s sees checked guest cohort even when raw RLS returns no orders',async actor=>{
+ state.allowRead=true;state.actor=actor;state.reservations=[checkedRow];renderHook(()=>usePropertyBookings('home'));
+ expect(await state.reader!()).toMatchObject([{id:'new-cohort',property_id:'home',guest_name:'Actual stored guest',check_in:'2030-01-10',status:'pending'}]);
+ expect(state.calls).toContainEqual({name:'list_property_reservations_checked',args:{p_property_ids:['home']}});
+});
+it.each(['denied','malformed','foreign resource'])('PMS checked %s cannot become an empty/raw fallback',async kind=>{
+ state.allowRead=true;
+ if(kind==='denied')state.checkedError='not authorized';
+ else state.reservations=[kind==='malformed'?{success:true}:{...checkedRow,order_items:[{item_type:'property',resource_id:'foreign'}]}];
+ renderHook(()=>usePropertyBookings('home'));
+ await expect(state.reader!()).rejects.toThrow();
 });

@@ -27,7 +27,7 @@ import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
 import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
-import { useOrders } from '@/hooks/useOrders';
+import { reserveProperty } from '@/lib/propertyReservation';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
@@ -49,7 +49,6 @@ export default function PropertyInquiry() {
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
   const isRu = language === 'ru';
-  const { createOrder } = useOrders();
 
   // Draft persistence — survives the AuthSheet round-trip (including OAuth
   // full-page redirects) so guests never lose contact info / message after
@@ -155,6 +154,7 @@ export default function PropertyInquiry() {
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedStatus, setSubmittedStatus] = useState<'pending' | 'confirmed' | 'cancelled'>('pending');
   const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
@@ -353,7 +353,7 @@ export default function PropertyInquiry() {
 
   // Show confirmation screen after a successful viewing request submission.
   if (submittedOrderId) {
-    return <InquiryConfirmation orderId={submittedOrderId} />;
+    return <InquiryConfirmation orderId={submittedOrderId} status={submittedStatus} />;
   }
 
   // If no dates, prompt the user to go back
@@ -858,121 +858,29 @@ export default function PropertyInquiry() {
                 // === REQUEST BOOKING PATH ===
                 setIsSubmitting(true);
                 try {
-                  // 0. Atomic availability check — prevents race conditions
-                  // when multiple guests try to book the same dates simultaneously.
-                  const { data: isAvailable, error: availErr } = await supabase.rpc(
-                    'check_property_dates_available',
-                    {
-                      p_property_id: id!,
-                      p_check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      p_check_out: format(checkOut!, 'yyyy-MM-dd'),
-                    },
-                  );
-                  if (availErr) {
-                    console.error('[PropertyInquiry] availability check error:', availErr);
-                    toast.error(
-                      isRu
-                        ? 'Не удалось проверить доступность дат. Попробуйте ещё раз.'
-                        : 'Could not verify date availability. Please try again.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-                  if (isAvailable === false) {
-                    toast.error(
-                      isRu
-                        ? 'Эти даты только что были забронированы. Выберите другие.'
-                        : 'These dates were just booked. Please pick different dates.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 1. Save to property_inquiries for owner dashboard visibility
-                  const { error: inquiryError } = await supabase
-                    .from('property_inquiries')
-                    .insert({
-                      property_id: id!,
-                      user_id: user!.id,
-                      check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      check_out: format(checkOut!, 'yyyy-MM-dd'),
-                      guests,
-                      name: formData.name,
-                      email: formData.email || null,
-                      phone: formData.phone || null,
-                      message: formData.message || null,
-                      status: 'pending',
-                    });
-                  if (inquiryError) {
-                    console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
-                    toast.error(
-                      isRu
-                        ? `Не удалось сохранить запрос: ${inquiryError.message}`
-                        : `Failed to save inquiry: ${inquiryError.message}`,
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 2. Create order for booking tracking
-                  const result = await createOrder({
-                    order_type: 'property',
-                    provider_org_id: propertyExt?.provider_id || undefined,
-                    start_at: checkIn!,
-                    end_at: checkOut!,
+                  const result = await reserveProperty(supabase, user!.id, {
+                    property_id: id!,
+                    check_in: format(checkIn!, 'yyyy-MM-dd'),
+                    check_out: format(checkOut!, 'yyyy-MM-dd'),
+                    guests_count: guests,
+                    guest_name: formData.name,
+                    guest_phone: formData.phone || undefined,
+                    guest_email: formData.email || undefined,
+                    notes: formData.message || undefined,
                     total_amount: pricing.total,
                     currency: listingCurrency,
-                    notes: formData.message || undefined,
-                    metadata: {
-                      property_id: id,
-                      property_title: propertyTitle,
-                      guests,
-                      nights,
-                      price_per_night: pricePerNight,
-                      // Bug #4 fix: this field is the *security* deposit
-                      // (refundable on checkout), NOT the prepayment.
-                      // Renaming it stops it being confused in finance reports.
-                      security_deposit_amount: rentalTerms?.deposit_amount || 0,
-                      discount_percent: pricing.lengthDiscountPercent,
-                      length_discount: pricing.lengthDiscount,
-                      early_bird_discount: pricing.earlyBirdDiscount,
-                      last_minute_discount: pricing.lastMinuteDiscount,
-                      seasonal_adjustment: pricing.seasonalAdjustment,
-                      prepay_amount: pricing.prepayAmount,
-                      prepay_percent: pricing.prepayPercent,
-                      booking_mode: 'request',
-                      ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
-                      ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
-                    },
-                    items: [{
-                      item_name: propertyTitle || 'Property booking',
-                      item_type: 'property_rental',
-                      qty: nights,
-                      unit_price: pricePerNight,
-                      amount: pricing.total,
-                      start_at: checkIn!,
-                      end_at: checkOut!,
-                      metadata: { source_id: id },
-                    }],
-                    participants: [{
-                      role: 'primary',
-                      name: formData.name,
-                      phone: formData.phone,
-                      email: formData.email || undefined,
-                    }],
-                    serviceName: propertyTitle || 'Property',
                   });
-                  if (result.success && result.order_id) {
+                  if (result.success && result.order.id) {
                     if (draftKey) {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
                     toast.success(isRu
-                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
-                      : "Request sent! We'll WhatsApp you within 24 hours.");
-                    setSubmittedOrderId(result.order_id);
+                      ? 'Бронирование сохранено. Откройте его актуальный статус.'
+                      : 'Reservation saved. Open its current status.');
+                    setSubmittedStatus(result.order.status);
+                    setSubmittedOrderId(result.order.id);
                   } else {
-                    // Bug #3 fix: surface failures from createOrder so the user
-                    // is never left staring at a silent footer.
+                    // Never display acceptance without a complete checked acknowledgement.
                     toast.error(
                       isRu
                         ? 'Не удалось создать запрос на бронирование. Попробуйте ещё раз.'
@@ -980,7 +888,7 @@ export default function PropertyInquiry() {
                     );
                   }
                 } catch (err) {
-                  // Error toast is handled by useOrders
+                  toast.error(isRu ? 'Сохранение не подтверждено. Повторите запрос: его идентификатор сохранён.' : 'Save not confirmed. Retry the request: its identity has been retained.');
                 } finally {
                   setIsSubmitting(false);
                 }
@@ -1005,8 +913,8 @@ export default function PropertyInquiry() {
                       ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
                       : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
                 : (isRu
-                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
-                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
+                    ? 'Оплата не списывается. Бронирование ожидает подтверждения управляющим.'
+                    : "You won't be charged. The reservation awaits manager confirmation.")}
             </p>
           </div>
         )}
