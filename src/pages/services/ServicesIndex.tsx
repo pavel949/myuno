@@ -1,3 +1,4 @@
+import { SEOHead } from '@/components/seo/SEOHead';
 import { pickLang } from '@/lib/i18n/pickLang';
 import '@/styles/public-commerce.css';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -101,6 +102,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       showFilter={false}
       showEcosystemHint={false}
     >
+      {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Найдите услуги для дома, поездок и повседневных дел на Пхукете.', 'Explore services for your home, travel and everyday life in Phuket.', 'ค้นหาบริการสำหรับบ้าน การเดินทาง และชีวิตประจำวันในภูเก็ต')} />}
       <nav aria-label={t('Категории услуг', 'Service categories', "หมวดหมู่บริการ")} className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {quickCategories.map(({ id, name, icon: Icon }) => <button key={id} type="button"
           onClick={() => update('category', id)} aria-pressed={category === id}

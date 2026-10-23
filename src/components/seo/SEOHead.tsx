@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -32,6 +33,11 @@ export function SEOHead({
   jsonLd,
 }: SEOHeadProps) {
   const { language } = useLanguage();
+  // React 19 hoists Helmet metadata natively; it does not replace index.html tags.
+  // Remove only explicitly marked static fallbacks once real page metadata mounts.
+  useEffect(() => {
+    document.head.querySelectorAll('[data-seo-fallback="true"]').forEach(node => node.remove());
+  }, []);
   const lang = language === 'ru' ? 'ru' : 'en';
   
   const finalTitle = title 
