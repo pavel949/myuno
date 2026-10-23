@@ -7,6 +7,7 @@ import sys
 import threading
 import shutil
 from playwright.sync_api import sync_playwright, expect
+from dialog_readiness import DIALOG_SETTLED
 
 output = pathlib.Path(sys.argv[1]).resolve()
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -68,9 +69,13 @@ try:
                 results.append(f'{surface} {width}: error distinct from empty/count, real query retry, no overflow')
             page.goto(f'{base}/fixture.html?surface=audit&scenario=full')
             combo = page.get_by_role('combobox', name='Entity type')
-            combo.click(); page.get_by_role('option', name='All', exact=True).wait_for(); page.keyboard.press('Escape')
+            combo.click(); page.get_by_role('option', name='All', exact=True).wait_for()
+            page.wait_for_function(DIALOG_SETTLED, arg=page.get_by_role('listbox').element_handle(), timeout=5000)
+            page.keyboard.press('Escape')
             entry = page.get_by_role('button', name='Open audit entry: Synthetic review event')
             entry.focus(); entry.press('Enter'); page.get_by_role('dialog').wait_for()
+            page.wait_for_function(DIALOG_SETTLED, arg=page.get_by_role('dialog').element_handle(), timeout=5000)
+            page.wait_for_function('(e)=>e.contains(document.activeElement)', arg=page.get_by_role('dialog').element_handle(), timeout=5000)
             page.screenshot(path=str(output / f'audit-detail-{width}.png'), full_page=True)
             page.keyboard.press('Escape'); page.get_by_role('dialog').wait_for(state='hidden')
             results.append(f'audit {width}: All filter opens, keyboard detail, Escape closes')
@@ -84,6 +89,7 @@ try:
         browser.close()
     assert not errors, errors
     assert not blocked, blocked
+    assert len(results) == 14 and len(set(results)) == 14, results
     (output / 'browser-results.json').write_text(json.dumps({'result': 'PASS', 'environment': 'actual components and canonical CSS; synthetic auth/query/SDK boundaries; no production writes', 'scenarios': results, 'errors': errors, 'blocked': blocked}, indent=2))
     (output / 'results.json').write_text(json.dumps([{'scenario': result, 'result': 'PASS'} for result in results], indent=2))
     print(f'PASS {len(results)} browser scenarios')

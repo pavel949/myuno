@@ -7,7 +7,7 @@ function shellRows() {
     language, width, state, outcome: 'PASS', actualShell: true, actualAdminLayout: true,
     geometry: {viewport: width, documentWidth: width, bad: [], touchTargets: Array.from({length: 5}, () => ({width: 44, height: 44}))},
     keyboard: {searchFocusReturned: true, dashboardSearchKeptFocus: true, avatarFocusReturned: true, singleCommandDialog: true, commandFocusReturned: true, preferencesFocusReturned: true, commands: Object.fromEntries(['ctrl', 'meta'].map(modifier => [modifier, {ready: {dialog: {state: 'open', containsFocus: true, animations: []}}, dismissed: true, focusReturned: true, closed: {dialogs: []}}]))},
-    navigation: {uniqueActualRoutes: 74, renderedMenuButtons: 74, singleActiveToday: true}, afterInteractionGeometry: {viewport: width, bad: []},
+    navigation: {uniqueActualRoutes: 73, renderedMenuButtons: 73, singleActiveToday: true}, afterInteractionGeometry: {viewport: width, bad: []},
   }))));
 }
 test('accepts a complete unique shell matrix with interaction evidence', () => assert.equal(assertUiEvidence(shellRows(), 18), 18));

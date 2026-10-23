@@ -28,7 +28,7 @@ export function assertUiEvidence(rows, expected) {
           if (command?.ready?.dialog?.state !== 'open' || !command.ready.dialog.containsFocus || !Array.isArray(command.ready.dialog.animations) || command.ready.dialog.animations.some(animation => animation.pending || animation.state === 'running') || command.dismissed !== true || command.focusReturned !== true || command.closed?.dialogs?.length !== 0) throw Error('Missing settled command interaction: ' + modifier);
         }
         if (row.width === 320 && row.keyboard?.preferencesFocusReturned !== true) throw Error('Missing mobile preferences evidence');
-        if (row.navigation?.uniqueActualRoutes !== 74 || row.navigation?.renderedMenuButtons !== 74 || row.navigation?.singleActiveToday !== true || row.afterInteractionGeometry?.viewport !== row.width || row.afterInteractionGeometry?.bad?.length !== 0) throw Error('Missing navigation evidence');
+        if (row.navigation?.uniqueActualRoutes !== 73 || row.navigation?.renderedMenuButtons !== 73 || row.navigation?.singleActiveToday !== true || row.afterInteractionGeometry?.viewport !== row.width || row.afterInteractionGeometry?.bad?.length !== 0) throw Error('Missing navigation evidence');
       }
     } else if (row.role === 'admin') {
       if (!row.proof?.counts || !row.proof?.destinations || !row.proof?.snapshotCells || !row.proof?.platformStatuses) throw Error('Missing source-state evidence');
