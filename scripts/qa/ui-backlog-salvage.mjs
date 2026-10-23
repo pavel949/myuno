@@ -10,6 +10,7 @@ await mkdir(output, { recursive: true });
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><rect width="1200" height="600" fill="#cbd5df"/><path d="M0 470L280 240 510 420 790 160 1200 450V600H0Z" fill="#7c8d9e"/><rect x="390" y="230" width="440" height="270" fill="#e8e5de"/><path d="M420 270H800M420 340H800M420 410H800" stroke="#263b50" stroke-width="30"/><text x="35" y="55" fill="#263b50" font-size="26">SYNTHETIC PROJECT IMAGE — NO REAL LISTING</text></svg>`;
 const image = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 const virtual = {
+  '@/contexts/AuthContext': `export const useAuth=()=>({user:{id:'synthetic-user'},signOut:async()=>{window.fixtureForbiddenWrites.push('AuthContext.signOut');throw Error('Production sign-out forbidden')}});`,
   '@/contexts/LanguageContext': `const language=new URLSearchParams(location.search).get('lang')||'ru';export const useLanguage=()=>({language,setLanguage:value=>{window.fixtureLanguage=value},t:key=>({'auth.showPassword':language==='ru'?'Показать пароль':'Show password','auth.hidePassword':language==='ru'?'Скрыть пароль':'Hide password'}[key]||key)});`,
   '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',setTheme:value=>{window.fixtureTheme=value}});`,
   '@/contexts/CurrencyContext': `export const currencies={THB:{code:'THB',symbol:'฿',name:'Thai baht',nameRu:'Тайский бат'}};export const useCurrency=()=>({currency:'THB',currencyInfo:currencies.THB,setCurrency:()=>{}});`,
@@ -47,7 +48,8 @@ createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter
   }}],
 });
 const inputs=Object.keys(result.metafile.inputs);
-if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useNewbuildProjects|useProjectUnits|useUserCollections)\.ts$|lib\/newbuilds\/attribution/.test(p)))throw Error('Production data module included');
+if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|contexts\/AuthContext\.tsx$|hooks\/(useNewbuildProjects|useProjectUnits|useUserCollections)\.ts$|lib\/newbuilds\/attribution/.test(p)))throw Error('Production data module included');
+if(!inputs.some(p=>p.endsWith('src/hooks/useUiSignOut.ts')))throw Error('Actual sign-out UI adapter missing');
 // This stylesheet must come from the actual standalone ProjectMicrosite import,
 // never from a fixture-only import or a preceding visit to another lazy route.
 if(!inputs.some(p=>p.endsWith('src/styles/newbuilds-theme.css')))throw Error('Standalone microsite theme import missing');

@@ -37,6 +37,7 @@ import { mergePrefillIntoForm } from './property-wizard/applyPrefill';
 import { buildPropertyPayload as buildPayload } from './property-wizard/buildPayload';
 import { validateWizardStep } from './property-wizard/validateStep';
 import { usePropertyWizardDraft } from './property-wizard/usePropertyWizardDraft';
+import { savePropertyWizardDocument } from '@/lib/owner/propertyWizardDocument';
 
 // Re-export types for backwards compatibility with existing consumers.
 export type { AssetClass, OwnershipData, OwnershipType, PropertyFormData };
@@ -162,42 +163,34 @@ export function usePropertyWizard() {
       // parallel property shells. Review is a separate checked transition.
       const savedDraft = await draft.persistDraft(true);
       if (!savedDraft || actorScopeRef.current !== submissionScope) return;
+      // Required documents belong to the retained draft. Do not move it into
+      // review or clear its resume identity until each persisted row is confirmed.
+      if (!companyId) {
+        const documents = [
+          ownershipData.management_document_url ? {
+            document_type: 'power_of_attorney' as const,
+            file_url: ownershipData.management_document_url,
+            file_name: ownershipData.management_document_name || 'management-document',
+            title: 'Management Agreement / POA', title_ru: 'Договор управления / Доверенность',
+          } : null,
+          ownershipData.ownership_document_url ? {
+            document_type: 'ownership_title' as const,
+            file_url: ownershipData.ownership_document_url,
+            file_name: ownershipData.ownership_document_name || 'ownership-document',
+            title: 'Ownership Document', title_ru: 'Документ о праве собственности',
+          } : null,
+        ];
+        for (const document of documents) {
+          if (!document) continue;
+          if (actorScopeRef.current !== submissionScope) return;
+          await savePropertyWizardDocument({ ...document, property_id: savedDraft.id, uploaded_by: user!.id });
+        }
+      }
+      if (actorScopeRef.current !== submissionScope) return;
       const property = approvalStatus === 'pending'
         ? await updateProperty.mutateAsync({ id: savedDraft.id, ...(companyId ? {} : submitPayload), is_active: false, _authoring: true, _expectedUpdatedAt: savedDraft.updated_at, _submitForReview: true } as never)
         : savedDraft;
-
       if (actorScopeRef.current !== submissionScope) return;
-
-      // Save documents
-      if (property?.id && !companyId) {
-        const userId = (await supabase.auth.getUser()).data.user?.id;
-
-        if (ownershipData.management_document_url) {
-          await supabase.from('property_documents').insert({
-            property_id: property.id,
-            document_type: 'power_of_attorney',
-            title: 'Management Agreement / POA',
-            title_ru: 'Договор управления / Доверенность',
-            file_url: ownershipData.management_document_url,
-            file_name: ownershipData.management_document_name || 'management-document',
-            is_sensitive: true,
-            uploaded_by: userId,
-          });
-        }
-
-        if (ownershipData.ownership_document_url) {
-          await supabase.from('property_documents').insert({
-            property_id: property.id,
-            document_type: 'ownership_title',
-            title: 'Ownership Document',
-            title_ru: 'Документ о праве собственности',
-            file_url: ownershipData.ownership_document_url,
-            file_name: ownershipData.ownership_document_name || 'ownership-document',
-            is_sensitive: true,
-            uploaded_by: userId,
-          });
-        }
-      }
 
       // Link property to a CRM owner contact when managing on behalf.
       // Priority: (1) reuse the contact the wizard was launched from, (2) reuse an
@@ -281,7 +274,7 @@ export function usePropertyWizard() {
       const msg = error instanceof Error ? error.message : String(error);
       toast.error(isRu ? `Ошибка сохранения: ${msg}` : `Error saving: ${msg}`);
     } finally { if (actorScopeRef.current === submissionScope) submitLock.current = false; }
-  }, [actorScope, activeOrgId, companyId, buildPropertyPayload, draft, formData, isRu, ownershipData, sendInvite, updateProperty]);
+  }, [actorScope, activeOrgId, companyId, buildPropertyPayload, draft, formData, isRu, ownershipData, sendInvite, updateProperty, user]);
 
   // Preview data for live preview
   const previewData = useMemo(() => ({

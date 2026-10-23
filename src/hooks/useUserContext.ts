@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import { type AppRole } from '@/types/auth';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export interface Org {
   id: string;
@@ -122,23 +123,9 @@ export function useUserContext() {
     ...CACHE_PROFILES.DYNAMIC,
   });
 
-  // Fetch user roles from user_roles table
-  const { data: userRoles, isLoading: rolesLoading } = useQuery({
-    queryKey: ['user-roles', user?.id],
-    queryFn: async (): Promise<string[]> => {
-      if (!user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
-      return (data || []).map(r => String(r.role));
-    },
-    enabled: !!user?.id,
-    ...CACHE_PROFILES.DYNAMIC,
-  });
+  // Share the canonical role-row query. A second query function returning
+  // string[] under the same key made access depend on consumer mount order.
+  const { roles: userRoles, isLoading: rolesLoading } = useUserRoles();
 
   // Fetch MC memberships — the PRIMARY source for 'owner' role
   const { data: mcMemberships, isLoading: mcLoading } = useQuery({
