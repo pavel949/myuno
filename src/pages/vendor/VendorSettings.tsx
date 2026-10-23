@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,7 +23,8 @@ import {
 const VendorSettings = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const signOut = useUiSignOut();
   const { profile } = useVendorProfile();
   const isRussian = language === 'ru';
 

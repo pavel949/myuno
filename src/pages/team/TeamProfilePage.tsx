@@ -5,6 +5,7 @@ import { TeamLayout } from '@/components/team/TeamLayout';
 import { useTeamMember, SPECIALIZATION_LABELS, type TeamSpecialization } from '@/hooks/useTeamMember';
 import { useMyGamification } from '@/hooks/useTeamGamification';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,8 @@ import { format } from 'date-fns';
 export default function TeamProfilePage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const signOut = useUiSignOut();
   const { member, isLoading, updateProfile, isUpdating } = useTeamMember();
   const { stats, achievements } = useMyGamification();
   const isRu = language === 'ru';
@@ -51,8 +53,7 @@ export default function TeamProfilePage() {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    if (await signOut()) navigate('/');
   };
 
   if (isLoading) {

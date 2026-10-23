@@ -13,17 +13,16 @@ import { AccountFlatMenu } from '@/components/account/AccountFlatMenu';
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 
 export default function MeProfile() {
   const { language } = useLanguage();
-  const { signOut } = useAuth();
+  const signOut = useUiSignOut();
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/');
+    if (await signOut()) navigate('/');
   };
 
   return (

@@ -31,6 +31,7 @@ import { ServiceClusterAccordion } from '@/components/nav/ServiceClusterAccordio
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -143,7 +144,8 @@ export function AppDrawer({
 }: AppDrawerProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const signOut = useUiSignOut();
   const { language, setLanguage } = useLanguage();
   const isRu = language === 'ru';
   const allServicesSectionTitle = pickTriplet(

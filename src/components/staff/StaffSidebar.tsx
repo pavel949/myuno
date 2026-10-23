@@ -25,6 +25,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUiSignOut } from '@/hooks/useUiSignOut';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -46,7 +47,8 @@ export function StaffSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const signOut = useUiSignOut();
   const { open, isMobile, setOpenMobile } = useSidebar();
   const isRu = language === 'ru';
 
