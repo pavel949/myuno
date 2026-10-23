@@ -1,0 +1,11 @@
+# Hooks plugin 7 — package upgrade with the existing lint policy
+
+This tranche upgrades eslint-plugin-react-hooks to 7.0.1 on the current dependency baseline. It keeps the two previously enabled rule IDs and severities exactly: `react-hooks/rules-of-hooks: error`, `react-hooks/exhaustive-deps: warn`. Existing scoped overrides (including Playwright fixtures) are unchanged. No previously enabled check is removed, disabled or lowered. Behavioral regressions exercise the installed plugin through the real project ESLint configuration: a conditional Hook must fail as an error and a missing effect dependency must remain a warning.
+
+The exact package README documents [custom configuration](https://www.npmjs.com/package/eslint-plugin-react-hooks/v/7.0.1#custom-configuration), distinguishing core Hooks rules from React Compiler rules. This uses that supported configuration; v7 has no named preset containing only the old two-rule policy. It does **not** claim compliance with v7's expanded recommended preset or install/activate React Compiler.
+
+The 15 additional Compiler checks have not previously been enabled in this repository's required CI: static-components, use-memo, component-hook-factories, preserve-manual-memoization, incompatible-library, immutability, globals, refs, set-state-in-effect, error-boundaries, purity, set-state-in-render, unsupported-syntax, config, gating. Their rollout requires its own source migration and verification rather than being silently coupled to a dev-dependency bump.
+
+Concrete migration evidence: a local three-file trial of v7's expanded recommended preset found 20 `react-hooks/refs` errors in `useCompanyAccessLifetime.ts`; HomeDiscoverySearch and the shared Calendar had none. The lifetime hook deliberately invalidates old actor/company work during the context render. Moving that invalidation to an effect only to appease the new Compiler check would change an authorization race guard. This tranche leaves that guard and all application behavior unchanged. A future Compiler migration must preserve its contract and pass isolated authorization/lifetime regressions and critical review under PROJECT.md §20.
+
+No new expanded-preset candidate was pushed to an existing PR or adopted as a required check before this explicit policy choice. No test or security check is weakened to obtain a green result.
