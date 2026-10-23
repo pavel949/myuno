@@ -18,7 +18,8 @@ async def main():
                     parsed = urlparse(r.request.url)
                     name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
                     file = OUTPUT/name
-                    types = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp'}
+                    if name.startswith('fonts/'): file = Path.cwd()/'public'/name
+                    types = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2'}
                     if parsed.netloc == 'localhost:8080' and file.is_file():
                         await r.fulfill(path=str(file), content_type=types.get(file.suffix,'application/octet-stream'))
                     else:
@@ -31,6 +32,17 @@ async def main():
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='networkidle')
                     await expect(page.locator('.home-rail-viewport')).to_have_count(5)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
+                    category_cards=page.locator('.home-service-category-card')
+                    await expect(category_cards).to_have_count(4)
+                    assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===4')
+                    for card in await category_cards.all():
+                        await card.scroll_into_view_if_needed()
+                        image=card.locator('img')
+                        await expect(image).to_be_visible()
+                        await expect(image).to_have_js_property('complete',True)
+                        assert await image.evaluate('(el)=>el.naturalWidth>0 && getComputedStyle(el).objectFit==="contain"')
+                    await page.locator('.home-services .home-rail-viewport').evaluate('(el)=>el.scrollLeft=0')
+
                     # Each gallery stays one card high and within its own section.
                     for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
                         geometry = await rail.evaluate('(el)=>({width:el.clientWidth,scroll:el.scrollWidth,tops:[...el.children].map(c=>c.getBoundingClientRect().top)})')
@@ -63,19 +75,19 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        rail = page.locator('.home-rail-viewport').first
-                        await rail.scroll_into_view_if_needed()
-                        await rail.evaluate('(el)=>el.scrollLeft=0')
-                        box = await rail.bounding_box()
-                        session = await context.new_cdp_session(page)
-                        y = box['y'] + box['height']/2
-                        x = box['x']+box['width']*.8
-                        await session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
-                        for step in range(1,8):
-                            await session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x-step*22,'y':y}]})
-                        await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-                        await page.wait_for_timeout(120)
-                        assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
+                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-services .home-rail-viewport')]:
+                            await rail.scroll_into_view_if_needed()
+                            await rail.evaluate('(el)=>el.scrollLeft=0')
+                            box = await rail.bounding_box()
+                            session = await context.new_cdp_session(page)
+                            y = box['y'] + box['height']/2
+                            x = box['x']+box['width']*.8
+                            await session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
+                            for step in range(1,8):
+                                await session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x-step*22,'y':y}]})
+                            await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+                            await page.wait_for_timeout(120)
+                            assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
                     # One entry; optional criteria appear only after selecting intent.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
                     await page.locator('.home-search-entry-button').click()
@@ -142,8 +154,10 @@ async def main():
                         await link.click()
                         await expect(page.get_by_test_id('location')).to_have_text(href)
                     for selector, prefix in [('.home-catalog a[href^="/experiences/"]', '/experiences/'),
-                                             ('.home-catalog a[href^="/services/provider/"]', '/services/provider/'),
-                                             ('.home-catalog a[href^="/flowers/bouquet/"]', '/flowers/bouquet/'),
+                                             ('.home-service-category-card a[href="/flowers"]', '/flowers'),
+                                             ('.home-service-category-card a[href="/transport"]', '/transport'),
+                                             ('.home-service-category-card a[href="/yachts"]', '/yachts'),
+                                             ('.home-service-category-card a[href="/services"]', '/services'),
                                              ('.home-owner-prompt a', '/for-owners')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
@@ -158,6 +172,10 @@ async def main():
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
                     results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':5,'arrowsKeyboardFocus':True,'swipe':width<768,'filters':True,'errors':errors})
+                except Exception:
+                    await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
+                    print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
+                    raise
                 finally:
                     await context.close()
         # Failures and genuine empties use the same production components.
@@ -168,13 +186,13 @@ async def main():
             await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='networkidle')
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(5)
+                await expect(page.get_by_role('alert')).to_have_count(4)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 2
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
                 await expect(page.get_by_text('No published experiences yet. Check back later.')).to_be_visible()
-                await expect(page.get_by_role('link',name='Air conditioning',exact=True)).to_be_visible()
+                await expect(page.get_by_text('No service categories to explore yet. Check back later.')).to_be_visible()
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
             results.append({'state':state,'width':390,'pageOverflow':False})
             await context.close()

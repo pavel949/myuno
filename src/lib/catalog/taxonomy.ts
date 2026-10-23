@@ -155,6 +155,8 @@ export interface ServiceEntry {
 
 export interface CategoryEntry {
   id: CategoryId;
+  /** Optional live taxonomy state; active does not imply an enabled destination. */
+  status?: ServiceStatus;
   /** Owning cluster id */
   clusterId: ClusterId;
   /** Display order within cluster (from DB `categories.sort_order`). Omitted on static SSOT. */
