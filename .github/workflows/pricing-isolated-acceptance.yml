@@ -1,0 +1,65 @@
+name: Pricing isolated acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/pricing-isolated-acceptance.yml'
+      - 'scripts/qa/pricing-acceptance/**'
+      - 'src/components/owner/pricing/**'
+      - 'src/components/owner/AirbnbCalendarGrid.tsx'
+      - 'src/hooks/useCalendarPrices.ts'
+      - 'src/lib/owner/calendarPricing.ts'
+      - 'src/lib/owner/propertyNavigation.ts'
+      - 'src/pages/owner/OwnerCalendar.tsx'
+      - 'src/pages/owner/RateManagementPage.tsx'
+      - 'supabase/functions/_shared/*quote.ts'
+      - 'supabase/migrations/20261021062539_canonical_pricing_calendar.sql'
+      - 'supabase/migrations/20261021063811_canonical_pricing_calendar_read.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pricing-acceptance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  pricing-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:15439:5432'
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked test dependencies
+        run: |
+          npm ci
+          npx --no-install playwright install --with-deps chromium
+      - name: Resolve installed Chromium
+        run: |
+          node --input-type=module -e "import {chromium} from '@playwright/test'; console.log('PLAYWRIGHT_CHROMIUM_EXECUTABLE='+chromium.executablePath())" >> "$GITHUB_ENV"
+      - name: Browser to SQL to canonical quote, with external network denied
+        run: node scripts/qa/pricing-acceptance/run.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Preserve synthetic acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pricing-isolated-acceptance
+          path: /tmp/browser/pricing-acceptance-20261024/
+          retention-days: 14

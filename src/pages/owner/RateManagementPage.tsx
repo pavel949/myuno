@@ -53,6 +53,7 @@ export default function RateManagementPage() {
   const setSelectedProperty = (id: string) => {
     if (id !== 'all' && !allProperties.some(p => p.property_id === id)) return;
     const next = new URLSearchParams(params);
+    if (id !== selectedProperty) next.delete('category');
     if (id === 'all') next.delete('property'); else { next.set('property', id); next.set('view', 'calendar'); }
     setParams(next);
   };

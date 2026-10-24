@@ -31,7 +31,7 @@ const virtual = {
   '@/hooks/usePropertyAvailabilityManagement': `export const usePropertyAvailabilityManagement=()=>({availability:[]});`,
   '@/hooks/usePropertyAvailability': `export const usePropertyRentalTerms=()=>({data:{price_per_night:1000}});`,
   '@/hooks/usePropertyRateSeasons': `export const usePropertyRateSeasons=()=>({data:[]});`,
-  '@tanstack/react-query': `export const useQuery=()=>({data:[]});`,
+  '@tanstack/react-query': `export const useQuery=()=>({data:[]}); export const useMutation=()=>{throw Error('Unexpected mutation in calendar fixture')}; export const useQueryClient=()=>({invalidateQueries:()=>{throw Error('Unexpected cache mutation in calendar fixture')}});`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({}, {get(){throw Error('Real database access forbidden')}});`,
   '@/hooks/useHapticFeedback': `export const triggerHaptic=()=>{};`,
   '@/hooks/useSoundEffects': `export const playSound=()=>{};export const isTypingKey=()=>false;`,
