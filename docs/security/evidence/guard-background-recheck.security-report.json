@@ -1,0 +1,570 @@
+{
+  "kind": "focused-security-regression-output",
+  "sourceCommit": "011b7f1a6320a8d6dbe7dd63bf92f2330c9c8667",
+  "baseCommit": "37de22d344274c0075e47f0717637bb40c6e5c1b",
+  "scope": "UI access quarantine and draft retention, not server authorization",
+  "runtimeSha256": {
+    "src/components/auth/AccessRecheckBoundary.tsx": "a30831bcb49e1c53c981c9b7886bfe180e46818d4e982845e2e12c86d80659e1",
+    "src/components/auth/RoleGuard.tsx": "bd23be0d5adf2d50c32d2add90e948da12687503d930bb3627bdcc0d7ed57aa2",
+    "src/components/auth/MCGuard.tsx": "d21a0f6ee09a4f772f9754a282f82cefe6086f741b51d878f21a615e41391fde",
+    "src/components/auth/InvestorGuard.tsx": "d57a60b28f6db9dbc2cf812cde64a509da079bee42c14c798de1a66f777406c0",
+    "src/hooks/useActiveCompany.ts": "a8ae0d4350e2cb3e380c3ce94d9c6afb1f7d8a80ece4be0340fccb9128f854ea"
+  },
+  "unitCommand": "npx vitest run src/components/auth/RoleGuard.verification.test.tsx --reporter=json",
+  "unitReport": {
+    "numTotalTestSuites": 2,
+    "numPassedTestSuites": 2,
+    "numFailedTestSuites": 0,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 10,
+    "numPassedTests": 10,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "snapshot": {
+      "added": 0,
+      "failure": false,
+      "filesAdded": 0,
+      "filesRemoved": 0,
+      "filesRemovedList": [],
+      "filesUnmatched": 0,
+      "filesUpdated": 0,
+      "matched": 0,
+      "total": 0,
+      "unchecked": 0,
+      "uncheckedKeysByFile": [],
+      "unmatched": 0,
+      "updated": 0,
+      "didUpdate": false
+    },
+    "startTime": 1792803827263,
+    "success": true,
+    "testResults": [
+      {
+        "assertionResults": [
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary preserves a same-identity draft across repeated successful checks while never exposing it pending",
+            "status": "passed",
+            "title": "preserves a same-identity draft across repeated successful checks while never exposing it pending",
+            "duration": 528.2329049999998,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary drops a previous actor immediately and ignores its late response",
+            "status": "passed",
+            "title": "drops a previous actor immediately and ignores its late response",
+            "duration": 258.2030490000002,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary drops a draft after verified revocation rather than revealing cached privilege",
+            "status": "passed",
+            "title": "drops a draft after verified revocation rather than revealing cached privilege",
+            "duration": 23.10988499999985,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary discards form state on a same-company membership-role change",
+            "status": "passed",
+            "title": "discards form state on a same-company membership-role change",
+            "duration": 46.846234000000095,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary unmounts safely during rechecks when native modal quarantine is unavailable",
+            "status": "passed",
+            "title": "unmounts safely during rechecks when native modal quarantine is unavailable",
+            "duration": 15.131093999999848,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary never grants cached admin while a real background verification is unresolved, including after its deadline",
+            "status": "passed",
+            "title": "never grants cached admin while a real background verification is unresolved, including after its deadline",
+            "duration": 294.58043,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary starts a fresh deadline for each verification after a previously successful shell",
+            "status": "passed",
+            "title": "starts a fresh deadline for each verification after a previously successful shell",
+            "duration": 104.81871699999965,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary does not treat cached data plus a failed verification as authority and retries the real query",
+            "status": "passed",
+            "title": "does not treat cached data plus a failed verification as authority and retries the real query",
+            "duration": 49.68404700000019,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary MC also blocks cached authority during verification and distinguishes failure from ordinary denial",
+            "status": "passed",
+            "title": "MC also blocks cached authority during verification and distinguishes failure from ordinary denial",
+            "duration": 72.8981859999999,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "actual resolved-context query verification boundary"
+            ],
+            "fullName": "actual resolved-context query verification boundary Investor also blocks cached authority during verification and distinguishes failure from ordinary denial",
+            "status": "passed",
+            "title": "Investor also blocks cached authority during verification and distinguishes failure from ordinary denial",
+            "duration": 63.25908299999992,
+            "failureMessages": [],
+            "meta": {}
+          }
+        ],
+        "startTime": 1792803829464,
+        "endTime": 1792803830921.259,
+        "status": "passed",
+        "message": "",
+        "name": "src/components/auth/RoleGuard.verification.test.tsx"
+      }
+    ]
+  },
+  "browserReport": {
+    "cases": [
+      {
+        "case": "owner-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved owner-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "owner-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved owner-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "owner-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved owner-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "owner-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved owner-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "admin-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved admin-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "admin-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved admin-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "admin-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved admin-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "admin-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved admin-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "staff-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved staff-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "staff-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved staff-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "staff-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved staff-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "staff-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved staff-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "vendor-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved vendor-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "vendor-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved vendor-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "vendor-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved vendor-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "vendor-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved vendor-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "team-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved team-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "team-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved team-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "team-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved team-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "team-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved team-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "mc-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved mc-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "mc-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved mc-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "mc-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved mc-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "mc-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved mc-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "investor-inline-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved investor-inline-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "investor-inline-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved investor-inline-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": false,
+        "writes": 0
+      },
+      {
+        "case": "investor-portal-390",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved investor-portal-390",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      },
+      {
+        "case": "investor-portal-1440",
+        "draftNodes": 1,
+        "mounts": 1,
+        "unmounts": 0,
+        "afterValue": "Unsaved investor-portal-1440",
+        "afterMounts": 1,
+        "errorRetry": true,
+        "accountSwitch": true,
+        "revocation": true,
+        "focusRestored": true,
+        "portalBlocked": true,
+        "writes": 0
+      }
+    ],
+    "mode": "synthetic adapters, actual query/guards/Radix, fresh production-build CSS",
+    "network": "nonlocal requests and writes blocked",
+    "driver": "explicit React Query focus-manager signal; native tab visibility not certified"
+  },
+  "independentReview": "Exact source commit reviewed independently; Source GO, 10 guard tests independently rerun",
+  "limits": [
+    "No production users, roles, credentials, schema or business records changed",
+    "Retained effects continue; server RLS and checked writers remain authoritative",
+    "Error/denial/identity changes discard drafts; unsupported showModal safely unmounts",
+    "No live-session or deployed-version certificate; not a general vulnerability scanner report"
+  ]
+}

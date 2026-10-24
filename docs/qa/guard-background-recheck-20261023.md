@@ -82,3 +82,8 @@ Public `/version.json` on apex and www could not be accessed through the
 available read-only web tool. Current live revision and live logged-in behavior
 remain UNVERIFIED. No production accounts, roles, credentials, schema or data
 were changed. This patch is not merged, published or remotely CI-certified.
+
+Machine-readable focused security regression output is retained in
+`docs/security/evidence/guard-background-recheck.security-report.json`.
+It records actual test results and runtime hashes; it is not a general scanner
+report or a live authorization certificate.
