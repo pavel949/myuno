@@ -140,8 +140,8 @@ function SortableImageItem({
         </div>
       )}
       
-      <div className="absolute top-2 left-1/2 -translate-x-1/2 p-1 bg-black/40 rounded-full opacity-60 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-        <GripVertical className="h-4 w-4 text-white" />
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 p-1 bg-background/90 rounded-full opacity-60 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+        <GripVertical className="h-4 w-4 text-foreground" />
       </div>
       
       <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-20">
@@ -149,25 +149,25 @@ function SortableImageItem({
           type="button"
           aria-label={editLabel}
           onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          className="p-1.5 bg-black/60 hover:bg-primary rounded-none transition-colors"
+          className="p-1.5 bg-background/90 text-foreground hover:bg-primary hover:text-primary-foreground rounded-none transition-colors"
         >
-          <Pencil className="h-4 w-4 text-white" />
+          <Pencil className="h-4 w-4" />
         </button>
         <button
           type="button"
           aria-label={removeLabel}
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="p-1.5 bg-black/60 hover:bg-destructive rounded-none transition-colors"
+          className="p-1.5 bg-background/90 text-foreground hover:bg-destructive hover:text-destructive-foreground rounded-none transition-colors"
         >
-          <X className="h-4 w-4 text-white" />
+          <X className="h-4 w-4" />
         </button>
       </div>
       
-      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-none z-20 pointer-events-none">
+      <div className="absolute bottom-2 right-2 bg-background/90 text-foreground text-xs px-2 py-1 rounded-none z-20 pointer-events-none">
         {index + 1}
       </div>
       
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-transparent group-hover:bg-foreground/10 transition-colors pointer-events-none z-0" />
     </div>
   );
 }
@@ -181,34 +181,34 @@ function UploadingImageItem({ image }: { image: UploadingImage }) {
         alt="Uploading"
         className="w-full h-full object-cover opacity-50"
       />
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/90">
         {image.status === 'compressing' && (
           <>
-            <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
-            <span className="text-white text-xs font-medium">Compressing...</span>
+            <Loader2 className="h-8 w-8 text-primary animate-spin mb-2" />
+            <span className="text-foreground text-xs font-medium">Compressing...</span>
           </>
         )}
         {image.status === 'uploading' && (
           <div className="w-16 h-16 relative">
             <svg className="w-16 h-16 transform -rotate-90">
-              <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.3)" strokeWidth="4" fill="none" />
-              <circle cx="32" cy="32" r="28" stroke="white" strokeWidth="4" fill="none"
+              <circle cx="32" cy="32" r="28" stroke="hsl(var(--border))" strokeWidth="4" fill="none" />
+              <circle cx="32" cy="32" r="28" stroke="hsl(var(--primary))" strokeWidth="4" fill="none"
                 strokeDasharray={175.93} strokeDashoffset={175.93 - (175.93 * image.progress) / 100} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-white text-sm font-bold">
+            <span className="absolute inset-0 flex items-center justify-center text-foreground text-sm font-bold">
               {image.progress}%
             </span>
           </div>
         )}
         {image.status === 'done' && (
           <div className="bg-success rounded-full p-2">
-            <Check className="h-6 w-6 text-white" />
+            <Check className="h-6 w-6 text-success-foreground" />
           </div>
         )}
         {image.status === 'error' && (
           <>
-            <AlertCircle className="h-8 w-8 text-destructive mb-2" />
-            <span className="text-destructive text-xs text-center px-2">{image.error}</span>
+            <AlertCircle className="h-8 w-8 text-danger mb-2" />
+            <span className="text-danger text-xs text-center px-2">{image.error}</span>
           </>
         )}
       </div>

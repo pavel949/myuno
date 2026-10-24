@@ -83,9 +83,9 @@ function Row({ ok, label }: { ok: boolean; label: string }) {
   return (
     <div className="flex items-start gap-3 py-2">
       {ok ? (
-        <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
       ) : (
-        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
       )}
       <span className={ok ? 'text-foreground' : 'text-foreground/80'}>{label}</span>
     </div>
@@ -192,8 +192,8 @@ export function SignupIntegrityModal({
         )}
 
         {error && !report && (
-          <div className="flex items-start gap-3 rounded border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-600" />
+          <div className="flex items-start gap-3 rounded border border-warning/40 bg-warning/10 p-3 text-sm">
+            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0 text-warning" />
             <span>{t.verifyError}</span>
           </div>
         )}
@@ -203,8 +203,8 @@ export function SignupIntegrityModal({
             <div
               className={`rounded border p-3 text-sm ${
                 allOk
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                  : 'border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200'
+                  ? 'border-success/40 bg-success/10 text-success'
+                  : 'border-warning/40 bg-warning/10 text-warning'
               }`}
             >
               {allOk ? t.okBanner : t.warnBanner}
