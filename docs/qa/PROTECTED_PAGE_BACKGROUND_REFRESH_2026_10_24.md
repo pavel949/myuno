@@ -1,3 +1,5 @@
+> Reconciliation note: the initial parallel implementation below is historical evidence, not the current guard contract. PR166 reconciles it with `AccessRecheckBoundary`: one native top-layer quarantine also covers body-portaled overlays; identity includes actor/context/policy/company/membership role but excludes pathname so sibling layouts remain mounted. The unused duplicate `AccessVerificationBoundary` is retired. Initial checks, errors, revocation and actor/scope changes remain fail-closed. Existing upstream admission tests are retained alongside the stronger late-response, membership-role and portal regressions. See `docs/qa/guard-background-recheck-20261023.md` for current evidence and limits. No backend/RLS/role changes or production activation.
+
 # Protected-page background refresh — 2026-10-24
 
 Finding: `1f935183-72f8-5a0b-8bd6-b62b2bf87dd3`.
