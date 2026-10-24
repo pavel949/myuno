@@ -8,6 +8,7 @@ import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /** Replace an unbounded spinner with recovery if a current check never settles. */
 const ROLE_GUARD_MAX_WAIT_MS = 12_000;
@@ -69,9 +70,17 @@ export function RoleGuard({
     </button>
   </div>;
 
-  // A deadline bounds the spinner, never authorization. Cached context cannot
-  // admit protected children while the current auth/context check is pending.
-  if (!allReady) return waitDeadlinePassed ? verificationUnavailable() : <LoadingState />;
+  // Only a previously admitted, unchanged identity can retain mounted state.
+  // Pending content is hidden/inert, never usable as cached authorization.
+  const identity = JSON.stringify([actorId, context?.mode, context?.entity_id, context?.role, permissions, allowedRoles, location.pathname]);
+  const protectedPage = (pending: boolean) => <AccessVerificationBoundary
+    identity={identity} pending={pending}
+    fallback={waitDeadlinePassed ? verificationUnavailable() : <LoadingState />}
+  >{children}</AccessVerificationBoundary>;
+  if (!allReady) {
+    if (user && !authLoading && !resolvedLoading && !resolvedError && context) return protectedPage(true);
+    return waitDeadlinePassed ? verificationUnavailable() : <LoadingState />;
+  }
 
   // Redirect to auth if not logged in
   if (!user) {
@@ -82,7 +91,7 @@ export function RoleGuard({
 
   // Server-resolved admin always passes
   if (context?.role === 'admin') {
-    return <>{children}</>;
+    return protectedPage(false);
   }
 
   // Check if user's server-resolved role matches any allowed role.
@@ -110,7 +119,7 @@ export function RoleGuard({
     return <Navigate to={fallbackPath} replace />;
   }
 
-  return <>{children}</>;
+  return protectedPage(false);
 }
 
 /**

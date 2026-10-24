@@ -7,6 +7,7 @@ import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /**
  * MC workspace guard — allows access only to users who are members
@@ -21,7 +22,11 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
   const { context, isLoading: contextLoading, isVerifying, error, refetch } = useResolvedContext();
   const { companies, activeCompany, isLoading: companiesLoading } = useActiveCompany();
 
+  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role, context?.permissions, activeCompany?.company_id, location.pathname]);
+  const protectedPage = (pending: boolean) => <AccessVerificationBoundary identity={identity} pending={pending} fallback={<LoadingState />}>{children}</AccessVerificationBoundary>;
+
   if (authLoading || contextLoading || isVerifying || companiesLoading) {
+    if (isVerifying && user && context && !authLoading && !contextLoading && !companiesLoading && !error) return protectedPage(true);
     return <LoadingState />;
   }
 
@@ -40,7 +45,7 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
 
   // Server-resolved admin access
   if (context?.role === 'admin') {
-    return <>{children}</>;
+    return protectedPage(false);
   }
 
   // No companies — redirect to onboarding
@@ -53,5 +58,5 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
     return <Navigate to="/mc/onboarding" replace />;
   }
 
-  return <>{children}</>;
+  return protectedPage(false);
 }
