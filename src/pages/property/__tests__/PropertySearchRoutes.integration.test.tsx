@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate, parsePath } from 'react-router-dom';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import PropertySearchPage from '../PropertySearchPage';
 import { CompareProvider } from '@/components/property/PropertyCompare';
@@ -29,10 +29,11 @@ vi.mock('@/pages/services/ServicesIndex', () => ({ default: () => null }));
 
 function Location() {
   const location = useLocation(); const navigate = useNavigate();
-  return <><output data-testid="location">{location.pathname}{location.search}{location.hash}</output><button onClick={() => navigate(-1)}>History back</button><button onClick={() => navigate(1)}>History forward</button></>;
+  return <><output hidden data-testid="navigation-state">{JSON.stringify(location.state)}</output><output data-testid="location">{location.pathname}{location.search}{location.hash}</output><button onClick={() => navigate(-1)}>History back</button><button onClick={() => navigate(1)}>History forward</button></>;
 }
-function mount(entry: string) {
-  const result = render(<MemoryRouter initialEntries={[entry]}><Location /><Routes>
+function mount(entry: string, navigationState?: unknown) {
+  const initialEntry = navigationState === undefined ? entry : { ...parsePath(entry), state: navigationState };
+  const result = render(<MemoryRouter initialEntries={[initialEntry]}><Location /><Routes>
     <Route path="/property/search" element={<PropertySearchPage />} />
     <Route path="/property" element={<PropertyHubIndex />} />
     <Route path="/property/browse" element={<PropertySearchRedirect />} />
@@ -47,13 +48,14 @@ afterEach(cleanup);
 
 describe('one residential results surface', () => {
   it('preserves a result bookmark hash and unapplied editor draft through sort history', async () => {
-    mount('/property/search?q=sea&guests=3&opaque=keep#results');
+    mount('/property/search?q=sea&guests=3&opaque=keep#results', { origin: 'synthetic-home' });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Draft Synthetic' } });
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Number of guests' }), { target: { value: '5' } });
     fireEvent.keyDown(screen.getByRole('combobox', { name: 'Sort homes' }), { key: 'Enter' });
     fireEvent.keyDown(await screen.findByRole('option', { name: 'Price: Low → High' }), { key: 'Enter' });
     const current = () => new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(current().hash).toBe('#results');
+    expect(screen.getByTestId('navigation-state')).toHaveTextContent(JSON.stringify({ origin: 'synthetic-home' }));
     expect(current().searchParams.get('sort')).toBe('price_asc');
     expect(current().searchParams.get('q')).toBe('sea');
     expect(current().searchParams.get('opaque')).toBe('keep');
@@ -61,9 +63,11 @@ describe('one residential results surface', () => {
     expect(screen.getByRole('spinbutton', { name: 'Number of guests' })).toHaveValue(5);
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
     expect(current().hash).toBe('#results');
+    expect(screen.getByTestId('navigation-state')).toHaveTextContent(JSON.stringify({ origin: 'synthetic-home' }));
     expect(screen.getByRole('combobox', { name: 'Sort homes' })).toHaveTextContent('Recommended');
     fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
     expect(current().hash).toBe('#results');
+    expect(screen.getByTestId('navigation-state')).toHaveTextContent(JSON.stringify({ origin: 'synthetic-home' }));
     expect(screen.getByRole('combobox', { name: 'Sort homes' })).toHaveTextContent('Price: Low → High');
     expect(screen.getByRole('searchbox', { name: 'Property name' })).toHaveValue('Draft Synthetic');
     expect(screen.getByRole('spinbutton', { name: 'Number of guests' })).toHaveValue(5);

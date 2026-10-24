@@ -82,7 +82,7 @@ export default function PropertySearchPage() {
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const sortKey = state.sort;
-  const setSortKey = (value: PropertySortKey) => navigate({ search: updatePropertySearchSort(searchParamsUrl, value).toString(), hash: location.hash });
+  const setSortKey = (value: PropertySortKey) => navigate({ search: updatePropertySearchSort(searchParamsUrl, value).toString(), hash: location.hash }, { state: location.state });
   const showMap = searchParamsUrl.get('view') === 'map';
   const selectedCompanyId = searchParamsUrl.get('company');
   const searchText = searchParamsUrl.get('q')?.trim() || '';
