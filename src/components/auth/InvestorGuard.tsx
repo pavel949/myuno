@@ -5,6 +5,7 @@ import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /**
  * Investor workspace guard — gates investor-only surfaces (`/capital`,
@@ -30,7 +31,11 @@ export function InvestorGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
   const { context, isLoading: contextLoading, isVerifying, error, refetch } = useResolvedContext();
 
+  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role, context?.permissions, location.pathname]);
+  const protectedPage = (pending: boolean) => <AccessVerificationBoundary identity={identity} pending={pending} fallback={<LoadingState />}>{children}</AccessVerificationBoundary>;
+
   if (authLoading || contextLoading || isVerifying) {
+    if (isVerifying && user && context && !authLoading && !contextLoading && !error) return protectedPage(true);
     return <LoadingState />;
   }
 
@@ -54,7 +59,7 @@ export function InvestorGuard({ children }: { children: React.ReactNode }) {
     serverRole === 'investor';
 
   if (isPrivileged) {
-    return <>{children}</>;
+    return protectedPage(false);
   }
 
   return <Navigate to="/invest" replace />;
