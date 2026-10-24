@@ -32,7 +32,7 @@ afterEach(cleanup);
 describe('platform Today workspace', () => {
   it('uses available admin width and only functional queue search/add actions', () => {
     mount();
-    expect(screen.getByRole('heading', { name: 'Today' }).closest('.max-w-full')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Today' }).closest('.ds-frame-full')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Add property' })).toHaveAttribute('href', '/admin/properties?action=new');
     expect(screen.getByRole('link', { name: 'Add service' })).toHaveAttribute('href', '/admin/services?action=new');
     const search = screen.getByRole('textbox', { name: 'Find a work queue' });

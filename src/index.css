@@ -150,8 +150,8 @@ body {
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: var(--type-page-body-size);
+    line-height: var(--type-page-body-leading);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-wrap: break-word;
@@ -163,37 +163,28 @@ body {
     outline-offset: 2px;
   }
 
-  @media (min-width: 1024px) {
-    body {
-      font-size: 16px;
-      line-height: 1.6;
-    }
-  }
 
   /* Typography — Source Serif 4 (display), Geist (body) — DS 2.1 */
   h1 {
-    @apply font-display font-bold tracking-tight leading-[1.15];
-    font-size: 1.75rem;
+    @apply font-display font-bold tracking-tight;
+    font-size: var(--type-page-h1-size);
+    line-height: var(--type-page-h1-leading);
     overflow-wrap: break-word;
   }
-  @media (min-width: 640px) { h1 { font-size: 2rem; } }
-  @media (min-width: 1024px) { h1 { font-size: 2.5rem; } }
   
   h2 {
-    @apply font-display font-bold tracking-tight leading-[1.2];
-    font-size: 1.25rem;
+    @apply font-display font-bold tracking-tight;
+    font-size: var(--type-page-h2-size);
+    line-height: var(--type-page-h2-leading);
     overflow-wrap: break-word;
   }
-  @media (min-width: 640px) { h2 { font-size: 1.5rem; } }
-  @media (min-width: 1024px) { h2 { font-size: 1.75rem; } }
   
   h3 {
-    @apply font-display font-semibold tracking-tight leading-[1.25];
-    font-size: 1rem;
+    @apply font-display font-semibold tracking-tight;
+    font-size: var(--type-page-h3-size);
+    line-height: var(--type-page-h3-leading);
     overflow-wrap: break-word;
   }
-  @media (min-width: 640px) { h3 { font-size: 1.125rem; } }
-  @media (min-width: 1024px) { h3 { font-size: 1.25rem; } }
   
   h4, h5, h6 {
     @apply font-display font-semibold leading-[1.3];

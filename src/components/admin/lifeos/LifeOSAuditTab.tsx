@@ -35,7 +35,7 @@ interface AuditLogEntry {
 const ACTION_COLORS: Record<string, string> = {
   create: 'bg-success/10 text-success border-success/20',
   update: 'bg-info/10 text-info border-info/20',
-  delete: 'bg-destructive/10 text-destructive border-destructive/20',
+  delete: 'bg-danger/10 text-danger border-danger/20',
   toggle: 'bg-warning/10 text-warning border-warning/20',
 };
 
@@ -209,7 +209,7 @@ export function LifeOSAuditTab() {
                       <TableCell>
                         <Badge 
                           variant="outline" 
-                          className={cn(ACTION_COLORS[log.action] || 'bg-gray-100')}
+                          className={cn(ACTION_COLORS[log.action] || 'bg-muted text-muted-foreground border-border')}
                         >
                           {log.action}
                         </Badge>

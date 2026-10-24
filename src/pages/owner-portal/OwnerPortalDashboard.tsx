@@ -84,7 +84,7 @@ export default function OwnerPortalDashboard() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6 pb-24">
+    <div className="ds-frame ds-frame-article ds-page ds-page-with-navigation space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -204,9 +204,9 @@ export default function OwnerPortalDashboard() {
                     </div>
                     
                     {/* Quick stats */}
-                    <div className="flex items-center gap-3 mt-2">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Shield className="w-3.5 h-3.5" />
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+                        <Shield className="w-3.5 h-3.5 shrink-0" />
                         <span>{isRu ? 'Под управлением' : 'Managed'}</span>
                       </div>
                       <Button

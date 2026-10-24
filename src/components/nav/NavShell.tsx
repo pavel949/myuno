@@ -88,7 +88,7 @@ export function NavShell({
               <main id={mainId} tabIndex={-1}
                 className={cn(
                   'flex-1 min-w-0 w-full',
-                  renderBottomBar && 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-4',
+                  renderBottomBar && 'ds-shell-with-navigation',
                   contentClassName,
                 )}
               >
@@ -112,7 +112,7 @@ export function NavShell({
         <main id={mainId} tabIndex={-1}
           className={cn(
             'flex-1 min-w-0 w-full',
-            renderBottomBar && 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-4',
+            renderBottomBar && 'ds-shell-with-navigation',
             contentClassName,
           )}
         >

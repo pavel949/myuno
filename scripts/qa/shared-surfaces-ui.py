@@ -1,15 +1,17 @@
 """Real primitives: responsive actions, validation, long dialogs, layered controls."""
-import asyncio,json,sys
+import asyncio,json,sys,shutil,os
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright,expect
 OUTPUT=Path(sys.argv[1])
+REPRESENTATIVE=os.environ.get('SHARED_SURFACES_REPRESENTATIVE')=='1'
+EXPECTED_PADDING=float(os.environ.get('SHARED_SURFACES_EXPECT_CARD_PADDING','16'))
 async def main():
  results=[]
  async with async_playwright() as p:
-  browser=await p.chromium.launch()
-  for lang in ['ru','en']:
-   for width in [320,375,390,430,768,1024,1440,1920]:
+  browser=await p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox'])
+  for lang in (['ru'] if REPRESENTATIVE else ['ru','en']):
+   for width in ([390,1440] if REPRESENTATIVE else [320,375,390,430,768,1024,1440,1920]):
     for theme in ['light','dark']:
      context=await browser.new_context(viewport={'width':width,'height':640},reduced_motion='reduce',service_workers='block')
      errors=[];blocked=[]
@@ -38,6 +40,10 @@ async def main():
        box=await locator.bounding_box();assert box and box['x']>=-1 and box['y']>=-1 and box['x']+box['width']<=width+1 and box['y']+box['height']<=641,box
        assert await locator.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
       assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+      assert await page.get_by_test_id('canonical-card-header').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
+      assert await page.get_by_test_id('canonical-section').locator('..').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
+      assert await page.get_by_test_id('canonical-inset').evaluate('(el)=>getComputedStyle(el).boxShadow') == 'none'
+      await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{theme}-primitives.png'),full_page=True)
       trigger=page.get_by_role('button',name='Dialog',exact=True);await trigger.click()
       dialog=page.get_by_role('dialog');await expect(dialog).to_be_visible();await bounds(dialog)
       assert await dialog.evaluate('(el)=>Number(getComputedStyle(el).zIndex)>100')
@@ -64,6 +70,7 @@ async def main():
      finally:
       (OUTPUT/'results.json').write_text(json.dumps(results,indent=2));await context.close()
   await browser.close()
- assert len(results)==32
- print('PASS: 32 responsive shared-surface scenarios')
+ expected=4 if REPRESENTATIVE else 32
+ assert len(results)==expected
+ print(f'PASS: {expected} responsive shared-surface scenarios')
 asyncio.run(main())

@@ -304,7 +304,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
 
           <p className="text-xs text-muted-foreground text-center">
             {t({
-              ru: 'Нажимая «Отправить», вы соглашаетесь с обработкой персональных данных.',
+              ru: 'Отправляя заявку, вы соглашаетесь с обработкой персональных данных.',
               en: 'By submitting you agree to our data-processing policy.', th: 'การส่งคำขอแสดงว่าคุณยอมรับนโยบายการประมวลผลข้อมูลของเรา',
             })}
           </p>

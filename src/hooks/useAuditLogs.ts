@@ -71,12 +71,12 @@ export function useAuditLogs(options: UseAuditLogsOptions = {}) {
 export function formatAuditAction(action: string): { label: string; color: string } {
   const actionMap: Record<string, { label: string; color: string }> = {
     create: { label: 'Создание', color: 'bg-success/10 text-success' },
-    update: { label: 'Изменение', color: 'bg-primary/10 text-primary' },
-    delete: { label: 'Удаление', color: 'bg-red-100 text-red-800' },
+    update: { label: 'Изменение', color: 'bg-info/10 text-info' },
+    delete: { label: 'Удаление', color: 'bg-danger/10 text-danger' },
     approve: { label: 'Одобрение', color: 'bg-success/10 text-success' },
-    reject: { label: 'Отклонение', color: 'bg-accent/10 text-accent' },
-    verify: { label: 'Верификация', color: 'bg-primary/10 text-primary' },
-    suspend: { label: 'Приостановка', color: 'bg-accent/10 text-accent' },
+    reject: { label: 'Отклонение', color: 'bg-danger/10 text-danger' },
+    verify: { label: 'Верификация', color: 'bg-info/10 text-info' },
+    suspend: { label: 'Приостановка', color: 'bg-warning/10 text-warning' },
     activate: { label: 'Активация', color: 'bg-success/10 text-success' },
   };
 
@@ -85,7 +85,7 @@ export function formatAuditAction(action: string): { label: string; color: strin
     if (key.includes(k)) return v;
   }
 
-  return { label: action, color: 'bg-gray-100 text-gray-800' };
+  return { label: action, color: 'bg-muted text-muted-foreground' };
 }
 
 // Format entity type for display

@@ -3,6 +3,7 @@
  * Unit states are inferred signals, not verified readiness or inventory status.
  */
 import type { ReactNode } from 'react';
+import { PageShell } from '@/components/page/PageShell';
 import { Link, useLocation } from 'react-router-dom';
 import { LogIn, LogOut, BedDouble, MessageSquare, RefreshCw, Phone, CalendarDays, ListTodo, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -146,7 +147,7 @@ export default function PmsTodayPage() {
   const attentionTitle = t({ en: 'Needs attention', ru: 'Требует внимания', th: 'ต้องดำเนินการ' });
   const todayTitle = t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' });
 
-  return <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 px-4 py-6 text-foreground">
+  return <PageShell width="wide" className="space-y-6 text-foreground">
     <header className="space-y-3 border-b border-border pb-4">
       <div className="min-w-0">
         <h1 className="break-words font-display text-h2 sm:text-h1">{todayTitle}</h1>
@@ -221,5 +222,5 @@ export default function PmsTodayPage() {
         <ul className="mt-4 grid min-w-0 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">{d.units.map(u => <UnitRow key={u.property_id} u={u} />)}</ul>
       </section>
     </>}
-  </div>;
+  </PageShell>;
 }

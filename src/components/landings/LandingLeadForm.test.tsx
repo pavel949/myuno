@@ -24,3 +24,10 @@ it('renders Thai shared labels and optional Thai caller copy', () => {
  fixture.language = 'th'; render(<LandingLeadForm variant="universal" entryPoint="synthetic-owner" submitLabel={{ ru: 'Отправить', en: 'Send', th: 'ส่งถึงทีม' }} />);
  expect(screen.getByLabelText(/ชื่อ/)).toBeVisible(); expect(screen.getByLabelText(/โทรศัพท์/)).toBeVisible(); expect(screen.getByLabelText('อีเมล')).toBeVisible(); expect(screen.getByRole('button', { name: 'ส่งถึงทีม' })).toBeDisabled();
 });
+it('keeps Russian consent accurate for an owner-specific submit label', () => {
+ fixture.language = 'ru';
+ render(<LandingLeadForm variant="universal" entryPoint="synthetic-owner" submitLabel={{ ru: 'Обсудить управление', en: 'Ask about management', th: 'สอบถามการจัดการ' }} />);
+ expect(screen.getByRole('button', { name: 'Обсудить управление' })).toBeVisible();
+ expect(screen.getByText('Отправляя заявку, вы соглашаетесь с обработкой персональных данных.')).toBeVisible();
+ expect(screen.queryByText(/Нажимая «Отправить»/)).toBeNull();
+});

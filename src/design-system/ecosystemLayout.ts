@@ -5,7 +5,7 @@
 export const ECOSYSTEM_SHELL = "min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip overflow-y-auto";
 
 /** Single source for horizontal bounds: main column + AppHeader row (same grid = no “double frame”). */
-export const ECOSYSTEM_PAGE_CONTAINER = "w-full max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10";
+export const ECOSYSTEM_PAGE_CONTAINER = "ds-frame ds-frame-wide";
 
 /** Use for sticky app chrome so header content aligns with `<main>` below. */
 export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
@@ -13,8 +13,8 @@ export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
 /** Opt-in marketing frame aligned with public chrome; catalog/form bounds stay domain-owned. */
 export const PUBLIC_CONTENT_LAYOUT = {
   marketing: ECOSYSTEM_PAGE_CONTAINER,
-  catalogue: 'w-full max-w-[1760px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10',
-  business: 'w-full max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10',
+  catalogue: 'ds-frame ds-frame-catalogue',
+  business: 'ds-frame ds-frame-workspace',
 } as const;
 
 /** Opt-in public page types; article, details, form and wizard frames stay unchanged. */
@@ -24,7 +24,11 @@ export function publicContentFrame(pathname: string): 'catalogue' | 'business' |
   if (path === '/for-business') return 'business';
   return 'default';
 }
-export const PUBLIC_CONTENT_WIDTH = { default: 1280, catalogue: 1760, business: 1536 } as const;
+export const PUBLIC_CONTENT_WIDTH = {
+  default: 'var(--layout-width-wide)',
+  catalogue: 'var(--layout-width-catalogue)',
+  business: 'var(--layout-width-workspace)',
+} as const;
 /** Actual cards and skeletons must occupy the same columns. */
 export const PUBLIC_CATALOG_GRID = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-[1440px]:grid-cols-4 gap-6';
 

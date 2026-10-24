@@ -20,6 +20,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCommissionForecastSeries } from '@/hooks/useCommissionForecastSeries';
 import { cn } from '@/lib/utils';
+import { CHART_THEME } from '@/lib/chartTheme';
 
 interface CommissionTimeSeriesChartProps {
   companyId: string;
@@ -114,26 +115,20 @@ export function CommissionTimeSeriesChart({
               <CartesianGrid strokeDasharray="2 2" stroke="hsl(var(--border))" vertical={false} />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                tick={CHART_THEME.axisTick}
                 tickLine={false}
                 axisLine={{ stroke: 'hsl(var(--border))' }}
               />
               <YAxis
                 tickFormatter={formatM}
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontFamily: 'IBM Plex Mono, ui-monospace' }}
+                tick={{ ...CHART_THEME.axisTick, fontSize: 10, fontFamily: 'var(--font-mono)' }}
                 tickLine={false}
                 axisLine={false}
                 width={42}
               />
               <Tooltip
                 cursor={{ fill: 'hsl(var(--muted) / 0.25)' }}
-                contentStyle={{
-                  background: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: 0,
-                  fontSize: 12,
-                  fontFamily: 'IBM Plex Mono, ui-monospace',
-                }}
+                contentStyle={{ ...CHART_THEME.tooltip, fontFamily: 'var(--font-mono)' }}
                 formatter={(value: number, name: string) => [formatM(value), name]}
               />
               <Legend

@@ -1,5 +1,5 @@
 /* Scoped operator chrome. Public, owner-portal and administrator themes are unchanged. */
-.mc-workspace-sidebar{--sidebar-background:211 60% 17%;--sidebar-foreground:40 25% 96%;--sidebar-accent:211 35% 29%;--sidebar-accent-foreground:0 0% 100%;--sidebar-border:211 28% 32%;--sidebar-ring:40 25% 85%;color:hsl(var(--sidebar-foreground))}
+.mc-workspace-sidebar{--sidebar-background:var(--operator-sidebar-background);--sidebar-foreground:var(--operator-sidebar-foreground);--sidebar-accent:var(--operator-sidebar-accent);--sidebar-accent-foreground:var(--operator-sidebar-accent-foreground);--sidebar-border:var(--operator-sidebar-border);--sidebar-ring:var(--operator-sidebar-ring);color:hsl(var(--sidebar-foreground))}
 .mc-workspace-sidebar .text-muted-foreground{color:hsl(var(--sidebar-foreground)/.78)}
 .mc-workspace-sidebar [data-sidebar=group-label]{color:hsl(var(--sidebar-foreground)/.8);height:auto;min-height:44px;padding-block:10px}
 .mc-workspace-sidebar [data-sidebar=group-label]:hover{color:hsl(var(--sidebar-foreground))}
