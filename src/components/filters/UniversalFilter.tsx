@@ -21,6 +21,7 @@ export interface FilterOption {
   labelTh?: string;
   icon?: string | LucideIcon;
   count?: number;
+  savedValue?: boolean;
 }
 
 export interface FilterSection {
@@ -108,6 +109,7 @@ function SingleSelectList({ options, value, onChange }: {
             onClick={() => onChange(isActive ? null : option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
+              option.savedValue && "min-w-0 max-w-full break-all text-left",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card border-border text-foreground hover:border-primary/50"
@@ -151,6 +153,7 @@ function MultiSelectChips({ options, value, onChange }: {
             onClick={() => toggle(option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
+              option.savedValue && "min-w-0 max-w-full break-all text-left",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card border-border text-foreground hover:border-primary/50"
@@ -282,7 +285,7 @@ export function UniversalFilter({
           {sections.map((originalSection, index) => {
             const saved = localValues[originalSection.id];
             const missing = config.secondaryGroup ? (Array.isArray(saved) ? saved : saved ? [saved] : []).filter(id => !originalSection.options.some(option => option.id === id)) : [];
-            const section = { ...originalSection, options: [...originalSection.options, ...missing.map(id => ({ id, labelEn: id, labelRu: id, labelTh: id }))] };
+            const section = { ...originalSection, options: [...originalSection.options, ...missing.map(id => ({ id, labelEn: id, labelRu: id, labelTh: id, savedValue: true }))] };
             return (
             <div key={section.id}>
               {index > 0 && <Separator className="mb-6" />}
@@ -295,12 +298,12 @@ export function UniversalFilter({
               {section.type === 'price-level' && (
                 <PriceLevelSelect
                   descriptions={section.priceLevelDescriptions}
-                  value={localValues[section.id] as string | null}
+                  value={(Array.isArray(saved) && config.secondaryGroup ? null : saved) as string | null}
                   onChange={(value) => updateSectionValue(section.id, value)}
                 />
               )}
 
-              {config.secondaryGroup && section.type === 'price-level' && typeof saved === 'string' && !['1', '2', '3', '4'].includes(saved) && <Button variant="outline" aria-pressed="true" onClick={() => updateSectionValue(section.id, null)}>{section.id}: {saved} <X className="ml-2 h-4 w-4" /></Button>}
+              {config.secondaryGroup && section.type === 'price-level' && (Array.isArray(saved) ? saved.length > 0 : typeof saved === 'string' && !['1', '2', '3', '4'].includes(saved)) && <Button className="h-auto max-w-full whitespace-normal text-left" variant="outline" aria-pressed="true" onClick={() => updateSectionValue(section.id, null)}><span className="min-w-0 break-all">{section.id}: {Array.isArray(saved) ? saved.join(', ') : saved}</span><X className="ml-2 h-4 w-4 shrink-0" /></Button>}
 
               {section.type === 'single' && (
                 <SingleSelectList
@@ -369,7 +372,7 @@ export function UniversalFilter({
               <p className="text-sm text-muted-foreground">{config.secondaryGroup.description}</p>
               {renderSections(config.sections.filter(section => section.secondary))}
               {Object.entries(localValues).filter(([id]) => !config.sections.some(section => section.id === id)).map(([id, value]) =>
-                (Array.isArray(value) ? value : value ? [value] : []).map(item => <Button key={`${id}:${item}`} variant="outline" aria-pressed="true" onClick={() => updateSectionValue(id, Array.isArray(value) ? value.filter(v => v !== item) : null)}>{id}: {item} <X className="ml-2 h-4 w-4" /></Button>))}
+                (Array.isArray(value) ? value : value ? [value] : []).map(item => <Button key={`${id}:${item}`} className="h-auto max-w-full whitespace-normal text-left" variant="outline" aria-pressed="true" onClick={() => updateSectionValue(id, Array.isArray(value) ? value.filter(v => v !== item) : null)}><span className="min-w-0 break-all">{id}: {item}</span><X className="ml-2 h-4 w-4 shrink-0" /></Button>))}
             </CollapsibleContent>
           </Collapsible>}
         </div>

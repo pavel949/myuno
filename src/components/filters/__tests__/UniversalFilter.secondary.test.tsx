@@ -49,3 +49,16 @@ it('exposes an unknown saved budget without silently normalizing it', () => {
  fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
  expect(change).toHaveBeenCalledWith({ priceLevel: null });
 });
+
+it('retains malformed multi-value budget until explicit removal without selecting a canonical tier', () => {
+ const change = vi.fn();
+ render(<UniversalFilter config={{ ...config, sections: [...sections, { id: 'priceLevel', titleEn: 'Budget', titleRu: 'Бюджет', type: 'price-level', options: [] }] }} values={{ priceLevel: ['1', 'legacy-budget'], guestFeatures: ['pool'] }} onChange={change} />);
+ fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+ expect(screen.getByRole('button', { name: '฿', exact: true })).toHaveAttribute('aria-pressed', 'false');
+ fireEvent.click(screen.getByRole('button', { name: /Apply/ }));
+ expect(change).toHaveBeenLastCalledWith({ priceLevel: ['1', 'legacy-budget'], guestFeatures: ['pool'] });
+ fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+ fireEvent.click(screen.getByRole('button', { name: 'priceLevel: 1, legacy-budget' }));
+ fireEvent.click(screen.getByRole('button', { name: /Apply/ }));
+ expect(change).toHaveBeenLastCalledWith({ priceLevel: null, guestFeatures: ['pool'] });
+});
