@@ -510,7 +510,8 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
         data-global-chat-launcher
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed w-12 h-12 rounded-full',
+          'fixed rounded-full',
+          FLOATING_OFFSET.chatSize,
           FLOATING_OFFSET.chatAboveStack,
           'right-4',
           FLOATING.chatFab,
@@ -518,7 +519,6 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           'flex items-center justify-center',
           'shadow-[var(--shadow-elevation-2)] ring-1 ring-primary/20',
           'transition-transform hover:scale-105 active:scale-95',
-          'md:bottom-6 md:w-14 md:h-14',
           className,
         )}
         aria-label={isRu ? 'Открыть помощник myUNO' : 'Open myUNO assistant'}

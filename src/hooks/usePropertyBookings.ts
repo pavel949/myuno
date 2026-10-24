@@ -730,35 +730,33 @@ export function useGuestPropertyBookings() {
         throw error;
       }
 
-      // P1 FIX: Batch property lookup instead of N+1 queries
-      const resourceIds = [...new Set(
-        (data || [])
-          .map(order => order.order_items?.[0]?.resource_id)
-          .filter(Boolean) as string[]
-      )];
-
-      let propertiesMap: Record<string, { id: string; title: string; title_ru: string | null; address: string | null; cover_image: string | null; check_in_time: string | null; check_out_time: string | null }> = {};
-      
+      // Display enrichment uses only the public projection. Orders remain authoritative.
+      const propertyItem = (order: NonNullable<typeof data>[number]) =>
+        order.order_items?.find(item => item.item_type === 'property');
+      const resourceIds = [...new Set((data || []).map(order => propertyItem(order)?.resource_id).filter((id): id is string => !!id))];
+      const propertiesMap: Record<string, { id: string; title: string | null; title_ru: string | null; address: string | null; cover_image: string | null; check_in_time: string | null; check_out_time: string | null }> = {};
+      let propertyNamesUnavailable = false;
       if (resourceIds.length > 0) {
-        const { data: props } = await supabase
-          .from('properties')
+        const { data: props, error: projectionError } = await supabase
+          .from('public_property_catalog')
           .select('id, title_en, title_ru, address, cover_image, check_in_time, check_out_time')
           .in('id', resourceIds);
-        
-        propertiesMap = (props || []).reduce((acc, prop) => {
-          acc[prop.id] = { ...prop, title: prop.title_en };
-          return acc;
-        }, {} as typeof propertiesMap);
+        propertyNamesUnavailable = !!projectionError;
+        if (!projectionError) for (const prop of props || []) {
+          if (prop.id) propertiesMap[prop.id] = { ...prop, id: prop.id, title: prop.title_en };
+        }
       }
-
-      // Map orders with pre-fetched property data
       const enrichedData = (data || []).map(order => {
-        const resourceId = order.order_items?.[0]?.resource_id;
-        const propertyData = resourceId ? propertiesMap[resourceId] || null : null;
-        
+        const item = propertyItem(order);
+        const resourceId = item?.resource_id;
+        // A stored human-readable name is a historical snapshot, never an identity/link.
+        const storedName = item?.item_name?.trim();
+        const historicalPropertyName = storedName && !/^property booking$/i.test(storedName) && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storedName) ? storedName : null;
         return {
           ...mapOrderToBooking(order, resourceId || ''),
-          owner_properties: propertyData,
+          owner_properties: resourceId ? propertiesMap[resourceId] || null : null,
+          historicalPropertyName,
+          propertyNamesUnavailable,
         };
       });
 

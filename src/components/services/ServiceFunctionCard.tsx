@@ -7,22 +7,22 @@ import { pickLang } from '@/lib/i18n/pickLang';
  import { cn } from '@/lib/utils';
  import type { LocalizedServiceFunction } from '@/hooks/useServiceFunctions';
  import { getCurrencySymbol } from '@/lib/config/currencies';
- 
+
  interface ServiceFunctionCardProps {
    fn: LocalizedServiceFunction;
    onClick?: () => void;
    compact?: boolean;
    catalogue?: boolean;
  }
- 
+
  export function ServiceFunctionCard({ fn, onClick, compact = false, catalogue = false }: ServiceFunctionCardProps) {
    const { language } = useLanguage();
    const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
- 
+
    const formatPrice = (price: number, currency: string) => {
      return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
- 
+
    // Category icons avoid implying that editorial images show actual providers.
    // Other placements retain their existing compact/default presentation.
    if (catalogue) {
@@ -38,19 +38,19 @@ import { pickLang } from '@/lib/i18n/pickLang';
          <button type="button" onClick={onClick} data-testid="service-request-card"
            aria-labelledby={`${titleId} ${actionId}`} aria-describedby={`${descriptionId} ${termsId}`}
            className="group flex h-full w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
-           <span aria-hidden="true" className="flex h-16 w-full items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><Icon className="!h-10 !w-10" strokeWidth={1.25} /></span>
+
            <span className="flex w-full flex-1 flex-col p-4">
-           <span id={titleId} className="block font-display text-h4 leading-snug text-foreground">{fn.name}</span>
+           <span className="flex items-start gap-3"><span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center bg-muted text-primary"><Icon className="h-5 w-5" strokeWidth={1.5} /></span><span id={titleId} className="min-w-0 font-display text-h4 leading-snug text-foreground">{fn.name}</span></span>
            <span id={descriptionId} className="mt-2 block text-sm leading-relaxed text-muted-foreground line-clamp-2">
              {fn.includes.slice(0, 3).join(' · ')}
            </span>
-           <span className="mt-auto block pt-4">
-             <span id={termsId} className="flex flex-col gap-2 border-t border-border pt-3 text-sm">
+           <span className="mt-auto block pt-3">
+             <span id={termsId} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-3 text-sm">
                <span className="inline-flex items-center gap-2 font-medium text-primary"><Coins className="h-4 w-4 shrink-0" aria-hidden="true" />{t('от', 'from', "เริ่มต้น")} {formatPrice(fn.basePrice, fn.currency)}</span>{' '}
                <span className="inline-flex items-center gap-2 text-muted-foreground"><Clock className="h-4 w-4 shrink-0" aria-hidden="true" />{fn.estimatedTime}</span>{' '}
                {fn.isUrgent && <span className="text-muted-foreground">{t('Срочная заявка', 'Urgent request', "คำขอเร่งด่วน")}</span>}
              </span>
-             <span id={actionId} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary group-hover:underline underline-offset-4">
+             <span id={actionId} className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary group-hover:underline underline-offset-4">
                {t('Оставить заявку', 'Request service', "ส่งคำขอบริการ")}<ChevronRight className="h-4 w-4" aria-hidden="true" />
              </span>
            </span>
@@ -62,7 +62,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 
    if (compact) {
      return (
-       <Card 
+       <Card
          className="cursor-pointer hover:shadow-md transition-shadow border-border/50"
          onClick={onClick}
        >
@@ -83,9 +83,9 @@ import { pickLang } from '@/lib/i18n/pickLang';
        </Card>
      );
    }
- 
+
    return (
-     <Card 
+     <Card
        className="cursor-pointer hover:shadow-md transition-all hover:border-primary/30 border-border/50 group"
        onClick={onClick}
      >
@@ -95,7 +95,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
            <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center text-2xl shrink-0 group-hover:bg-primary/20 transition-colors">
              {fn.icon}
            </div>
-           
+
            {/* Content */}
            <div className="flex-1 min-w-0">
              <div className="flex items-start justify-between gap-2 mb-1">
@@ -107,12 +107,12 @@ import { pickLang } from '@/lib/i18n/pickLang';
                  </Badge>
                )}
              </div>
-             
+
              {/* Description / Includes */}
              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                {fn.includes.slice(0, 3).join(' • ')}
              </p>
-             
+
              {/* Footer: Time + Price + CTA */}
              <div className="flex flex-wrap items-center justify-between gap-2">
                <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -121,7 +121,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
                    {fn.estimatedTime}
                  </span>
                </div>
-               
+
                <div className="flex items-center gap-2">
                  <span className="text-sm font-semibold text-primary">
                    {t('от', 'from', "เริ่มต้น")} {formatPrice(fn.basePrice, fn.currency)}
@@ -138,16 +138,16 @@ import { pickLang } from '@/lib/i18n/pickLang';
      </Card>
    );
  }
- 
+
  // Compact grid variant for quick access
  export function ServiceFunctionQuickCard({ fn, onClick }: { fn: LocalizedServiceFunction; onClick?: () => void }) {
    const { language } = useLanguage();
    const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
- 
+
    const formatPrice = (price: number, currency: string) => {
      return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
- 
+
    return (
      <button
        onClick={onClick}

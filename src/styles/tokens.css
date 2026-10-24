@@ -329,6 +329,8 @@
   --touch-target:      2.75rem;    /* 44px WCAG */
   --nav-icon-size:     1.25rem;
   --bottom-nav-h:      calc(60px + env(safe-area-inset-bottom, 0px));
+  --floating-chat-size: 3rem;
+  --floating-chat-gap: 1rem;
 
   /* ═══════════════════════════════════════════════════════════
      11 · BACKWARD-COMPAT ALIASES — to keep ~1000 components alive
@@ -446,6 +448,8 @@
 @media (min-width: 768px) {
   :root {
     --bottom-nav-h:    0px;
+    --floating-chat-size: 3.5rem;
+    --floating-chat-gap: 1.5rem;
     --layout-gutter: 1.5rem;
     --layout-page-space-y: 1.5rem;
     --section-gap:     2rem;

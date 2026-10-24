@@ -31,7 +31,7 @@ describe('provider catalogue states', () => {
   });
   it('offers retry on failure without claiming empty inventory', () => {
     isError = true; mount();
-    expect(screen.getByText('Could not load services.')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not load services.');
     fireEvent.click(screen.getByText('Retry')); expect(refetch).toHaveBeenCalledOnce();
     expect(screen.queryByText(/Online booking is not available/)).toBeNull();
   });
