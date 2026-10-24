@@ -90,3 +90,12 @@ Machine-readable focused security regression output is retained in
 `docs/security/evidence/guard-background-recheck.security-report.json`.
 It records actual test results and runtime hashes; it is not a general scanner
 report or a live authorization certificate.
+
+
+## Reconciliation with main2fa3d90b — 24 October
+
+Main introduced a parallel inline-hidden boundary and pathname-bound wrapper identities. Its Role/MC/Investor changes overlap this branch. Two unchanged stableLoadingShell tests on clean main reproduce a layout remount (2 instead of1) on sibling navigation/lazy pending. The reviewed PR166 boundary remains canonical: native top-layer quarantine for body-portaled dialogs, no pathname in authorization identity, actor/context/policy/company/membership-role invalidation and safe unmount without native modality. Existing authorization predicates, resolver/RPC/cache truth and server RLS are not broadened.
+
+Resolution preserves unrelated main AGENTS/roadmap/lockfile changes and the distinct upstream admission tests; it retires the now-unused duplicate AccessVerificationBoundary. Homepage PR168 is not included. Fresh targeted tests, browser evidence, exact-head CI and independent review remain required before declaring this reconciliation ready. No merge to main, deployment, role grant or schema activation is authorized by this report.
+
+Current reconciliation local results:91/91 across12 files, including both unchanged stableLoadingShell assertions; captured security/shell subset26/26. Fresh actual-guard/real-Radix Chromium28/28 with current-source Vite CSS,7 guards × inline/portal ×390/1440. Retained Portal content is opaque-concealed and excluded from accessibility while pending; restored field/value/focus survives success; errors/revocation/actor changes discard it. Synthetic writes remain0. Pointer Retry after12s with retained Radix modal also passed (mount1/unmount0/writes0). Native OS tab-foreground behavior and live sessions remain unverified: the harness drives the actual React Query focus manager. Current-source CSS is labelled as such, not a production build. Pending and restored pixels were inspected. Independent reconciled-source review:GO, contingent on exact-head CI; no main merge or publication.

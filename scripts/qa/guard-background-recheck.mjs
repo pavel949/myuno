@@ -32,6 +32,6 @@ createRoot(document.getElementById('root')).render(<QueryClientProvider client={
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|contexts\/AuthContext\.tsx$/.test(p)))throw Error('Production data module included');
 const cssFile=process.env.GUARD_CSS_FILE;
 if(cssFile)await writeFile(path.join(output,'app.css'),await readFile(cssFile));
-await writeFile(path.join(output,'style-source.json'),JSON.stringify({mode:cssFile?'production-build':'diagnostic',file:cssFile??null}));
+await writeFile(path.join(output,'style-source.json'),JSON.stringify({mode:cssFile?(process.env.GUARD_CSS_SOURCE||'production-build'):'diagnostic',file:cssFile??null}));
 await writeFile(path.join(output,'index.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">'+(cssFile?'<link rel="stylesheet" href="/app.css">':'')+'<style>body{font:18px system-ui;padding:24px;background:#fafafa;color:#192638}form{padding:24px;border:1px solid #aaa}input,button{display:block;margin:12px 0;padding:12px;font:inherit}.uno-splash{display:flex;align-items:center;justify-content:center}.uno-splash svg{width:48px;height:48px;stroke:currentColor}</style></head><body><div id="root"></div><script type="module" src="/app.js"></script></body></html>');
 if(!process.argv.includes('--build-only')){const r=spawnSync('python3',[path.join(root,'scripts/qa/guard-background-recheck.py'),output],{stdio:'inherit'});process.exitCode=r.status??1;}

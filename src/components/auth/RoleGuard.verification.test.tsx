@@ -97,3 +97,40 @@ describe('actual resolved-context query verification boundary',()=>{
  });
 
 });
+
+// Retain the parallel main branch's distinct admission/identity regressions.
+function MainDraft(){const [value,setValue]=React.useState('');return <input aria-label="Retained form draft" value={value} onChange={e=>setValue(e.target.value)}/>;}
+function draftShell(Guard:typeof MCGuard){return <QueryClientProvider client={client}><MemoryRouter><Guard><MainDraft/></Guard></MemoryRouter></QueryClientProvider>;}
+const AdminPage=({children}:{children:React.ReactNode})=><RoleGuard allowedRoles={['admin']}>{children}</RoleGuard>;
+describe('reconciled main admission regressions',()=>{
+ it.each([['MC',MCGuard],['Investor',InvestorGuard]] as const)('%s retains its same input across two successful checks',async(_name,Guard)=>{
+  render(draftShell(Guard));const input=screen.getByRole('textbox',{name:'Retained form draft'});fireEvent.change(input,{target:{value:'Unsaved property description'}});
+  for(let i=0;i<2;i++){
+   await startVerification();expect(input).not.toBeVisible();expect(input.closest('[inert]')).toBeTruthy();expect(screen.queryByRole('textbox')).toBeNull();
+   await act(async()=>{finish({data:{...context,resolved_at:`check-${i}`},error:null});await vi.advanceTimersByTimeAsync(2);});
+   expect(screen.getByRole('textbox',{name:'Retained form draft'})).toBe(input);expect(input).toHaveValue('Unsaved property description');
+  }
+ });
+ it('does not mount an initial cached page while its first check is pending',async()=>{
+  await client.invalidateQueries({queryKey:['resolved-context','actor-a']});render(draftShell(AdminPage));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});
+  expect(screen.queryByLabelText('Retained form draft')).toBeNull();expect(screen.getByRole('status')).toBeTruthy();
+ });
+ it.each(['failure','revocation'] as const)('removes a retained form after %s',async(outcome)=>{
+  render(draftShell(AdminPage));const input=screen.getByRole('textbox');await startVerification();
+  await act(async()=>{finish(outcome==='failure'?{data:null,error:{message:'denied'}}:{data:{...context,role:'user',permissions:[]},error:null});await vi.advanceTimersByTimeAsync(2);});
+  expect(input.isConnected).toBe(false);expect(screen.queryByLabelText('Retained form draft')).toBeNull();expect(screen.getByRole('alert')).toBeTruthy();
+ });
+ it('removes the previous actor form immediately without needing an existing refetch',()=>{
+  const view=render(draftShell(AdminPage));const input=screen.getByRole('textbox');fixture.actor='actor-b';view.rerender(draftShell(AdminPage));
+  expect(input.isConnected).toBe(false);expect(screen.queryByLabelText('Retained form draft')).toBeNull();
+ });
+ it('does not retain a previous company during verification',async()=>{
+  const view=render(draftShell(MCGuard));const input=screen.getByRole('textbox');await startVerification();fixture.companies=[{company_id:'company-b'}];view.rerender(draftShell(MCGuard));
+  expect(input.isConnected).toBe(false);expect(screen.queryByLabelText('Retained form draft')).toBeNull();
+ });
+ it('resets local state when the resolved context entity changes',async()=>{
+  render(draftShell(AdminPage));const input=screen.getByRole('textbox');fireEvent.change(input,{target:{value:'Old scope'}});
+  await act(async()=>{client.setQueryData(['resolved-context','actor-a'],{...context,entity_id:'company-b'});await vi.advanceTimersByTimeAsync(1);});
+  expect(input.isConnected).toBe(false);expect(screen.getByRole('textbox')).toHaveValue('');
+ });
+});

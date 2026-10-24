@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-24 · Protected-page background verification
+- [x] Reconcile parallel guard implementations: preserve same-actor/context drafts with native portal quarantine and stable sibling layouts, without stale admission.
+- [x] Current local reconciliation:91 selected tests (including26 security/shell tests),28 controlled-focus Chromium cases and pointer Retry probe pass. No production access, deployment or publishing. Evidence: docs/qa/guard-background-recheck-20261023.md.
+- [ ] Complete exact-head CI and release review; source/runtime proof is not live activation.
+
 ## 2026-10-22 · Authorized sitemap, metadata and monitoring tranche
 - [ ] First correct the four broken child sitemaps using the existing public catalogue contract; verify without publishing.
 - [ ] Give housing and services distinct accurate search titles/descriptions using existing page metadata.
