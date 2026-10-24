@@ -48,9 +48,9 @@ afterEach(cleanup);
 
 describe('one residential results surface', () => {
   it.each([
-    ['en', 'Pool', 'Remove Pool', 'Price & amenities', 'Popular features'],
-    ['ru', 'Бассейн', 'Убрать Бассейн', 'Цена и удобства', 'Популярные удобства'],
-    ['th', 'สระว่ายน้ำ', 'นำออก สระว่ายน้ำ', 'ราคาและสิ่งอำนวยความสะดวก', 'สิ่งอำนวยความสะดวกยอดนิยม'],
+    ['en', 'Pool', 'Remove Pool', 'Price & amenities', 'Home preferences'],
+    ['ru', 'Бассейн', 'Убрать Бассейн', 'Цена и удобства', 'Пожелания к жилью'],
+    ['th', 'สระว่ายน้ำ', 'นำออก สระว่ายน้ำ', 'ราคาและสิ่งอำนวยความสะดวก', 'ความต้องการที่พัก'],
   ])('uses the broad pool intent consistently in actual %s selected chip and sheet', (language, label, remove, trigger, group) => {
     state.language = language;
     mount('/property/search?cats=pool');
@@ -325,7 +325,7 @@ describe('one residential results surface', () => {
     mount('/property/search?instant=0&f.instantBooking=yes&bedrooms=&f.bedrooms=2&cats=pool');
     expect(state.filters.instantBooking).toBeUndefined();
     expect(state.filters.minBedrooms).toBeUndefined();
-    fireEvent.click(screen.getByRole('button', { name: `Remove ${PROPERTY_FEATURE_MAP.get('pool')!.labelEn}` }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Pool' }));
     expect(state.filters.instantBooking).toBeUndefined();
     expect(state.filters.minBedrooms).toBeUndefined();
     const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
@@ -334,7 +334,7 @@ describe('one residential results surface', () => {
   });
   it('lets legacy feature bookmarks be removed individually without dropping unrelated filters', () => {
     mount('/property/search?amenities=pool,wifi&cats=sea_view&f.priceLevel=2&source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: `Remove ${PROPERTY_FEATURE_MAP.get('pool')!.labelEn}` }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Pool' }));
     const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.has('amenities')).toBe(false);
     expect(url.searchParams.get('cats')?.split(',')).toEqual(['sea_view', 'wifi']);

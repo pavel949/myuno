@@ -5,7 +5,7 @@ import '@/styles/public-commerce.css';
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
 import { pickLang } from '@/lib/i18n/pickLang';
-import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -51,7 +51,7 @@ export default function PropertySearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const text = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
@@ -137,17 +137,21 @@ export default function PropertySearchPage() {
   // Core criteria have one editor (the search bar). Avoid a second conflicting
   // property type/district/bedroom/party selection inside the advanced filter sheet.
   const advancedFilterConfig = useMemo<FilterConfig>(() => ({
+    secondaryGroup: {
+      title: text('Точные параметры объявления', 'Exact listing details', 'รายละเอียดประกาศ'),
+      description: text('Дополнительные условия из полей объявления. Они уточняют пожелания выше и могут сократить результаты.', 'Additional conditions from listing fields. These refine the preferences above and may reduce results.', 'เงื่อนไขเพิ่มเติมจากประกาศ อาจทำให้ผลการค้นหาลดลง'),
+    },
     sections: [
-      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, titleTh: FILTER_TITLES_TH[section.id], ...(section.id === 'priceLevel' ? { priceLevelDescriptions: propertyPriceLevelDescriptions(propertyMode === 'buy' ? 'sale' : 'rent', language) } : {}) })),
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, secondary: section.id !== 'priceLevel', description: section.id === 'amenities' ? text('В объявлении должны быть все выбранные удобства.', 'The listing must include every selected amenity.', 'ประกาศต้องมีสิ่งอำนวยความสะดวกที่เลือกทั้งหมด') : section.id === 'highlights' ? text('Достаточно хотя бы одной выбранной особенности.', 'At least one selected highlight is enough.', 'มีจุดเด่นที่เลือกอย่างน้อยหนึ่งรายการก็เพียงพอ') : undefined, titleTh: FILTER_TITLES_TH[section.id], ...(section.id === 'priceLevel' ? { priceLevelDescriptions: propertyPriceLevelDescriptions(propertyMode === 'buy' ? 'sale' : 'rent', language) } : {}) })),
       {
-        id: 'guestFeatures', titleEn: 'Popular features', titleRu: 'Популярные удобства', titleTh: 'สิ่งอำนวยความสะดวกยอดนิยม', type: 'multi',
+        id: 'guestFeatures', titleEn: 'Home preferences', titleRu: 'Пожелания к жилью', titleTh: 'ความต้องการที่พัก', type: 'multi',
         options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
           const feature = PROPERTY_FEATURE_MAP.get(id);
           return feature ? [{ id, ...propertySearchFeatureLabels(feature), labelTh: FEATURE_LABELS_TH[id] }] : [];
         }),
       },
     ],
-  }), [filterConfig, propertyMode, priceBandUnavailable, language]);
+  }), [filterConfig, propertyMode, priceBandUnavailable, language, text]);
   const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
   delete advancedValues.bedrooms;
   if (propertyMode === 'buy') delete advancedValues.instantBooking;

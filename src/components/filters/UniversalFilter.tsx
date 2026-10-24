@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { InlineIcon } from '@/components/ui/IconBadge';
 import { Bed } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 // ====== UNIVERSAL FILTER TYPES ======
@@ -31,9 +32,12 @@ export interface FilterSection {
   options: FilterOption[];
   defaultValue?: string | string[];
   priceLevelDescriptions?: Record<string, string>;
+  secondary?: boolean;
+  description?: string;
 }
 
 export interface FilterConfig {
+  secondaryGroup?: { title: string; description: string };
   sections: FilterSection[];
 }
 
@@ -224,9 +228,14 @@ export function UniversalFilter({
   const [isOpen, setIsOpen] = useState(false);
   const [localValues, setLocalValues] = useState<FilterValues>(values);
 
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
+  const isSecondary = (id: string) => !config.sections.some(section => section.id === id && !section.secondary);
+  const countValues = (entries: FilterValues) => Object.values(entries).reduce<number>((count, value) => count + (Array.isArray(value) ? value.length : value ? 1 : 0), 0);
+  const secondaryCount = countValues(Object.fromEntries(Object.entries(localValues).filter(([id]) => isSecondary(id))));
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setLocalValues(values);
+      setSecondaryOpen(Object.entries(values).some(([id, value]) => isSecondary(id) && (Array.isArray(value) ? value.length > 0 : !!value)));
     }
     setIsOpen(open);
   };
@@ -269,6 +278,56 @@ export function UniversalFilter({
     </Button>
   );
 
+  const renderSections = (sections: FilterSection[]) => <>
+          {sections.map((originalSection, index) => {
+            const saved = localValues[originalSection.id];
+            const missing = config.secondaryGroup ? (Array.isArray(saved) ? saved : saved ? [saved] : []).filter(id => !originalSection.options.some(option => option.id === id)) : [];
+            const section = { ...originalSection, options: [...originalSection.options, ...missing.map(id => ({ id, labelEn: id, labelRu: id, labelTh: id }))] };
+            return (
+            <div key={section.id}>
+              {index > 0 && <Separator className="mb-6" />}
+
+              <h3 className="font-semibold text-base mb-4">
+                {pickLang(language, { ru: section.titleRu, en: section.titleEn, th: section.titleTh })}
+              </h3>
+
+              {section.description && <p className="mb-4 text-sm text-muted-foreground">{section.description}</p>}
+              {section.type === 'price-level' && (
+                <PriceLevelSelect
+                  descriptions={section.priceLevelDescriptions}
+                  value={localValues[section.id] as string | null}
+                  onChange={(value) => updateSectionValue(section.id, value)}
+                />
+              )}
+
+              {config.secondaryGroup && section.type === 'price-level' && typeof saved === 'string' && !['1', '2', '3', '4'].includes(saved) && <Button variant="outline" aria-pressed="true" onClick={() => updateSectionValue(section.id, null)}>{section.id}: {saved} <X className="ml-2 h-4 w-4" /></Button>}
+
+              {section.type === 'single' && (
+                <SingleSelectList
+                  options={section.options}
+                  value={localValues[section.id] as string | null}
+                  onChange={(value) => updateSectionValue(section.id, value)}
+                />
+              )}
+
+              {section.type === 'multi' && (
+                section.id === 'bedrooms' ? (
+                  <BedroomSelect
+                    value={(localValues[section.id] as string[]) || []}
+                    onChange={(value) => updateSectionValue(section.id, value)}
+                  />
+                ) : (
+                  <MultiSelectChips
+                    options={section.options}
+                    value={(localValues[section.id] as string[]) || []}
+                    onChange={(value) => updateSectionValue(section.id, value)}
+                  />
+                )
+              )}
+            </div>
+          ); })}
+  </>;
+
   return (
     <>
       <div onClick={() => handleOpenChange(true)} className="cursor-pointer shrink-0">
@@ -301,46 +360,18 @@ export function UniversalFilter({
         }
       >
         <div className="space-y-6">
-          {config.sections.map((section, index) => (
-            <div key={section.id}>
-              {index > 0 && <Separator className="mb-6" />}
-
-              <h3 className="font-semibold text-base mb-4">
-                {pickLang(language, { ru: section.titleRu, en: section.titleEn, th: section.titleTh })}
-              </h3>
-
-              {section.type === 'price-level' && (
-                <PriceLevelSelect
-                  descriptions={section.priceLevelDescriptions}
-                  value={localValues[section.id] as string | null}
-                  onChange={(value) => updateSectionValue(section.id, value)}
-                />
-              )}
-
-              {section.type === 'single' && (
-                <SingleSelectList
-                  options={section.options}
-                  value={localValues[section.id] as string | null}
-                  onChange={(value) => updateSectionValue(section.id, value)}
-                />
-              )}
-
-              {section.type === 'multi' && (
-                section.id === 'bedrooms' ? (
-                  <BedroomSelect
-                    value={(localValues[section.id] as string[]) || []}
-                    onChange={(value) => updateSectionValue(section.id, value)}
-                  />
-                ) : (
-                  <MultiSelectChips
-                    options={section.options}
-                    value={(localValues[section.id] as string[]) || []}
-                    onChange={(value) => updateSectionValue(section.id, value)}
-                  />
-                )
-              )}
-            </div>
-          ))}
+          {renderSections(config.secondaryGroup ? config.sections.filter(section => !section.secondary) : config.sections)}
+          {config.secondaryGroup && <Collapsible open={secondaryOpen} onOpenChange={setSecondaryOpen}>
+            <CollapsibleTrigger asChild><Button variant="outline" className="w-full justify-between h-auto whitespace-normal text-left">
+              <span>{config.secondaryGroup.title}{secondaryCount > 0 ? ` (${secondaryCount})` : ''}</span><ChevronDown className="h-4 w-4 shrink-0" />
+            </Button></CollapsibleTrigger>
+            <CollapsibleContent className="space-y-6 pt-4">
+              <p className="text-sm text-muted-foreground">{config.secondaryGroup.description}</p>
+              {renderSections(config.sections.filter(section => section.secondary))}
+              {Object.entries(localValues).filter(([id]) => !config.sections.some(section => section.id === id)).map(([id, value]) =>
+                (Array.isArray(value) ? value : value ? [value] : []).map(item => <Button key={`${id}:${item}`} variant="outline" aria-pressed="true" onClick={() => updateSectionValue(id, Array.isArray(value) ? value.filter(v => v !== item) : null)}>{id}: {item} <X className="ml-2 h-4 w-4" /></Button>))}
+            </CollapsibleContent>
+          </Collapsible>}
         </div>
       </ResponsiveModal>
     </>
