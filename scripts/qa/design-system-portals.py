@@ -9,13 +9,16 @@ OUTPUT, CSS = Path(sys.argv[1]), Path(sys.argv[2])
 if not CSS.is_file(): raise RuntimeError('Current compiled CSS missing: ' + str(CSS))
 SCENES = ['vendor', 'guest', 'team', 'capital', 'developer', 'owner']
 SMOKE = os.environ.get('DS_PORTALS_SMOKE') == '1'
+TABLET_TOOLBAR = os.environ.get('DS_PORTALS_TABLET_TOOLBAR') == '1'
+if SMOKE and TABLET_TOOLBAR: raise RuntimeError('Choose one bounded portal subset only')
+if TABLET_TOOLBAR: SCENES=['vendor','capital']
 async def main():
     results = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, executable_path=shutil.which('chromium'), args=['--no-sandbox'])
         for scene in SCENES:
             for lang in (['ru'] if SMOKE else ['ru', 'en', 'th']):
-                for width in ([390] if SMOKE else [375,390,430,768,1440]):
+                for width in ([390] if SMOKE else [768] if TABLET_TOOLBAR else [375,390,430,768,1440]):
                     for theme in ['light', 'dark']:
                         row = dict(scene=scene, lang=lang, width=width, theme=theme, mode='actual layout / synthetic data and Outlet', assertions=[])
                         context = await browser.new_context(viewport={'width':width, 'height':900}, has_touch=width<640, service_workers='block')
@@ -50,6 +53,20 @@ async def main():
                             row['assertions'].append('no horizontal page overflow')
                             route_before = await page.locator('#fixture-route').inner_text()
                             mounts = await page.evaluate('window.fixtureMounts')
+                            await page.locator('#fixture-theme').scroll_into_view_if_needed()
+                            assert await page.locator('#fixture-theme').evaluate("el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return hit===el||el.contains(hit)}"), 'synthetic theme control is covered by layout chrome'
+                            row['assertions'].append('synthetic control has an unobscured normal pointer hit target')
+                            if width==768 and scene in ['vendor','capital']:
+                                controls=page.locator('[data-fixture-controls]')
+                                original_style=await controls.get_attribute('style')
+                                await controls.evaluate("el=>{el.style.fontFamily='monospace';el.style.fontSize='15px'}")
+                                assert await page.locator('#fixture-theme').evaluate("el=>{const b=el.getBoundingClientRect(),hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);return hit===el||el.contains(hit)}"), 'tablet fixture toolbar is covered under alternate font metrics'
+                                await page.locator('#fixture-theme').click()
+                                await page.locator('#fixture-theme').click()
+                                await page.wait_for_function("theme=>document.documentElement.getAttribute('data-theme-ready')===theme&&document.querySelector('#fixture-theme-value').textContent===theme&&localStorage.getItem('myuno-theme')===theme",arg=theme)
+                                await controls.evaluate("(el,style)=>{if(style===null)el.removeAttribute('style');else el.setAttribute('style',style)}",original_style)
+                                row['assertions'].append('tablet alternate-toolbar-font hit target and rapid clicks pass; application fonts untouched')
+
                             for expected in ['dark' if theme=='light' else 'light',theme]:
                                 await page.locator('#fixture-theme').click()
                                 await page.wait_for_function("expected=>document.documentElement.getAttribute('data-theme-ready')===expected && document.querySelector('#fixture-theme-value').textContent===expected",arg=expected)
@@ -110,6 +127,7 @@ async def main():
         await browser.close()
     report={'scope':str(len(results))+' isolated actual-layout frames; backend/roles/data correctness not tested','cssPath':str(CSS),'cssSha256':hashlib.sha256(CSS.read_bytes()).hexdigest(),'manifest':json.loads((OUTPUT/'manifest.json').read_text()),'results':results}
     (OUTPUT/'results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+    assert len(results)==(12 if SMOKE or TABLET_TOOLBAR else 180), 'portal matrix incomplete'
     failures=[row for row in results if row['status']!='PASS']
     print(json.dumps({'cases':len(results),'passed':len(results)-len(failures),'failed':len(failures),'report':str(OUTPUT/'results.json'),'failures':[{k:r.get(k) for k in ['scene','lang','width','theme','failure','traceback']} for r in failures]},ensure_ascii=False))
     if failures: raise SystemExit(1)
