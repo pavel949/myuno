@@ -44,15 +44,19 @@ with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
  for width in [390,1440]:
   for theme in ['light','dark']:
-   for state in ['named','loading','error','unavailable']:
+   for state in ['named','loading','error','unavailable','checked_in','checked_out','deposit_paid','completed','future_status']:
     page=browser.new_page(viewport={'width':width,'height':844});errors=[];blocked=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
     def route(r):
      if r.request.url.startswith('http://127.0.0.1:'):r.continue_()
      else:blocked.append(r.request.url);r.abort()
     page.route('**/*',route);page.goto(f'http://127.0.0.1:{server.server_port}/orders/synthetic-order-reference/tracking?state={state}&theme={theme}&lang=ru')
-    if state=='named':
+    if state in ['named', 'checked_in', 'checked_out', 'deposit_paid', 'completed', 'future_status']:
      page.get_by_text('Synthetic home with a long stored name',exact=False).wait_for()
+     assert page.get_by_role('progressbar').count() == 0
+     assert page.get_by_role('dialog').count() == 0
+     labels = {'checked_in': 'Заехал', 'checked_out': 'Выехал', 'deposit_paid': 'Депозит оплачен', 'completed': 'Завершён', 'future_status': 'Статус неизвестен'}
+     if state in labels: assert page.get_by_text(labels[state], exact=True).is_visible()
      assert page.get_by_role('link',name='Мои обращения').get_attribute('href')=='/me/requests'
     if state=='error':page.get_by_role('button',name='Повторить',exact=True).click();assert page.evaluate('window.readRetries')==1
     if state=='unavailable':page.get_by_text('Возможно, заказ был удалён или у вас нет доступа').wait_for()
@@ -62,5 +66,5 @@ with sync_playwright() as p:
     assert not blocked,blocked
     rows.append({'page':'actual OrderTracking synthetic shell/read hooks','width':width,'theme':theme,'state':state,'result':'PASS','screenshot':name});page.close()
  browser.close()
-server.shutdown();assert len(rows)==52
-(out/'results.json').write_text(json.dumps(rows,indent=2));print('52/52 PASS; external transport blocked; overview/detail synthetic read hooks and shell only')
+server.shutdown();assert len(rows)==72
+(out/'results.json').write_text(json.dumps(rows,indent=2));print('72/72 PASS; external transport blocked; overview/detail synthetic read hooks and shell only')

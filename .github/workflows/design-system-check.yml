@@ -74,7 +74,6 @@ jobs:
           SERVICES_A11Y_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/services" node scripts/qa/services-compact-accessibility.mjs
           SERVICES_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/clearance" node scripts/qa/services-floating-clearance.mjs
           ORDERS_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders" node scripts/qa/orders-readable-names.mjs
-          python scripts/qa/orders-readable-names.py artifacts/design-system/orders
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence

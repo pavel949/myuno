@@ -15,3 +15,10 @@ it('surfaces a failed order read and retry recovers',async()=>{s.error=true;cons
 it('ignores a late former-actor response after account switch and logout',async()=>{s.pending=true;const{result,rerender}=mount();await waitFor(()=>expect(s.resolveLate).toBeTruthy());const late=s.resolveLate!;s.pending=false;s.actor='guest-b';rerender();await waitFor(()=>expect(result.current.order?.customer_user_id).toBe('guest-b'));late({data:{id:'order-a',customer_user_id:'guest-a',status:'pending'},error:null});await new Promise(resolve=>setTimeout(resolve,0));expect(result.current.order?.customer_user_id).toBe('guest-b');s.actor=null;rerender();expect(result.current.order).toBeNull();expect(result.current.timeline).toEqual([]);});
 
 it('ignores a late former-actor timeline after switching accounts',async()=>{s.timelinePending=true;const{result,rerender}=mount();await waitFor(()=>expect(s.resolveTimeline).toBeTruthy());const late=s.resolveTimeline!;s.timelinePending=false;s.actor='guest-b';rerender();await waitFor(()=>expect(result.current.timeline[0]?.status).toBe('confirmed'));late({data:[{status:'pending'}],error:null});await new Promise(resolve=>setTimeout(resolve,0));expect(result.current.timeline[0]?.status).toBe('confirmed');});
+
+it.each(['checked_in', 'checked_out', 'deposit_paid', 'pending_deposit', 'future_status'])('does not fabricate service-sequence progress for %s', status => {
+  const { result } = mount();
+  expect(result.current.getProgressPercentage(status as never)).toBeNull();
+  expect(result.current.isStatusCompleted('pending', status as never)).toBe(false);
+  expect(result.current.isStatusCompleted(status as never, 'confirmed')).toBe(false);
+});

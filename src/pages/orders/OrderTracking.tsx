@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import type { OrderStatus } from '@/hooks/useOrders';
+import type { OrderStatus, OrderType } from '@/hooks/useOrders';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 const statusConfig: Record<OrderStatus, { 
@@ -50,6 +50,18 @@ const statusConfig: Record<OrderStatus, {
   refunded: { icon: RefreshCw, color: 'bg-warning/20 text-warning', labelEn: 'Refunded', labelRu: 'Возврат' },
   disputed: { icon: AlertCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Disputed', labelRu: 'Спор' },
   no_show: { icon: AlertCircle, color: 'bg-muted text-muted-foreground', labelEn: 'No Show', labelRu: 'Неявка' },
+};
+
+// Preserve existing known non-property UI only; unknown/mixed kinds have no single review target.
+// This containment is not evidence that other vertical review contracts are verified.
+const legacyReviewTypes: readonly OrderType[] = [
+  'service', 'tour', 'yacht', 'vehicle', 'event', 'activity', 'beauty', 'cleaning',
+  'babysitter', 'education', 'medical', 'legal', 'pet_service', 'flowers', 'food',
+];
+
+const unknownStatusConfig = {
+  icon: AlertCircle, color: 'bg-muted text-muted-foreground',
+  labelEn: 'Status unknown', labelRu: 'Статус неизвестен',
 };
 
 export default function OrderTracking() {
@@ -106,7 +118,7 @@ export default function OrderTracking() {
   }
 
   const status = order.status as OrderStatus;
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = statusConfig[status] || unknownStatusConfig;
   const StatusIcon = config.icon;
   const progress = getProgressPercentage(status);
   const isPropertyOrder = order.order_type === 'property' || order.order_items?.some(item => item.item_type === 'property') === true;
@@ -137,8 +149,8 @@ export default function OrderTracking() {
               </Badge>
             </div>
 
-            {/* Progress Bar */}
-            {!['cancelled', 'refunded', 'disputed'].includes(status) && (
+            {/* Generic service stages do not describe property inventory/payment lifecycles. */}
+            {!isPropertyOrder && progress !== null && STATUS_SEQUENCE.includes(status) && (
               <div className="space-y-2">
                 <Progress value={progress} aria-label={isRu ? 'Статус заказа' : 'Order status'} className="h-2" />
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -175,7 +187,7 @@ export default function OrderTracking() {
                 <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-border" />
                 
                 {timeline.map((event, index) => {
-                  const eventConfig = statusConfig[event.status as OrderStatus] || statusConfig.pending;
+                  const eventConfig = statusConfig[event.status as OrderStatus] || unknownStatusConfig;
                   const EventIcon = eventConfig.icon;
                   
                   return (
@@ -291,8 +303,8 @@ export default function OrderTracking() {
           </CardContent>
         </Card>
 
-        {/* Review Prompt — only for completed orders */}
-        {status === 'completed' && (() => {
+        {/* Property reviews require a separately verified resource identity and dismissal contract. */}
+        {!isPropertyOrder && legacyReviewTypes.includes(order.order_type) && status === 'completed' && (() => {
           const reviewed = localStorage.getItem(`reviewed-order-${order.id}`);
           if (reviewed) return null;
           return (

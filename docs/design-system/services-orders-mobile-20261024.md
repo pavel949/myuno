@@ -8,7 +8,7 @@ This batch depends on the reviewed design-system stack through `04ba44df4cd98bac
 - Compact request-service cards retain their actual descriptions, indicative prices, durations and urgency conditions. Service-specific enquiry copy preserves the existing one-contact validation and transport.
 - Request fields have associated labels, help and error messages. Footer clearance is measured so the actual chat launcher and the last contact control remain apart, including enlarged text. The prior clearance variable is restored when leaving the form.
 - Guest property orders choose the property line item and enrich names through a single public catalogue projection. Missing public names retain historical human-readable snapshots or a neutral unavailable label. Commercial order IDs still open the existing order-tracking route; no inferred inventory IDs.
-- Orders overview uses native, responsive navigation links, not incomplete ARIA tabs. Tracking reads/timelines are actor-scoped, abortable, and distinguish errors from unavailable rows. Property details remain read-only and retain authoritative dates, amounts and statuses. Shared progress now forwards its known numeric value to Radix and has an accessible name.
+- Orders overview uses native, responsive navigation links, not incomplete ARIA tabs. Tracking reads/timelines are actor-scoped, abortable, and distinguish errors from unavailable rows. Property details remain read-only and retain authoritative dates, amounts and statuses. The existing generic service progress forwards its known numeric value to Radix and has an accessible name. Property details show their stored status/history without imposing generic service percentages. Unsupported statuses never receive an invented progress value, and unknown statuses are labelled neutrally. Property/unknown-kind records cannot mount the review writer until resource identity and dismissal are separately verified.
 
 ## Verification contract
 
@@ -17,9 +17,11 @@ The four QA adapters render actual components while replacing transport/context 
 - Consumer header: 76 guest/authenticated, RU/EN/TH, light/dark, mobile/tablet/desktop cases; actual menu/preferences/cart controls, 44px targets, focus/Escape, motion action and no page overflow.
 - Services: six language/viewport journeys through category/query/history, empty/error/retry, request CTA and return URL, associated validation, relevant enquiry copy and synthetic submit failure/retry.
 - Floating clearance: 12 actual form/chat/bottom-bar scenarios, including 150% root text. Embedded service and Orders-model resting offsets are checked separately; that model is not a full Orders application shell.
-- Orders: 52 overview/detail read-state cases. Native section links additionally exercise keyboard activation and browser Back/Forward. Read-hook unit regressions cover actor switch/logout, unauthorized/error states, and public name enrichment.
+- Orders: 72 overview/detail read-state cases, including checked-in/out, deposit-paid, completed and unknown property states. Native section links additionally exercise keyboard activation and browser Back/Forward. Read-hook unit regressions cover actor switch/logout, unauthorized/error states, and public name enrichment.
 
-Source review is independent of browser evidence. No application writer, role grant, price calculation or backend schema is changed. Unknown future tracking statuses still inherit the pre-existing pending fallback; that limitation is not evidence of a completed booking lifecycle.
+Review follow-up reproduced 16 failures at the old boundary; 40 focused regressions pass after containment, with the actual review component retained and its synthetic writer forbidden for property records. Known non-property review UI is preserved but its target and dismissal contracts remain outside this acceptance.
+
+Source review is independent of browser evidence. No application writer, role grant, price calculation or backend schema is changed. Property reviews are safely contained, not implemented as a complete review workflow. The broader booking lifecycle and other vertical review contracts are not certified by this read-only UI batch.
 
 ## Evidence and limits
 
