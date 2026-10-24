@@ -47,6 +47,21 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.propertie
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([
+    ['en', 'Pool', 'Remove Pool', 'Price & amenities', 'Popular features'],
+    ['ru', 'Бассейн', 'Убрать Бассейн', 'Цена и удобства', 'Популярные удобства'],
+    ['th', 'สระว่ายน้ำ', 'นำออก สระว่ายน้ำ', 'ราคาและสิ่งอำนวยความสะดวก', 'สิ่งอำนวยความสะดวกยอดนิยม'],
+  ])('uses the broad pool intent consistently in actual %s selected chip and sheet', (language, label, remove, trigger, group) => {
+    state.language = language;
+    mount('/property/search?cats=pool');
+    expect(screen.getByRole('button', { name: remove })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${trigger}`) }));
+    const section = screen.getByRole('heading', { name: group }).parentElement!;
+    expect(within(section).getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(section).queryByRole('button', { name: 'Shared pool' })).toBeNull();
+    expect(PROPERTY_FEATURE_MAP.get('pool')!.labelEn).toBe('Shared pool');
+  });
+
   it('preserves a result bookmark hash and unapplied editor draft through sort history', async () => {
     mount('/property/search?q=sea&guests=3&opaque=keep#results', { origin: 'synthetic-home' });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Draft Synthetic' } });

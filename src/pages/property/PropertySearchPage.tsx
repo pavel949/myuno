@@ -308,10 +308,11 @@ export default function PropertySearchPage() {
             <div className="property-discovery-features" role="group" aria-label={text('Популярные удобства', 'Popular features', 'สิ่งอำนวยความสะดวกยอดนิยม')}>
               {QUICK_FEATURE_IDS.map(id => {
                 const feature = PROPERTY_FEATURE_MAP.get(id)!;
+                const labels = propertySearchFeatureLabels(feature);
                 const selected = categoryFilters.includes(id);
                 return <button type="button" key={id} aria-pressed={selected} onClick={() => setCategoryFilters(selected ? categoryFilters.filter(value => value !== id) : [...categoryFilters, id])}>
                   {selected && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                  {pickLang(language, { ru: feature.labelRu, en: feature.labelEn, th: FEATURE_LABELS_TH[feature.id] })}
+                  {pickLang(language, { ru: labels.labelRu, en: labels.labelEn, th: FEATURE_LABELS_TH[feature.id] })}
                 </button>;
               })}
             </div>
@@ -320,7 +321,8 @@ export default function PropertySearchPage() {
           {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).length > 0 && <div className="flex flex-wrap gap-2" aria-label={text('Выбранные особенности', 'Selected features', 'สิ่งอำนวยความสะดวกที่เลือก')}>
             {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).map(id => {
               const feature = PROPERTY_FEATURE_MAP.get(id);
-              const label = feature ? (pickLang(language, { ru: feature.labelRu, en: feature.labelEn, th: FEATURE_LABELS_TH[feature.id] })) : id;
+              const labels = feature ? propertySearchFeatureLabels(feature) : undefined;
+              const label = feature && labels ? pickLang(language, { ru: labels.labelRu, en: labels.labelEn, th: FEATURE_LABELS_TH[feature.id] }) : id;
               return <button type="button" key={id} className="min-h-11 border border-primary/30 bg-card px-3 text-body-sm" aria-label={`${text('Убрать', 'Remove', 'นำออก')} ${label}`} onClick={() => setCategoryFilters(categoryFilters.filter(value => value !== id))}>{label} ×</button>;
             })}
           </div>}

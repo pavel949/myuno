@@ -8,7 +8,7 @@ OUT=Path(sys.argv[1])
 async def main():
  rows=[]
  async with async_playwright()as p:
-  browser=await p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+  browser=await p.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,headless=True,args=['--no-sandbox'])
   for lang in ['en','ru']:
    for width in [320,375,390,430,1180]:
     height=757 if width==1180 else 740;context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block',timezone_id='Pacific/Honolulu');blocked=[];errors=[]
