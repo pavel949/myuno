@@ -36,3 +36,13 @@ No unsupported main guard changes are imported. Any pre-existing stableLoadingSh
 - Operational proof of inquiry readback, staff handling and optional notification delivery in an authorized backend environment.
 
 Local screenshots: `/workspace/artifacts/myuno-homepage-intents-20261024/` (synthetic, not production). Exact tests, final SHA, CI and deliverable links are recorded in the PR once available.
+
+## Local verification checkpoint
+
+- Focused frozen-runtime regression report:101 passed,0 failed,0 skipped. Includes both real Landing composition/motion tests and shared form/receipt tests.
+- Frozen runtime TypeScript build check:PASS. Scoped changed TypeScript lint:0 errors,5 warnings. Earlier full lint:0 errors,2486 warnings. Candidate production build:PASS; exact-head CI still required.
+- Homepage synthetic matrix:18 passed (RU/EN/TH ×360/390/768/1440/1920 plus loading/empty/error). A final six-case short-screen/root-rem-text-scale/reduced-motion supplement passed. Gallery code validates four immediate intent destinations, arrow/keyboard/focus/swipe and no page overflow.
+- Routed synthetic matrix:42 distinct cases passed, including current owner form. Explicit limits: no backend commit, authentication, payment, notification delivery or service fulfillment proof.
+- Existing base2fa3d90b stableLoadingShell test independently reproduces2 failures (layout mounted twice, expected once),6 passes in a clean detached worktree. This homepage patch does not include an unrelated guard fix.
+- Full local suite was run, not declared green:50 failures during an overloaded run; the serial retry separates environment/guard failures from these changes. Seven PostgreSQL suites cannot initialize because this executor has no `postgres` binary; hosted safe workflows install their isolated dependency.
+- Geometry screenshots use fallback fonts. A separate attempt to load the exact existing Google Font assets did not complete. Direct public CSS read returned `Tunnel connection failed:403 Forbidden` for fonts.googleapis.com. No alternate route, TLS bypass or font substitution was used. Canonical-font visual acceptance remains UNVERIFIED; this does not prove the production site has a font outage.
