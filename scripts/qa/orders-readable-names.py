@@ -42,7 +42,7 @@ with sync_playwright() as p:
  browser.close()
 with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,args=['--no-sandbox'])
- for width in [390,1440]:
+ for width in [320,390,1440]:
   for theme in ['light','dark']:
    for state in ['named','loading','error','unavailable','checked_in','checked_out','deposit_paid','completed','future_status']:
     page=browser.new_page(viewport={'width':width,'height':844});errors=[];blocked=[]
@@ -66,5 +66,5 @@ with sync_playwright() as p:
     assert not blocked,blocked
     rows.append({'page':'actual OrderTracking synthetic shell/read hooks','width':width,'theme':theme,'state':state,'result':'PASS','screenshot':name});page.close()
  browser.close()
-server.shutdown();assert len(rows)==72
-(out/'results.json').write_text(json.dumps(rows,indent=2));print('72/72 PASS; external transport blocked; overview/detail synthetic read hooks and shell only')
+server.shutdown();assert len(rows)==90
+(out/'results.json').write_text(json.dumps(rows,indent=2));print('90/90 PASS; external transport blocked; overview/detail synthetic read hooks and shell only')

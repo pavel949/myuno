@@ -28,6 +28,7 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { OrderStatus, OrderType } from '@/hooks/useOrders';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
+import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 
 const statusConfig: Record<OrderStatus, { 
   icon: typeof Clock; 
@@ -82,7 +83,7 @@ export default function OrderTracking() {
 
   if (isLoading) {
     return (
-      <AppLayout title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
+      <AppLayout usePageContainer={false} title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-32 w-full rounded-none" />
@@ -94,11 +95,11 @@ export default function OrderTracking() {
     );
   }
 
-  if (error) return <AppLayout title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}><PageContainer><div role="alert" className="space-y-4 py-8"><p>{isRu ? 'Не удалось загрузить заказ. Повторите попытку.' : 'Could not load the order. Please retry.'}</p><Button onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div></PageContainer></AppLayout>;
+  if (error) return <AppLayout usePageContainer={false} title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}><PageContainer><div role="alert" className="space-y-4 py-8"><p>{isRu ? 'Не удалось загрузить заказ. Повторите попытку.' : 'Could not load the order. Please retry.'}</p><Button onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div></PageContainer></AppLayout>;
 
   if (!order) {
     return (
-      <AppLayout title={isRu ? 'Заказ не найден' : 'Order Not Found'}>
+      <AppLayout usePageContainer={false} title={isRu ? 'Заказ не найден' : 'Order Not Found'}>
         <PageContainer>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Package className="w-16 h-16 text-muted-foreground mb-4" />
@@ -124,8 +125,8 @@ export default function OrderTracking() {
   const isPropertyOrder = order.order_type === 'property' || order.order_items?.some(item => item.item_type === 'property') === true;
 
   return (
-    <AppLayout title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
-      <PageContainer className="pb-24">
+    <AppLayout usePageContainer={false} title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
+      <PageContainer className={isPropertyOrder ? FLOATING_OFFSET.contentClearance : 'pb-24'}>
         <PageHeader 
           title={isRu ? 'Отслеживание заказа' : 'Order Tracking'} 
           showBack 
@@ -134,8 +135,8 @@ export default function OrderTracking() {
         {/* Order Header */}
         <Card className="mb-4">
           <CardContent className="pt-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+              <div className="min-w-0 break-words">
                 <p className="text-sm text-muted-foreground">
                   {isRu ? 'Заказ' : 'Order'} #{order.order_number}
                 </p>
@@ -143,7 +144,7 @@ export default function OrderTracking() {
                   {isPropertyOrder ? (isRu ? 'Бронирование жилья' : 'Property booking') : order.order_type?.replace(/_/g, ' ') || (isRu ? 'Заказ' : 'Order')}
                 </h2>
               </div>
-              <Badge className={cn('text-sm', config.color)}>
+              <Badge className={cn('shrink-0 whitespace-nowrap text-sm', config.color)}>
                 <StatusIcon className="w-4 h-4 mr-1" />
                 {isRu ? config.labelRu : config.labelEn}
               </Badge>
@@ -328,15 +329,15 @@ export default function OrderTracking() {
         )}
 
         {/* Action Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-bottom">
-          <div className="flex gap-3 max-w-lg mx-auto">
-            <Button variant="outline" className="flex-1" asChild>
+        <div data-order-contact-actions className={isPropertyOrder ? 'mt-6' : 'fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-bottom'}>
+          <div className={cn('flex gap-3 max-w-lg mx-auto', isPropertyOrder && 'flex-wrap')}>
+            <Button variant="outline" className={cn('flex-1', isPropertyOrder && 'min-w-max')} asChild>
               <a href={getTelLink()}>
                 <Phone className="w-4 h-4 mr-2" />
                 {isRu ? 'Позвонить' : 'Call'}
               </a>
             </Button>
-            {isPropertyOrder ? <Button className="flex-1" asChild><Link to="/me/requests"><MessageCircle className="w-4 h-4 mr-2" />{isRu ? 'Мои обращения' : 'My requests'}</Link></Button> : <Button className="flex-1">
+            {isPropertyOrder ? <Button className="min-w-max flex-1" asChild><Link to="/me/requests"><MessageCircle className="w-4 h-4 mr-2" />{isRu ? 'Мои обращения' : 'My requests'}</Link></Button> : <Button className="flex-1">
               <MessageCircle className="w-4 h-4 mr-2" />
               {isRu ? 'Чат' : 'Chat'}
             </Button>}

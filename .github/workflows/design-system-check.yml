@@ -76,6 +76,10 @@ jobs:
           ORDERS_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders" node scripts/qa/orders-readable-names.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual property order actions with bottom navigation and chat
+        run: ORDERS_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders-clearance" node scripts/qa/orders-floating-clearance.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
