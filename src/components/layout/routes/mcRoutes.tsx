@@ -118,6 +118,7 @@ export const mcRoutes = (
     <Route path="vault" element={<LazyPage><Pages.OwnerVaultPage /></LazyPage>} />
     <Route path="rates" element={<LazyPage><Pages.RateManagementPage /></LazyPage>} />
     <Route path="structure" element={<LazyPage><Pages.PropertyStructurePage /></LazyPage>} />
+    <Route path="resort-ops" element={<LazyPage><Pages.ResortOpsPage /></LazyPage>} />
     <Route path="reviews-management" element={<LazyPage><Pages.ReviewsManagementPage /></LazyPage>} />
     <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
     <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />

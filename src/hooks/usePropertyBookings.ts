@@ -5,6 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { isLayantaraPmsEnabled } from '@/hooks/useLayantaraPms';
+import { loadFamilyHolds, pmsConflictMessage } from '@/hooks/usePmsConflicts';
+import { BookingConflictError, assertNoConflicts } from '@/lib/pms/bookingConflicts';
 import { useStorefront } from '@/contexts/StorefrontContext';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
@@ -128,6 +131,28 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
   };
 }
 
+/** DB overlap guard rejections (23P01 / FAMILY_OVERLAP) -> the same bilingual conflict message. */
+function throwMappedOverlap(error: { code?: string; message?: string } | null): void {
+  if (!error) return;
+  if (error.code !== '23P01' && !error.message?.includes('FAMILY_OVERLAP')) return;
+  const hit = { kind: 'same_key', propertyId: '', bookingId: null, overlapStart: '', overlapEnd: '', source: null } as const;
+  throw new Error(pmsConflictMessage(new BookingConflictError([hit])));
+}
+
+/** Layan Tara PMS: reject villa/room family overlaps before the order is written. */
+async function assertFamilyAvailable(
+  propertyId: string, checkIn: string, checkOut: string, ignoreOrderId?: string,
+): Promise<void> {
+  const holds = await loadFamilyHolds(propertyId, checkIn, checkOut, ignoreOrderId);
+  if (!holds) return;
+  try {
+    assertNoConflicts({ ...holds, stay: { checkIn, checkOut } });
+  } catch (error) {
+    if (error instanceof BookingConflictError) throw new Error(pmsConflictMessage(error));
+    throw error;
+  }
+}
+
 function requireStayDates(checkIn: string, checkOut: string) {
   const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
     && isValid(parseCivilDate(value)) && civilDateKey(parseCivilDate(value)) === value;
@@ -199,6 +224,8 @@ export function usePropertyBookings(propertyId?: string) {
       if (!user?.id) throw new Error('Not authenticated');
 
       requireStayDates(input.check_in, input.check_out);
+      const pmsEnabled = await isLayantaraPmsEnabled(queryClient);
+      if (pmsEnabled) await assertFamilyAvailable(input.property_id, input.check_in, input.check_out);
 
       // P1: Overlap validation — check existing orders and manual blocks
       const checkInTime = input.check_in_time || '14:00';
@@ -275,6 +302,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       if (orderError) {
         errorLog.silent(orderError, 'create_order');
+        throwMappedOverlap(orderError);
         throw orderError;
       }
 
@@ -302,6 +330,7 @@ export function usePropertyBookings(propertyId?: string) {
         errorLog.silent(itemError, 'create_order_item');
         // Rollback: delete order
         await supabase.from('orders').delete().eq('id', order.id);
+        throwMappedOverlap(itemError);
         throw itemError;
       }
 
@@ -349,8 +378,12 @@ export function usePropertyBookings(propertyId?: string) {
         const today = bangkokTodayISO();
         const effectiveCleaningDate = cleaningDate < today ? today : cleaningDate;
 
-        const tasks = [
+        // PMS flag ON: the DB trigger creates the post-checkout turnover clean instead.
+        const preArrivalClean = pmsEnabled ? [] : [
           { task_type: 'cleaning', scheduled_date: effectiveCleaningDate, title: `Pre-arrival cleaning: ${guestName}`, title_ru: `Уборка перед заездом: ${guestName}` },
+        ];
+        const tasks = [
+          ...preArrivalClean,
           { task_type: 'check_in', scheduled_date: checkInDate, title: `Check-in: ${guestName}`, title_ru: `Заезд: ${guestName}` },
           { task_type: 'check_out', scheduled_date: checkOutDate, title: `Check-out: ${guestName}`, title_ru: `Выезд: ${guestName}` },
         ];
@@ -403,6 +436,7 @@ export function usePropertyBookings(propertyId?: string) {
         const checkOut = updates.check_out ?? curr?.end_at?.split('T')[0];
         if (!propertyId || !checkIn || !checkOut) throw new Error('Booking dates or property unavailable');
         requireStayDates(checkIn, checkOut);
+        if (await isLayantaraPmsEnabled(queryClient)) await assertFamilyAvailable(propertyId, checkIn, checkOut, id);
         if (propertyId && checkIn && checkOut) {
           const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
           const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
@@ -474,6 +508,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       if (error) {
         errorLog.silent(error, 'update_booking');
+        throwMappedOverlap(error);
         throw error;
       }
       

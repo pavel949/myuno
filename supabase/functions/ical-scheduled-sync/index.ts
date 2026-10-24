@@ -192,6 +192,37 @@ function calculateNights(dtstart: string, dtend: string): number {
   return nights;
 }
 
+// Civil date in the Asia/Bangkok calendar for a stored timestamp.
+function toBangkokDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value).slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(d);
+}
+
+// True when a DB error is the overlap / family guard rejecting the write.
+function isOverlapGuardError(error: any): boolean {
+  const msg = String(error?.message || '');
+  return error?.code === '23P01' || msg.includes('FAMILY_OVERLAP') || msg.includes('no_overlap');
+}
+
+async function recordFamilyConflict(
+  supabase: any,
+  calendar: any,
+  event: { uid: string; dtstart: string | null; dtend: string | null },
+  reason: string
+): Promise<void> {
+  const { error } = await supabase.from('booking_conflicts').insert({
+    property_id: calendar.property_id,
+    calendar_id: calendar.id,
+    source_event_id: event.uid,
+    conflict_type: 'family',
+    conflict_start: `${event.dtstart}T14:00:00Z`,
+    conflict_end: `${event.dtend}T12:00:00Z`,
+    raw: { channel_a: detectChannelType(calendar.ical_url, calendar.name), channel_b: 'family', reason },
+  });
+  if (error) console.error(`Failed to record family conflict: ${error.message}`);
+}
+
 // Check for overlapping orders for this property and date range; return conflict order id if found
 async function findOverlappingOrder(
   supabase: any,
@@ -200,17 +231,15 @@ async function findOverlappingOrder(
   endDate: string,
   excludeOrderId?: string
 ): Promise<{ orderId: string; channel: string } | null> {
-  const startAt = `${startDate}T00:00:00Z`;
-  const endAt = `${endDate}T23:59:59Z`;
-
+  // Civil-date comparison on half-open [start, end): a same-day turnover
+  // (one stay ends the day another starts) is not a conflict.
   const { data: items } = await supabase
     .from('order_items')
-    .select('order_id, metadata, resource_id')
-    .eq('item_type', 'property');
+    .select('order_id')
+    .eq('item_type', 'property')
+    .or(`resource_id.eq.${propertyId},metadata->>property_id.eq.${propertyId}`);
 
-  const orderIdsForProperty = (items || [])
-    .filter((i: any) => i.resource_id === propertyId || i.metadata?.property_id === propertyId)
-    .map((i: any) => i.order_id);
+  const orderIdsForProperty = (items || []).map((i: any) => i.order_id);
 
   if (orderIdsForProperty.length === 0) return null;
 
@@ -224,11 +253,9 @@ async function findOverlappingOrder(
   const overlapping = (orders || []).find((o: any) => {
     if (!propertyOrderHoldsInventory(o.status)) return false;
     if (excludeOrderId && o.id === excludeOrderId) return false;
-    const oStart = new Date(o.start_at).getTime();
-    const oEnd = new Date(o.end_at).getTime();
-    const eStart = new Date(startAt).getTime();
-    const eEnd = new Date(endAt).getTime();
-    return oStart < eEnd && eStart < oEnd;
+    const oStart = toBangkokDate(o.start_at);
+    const oEnd = toBangkokDate(o.end_at);
+    return oStart < endDate && startDate < oEnd;
   });
 
   if (!overlapping) return null;
@@ -243,7 +270,7 @@ async function upsertOrderForEvent(
   event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string; price?: number; guestCount?: number; location?: string; organizer?: string; guestName?: string; guestEmail?: string; guestPhone?: string },
   calendar: any,
   existingOrderId?: string
-): Promise<string> {
+): Promise<string | null> {
   const startAt = `${event.dtstart}T14:00:00Z`;
   const endAt = `${event.dtend}T12:00:00Z`;
 
@@ -319,10 +346,11 @@ async function upsertOrderForEvent(
   }
 
   if (existingOrderId) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('orders')
       .update(orderData)
       .eq('id', existingOrderId);
+    if (updateError) throw updateError;
     return existingOrderId;
   } else {
     const { data: order, error } = await supabase
@@ -333,8 +361,10 @@ async function upsertOrderForEvent(
 
     if (error) throw error;
 
-    // Create order_item linking to property
-    await supabase
+    // Create order_item linking to property. A DB-level family/overlap guard on the
+    // mirrored property_bookings row can reject this insert: roll the order back
+    // and record a conflict instead of leaving an orphan order.
+    const { error: itemError } = await supabase
       .from('order_items')
       .insert({
         order_id: order.id,
@@ -350,6 +380,19 @@ async function upsertOrderForEvent(
           guest_count: event.guestCount,
         },
       });
+
+    if (itemError) {
+      console.warn(`order_items insert rejected for ${event.uid}: ${itemError.message}`);
+      // Soft-delete the just-created order (matches the rest of this file).
+      const { error: deleteError } = await supabase
+        .from('orders')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', order.id);
+      if (deleteError) console.error(`Failed to remove orphan order ${order.id}: ${deleteError.message}`);
+      if (!isOverlapGuardError(itemError)) throw itemError;
+      await recordFamilyConflict(supabase, calendar, event, itemError.message);
+      return null;
+    }
 
     // Create guest participant with contact info
     await supabase
@@ -475,7 +518,16 @@ async function syncCalendar(
         }
       }
 
-      const orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
+      let orderId: string | null;
+      try {
+        orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
+      } catch (error: any) {
+        if (!isOverlapGuardError(error)) throw error;
+        // One family overlap must not fail the whole calendar sync.
+        await recordFamilyConflict(supabase, calendar, event, String(error?.message || 'overlap'));
+        console.info(`Family overlap for event ${event.uid}; conflict recorded, continuing`);
+        continue;
+      }
 
       if (existingOrderId) {
         eventsUpdated++;

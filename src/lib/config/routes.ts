@@ -511,6 +511,7 @@ export const APP_ROUTES = {
   MC_MESSAGES: '/mc/messages',
   MC_SUBSCRIPTION: '/mc/subscription',
   MC_RATES: '/mc/rates',
+  MC_RESORT_OPS: '/mc/resort-ops',
   MC_INSURANCE: '/mc/insurance',
   MC_DOCUMENTS: '/mc/documents',
   MC_SEQUENCES: '/mc/sequences',
