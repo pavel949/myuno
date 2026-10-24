@@ -41,7 +41,7 @@ const buttonVariants = cva(
           "bg-transparent text-[hsl(var(--text-body))] hover:bg-[hsl(var(--surface-raised))] hover:text-foreground",
         // Destructive — canon §8.1: transparent, red text, 1px red border.
         destructive:
-          "bg-transparent text-destructive border border-destructive hover:bg-[hsl(var(--danger-bg))]",
+          "bg-transparent text-danger border border-danger hover:bg-[hsl(var(--danger-bg))]",
         // Inline text link (not a button surface, kept for legacy callers).
         link: "text-primary underline-offset-4 hover:underline bg-transparent",
       },

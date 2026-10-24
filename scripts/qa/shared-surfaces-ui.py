@@ -42,6 +42,26 @@ async def main():
       }""")
       assert error_contrast>=4.5,f'Error text contrast {error_contrast}'
 
+      action_contrast=await page.get_by_test_id('canonical-danger-action').evaluate(r"""el=>{
+       const rgb=s=>(s.match(/[\d.]+/g)||[]).map(Number);
+       const lum=c=>c.slice(0,3).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
+       let bg;for(let node=el;node;node=node.parentElement){const c=rgb(getComputedStyle(node).backgroundColor);if(c.length===3||c[3]===1){bg=c;break;}}
+       if(!bg)throw Error('No opaque destructive-action background');
+       const a=lum(rgb(getComputedStyle(el).color)),b=lum(bg);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      }""")
+      assert action_contrast>=4.5,f'Destructive action text contrast {action_contrast}'
+      await page.get_by_test_id('canonical-danger-action').hover()
+      await page.wait_for_timeout(180)  # settle the existing 150ms color transition, not an authority/data wait
+      action_hover_contrast=await page.get_by_test_id('canonical-danger-action').evaluate(r"""el=>{
+       const rgb=s=>(s.match(/[\d.]+/g)||[]).map(Number);
+       const lum=c=>c.slice(0,3).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
+       let bg;for(let node=el;node;node=node.parentElement){const c=rgb(getComputedStyle(node).backgroundColor);if(c.length===3||c[3]===1){bg=c;break;}}
+       if(!bg)throw Error('No opaque destructive-action background');
+       const a=lum(rgb(getComputedStyle(el).color)),b=lum(bg);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      }""")
+      assert action_hover_contrast>=4.5,f'Destructive action hover contrast {action_hover_contrast}'
+
+
       await expect(page.get_by_role('button',name='Disabled',exact=True)).to_be_disabled()
       async def bounds(locator):
        await expect(locator).to_be_visible()
@@ -77,7 +97,7 @@ async def main():
       assert not errors,errors
       # Font URLs may be requested, but all external requests are denied.
       assert all('/fonts/' in x for x in blocked),blocked
-      results.append({'language':lang,'width':width,'theme':theme,'outcome':'PASS','errorTextContrast':error_contrast,'errors':errors})
+      results.append({'language':lang,'width':width,'theme':theme,'outcome':'PASS','errorTextContrast':error_contrast,'destructiveActionContrast':action_contrast,'destructiveActionHoverContrast':action_hover_contrast,'errors':errors})
      except Exception as e:
       results.append({'language':lang,'width':width,'theme':theme,'outcome':'FAIL','error':str(e)})
       await page.screenshot(path=str(OUTPUT/f'FAIL-{lang}-{width}-{theme}.png'))
