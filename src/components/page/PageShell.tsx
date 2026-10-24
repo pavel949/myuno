@@ -6,15 +6,16 @@
  * Do NOT add extra horizontal padding inside — PageShell handles it.
  *
  * Width modes:
- *  - 'narrow'  → max-w-3xl   (forms, settings, single-column reads)
- *  - 'default' → max-w-5xl   (dashboards, lists)
- *  - 'wide'    → max-w-7xl   (data tables, multi-column workspaces)
+ *  - 'narrow'  → article token   (forms, settings, single-column reads)
+ *  - 'default' → content token   (dashboards, lists)
+ *  - 'wide'    → wide token   (data tables, multi-column workspaces)
+ *  - 'workspace' → named workspace width (operator dashboards)
  *  - 'full'    → no max-width (canvas, maps, custom layouts)
  */
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-export type PageWidth = 'narrow' | 'default' | 'wide' | 'full';
+export type PageWidth = 'narrow' | 'default' | 'wide' | 'workspace' | 'full';
 
 interface PageShellProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ const widthClass: Record<PageWidth, string> = {
   narrow: 'ds-frame-article',
   default: 'ds-frame-content',
   wide: 'ds-frame-wide',
+  workspace: 'ds-frame-workspace',
   full: 'ds-frame-full',
 };
 

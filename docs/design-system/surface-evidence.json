@@ -4,7 +4,7 @@
   "foundationCommit": "5d6d8fe4604a4efabc156337f3b700dbb9ab50d5",
   "routeInventory": "route-surface-register.json",
   "defaultForUnlistedRoutes": "NOT_TESTED, even where shared CSS is inherited",
-  "legacyFindings": 4299,
+  "legacyFindings": 4296,
   "legacyMeaning": "retained source inventory, not confirmed visible defects",
   "screenshots": "Future CI artifacts under design-system/core, portals, shared and shared-rebrand. Local reviewed images use synthetic data and blocked external fonts.",
   "surfaces": [
@@ -264,6 +264,57 @@
         "complete locale copy"
       ],
       "proof": "capital-adoption/results.json; lead-results.json; provenance.json"
+    },
+    {
+      "surface": "management workspace",
+      "module": "src/pages/owner/OwnerDashboard.tsx",
+      "sourceRoute": "/mc",
+      "kind": "actual page frame; nested widgets/data/auth are synthetic",
+      "sharedTheme": "ADOPTED named workspace width; intentional672px onboarding cap retained",
+      "localRender": "PASS: part of56 EN/RU light/dark frame contexts at390/768/1024/1440; not56journeys",
+      "proof": "workspace-adoption/results.json; manifest.json",
+      "mountedRoute": "NOT_TESTED: route guards/layouts not mounted; NavShell clearance model only",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "actual authorized route and nested widget integration",
+        "loaded production fonts",
+        "page error states not exposed by current hooks",
+        "TH page copy not certified"
+      ]
+    },
+    {
+      "surface": "vendor dashboard",
+      "module": "src/pages/vendor/VendorDashboard.tsx",
+      "sourceRoute": "/vendor",
+      "kind": "actual page frame; nested widgets/data/auth are synthetic",
+      "sharedTheme": "ADOPTED shared width/gutters, modelled parent clearance, cancellation contrast",
+      "localRender": "PASS: part of56 EN/RU light/dark frame contexts at390/768/1024/1440; not56journeys",
+      "proof": "workspace-adoption/results.json; manifest.json",
+      "mountedRoute": "NOT_TESTED: route guards/layouts not mounted; NavShell clearance model only",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "actual authorized route and nested widget integration",
+        "loaded production fonts",
+        "page error states not exposed by current hooks",
+        "TH page copy not certified"
+      ]
+    },
+    {
+      "surface": "vendor settings",
+      "module": "src/pages/vendor/VendorSettings.tsx",
+      "sourceRoute": "/vendor/settings",
+      "kind": "actual page frame; nested widgets/data/auth are synthetic",
+      "sharedTheme": "KEEP existing canonical primitives",
+      "localRender": "PASS: part of56 EN/RU light/dark frame contexts at390/768/1024/1440; not56journeys",
+      "proof": "workspace-adoption/results.json; manifest.json",
+      "mountedRoute": "NOT_TESTED: route guards/layouts not mounted; NavShell clearance model only",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "actual authorized route and nested widget integration",
+        "loaded production fonts",
+        "page error states not exposed by current hooks",
+        "TH page copy not certified"
+      ]
     }
   ]
 }
