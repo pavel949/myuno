@@ -12,7 +12,7 @@ import { PageTransition } from '../PageTransition';
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>
-    <Suspense fallback={<LoadingState />}>{children}</Suspense>
+    <Suspense fallback={<LoadingState scope="content" />}>{children}</Suspense>
   </PageTransition>
 );
 

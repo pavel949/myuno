@@ -42,7 +42,7 @@ export function TeamLayout({
         )}
         
         {/* Main Content */}
-        <main 
+        <div
           className={cn(
             "flex-1 overflow-y-auto overflow-x-hidden min-w-0",
             "ds-page-with-navigation",
@@ -54,7 +54,7 @@ export function TeamLayout({
           }}
         >
           {children}
-        </main>
+        </div>
       </div>
     </AppLayout>
   );
