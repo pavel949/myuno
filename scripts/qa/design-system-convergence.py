@@ -10,6 +10,8 @@ CASES=[(r,l,w,t,v,'normal') for r in ROLES for l in (['ru'] if BASELINE else ['r
 if not BASELINE:
  CASES += [(r,'ru',w,t,'normal','normal') for r in ROLES for w in [320,375,430,768,1920] for t in ['light','dark']]
  CASES += [(r,'ru',390,t,'normal',s) for r in ROLES for t in ['light','dark'] for s in ['loading','error']]
+if '--admin-states' in sys.argv:
+ CASES=[case for case in CASES if case[0]=='admin' and case[5] in ['loading','error']]
 
 def rgba(value):
  nums=[float(n) for n in re.findall(r'[\d.]+',value)]
@@ -49,6 +51,15 @@ async def main():
     assert await page.evaluate('document.documentElement.classList.contains("dark")')==(theme=='dark'),'theme not applied by actual ThemeProvider'
     assert not errors,errors
     assert not blocked,blocked
+    if role=='admin' and state=='loading':
+     await page.locator('[data-count-state=loading]').first.wait_for()
+     assert await page.locator('[data-count-state=ready],[data-count-state=empty]').count()==0,'admin loading fixture resolved to populated data'
+     assert await page.evaluate('window.fixtureReads.stats>0'),'loading scenario never started the synthetic read'
+     row['stateEvidence']='actual DashboardCount loading markers, no ready/empty counts; synthetic read started and stays pending'
+    if role=='admin' and state=='error':
+     await page.locator('[data-count-key=pendingProviders][data-count-state=unavailable]').first.wait_for()
+     row['stateEvidence']='actual unavailable provider count from synthetic source error'
+
     metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();return{frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
     assert not metrics['overflow'],'page overflow'
     # Real mounted input and existing ThemeProvider, not a CSS-class-only toggle.
@@ -80,7 +91,7 @@ async def main():
    row.update(errors=errors,blockedRequests=blocked);results.append(row)
    await context.close()
   await browser.close()
- (OUT/'results.json').write_text(json.dumps({'mode':'isolated actual components, no live business acceptance','fontFidelity':'fallback stacks; external font loading intentionally blocked','cases':results},indent=2,ensure_ascii=False)+'\n')
+ (OUT/('results-admin-states.json' if '--admin-states' in sys.argv else 'results.json')).write_text(json.dumps({'mode':'isolated actual components, no live business acceptance','fontFidelity':'fallback stacks; external font loading intentionally blocked','cases':results},indent=2,ensure_ascii=False)+'\n')
  failed=[r for r in results if r['outcome']!='PASS'];print(json.dumps({'cases':len(results),'passed':len(results)-len(failed),'failed':len(failed),'failures':[{k:r.get(k) for k in ['role','lang','width','theme','variant','state','error']} for r in failed]},ensure_ascii=False))
  if failed:sys.exit(1)
 

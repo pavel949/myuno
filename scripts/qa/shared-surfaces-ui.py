@@ -43,6 +43,12 @@ async def main():
       assert await page.get_by_test_id('canonical-card-header').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
       assert await page.get_by_test_id('canonical-section').locator('..').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
       assert await page.get_by_test_id('canonical-inset').evaluate('(el)=>getComputedStyle(el).boxShadow') == 'none'
+      button_size=await page.get_by_test_id('canonical-button-size').evaluate('(el)=>parseFloat(getComputedStyle(el).fontSize)')
+      assert button_size==15,f'Canonical Button inherited parent font size: {button_size}'
+      assert await page.get_by_test_id('canonical-button-size').evaluate('(el)=>getComputedStyle(el).fontWeight')=='500'
+      await page.evaluate("document.documentElement.style.setProperty('--type-body-size','21px')")
+      assert await page.get_by_test_id('canonical-button-size').evaluate('(el)=>parseFloat(getComputedStyle(el).fontSize)')==21
+      await page.evaluate("document.documentElement.style.removeProperty('--type-body-size')")
       await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{theme}-primitives.png'),full_page=True)
       trigger=page.get_by_role('button',name='Dialog',exact=True);await trigger.click()
       dialog=page.get_by_role('dialog');await expect(dialog).to_be_visible();await bounds(dialog)

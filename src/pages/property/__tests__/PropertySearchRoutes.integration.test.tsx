@@ -50,7 +50,7 @@ describe('one residential results surface', () => {
     state.loading = true;
     const loading = mount('/property/search?source=wide-layout');
     const columns = screen.getByTestId('property-results-skeleton').className;
-    expect(loading.container.querySelector('.property-discovery')).toHaveClass('max-w-[1760px]');
+    expect(loading.container.querySelector('.property-discovery')).toHaveClass('ds-frame', 'ds-frame-catalogue');
     expect(loading.container.querySelector('.property-discovery-editor')).not.toHaveClass('journey-primary');
     cleanup();
     state.loading = false;
