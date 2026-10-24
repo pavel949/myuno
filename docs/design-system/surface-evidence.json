@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "scope": "Source/component evidence; never certifies all route declarations as executed journeys",
-  "foundationCommit": "836f141e71f8d914b0f6dd25001d41a1aac9cd7d",
+  "foundationCommit": "5d6d8fe4604a4efabc156337f3b700dbb9ab50d5",
   "routeInventory": "route-surface-register.json",
   "defaultForUnlistedRoutes": "NOT_TESTED, even where shared CSS is inherited",
-  "legacyFindings": 4391,
+  "legacyFindings": 4299,
   "legacyMeaning": "retained source inventory, not confirmed visible defects",
   "screenshots": "Future CI artifacts under design-system/core, portals, shared and shared-rebrand. Local reviewed images use synthetic data and blocked external fonts.",
   "surfaces": [
@@ -249,6 +249,21 @@
         "full route consumers",
         "physical device text scaling"
       ]
+    },
+    {
+      "surface": "Capital Newbuilds Deals",
+      "module": "src/pages/capital/CapitalNewbuildsDeals.tsx",
+      "kind": "actual page with synthetic read-only SDK",
+      "sharedTheme": "ADOPTED",
+      "localRender": "PASS: 11 regression tests; 12 normal/loading/error browser contexts plus 2 populated-lead keyboard cases",
+      "mountedRoute": "NOT_TESTED: standalone page, CapitalLayout/auth not mounted",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "loaded production fonts",
+        "authorized Capital workspace and actual backend",
+        "complete locale copy"
+      ],
+      "proof": "capital-adoption/results.json; lead-results.json; provenance.json"
     }
   ]
 }

@@ -33,9 +33,13 @@ const L = {
     title: 'Статус регистрации',
     subtitle: 'Проверьте, какие данные сохранены на сервере.',
     profile: 'Профиль создан',
+    profileReview: 'Профиль требует проверки',
     phone: 'Телефон сохранён',
+    phoneReview: 'Телефон требует проверки',
     terms: 'Условия использования приняты',
+    termsReview: 'Принятие условий использования требует проверки',
     privacy: 'Политика конфиденциальности принята',
+    privacyReview: 'Принятие политики конфиденциальности требует проверки',
     phoneMismatch: 'Телефон не совпадает с введённым',
     refresh: 'Обновить данные',
     refreshing: 'Обновляем…',
@@ -49,9 +53,13 @@ const L = {
     title: 'Signup status',
     subtitle: 'Check which data was stored on the server.',
     profile: 'Profile created',
+    profileReview: 'Profile needs review',
     phone: 'Phone saved',
+    phoneReview: 'Phone needs review',
     terms: 'Terms of Service accepted',
+    termsReview: 'Terms acceptance needs review',
     privacy: 'Privacy Policy accepted',
+    privacyReview: 'Privacy acceptance needs review',
     phoneMismatch: "Stored phone doesn't match the value you entered",
     refresh: 'Refresh',
     refreshing: 'Refreshing…',
@@ -65,9 +73,13 @@ const L = {
     title: 'สถานะการลงทะเบียน',
     subtitle: 'ตรวจสอบข้อมูลที่บันทึกบนเซิร์ฟเวอร์',
     profile: 'สร้างโปรไฟล์แล้ว',
+    profileReview: 'ต้องตรวจสอบโปรไฟล์',
     phone: 'บันทึกเบอร์โทรแล้ว',
+    phoneReview: 'ต้องตรวจสอบเบอร์โทร',
     terms: 'ยอมรับเงื่อนไขแล้ว',
+    termsReview: 'ต้องตรวจสอบการยอมรับเงื่อนไข',
     privacy: 'ยอมรับนโยบายความเป็นส่วนตัวแล้ว',
+    privacyReview: 'ต้องตรวจสอบการยอมรับนโยบายความเป็นส่วนตัว',
     phoneMismatch: 'เบอร์โทรไม่ตรงกับที่กรอก',
     refresh: 'รีเฟรช',
     refreshing: 'กำลังรีเฟรช…',
@@ -210,10 +222,10 @@ export function SignupIntegrityModal({
               {allOk ? t.okBanner : t.warnBanner}
             </div>
             <div className="divide-y divide-border">
-              <Row ok={report.profile_exists} label={t.profile} />
-              <Row ok={phoneOk} label={t.phone + (report.phone_saved && expectedPhone && !report.phone_matches ? ` — ${t.phoneMismatch}` : '')} />
-              <Row ok={report.terms_accepted} label={t.terms} />
-              <Row ok={report.privacy_accepted} label={t.privacy} />
+              <Row ok={report.profile_exists} label={report.profile_exists ? t.profile : t.profileReview} />
+              <Row ok={phoneOk} label={(phoneOk ? t.phone : t.phoneReview) + (report.phone_saved && expectedPhone && !report.phone_matches ? ` — ${t.phoneMismatch}` : '')} />
+              <Row ok={report.terms_accepted} label={report.terms_accepted ? t.terms : t.termsReview} />
+              <Row ok={report.privacy_accepted} label={report.privacy_accepted ? t.privacy : t.privacyReview} />
             </div>
           </>
         )}

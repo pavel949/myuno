@@ -43,6 +43,10 @@ jobs:
         run: DS_PUBLIC_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/public-adoption" node scripts/qa/design-system-public-adoption.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual Capital read states and responsive tables
+        run: DS_CAPITAL_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/capital-adoption" node scripts/qa/design-system-capital-adoption.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual portal layout surfaces
         run: DS_PORTALS_CSS="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/normal.css" DS_PORTALS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/portals" node scripts/qa/design-system-portals.mjs
         env:
