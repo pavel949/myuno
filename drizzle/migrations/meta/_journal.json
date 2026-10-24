@@ -253,6 +253,13 @@
       "when": 1792402098320,
       "tag": "0035_restore_anon_execute_public_read_rpcs",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792719884619,
+      "tag": "0036_property_reservation_lifecycle",
+      "breakpoints": true
     }
   ]
 }

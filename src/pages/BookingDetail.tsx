@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { PropertyReservationDetail } from '@/components/property/PropertyReservationDetail';
 import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2, ClipboardCheck, Home, History } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -95,6 +96,11 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function BookingDetail() {
+  const [params] = useSearchParams();
+  return params.get('propertyReservation') === '1' ? <PropertyReservationDetail /> : <LegacyBookingDetail />;
+}
+
+function LegacyBookingDetail() {
   const { id, type } = useParams<{ id: string; type: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();

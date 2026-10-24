@@ -23,14 +23,14 @@ describe('InquiryConfirmation', () => {
   it('renders the EN heading', () => {
     renderComponent();
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Viewing request received' }),
+      screen.getByRole('heading', { level: 2, name: 'Reservation request saved' }),
     ).toBeInTheDocument();
   });
 
-  it('renders the WhatsApp confirmation body copy', () => {
+  it('describes a persisted unpaid reservation without promising delivery', () => {
     renderComponent();
     expect(
-      screen.getByText(/WhatsApp within 24 hours/i),
+      screen.getByText(/No payment has been collected/i),
     ).toBeInTheDocument();
   });
 
