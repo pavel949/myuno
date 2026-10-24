@@ -212,7 +212,11 @@ export default function PropertyDetail() {
   const supportsShortStay = tenancyModes.length > 0
     ? tenancyModes.includes('short')
     : !!pricePerNight;
-  const isLongStayOnly = tenancyModes.length > 0 && !supportsShortStay;
+  const requestedTenancy = searchParams.get('tenancy');
+  // A supported explicit long/monthly search opens the existing request flow,
+  // including dual short+long offers; URL intent never grants listing eligibility.
+  const longStayRequested = (requestedTenancy === 'medium' || requestedTenancy === 'long') && tenancyModes.includes(requestedTenancy);
+  const isLongStayOnly = (tenancyModes.length > 0 && !supportsShortStay) || longStayRequested;
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes.map((vt) => viewTypeLabels[vt]).filter(Boolean);
 

@@ -1,37 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Search } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { HomeDiscoverySearch } from './HomeDiscoverySearch';
+import { APP_ROUTES as R } from '@/lib/config/routes';
 
-type Intent = 'holiday' | 'long' | 'buy';
+/** Intent is persisted in the canonical results URL. Dates and filters belong there. */
+const homeSearchIntents = [
+  { id: 'holiday', query: 'mode=rent&tenancy=short', title: { ru: 'Для отдыха', en: 'For a holiday', th: 'สำหรับวันหยุด' }, detail: { ru: 'Краткосрочная аренда', en: 'Short stays', th: 'เช่าระยะสั้น' } },
+  { id: 'monthly', query: 'mode=rent&tenancy=medium', title: { ru: 'Пожить несколько месяцев', en: 'Stay for a few months', th: 'พักหลายเดือน' }, detail: { ru: 'Помесячная аренда', en: 'Monthly rentals', th: 'เช่ารายเดือน' } },
+  { id: 'long', query: 'mode=rent&tenancy=long', title: { ru: 'Поселиться надолго', en: 'Settle in for longer', th: 'อยู่อาศัยระยะยาว' }, detail: { ru: 'Аренда на год', en: 'Yearly rentals', th: 'เช่ารายปี' } },
+  { id: 'buy', query: 'mode=buy', title: { ru: 'Купить недвижимость', en: 'Buy a home', th: 'ซื้อบ้าน' }, detail: { ru: 'Предложения о продаже', en: 'Homes for sale', th: 'อสังหาริมทรัพย์สำหรับขาย' } },
+] satisfies { id: string; query: string; title: LangValues; detail: LangValues }[];
 
-/** One public entry; existing search URL and civil-date contracts remain authoritative. */
 export function HomeSearchEntry() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const [open, setOpen] = useState(false);
-  const [intent, setIntent] = useState<Intent | null>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { if (open) titleRef.current?.focus(); }, [intent, open]);
-  const labels: Record<Intent, LangValues> = {
-    holiday: { ru: 'Для отдыха', en: 'For a holiday', th: 'สำหรับวันหยุด' },
-    long: { ru: 'Для жизни надолго', en: 'For a longer stay', th: 'สำหรับพักระยะยาว' },
-    buy: { ru: 'Хочу купить', en: 'To buy a home', th: 'ต้องการซื้อบ้าน' },
-  };
   return <div className="home-search-entry">
-    <Sheet open={open} onOpenChange={value => { setOpen(value); if (!value) setIntent(null); }}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild><button type="button" className="home-search-entry-button">
         <Search size={23} aria-hidden="true" /><span><strong>{t({ ru: 'Найти жильё на Пхукете', en: 'Find a home in Phuket', th: 'ค้นหาที่พักในภูเก็ต' })}</strong><small>{t({ ru: 'Для отдыха, жизни или покупки', en: 'For a holiday, a longer stay or a purchase', th: 'สำหรับวันหยุด อยู่อาศัย หรือซื้อ' })}</small></span><ArrowRight size={22} aria-hidden="true" />
       </button></SheetTrigger>
-      <SheetContent onOpenAutoFocus={event => { event.preventDefault(); titleRef.current?.focus(); }} side="bottom" className="home-search-sheet" closeLabel={t({ ru: 'Закрыть поиск', en: 'Close search', th: 'ปิดการค้นหา' })}>
+      <SheetContent side="bottom" className="home-search-sheet home-intent-sheet" closeLabel={t({ ru: 'Закрыть поиск', en: 'Close search', th: 'ปิดการค้นหา' })}>
         <div className="home-search-sheet-inner">
-          <SheetHeader><SheetTitle ref={titleRef} tabIndex={-1}>{intent ? t(labels[intent]) : t({ ru: 'Для чего ищете жильё?', en: 'What are you looking for?', th: 'คุณกำลังมองหาที่พักแบบใด' })}</SheetTitle><SheetDescription>{t({ ru: 'Можно начать без дат и выбранного района.', en: 'You can start without dates or a chosen area.', th: 'เริ่มค้นหาได้โดยไม่ต้องระบุวันที่หรือย่าน' })}</SheetDescription></SheetHeader>
-          {intent ? <>
-            <button type="button" className="home-search-back" onClick={() => setIntent(null)}><ArrowLeft size={16} aria-hidden="true" />{t({ ru: 'Изменить цель', en: 'Change your plans', th: 'เปลี่ยนความต้องการ' })}</button>
-            <HomeDiscoverySearch key={intent} hideModeSwitch progressive initialParams={new URLSearchParams(intent === 'buy' ? { mode: 'buy' } : { mode: 'rent', tenancy: intent === 'long' ? 'long' : 'short' })} />
-          </> : <div className="home-search-intents">{(['holiday', 'long', 'buy'] as const).map(value => <button type="button" key={value} onClick={() => setIntent(value)}>{t(labels[value])}<ArrowRight size={20} aria-hidden="true" /></button>)}</div>}
+          <SheetHeader><SheetTitle>{t({ ru: 'Какие у вас планы?', en: 'What are your plans?', th: 'คุณมีแผนอย่างไร' })}</SheetTitle><SheetDescription>{t({ ru: 'Сразу покажем варианты. Даты и район — по желанию.', en: 'Go straight to homes. Dates and area are optional.', th: 'ดูที่พักได้ทันที วันที่และย่านเป็นตัวเลือก' })}</SheetDescription></SheetHeader>
+          <div className="home-search-intents">{homeSearchIntents.map(intent => <Link key={intent.id} to={`${R.PROPERTY_SEARCH}?${intent.query}`} onClick={() => setOpen(false)}><span><strong>{t(intent.title)}</strong><small>{t(intent.detail)}</small></span><ArrowRight size={20} aria-hidden="true" /></Link>)}</div>
         </div>
       </SheetContent>
     </Sheet>

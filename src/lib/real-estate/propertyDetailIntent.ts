@@ -25,7 +25,7 @@ export function propertyDetailMode(property: PropertyIntentFields, requested?: s
 function withGuestContext(href: string, mode: 'rent' | 'buy', search = ''): string {
   const source = new URLSearchParams(search);
   const params = new URLSearchParams({ mode });
-  for (const key of ['checkIn', 'checkOut', 'guests']) {
+  for (const key of ['checkIn', 'checkOut', 'guests', 'tenancy']) {
     const value = source.get(key);
     if (value) params.set(key, value);
   }

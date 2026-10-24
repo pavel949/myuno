@@ -3,6 +3,7 @@
  * Provides hero, benefits grid, and a slot for the lead form / extra sections.
  */
 import React from 'react';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,22 +14,22 @@ import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesCon
 
 export interface LandingBenefit {
   icon: React.ComponentType<{ className?: string }>;
-  title: { ru: string; en: string };
-  desc: { ru: string; en: string };
+  title: LangValues;
+  desc: LangValues;
 }
 
 export interface LandingShellProps {
-  eyebrow?: { ru: string; en: string };
-  title: { ru: string; en: string };
-  subtitle: { ru: string; en: string };
-  badges?: { ru: string; en: string }[];
+  eyebrow?: LangValues;
+  title: LangValues;
+  subtitle: LangValues;
+  badges?: LangValues[];
   benefits: LandingBenefit[];
   /** Lead form (or any CTA block) rendered in the right column on desktop. */
   formSlot: React.ReactNode;
   /** Optional extra sections rendered below the hero. */
   children?: React.ReactNode;
-  seoTitle: { ru: string; en: string };
-  seoDescription: { ru: string; en: string };
+  seoTitle: LangValues;
+  seoDescription: LangValues;
 }
 
 export function LandingShell({
@@ -44,8 +45,7 @@ export function LandingShell({
 }: LandingShellProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const t = (p: LangValues) => pickLang(language, p);
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,7 +55,7 @@ export function LandingShell({
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-1.5" />
-            {t({ ru: 'Назад', en: 'Back' })}
+            {t({ ru: 'Назад', en: 'Back', th: 'กลับ' })}
           </Button>
           <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
         </div>
@@ -116,16 +116,16 @@ export function LandingShell({
 export function LandingChecklist({
   items,
 }: {
-  items: { ru: string; en: string }[];
+  items: LangValues[];
 }) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+
   return (
     <ul className="grid gap-2 sm:grid-cols-2">
       {items.map((it, i) => (
         <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
           <Check className="h-4 w-4 text-primary mt-0.5 flex-none" />
-          <span>{isRu ? it.ru : it.en}</span>
+          <span>{pickLang(language, it)}</span>
         </li>
       ))}
     </ul>

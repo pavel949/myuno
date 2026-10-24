@@ -3,10 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Compass, ImageOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
-import { usePublicPropertyProjects } from '@/hooks/usePropertyProjects';
 import { useExperiences } from '@/hooks/useExperiences';
-import { getDistrictLabel } from '@/lib/taxonomies';
-import { LIVE_AREA_SLUGS } from '@/content/landings/areaLandings';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { HorizontalRail } from './HorizontalRail';
@@ -55,14 +52,14 @@ export function CatalogState({
   );
 }
 
-function CatalogPhoto({ image }: { image?: string | null }) {
+function CatalogPhoto({ image, onUnavailable }: { image?: string | null; onUnavailable?: (image: string) => void }) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const safe = complexMediaUrl(image);
   return (
     <div className="home-catalog-photo">
       {safe && failedImage !== safe ? (
         <img
-          onError={() => setFailedImage(safe)}
+          onError={() => { setFailedImage(safe); onUnavailable?.(safe); }}
           src={safe}
           alt=""
           loading="lazy"
@@ -77,64 +74,51 @@ function CatalogPhoto({ image }: { image?: string | null }) {
   );
 }
 
-/** Stock catalog illustrations must not be presented as neighborhood photography. */
-function areaProjectPhoto(project?: { cover_image?: string | null; images?: string[] | null }) {
-  return [project?.cover_image, ...(project?.images ?? [])].find(value => {
-    const safe = complexMediaUrl(value);
-    if (!safe) return false;
-    const host = new URL(safe).hostname;
-    return !/(^|\.)(unsplash\.com|pexels\.com|pixabay\.com)$/.test(host);
-  });
-}
+// Guide routes are verified navigation, not supply or photographic evidence.
+// Project photos cannot establish what an entire neighborhood looks like.
+const AREA_GUIDES = [
+  { slug: 'kamala', name: { ru: 'Камала', en: 'Kamala', th: 'กมลา' } },
+  { slug: 'surin', name: { ru: 'Сурин', en: 'Surin', th: 'สุรินทร์' } },
+  { slug: 'bang-tao', name: { ru: 'Банг Тао', en: 'Bang Tao', th: 'บางเทา' } },
+];
 
 export function HomeLocationGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
-  const projects = usePublicPropertyProjects(24);
-  // Editorial guide order is independent of the alphabetical project catalogue.
-  // One targeted public read supplies Surin media without downloading every project.
-  const surin = usePublicPropertyProjects(1, 'Surin');
-  const seen = new Set<string>();
-  const catalogAreas = [...(projects.data ?? []), ...(surin.data ?? [])].flatMap(project => {
-    const district = project.district;
-    if (!district) return [];
-    const normalized = district.toLowerCase().trim().replace(/[ _-]+/g, '');
-    const slug = LIVE_AREA_SLUGS.find(value => value.replace(/-/g, '') === normalized);
-    if (!slug || seen.has(slug)) return [];
-    seen.add(slug);
-    return [{ slug, district, project }];
-  });
-  const featured = ['kamala', 'surin', 'bang-tao'];
-  const areas = [
-    ...featured.map(slug => catalogAreas.find(area => area.slug === slug) ?? { slug, district: slug === 'bang-tao' ? 'Bang Tao' : slug, project: undefined }),
-    ...catalogAreas.filter(area => !featured.includes(area.slug)),
-  ];
-  const retry = () => { void projects.refetch(); void surin.refetch(); };
-  const title = t({ ru: 'Познакомьтесь с районами Пхукета', en: 'Get to know Phuket’s areas', th: 'ทำความรู้จักย่านต่าง ๆ ในภูเก็ต' });
   return <section className="home-locations home-container" aria-labelledby="home-locations-title">
-    <div className="home-section-heading"><div><h2 id="home-locations-title">{title}</h2><p className="home-section-lead">{t({ ru: 'Ещё не знаете, где остановиться? Начните со знакомства с островом.', en: 'Not sure where to stay? Start by getting to know the island.', th: 'ยังไม่แน่ใจว่าจะพักที่ไหน เริ่มจากทำความรู้จักเกาะ' })}</p></div><Link className="home-text-link" to={R.AREA_INDEX}>{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-    {(projects.isLoading || surin.isLoading || projects.isError || surin.isError) && <CatalogState loading={projects.isLoading || surin.isLoading} error={projects.isError || surin.isError} retry={retry} empty={{ ru: 'Фото районов пока нет.', en: 'Area photographs are not available yet.', th: 'ยังไม่มีภาพย่าน' }} />}
-    <HorizontalRail label={title}>
-      {areas.map(({ slug, district, project }) => <Link className="home-location-card home-location-card--editorial" key={slug} to={R.AREA_DETAIL(slug)}>
-        <CatalogPhoto image={areaProjectPhoto(project)} />
-        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{project ? <>{t(areaProjectPhoto(project) ? { ru: 'Фото из карточки комплекса', en: 'Image from the community catalog', th: 'ภาพจากรายการโครงการ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</> : t({ ru: 'Фото района пока нет', en: 'Area photograph not available yet', th: 'ยังไม่มีภาพย่าน' })}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
+    <div className="home-section-heading"><div>
+      <h2 id="home-locations-title">{t({ ru: 'Где остановиться на Пхукете?', en: 'Where to stay in Phuket?', th: 'พักที่ไหนดีในภูเก็ต' })}</h2>
+      <p className="home-section-lead">{t({ ru: 'Не знаете район? Познакомьтесь с островом до выбора жилья.', en: 'Not sure about the area? Get to know the island before choosing a home.', th: 'ยังไม่แน่ใจเรื่องย่าน ทำความรู้จักเกาะก่อนเลือกที่พัก' })}</p>
+    </div><Link className="home-text-link" to={R.AREA_INDEX}>{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
+    <div className="home-area-guide-links">
+      {AREA_GUIDES.map(area => <Link className="home-area-guide-link" key={area.slug} to={R.AREA_DETAIL(area.slug)}>
+        <span>{t(area.name)}</span>
+        <span>{t({ ru: 'Гид по району', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span>
       </Link>)}
-    </HorizontalRail>
+    </div>
   </section>;
 }
 
 export function HomeExperienceGallery() {
   const { language } = useLanguage();
+  const [failedMedia, setFailedMedia] = useState<Set<string>>(() => new Set());
   const t = (value: LangValues) => pickLang(language, value);
   const { experiences, isLoading, error, refetch } = useExperiences({
     limit: 8,
     publishedOnly: true,
   });
+  // Curated preview needs stored usable media; no invented image substitutes.
+  const preview = experiences.flatMap(item => {
+    const image = [item.cover_image, ...(item.images ?? [])].map(complexMediaUrl).find(image => image && !failedMedia.has(image));
+    return image ? [{ item, image }] : [];
+  }).slice(0, 4);
   const title = t({
     ru: 'За пределами дома',
     en: 'More of the island',
     th: 'สัมผัสประสบการณ์บนเกาะ',
   });
+  // Successful empty supply is omitted; a failed read remains retryable.
+  if (!isLoading && !error && !preview.length) return null;
   return (
     <section
       className="home-catalog home-experiences home-container"
@@ -145,9 +129,9 @@ export function HomeExperienceGallery() {
           <h2 id="home-experiences-title">{title}</h2>
           <p className="home-section-lead">
             {t({
-              ru: 'Туры и занятия из опубликованного каталога.',
-              en: 'Tours and activities from the published catalog.',
-              th: 'ทัวร์และกิจกรรมจากรายการที่เผยแพร่',
+              ru: 'Идеи для прогулок и отдыха на острове.',
+              en: 'Explore activities around the island.',
+              th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ',
             })}
           </p>
         </div>
@@ -173,10 +157,10 @@ export function HomeExperienceGallery() {
         />
       ) : (
         <HorizontalRail label={title}>
-          {experiences.map((item) => (
+          {preview.map(({ item, image }) => (
             <article className="home-catalog-card" key={item.id}>
               <Link to={R.EXPERIENCE_DETAIL(item.id)}>
-                <CatalogPhoto image={item.cover_image || item.images?.[0]} />
+                <CatalogPhoto image={image} onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))} />
                 <div className="home-catalog-copy">
                   <Compass size={18} aria-hidden="true" />
                   <h3>
@@ -218,6 +202,8 @@ export function HomeServiceGallery() {
   // not evidence of a live category. Keep loading/error/empty explicit here.
   const categories = catalog.isFromDB ? homeServiceCategories(catalog.categories) : [];
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
+  // Static taxonomy fallback is never promoted to published supply.
+  if (!catalog.isLoading && !catalog.error && !categories.length) return null;
   return <section className="home-catalog home-services home-container" aria-labelledby="home-services-title">
     <div className="home-section-heading"><div>
       <h2 id="home-services-title">{title}</h2>
@@ -226,15 +212,16 @@ export function HomeServiceGallery() {
     {catalog.isLoading || catalog.error || !categories.length ? <CatalogState
       loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
       empty={{ ru: 'Пока нет категорий услуг для просмотра. Загляните позже.', en: 'No service categories to explore yet. Check back later.', th: 'ยังไม่มีหมวดหมู่บริการให้เลือก โปรดกลับมาดูอีกครั้ง' }}
-    /> : <HorizontalRail label={t({ ru: 'Категории услуг', en: 'Service categories', th: 'หมวดหมู่บริการ' })} compact>
+    /> : <div className="home-service-category-grid">
       {categories.map(category => <article className="home-service-category-card" key={category.id}>
         <Link to={category.path}>
           <ServiceCategoryArt image={category.image} />
           <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3>
+            <p>{t(category.benefit)}</p>
             <span>{t({ ru: 'Открыть категорию', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>
         </Link>
       </article>)}
-    </HorizontalRail>}
+    </div>}
   </section>;
 }

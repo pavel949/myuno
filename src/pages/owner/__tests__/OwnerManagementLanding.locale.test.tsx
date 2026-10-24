@@ -18,15 +18,15 @@ describe('owner management language consistency', () => {
   it('uses Russian management labels in the Russian landing', () => {
     locale.value = 'ru';
     render(<MemoryRouter><OwnerManagementLanding /></MemoryRouter>);
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Полное управление — ваша вилла или квартира в надёжных руках');
-    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Что входит в полное управление');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Обсудим управление вашей недвижимостью');
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Уже управляете сами?');
     expect(screen.queryByText(/Full Management/i)).toBeNull();
   });
   it('preserves the English labels when English is selected', () => {
     locale.value = 'en';
     render(<MemoryRouter><OwnerManagementLanding /></MemoryRouter>);
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Full Management — your villa or condo in safe hands');
-    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('What full management includes');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Let’s discuss managing your property');
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Already managing your property?');
   });
 });
 
@@ -34,7 +34,7 @@ function LocationProbe() { const location = useLocation(); return <output data-t
 it.each([false, true])('preserves management intent through account selection (signed in: %s)', signedIn => {
   locale.value = 'en'; locale.user = signedIn ? { id: 'owner' } : null;
   render(<MemoryRouter><OwnerManagementLanding /><LocationProbe /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: /Become owner/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Open owner workspace/ }));
   const destination = new URL(screen.getByTestId('location').textContent!, 'https://fixture.test');
   const accountUrl = signedIn ? destination : new URL(destination.searchParams.get('redirect')!, 'https://fixture.test');
   expect(accountUrl.pathname).toBe('/auth/account-type');

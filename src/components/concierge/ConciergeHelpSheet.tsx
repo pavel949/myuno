@@ -6,7 +6,7 @@
  * сохраняет её в `help_requests` и рассылает алерт менеджеру.
  */
 import { useRef, useState } from 'react';
-import { Loader2, CheckCircle2, ShieldCheck, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, MessageSquare, Clock } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,15 +56,15 @@ export interface ConciergeHelpSheetProps {
   sourceData?: Record<string, unknown>;
 }
 
-const TOPIC_LABELS: Record<HelpTopic, { ru: string; en: string }> = {
-  visa: { ru: 'Виза и иммиграция', en: 'Visa & immigration' },
-  invest: { ru: 'Инвестиции', en: 'Investment' },
-  business: { ru: 'Бизнес и компания', en: 'Business & company' },
-  relocation: { ru: 'Переезд', en: 'Relocation' },
-  property: { ru: 'Недвижимость', en: 'Property' },
-  legal: { ru: 'Юридический вопрос', en: 'Legal' },
-  finance: { ru: 'Финансы и платежи', en: 'Finance' },
-  general: { ru: 'Общий вопрос', en: 'General question' },
+const TOPIC_LABELS: Record<HelpTopic, LangValues> = {
+  visa: { ru: 'Виза и иммиграция', en: 'Visa & immigration', th: 'วีซ่าและการเข้าเมือง' },
+  invest: { ru: 'Инвестиции', en: 'Investment', th: 'การลงทุน' },
+  business: { ru: 'Бизнес и компания', en: 'Business & company', th: 'ธุรกิจและบริษัท' },
+  relocation: { ru: 'Переезд', en: 'Relocation', th: 'การย้ายถิ่นฐาน' },
+  property: { ru: 'Недвижимость', en: 'Property', th: 'อสังหาริมทรัพย์' },
+  legal: { ru: 'Юридический вопрос', en: 'Legal', th: 'กฎหมาย' },
+  finance: { ru: 'Финансы и платежи', en: 'Finance', th: 'การเงิน' },
+  general: { ru: 'Общий вопрос', en: 'General question', th: 'คำถามทั่วไป' },
 };
 
 export function ConciergeHelpSheet({
@@ -77,7 +78,8 @@ export function ConciergeHelpSheet({
 }: ConciergeHelpSheetProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const isRu = language === 'ru';
+  const t = (value: LangValues) => pickLang(language, value);
+  const pendingRef = useRef(false);
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const [subject, setSubject] = useState(initialSubject ?? '');
@@ -91,19 +93,21 @@ export function ConciergeHelpSheet({
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const topicLabel = TOPIC_LABELS[topic][isRu ? 'ru' : 'en'];
+  const topicLabel = t(TOPIC_LABELS[topic]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pendingRef.current || submitted) return;
     if (message.trim().length < 5) {
-      toast.error(isRu ? 'Опишите запрос подробнее' : 'Please describe your request');
+      toast.error(t({ ru: 'Опишите запрос подробнее', en: 'Please describe your request', th: 'โปรดอธิบายคำขอเพิ่มเติม' }));
       return;
     }
     if (!user && !email && !phone) {
-      toast.error(isRu ? 'Укажите email или телефон' : 'Email or phone is required');
+      toast.error(t({ ru: 'Укажите email или телефон', en: 'Email or phone is required', th: 'โปรดระบุอีเมลหรือหมายเลขโทรศัพท์' }));
       return;
     }
 
+    pendingRef.current = true;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('submit-help-request', {
@@ -115,7 +119,7 @@ export function ConciergeHelpSheet({
           contact_email: email || undefined,
           contact_phone: phone || undefined,
           preferred_channel: channel,
-          language: isRu ? 'ru' : 'en',
+          language: language === 'ru' || language === 'th' ? language : 'en',
           source_page: typeof document !== 'undefined' ? document.title : undefined,
           source_route: typeof window !== 'undefined' ? window.location.pathname : undefined,
           vendor_id: vendorId ?? undefined,
@@ -124,7 +128,7 @@ export function ConciergeHelpSheet({
         },
       });
 
-      if (error || !data?.success) {
+      if (error || data?.success !== true || typeof data.request_id !== 'string' || !data.request_id.trim()) {
         throw new Error(error?.message ?? 'submit_failed');
       }
 
@@ -137,15 +141,14 @@ export function ConciergeHelpSheet({
       });
 
       setSubmitted(true);
-      toast.success(isRu ? 'Заявка отправлена' : 'Request sent');
+      toast.success(t({ ru: 'Заявка сохранена', en: 'Request saved', th: 'บันทึกคำขอแล้ว' }));
     } catch (err) {
       console.error('[ConciergeHelpSheet] submit failed:', err);
       toast.error(
-        isRu
-          ? 'Не удалось отправить. Попробуйте ещё раз.'
-          : "Couldn't submit. Please try again.",
+        t({ ru: 'Сохранение заявки не подтверждено. Попробуйте ещё раз.', en: 'Request saving was not confirmed. Please try again.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้ โปรดลองอีกครั้ง' }),
       );
     } finally {
+      pendingRef.current = false;
       setLoading(false);
     }
   };
@@ -164,6 +167,7 @@ export function ConciergeHelpSheet({
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent
         side="bottom"
+        closeLabel={t({ ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
         className="max-h-[92vh] overflow-y-auto"
         onOpenAutoFocus={() => {
           // This controlled sheet has callers outside a SheetTrigger. Capture
@@ -182,12 +186,10 @@ export function ConciergeHelpSheet({
       >
         <SheetHeader className="text-left">
           <SheetTitle>
-            {isRu ? 'Чем помочь?' : 'How can we help?'} · {topicLabel}
+            {t({ ru: 'Чем помочь?', en: 'How can we help?', th: 'ให้เราช่วยเรื่องอะไร' })} · {topicLabel}
           </SheetTitle>
           <SheetDescription>
-            {isRu
-              ? 'Расскажите своими словами, что нужно. Мы ответим и найдём проверенного специалиста.'
-              : 'Tell us what you need in your own words. We will reply and find a verified specialist.'}
+            {t({ ru: 'Расскажите, что нужно. Форма сохраняет обращение для команды myUNO.', en: 'Tell us what you need. This form saves a request for the myUNO team.', th: 'บอกสิ่งที่คุณต้องการ แบบฟอร์มนี้บันทึกคำขอถึงทีม myUNO' })}
           </SheetDescription>
         </SheetHeader>
 
@@ -197,31 +199,27 @@ export function ConciergeHelpSheet({
               <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-lg font-semibold">
-              {isRu ? 'Спасибо, мы получили ваше сообщение' : 'Thank you, we have your message'}
+              {t({ ru: 'Заявка сохранена', en: 'Your request is saved', th: 'บันทึกคำขอของคุณแล้ว' })}
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              {isRu
-                ? 'Мы свяжемся с вами удобным способом — обычно в течение 1–2 часов. Все обращения сохраняются в разделе «Я».'
-                : "We will get back to you your preferred way, usually within 1–2 hours. All your requests are saved under 'Me'."}
+              {t({ ru: 'Команда ещё не ответила. Сохранение заявки не подтверждает услугу или срок ответа.', en: 'A team reply is still pending. Saving a request does not confirm a service or response time.', th: 'ยังรอการตอบกลับจากทีม การบันทึกคำขอไม่ได้ยืนยันบริการหรือเวลาตอบกลับ' })}
             </p>
             <Button onClick={() => handleClose(false)} className="mt-4">
-              {isRu ? 'Закрыть' : 'Close'}
+              {t({ ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
             <div className="flex items-center gap-3 rounded-none border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-              <ShieldCheck className="w-4 h-4 shrink-0 text-primary" />
+              <MessageSquare className="w-4 h-4 shrink-0 text-primary" />
               <span>
-                {isRu
-                  ? 'Общение идёт через myUNO. Мы не передаём ваши контакты третьим лицам и знакомим вас со специалистом сами.'
-                  : 'Everything goes through myUNO. We never pass on your contact details — we introduce you ourselves.'}
+                {t({ ru: 'Укажите контакт для ответа команды myUNO по вашему обращению.', en: 'Provide a contact for the myUNO team to reply about your request.', th: 'ระบุช่องทางติดต่อเพื่อให้ทีม myUNO ตอบกลับเรื่องคำขอของคุณ' })}
               </span>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="hr-subject">
-                {isRu ? 'Коротко о чём вопрос (необязательно)' : 'What is it about (optional)'}
+                {t({ ru: 'Коротко о чём вопрос (необязательно)', en: 'What is it about (optional)', th: 'หัวข้อคำถาม (ไม่บังคับ)' })}
               </Label>
               <Input
                 id="hr-subject"
@@ -229,14 +227,14 @@ export function ConciergeHelpSheet({
                 onChange={(e) => setSubject(e.target.value)}
                 maxLength={200}
                 placeholder={
-                  isRu ? 'Например: учебная виза на год' : 'For example: education visa for one year'
+                  t({ ru: 'Например: учебная виза на год', en: 'For example: education visa for one year', th: 'เช่น วีซ่าการศึกษาหนึ่งปี' })
                 }
               />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="hr-message">
-                {isRu ? 'Расскажите, что нужно' : 'Tell us what you need'} *
+                {t({ ru: 'Расскажите, что нужно', en: 'Tell us what you need', th: 'บอกสิ่งที่คุณต้องการ' })} *
               </Label>
               <div className="relative">
                 <Textarea
@@ -247,9 +245,7 @@ export function ConciergeHelpSheet({
                   maxLength={5000}
                   required
                   placeholder={
-                    isRu
-                      ? 'Своими словами: что нужно, к какому сроку, есть ли бюджет. Можно записать голосом.'
-                      : 'In your own words: what you need, by when, and your budget. You can also record it.'
+                    t({ ru: 'Что нужно, к какому сроку, есть ли бюджет. Можно записать голосом.', en: 'What you need, by when, and your budget. You can also record it.', th: 'สิ่งที่ต้องการ กำหนดเวลา และงบประมาณ คุณสามารถใช้เสียงได้ด้วย' })
                   }
                   className="pr-12"
                 />
@@ -262,31 +258,31 @@ export function ConciergeHelpSheet({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>{isRu ? 'Насколько срочно' : 'How urgent is it'}</Label>
+                <Label htmlFor="hr-urgency">{t({ ru: 'Насколько срочно', en: 'How urgent is it', th: 'เร่งด่วนเพียงใด' })}</Label>
                 <Select value={urgency} onValueChange={(v) => setUrgency(v as typeof urgency)}>
-                  <SelectTrigger>
+                  <SelectTrigger id="hr-urgency">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">{isRu ? 'Могу подождать' : 'I can wait'}</SelectItem>
-                    <SelectItem value="normal">{isRu ? 'В обычном порядке' : 'No rush'}</SelectItem>
-                    <SelectItem value="high">{isRu ? 'Хотелось бы быстрее' : 'Soon, please'}</SelectItem>
-                    <SelectItem value="urgent">{isRu ? 'Нужно сейчас' : 'I need help now'}</SelectItem>
+                    <SelectItem value="low">{t({ ru: 'Могу подождать', en: 'I can wait', th: 'รอได้' })}</SelectItem>
+                    <SelectItem value="normal">{t({ ru: 'В обычном порядке', en: 'No rush', th: 'ไม่เร่งด่วน' })}</SelectItem>
+                    <SelectItem value="high">{t({ ru: 'Хотелось бы быстрее', en: 'Soon, please', th: 'ต้องการความช่วยเหลือเร็ว ๆ นี้' })}</SelectItem>
+                    <SelectItem value="urgent">{t({ ru: 'Нужно сейчас', en: 'I need help now', th: 'ต้องการความช่วยเหลือตอนนี้' })}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label>{isRu ? 'Как с вами связаться' : 'How to reach you'}</Label>
+                <Label htmlFor="hr-channel">{t({ ru: 'Как с вами связаться', en: 'How to reach you', th: 'ช่องทางติดต่อกลับ' })}</Label>
                 <Select value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
-                  <SelectTrigger>
+                  <SelectTrigger id="hr-channel">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="in_app">{isRu ? 'В приложении' : 'In-app'}</SelectItem>
+                    <SelectItem value="in_app">{t({ ru: 'В приложении', en: 'In-app', th: 'ในแอป' })}</SelectItem>
                     <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="phone">{isRu ? 'Звонок' : 'Phone call'}</SelectItem>
+                    <SelectItem value="email">{t({ ru: 'Email', en: 'Email', th: 'อีเมล' })}</SelectItem>
+                    <SelectItem value="phone">{t({ ru: 'Звонок', en: 'Phone call', th: 'โทรศัพท์' })}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -294,7 +290,7 @@ export function ConciergeHelpSheet({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="hr-email">Email {!user && !phone && '*'}</Label>
+                <Label htmlFor="hr-email">{t({ ru: 'Email', en: 'Email', th: 'อีเมล' })} {!user && !phone && '*'}</Label>
                 <Input
                   id="hr-email"
                   type="email"
@@ -306,7 +302,7 @@ export function ConciergeHelpSheet({
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="hr-phone">
-                  {isRu ? 'Телефон' : 'Phone'} {!user && !email && '*'}
+                  {t({ ru: 'Телефон', en: 'Phone', th: 'หมายเลขโทรศัพท์' })} {!user && !email && '*'}
                 </Label>
                 <Input
                   id="hr-phone"
@@ -322,9 +318,7 @@ export function ConciergeHelpSheet({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
               <span>
-                {isRu
-                  ? 'Обычно отвечаем в течение 1–2 часов в рабочее время.'
-                  : 'We usually reply within 1–2 hours during business hours.'}
+                {t({ ru: 'Срок ответа пока не подтверждён.', en: 'A response time has not been confirmed.', th: 'ยังไม่ได้ยืนยันเวลาตอบกลับ' })}
               </span>
             </div>
 
@@ -332,13 +326,9 @@ export function ConciergeHelpSheet({
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isRu ? 'Отправка…' : 'Sending…'}
+                  {t({ ru: 'Отправка…', en: 'Sending…', th: 'กำลังส่ง…' })}
                 </>
-              ) : isRu ? (
-                'Отправить'
-              ) : (
-                'Send to a concierge'
-              )}
+              ) : t({ ru: 'Отправить', en: 'Send to a concierge', th: 'ส่งคำขอ' })}
             </Button>
           </form>
         )}

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export type ConsultationRequestType =
   | 'vacation_rental'
@@ -123,6 +125,13 @@ export interface ConsultationRequest {
   updated_at: string;
 }
 
+/** A committed-create receipt is distinct from optional private row readback. */
+export type ConsultationSubmissionReceipt = {
+  id: string;
+  readbackStatus: 'loaded' | 'unavailable' | 'not-requested';
+  record: ConsultationRequest | null;
+};
+
 export interface CreateConsultationInput {
   request_type: ConsultationRequestType;
   name: string;
@@ -153,6 +162,9 @@ export interface CreateConsultationInput {
 
 export function useConsultationRequests() {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const saved = () => toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
+  const unconfirmed = () => toast.error(pickLang(language, { ru: 'Сохранение заявки не подтверждено.', en: 'Request saving was not confirmed.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้' }));
   const queryClient = useQueryClient();
 
   // Fetch user's consultation requests
@@ -177,7 +189,7 @@ export function useConsultationRequests() {
   // Guests have no SELECT access to consultation_requests (PII), so the row is
   // created through the security-definer RPC that returns only the new id.
   const createConsultation = useMutation({
-    mutationFn: async (input: CreateConsultationInput) => {
+    mutationFn: async (input: CreateConsultationInput): Promise<ConsultationSubmissionReceipt> => {
       const { data: newId, error } = await supabase.rpc('submit_consultation_request', {
         payload: input as never,
       });
@@ -185,16 +197,19 @@ export function useConsultationRequests() {
 
       if (error) throw error;
 
-      if (user?.id && newId) {
-        const { data: row } = await supabase
-          .from('consultation_requests')
-          .select('*')
-          .eq('id', newId as string)
-          .maybeSingle();
-        if (row) return row as unknown as ConsultationRequest;
-      }
+      if (typeof newId !== 'string' || !newId.trim()) throw new Error('Consultation request receipt was not confirmed.');
 
-      return { ...(input as object), id: newId } as unknown as ConsultationRequest;
+      // The RPC receipt acknowledges the committed insert. Optional PII readback
+      // must never turn an accepted request into a failed/retried creation.
+      if (user?.id) {
+        try {
+          const { data: row, error: readError } = await supabase
+            .from('consultation_requests').select('*').eq('id', newId).maybeSingle();
+          if (!readError && row?.id === newId) return { id: newId, record: row as unknown as ConsultationRequest, readbackStatus: 'loaded' };
+        } catch { /* Keep the durable receipt; details are unavailable. */ }
+      }
+      return { id: newId, record: null, readbackStatus: user?.id ? 'unavailable' : 'not-requested' };
+
     },
 
     onSuccess: () => {
@@ -212,10 +227,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка отправлена! Мы свяжемся с вами в ближайшее время.');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки. Попробуйте ещё раз.');
+      unconfirmed();
     },
   });
 
@@ -228,10 +243,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на просмотр отправлена!');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки.');
+      unconfirmed();
     },
   });
 
@@ -244,10 +259,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на управление отправлена! Наш менеджер свяжется с вами.');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки.');
+      unconfirmed();
     },
   });
 
@@ -260,10 +275,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на консультацию по инвестициям отправлена!');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки.');
+      unconfirmed();
     },
   });
 
@@ -276,10 +291,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на аренду отправлена. Подберём подходящие варианты.');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки.');
+      unconfirmed();
     },
   });
 
@@ -292,12 +307,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success(
-        'Заявка отправлена! Команда myUNO свяжется с вами для обсуждения партнёрства.'
-      );
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки. Попробуйте ещё раз.');
+      unconfirmed();
     },
   });
 
@@ -310,10 +323,10 @@ export function useConsultationRequests() {
       });
     },
     onSuccess: () => {
-      toast.success('Заявка на управление каналами отправлена! Мы свяжемся с вами.');
+      saved();
     },
     onError: () => {
-      toast.error('Ошибка при отправке заявки.');
+      unconfirmed();
     },
   });
 

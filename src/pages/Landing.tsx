@@ -14,8 +14,9 @@ import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeSearchEntry } from '@/components/home/HomeSearchEntry';
 import { HorizontalRail } from '@/components/home/HorizontalRail';
 import { HomeLocationGallery, HomeExperienceGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
-import { HomeProjectGallery } from '@/components/home/HomeProjectGallery';
-import { PropertyListingCard } from '@/components/property/PropertyListingCard';
+import { HomePopulatedProjects } from '@/components/home/HomePopulatedProjects';
+import { HomeListingCard } from '@/components/home/HomeListingCard';
+import { selectHomeShowcase } from '@/components/home/homeShowcase';
 import { useProperties } from '@/hooks/useProperties';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-desktop.webp';
@@ -29,7 +30,9 @@ export default function Landing() {
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
   const [requestSubject, setRequestSubject] = useState<string | undefined>();
-  const stays = useProperties({ listingType: 'rent' }, 8);
+  const stays = useProperties({ listingType: 'rent' }, 18);
+  const [unavailableMedia, setUnavailableMedia] = useState<Set<string>>(() => new Set());
+  const homes = selectHomeShowcase((stays.data ?? []).filter(home => !unavailableMedia.has(home.id)));
   const [motionPaused, setMotionPaused] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [motionStarted, setMotionStarted] = useState(false);
@@ -92,16 +95,21 @@ export default function Landing() {
         </div>
         <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
       </section>
-      <HomeLocationGallery />
       <section className="home-properties home-container" aria-labelledby="home-stays-title">
         <div className="home-section-heading"><div><h2 id="home-stays-title">{t(copy.stays)}</h2><p className="home-section-lead">{t(copy.staysLead)}</p></div><Link className="home-text-link" to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-        {stays.isLoading ? <div className="home-properties-loading" role="status">{t({ ru: 'Загружаем варианты…', en: 'Loading homes…', th: 'กำลังโหลดที่พัก…' })}</div> : stays.isError ? <p className="home-properties-empty">{t(copy.loadHomesError)}</p> : stays.data?.length ? <HorizontalRail label={t(copy.stays)}>{stays.data.map(property => <div key={property.id} className="home-home-card"><PropertyListingCard property={property} mode="rent" /></div>)}</HorizontalRail> : <p className="home-properties-empty">{t(copy.emptyHomes)} <Link to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}</Link></p>}
+        {stays.isLoading ? <div className="home-properties-loading" role="status">{t({ ru: 'Загружаем варианты…', en: 'Loading homes…', th: 'กำลังโหลดที่พัก…' })}</div> : stays.isError ? <div className="home-properties-empty" role="alert"><p>{t(copy.loadHomesError)}</p><button type="button" className="home-text-link" onClick={() => stays.refetch()}>{t({ ru: 'Повторить', en: 'Try again', th: 'ลองอีกครั้ง' })}</button></div> : homes.length ? <HorizontalRail label={t(copy.stays)}>{homes.map(property => <HomeListingCard key={property.id} property={property} onUnavailable={id => setUnavailableMedia(previous => new Set(previous).add(id))} />)}</HorizontalRail> : <p className="home-properties-empty">{t(copy.emptyHomes)} <Link to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}</Link></p>}
       </section>
-      <HomeProjectGallery />
+      <section className="home-process home-container" aria-labelledby="home-process-title"><h2 id="home-process-title">{t({ ru: 'От выбора к понятному решению', en: 'From browsing to your next step', th: 'จากการค้นหาสู่ขั้นตอนถัดไป' })}</h2><ol>
+        <li><span>01</span><h3>{t({ ru: 'Выберите вариант', en: 'Explore a home', th: 'เลือกที่พัก' })}</h3><p>{t({ ru: 'Фото, описание и условия — в карточке. Даты можно уточнить позже.', en: 'Photos, details and terms are on each listing. Choose dates later if needed.', th: 'ดูรูป รายละเอียด และเงื่อนไขในประกาศ เลือกวันที่ภายหลังได้' })}</p></li>
+        <li><span>02</span><h3>{t({ ru: 'Уточните детали', en: 'Ask about the details', th: 'สอบถามรายละเอียด' })}</h3><p>{t({ ru: 'Используйте доступное действие в карточке или отправьте вопрос команде.', en: 'Use the action on the listing or send your question to the team.', th: 'ใช้ปุ่มในประกาศหรือส่งคำถามถึงทีมงาน' })}</p></li>
+        <li><span>03</span><h3>{t({ ru: 'Согласуйте условия', en: 'Agree on the terms', th: 'ตกลงเงื่อนไข' })}</h3><p>{t({ ru: 'Заявка не гарантирует бронь. Дождитесь подтверждения дат и условий.', en: 'An inquiry is not a confirmed booking. Wait for dates and terms to be confirmed.', th: 'คำขอไม่ใช่การยืนยันการจอง โปรดรอการยืนยันวันที่และเงื่อนไข' })}</p></li>
+      </ol></section>
+      <HomeLocationGallery />
+      {!stays.isError && <HomePopulatedProjects homes={homes} />}
       <HomeExperienceGallery />
       <HomeServiceGallery />
-      <section className="home-closing home-container"><h2>{t(copy.closing)}</h2><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
-      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t(copy.ownersPromptLead)}</p></div><Link className="home-text-link" to={R.FOR_OWNERS}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link></section>
+      <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
+      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t(copy.ownersPromptLead)}</p></div><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link></section>
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>
