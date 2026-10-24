@@ -77,6 +77,10 @@ jobs:
           python scripts/qa/orders-readable-names.py artifacts/design-system/orders
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual route fallbacks and Team landmark ownership
+        run: ROUTE_LAYOUT_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/route-layout" node scripts/qa/route-layout.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
