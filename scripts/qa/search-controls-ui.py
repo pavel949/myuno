@@ -1,0 +1,61 @@
+"""Actual search page/calendar/taxonomy filter UI; synthetic readers and denied external transport."""
+import asyncio,json,sys,re
+from datetime import datetime,timezone
+from pathlib import Path
+from urllib.parse import urlparse,urlencode,parse_qs
+from playwright.async_api import async_playwright,expect
+OUT=Path(sys.argv[1])
+async def main():
+ rows=[]
+ async with async_playwright()as p:
+  browser=await p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+  for lang in ['en','ru']:
+   for width in [320,375,390,430,1180]:
+    height=757 if width==1180 else 740;context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block',timezone_id='Pacific/Honolulu');blocked=[];errors=[]
+    async def route(r):
+     u=urlparse(r.request.url);name='fixture.html'if u.path in ['/fixture','/property/search','/property/browse']else u.path.lstrip('/');types={'fixture.html':'text/html','fixture.js':'text/javascript','fixture.css':'text/css','synthetic-property.svg':'image/svg+xml'}
+     if u.netloc=='localhost:8080'and r.request.method=='GET'and name in types:await r.fulfill(path=str(OUT/name),content_type=types[name])
+     else:blocked.append(r.request.url);await r.abort()
+    await context.route('**/*',route);page=await context.new_page();await page.clock.set_fixed_time(datetime(2026,10,24,23,30,tzinfo=timezone.utc));page.on('pageerror',lambda e:errors.append(str(e)));prefix=f'{lang}-{width}';row={'lang':lang,'width':width,'height':height,'outcome':'FAIL'}
+    try:
+     q={'lang':lang,'checkIn':'2027-05-01','checkOut':'2027-05-03','opaque':'keep','q':'Synthetic','guests':'3','district':'unknown-fixture','f.amenities':'wifi','cats':'pool'}
+     await page.goto('http://localhost:8080/fixture?'+urlencode(q)+'#results',wait_until='domcontentloaded');await page.evaluate('document.fonts.ready');sort=page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка');await expect(sort).to_be_visible();await sort.click();await page.get_by_role('option',name='Price: Low → High'if lang=='en'else'Цена: по возрастанию',exact=True).click();await expect(page.get_by_test_id('location')).to_contain_text('sort=price_asc');assert urlparse(page.url).fragment=='results';await page.get_by_test_id('history-back').click();await expect(sort).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые');assert urlparse(page.url).fragment=='results';await page.get_by_test_id('history-forward').click();await expect(sort).to_contain_text('Price: Low'if lang=='en'else'Цена: по возрастанию');assert urlparse(page.url).fragment=='results';state=await page.get_by_test_id('location').text_content();assert 'opaque=keep'in state and 'f.amenities=wifi'in state and 'cats=pool'in state
+     await page.reload(wait_until='domcontentloaded');assert urlparse(page.url).fragment=='results';await expect(page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка')).to_contain_text('Price: Low'if lang=='en'else'Цена: по возрастанию')
+     # Unapplied criteria stay local while only the result sort changes.
+     draft_query=page.get_by_role('searchbox',name='Property name'if lang=='en'else'Название объекта',exact=True)
+     draft_guests=page.get_by_role('spinbutton',name='Number of guests'if lang=='en'else'Количество гостей',exact=True)
+     if not await draft_query.is_visible():await page.locator('summary').first.click()
+     await draft_query.fill('Draft Synthetic');await draft_guests.fill('5')
+     draft_dates=page.get_by_role('button',name='Stay dates'if lang=='en'else'Даты проживания',exact=True);await draft_dates.click();draft_panel=page.get_by_role('dialog');await draft_panel.locator('[data-day="2027-05-30"] button').click();await draft_panel.locator('[data-day="2027-05-31"] button').click();await expect(draft_panel).to_have_count(0)
+     async def assert_draft():
+      await expect(draft_query).to_be_visible();await expect(draft_query).to_have_value('Draft Synthetic');await expect(draft_guests).to_have_value('5');await expect(draft_dates).to_contain_text('30');await expect(draft_dates).to_contain_text('31')
+     await sort.click();await page.get_by_role('option',name='Price: High → Low'if lang=='en'else'Цена: по убыванию',exact=True).click();await assert_draft();assert urlparse(page.url).fragment=='results';assert parse_qs(urlparse(page.url).query)['q']==['Synthetic']
+     await page.get_by_test_id('history-back').click();await expect(sort).to_contain_text('Price: Low'if lang=='en'else'Цена: по возрастанию');await assert_draft();assert urlparse(page.url).fragment=='results'
+     await page.get_by_test_id('history-forward').click();await expect(sort).to_contain_text('Price: High'if lang=='en'else'Цена: по убыванию');await assert_draft();assert urlparse(page.url).fragment=='results'
+     await page.get_by_role('form').screenshot(path=str(OUT/f'{prefix}-staged-draft-form.png'));await sort.screenshot(path=str(OUT/f'{prefix}-staged-draft-sort.png'))
+     await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();submitted=parse_qs(urlparse(page.url).query)
+     for key,value in {'q':'Draft Synthetic','guests':'5','checkIn':'2027-05-30','checkOut':'2027-05-31','sort':'price_desc','opaque':'keep','district':'unknown-fixture'}.items():assert submitted[key]==[value],submitted
+     await page.get_by_test_id('history-back').click()
+     if not await draft_query.is_visible():await page.locator('summary').first.click()
+     await expect(draft_query).to_have_value('Synthetic');await expect(draft_guests).to_have_value('3');assert 'checkIn=2027-05-01'in page.url
+     await page.get_by_test_id('history-forward').click()
+     if not await draft_query.is_visible():await page.locator('summary').first.click()
+     await assert_draft();await expect(sort).to_contain_text('Price: High'if lang=='en'else'Цена: по убыванию');row['draftSortSubmitHistory']='PASS'
+     await page.evaluate('window.scrollTo(0,0)');dates=page.get_by_role('button',name='Stay dates'if lang=='en'else'Даты проживания',exact=True);await dates.click();panel=page.get_by_role('dialog');await expect(panel).to_be_visible();await panel.evaluate('(e)=>Promise.all(e.getAnimations().map(a=>a.finished))');await page.screenshot(path=str(OUT/f'{prefix}-calendar-open.png'))
+     async def inside(locator,container):
+      r=await locator.bounding_box();c=await container.bounding_box();assert r and c and r['y']>=c['y']-.5 and r['y']+r['height']<=min(height,c['y']+c['height'])+.5,(r,c)
+     await inside(panel.get_by_role('button',name='Clear dates'if lang=='en'else'Сбросить даты',exact=True),panel);await inside(panel.get_by_role('button',name='Close'if lang=='en'else'Закрыть',exact=True).last,panel)
+     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+     row['calendar']=await panel.evaluate('(e)=>({height:e.getBoundingClientRect().height,client:e.clientHeight,scroll:e.scrollHeight,overflow:getComputedStyle(e).overflowY})')
+     day=panel.locator('[data-day="2027-05-31"] button');await day.scroll_into_view_if_needed();await expect(day).to_be_visible();await day.focus();await expect(day).to_be_focused();await inside(day,panel.locator('[data-date-calendar-scroll]'));await page.screenshot(path=str(OUT/f'{prefix}-calendar-last-week.png'));await panel.locator('[data-day="2027-05-30"] button').press('Enter');await panel.locator('[data-day="2027-05-31"] button').press('Space');await expect(panel).to_have_count(0);await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();await expect(page.get_by_test_id('location')).to_contain_text('checkIn=2027-05-30');await expect(page.get_by_test_id('location')).to_contain_text('checkOut=2027-05-31');await dates.click();await expect(panel).to_be_visible();clear=panel.get_by_role('button',name='Clear dates'if lang=='en'else'Сбросить даты',exact=True);await clear.scroll_into_view_if_needed();await clear.focus();await clear.press('Enter');await expect(panel).to_be_visible();close=panel.get_by_role('button',name='Close'if lang=='en'else'Закрыть',exact=True).last;await close.scroll_into_view_if_needed();await page.screenshot(path=str(OUT/f'{prefix}-calendar-bottom.png'));await close.click();await expect(panel).to_have_count(0);await dates.click();await page.keyboard.press('Escape');await expect(panel).to_have_count(0);await expect(dates).to_be_focused();await dates.click();await page.mouse.click(2,2);await expect(panel).to_have_count(0)
+     await page.get_by_role('button',name='Clear all'if lang=='en'else'Сбросить всё',exact=True).click();await expect(page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка')).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые')
+     if width in [390,1180]:
+      await page.get_by_role('button',name='Price & amenities'if lang=='en'else'Цена и удобства',exact=True).click();filters=page.get_by_role('dialog');popular=filters.get_by_role('heading',name='Popular features'if lang=='en'else'Популярные удобства',exact=True).locator('..');broad_pool=popular.get_by_role('button',name='Pool'if lang=='en'else'Бассейн',exact=True);await broad_pool.click();await filters.get_by_role('button',name='Shared pool'if lang=='en'else'Общий бассейн',exact=True).click();amenities=filters.get_by_role('heading',name='Amenities'if lang=='en'else'Удобства',exact=True).locator('..');await amenities.get_by_role('button',name='WiFi',exact=True).click();await expect(popular.get_by_role('button',name='WiFi',exact=True)).to_have_attribute('aria-pressed','false');tier=filters.get_by_role('button',name='฿: THB ≤ 3,000 · '+('per night'if lang=='en'else'за ночь'),exact=True);await tier.click();await expect(tier).to_have_attribute('aria-pressed','true');await tier.evaluate('(e)=>Promise.all(e.getAnimations().map(a=>a.finished))');row['priceTierPaint']=await tier.evaluate('(e)=>({background:getComputedStyle(e).backgroundColor,color:getComputedStyle(e).color,classes:e.className})');await page.screenshot(path=str(OUT/f'{prefix}-strict-and-broad-filters.png'));await filters.get_by_role('button',name=re.compile('^Apply'if lang=='en'else'^Применить')).click();await expect(filters).to_have_count(0);await expect(page.get_by_test_id('location')).to_contain_text('cats=pool');await expect(page.get_by_test_id('location')).to_contain_text('f.poolType=shared');await expect(page.get_by_test_id('location')).to_contain_text('f.amenities=wifi');assert await page.evaluate('window.fixtureFilters.poolType==="shared"&&window.fixtureFilters.amenities.includes("wifi")&&window.fixtureFilters.maxPrice===3000')
+     if width in [390,1180]:
+      await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,'sort':'invalid-sort','checkIn':'bad','checkOut':'2027-02-30'}),wait_until='domcontentloaded');await expect(page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка')).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые');await page.get_by_role('button',name='Stay dates'if lang=='en'else'Даты проживания',exact=True).click();invalid_panel=page.get_by_role('dialog');await expect(invalid_panel.locator('[data-day="2026-10-24"] button')).to_be_disabled();await expect(invalid_panel.locator('[data-day="2026-10-25"] button')).to_be_enabled();await page.keyboard.press('Escape');await expect(invalid_panel).to_have_count(0);await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();await expect(page.get_by_test_id('location')).not_to_contain_text('district=');await expect(page.get_by_role('alert')).to_have_count(0)
+     assert not errors and not blocked,(errors,blocked);assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');row['outcome']='PASS'
+    except Exception as e:row['error']=str(e);row['pageErrors']=errors;row['blocked']=blocked;await page.screenshot(path=str(OUT/f'{prefix}-FAIL.png'))
+    rows.append(row);print(json.dumps(row),flush=True);await context.close()
+  await browser.close()
+ (OUT/'results.json').write_text(json.dumps({'cases':rows,'limits':['Actual page/calendar/filter components; synthetic lookup and catalogue readers','Fallback fonts; no full App chrome or backend acceptance']},indent=2));assert all(r['outcome']=='PASS'for r in rows)
+asyncio.run(main())

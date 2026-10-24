@@ -30,6 +30,7 @@ export interface FilterSection {
   type: 'single' | 'multi' | 'range' | 'price-level';
   options: FilterOption[];
   defaultValue?: string | string[];
+  priceLevelDescriptions?: Record<string, string>;
 }
 
 export interface FilterConfig {
@@ -51,7 +52,7 @@ export interface UniversalFilterProps {
 
 // ====== PRICE LEVEL COMPONENT ======
 
-function PriceLevelSelect({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+function PriceLevelSelect({ value, onChange, descriptions }: { value: string | null; onChange: (v: string | null) => void; descriptions?: Record<string, string> }) {
   const levels = [
     { id: '1', label: '฿' },
     { id: '2', label: '฿฿' },
@@ -60,10 +61,14 @@ function PriceLevelSelect({ value, onChange }: { value: string | null; onChange:
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="space-y-2"><div className="flex gap-2">
       {levels.map((level) => (
         <button
           key={level.id}
+          type="button"
+          aria-pressed={value === level.id}
+          aria-label={descriptions?.[level.id] ? `${level.label}: ${descriptions[level.id]}` : level.label}
+          title={descriptions?.[level.id]}
           onClick={() => onChange(value === level.id ? null : level.id)}
           className={cn(
             "flex-1 py-2 rounded-none text-sm font-medium border transition-colors",
@@ -75,7 +80,7 @@ function PriceLevelSelect({ value, onChange }: { value: string | null; onChange:
           {level.label}
         </button>
       ))}
-    </div>
+    </div>{value && descriptions?.[value] && <p className="text-sm text-muted-foreground" aria-live="polite">{descriptions[value]}</p>}</div>
   );
 }
 
@@ -306,6 +311,7 @@ export function UniversalFilter({
 
               {section.type === 'price-level' && (
                 <PriceLevelSelect
+                  descriptions={section.priceLevelDescriptions}
                   value={localValues[section.id] as string | null}
                   onChange={(value) => updateSectionValue(section.id, value)}
                 />

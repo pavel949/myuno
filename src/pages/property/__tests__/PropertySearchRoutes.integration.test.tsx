@@ -46,6 +46,33 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.propertie
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('preserves a result bookmark hash and unapplied editor draft through sort history', async () => {
+    mount('/property/search?q=sea&guests=3&opaque=keep#results');
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Draft Synthetic' } });
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Number of guests' }), { target: { value: '5' } });
+    fireEvent.keyDown(screen.getByRole('combobox', { name: 'Sort homes' }), { key: 'Enter' });
+    fireEvent.keyDown(await screen.findByRole('option', { name: 'Price: Low → High' }), { key: 'Enter' });
+    const current = () => new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+    expect(current().hash).toBe('#results');
+    expect(current().searchParams.get('sort')).toBe('price_asc');
+    expect(current().searchParams.get('q')).toBe('sea');
+    expect(current().searchParams.get('opaque')).toBe('keep');
+    expect(screen.getByRole('searchbox', { name: 'Property name' })).toHaveValue('Draft Synthetic');
+    expect(screen.getByRole('spinbutton', { name: 'Number of guests' })).toHaveValue(5);
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(current().hash).toBe('#results');
+    expect(screen.getByRole('combobox', { name: 'Sort homes' })).toHaveTextContent('Recommended');
+    fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
+    expect(current().hash).toBe('#results');
+    expect(screen.getByRole('combobox', { name: 'Sort homes' })).toHaveTextContent('Price: Low → High');
+    expect(screen.getByRole('searchbox', { name: 'Property name' })).toHaveValue('Draft Synthetic');
+    expect(screen.getByRole('spinbutton', { name: 'Number of guests' })).toHaveValue(5);
+    fireEvent.submit(screen.getByRole('form'));
+    expect(current().searchParams.get('q')).toBe('Draft Synthetic');
+    expect(current().searchParams.get('guests')).toBe('5');
+    expect(current().searchParams.get('sort')).toBe('price_asc');
+  });
+
   it('uses the same wide catalogue columns for loaded homes and skeletons without a second form frame', () => {
     state.loading = true;
     const loading = mount('/property/search?source=wide-layout');
@@ -302,7 +329,7 @@ describe('one residential results surface', () => {
     expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Price & amenities' }));
     const dialog = within(screen.getByRole('dialog'));
-    for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Shared pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
+    for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
       expect(dialog.getByRole('button', { name: label })).toBeVisible();
     }
   });

@@ -1,7 +1,19 @@
 /** Compatibility boundary for the one residential catalogue URL. */
+import type { PropertySortKey } from '@/lib/propertySortPrice';
 import type { SearchParams } from '@/components/property/AirbnbSearchBar';
 import { parseFiltersFromParams } from '@/lib/propertyBrowseFilters';
 import { parseCivilDate } from '@/lib/hotelDates';
+
+const SORT_KEYS: readonly PropertySortKey[] = ['recommended', 'price_asc', 'price_desc', 'rating', 'newest'];
+export function readPropertySortKey(value: string | null): PropertySortKey {
+  return SORT_KEYS.includes(value as PropertySortKey) ? value as PropertySortKey : 'recommended';
+}
+export function updatePropertySearchSort(params: URLSearchParams, value: PropertySortKey): URLSearchParams {
+  const next = new URLSearchParams(params);
+  const sort = readPropertySortKey(value);
+  if (sort === 'recommended') next.delete('sort'); else next.set('sort', sort);
+  return next;
+}
 
 const list = (value: unknown): string[] => Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.split(',').filter(Boolean) : [];
 const arrayFilters = ['district', 'propertyType', 'bedrooms', 'amenities', 'highlights', 'viewType', 'furnishingLevel', 'poolType', 'parkingType', 'ownershipForm'];
@@ -36,7 +48,7 @@ export function readPropertySearchQuery(params: URLSearchParams) {
   const tenancyValue = params.get('tenancy') ?? (intent === 'rent-month' ? 'medium' : intent === 'rent-long' ? 'long' : 'short');
   const tenancy: 'short' | 'medium' | 'long' = tenancyValue === 'medium' ? 'medium' : tenancyValue === 'long' ? 'long' : 'short';
   const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined = intent === 'standard' || intent === 'assignment' || intent === 'quick_sale' ? intent : undefined;
-  return { search, hasGuestFilter, mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
+  return { search, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
 }
 
 /** Preserve bookmark parameters; a route alias only supplies its owned defaults. */

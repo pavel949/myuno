@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readPropertySearchQuery, propertySearchHref } from '../propertySearchQuery';
+import { readPropertySearchQuery, propertySearchHref, updatePropertySearchSort } from '../propertySearchQuery';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '../propertyCatalogServerFilters';
 import { civilDateKey } from '../hotelDates';
 
@@ -72,3 +72,25 @@ describe('unified residential query compatibility', () => {
     expect(state.tenancy).toBe('short');
   });
 });
+
+describe('validated sort URL contract', () => {
+  it.each(['recommended', 'price_asc', 'price_desc', 'rating', 'newest'])('hydrates sort %s', sort => {
+    expect(readPropertySearchQuery(new URLSearchParams({ sort })).sort).toBe(sort);
+  });
+  it.each(['', 'priceasc', 'unknown', 'PRICE_ASC'])('rejects unknown sort %s without affecting criteria', sort => {
+    const state = readPropertySearchQuery(new URLSearchParams({ sort, district: 'unknown-area', guests: '4', q: 'view' }));
+    expect(state.sort).toBe('recommended');
+    expect(state.search.locations).toEqual(['unknown-area']);
+    expect(state.search.guests).toBe(4);
+  });
+});
+
+ it('changes only the sort key and retains mixed known/unknown criteria', () => {
+ const original = new URLSearchParams('opaque=keep&q=sea&district=unknown&guests=4&cats=pool&f.amenities=wifi&f.poolType=shared&sort=rating');
+ const updated = updatePropertySearchSort(original, 'price_asc');
+ expect(updated.get('sort')).toBe('price_asc');expect(original.get('sort')).toBe('rating');
+ for(const [key,value]of original)if(key!=='sort')expect(updated.get(key)).toBe(value);
+ expect(updatePropertySearchSort(updated, 'recommended').has('sort')).toBe(false);
+ });
+
+ it('treats invalid civil dates as optional unset criteria without inventing an area',()=>{const state=readPropertySearchQuery(new URLSearchParams('checkIn=2027-02-30&checkOut=bad'));expect(state.search.checkIn).toBeUndefined();expect(state.search.checkOut).toBeUndefined();expect(state.search.locations).toEqual([]);});
