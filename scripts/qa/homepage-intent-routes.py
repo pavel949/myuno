@@ -31,7 +31,7 @@ async def main():
         browser=await p.chromium.launch(headless=True, executable_path=shutil.which("chromium"), args=["--no-sandbox"])
         for lang,width,intent in CASES:
             context=await browser.new_context(viewport={'width':width,'height':1000},service_workers='block')
-            errors=[]; blocked=[]
+            errors=[]; blocked=[]; failed_requests=[]
             async def route(r):
                 u=urlparse(r.request.url); name='fixture.html' if u.path=='/fixture' else u.path.lstrip('/')
                 types={'fixture.html':'text/html','fixture.js':'text/javascript','fixture.css':'text/css','synthetic-property.svg':'image/svg+xml'}
@@ -43,21 +43,24 @@ async def main():
                         await r.fulfill(path=str(font),content_type='font/woff2')
                     else:
                         blocked.append({'url':r.request.url,'method':r.request.method});await r.abort()
-                elif os.environ.get('HOME_INTENT_PUBLIC_FONTS')=='1' and u.scheme=='https' and u.hostname in ['fonts.googleapis.com','fonts.gstatic.com'] and r.request.method=='GET':
+                elif os.environ.get('HOME_INTENT_PUBLIC_FONTS')=='1' and u.scheme=='https' and u.netloc in ['fonts.googleapis.com','fonts.gstatic.com'] and r.request.method=='GET':
                     await r.continue_(headers={k:v for k,v in r.request.headers.items() if k.lower() not in ['cookie','authorization']})
                 else:
                     blocked.append({'url':r.request.url,'method':r.request.method});await r.abort()
             await context.route('**/*',route)
             page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
+            page.on('requestfailed',lambda request:failed_requests.append({'url':request.url,'failure':request.failure}))
             row={'lang':lang,'width':width,'intent':intent,'outcome':'FAIL'}
             prefix=f'{lang}-{width}-{intent}'
             try:
                 await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,'intent':intent}),wait_until='domcontentloaded')
                 await page.locator('h1').first.wait_for();await page.evaluate('document.fonts.ready')
                 if os.environ.get('HOME_INTENT_PUBLIC_FONTS')=='1':
-                    await page.wait_for_function("[...document.styleSheets].some(s=>s.href?.startsWith('https://fonts.googleapis.com/') && s.ownerNode.media==='all')")
+                    await page.wait_for_function("[...document.styleSheets].some(s=>s.href?.startsWith('https://fonts.googleapis.com/') && ['','all'].includes(s.ownerNode.media))")
                     row['loadedFontFaces']=await page.evaluate('''async()=>{await Promise.all([document.fonts.load('400 16px Geist'),document.fonts.load('400 16px "Source Serif 4"')]);await document.fonts.ready;return {geist:document.fonts.check('400 16px Geist'),sourceSerif4:document.fonts.check('400 16px "Source Serif 4"'),faces:[...document.fonts].filter(f=>f.status==='loaded').map(f=>f.family)}}''')
                     assert row['loadedFontFaces']['geist'] and row['loadedFontFaces']['sourceSerif4'],row['loadedFontFaces']
+                    families=[f.strip(chr(34)) for f in row['loadedFontFaces']['faces']]
+                    assert 'Geist' in families and 'Source Serif 4' in families,row['loadedFontFaces']
                 assert not errors, errors
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'page overflow'
                 await page.screenshot(path=str(OUTPUT/f'{prefix}-entry.png'),full_page=True)
@@ -95,8 +98,10 @@ async def main():
             except Exception as e:
                 row['error']=str(e);row['pageErrors']=errors
                 await page.screenshot(path=str(OUTPUT/f'{prefix}-FAIL.png'),full_page=True)
-            row['blockedRequests']=blocked;results.append(row);print(json.dumps(row,ensure_ascii=False),flush=True)
+            row['failedRequests']=failed_requests;row['blockedRequests']=blocked;results.append(row);print(json.dumps(row,ensure_ascii=False),flush=True)
             await context.close()
+            if os.environ.get('HOME_INTENT_PUBLIC_FONTS')=='1' and row['outcome']=='FAIL':
+                break  # Stop public-font provisioning after the first failure; no bypass/retry.
         await browser.close()
     (OUTPUT/'results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
     print(f"{sum(r['outcome']=='PASS' for r in results)}/{len(results)} PASS")
