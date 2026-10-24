@@ -1,11 +1,11 @@
 import React from 'react';
+import { AccessRecheckBoundary } from './AccessRecheckBoundary';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /**
  * Investor workspace guard — gates investor-only surfaces (`/capital`,
@@ -31,36 +31,35 @@ export function InvestorGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth();
   const { context, isLoading: contextLoading, isVerifying, error, refetch } = useResolvedContext();
 
-  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role, context?.permissions, location.pathname]);
-  const protectedPage = (pending: boolean) => <AccessVerificationBoundary identity={identity} pending={pending} fallback={<LoadingState />}>{children}</AccessVerificationBoundary>;
+  const pending = authLoading || contextLoading || isVerifying;
+  const serverRole = context?.role ?? null;
+  const isPrivileged = serverRole === 'admin' || serverRole === 'capital_team' || serverRole === 'investor';
+  const allowed = !pending && !!user && !error && isPrivileged;
+  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, serverRole,
+    [...(context?.permissions ?? [])].sort()]);
+  const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary identity={identity}
+    allowed={allowed} pending={pending && !error} fallback={fallback}>{children}</AccessRecheckBoundary>;
 
-  if (authLoading || contextLoading || isVerifying) {
-    if (isVerifying && user && context && !authLoading && !contextLoading && !error) return protectedPage(true);
-    return <LoadingState />;
+  if (pending) {
+    return renderBoundary(<LoadingState />);
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return renderBoundary(<Navigate to="/auth" state={{ from: location }} replace />);
   }
 
   if (error) {
-    return <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
+    return renderBoundary(<div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
       <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
       <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => { void refetch(); }}>
         {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
       </button>
-    </div>;
+    </div>);
   }
-
-  const serverRole = context?.role ?? null;
-  const isPrivileged =
-    serverRole === 'admin' ||
-    serverRole === 'capital_team' ||
-    serverRole === 'investor';
 
   if (isPrivileged) {
-    return protectedPage(false);
+    return renderBoundary(null);
   }
 
-  return <Navigate to="/invest" replace />;
+  return renderBoundary(<Navigate to="/invest" replace />);
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { AccessRecheckBoundary } from './AccessRecheckBoundary';
 import { Navigate, useLocation } from 'react-router-dom';
 import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +8,6 @@ import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /**
  * MC workspace guard — allows access only to users who are members
@@ -19,44 +19,48 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: contextLoading, isVerifying, error, refetch } = useResolvedContext();
-  const { companies, activeCompany, isLoading: companiesLoading } = useActiveCompany();
+  const { context, isLoading: contextLoading, isVerifying, error: contextError, refetch } = useResolvedContext();
+  const { companies, activeCompany, isLoading: companiesLoading, isVerifying: companiesVerifying, error: companiesError, refetch: retryCompanies } = useActiveCompany();
 
-  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role, context?.permissions, activeCompany?.company_id, location.pathname]);
-  const protectedPage = (pending: boolean) => <AccessVerificationBoundary identity={identity} pending={pending} fallback={<LoadingState />}>{children}</AccessVerificationBoundary>;
+  const pending = authLoading || contextLoading || isVerifying || (context?.role !== 'admin' && (companiesLoading || !!companiesVerifying));
+  const error = contextError || (context?.role === 'admin' ? null : companiesError);
+  const allowed = !pending && !!user && !error && (context?.role === 'admin' || (companies.length > 0 && !!activeCompany));
+  const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role,
+    [...(context?.permissions ?? [])].sort(), activeCompany?.company_id, activeCompany?.role]);
+  const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary identity={identity}
+    allowed={allowed} pending={pending && !error} fallback={fallback}>{children}</AccessRecheckBoundary>;
 
-  if (authLoading || contextLoading || isVerifying || companiesLoading) {
-    if (isVerifying && user && context && !authLoading && !contextLoading && !companiesLoading && !error) return protectedPage(true);
-    return <LoadingState />;
+  if (pending) {
+    return renderBoundary(<LoadingState />);
   }
 
   if (!user) {
-    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
+    return renderBoundary(<Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />);
   }
 
   if (error) {
-    return <div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
+    return renderBoundary(<div role="alert" className="min-h-[12rem] flex flex-col items-center justify-center gap-4 p-6 text-center">
       <p>{pickLang(language, { en: 'Could not verify access. Please try again.', ru: 'Не удалось проверить доступ. Повторите попытку.', th: 'ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
-      <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => { void refetch(); }}>
+      <button type="button" style={{ minHeight: 44, minWidth: 44 }} className="underline underline-offset-4" onClick={() => { void refetch(); void retryCompanies?.(); }}>
         {pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
       </button>
-    </div>;
+    </div>);
   }
 
   // Server-resolved admin access
   if (context?.role === 'admin') {
-    return protectedPage(false);
+    return renderBoundary(null);
   }
 
   // No companies — redirect to onboarding
   if (companies.length === 0) {
-    return <Navigate to="/mc/onboarding" replace />;
+    return renderBoundary(<Navigate to="/mc/onboarding" replace />);
   }
 
   // Has companies but activeCompany couldn't be resolved (e.g. stored ID from another company)
   if (!activeCompany) {
-    return <Navigate to="/mc/onboarding" replace />;
+    return renderBoundary(<Navigate to="/mc/onboarding" replace />);
   }
 
-  return protectedPage(false);
+  return renderBoundary(null);
 }

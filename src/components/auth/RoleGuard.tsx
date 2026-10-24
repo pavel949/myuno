@@ -6,9 +6,9 @@ import { type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
+import { AccessRecheckBoundary } from './AccessRecheckBoundary';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { AccessVerificationBoundary } from './AccessVerificationBoundary';
 
 /** Replace an unbounded spinner with recovery if a current check never settles. */
 const ROLE_GUARD_MAX_WAIT_MS = 12_000;
@@ -70,56 +70,29 @@ export function RoleGuard({
     </button>
   </div>;
 
-  // Only a previously admitted, unchanged identity can retain mounted state.
-  // Pending content is hidden/inert, never usable as cached authorization.
-  const identity = JSON.stringify([actorId, context?.mode, context?.entity_id, context?.role, permissions, allowedRoles, location.pathname]);
-  const protectedPage = (pending: boolean) => <AccessVerificationBoundary
-    identity={identity} pending={pending}
-    fallback={waitDeadlinePassed ? verificationUnavailable() : <LoadingState />}
-  >{children}</AccessVerificationBoundary>;
-  if (!allReady) {
-    if (user && !authLoading && !resolvedLoading && !resolvedError && context) return protectedPage(true);
-    return waitDeadlinePassed ? verificationUnavailable() : <LoadingState />;
-  }
-
-  // Redirect to auth if not logged in
-  if (!user) {
-    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
-  }
-
-  if (resolvedError) return verificationUnavailable();
-
-  // Server-resolved admin always passes
-  if (context?.role === 'admin') {
-    return protectedPage(false);
-  }
-
-  // Check if user's server-resolved role matches any allowed role.
-  // Also grant access when the user holds the wildcard permission ('*') or
-  // a permission matching an allowed role name, so MC members with broad
-  // permissions can navigate freely.
   const serverRole = context?.role;
-  const hasAllowedRole = allowedRoles.some(role =>
+  const hasAllowedRole = serverRole === 'admin' || allowedRoles.some(role =>
     role === serverRole ||
     (serverRole !== 'uno_team' && permissions.includes('*')) ||
     permissions.includes(role)
   );
+  const allowed = allReady && !!user && !resolvedError && hasAllowedRole;
+  // A refresh timestamp is not a scope change. Actor/role/entity/permission
+  // changes are: never carry another identity's form through admission.
+  const identity = JSON.stringify([actorId, context?.mode, context?.entity_id,
+    serverRole, [...permissions].sort(), [...allowedRoles].sort()]);
+  const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary
+    identity={identity} allowed={allowed} pending={!allReady && !resolvedError}
+    fallback={fallback}>{children}</AccessRecheckBoundary>;
 
-  if (!hasAllowedRole) {
-    // Show informative access denied page instead of redirect
-    if (showAccessDenied) {
-      return (
-        <AccessDenied 
-          requiredRoles={allowedRoles} 
-          currentPath={location.pathname}
-        />
-      );
-    }
-    // Fallback to redirect behavior
-    return <Navigate to={fallbackPath} replace />;
-  }
-
-  return protectedPage(false);
+  // Pending children remain concealed/inert, not admitted on cached authority.
+  if (!allReady) return renderBoundary(waitDeadlinePassed ? verificationUnavailable() : <LoadingState />);
+  if (!user) return renderBoundary(<Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />);
+  if (resolvedError) return renderBoundary(verificationUnavailable());
+  if (!hasAllowedRole) return renderBoundary(showAccessDenied
+    ? <AccessDenied requiredRoles={allowedRoles} currentPath={location.pathname} />
+    : <Navigate to={fallbackPath} replace />);
+  return renderBoundary(null);
 }
 
 /**
