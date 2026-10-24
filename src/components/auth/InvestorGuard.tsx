@@ -36,7 +36,7 @@ export function InvestorGuard({ children }: { children: React.ReactNode }) {
   const isPrivileged = serverRole === 'admin' || serverRole === 'capital_team' || serverRole === 'investor';
   const allowed = !pending && !!user && !error && isPrivileged;
   const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, serverRole,
-    [...(context?.permissions ?? [])].sort(), location.pathname]);
+    [...(context?.permissions ?? [])].sort()]);
   const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary identity={identity}
     allowed={allowed} pending={pending && !error} fallback={fallback}>{children}</AccessRecheckBoundary>;
 

@@ -80,7 +80,7 @@ export function RoleGuard({
   // A refresh timestamp is not a scope change. Actor/role/entity/permission
   // changes are: never carry another identity's form through admission.
   const identity = JSON.stringify([actorId, context?.mode, context?.entity_id,
-    serverRole, [...permissions].sort(), [...allowedRoles].sort(), location.pathname]);
+    serverRole, [...permissions].sort(), [...allowedRoles].sort()]);
   const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary
     identity={identity} allowed={allowed} pending={!allReady && !resolvedError}
     fallback={fallback}>{children}</AccessRecheckBoundary>;

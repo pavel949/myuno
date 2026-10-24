@@ -17,8 +17,10 @@ fetching; it was not changed.
 ## Change and security boundary
 
 AccessRecheckBoundary preserves a previously admitted component tree only while
-checking the same actor, route, role, entity and permission identity. MC also
-binds this to active company ID and membership role. A successful unchanged
+checking the same actor, role, entity and permission identity. MC also
+binds this to active company ID and membership role. RoleGuard also binds its
+allowed-role policy. Sibling navigation keeps the existing workspace layout;
+the router still owns page transitions. A successful unchanged
 resolution restores the same form and its focused control.
 
 Pending UI is not authorized on cached data. Its inline tree is hidden/inert.
@@ -38,8 +40,9 @@ checked server writers remain authoritative and were not changed.
 
 ## Isolated checks
 
-- 75 unit/regression tests in 11 affected auth/layout/navigation files passed;
-  this includes the 22 focused guard/security cases (do not sum them).
+- 83 unit/regression tests in 12 affected auth/layout/navigation files passed,
+  including the unchanged stable-shell navigation/lazy-route regressions.
+  Focused subsets overlap this total and must not be summed.
 - TypeScript and production build passed.
 - Scoped lint: zero errors, one existing RoleGuard HOC fast-refresh warning.
 - Chromium matrix: 7 guards × inline/actual canonical Radix Dialog × 390/1440
@@ -65,7 +68,7 @@ native foreground visibility across every browser/OS.
 Commands:
 
 ```sh
-npx vitest run src/components/auth src/test/layout src/test/navigation/sitemapMcGuard.test.tsx src/hooks/__tests__/useIsAdmin.actor.test.tsx
+npx vitest run src/components/layout/__tests__/stableLoadingShell.test.tsx src/components/auth src/test/layout src/test/navigation/sitemapMcGuard.test.tsx src/hooks/__tests__/useIsAdmin.actor.test.tsx
 npm run typecheck
 npm run build
 node scripts/qa/guard-background-recheck.mjs

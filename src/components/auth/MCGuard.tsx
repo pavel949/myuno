@@ -26,7 +26,7 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
   const error = contextError || (context?.role === 'admin' ? null : companiesError);
   const allowed = !pending && !!user && !error && (context?.role === 'admin' || (companies.length > 0 && !!activeCompany));
   const identity = JSON.stringify([user?.id, context?.mode, context?.entity_id, context?.role,
-    [...(context?.permissions ?? [])].sort(), activeCompany?.company_id, activeCompany?.role, location.pathname]);
+    [...(context?.permissions ?? [])].sort(), activeCompany?.company_id, activeCompany?.role]);
   const renderBoundary = (fallback: React.ReactNode) => <AccessRecheckBoundary identity={identity}
     allowed={allowed} pending={pending && !error} fallback={fallback}>{children}</AccessRecheckBoundary>;
 
