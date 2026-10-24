@@ -1,5 +1,5 @@
 """Synthetic real browse/card QA. No SPA, tiles, auth, database, or production requests."""
-import asyncio, json, sys
+import asyncio, json, os, sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, urlencode
 from playwright.async_api import async_playwright, expect
@@ -8,7 +8,7 @@ OUTPUT = Path(sys.argv[1])
 async def main():
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, **({'executable_path': os.environ['PLAYWRIGHT_CHROMIUM_EXECUTABLE']} if os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE') else {}))
         for lang in ['ru', 'en']:
             for width in [375, 390, 430, 1280]:
                 context = await browser.new_context(viewport={'width': width, 'height': 1500}, has_touch=width < 640, service_workers='block')
@@ -40,7 +40,7 @@ async def main():
                     await expect(cards.first).to_have_attribute('data-listing-id', 'synthetic-villa')
                     await bounds()
                     title_link = cards.first.get_by_role('link', name='Тестовая вилла с бассейном' if lang == 'ru' else 'Synthetic pool villa', exact=True)
-                    await expect(title_link).to_have_attribute('href', f'/property/synthetic-villa?mode={mode}&checkIn=2026-11-01&checkOut=2026-11-05&guests=3')
+                    await expect(title_link).to_have_attribute('href', f'/property/synthetic-villa?mode={mode}&checkIn=2026-11-01&checkOut=2026-11-05&guests=3&tenancy=long')
                     await title_link.focus()
                     await expect(title_link).to_be_focused()
                     if width < 640:
@@ -70,7 +70,7 @@ async def main():
                     await cards.first.click()
                     await expect(page.get_by_test_id('detail-boundary')).to_have_text('/property/synthetic-villa')
                     detail_params = parse_qs((await page.get_by_test_id('location').text_content()).split('?', 1)[1])
-                    assert detail_params == {k: [params[k]] for k in ['mode', 'checkIn', 'checkOut', 'guests']}, detail_params
+                    assert detail_params == {k: [params[k]] for k in ['mode', 'checkIn', 'checkOut', 'guests', 'tenancy']}, detail_params
                     await page.get_by_test_id('history-back').click()
                     await expect(page.get_by_test_id('map')).to_be_visible()
                     await expect(page.get_by_test_id('marker')).to_have_attribute('aria-pressed', 'true')

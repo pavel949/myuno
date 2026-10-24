@@ -13,7 +13,7 @@ vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <small>Existing legal footer</small> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button> }));
-vi.mock('@/components/home/HomeProjectGallery', () => ({ HomeProjectGallery: () => <section aria-label="Project gallery">Public project gallery</section> }));
+vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => <section aria-label="Project gallery">Populated public projects</section> }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
@@ -59,7 +59,7 @@ it.each([
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
  expect(screen.getByRole('button', { name: 'Unified home search' })).toBeVisible();
- expect(screen.getByText('Public project gallery')).toBeVisible();
+ expect(screen.getByText('Populated public projects')).toBeVisible();
  expect(screen.getByRole('heading', { name: language === 'ru' ? 'Найдите свой дом' : language === 'th' ? 'ที่พักสำหรับคุณ' : 'Find your home' })).toBeVisible();
  expect(screen.queryByRole('heading', { name: 'Layantara Villas' })).toBeNull();
  const bar = screen.getByRole('navigation', { name });

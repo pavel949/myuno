@@ -11,7 +11,7 @@ async def main():
         system = '/usr/bin/chromium'
         browser = await p.chromium.launch(executable_path=system if Path(system).exists() else None, args=['--no-sandbox'])
         for lang in ['en', 'ru', 'th']:
-            for width in [320, 390, 768, 1440, 1920]:
+            for width in [360, 390, 768, 1440, 1920]:
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, has_touch=width < 768, reduced_motion='reduce', service_workers='block')
                 blocked, errors = [], []
                 async def route(r):
@@ -30,7 +30,7 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='networkidle')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(5)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(2)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
@@ -41,7 +41,6 @@ async def main():
                         await expect(image).to_be_visible()
                         await expect(image).to_have_js_property('complete',True)
                         assert await image.evaluate('(el)=>el.naturalWidth>0 && getComputedStyle(el).objectFit==="contain"')
-                    await page.locator('.home-services .home-rail-viewport').evaluate('(el)=>el.scrollLeft=0')
 
                     # Each gallery stays one card high and within its own section.
                     for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
@@ -75,7 +74,7 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-services .home-rail-viewport')]:
+                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-experiences .home-rail-viewport')]:
                             await rail.scroll_into_view_if_needed()
                             await rail.evaluate('(el)=>el.scrollLeft=0')
                             box = await rail.bounding_box()
@@ -88,66 +87,32 @@ async def main():
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                             await page.wait_for_timeout(120)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
-                    # One entry; optional criteria appear only after selecting intent.
+                    # One intention choice goes directly to canonical results, without an initial form.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
+                    for index, query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
+                        await page.locator('.home-search-entry-button').click()
+                        dialog = page.get_by_role('dialog')
+                        await expect(dialog).to_be_visible()
+                        await dialog.evaluate('(el)=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})))')
+                        choices = dialog.locator('.home-search-intents a')
+                        await expect(choices).to_have_count(4)
+                        # Every intention, including Buy, fits the current sheet without scrolling.
+                        bounds = await dialog.bounding_box()
+                        for choice in await choices.all():
+                            box = await choice.bounding_box()
+                            assert box['y'] >= bounds['y'] and box['y']+box['height'] <= bounds['y']+bounds['height'], box
+                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-intent.png'))
+                        await choices.nth(index).click()
+                        await expect(page.get_by_test_id('location')).to_have_text('/property/search?'+query)
+                        await expect(dialog).to_have_count(0)
                     await page.locator('.home-search-entry-button').click()
-                    await expect(page.get_by_role('dialog')).to_be_visible()
-                    await page.locator('.home-search-intents button').nth(0).click()
-                    await expect(page.locator('.home-search-sheet h2')).to_be_focused()
-                    await page.locator('.home-search-back').click()
-                    await expect(page.locator('.home-search-sheet h2')).to_be_focused()
-                    await page.locator('.home-search-intents button').nth(0).click()
-                    await expect(page.locator('.home-search-sheet select')).to_have_count(0)
-                    await page.locator('.home-search-sheet .home-search-submit').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent&tenancy=short')
                     await page.keyboard.press('Escape')
                     await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(page.locator('.home-search-entry-button')).to_be_focused()
-                    await page.locator('.home-search-entry-button').click()
-                    await page.locator('.home-search-intents button').nth(1).click()
-                    duration = page.locator('.home-search-sheet .home-search-duration')
-                    await expect(duration).to_be_visible()
-                    await expect(duration.locator('button').nth(2)).to_have_attribute('aria-pressed', 'true')
-                    await expect(page.locator('.home-search-sheet .home-search-refine')).to_have_attribute('aria-expanded', 'false')
-                    if lang == 'ru' and width in [390, 768, 1440]:
-                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-yearly-visible.png'))
-                    await duration.locator('button').nth(1).focus()
-                    await page.keyboard.press('Enter')
-                    await expect(duration.locator('button').nth(1)).to_have_attribute('aria-pressed', 'true')
-                    await expect(duration.locator('button').nth(1)).to_be_focused()
-                    await page.locator('.home-search-sheet .home-search-submit').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent&tenancy=medium')
-                    if lang == 'ru' and width in [390, 768, 1440]:
-                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-monthly-selected.png'))
-                    await page.keyboard.press('Escape')
-                    await expect(page.locator('.home-search-entry-button')).to_be_focused()
-                    await page.locator('.home-search-entry-button').click()
-                    await page.locator('.home-search-intents button').nth(2).click()
-                    await expect(page.locator('.home-search-sheet .home-search-dates')).to_have_count(0)
-                    await page.locator('.home-search-sheet .home-search-submit').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=buy')
-                    await page.keyboard.press('Escape')
-                    # Complex filters preserve typed inventory + rent/buy detail intents.
-                    projects = page.locator('.home-projects')
-                    await projects.locator('summary').click()
-                    await projects.locator('input[type=search]').fill('Fixture community 1' if lang!='ru' else 'Тестовый комплекс 1')
-                    await expect(projects.locator('article:visible')).to_have_count(1)
-                    await projects.locator('input[type=search]').fill('no-match')
-                    await expect(projects.locator('article:visible')).to_have_count(0)
-                    await projects.locator('input[type=search]').fill('')
-                    await projects.locator('select').first.select_option('rawai')
-                    await expect(projects.locator('article:visible')).to_have_count(1)
-                    await projects.locator('select').first.select_option('')
-                    await projects.locator('select').nth(1).select_option('condo')
-                    await expect(projects.locator('article:visible')).to_have_count(5)
-                    await projects.locator('.home-project-mode button').nth(1).click()
-                    await expect(projects.locator('article:visible')).to_have_count(6)
-                    assert 'mode=buy&propertyType=condo' in await projects.locator('article a').first.get_attribute('href')
-                    await projects.locator('select').nth(1).select_option('')
                     # Exercise actual card CTAs and verify the committed public destination.
-                    for selector, prefix in [('.home-location-card', '/area/'),
-                                             ('.home-project-card-link', '/property/complex/'),
-                                             ('.home-home-card a', '/property/home-')]:
+                    for selector, prefix in [('.home-area-guide-link', '/area/'),
+                                             ('.home-populated-projects a', '/property/complex/'),
+                                             ('.home-listing a', '/property/home-')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
@@ -158,20 +123,18 @@ async def main():
                                              ('.home-service-category-card a[href="/transport"]', '/transport'),
                                              ('.home-service-category-card a[href="/yachts"]', '/yachts'),
                                              ('.home-service-category-card a[href="/services"]', '/services'),
-                                             ('.home-owner-prompt a', '/for-owners')]:
+                                             ('.home-owner-prompt a', '/owner/management-landing')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
                         await link.click()
                         await expect(page.get_by_test_id('location')).to_have_text(href)
-                    await projects.locator('.home-project-mode button').nth(0).click()
-                    await projects.locator('details').evaluate('(el)=>el.open=false')
                     await page.locator('.home-rail-viewport').evaluate_all('(rows)=>rows.forEach(row=>row.scrollLeft=0)')
                     await page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':5,'arrowsKeyboardFocus':True,'swipe':width<768,'filters':True,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':2,'arrowsKeyboardFocus':True,'swipe':width<768,'directIntentRoutes':4,'errors':errors})
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
                     print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
@@ -186,13 +149,13 @@ async def main():
             await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='networkidle')
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(4)
+                await expect(page.get_by_role('alert')).to_have_count(3)
                 await page.get_by_role('button',name='Try again').first.click()
-                assert await page.evaluate('window.fixtureRetries') == 2
+                assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
-                await expect(page.get_by_text('No published experiences yet. Check back later.')).to_be_visible()
-                await expect(page.get_by_text('No service categories to explore yet. Check back later.')).to_be_visible()
+                await expect(page.locator('.home-experiences,.home-services,.home-populated-projects')).to_have_count(0)
+                await expect(page.locator('.home-area-guide-link')).to_have_count(3)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
             results.append({'state':state,'width':390,'pageOverflow':False})
             await context.close()

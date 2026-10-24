@@ -54,6 +54,18 @@ describe('actual property detail purchase/rental intent', () => {
     expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
   });
+  it.each(['medium', 'long'])('keeps supported %s intent on a dual rental offer', tenancy => {
+    state.property.tenancy_modes = ['short', tenancy];
+    mount(`rent&tenancy=${tenancy}`);
+    expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
+    expect(propertyDetailHref('unit', 'rent', `?tenancy=${tenancy}`)).toContain(`tenancy=${tenancy}`);
+  });
+  it('does not turn unsupported rental URL intent into a long-term offer', () => {
+    state.property.tenancy_modes = ['short'];
+    mount('rent&tenancy=long');
+    expect(screen.getByRole('button', { name: 'Book rental' })).toBeVisible();
+  });
   it('updates untouched mobile fields on same-ID URL navigation', () => {
     mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));

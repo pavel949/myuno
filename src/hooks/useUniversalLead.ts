@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { LeadSource, getLeadVerticalById } from '@/lib/leadVerticalConfig';
 import { logger } from '@/lib/logger';
 import type { Json } from '@/integrations/supabase/types';
@@ -88,7 +89,8 @@ export function useUniversalLead() {
 
       if (error) throw error;
 
-      const data = leadId ? { id: leadId as string } : null;
+      if (typeof leadId !== 'string' || !leadId.trim()) throw new Error('Lead request receipt was not confirmed.');
+      const data = { id: leadId };
 
       // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
       // silent failure means Pavel never hears about a new lead — log it (with the
@@ -130,23 +132,10 @@ export function useUniversalLead() {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
       
-      const isRu = language === 'ru';
-      const vertical = getLeadVerticalById(variables.vertical_id);
-      const verticalName = isRu ? vertical?.nameRu : vertical?.nameEn;
-      
-      toast.success(
-        isRu 
-          ? `Заявка отправлена! Мы свяжемся с вами в ближайшее время.`
-          : `Request sent! We will contact you shortly.`
-      );
+      toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
     },
     onError: () => {
-      const isRu = language === 'ru';
-      toast.error(
-        isRu 
-          ? 'Ошибка при отправке заявки. Попробуйте ещё раз.'
-          : 'Failed to submit request. Please try again.'
-      );
+      toast.error(pickLang(language, { ru: 'Сохранение заявки не подтверждено.', en: 'Request saving was not confirmed.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้' }));
     },
   });
 

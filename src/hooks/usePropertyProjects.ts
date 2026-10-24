@@ -112,13 +112,19 @@ export function useAdminPropertyProjects() {
 export const GUEST_PROJECT_COLUMNS = 'id,name_en,name_ru,description_en,description_ru,address,district,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active';
 
 /** Public, allowlisted project collection for guest discovery surfaces. */
-export function usePublicPropertyProjects(limit = 24, district?: string) {
+export function usePublicPropertyProjects(limit = 24, district?: string, projectIds?: string[]) {
+  const ids = projectIds === undefined ? undefined : [...new Set(projectIds.filter(Boolean))].sort();
   return useQuery({
-    queryKey: district ? ['public-property-projects', limit, district] : ['public-property-projects', limit],
+    queryKey: ids === undefined
+      ? district ? ['public-property-projects', limit, district] : ['public-property-projects', limit]
+      : ['public-property-projects', limit, district ?? null, { ids }],
+    enabled: ids === undefined || ids.length > 0,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
+      if (ids?.length === 0) return [];
       let query = createProjectCatalogQuery(GUEST_PROJECT_COLUMNS).eq('is_active', true);
+      if (ids) query = query.in('id', ids);
       if (district) query = query.eq('district', district);
       const { data, error } = await query.order('name_en').limit(limit);
 
