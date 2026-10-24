@@ -71,7 +71,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
           }
         }}
         className="mx-auto w-fit px-0"
-        classNames={{ weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
+        classNames={{ months: 'relative flex flex-col', nav: 'sticky top-0 z-20 -mb-11 flex h-11 items-center justify-between', month_caption: 'sticky top-0 z-10 flex h-11 items-center justify-center bg-popover', weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
       />
       </div>
       <div className="flex shrink-0 justify-between border-t p-3">

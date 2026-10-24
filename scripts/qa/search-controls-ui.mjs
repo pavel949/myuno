@@ -68,5 +68,9 @@ await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><me
 await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({base:'4017dc4b0cf2439b56d7ee6fa5cd46b6dd04d689',mode:'Actual page/calendar/UniversalFilter and taxonomy hook; synthetic readers, denied writers, fallback fonts',sources:await Promise.all(['src/pages/property/PropertySearchPage.tsx','src/components/home/HomeSearchDateRange.tsx','src/components/filters/UniversalFilter.tsx','src/lib/propertySearchQuery.ts','src/lib/propertyCatalogServerFilters.ts','src/lib/propertySearchPresentation.ts','src/components/property/PropertyCategoryIcons.tsx','src/lib/propertySortPrice.ts','src/lib/nav/floatingStack.ts','src/hooks/usePropertyFilterOptions.ts','src/index.css','src/styles/cinematic-home.css','src/styles/property-search.css','src/styles/public-commerce.css'].map(async file=>({file,sha256:createHash('sha256').update(await readFile(file)).digest('hex')})))},null,2));
 if(process.argv.includes('--build-only')) process.exit(0);
 const run=spawnSync('python3',[path.join(root,'scripts/qa/search-controls-ui.py'),output],{stdio:'inherit'});
-process.exitCode=run.status??1;
+if(run.status!==0) process.exitCode=run.status??1;
+else {
+  const thai=spawnSync('python3',[path.join(root,'scripts/qa/search-controls-thai-smoke.py'),output],{stdio:'inherit'});
+  process.exitCode=thai.status??1;
+}
 
