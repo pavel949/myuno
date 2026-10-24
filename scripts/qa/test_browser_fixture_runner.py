@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def declared_fixture_output(source):
     """Resolve supported static declarations with the CI default temporary root."""
-    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.HOME_GALLERY_OUTPUT\s*\|\|\s*)?'([^']+)'\s*;", source)
+    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.(?:HOME_GALLERY_OUTPUT|SHARED_SURFACES_OUTPUT)\s*\|\|\s*)?'([^']+)'\s*;", source)
     if literal:
         return literal.group(1)
     portable = re.search(
@@ -82,6 +82,10 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
         portable = "const output = path.join(process.env.TEMP || '/tmp', 'browser', 'moderation-queue-isolated');"
         self.assertEqual(declared_fixture_output(literal), declared_fixture_output(portable))
         self.assertNotEqual(declared_fixture_output(portable.replace('moderation-queue-isolated', 'wrong')), declared_fixture_output(literal))
+        override = "const output = process.env.SHARED_SURFACES_OUTPUT || '/tmp/browser/shared-surfaces-isolated';"
+        self.assertEqual(declared_fixture_output(override), '/tmp/browser/shared-surfaces-isolated')
+        with self.assertRaisesRegex(AssertionError, 'Fixture must declare'):
+            declared_fixture_output(override.replace('SHARED_SURFACES_OUTPUT', 'ARBITRARY_OUTPUT'))
         with self.assertRaisesRegex(AssertionError, 'Fixture must declare'):
             declared_fixture_output('const output = arbitraryPath();')
 
