@@ -37,19 +37,19 @@ describe('actual resolved-context query verification boundary',()=>{
  it('does not treat cached data plus a failed verification as authority and retries the real query',async()=>{
   mount();await startVerification();
   await act(async()=>{finish({data:null,error:{message:'Synthetic verification failed'}});await vi.advanceTimersByTimeAsync(1);await vi.advanceTimersByTimeAsync(1);});
-  expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Access denied')).toBeNull();
+  expect(screen.queryByText('Protected page')).toBeNull();expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Access denied')).toBeNull();
   expect(screen.getByRole('button',{name:'Retry'}).style.minHeight).toBe('44px');fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});expect(fixture.rpc).toHaveBeenCalledTimes(2);
-  expect(screen.queryByText('Protected page')).not.toBeVisible();
+  expect(screen.queryByText('Protected page')).toBeNull();
   await act(async()=>{finish({data:context,error:null});await vi.advanceTimersByTimeAsync(1);await vi.advanceTimersByTimeAsync(1);});expect(screen.getByText('Protected page')).toBeTruthy();
  });
  it.each([['MC',MCGuard,'/mc/onboarding'],['Investor',InvestorGuard,'/invest']] as const)('%s also blocks cached authority during verification and distinguishes failure from ordinary denial',async(_name,Guard,destination)=>{
   render(<QueryClientProvider client={client}><MemoryRouter><Location/><Guard><p>Protected page</p></Guard></MemoryRouter></QueryClientProvider>);
   expect(screen.getByText('Protected page')).toBeTruthy();await startVerification();expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.getByRole('status')).toBeTruthy();
   await act(async()=>{finish({data:null,error:{message:'Synthetic verification failed'}});await vi.advanceTimersByTimeAsync(1);});
-  expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Protected page')).not.toBeVisible();
+  expect(screen.getByRole('alert').textContent).toContain('Could not verify access');expect(screen.queryByText('Protected page')).toBeNull();
   expect(screen.getByRole('button',{name:'Retry'}).style.minHeight).toBe('44px');fireEvent.click(screen.getByRole('button',{name:'Retry'}));await act(async()=>{await vi.advanceTimersByTimeAsync(1);});
   fixture.companies=[];await act(async()=>{finish({data:{...context,mode:'user',role:'user',permissions:[]},error:null});await vi.advanceTimersByTimeAsync(1);});
-  expect(screen.queryByText('Protected page')).not.toBeVisible();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByTestId('location').textContent).toBe(destination);
+  expect(screen.queryByText('Protected page')).toBeNull();expect(screen.queryByRole('alert')).toBeNull();expect(screen.getByTestId('location').textContent).toBe(destination);
  });
 
 });
