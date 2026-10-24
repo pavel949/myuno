@@ -98,6 +98,11 @@ async def main():
                             row['status']='PASS'
                         except Exception as error:
                             row['status']='FAIL';row['failure']=str(error);row['traceback']=traceback.format_exc()
+                            try:
+                                row['themeSnapshot']=await page.evaluate("()=>({classes:document.documentElement.className,ready:document.documentElement.getAttribute('data-theme-ready'),stored:localStorage.getItem('myuno-theme'),provider:document.querySelector('#fixture-theme-value')?.textContent})")
+                            except Exception as diagnostic_error:
+                                row['diagnosticError']=str(diagnostic_error)
+                            print(json.dumps({'portalFailure':row},ensure_ascii=False),flush=True)
                             await page.screenshot(path=str(OUTPUT/f'{scene}-{lang}-{width}-{theme}-FAIL.png'),full_page=True)
                         row['pageErrors']=errors; row['blockedRequests']=blocked
                         results.append(row)
@@ -106,6 +111,6 @@ async def main():
     report={'scope':str(len(results))+' isolated actual-layout frames; backend/roles/data correctness not tested','cssPath':str(CSS),'cssSha256':hashlib.sha256(CSS.read_bytes()).hexdigest(),'manifest':json.loads((OUTPUT/'manifest.json').read_text()),'results':results}
     (OUTPUT/'results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     failures=[row for row in results if row['status']!='PASS']
-    print(json.dumps({'cases':len(results),'passed':len(results)-len(failures),'failed':len(failures),'report':str(OUTPUT/'results.json')}))
+    print(json.dumps({'cases':len(results),'passed':len(results)-len(failures),'failed':len(failures),'report':str(OUTPUT/'results.json'),'failures':[{k:r.get(k) for k in ['scene','lang','width','theme','failure','traceback']} for r in failures]},ensure_ascii=False))
     if failures: raise SystemExit(1)
 asyncio.run(main())

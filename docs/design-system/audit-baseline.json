@@ -3707,7 +3707,6 @@
     {"id":"0193bab4c448451745a7e9aa758e5d3bc977c6247edc619fc43498f48f48daf8","file":"src/pages/PricingPage.tsx","line":92,"code":"literal-type-size","detail":"text-[11.5px]"},
     {"id":"d893435207a85db8214da96cbad296d8791de17e8e12864b1cb78ca8c96d2673","file":"src/pages/profile/ReferralPage.tsx","line":18,"code":"local-geometry","detail":"max-w-lg"},
     {"id":"b62d36e0231a7574d033006c3982278f2977e30a2a2645a31b8c25ef3f391c84","file":"src/pages/profile/ReferralPage.tsx","line":18,"code":"local-geometry","detail":"px-4"},
-    {"id":"72e0b22bd5e68a7869eb2845b6547abbe409ce1b6f12d13dce89da1db0625161","file":"src/pages/property/__tests__/PropertySearchRoutes.integration.test.tsx","line":53,"code":"local-geometry","detail":"max-w-[1760px]"},
     {"id":"2caa5f97af23d7177eefe544ac0d9094676120dbb298b6d52e01c563816edcef","file":"src/pages/property/CommercialDetail.tsx","line":92,"code":"named-palette","detail":"text-white"},
     {"id":"cd693729ddfb85da32ab36104229777acdde762c386e49659fbef9b2f31dd5dc","file":"src/pages/property/CommercialDetail.tsx","line":92,"code":"named-palette","detail":"text-white"},
     {"id":"e5861643f37a33cbef75f5cc72387a5c7bfbd84dbaf163ef0f19540f68751b12","file":"src/pages/property/CommercialDetail.tsx","line":97,"code":"named-palette","detail":"text-white"},

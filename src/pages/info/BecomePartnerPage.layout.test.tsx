@@ -26,7 +26,7 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 function assertFrame(container: HTMLElement) {
  expect(container.querySelector('main')).toHaveAttribute('data-auto-frame', 'false');
  const frame = container.querySelector('main > div');
- expect(frame).toHaveClass('max-w-3xl', 'mx-auto');
+ expect(frame).toHaveClass('max-w-3xl', 'ds-frame');
  expect(frame).not.toHaveClass('max-w-full', 'max-w-[1280px]');
 }
 
