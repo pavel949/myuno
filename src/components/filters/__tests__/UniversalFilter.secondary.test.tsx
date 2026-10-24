@@ -54,7 +54,7 @@ it('retains malformed multi-value budget until explicit removal without selectin
  const change = vi.fn();
  render(<UniversalFilter config={{ ...config, sections: [...sections, { id: 'priceLevel', titleEn: 'Budget', titleRu: 'Бюджет', type: 'price-level', options: [] }] }} values={{ priceLevel: ['1', 'legacy-budget'], guestFeatures: ['pool'] }} onChange={change} />);
  fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
- expect(screen.getByRole('button', { name: '฿', exact: true })).toHaveAttribute('aria-pressed', 'false');
+ expect(screen.getByRole('button', { name: '฿' })).toHaveAttribute('aria-pressed', 'false');
  fireEvent.click(screen.getByRole('button', { name: /Apply/ }));
  expect(change).toHaveBeenLastCalledWith({ priceLevel: ['1', 'legacy-budget'], guestFeatures: ['pool'] });
  fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
