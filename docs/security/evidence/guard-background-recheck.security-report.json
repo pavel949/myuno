@@ -1,23 +1,23 @@
 {
   "kind": "focused-security-regression-output",
-  "sourceCommit": "011b7f1a6320a8d6dbe7dd63bf92f2330c9c8667",
+  "sourceCommit": "d23d6a989bc95dae0c1c72fea7e1672bc574b122",
   "baseCommit": "37de22d344274c0075e47f0717637bb40c6e5c1b",
   "scope": "UI access quarantine and draft retention, not server authorization",
   "runtimeSha256": {
     "src/components/auth/AccessRecheckBoundary.tsx": "a30831bcb49e1c53c981c9b7886bfe180e46818d4e982845e2e12c86d80659e1",
-    "src/components/auth/RoleGuard.tsx": "bd23be0d5adf2d50c32d2add90e948da12687503d930bb3627bdcc0d7ed57aa2",
-    "src/components/auth/MCGuard.tsx": "d21a0f6ee09a4f772f9754a282f82cefe6086f741b51d878f21a615e41391fde",
-    "src/components/auth/InvestorGuard.tsx": "d57a60b28f6db9dbc2cf812cde64a509da079bee42c14c798de1a66f777406c0",
+    "src/components/auth/RoleGuard.tsx": "4a0178ce55663a0dfc563d75321ca6a5b24de3e4b3bb5925d693c1c20c038a45",
+    "src/components/auth/MCGuard.tsx": "14b1cbee311310f643c6311fb79e4f5fe9b40005c0d76f109edf55d17b5fa61e",
+    "src/components/auth/InvestorGuard.tsx": "93ff281c62695eccbeaa3fee0745b505410b7d2f966136ba3ffcb79eea484390",
     "src/hooks/useActiveCompany.ts": "a8ae0d4350e2cb3e380c3ce94d9c6afb1f7d8a80ece4be0340fccb9128f854ea"
   },
-  "unitCommand": "npx vitest run src/components/auth/RoleGuard.verification.test.tsx --reporter=json",
+  "unitCommand": "npx vitest run src/components/auth/RoleGuard.verification.test.tsx src/components/layout/__tests__/stableLoadingShell.test.tsx --reporter=json",
   "unitReport": {
-    "numTotalTestSuites": 2,
-    "numPassedTestSuites": 2,
+    "numTotalTestSuites": 4,
+    "numPassedTestSuites": 4,
     "numFailedTestSuites": 0,
     "numPendingTestSuites": 0,
-    "numTotalTests": 10,
-    "numPassedTests": 10,
+    "numTotalTests": 18,
+    "numPassedTests": 18,
     "numFailedTests": 0,
     "numPendingTests": 0,
     "numTodoTests": 0,
@@ -37,7 +37,7 @@
       "updated": 0,
       "didUpdate": false
     },
-    "startTime": 1792803827263,
+    "startTime": 1792804706711,
     "success": true,
     "testResults": [
       {
@@ -49,7 +49,7 @@
             "fullName": "actual resolved-context query verification boundary preserves a same-identity draft across repeated successful checks while never exposing it pending",
             "status": "passed",
             "title": "preserves a same-identity draft across repeated successful checks while never exposing it pending",
-            "duration": 528.2329049999998,
+            "duration": 425.0974510000001,
             "failureMessages": [],
             "meta": {}
           },
@@ -60,7 +60,7 @@
             "fullName": "actual resolved-context query verification boundary drops a previous actor immediately and ignores its late response",
             "status": "passed",
             "title": "drops a previous actor immediately and ignores its late response",
-            "duration": 258.2030490000002,
+            "duration": 171.47411699999975,
             "failureMessages": [],
             "meta": {}
           },
@@ -71,7 +71,7 @@
             "fullName": "actual resolved-context query verification boundary drops a draft after verified revocation rather than revealing cached privilege",
             "status": "passed",
             "title": "drops a draft after verified revocation rather than revealing cached privilege",
-            "duration": 23.10988499999985,
+            "duration": 78.72622000000001,
             "failureMessages": [],
             "meta": {}
           },
@@ -82,7 +82,7 @@
             "fullName": "actual resolved-context query verification boundary discards form state on a same-company membership-role change",
             "status": "passed",
             "title": "discards form state on a same-company membership-role change",
-            "duration": 46.846234000000095,
+            "duration": 161.45619099999976,
             "failureMessages": [],
             "meta": {}
           },
@@ -93,7 +93,7 @@
             "fullName": "actual resolved-context query verification boundary unmounts safely during rechecks when native modal quarantine is unavailable",
             "status": "passed",
             "title": "unmounts safely during rechecks when native modal quarantine is unavailable",
-            "duration": 15.131093999999848,
+            "duration": 11.877283000000261,
             "failureMessages": [],
             "meta": {}
           },
@@ -104,7 +104,7 @@
             "fullName": "actual resolved-context query verification boundary never grants cached admin while a real background verification is unresolved, including after its deadline",
             "status": "passed",
             "title": "never grants cached admin while a real background verification is unresolved, including after its deadline",
-            "duration": 294.58043,
+            "duration": 286.30352600000015,
             "failureMessages": [],
             "meta": {}
           },
@@ -115,7 +115,7 @@
             "fullName": "actual resolved-context query verification boundary starts a fresh deadline for each verification after a previously successful shell",
             "status": "passed",
             "title": "starts a fresh deadline for each verification after a previously successful shell",
-            "duration": 104.81871699999965,
+            "duration": 252.93865899999992,
             "failureMessages": [],
             "meta": {}
           },
@@ -126,7 +126,7 @@
             "fullName": "actual resolved-context query verification boundary does not treat cached data plus a failed verification as authority and retries the real query",
             "status": "passed",
             "title": "does not treat cached data plus a failed verification as authority and retries the real query",
-            "duration": 49.68404700000019,
+            "duration": 87.5867589999998,
             "failureMessages": [],
             "meta": {}
           },
@@ -137,7 +137,7 @@
             "fullName": "actual resolved-context query verification boundary MC also blocks cached authority during verification and distinguishes failure from ordinary denial",
             "status": "passed",
             "title": "MC also blocks cached authority during verification and distinguishes failure from ordinary denial",
-            "duration": 72.8981859999999,
+            "duration": 116.81757600000037,
             "failureMessages": [],
             "meta": {}
           },
@@ -148,16 +148,113 @@
             "fullName": "actual resolved-context query verification boundary Investor also blocks cached authority during verification and distinguishes failure from ordinary denial",
             "status": "passed",
             "title": "Investor also blocks cached authority during verification and distinguishes failure from ordinary denial",
-            "duration": 63.25908299999992,
+            "duration": 104.70571699999982,
             "failureMessages": [],
             "meta": {}
           }
         ],
-        "startTime": 1792803829464,
-        "endTime": 1792803830921.259,
+        "startTime": 1792804708835,
+        "endTime": 1792804710532.7058,
         "status": "passed",
         "message": "",
         "name": "src/components/auth/RoleGuard.verification.test.tsx"
+      },
+      {
+        "assertionResults": [
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries does not remount children or repeat mount work after the first animation frame",
+            "status": "passed",
+            "title": "does not remount children or repeat mount work after the first animation frame",
+            "duration": 92.26752600000009,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries retains actual route layout through sibling navigation and Back/Forward",
+            "status": "passed",
+            "title": "retains actual route layout through sibling navigation and Back/Forward",
+            "duration": 691.6423770000001,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries does not mount protected page/shell during pending authority and renders denial after resolution",
+            "status": "passed",
+            "title": "does not mount protected page/shell during pending authority and renders denial after resolution",
+            "duration": 713.7846630000004,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries keeps route-level lazy pending inside the retained shell instead of taking the viewport",
+            "status": "passed",
+            "title": "keeps route-level lazy pending inside the retained shell instead of taking the viewport",
+            "duration": 290.9855309999998,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries distinguishes authority read failure from denial and offers a safe retry",
+            "status": "passed",
+            "title": "distinguishes authority read failure from denial and offers a safe retry",
+            "duration": 25.902408999999352,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries does not let the 12-second deadline admit cached admin while auth remains pending",
+            "status": "passed",
+            "title": "does not let the 12-second deadline admit cached admin while auth remains pending",
+            "duration": 34.19930300000033,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries does not let the 12-second deadline admit cached admin while context remains pending",
+            "status": "passed",
+            "title": "does not let the 12-second deadline admit cached admin while context remains pending",
+            "duration": 31.119925999999396,
+            "failureMessages": [],
+            "meta": {}
+          },
+          {
+            "ancestorTitles": [
+              "stable source loading boundaries"
+            ],
+            "fullName": "stable source loading boundaries uses intentional spinner dimensions and a shared full-page auth pending status",
+            "status": "passed",
+            "title": "uses intentional spinner dimensions and a shared full-page auth pending status",
+            "duration": 39.028816000000006,
+            "failureMessages": [],
+            "meta": {}
+          }
+        ],
+        "startTime": 1792804709277,
+        "endTime": 1792804711196.0288,
+        "status": "passed",
+        "message": "",
+        "name": "src/components/layout/__tests__/stableLoadingShell.test.tsx"
       }
     ]
   },
@@ -560,11 +657,12 @@
     "network": "nonlocal requests and writes blocked",
     "driver": "explicit React Query focus-manager signal; native tab visibility not certified"
   },
-  "independentReview": "Exact source commit reviewed independently; Source GO, 10 guard tests independently rerun",
+  "independentReview": "Original runtime011b7f1 reviewed independently with10 guard tests rerun; subsequent three-line pathname removal reviewed independently with Source GO. Final runtime is bound by runtimeSha256; current captured security/shell subset18/18 passed.",
   "limits": [
     "No production users, roles, credentials, schema or business records changed",
     "Retained effects continue; server RLS and checked writers remain authoritative",
     "Error/denial/identity changes discard drafts; unsupported showModal safely unmounts",
     "No live-session or deployed-version certificate; not a general vulnerability scanner report"
-  ]
+  ],
+  "regressionCorrection": "Guard identity excludes pathname so unchanged authorized workspace layout survives sibling navigation and Back/Forward. Actor, context, role, permissions, allowed-role policy, entity, company and membership-role boundaries remain."
 }
