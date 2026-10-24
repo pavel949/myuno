@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-10-24 · Protected-page background verification
+- [ ] Preserve previously admitted form state during same-actor/context background verification without allowing interaction or stale authorization.
+- [ ] Verify isolated state retention, failed/revoked access, initial checks and actor/company changes; no production access, deployment or publishing.
+
 ## 2026-10-22 · Authorized sitemap, metadata and monitoring tranche
 - [ ] First correct the four broken child sitemaps using the existing public catalogue contract; verify without publishing.
 - [ ] Give housing and services distinct accurate search titles/descriptions using existing page metadata.

@@ -20,6 +20,7 @@
 - Unknown is UNKNOWN, not false/default. Never invent catalogues, prices, availability, provider mappings, property facts or production state.
 - High-risk sequence: Audit → Design → Isolated Tests → Implement → Verify → GO/NO-GO. Do not automatically continue after money, inventory, RLS, schema or enforcement changes.
 - UI tests use synthetic/stubbed data and must not mutate production business records.
+- Protected guards may preserve an already-admitted subtree only for the same actor/context/company during verification, hidden and inert; failures/revocations remove it so state retention never grants cached authority.
 - Calendar/date logic uses shared civil-date helpers; avoid UTC/date-only parsing that shifts Phuket/Bangkok dates.
 - Convergence/audit docs are evidence, not permanent normative authority. Promote accepted durable rules into PROJECT.md / AGENTS.md / canonical docs.
 
