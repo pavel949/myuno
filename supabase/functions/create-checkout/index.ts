@@ -1,4 +1,5 @@
  // Deno.serve used (native edge runtime)
+import { reserveCheckout } from "./reservation.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders, getAllowedOrigin } from "../_shared/cors.ts";
@@ -50,27 +51,11 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
      // This prevents an authenticated user from paying an arbitrary amount (e.g.
      // 1 THB) for any order by tampering with the request body.
      const serviceClient = createServiceClient();
-     const { data: order, error: orderError } = await serviceClient
-       .from("orders")
-       .select("total_amount, currency, customer_user_id")
-       .eq("id", order_id)
-       .single();
-
-     if (orderError || !order) throw new Error("Order not found");
-
-     // Ownership guard: the order must belong to the caller.
-     if (order.customer_user_id && order.customer_user_id !== user.id) {
-       return new Response(
-         JSON.stringify({ error: "Forbidden", message: "Order does not belong to the authenticated user" }),
-         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
-       );
-     }
-
-     const amount = Number(order.total_amount);
-     if (!Number.isFinite(amount) || amount <= 0) {
-       throw new Error("Order has no valid amount to charge");
-     }
-     const currency = (order.currency || "THB").toString();
+     // This RPC derives price, checks exact ownership/waiting/unpaid state and
+     // commits a pending intent under the same order lock used by cancellation.
+     // Missing/unapplied RPC fails before any Stripe request.
+     const reservation = await reserveCheckout(serviceClient, order_id, user.id);
+     const { amount, currency } = reservation;
 
      console.info(`[create-checkout] Processing ${order_type} order ${order_id} for ${amount} ${currency}`);
 
@@ -136,15 +121,18 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
          order_type,
          user_id: user.id,
          type: "order_payment",
+         payment_intent_id: reservation.intentId,
        },
      });
 
-     // Update order status to pending payment (service role — bypasses RLS so the
-     // session id is reliably persisted).
-     await serviceClient
-       .from('orders')
-       .update({ metadata: { stripe_session_id: session.id } })
-       .eq('id', order_id);
+     // Never release the pending reservation on provider/link uncertainty.
+     // Cancellation must continue to refuse it until authoritative reconciliation.
+     const { data: linked, error: linkError } = await serviceClient
+       .from('payment_intents')
+       .update({ provider_ref: session.id, provider_session_id: session.id })
+       .eq('id', reservation.intentId).eq('order_id', order_id).eq('status', 'pending')
+       .select('id').single();
+     if (linkError || linked?.id !== reservation.intentId) throw new Error('checkout_session_link_not_confirmed');
 
      console.info(`[create-checkout] Session created: ${session.id}`);
 

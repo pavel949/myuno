@@ -27,11 +27,12 @@ const STATUS_SEQUENCE: OrderStatus[] = [
 
 export function useOrderTracking(orderId: string | undefined) {
   const { user } = useAuth();
+  const userId = user?.id;
   const [timeline, setTimeline] = useState<OrderTimelineEvent[]>([]);
 
   // Fetch order details
   const { data: order, isLoading: orderLoading, error, refetch } = useQuery({
-    queryKey: ['order-tracking', orderId],
+    queryKey: ['order-tracking', orderId, user?.id],
     queryFn: async () => {
       if (!orderId) return null;
       
@@ -54,7 +55,7 @@ export function useOrderTracking(orderId: string | undefined) {
 
   // Fetch timeline
   const fetchTimeline = useCallback(async () => {
-    if (!orderId) return;
+    if (!orderId || !userId) return;
     
     const { data, error } = await supabase
       .rpc('get_order_timeline', { p_order_id: orderId });
@@ -62,7 +63,7 @@ export function useOrderTracking(orderId: string | undefined) {
     if (!error && data) {
       setTimeline(data as OrderTimelineEvent[]);
     }
-  }, [orderId]);
+  }, [orderId, userId]);
 
   useEffect(() => {
     fetchTimeline();
@@ -131,6 +132,7 @@ export function useOrderTracking(orderId: string | undefined) {
     isLoading: orderLoading,
     error,
     refetch,
+    refresh: () => Promise.all([refetch(), fetchTimeline()]),
     getProgressPercentage,
     isStatusCompleted,
     STATUS_SEQUENCE,
