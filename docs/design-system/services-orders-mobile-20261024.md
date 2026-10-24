@@ -32,3 +32,7 @@ Local evidence is recorded under `artifacts/myuno-services-orders-mobile-2026102
 The two supplied Library screenshots could not be materialized: the supported helper returned `library file transfer failed: download failed` on the initial attempts and one bounded retry. Original pixels were not inspected. Defects and results were independently reproduced with actual components, with the parent's permission; no alternate transfer route was used.
 
 Deferred, separate batches: route/layout alias regressions and search/filter/date/location behavior, including sort URL persistence. The rest of the platform is not claimed fully unified.
+
+## Combined-layout verification adapter
+
+The first final-head Connected run passed all 22 PMS browser groups, but the early 105-case combined-layout suite exhausted its unchanged 240-second budget while waiting for an intentionally hidden inline language button. Its consumer-mobile contract now checks one 44px named menu trigger, the actual settings menu/guest preferences controls, Escape/focus return and horizontal bounds. Desktop and marketing inline locale checks remain intact. Compact row/height checks are stricter (one row, at most 80px); the same languages, widths, surfaces and timeout remain. Browser execution of that helper stays CI-only; local preflight is Python syntax and its five existing initializer/readiness regressions. Final CI must independently prove all 105 cases.
