@@ -33,6 +33,11 @@ cannot silently become a unit write.
    directions. The category editor is shared with `/mc/calendar`; unit booking
    actions and the unit tasks sidebar remain on the property calendar view.
 
+3. Independent review reproduced an already-open unit booking dialog surviving
+   browser Back into category pricing. Hiding its launcher alone was insufficient.
+   The unit dialog is now unmounted in category pricing; a failing-before/passing-
+   after navigation regression covers the history transition.
+
 No SQL function, applied migration or permission policy is changed by this patch.
 
 ## Evidence and limits
@@ -65,10 +70,12 @@ Passing isolated scenarios:
     calendar layouts, preserved civil date, no overflow, runtime errors or external
     browser requests.
 
-Separate unit/navigation/quote suite: 84 tests in 8 files. One earlier 5-second
+Separate unit/navigation/quote suite: 85 tests in 8 files after independent review. One earlier 5-second
 month-navigation test timed out under parallel build/compiler load; rerunning
 with the CI-style `--maxWorkers=2` and locked dependencies passed without raising
-its timeout. No dependency or lockfile changes are part of this patch.
+its timeout. Review also cached the stable Next-month control in that test rather
+than recomputing its accessible role sixteen times; all sixteen transitions and
+final range assertions are retained. No dependency or lockfile changes are part of this patch.
 
 Initial general build/typecheck used the October 21 node_modules from another
 checkout and failed on missing new Vercel telemetry packages and an obsolete
@@ -87,7 +94,7 @@ PWA generated; synthetic loopback configuration and outbound network guard).
 Targeted lint: zero errors, eight existing label/any/autofocus warnings. Node
 syntax checks for all three acceptance modules and `git diff --check` PASS.
 Generated version/MCP outputs from the isolated build were restored and are not
-part of the patch. Final `npm run typecheck` PASS with the locked dependencies. Six new regression
+part of the patch. Final `npm run typecheck` PASS with the locked dependencies. Seven new regression
 tests cover conflict refresh, category restoration/denial, canonical category
 view, property switching and its back destination.
 
@@ -132,10 +139,16 @@ for this app's release or database.
 
 ## Delivery / remaining gate
 
-This is a local isolated branch/patch for review. It is not pushed: a push/PR may
-automatically create deployments, which this acceptance request prohibited.
+The first acceptance pass was delivered as a local branch/patch, without a push.
+The subsequent coordination request authorizes pushing this isolated branch and
+opening a draft PR, while explicitly prohibiting merge/manual deployment,
+production seeding, permission changes and production data mutations. A dedicated
+`pricing-isolated-acceptance.yml` runs the same local-only story with Node 24,
+PostgreSQL on loopback, no production secrets, and preserved synthetic artifacts.
+Legacy backend-seeding e2e is not dispatched. Safe CI does not constitute release
+approval or real operator-session acceptance.
 Concurrent PR #165/#166 branches are untouched. Source/build evidence is not a
-claim that these two new fixes are already on myuno.app.
+claim that these fixes are already on myuno.app.
 
 Remaining: review the patch, authorize the normal release separately, then perform
 role-appropriate operator-session/live visual acceptance without using production

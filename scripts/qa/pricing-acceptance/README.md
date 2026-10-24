@@ -37,6 +37,18 @@ is `/usr/bin/chromium`. CSS is compiled by a CSS-only Vite server with config/en
 loading, entry discovery and warmup disabled. Google Fonts and the app shell are
 not loaded; screenshots use the project CSS with local fallback fonts.
 
+## CI and startup failure
+
+`.github/workflows/pricing-isolated-acceptance.yml` runs this same harness with
+Node 24 and a PostgreSQL service exposed on loopback. It resolves the Chromium
+installed by Playwright, denies external network during the test, uploads only
+synthetic artifacts, and never loads production secrets or starts a deployment.
+The existing production-seeding e2e workflow is not dispatched.
+
+The runner also records browser startup failures and always closes its local DB
+resources. Review verified a deliberately missing Chromium executable exits
+nonzero, records `fixture setup` failure, and leaves no fixture database behind.
+
 ## Evidence
 
 `/tmp/browser/pricing-acceptance-20261024/` contains:

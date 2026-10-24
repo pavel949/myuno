@@ -276,7 +276,7 @@ export default function OwnerCalendar() {
         defaultDate={bangkokTodayDate()}
       />
 
-      {selectedPropertyId && (
+      {selectedPropertyId && !pricingProperty && (
         <AddBookingFromCalendarDialog
           open={showAddBookingDialog}
           onOpenChange={setShowAddBookingDialog}

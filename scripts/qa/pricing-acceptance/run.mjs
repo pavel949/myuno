@@ -10,12 +10,10 @@ const root=process.cwd(),output=path.resolve('/tmp/browser/pricing-acceptance-20
 await mkdir(output,{recursive:true});
 await buildFixture(root,output);
 const fixture=await startFixture(root,output);
-const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+let browser; let page;
 const results=[],externalRequests=[],runtimeErrors=[],layoutCases=[];
 const httpQuote=async payload=>{const response=await fetch(fixture.url+'/quote',{method:'POST',headers:{'Content-Type':'application/json','x-fixture-actor':'owner'},body:JSON.stringify(payload)});return response.json();};
-const page=await browser.newPage({viewport:{width:1440,height:1100}});
-await page.route('**/*',route=>{if(new URL(route.request().url()).origin===fixture.url)return route.continue();externalRequests.push(route.request().url());return route.abort();});
-page.on('pageerror',e=>runtimeErrors.push(e.message));
+
 const rates=(property=ids.unit,extra='')=>`${fixture.url}/mc/rates?property=${property}&date=2026-11-10${extra}`;
 const read=(property=ids.unit,category=null,from='2026-11-10',to='2026-11-13',actor=ids.owner)=>fixture.rpc('get_property_calendar_prices',{p_property_id:property,p_category_id:category,p_from:from,p_to:to},actor);
 const snapshot=(rows,category=false)=>Object.fromEntries(rows.map(r=>[r.date,category?{price:r.price_override,minimum:r.min_stay_nights,arrival:r.closed_to_arrival,departure:r.closed_to_departure,stop:r.stop_sell}:{price:r.price_override,minimum:r.min_nights_override,status:r.status,booking:r.booking_id}]));
@@ -25,6 +23,10 @@ const edit=async(value,from='2026-11-10',through='2026-11-11')=>{
  await page.getByLabel('From',{exact:true}).fill(from);await page.getByLabel('Through (inclusive)').fill(through);await page.getByLabel('Per night · THB').fill(value);await expect(page.getByRole('button',{name:'Apply nightly price'})).toBeEnabled();
 };
 try{
+ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ page=await browser.newPage({viewport:{width:1440,height:1100}});
+ await page.route('**/*',route=>{if(new URL(route.request().url()).origin===fixture.url)return route.continue();externalRequests.push(route.request().url());return route.abort();});
+ page.on('pageerror',e=>runtimeErrors.push(e.message));
  await caseRun('canonical quote uses latest overlapping season before overrides',async()=>{
   assert.equal((await httpQuote({property:ids.unit,from:'2026-11-10',to:'2026-11-13',total:5500})).ok,true);
   assert.equal((await httpQuote({property:ids.hotel,category:ids.category,from:'2026-11-10',to:'2026-11-13'})).total,9350);
@@ -133,9 +135,11 @@ try{
   }
   assert.deepEqual(runtimeErrors,[]);assert.deepEqual(externalRequests,[]);
  });
-}catch(e){process.exitCode=1;console.error(e.message);}finally{
+}catch(e){process.exitCode=1;if(!results.some(x=>x.status==='fail'))results.push({name:'fixture setup',status:'fail',error:e.message});console.error(e.message);}finally{
+ try{
  const sourceFiles=['src/components/owner/pricing/CalendarPriceEditor.tsx','src/pages/owner/OwnerCalendar.tsx','src/pages/owner/RateManagementPage.tsx','src/lib/owner/propertyNavigation.ts','src/hooks/useCalendarPrices.ts','src/components/owner/AirbnbCalendarGrid.tsx','supabase/functions/_shared/property-quote.ts','supabase/functions/_shared/hotel-quote.ts','supabase/migrations/20261021062539_canonical_pricing_calendar.sql','supabase/migrations/20261021063811_canonical_pricing_calendar_read.sql'];
  const fingerprints=Object.fromEntries(await Promise.all(sourceFiles.map(async file=>[file,createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')])));
  await writeFile(path.join(output,'results.json'),JSON.stringify({baseCommit:'37de22d344274c0075e47f0717637bb40c6e5c1b',headCommit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),fingerprints,results,layoutCases,runtimeErrors,externalRequests,calls:fixture.calls,state:await fixture.state()},null,2));
- console.log(JSON.stringify({results,layoutCases:layoutCases.length,output,externalRequests:externalRequests.length,runtimeErrors},null,2));await browser.close();await fixture.close();
+ console.log(JSON.stringify({results,layoutCases:layoutCases.length,output,externalRequests:externalRequests.length,runtimeErrors},null,2));
+ }finally{await browser?.close();await fixture.close();}
 }
