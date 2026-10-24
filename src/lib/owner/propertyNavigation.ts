@@ -20,6 +20,7 @@ export function propertyContextBackPath(returnTo: string | null, propertyId: str
     if (url.origin !== 'https://myuno.invalid') return fallback;
     if (url.pathname === '/mc/calendar') {
       if (!selected) return fallback;
+      if (url.searchParams.get('property') !== selected) url.searchParams.delete('category');
       url.searchParams.set('property', selected);
       // Avoid recursive return chains between contextual pages.
       url.searchParams.delete('returnTo');

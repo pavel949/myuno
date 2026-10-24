@@ -1,3 +1,4 @@
+import { CalendarPriceEditor } from '@/components/owner/pricing/CalendarPriceEditor';
 import { bangkokTodayDate } from '@/lib/hotelDates';
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -45,8 +46,10 @@ export default function OwnerCalendar() {
     if (!allProperties.some(p => p.property_id === id)) return;
     const next = new URLSearchParams(params);
     next.set('property', id);
+    if(id !== selectedPropertyId) next.delete('category');
     setParams(next);
   };
+  const pricingProperty = params.get('category') ? allProperties.find(p => p.property_id === selectedPropertyId) : undefined;
   const { data: complexes } = usePropertyComplexes();
   const { data: projects } = usePropertyProjects();
 
@@ -121,7 +124,7 @@ export default function OwnerCalendar() {
         <h1 className="font-display text-h3 break-words">
           {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
         </h1>
-        {!isMulti && (
+        {!isMulti && !pricingProperty && (
           <Button className="w-full sm:w-auto min-h-11" disabled={!selectedPropertyId}
             onClick={() => setShowAddBookingDialog(true)}>
             <CalendarPlus className="h-4 w-4" aria-hidden="true" />
@@ -132,7 +135,7 @@ export default function OwnerCalendar() {
       {allProperties.length > 1 && (
         <div className="grid grid-cols-2 gap-1 border-b border-border pb-3" role="group"
           aria-label={isRu ? 'Режим календаря' : 'Calendar view'}>
-          <Button variant="ghost" aria-pressed={isMulti} onClick={() => { const next = new URLSearchParams(params); next.delete('property'); setParams(next); setViewMode('multi'); }}
+          <Button variant="ghost" aria-pressed={isMulti} onClick={() => { const next = new URLSearchParams(params); next.delete('property'); next.delete('category'); setParams(next); setViewMode('multi'); }}
             className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
             <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden="true" />
             {isRu ? 'Все объекты' : 'Portfolio'}
@@ -227,20 +230,22 @@ export default function OwnerCalendar() {
             const returnTo = new URLSearchParams(params);
             returnTo.set('property', selectedPropertyId);
             const next = new URLSearchParams({ property: selectedPropertyId, returnTo: location.pathname + '?' + returnTo.toString() });
+            if(params.get('category')) next.set('category', params.get('category')!);
+            if(params.get('date')) next.set('date', params.get('date')!);
             navigate('/mc/rates?' + next.toString());
           }}>{isRu ? 'Тарифы объекта' : 'Property rates'}</Button>}
 
           {/* Calendar + today’s tasks: full-width grid on large screens */}
-          <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">
+          <div className={cn(!pricingProperty && "xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start")}>
             <div className="min-w-0 w-full space-y-4">
-              <AirbnbCalendarGrid
+              {pricingProperty ? <CalendarPriceEditor key={pricingProperty.property_id} property={pricingProperty} calendarContext /> : <AirbnbCalendarGrid
                 propertyId={selectedPropertyId || undefined}
                 properties={propertyRefs}
-              />
+              />}
             </div>
-            <aside className="min-w-0 w-full space-y-4 xl:sticky xl:top-4 xl:self-start">
+            {!pricingProperty && <aside className="min-w-0 w-full space-y-4 xl:sticky xl:top-4 xl:self-start">
               <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
-            </aside>
+            </aside>}
           </div>
 
           {/* iCal Sync - Collapsible */}
