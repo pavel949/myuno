@@ -14,7 +14,7 @@ Base: `2fa3d90b42caf710c8c5300b5cf807f84a2774b5`, pavel949/myuno. Separate from 
 - Experiences require usable stored media, capped at4. Successfully empty experience/service previews disappear; loading and read errors remain explicit with retry. Active real DB category records still determine service destinations. Service categories use a small grid with descriptions rather than a third repeated carousel.
 - Homepage, cards and intent sheet use the existing semantic background/card/border/text/accent roles. No global theme replacement.
 - Property detail links retain tenancy. An explicitly supported monthly/yearly intent selects the existing manager-request UI even on mixed short/long offers; the URL never makes an unsupported property eligible.
-- Owner entry goes directly to the existing `/owner/management-landing` request. Unsupported occupancy/yield/SLA/fee claims were removed from this directly affected page. Self-management/account entry remains secondary.
+- Owner entry goes directly to the existing `/owner/management-landing` request. Unsupported occupancy/yield/SLA/fee claims were removed from this directly affected page. Existing-owner access remains a secondary link to the guarded /my-property portal, through sign-in when needed; no account-type grant or duplicate management questionnaire.
 - Existing HelpSheet and consultation/owner intake require nonblank server receipts before showing saved state. Optional private consultation readback failure is reported as unavailable without retrying an already accepted creation or fabricating a row. Pending locks prevent concurrent duplicate form submissions.
 
 ## Evidence and boundaries

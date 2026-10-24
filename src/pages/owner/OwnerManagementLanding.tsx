@@ -30,8 +30,8 @@ export default function OwnerManagementLanding() {
     seoTitle={{ ru: 'Управление недвижимостью на Пхукете — myUNO', en: 'Property management in Phuket — myUNO', th: 'การจัดการอสังหาริมทรัพย์ในภูเก็ต — myUNO' }}
     seoDescription={{ ru: 'Отправьте запрос на обсуждение сдачи, обслуживания или управления вашей недвижимостью на Пхукете.', en: 'Send an inquiry about letting, maintaining or managing your property in Phuket.', th: 'ส่งคำขอปรึกษาเรื่องปล่อยเช่า ดูแล หรือจัดการอสังหาริมทรัพย์ของคุณในภูเก็ต' }}
   >
-    <section className="border-t border-border pt-6"><h2 className="font-display text-2xl mb-3">{t({ ru: 'Уже управляете сами?', en: 'Already managing your property?', th: 'จัดการทรัพย์สินด้วยตัวเองอยู่แล้วหรือไม่' })}</h2><p className="text-muted-foreground mb-4">{t({ ru: 'Для работы в кабинете потребуется вход и подтверждённый доступ к объектам.', en: 'The workspace requires sign-in and confirmed access to your properties.', th: 'การใช้พื้นที่ทำงานต้องเข้าสู่ระบบและมีสิทธิ์เข้าถึงทรัพย์สินที่ยืนยันแล้ว' })}</p><Button onClick={() => {
-      const target = `${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`;
+    <section className="border-t border-border pt-6"><h2 className="font-display text-2xl mb-3">{t({ ru: 'Уже есть кабинет собственника?', en: 'Already have an owner account?', th: 'มีบัญชีเจ้าของอยู่แล้วหรือไม่' })}</h2><p className="text-muted-foreground mb-4">{t({ ru: 'Для работы в кабинете потребуется вход и подтверждённый доступ к объектам.', en: 'The workspace requires sign-in and confirmed access to your properties.', th: 'การใช้พื้นที่ทำงานต้องเข้าสู่ระบบและมีสิทธิ์เข้าถึงทรัพย์สินที่ยืนยันแล้ว' })}</p><Button onClick={() => {
+      const target = APP_ROUTES.OWNER_PORTAL;
       navigate(user ? target : `/auth?redirect=${encodeURIComponent(target)}`);
     }}>{t({ ru: 'Открыть кабинет собственника', en: 'Open owner workspace', th: 'เปิดพื้นที่ทำงานเจ้าของ' })}<ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" /></Button></section>
   </LandingShell>;
