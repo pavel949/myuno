@@ -8,7 +8,8 @@ import { complexDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 
 /** Only projects linked to loaded public rental homes; not date-specific availability. */
 export function HomePopulatedProjects({ homes }: { homes: Property[] }) {
-  const projects = usePublicPropertyProjects(12);
+  const projectIds = [...new Set(homes.map(home => home.project_id).filter((id): id is string => Boolean(id)))];
+  const projects = usePublicPropertyProjects(3, undefined, projectIds);
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const ids = new Set(homes.map(home => home.project_id).filter(Boolean));

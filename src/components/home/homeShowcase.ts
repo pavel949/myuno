@@ -2,8 +2,11 @@ import type { Property } from '@/hooks/useProperties';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 
 /** Presentation eligibility, never availability or verification. No inferred property facts. */
+export function showcaseImages(property: Property): string[] {
+  return [...new Set([property.cover_image, ...(property.images ?? [])].map(complexMediaUrl).filter((url): url is string => Boolean(url)))];
+}
 export function showcaseImage(property: Property): string | null {
-  return [property.cover_image, ...(property.images ?? [])].map(complexMediaUrl).find((url): url is string => Boolean(url)) ?? null;
+  return showcaseImages(property)[0] ?? null;
 }
 export function selectHomeShowcase(properties: Property[], limit = 6): Property[] {
   const seen = new Set<string>();

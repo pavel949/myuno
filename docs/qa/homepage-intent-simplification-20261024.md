@@ -39,7 +39,7 @@ Local screenshots: `/workspace/artifacts/myuno-homepage-intents-20261024/` (synt
 
 ## Local verification checkpoint
 
-- Focused frozen-runtime regression report:101 passed,0 failed,0 skipped. Includes both real Landing composition/motion tests and shared form/receipt tests.
+- Focused frozen-runtime regression report:106 passed,0 failed,0 skipped. Includes both real Landing composition/motion tests and shared form/receipt tests.
 - Frozen runtime TypeScript build check:PASS. Scoped changed TypeScript lint:0 errors,5 warnings. Earlier full lint:0 errors,2486 warnings. Candidate production build:PASS; exact-head CI still required.
 - Homepage synthetic matrix:18 passed (RU/EN/TH ×360/390/768/1440/1920 plus loading/empty/error). A final six-case short-screen/root-rem-text-scale/reduced-motion supplement passed. Gallery code validates four immediate intent destinations, arrow/keyboard/focus/swipe and no page overflow.
 - Routed synthetic matrix:42 distinct cases passed, including current owner form. Explicit limits: no backend commit, authentication, payment, notification delivery or service fulfillment proof.
@@ -48,3 +48,9 @@ Local screenshots: `/workspace/artifacts/myuno-homepage-intents-20261024/` (synt
 - Geometry screenshots use fallback fonts. A separate attempt to load the exact existing Google Font assets did not complete. Direct public CSS read returned `Tunnel connection failed:403 Forbidden` for fonts.googleapis.com. No alternate route, TLS bypass or font substitution was used. Canonical-font visual acceptance remains UNVERIFIED; this does not prove the production site has a font outage.
 - Existing mobile-header/settings/motion regression was updated to assert four immediate canonical intent links (rather than the removed three-step buttons); its12-case wide matrix passed without removing menu, focus, safe-area, reduced-motion or enlarged-text checks.
 - Serial local diagnosis:207 tests passed,4 failed; seven suites still lack the PostgreSQL binary. Two layout failures reproduce on untouched main. The remaining two admin-editor timing failures passed in a separate unchanged12-test file rerun. This is evidence of reduced contention, not a waived CI gate.
+
+## Independent-review corrections
+
+- Populated communities now use the existing public project hook with a normalized ID-bound cache key and one ID-filtered request capped at3. No alphabetical global prefix or per-project waterfall; empty IDs disable the read and manual refetch returns an empty result without a global query. The public column allowlist and active filter are unchanged. An actual-hook regression includes a linked project beyond the first12 names.
+- Home cards try every unique valid stored image URL of the same object. A failed cover does not remove a home or its linked community when another stored gallery image works; only exhaustion excludes it. Unit tests cover both paths. Two real isolated Chromium probes received synthetic HTTP404 for cover/gallery: cover404→gallery success retained the home/community; all404 removed both. These do not assert any production404 frequency.
+- Independent bounded source review of these corrections:GO. The prior4076 Verify completed with4171 passed and only2 known base stableLoadingShell failures; fresh exact-head checks remain required after these corrections.
