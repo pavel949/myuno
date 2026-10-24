@@ -122,6 +122,10 @@ export default {
         "surface-raised": "hsl(var(--surface-raised))",
         "surface-white":  "hsl(var(--surface-white))",
 
+        // Fixed inverse media roles, independent of light/dark action colors.
+        "media-canvas": "hsl(var(--media-canvas) / <alpha-value>)",
+        "media-foreground": "hsl(var(--media-foreground) / <alpha-value>)",
+
         // Status (semantic). Backgrounds use the *-bg tokens.
         success: {
           DEFAULT: "hsl(var(--success))",

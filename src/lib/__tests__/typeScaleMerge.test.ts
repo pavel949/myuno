@@ -12,6 +12,15 @@ describe('canonical typography merge contract', () => {
     expect(cn('text-sm', size)).toBe(size);
     expect(cn(`md:${size}`, 'md:text-primary')).toBe(`md:${size} md:text-primary`);
   });
+  it.each(['default', 'outline', 'secondary', 'ghost', 'destructive', 'link'] as const)('keeps body family for %s, allowing an explicit caller family', variant => {
+    const result = cn(buttonVariants({ variant }));
+    expect(result.split(' ')).toContain('font-sans');
+    expect(result.split(' ')).toContain('font-medium');
+    const override = cn(buttonVariants({ variant, className: 'font-display' }));
+    expect(override.split(' ')).toContain('font-display');
+    expect(override.split(' ')).not.toContain('font-sans');
+    expect(override.split(' ')).toContain('font-medium');
+  });
   it.each(['default', 'outline', 'secondary', 'ghost', 'destructive', 'link'] as const)('keeps default button size and %s color', variant => {
     const result = cn(buttonVariants({ variant }));
     expect(result.split(' ')).toContain('text-body');

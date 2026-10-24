@@ -244,7 +244,7 @@ export function ImageEditor({
         </DialogHeader>
         
         {/* Image Area */}
-        <div className="relative min-h-0 flex-1 bg-black/95 overflow-hidden">
+        <div className="relative min-h-0 flex-1 bg-media-canvas/95 overflow-hidden">
           {mode === 'view' ? (
             <div className="w-full h-full flex items-center justify-center p-4">
               <img
@@ -255,7 +255,7 @@ export function ImageEditor({
               />
             </div>
           ) : (
-            <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+            <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-media-foreground" /></div>}>
               <Cropper
                 ref={cropperRef}
                 src={currentImage}
@@ -271,9 +271,9 @@ export function ImageEditor({
           
           {/* AI Enhance overlay */}
           {isEnhancing && (
-            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <span className="text-white font-medium">AI улучшает фото...</span>
+            <div className="absolute inset-0 bg-media-canvas/70 flex flex-col items-center justify-center gap-3">
+              <Loader2 className="h-10 w-10 text-media-foreground animate-spin" />
+              <span className="text-media-foreground font-medium">AI улучшает фото...</span>
             </div>
           )}
         </div>

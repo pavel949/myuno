@@ -47,6 +47,14 @@ jobs:
         run: DS_CAPITAL_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/capital-adoption" node scripts/qa/design-system-capital-adoption.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual management and vendor page frames
+        run: WORKSPACE_DS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/workspace-adoption" node scripts/qa/ds-workspace-pages.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual media dialogs and local cropper
+        run: DS_MEDIA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/media-adoption" node scripts/qa/design-system-media-surfaces.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual portal layout surfaces
         run: DS_PORTALS_CSS="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/normal.css" DS_PORTALS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/portals" node scripts/qa/design-system-portals.mjs
         env:
