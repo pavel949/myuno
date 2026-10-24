@@ -25,10 +25,45 @@ async def check_header(page, marketing):
     failures = await bounds(page, header.locator('button,a'))
     assert not failures, {'headerOverflow': failures}
     assert await header.locator('button,a').evaluate_all("""els=>{const boxes=els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.getBoundingClientRect());return boxes.every((x,i)=>boxes.slice(i+1).every(y=>x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1))}"""), 'header controls overlap'
+    lang = await page.locator('html').get_attribute('lang')
     language = header.locator('[data-testid="language-switch"]:visible')
-    await expect(language).to_have_count(1)
-    await expect(language).to_have_text((await page.locator('html').get_attribute('lang')).upper())
-    assert await language.evaluate("""e=>{const s=e.querySelector('span');const r=document.createRange();r.selectNodeContents(s);return r.getClientRects().length===1 && s.scrollWidth<=s.clientWidth+1 && e.getBoundingClientRect().width>=44;}"""), 'language label split/clipped'
+    compact_consumer = await header.evaluate("e=>e.classList.contains('consumer-header')") and page.viewport_size['width'] <= 820
+    if compact_consumer:
+        # The mobile product deliberately moves secondary settings off the header.
+        # Verify the real menu route/controls instead of waiting on hidden widgets.
+        await expect(language).to_have_count(0)
+        trigger = header.locator('.consumer-account-trigger:visible, .consumer-menu:visible')
+        await expect(trigger).to_have_count(1)
+        target = await trigger.bounding_box()
+        assert target and target['width'] >= 44 and target['height'] >= 44, {'mobileMenuTarget': target}
+        account_menu = await trigger.evaluate("e=>e.classList.contains('consumer-account-trigger')")
+        labels = ({'ru': 'Меню аккаунта', 'en': 'Account menu', 'th': 'เมนูบัญชี'} if account_menu
+                  else {'ru': 'Открыть меню', 'en': 'Open menu', 'th': 'เปิดเมนู'})
+        await expect(trigger).to_have_accessible_name(labels[lang])
+        await trigger.click()
+        if account_menu:
+            menu = page.get_by_role('menu')
+            await expect(menu).to_be_visible()
+            settings = menu.get_by_role('menuitem', name={'ru': 'Настройки', 'en': 'Settings', 'th': 'การตั้งค่า'}[lang], exact=True)
+            await settings.scroll_into_view_if_needed()
+            await expect(settings).to_be_visible()
+            settings_box = await settings.bounding_box()
+            assert settings_box and settings_box['height'] >= 44, {'settingsTarget': settings_box}
+            assert not await bounds(page, menu.get_by_role('menuitem')), 'mobile menu horizontal overflow'
+        else:
+            dialog = page.get_by_role('dialog')
+            await expect(dialog).to_be_visible()
+            sheet_language = dialog.locator('[data-testid="language-switch"]:visible')
+            await expect(sheet_language).to_have_count(1)
+            await expect(sheet_language).to_have_text(lang.upper())
+        await page.keyboard.press('Escape')
+        await expect(page.get_by_role('menu')).to_have_count(0)
+        await expect(page.get_by_role('dialog')).to_have_count(0)
+        await expect(trigger).to_be_focused()
+    else:
+        await expect(language).to_have_count(1)
+        await expect(language).to_have_text(lang.upper())
+        assert await language.evaluate("""e=>{const s=e.querySelector('span');const r=document.createRange();r.selectNodeContents(s);return r.getClientRects().length===1 && s.scrollWidth<=s.clientWidth+1 && e.getBoundingClientRect().width>=44;}"""), 'language label split/clipped'
     box = await header.bounding_box()
     if marketing:
         inner = await header.locator(':scope > div').bounding_box()
@@ -36,13 +71,13 @@ async def check_header(page, marketing):
     else:
         height = await page.locator('[data-canvas]').first.evaluate("e=>parseFloat(getComputedStyle(e).getPropertyValue('--consumer-header-height'))")
         assert abs(height - box['height']) <= 1, {'heightVariable': height, 'header': box}
-        if page.viewport_size['width'] < 640:
+        if compact_consumer or page.viewport_size['width'] < 640:
             centers = await header.locator('button,a').evaluate_all("els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>{const r=e.getBoundingClientRect();return r.top+r.height/2}).sort((a,b)=>a-b)")
             rows = []
             for center in centers:
                 if not rows or abs(center - rows[-1]) > 8:
                     rows.append(center)
-            assert len(rows) <= 2 and box['height'] <= 120, {'mobileControlRows': rows, 'header': box}
+            assert len(rows) <= (1 if compact_consumer else 2) and box['height'] <= (80 if compact_consumer else 120), {'mobileControlRows': rows, 'header': box}
     return box
 
 
