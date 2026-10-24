@@ -50,6 +50,7 @@ export interface Property {
   updated_at: string;
   // Unit-specific fields
   project_id?: string;
+  complex_id?: string | null;
   management_company_id?: string | null;
   floor?: number;
   unit_number?: string;
@@ -669,22 +670,23 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
   });
 }
 
-// Fetch properties by project ID
-export function usePropertiesByProject(
-  projectId?: string,
+// Shared public unit query. Project and managed-complex IDs remain separate domains.
+function usePropertiesByGroup(
+  column: 'project_id' | 'complex_id',
+  groupId?: string,
   limit = 20,
   options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {},
 ) {
   return useQuery({
-    queryKey: ['properties-by-project', projectId, limit, options.mode, options.managementCompanyId, options.propertyType],
+    queryKey: [column === 'project_id' ? 'properties-by-project' : 'properties-by-complex', groupId, limit, options.mode, options.managementCompanyId, options.propertyType],
     queryFn: async () => {
-      if (!projectId) return { properties: [] as Property[], total: 0 };
+      if (!groupId) return { properties: [] as Property[], total: 0 };
 
       // Public projection enforces active, approved, non-deleted inventory.
-      // A project is not an operator: management scope must be explicitly supplied.
+      // A grouping is not an operator: management scope must be explicitly supplied.
       let query = supabase.from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS, { count: 'exact' })
-        .eq('project_id', projectId);
+        .eq(column, groupId);
       if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
       if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
       if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
@@ -698,8 +700,16 @@ export function usePropertiesByProject(
       const rows = (data || []) as unknown as Property[];
       return { properties: rows.map((p) => normalizePropertyTaxonomyArrays(p)), total: count ?? 0 };
     },
-    enabled: !!projectId,
+    enabled: !!groupId,
   });
+}
+
+export function usePropertiesByProject(projectId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {}) {
+  return usePropertiesByGroup('project_id', projectId, limit, options);
+}
+
+export function usePropertiesByComplex(complexId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {}) {
+  return usePropertiesByGroup('complex_id', complexId, limit, options);
 }
 
 // Get project statistics (units count, price ranges by bedroom type)

@@ -1,13 +1,20 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LocationStep } from '../LocationStep';
 import { initialFormData } from '@/hooks/property-wizard/initialData';
 const state = vi.hoisted(() => ({ language: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
+vi.mock('../../ManagedComplexPicker', () => ({ ManagedComplexPicker: ({ value, onChange }) => <button onClick={() => onChange('approved-complex')}>Select complex {value}</button> }));
 vi.mock('@/components/property/ProjectLocationPicker', () => ({ ProjectLocationPicker: () => null }));
 vi.mock('@/components/shared/GooglePlacesAutocomplete', () => ({ GooglePlacesAutocomplete: () => null }));
 afterEach(cleanup);
 describe('catalogue-only location fields', () => {
+  it('connects the managed grouping picker to complex_id without replacing project identity', () => {
+    const update = vi.fn();
+    render(<LocationStep formData={{ ...initialFormData, project_id: 'existing-project' }} updateFormData={update} catalogueOnly />);
+    fireEvent.click(screen.getByRole('button', { name: /Select complex/ }));
+    expect(update).toHaveBeenCalledExactlyOnceWith({ complex_id: 'approved-complex' });
+  });
   it.each(['en', 'ru', 'th'])('does not accept access credentials in managed %s drafts', language => {
     state.language = language;
     const { container } = render(<LocationStep formData={initialFormData} updateFormData={vi.fn()} catalogueOnly />);
@@ -17,5 +24,6 @@ describe('catalogue-only location fields', () => {
   it('preserves the separate independent-author input', () => {
     state.language = 'en'; render(<LocationStep formData={initialFormData} updateFormData={vi.fn()} />);
     expect(screen.getByLabelText('Access code')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Select complex/ })).toBeNull();
   });
 });
