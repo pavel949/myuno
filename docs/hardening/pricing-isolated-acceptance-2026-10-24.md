@@ -154,3 +154,20 @@ Remaining: review the patch, authorize the normal release separately, then perfo
 role-appropriate operator-session/live visual acceptance without using production
 business writes as QA. Do not replay migrations or alter domain/permission settings.
 Rollback of this patch is frontend-only; retain the existing SQL/audit history.
+
+## Draft PR CI review
+
+Draft PR #167 first head `3abf9931db589ed3191d52766a5ae3dd511958fb` passed
+its dedicated pricing acceptance job. Standard verify caught three unsupported
+`exact` options in the new Testing Library role queries; anchored name regexes
+preserve the intended strict matching. The old calendar browser bundle also
+needed React Query hook exports after the editor became an import of the page.
+Its synthetic module now supplies those exports with throwing mutation guards;
+no assertion or test path is removed. The original calendar browser assertions
+passed locally in 24 configurations (only Chromium executable selection changed
+for the installed local browser).
+
+Downloading the failed run's log archive was Forbidden on
+`results-receiver.actions.githubusercontent.com`. The archive was not retrieved
+through another route. Authorized GitHub check annotations supplied the exact
+file/line type errors; local reproduction identified the fixture linkage error.

@@ -180,9 +180,9 @@ describe('owner property navigation', () => {
 
   it('unmounts an already-open unit booking dialog when history returns to category pricing', () => {
     render(<Harness path="/mc/calendar?property=p1&category=category" />);
-    fireEvent.click(screen.getByRole('button',{name:'Portfolio',exact:true}));
-    fireEvent.click(screen.getByRole('button',{name:'Single property',exact:true}));
-    fireEvent.click(screen.getByRole('button',{name:'Add Booking',exact:true}));
+    fireEvent.click(screen.getByRole('button',{name:/^Portfolio$/}));
+    fireEvent.click(screen.getByRole('button',{name:/^Single property$/}));
+    fireEvent.click(screen.getByRole('button',{name:/^Add Booking$/}));
     expect(screen.getByTestId('booking-property-id')).toHaveTextContent('p1');
     fireEvent.click(screen.getByText('History back'));
     fireEvent.click(screen.getByText('History back'));
