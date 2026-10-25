@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 // Offline only. Never opens a database, accepts credentials or executes SQL.
 const root = new URL('../../', import.meta.url);
 const forward = [
+  'docs/convergence/mc-authoring-activation/public-property-catalog-readonly.candidate.sql',
   'docs/convergence/employee-property-publication/employee-task-capability.candidate.sql',
   'docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql',
   'docs/convergence/employee-property-publication/checked-publication.candidate.sql',

@@ -909,12 +909,19 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
     ALTER POLICY owners_and_mc_manage_operational_tasks ON property_operational_tasks USING(false) WITH CHECK(false);`);
    await sql.unsafe(sourceFunction('supabase/migrations/20260225003935_ed23eb67-167a-469c-b3d1-46d0cf429134.sql','log_task_activity'));
    await sql.unsafe('CREATE TRIGGER acceptance_task_audit AFTER INSERT OR UPDATE ON property_operational_tasks FOR EACH ROW EXECUTE FUNCTION log_task_activity()');
+   // Read-only metadata confirmed this automatically updatable live view has
+   // legacy DML grants. Reproduce only in the owned synthetic database.
+   await sql.unsafe('GRANT INSERT,UPDATE,DELETE ON public_property_catalog TO anon,authenticated');
+   const publicKey=await property({approval_status:'approved',is_active:true});
+   expect(await as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Pre-activation catalogue writer' WHERE id=${publicKey} RETURNING id`)).toHaveLength(1);
    const forward=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation());"],{encoding:'utf8'});
    const failure=forward.replace(/COMMIT;\s*$/, () => "DO $$ BEGIN RAISE EXCEPTION 'acceptance forced activation failure'; END $$;\nCOMMIT;");
    await expect(applyTransactionScript(sql,failure)).rejects.toThrow(/forced activation failure/);
    expect((await sql`SELECT to_regprocedure('public.create_managed_complex_checked(uuid,uuid,jsonb,boolean)') name`)[0].name).toBeNull();
    expect(await sql`SELECT column_name FROM information_schema.columns WHERE table_name='properties' AND column_name='content_author_user_id'`).toEqual([]);
    await applyTransactionScript(sql,forward);
+   await expect(as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Forbidden' WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
+   await expect(as(U.editor,tx=>tx`DELETE FROM public_property_catalog WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
    const complex=(await as(U.editor,async tx=>(await tx`SELECT create_managed_complex_checked(${C},${SPACE},'{"name":"Synthetic acceptance complex"}'::jsonb,false) row`)[0].row));
    expect(await as(null,tx=>tx`SELECT id FROM public_complex_catalog WHERE id=${complex.id}`)).toEqual([]);
    const cPending=await as(U.editor,async tx=>(await tx`SELECT save_managed_complex_draft_checked(${complex.id},${complex.updated_at}::text::timestamptz,'{"description_en":"Saved complex"}'::jsonb,true) row`)[0].row);
@@ -948,6 +955,7 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
    expect(await sql`SELECT action FROM property_activity_log WHERE entity_id=${task} ORDER BY created_at`).toEqual([{action:'task_created'},{action:'task_status_changed'}]);
    const rollback=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation('rollback'));"],{encoding:'utf8'});
    await applyTransactionScript(sql,rollback);
+   await expect(as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Forbidden after rollback' WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
    await expect(read(U.editor,key)).rejects.toThrow(/permission denied/);
    expect((await sql`SELECT count(*)::int n FROM properties WHERE id=${key}`)[0].n).toBe(1);
    expect(await sql`SELECT policyname FROM pg_policies WHERE policyname='employee_task_view_ceiling'`).toHaveLength(1);

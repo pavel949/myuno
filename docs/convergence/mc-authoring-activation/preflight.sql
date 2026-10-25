@@ -35,3 +35,11 @@ SELECT c.relname,c.relrowsecurity,c.relforcerowsecurity,c.reloptions
 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
 WHERE n.nspname='public' AND c.relname IN ('properties','property_complexes',
  'property_operational_tasks','public_property_catalog','public_complex_catalog');
+
+SELECT grantee,table_name,privilege_type FROM information_schema.role_table_grants
+WHERE table_schema='public' AND grantee IN ('anon','authenticated') AND table_name IN (
+ 'properties','property_complexes','public_property_catalog','property_operational_tasks','admin_audit_logs')
+ORDER BY table_name,grantee,privilege_type;
+
+SELECT table_name,is_updatable,is_insertable_into,check_option
+FROM information_schema.views WHERE table_schema='public' AND table_name='public_property_catalog';
