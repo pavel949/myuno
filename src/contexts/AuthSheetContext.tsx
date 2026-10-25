@@ -13,6 +13,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { AuthSheet } from '@/components/auth/AuthSheet';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { sanitizeAuthReturnPath } from '@/lib/auth/redirectToAuth';
 
 export interface OpenAuthSheetOptions {
   /** Called once the user is authenticated (existing or new). */
@@ -34,35 +36,75 @@ const AuthSheetContext = createContext<AuthSheetContextValue | undefined>(undefi
 export function AuthSheetProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [opts, setOpts] = useState<OpenAuthSheetOptions>({});
-  const optsRef = useRef(opts);
+  const { user, session, isLoading } = useAuth();
+  const currentAuth = useRef({ user, session, isLoading });
+  const attempt = useRef(0);
+  const [authenticatedAttempt, setAuthenticatedAttempt] = useState<{ revision: number; actorId: string } | null>(null);
+  const pending = useRef<{ revision: number; options: OpenAuthSheetOptions } | null>(null);
+
+  // Any departure from an admitted actor invalidates the old intent, even if
+  // the same account subsequently signs in again on this mounted provider.
+  if (currentAuth.current.user && (currentAuth.current.user.id !== user?.id || !session)) {
+    pending.current = null;
+    attempt.current += 1;
+  }
+  currentAuth.current = { user, session, isLoading };
+
+  const closeAuthSheet = useCallback(() => {
+    attempt.current += 1;
+    pending.current = null;
+    setAuthenticatedAttempt(null);
+    setIsOpen(false);
+  }, []);
+
+  // Every entry point, including already-authenticated consumers, verifies the
+  // current server actor. A successful signup response alone is not a session.
+  const handleSuccess = useCallback(async (expectedActorId?: string) => {
+    const continuation = pending.current;
+    if (!continuation) return;
+    const before = currentAuth.current;
+    if (before.isLoading) return;
+    const initialActor = before.user?.id;
+    let result;
+    try { result = await supabase.auth.getUser(); } catch { return; }
+    const { data, error } = result;
+    const actorId = data.user?.id;
+    if (error || !actorId || (expectedActorId && actorId !== expectedActorId) || (initialActor && initialActor !== actorId) ||
+        pending.current !== continuation || attempt.current !== continuation.revision) return;
+    setAuthenticatedAttempt({ revision: continuation.revision, actorId });
+  }, []);
+
   useEffect(() => {
-    optsRef.current = opts;
-  }, [opts]);
-  const { user } = useAuth();
+    const continuation = pending.current;
+    if (!continuation || !authenticatedAttempt || authenticatedAttempt.revision !== continuation.revision) return;
+    const actorId = authenticatedAttempt.actorId;
+    const after = currentAuth.current;
+    if (after.user && after.user.id !== actorId) { closeAuthSheet(); return; }
+    if (after.isLoading ||
+        after.user?.id !== actorId || after.session?.user.id !== actorId ||
+        pending.current !== continuation || attempt.current !== continuation.revision) return;
+    pending.current = null; // consume before invoking a potentially synchronous writer
+    setIsOpen(false);
+    const options = continuation.options;
+    options.onSuccess?.();
+    if (!options.onSuccess && options.redirectTo) {
+      window.location.href = sanitizeAuthReturnPath(options.redirectTo);
+    }
+  }, [authenticatedAttempt, user, session, isLoading, closeAuthSheet]);
 
   const openAuthSheet = useCallback((options: OpenAuthSheetOptions = {}) => {
-    if (user) {
-      // Already signed in — fire onSuccess immediately, no UI.
-      options.onSuccess?.();
-      return;
-    }
+    const revision = ++attempt.current;
+    pending.current = { revision, options: { ...options } };
     setOpts(options);
-    setIsOpen(true);
-  }, [user]);
+    const auth = currentAuth.current;
+    if (!auth.isLoading && auth.user && auth.session?.user.id === auth.user.id) {
+      void handleSuccess(auth.user.id);
+    } else {
+      setIsOpen(true);
+    }
+  }, [handleSuccess]);
 
-  const closeAuthSheet = useCallback(() => setIsOpen(false), []);
-
-  const handleSuccess = useCallback(() => {
-    setIsOpen(false);
-    // Fire onSuccess on next tick so consumer state updates settle first.
-    setTimeout(() => {
-      const o = optsRef.current;
-      o.onSuccess?.();
-      if (!o.onSuccess && o.redirectTo) {
-        window.location.href = o.redirectTo;
-      }
-    }, 0);
-  }, []);
+  useEffect(() => () => { pending.current = null; attempt.current += 1; }, []);
 
   const value = useMemo<AuthSheetContextValue>(() => ({
     openAuthSheet, closeAuthSheet, isOpen,
@@ -71,7 +113,7 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
   return (
     <AuthSheetContext.Provider value={value}>
       {children}
-      <AuthSheet open={isOpen} onOpenChange={setIsOpen} onSuccess={handleSuccess} intent={opts.intent} />
+      <AuthSheet open={isOpen} onOpenChange={(open) => { if (!open) closeAuthSheet(); }} onSuccess={handleSuccess} intent={opts.intent} />
     </AuthSheetContext.Provider>
   );
 }

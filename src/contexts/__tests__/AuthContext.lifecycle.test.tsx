@@ -15,6 +15,28 @@ function setup() { const client = new QueryClient({ defaultOptions: { queries: {
 beforeEach(() => { vi.clearAllMocks(); mock.callback = null; mock.getSession.mockResolvedValue({ data: { session: null } }); mock.signOut.mockResolvedValue({ error: null }); sessionStorage.clear(); });
 afterEach(cleanup);
 describe('auth initialization and truthful logout', () => {
+  it('preserves the SDK persisted session while clearing old app authority on account switch', async () => {
+    const view = setup(); await act(async () => {}); act(() => mock.callback!('SIGNED_IN', session('actor-a')));
+    view.client.setQueryData(['private', 'actor-a'], { private: true }); sessionStorage.setItem('myuno:platform-view-as', 'old');
+    const stored = JSON.stringify({ user: { id: 'actor-b' }, access_token: 'synthetic-token' });
+    localStorage.setItem('sb-synthetic-auth-token', stored);
+    act(() => mock.callback!('SIGNED_IN', session('actor-b')));
+    expect(localStorage.getItem('sb-synthetic-auth-token')).toBe(stored); expect(view.result.current.user?.id).toBe('actor-b');
+    expect(view.client.getQueryCache().getAll()).toHaveLength(0); expect(sessionStorage.getItem('myuno:platform-view-as')).toBeNull();
+    localStorage.removeItem('sb-synthetic-auth-token');
+  });
+  it.each(['SIGNED_OUT', 'SIGNED_IN'])('clears private cache on external %s actor transition', async (event) => {
+    const view = setup(); await act(async () => {}); act(() => mock.callback!('SIGNED_IN', session('actor-a')));
+    view.client.setQueryData(['private', 'actor-a'], { private: true }); sessionStorage.setItem('myuno:platform-view-as', 'old');
+    act(() => mock.callback!(event, event === 'SIGNED_OUT' ? null : session('actor-b')));
+    expect(view.client.getQueryCache().getAll()).toHaveLength(0); expect(sessionStorage.getItem('myuno:platform-view-as')).toBeNull();
+  });
+  it('keeps same-actor cached data during token refresh', async () => {
+    const view = setup(); await act(async () => {}); act(() => mock.callback!('SIGNED_IN', session('actor-a')));
+    view.client.setQueryData(['private', 'actor-a'], { private: true });
+    act(() => mock.callback!('TOKEN_REFRESHED', session('actor-a')));
+    expect(view.client.getQueryData(['private', 'actor-a'])).toEqual({ private: true });
+  });
   it('restores a valid initial session when no newer event has arrived', async () => {
     mock.getSession.mockResolvedValue({ data: { session: session('restored-actor') } }); const view = setup();
     await act(async () => {}); expect(view.result.current.user?.id).toBe('restored-actor'); expect(view.result.current.isLoading).toBe(false);

@@ -14,7 +14,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 interface OtpStepProps {
   phone: string;
   onBack: () => void;
-  onSuccess: () => void;
+  onSuccess: (actorId?: string) => void;
 }
 
 export function OtpStep({ phone, onBack, onSuccess }: OtpStepProps) {
@@ -32,7 +32,7 @@ export function OtpStep({ phone, onBack, onSuccess }: OtpStepProps) {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         phone,
         token: code,
         type: 'sms',
@@ -41,7 +41,7 @@ export function OtpStep({ phone, onBack, onSuccess }: OtpStepProps) {
         toast.error(error.message || (isRu ? 'Неверный код' : 'Invalid code'));
         return;
       }
-      onSuccess();
+      if (data.session && data.user?.id === data.session.user.id) onSuccess(data.user.id);
     } finally {
       setLoading(false);
     }

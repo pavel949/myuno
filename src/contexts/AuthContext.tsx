@@ -40,7 +40,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   signUp: (data: SignUpData) => Promise<SignUpResult>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; user?: User | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
@@ -54,10 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const refreshFailureCountRef = useRef(0);
   const sessionRevisionRef = useRef(0);
+  const actorRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
 
-  const clearStoredAuthSession = useCallback(() => {
-    sessionRevisionRef.current += 1;
+  const clearAppAuthorityCaches = useCallback(() => {
     if (typeof window !== 'undefined') {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
@@ -71,9 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     clearAdminCache();
+    queryClient.clear();
+  }, [queryClient]);
+
+  const clearStoredAuthSession = useCallback(() => {
+    sessionRevisionRef.current += 1;
+    clearAppAuthorityCaches();
+    actorRef.current = null;
     setSession(null);
     setUser(null);
-  }, []);
+  }, [clearAppAuthorityCaches]);
 
   useEffect(() => {
     let isMounted = true;
@@ -114,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!isCurrent()) return;
 
         refreshFailureCountRef.current = 0;
+        actorRef.current = session?.user.id ?? null;
         setSession(session);
         setUser(session?.user ?? null);
       } catch (error) {
@@ -141,6 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (isMounted) {
+          const nextActor = session?.user.id ?? null;
+          if (event === 'SIGNED_OUT') clearStoredAuthSession();
+          else if (actorRef.current !== nextActor) clearAppAuthorityCaches();
+          actorRef.current = nextActor;
           sessionRevisionRef.current += 1;
           refreshFailureCountRef.current = 0;
           setSession(session);
@@ -171,10 +183,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       subscription.unsubscribe();
     };
-  }, [clearStoredAuthSession]);
+  }, [clearStoredAuthSession, clearAppAuthorityCaches]);
 
   const signUp = useCallback(async ({ email, password, fullName, phone, anonSessionId }: SignUpData): Promise<SignUpResult> => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${window.location.origin}/auth`;
 
     // M5 H.2 — read anon onboarding session id so handle_new_user() can
     // claim concierge_sessions / persona_detection_log on the new user.
@@ -192,6 +204,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
+
+    if (!error && data.user && !data.session) {
+      // Actor-bound marker only: never persist phone, password or a callback.
+      window.sessionStorage.setItem('myuno_pending_signup_integrity', data.user.id);
+    }
 
     // NOTE: phone is persisted to profiles by the `handle_new_user` trigger
     // (it reads NEW.phone OR raw_user_meta_data.phone). Previous client-side
@@ -213,12 +230,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     refreshFailureCountRef.current = 0;
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     
-    return { error: error as Error | null };
+    return { error: error as Error | null, user: data.user };
   }, []);
 
   const signOut = useCallback(async () => {

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertTriangle, RefreshCw, Loader2, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type IntegrityReport = {
   ok: boolean;
@@ -115,22 +116,34 @@ export function SignupIntegrityModal({
   language,
 }: SignupIntegrityModalProps) {
   const t = L[language] ?? L.en;
-  const [report, setReport] = useState<IntegrityReport | null>(initialReport);
+  const { user, session, isLoading: authLoading } = useAuth();
+  const ownActor = !userId || (user?.id === userId && session?.user.id === userId && !authLoading);
+  const [savedReport, setReport] = useState<IntegrityReport | null>(initialReport);
+  const report = ownActor ? savedReport : null;
   const [error, setError] = useState<string | null>(initialError);
   const [refreshing, setRefreshing] = useState(false);
   const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(initialReport || initialError ? Date.now() : null);
   const lastFetchRef = useRef<number>(0);
+  const scopeRef = useRef({ open, userId, emailConfirmationRequired, actorId: user?.id, token: session?.access_token });
+  const previousScope = scopeRef.current;
+  if (previousScope.open !== open || previousScope.userId !== userId ||
+      previousScope.emailConfirmationRequired !== emailConfirmationRequired ||
+      previousScope.actorId !== user?.id || previousScope.token !== session?.access_token) {
+    scopeRef.current = { open, userId, emailConfirmationRequired, actorId: user?.id, token: session?.access_token };
+  }
 
   // Sync when parent passes fresh initial values (e.g. modal re-opened after a new signUp)
   useEffect(() => {
     setReport(initialReport);
     setError(initialError);
     if (initialReport || initialError) setLastCheckedAt(Date.now());
-  }, [initialReport, initialError]);
+    lastFetchRef.current = 0;
+  }, [initialReport, initialError, userId, emailConfirmationRequired]);
 
   const fetchStatus = useCallback(
     async (opts?: { silent?: boolean }) => {
-      if (!userId) return;
+      if (!open || !userId || emailConfirmationRequired || !ownActor) return;
+      const requestScope = scopeRef.current;
       // Throttle: ignore calls within 2s of the previous one
       const now = Date.now();
       if (now - lastFetchRef.current < 2000) return;
@@ -139,9 +152,13 @@ export function SignupIntegrityModal({
       setRefreshing(true);
       if (!opts?.silent) setError(null);
       try {
+        const { data: auth, error: authError } = await supabase.auth.getUser();
+        if (authError || auth.user?.id !== userId || scopeRef.current !== requestScope) return;
         const { data, error: invErr } = await supabase.functions.invoke('verify-signup-integrity', {
           body: { user_id: userId, expected_phone: expectedPhone || undefined },
         });
+        const { data: currentActor, error: actorError } = await supabase.auth.getUser();
+        if (actorError || currentActor.user?.id !== userId || scopeRef.current !== requestScope) return;
         if (invErr) {
           setError(invErr.message || 'verify_failed');
           if (!opts?.silent) toast.error(t.verifyError);
@@ -152,6 +169,7 @@ export function SignupIntegrityModal({
         }
         setLastCheckedAt(Date.now());
       } catch (e) {
+        if (scopeRef.current !== requestScope) return;
         const msg = e instanceof Error ? e.message : 'verify_failed';
         setError(msg);
         if (!opts?.silent) toast.error(t.verifyError);
@@ -159,7 +177,7 @@ export function SignupIntegrityModal({
         setRefreshing(false);
       }
     },
-    [userId, expectedPhone, t.verifyError, t.okBanner],
+    [open, userId, expectedPhone, emailConfirmationRequired, ownActor, t.verifyError, t.okBanner],
   );
 
   const handleRefresh = () => fetchStatus();
@@ -167,8 +185,7 @@ export function SignupIntegrityModal({
   // Auto-refresh when modal opens
   useEffect(() => {
     if (open && userId) fetchStatus({ silent: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, userId]);
+  }, [open, userId, emailConfirmationRequired, fetchStatus]);
 
   // Auto-refresh on tab focus / visibility return while modal is open
   useEffect(() => {
@@ -238,7 +255,7 @@ export function SignupIntegrityModal({
         )}
 
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button variant="outline" onClick={handleRefresh} disabled={refreshing || !userId}>
+          <Button variant="outline" onClick={handleRefresh} disabled={refreshing || !userId || emailConfirmationRequired || !ownActor}>
             {refreshing ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t.refreshing}</>
             ) : (

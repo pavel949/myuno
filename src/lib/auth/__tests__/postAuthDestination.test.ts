@@ -6,6 +6,12 @@ const base = { redirectPath: '/', activeRole: 'user' as const, availableRoles: [
 const resolve = (options: Partial<Parameters<typeof postAuthDestination>[0]> = {}) => postAuthDestination({ ...base, availableRoles: ['user'], ...options });
 
 describe('post-login employee continuation', () => {
+  it('routes established MC staff to the existing task workspace', () => {
+    expect(resolve({ activeRole: 'staff', hasMCMembership: true })).toEqual({ path: '/mc/tasks', activateRole: undefined });
+  });
+  it('does not infer MC authority for standalone platform staff', () => {
+    expect(resolve({ activeRole: 'staff' })).toEqual({ path: '/profile', activateRole: undefined });
+  });
   it('routes an invited MC staff member to the property workspace using existing context selection', () => {
     expect(resolve({ needsAccountType: true, hasMCMembership: true, availableRoles: ['user', 'property_manager'] })).toEqual({ path: '/mc/properties', activateRole: 'property_manager' });
   });

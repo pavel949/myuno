@@ -117,7 +117,16 @@ export default function Auth() {
   );
 
   useEffect(() => {
-    if (!user || authLoading || userContextLoading || ownerTypeLoading) return;
+    if (!user || authLoading || userContextLoading || ownerTypeLoading || isLoading || integrityModal.open) return;
+    const pendingSignupActor = window.sessionStorage.getItem('myuno_pending_signup_integrity');
+    if (pendingSignupActor) {
+      window.sessionStorage.removeItem('myuno_pending_signup_integrity');
+      if (pendingSignupActor === user.id) {
+        setIntegrityModal({ open: true, userId: user.id, expectedPhone: null, report: null,
+          error: null, emailConfirmationRequired: false, redirectToLoginOnClose: false });
+        return;
+      }
+    }
     let cancelled = false;
     setRoutingError(false);
 
@@ -160,7 +169,7 @@ export default function Auth() {
     })();
 
     return () => { cancelled = true; };
-  }, [user, authLoading, userContextLoading, ownerTypeLoading, navigate, redirectPath, activeRole, availableRoles, hasMCMembership, switchContext, isMCPortal, routingAttempt]);
+  }, [user, authLoading, userContextLoading, ownerTypeLoading, navigate, redirectPath, activeRole, availableRoles, hasMCMembership, switchContext, isMCPortal, routingAttempt, isLoading, integrityModal.open]);
 
   // OAuth callback error surfacing — `/auth/callback` renders this same page and
   // relies on Supabase auto session-detection. When the provider returns an
@@ -324,11 +333,11 @@ export default function Auth() {
         }).catch(err => console.error('Signup notification error:', err));
 
         // Verify server-side artefacts (profile.phone + terms_acceptances).
-        // Uses service role inside the edge function, so it works even when
-        // the new user has no session yet (email-confirmation flow).
+        // The edge function requires an authenticated same-user session.
+        // Pending email confirmation is not a failed integrity check.
         let integrity: IntegrityReport | null = null;
         let integrityError: string | null = null;
-        if (data?.user?.id) {
+        if (data?.user?.id && data.session?.user.id === data.user.id) {
           try {
             const { data: verifyData, error: verifyErr } = await withTimeout(
               supabase.functions.invoke('verify-signup-integrity', {
@@ -358,6 +367,7 @@ export default function Auth() {
         });
 
         if (!hasSession) {
+          if (data?.user?.id) window.sessionStorage.setItem('myuno_pending_signup_integrity', data.user.id);
           setPassword('');
           setConfirmPassword('');
         }
@@ -461,7 +471,7 @@ export default function Auth() {
       <PremiumButton onClick={() => setRoutingAttempt(value => value + 1)}>{isTh ? 'ลองอีกครั้ง' : isRu ? 'Повторить' : 'Retry'}</PremiumButton>
     </div>;
   }
-  if (authLoading || user) {
+  if (authLoading || (user && !integrityModal.open)) {
     return <LoadingState />;
   }
 

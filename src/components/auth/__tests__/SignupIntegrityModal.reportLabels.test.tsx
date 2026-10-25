@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SignupIntegrityModal, type IntegrityReport } from '../SignupIntegrityModal';
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null, session: null, isLoading: false }) }));
 const invoke = vi.hoisted(() => vi.fn(() => { throw new Error('Live auth transport forbidden'); }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });

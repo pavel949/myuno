@@ -15,7 +15,7 @@ import { z } from 'zod';
 
 interface EmailStepProps {
   onBack: () => void;
-  onSuccess: () => void;
+  onSuccess: (actorId?: string) => void;
 }
 
 type Mode = 'signin' | 'signup';
@@ -33,6 +33,7 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmationPending, setConfirmationPending] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +44,7 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
       toast.error(isRu ? 'Неверный email' : 'Invalid email');
       return;
     }
-    const pwParse = passwordSchema.safeParse(password);
+    const pwParse = (mode === 'signup' ? passwordSchema : z.string().min(1)).safeParse(password);
     if (!pwParse.success) {
       toast.error(isRu ? 'Пароль минимум 8 символов' : 'Password must be 8+ characters');
       return;
@@ -52,12 +53,12 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
     setLoading(true);
     try {
       if (mode === 'signin') {
-        const { error } = await signIn(email, password);
+        const { error, user: signedInUser } = await signIn(email, password);
         if (error) {
           toast.error(isRu ? 'Неверный email или пароль' : 'Invalid email or password');
           return;
         }
-        onSuccess();
+        if (signedInUser?.id) onSuccess(signedInUser.id);
       } else {
         const { error, data } = await signUp({ email, password, fullName });
         if (error) {
@@ -70,10 +71,12 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
               ? 'Проверьте email — мы отправили ссылку для подтверждения'
               : 'Check your email — we sent a confirmation link',
           );
-          onSuccess();
+          setConfirmationPending(true);
+          setPassword('');
+          setMode('signin');
           return;
         }
-        onSuccess();
+        if (data?.user?.id && data.session.user.id === data.user.id) onSuccess(data.user.id);
       }
     } finally {
       setLoading(false);
@@ -105,6 +108,9 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
         {isRu ? 'Назад' : 'Back'}
       </button>
 
+      {confirmationPending && <p role="status" className="text-sm text-muted-foreground">
+        {isRu ? 'Подтвердите email, затем войдите, чтобы продолжить.' : 'Confirm your email, then log in to continue.'}
+      </p>}
       <div className="space-y-2">
         <Label htmlFor="auth-email">Email</Label>
         <Input
@@ -125,11 +131,11 @@ export function EmailStep({ onBack, onSuccess }: EmailStepProps) {
           id="auth-password"
           type="password"
           autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-          placeholder={isRu ? 'Минимум 8 символов' : 'At least 8 characters'}
+          placeholder={mode === 'signup' ? (isRu ? 'Минимум 8 символов' : 'At least 8 characters') : undefined}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={8}
+          minLength={mode === 'signup' ? 8 : undefined}
         />
       </div>
 

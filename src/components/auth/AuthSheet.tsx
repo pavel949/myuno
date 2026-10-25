@@ -25,7 +25,7 @@ type Step = 'method' | 'email' | 'phone' | 'otp';
 interface AuthSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (actorId?: string) => void;
   intent?: string;
 }
 

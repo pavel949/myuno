@@ -1,0 +1,33 @@
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { EmailStep } from '../EmailStep';
+import { InquiryForm } from '@/components/vertical-wizard/InquiryForm';
+import { AuthSheetProvider } from '@/contexts/AuthSheetContext';
+const f = vi.hoisted(() => ({ auth: { user: null, session: null, isLoading: false } as any, signUp: vi.fn(), signIn: vi.fn(), getUser: vi.fn(), write: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ ...f.auth, signUp: f.signUp, signIn: f.signIn }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: f.getUser } } }));
+vi.mock('@/hooks/useUniversalLead', () => ({ useUniversalLead: () => ({ submitLead: { mutateAsync: f.write }, isSubmitting: false }) }));
+vi.mock('@/components/auth/AuthSheet', () => ({ AuthSheet: ({ open, onSuccess }: any) => open ? <EmailStep onBack={() => {}} onSuccess={onSuccess} /> : null }));
+afterEach(() => { cleanup(); vi.clearAllMocks(); f.auth = { user: null, session: null, isLoading: false }; localStorage.clear(); });
+it('allows existing six-character signin passwords to reach backend validation', async () => {
+ f.signIn.mockResolvedValue({ error: null, user: { id: 'synthetic-actor' } }); const success = vi.fn(); const view = render(<EmailStep onBack={() => {}} onSuccess={success} />);
+ fireEvent.change(screen.getByLabelText('Email', { selector: '#auth-email' }), { target: { value: 'synthetic@example.test' } }); fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'abcdef' } }); fireEvent.submit(view.container.querySelector('form')!);
+ await waitFor(() => expect(f.signIn).toHaveBeenCalledWith('synthetic@example.test', 'abcdef')); expect(success).toHaveBeenCalledTimes(1);
+});
+it('actual inquiry consumer never writes after no-session signup, then resumes once after same-actor signin', async () => {
+ f.signUp.mockResolvedValue({ error: null, data: { user: { id: 'synthetic-actor' }, session: null } });
+ f.signIn.mockResolvedValue({ error: null, user: { id: 'synthetic-actor' } }); f.getUser.mockResolvedValue({ data: { user: { id: 'synthetic-actor' } }, error: null }); f.write.mockResolvedValue({ id: 'synthetic-request' });
+ const View = () => <AuthSheetProvider><InquiryForm open onOpenChange={() => {}} listingId="synthetic-listing" listingTitle="Synthetic listing" verticalId="tour" /></AuthSheetProvider>;
+ const view = render(<View />);
+ fireEvent.change(screen.getByLabelText('Name *'), { target: { value: 'Synthetic Guest' } }); fireEvent.change(screen.getByLabelText('Phone / WhatsApp *'), { target: { value: '+66000000000' } });
+ fireEvent.submit(view.container.ownerDocument.querySelector('form')!);
+ await screen.findByText("Don't have an account? Sign up"); fireEvent.click(screen.getByText("Don't have an account? Sign up"));
+ fireEvent.change(screen.getByLabelText('Email', { selector: '#auth-email' }), { target: { value: 'synthetic@example.test' } }); fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'synthetic-password' } });
+ fireEvent.submit(screen.getByLabelText('Password').closest('form')!); await waitFor(() => expect(f.signUp).toHaveBeenCalled());
+ expect(f.write).not.toHaveBeenCalled(); expect(f.getUser).not.toHaveBeenCalled();
+ await screen.findByText('Log in', { selector: 'button[type="submit"]' }); fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'synthetic-password' } }); fireEvent.submit(screen.getByLabelText('Password').closest('form')!); await act(async () => {});
+ expect(f.write).not.toHaveBeenCalled();
+ f.auth = { user: { id: 'synthetic-actor', user_metadata: {} }, session: { user: { id: 'synthetic-actor' } }, isLoading: false }; view.rerender(<View />);
+ await waitFor(() => expect(f.write).toHaveBeenCalledTimes(1));
+});

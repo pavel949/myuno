@@ -31,7 +31,7 @@ export function postAuthDestination({ redirectPath, activeRole, availableRoles, 
   if (redirectPath !== APP_ROUTES.HOME) return { path: redirectPath, activateRole };
 
   const path = role === 'uno_team' ? APP_ROUTES.TEAM_CONTENT
-    : role === 'staff' ? '/staff'
+    : role === 'staff' ? (hasMCMembership ? APP_ROUTES.MC_TASKS : APP_ROUTES.PROFILE)
     : role === 'admin' ? '/admin'
     : role === 'vendor' ? '/vendor'
     : role === 'investor' ? '/invest'
