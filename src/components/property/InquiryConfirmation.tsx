@@ -7,9 +7,11 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 interface InquiryConfirmationProps {
   orderId: string;
+  /** Set only after the PR160 canonical reader validates order + exact hold. */
+  propertyReservation?: boolean;
 }
 
-export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
+export function InquiryConfirmation({ orderId, propertyReservation = false }: InquiryConfirmationProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -21,18 +23,18 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </div>
 
       <h2 className="text-2xl font-bold mb-2">
-        {isRu ? 'Запрос на просмотр отправлен' : 'Viewing request received'}
+        {isRu ? 'Запрос отправлен' : 'Request submitted'}
       </h2>
 
       <p className="text-muted-foreground mb-8 max-w-sm">
         {isRu
-          ? 'Свяжемся с вами в WhatsApp в течение 24 часов, чтобы подтвердить время просмотра.'
-          : "We'll message you on WhatsApp within 24 hours to confirm your viewing time."}
+          ? 'Проверьте сохранённый статус запроса. Отправка запроса не означает подтверждение бронирования.'
+          : 'Check the persisted request status. Submitting a request does not mean the reservation is confirmed.'}
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Button size="lg" onClick={() => navigate(APP_ROUTES.BOOKING_DETAIL(orderId))}>
-          {isRu ? 'Открыть бронирование' : 'View booking'}
+        <Button size="lg" onClick={() => navigate(`${APP_ROUTES.BOOKING_DETAIL(orderId)}?${propertyReservation ? 'propertyReservation' : 'propertyOrder'}=1`)}>
+          {isRu ? 'Проверить статус' : 'Check status'}
         </Button>
         <Button variant="outline" size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY)}>
           {isRu ? 'Смотреть объекты' : 'Browse properties'}

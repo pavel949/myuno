@@ -10,6 +10,9 @@ import type { OwnershipData, PropertyFormData } from './types';
 import { buildPropertyPayload } from './buildPayload';
 import { PropertyDraftSaveError, readManagedPropertyDraft, propertyAuthoringDelta, editablePropertyAuthoringPatch, type PropertyAuthoringCapabilities } from '@/lib/propertyAuthoring';
 import type { OwnerProperty } from '@/types/property';
+import { clearConfirmedAuthoringCreateIntents, AuthoringCreationResumeRequired } from '@/lib/authoringCreateIntent';
+import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
+import { bindCompanyAccessOperation } from '@/lib/companyAccessOperation';
 
 const errorLog = createErrorHandler('usePropertyWizardDraft');
 
@@ -49,8 +52,13 @@ export function usePropertyWizardDraft({
 }: DraftHookArgs) {
   const draftCreateProperty = useCreateOwnerProperty();
   const draftUpdateProperty = useUpdateOwnerProperty();
+  const lifetime = useCompanyAccessLifetime(userId, companyId || undefined);
 
   const actorScope = `${userId || ''}:${companyId || ''}`;
+  // Async closures must reject the previous render immediately, before passive
+  // effects have reset the form. This is response isolation, not server auth.
+  const currentActorScopeRef = useRef(actorScope);
+  currentActorScopeRef.current = actorScope;
   const scopeRef = useRef(actorScope);
   const draftIdRef = useRef<string>(undefined);
   const updatedAtRef = useRef<string>(undefined);
@@ -83,6 +91,7 @@ export function usePropertyWizardDraft({
   }, []);
 
   const clearDraft = useCallback(() => {
+    if (userId && companyId) clearConfirmedAuthoringCreateIntents('property', userId, companyId);
     setHasDraft(false);
     setLastSaved(null);
     setDraftPropertyId(undefined);
@@ -92,7 +101,7 @@ export function usePropertyWizardDraft({
     setDraftLoadError(null);
     lastSavedSnapshotRef.current = JSON.stringify(initialFormData);
     setSaveState('idle');
-  }, []);
+  }, [userId, companyId]);
 
   const restoreDraft = useCallback(() => {
     // Latest draft is loaded automatically from Supabase on open.
@@ -130,7 +139,9 @@ export function usePropertyWizardDraft({
       try {
         let data;
         if (companyId && resumeDraftId) {
-          data = await readManagedPropertyDraft(resumeDraftId, companyId);
+          const lease = lifetime.begin();
+          try { data = await readManagedPropertyDraft(resumeDraftId, companyId, await bindCompanyAccessOperation(lease)); }
+          finally { lease.finish(); }
         } else {
         let query = supabase.from('properties').select('*').is('deleted_at', null);
         if (resumeDraftId) query = query.eq('id', resumeDraftId);
@@ -169,12 +180,13 @@ export function usePropertyWizardDraft({
     return () => {
       cancelled = true;
     };
-  }, [actorScope, userId, cloneFromId, companyId, resumeDraftId, setFormData]);
+  }, [actorScope, userId, cloneFromId, companyId, resumeDraftId, setFormData, lifetime]);
 
   const persistDraft = useCallback(async (showToast = false): Promise<OwnerProperty | null> => {
+    if (currentActorScopeRef.current !== actorScope) return null;
     while (savingRef.current) {
       const saved = await savingRef.current;
-      if (!saved || scopeRef.current !== actorScope) return null;
+      if (!saved || currentActorScopeRef.current !== actorScope) return null;
       if (lastSavedSnapshotRef.current === JSON.stringify(formData)) return saved;
     }
     if (!hasMeaningfulDraftData || !userId || isLoadingDraft || draftLoadError) return null;
@@ -195,7 +207,7 @@ export function usePropertyWizardDraft({
         const property = draftIdRef.current
           ? await draftUpdateProperty.mutateAsync({ id: draftIdRef.current, ...draftPayload, _silent: true, _authoring: true, _expectedUpdatedAt: updatedAtRef.current } as never)
           : await draftCreateProperty.mutateAsync({ ...draftPayload, _silent: true, _companyId: companyId || undefined, _operatingSpaceId: operatingSpaceId } as never);
-        if (scopeRef.current !== savingScope) return null;
+        if (currentActorScopeRef.current !== savingScope) return null;
         if (!property?.id) throw new Error('Draft save was not confirmed');
         draftIdRef.current = property.id;
         updatedAtRef.current = property.updated_at;
@@ -209,7 +221,7 @@ export function usePropertyWizardDraft({
         if (showToast) toast.success(pickLang(language || (isRu ? 'ru' : 'en'), { en: 'Draft saved', ru: 'Черновик сохранён', th: 'บันทึกฉบับร่างแล้ว' }));
         return property as OwnerProperty;
       } catch (error) {
-        if (scopeRef.current !== savingScope) return null;
+        if (currentActorScopeRef.current !== savingScope) return null;
         if (error instanceof PropertyDraftSaveError) {
           draftIdRef.current = error.propertyId;
           updatedAtRef.current = error.expectedUpdatedAt;
@@ -218,6 +230,14 @@ export function usePropertyWizardDraft({
           setDraftPropertyId(error.propertyId);
           onDraftCreated(error.propertyId);
         }
+        if (error instanceof AuthoringCreationResumeRequired) {
+          draftIdRef.current = error.draft.id;
+          updatedAtRef.current = undefined;
+          needsFullSaveRef.current = true;
+          setDraftLoadError('The previous creation was saved. Reload this draft before changing its content.');
+          setDraftPropertyId(error.draft.id);
+          onDraftCreated(error.draft.id);
+        }
         setSaveState('error');
         if (showToast) toast.error(pickLang(language || (isRu ? 'ru' : 'en'), { en: 'Could not save draft', ru: 'Не удалось сохранить черновик', th: 'บันทึกฉบับร่างไม่สำเร็จ' }), {
           description: error instanceof Error ? error.message : undefined,
@@ -225,7 +245,7 @@ export function usePropertyWizardDraft({
         errorLog.silent(error, 'persist_property_draft');
         return null;
       } finally {
-        if (scopeRef.current === savingScope) {
+        if (currentActorScopeRef.current === savingScope) {
           savingRef.current = null;
           setIsSavingDraft(false);
         }

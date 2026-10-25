@@ -8,6 +8,7 @@ const state = vi.hoisted(() => ({
   existing: [] as { id: string; check_in: string; check_out: string }[],
   boundary: [] as string[],
   failedTable: '', missingOrder: false,
+  command: vi.fn(),
 }));
 vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: [], isLoading: false }),
@@ -18,6 +19,8 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthe
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: null }) }));
 vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefront: null }) }));
 vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: () => { throw Error('Forbidden query'); } }));
+vi.mock('@/lib/propertyReservationReceipt', () => ({ bindPropertyReservationReader: async () => ({}) }));
+vi.mock('@/lib/manualPropertyBooking', async original => ({ ...await original<typeof import('@/lib/manualPropertyBooking')>(), executePropertyBookingChange: state.command }));
 vi.mock('@/integrations/supabase/client', () => {
   function from(table: string) {
     const filters: { method: string; field: string; value: unknown }[] = [];
@@ -78,8 +81,8 @@ const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: Civ
   { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
 ];
 
-beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; });
-describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
+beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; state.command.mockReset(); });
+describe('legacy manual create preflight — synthetic only', () => {
   it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
     state.blocked = blocked;
     state.existing = existing ? [{ ...existing, id: 'synthetic-existing' }] : [];
@@ -87,15 +90,13 @@ describe.each(['create', 'update'] as const)('%s real booking writer preflight �
     expect(uiAllowed).toBe(allowed);
     expect(blocked.some(day => occupiedCivilDates(stay).includes(day))).toBe(blocked.some(day => stayOccupiesDate(stay, day)));
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
-      : result.current.updateBooking({ id: 'synthetic-current', ...stay });
+    const attempt = result.current.createBooking({ property_id: 'synthetic-home', ...stay });
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
-    expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
+    expect(state.boundary).toEqual(allowed ? ['orders.insert'] : []);
   });
 });
 
-describe.each(['create', 'update'] as const)('%s fails closed before mutation', mode => {
+describe('legacy manual create fails closed before mutation', () => {
   it.each(['orders', 'order_items', 'property_availability'])('rejects failed %s availability source', async table => {
     state.failedTable = table;
     state.existing = [{ id: 'synthetic-other', check_in: '2026-10-10', check_out: '2026-10-13' }];
@@ -103,25 +104,49 @@ describe.each(['create', 'update'] as const)('%s fails closed before mutation', 
     const dates = { check_in: '2026-10-11', check_out: '2026-10-14' };
     // For block-source failure, no earlier overlap should stop the read.
     if (table === 'property_availability') state.existing = [];
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...dates })
-      : result.current.updateBooking({ id: 'synthetic-current', ...dates });
+    const attempt = result.current.createBooking({ property_id: 'synthetic-home', ...dates });
     await expect(attempt).rejects.toThrow('Synthetic read failure');
     expect(state.boundary).toEqual([]);
   });
   it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('rejects invalid stay %s → %s', async (check_in, check_out) => {
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create' ? result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out })
-      : result.current.updateBooking({ id: 'synthetic-current', check_in, check_out });
-    await expect(attempt).rejects.toThrow(mode === 'update' && !check_in ? 'Booking dates or property unavailable' : 'корректные даты');
+    const attempt = result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out });
+    await expect(attempt).rejects.toThrow('корректные даты');
     expect(state.boundary).toEqual([]);
   });
 });
-it.each(['missing', 'error'])('update rejects %s current order before mutation', async outcome => {
-  state.missingOrder = outcome === 'missing'; state.failedTable = outcome === 'error' ? 'current' : '';
-  const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-  await expect(result.current.updateBooking({ id: 'synthetic-current', check_in: '2026-10-11' })).rejects.toThrow();
-  expect(state.boundary).toEqual([]);
+
+describe('checked update delegates inventory validation with unchanged civil dates', () => {
+  it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
+    // Inventory decisions now belong to the checked server transaction. Keep
+    // every prior boundary case and prove the browser neither reinterprets the
+    // civil dates nor falls back to raw order/participant writes on rejection.
+    expect(!blocked.some(day => stayOccupiesDate(stay, day)) && !(existing && civilStaysOverlap(existing, stay))).toBe(allowed);
+    state.command.mockRejectedValue(new Error(allowed ? 'CANONICAL_COMMAND_BOUNDARY' : 'Canonical inventory conflict'));
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    await expect(result.current.updateBooking({ id: 'synthetic-current', ...stay })).rejects.toThrow(allowed ? 'CANONICAL_COMMAND_BOUNDARY' : 'Canonical inventory conflict');
+    expect(state.command).toHaveBeenCalledExactlyOnceWith({}, 'synthetic-user', 'synthetic-current', stay, undefined);
+    expect(state.boundary).toEqual([]);
+  });
+  it.each(['orders', 'order_items', 'property_availability'])('propagates failed canonical %s validation without client writes', async source => {
+    state.command.mockRejectedValue(new Error(`Canonical ${source} unavailable`));
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    await expect(result.current.updateBooking({ id: 'synthetic-current', check_in: '2026-10-11', check_out: '2026-10-14' })).rejects.toThrow(`Canonical ${source} unavailable`);
+    expect(state.boundary).toEqual([]);
+  });
+  it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('propagates canonical invalid stay %s → %s', async (check_in, check_out) => {
+    state.command.mockRejectedValue(new Error('invalid_property_stay_dates'));
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    await expect(result.current.updateBooking({ id: 'synthetic-current', check_in, check_out })).rejects.toThrow('invalid_property_stay_dates');
+    expect(state.command).toHaveBeenCalledExactlyOnceWith({}, 'synthetic-user', 'synthetic-current', { check_in, check_out }, undefined);
+    expect(state.boundary).toEqual([]);
+  });
+  it.each(['missing', 'error'])('propagates %s canonical revision without raw current-order reads', async outcome => {
+    state.command.mockRejectedValue(new Error(`Canonical revision ${outcome}`));
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    await expect(result.current.updateBooking({ id: 'synthetic-current', check_in: '2026-10-11' })).rejects.toThrow(`Canonical revision ${outcome}`);
+    expect(state.boundary).toEqual([]);
+  });
 });
 
 describe('timestamp contract ambiguity — evidence, not a new conversion', () => {

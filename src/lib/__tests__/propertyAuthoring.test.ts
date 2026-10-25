@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createManagedPropertyDraft, readManagedPropertyDraft, listManagedPropertyDrafts, propertyAuthoringDelta, editablePropertyAuthoringPatch, propertyAuthoringPatch, propertyCreationSpace, PropertyDraftSaveError, saveManagedPropertyDraft } from '../propertyAuthoring';
+import type { BoundCompanyAccessOperation } from '../companyAccessOperation';
+import { createManagedPropertyDraft, readManagedPropertyDraft, listManagedPropertyDrafts, propertyAuthoringDelta, editablePropertyAuthoringPatch, propertyAuthoringPatch, propertyCreationSpace, PropertyDraftSaveError, saveManagedPropertyDraft, resolveManagedPropertyCreation } from '../propertyAuthoring';
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), scope: vi.fn(), from: vi.fn(), single: vi.fn(), eq: vi.fn() }));
 vi.mock('@/lib/untypedTables', () => ({ untypedRpc: mocks.rpc }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from } }));
@@ -104,5 +105,82 @@ describe('safe content-only reads and deltas', () => {
   it.each([{ pricing: false, bookings: false }, { pricing: true, bookings: false }, { pricing: false, bookings: true }])('keeps pricing and booking authority separate: %j', capabilities => {
     const result = editablePropertyAuthoringPatch({ title: 'Villa', price_per_night: 100, instant_booking: true, seasonal_pricing: [] }, capabilities);
     expect(result).toEqual({ title: 'Villa', ...(capabilities.pricing ? { price_per_night: 100 } : {}), ...(capabilities.bookings ? { instant_booking: true } : {}) });
+  });
+});
+
+describe('retry-safe property creation with a frozen company operation', () => {
+  function bound(rpc = vi.fn(async (name: string, _args?: Record<string, unknown>) => ({ data: name === 'list_managed_property_authoring_spaces_checked' ? scope.spaces : saved, error: null as { message: string } | null }))) {
+    const assertCurrent = vi.fn(() => {});
+    const operation = { actorId: 'employee-a', companyId: company, client: { rpc }, assertCurrent } as unknown as BoundCompanyAccessOperation;
+    return { rpc, assertCurrent, operation };
+  }
+  it('creates through the frozen client using exactly scope and atomic retry-safe create', async () => {
+    const { rpc, operation } = bound();
+    const result = await createManagedPropertyDraft({ companyId: company, operatingSpaceId: space1, patch: { title_en: 'Villa', owner_id: 'forged' }, requestId: 'request-a', operation });
+    expect(result).toEqual(saved);
+    expect(rpc.mock.calls).toEqual([
+      ['list_managed_property_authoring_spaces_checked', { p_company_id: company }],
+      ['create_managed_property_idempotent_checked', { p_company_id: company, p_operating_space_id: space1, p_request_id: 'request-a', p_patch: { title_en: 'Villa' } }],
+    ]);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it('resolves an async request factory only after the selected Space was verified', async () => {
+    const { rpc, operation } = bound();
+    const requestId = vi.fn(async (selected: string) => {
+      expect(selected).toBe(space1);
+      expect(rpc).toHaveBeenCalledTimes(1);
+      await Promise.resolve();
+      return 'persisted-intent';
+    });
+    await createManagedPropertyDraft({ companyId: company, operatingSpaceId: space1, patch: {}, requestId, operation });
+    expect(requestId).toHaveBeenCalledOnce();
+    expect(rpc).toHaveBeenNthCalledWith(2, 'create_managed_property_idempotent_checked', { p_company_id: company, p_request_id: 'persisted-intent', p_operating_space_id: space1, p_patch: {} });
+  });
+  it('does not fall back to shell create/read/save when the keyed RPC is missing', async () => {
+    const rpc = vi.fn(async (name: string) => ({ data: name === 'list_managed_property_authoring_spaces_checked' ? scope.spaces : null, error: name === 'list_managed_property_authoring_spaces_checked' ? null : { message: 'Atomic RPC unavailable' } }));
+    const { operation } = bound(rpc);
+    await expect(createManagedPropertyDraft({ companyId: company, patch: {}, requestId: 'request-a', operation })).rejects.toThrow('Atomic RPC unavailable');
+    expect(rpc.mock.calls.map(([name]) => name)).toEqual(['list_managed_property_authoring_spaces_checked', 'create_managed_property_idempotent_checked']);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it('rejects a completed response after its operation became stale', async () => {
+    let stale = false;
+    const rpc = vi.fn(async (name: string) => {
+      if (name !== 'list_managed_property_authoring_spaces_checked') stale = true;
+      return { data: name === 'list_managed_property_authoring_spaces_checked' ? scope.spaces : saved, error: null };
+    });
+    const { operation, assertCurrent } = bound(rpc);
+    assertCurrent.mockImplementation(() => { if (stale) throw new Error('Stale operation'); });
+    await expect(createManagedPropertyDraft({ companyId: company, patch: {}, requestId: 'request-a', operation })).rejects.toThrow('Stale operation');
+    expect(rpc).toHaveBeenCalledTimes(2);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it('rejects a company mismatch before any request is dispatched', async () => {
+    const { rpc, operation } = bound();
+    await expect(createManagedPropertyDraft({ companyId: 'another-company', patch: {}, requestId: 'request-a', operation })).rejects.toThrow('different company');
+    expect(rpc).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it('validates a read against the bound company even when optional companyId is omitted', async () => {
+    const rpc = vi.fn(async () => ({ data: { ...saved, management_company_id: 'another-company' }, error: null }));
+    const { operation } = bound(rpc);
+    await expect(readManagedPropertyDraft(property, undefined, operation)).rejects.toThrow('does not match');
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+  it('resolves an uncertain create through the frozen client without issuing another create', async () => {
+    const { rpc, operation } = bound();
+    expect(await resolveManagedPropertyCreation(operation, 'persisted-intent', space1)).toEqual(saved);
+    expect(rpc).toHaveBeenCalledExactlyOnceWith('resolve_managed_property_creation_checked', { p_company_id: company, p_operating_space_id: space1, p_request_id: 'persisted-intent' });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it('preserves unknown resolution as null without inferring a failed original create', async () => {
+    const rpc = vi.fn(async () => ({ data: null, error: null }));
+    const { operation } = bound(rpc);
+    expect(await resolveManagedPropertyCreation(operation, 'persisted-intent', space1)).toBeNull();
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 });

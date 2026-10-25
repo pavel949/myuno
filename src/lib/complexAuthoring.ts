@@ -49,6 +49,13 @@ export async function readComplexCreationScope(operation: BoundCompanyAccessOper
   return { companyId: operation.companyId!, spaces: data };
 }
 
+export async function resolveManagedComplexCreation(operation: BoundCompanyAccessOperation, requestId: string, spaceId: string): Promise<ManagedComplexDraft | null> {
+  const data = await complexRpc(operation, 'resolve_managed_complex_creation_checked', {
+    p_company_id: operation.companyId, p_operating_space_id: spaceId, p_request_id: requestId,
+  });
+  return data === null ? null : managedComplexRow(data, operation.companyId!);
+}
+
 export async function listManagedComplexDrafts(operation: BoundCompanyAccessOperation, offset = 0, limit = 50): Promise<ManagedComplexDraft[]> {
   const data = await complexRpc(operation, 'list_managed_complex_drafts_checked', { p_company_id: operation.companyId, p_limit: limit, p_offset: offset });
   if (!Array.isArray(data)) throw new Error('Complex list was not confirmed');
@@ -60,7 +67,7 @@ export async function readManagedComplexDraft(operation: BoundCompanyAccessOpera
   return managedComplexRow(data, operation.companyId!, complexId);
 }
 
-export async function saveManagedComplexDraft(operation: BoundCompanyAccessOperation, args: { complexId?: string; operatingSpaceId?: string; expectedUpdatedAt?: string; patch: ComplexFormData | Record<string, unknown>; submit?: boolean }): Promise<ManagedComplexDraft> {
+export async function saveManagedComplexDraft(operation: BoundCompanyAccessOperation, args: { complexId?: string; operatingSpaceId?: string; expectedUpdatedAt?: string; patch: ComplexFormData | Record<string, unknown>; submit?: boolean; requestId?: string | ((spaceId: string) => string | Promise<string>) }): Promise<ManagedComplexDraft> {
   const submit = args.submit === true;
   let data: unknown;
   if (args.complexId) {
@@ -70,8 +77,9 @@ export async function saveManagedComplexDraft(operation: BoundCompanyAccessOpera
     // Revalidate at action time using the same verified account and frozen token.
     const scope = await readComplexCreationScope(operation);
     const spaceId = propertyCreationSpace(scope, args.operatingSpaceId);
+    const requestId = typeof args.requestId === 'function' ? await args.requestId(spaceId) : args.requestId;
     // Checked creation and content are atomic. Never invent a legal owner.
-    data = await complexRpc(operation, 'create_managed_complex_checked', { p_company_id: operation.companyId, p_operating_space_id: spaceId, p_patch: complexAuthoringPatch(args.patch), p_submit: submit });
+    data = await complexRpc(operation, requestId ? 'create_managed_complex_idempotent_checked' : 'create_managed_complex_checked', { p_company_id: operation.companyId, p_operating_space_id: spaceId, p_patch: complexAuthoringPatch(args.patch), p_submit: submit, ...(requestId ? { p_request_id: requestId } : {}) });
   }
   const saved = managedComplexRow(data, operation.companyId!, args.complexId);
   if (saved.is_active || saved.approval_status !== (submit ? 'pending' : 'draft')) throw new Error('The expected complex state was not confirmed. Reload before retrying.');

@@ -6,7 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
 import { bindCompanyAccessOperation, StaleCompanyAccessOperation } from '@/lib/companyAccessOperation';
-import { complexAuthoringDelta, listManagedComplexDrafts, readComplexCreationScope, readManagedComplexDraft, saveManagedComplexDraft, type ManagedComplexDraft } from '@/lib/complexAuthoring';
+import { complexAuthoringDelta, complexAuthoringPatch, listManagedComplexDrafts, readComplexCreationScope, readManagedComplexDraft, saveManagedComplexDraft, resolveManagedComplexCreation, type ManagedComplexDraft } from '@/lib/complexAuthoring';
+import { authoringCreateRequestId, confirmAuthoringCreateIntent, clearConfirmedAuthoringCreateIntents, AuthoringCreationResumeRequired } from '@/lib/authoringCreateIntent';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { Button } from '@/components/ui/button';
 import { ComplexFormDialog } from './ComplexFormDialog';
@@ -36,6 +37,7 @@ function ComplexDraftWorkspace({ actorId, companyId }: { actorId: string; compan
   const [saving, setSaving] = useState(false);
   const [mustReload, setMustReload] = useState(false);
   const [openError, setOpenError] = useState(false);
+  const [recoveredDraft, setRecoveredDraft] = useState<ManagedComplexDraft | null>(null);
   const requestInFlight = useRef(false);
   const drafts = useQuery({
     queryKey: ['managed-complex-drafts', actorId, companyId, offset],
@@ -81,18 +83,29 @@ function ComplexDraftWorkspace({ actorId, companyId }: { actorId: string; compan
     if (requestInFlight.current || mustReload) throw new Error('Reload before saving');
     requestInFlight.current = true; setSaving(true);
     const lease = lifetime.begin();
+    let intent: { kind: 'complex'; actorId: string; companyId: string; spaceId: string } | undefined;
     try {
       const operation = await bindCompanyAccessOperation(lease);
-      await saveManagedComplexDraft(operation, {
+      const saved = await saveManagedComplexDraft(operation, {
         complexId: editing?.id, expectedUpdatedAt: editing?.updated_at,
         operatingSpaceId: editing?.authoring_space_id || spaceId,
         patch: editing ? complexAuthoringDelta(data, baseline) : data, submit,
+        requestId: editing ? undefined : async actualSpaceId => {
+          intent = { kind: 'complex', actorId, companyId, spaceId: actualSpaceId };
+          return authoringCreateRequestId(intent, { patch: complexAuthoringPatch(data), submit }, async requestId => {
+            const found = await resolveManagedComplexCreation(operation, requestId, actualSpaceId);
+            if (found) setRecoveredDraft(found);
+            return found;
+          });
+        },
       });
       operation.assertCurrent();
+      if (intent) confirmAuthoringCreateIntent(intent, saved.id);
       // Persisted success is independent of a later list-refresh error.
       void queryClient.invalidateQueries({ queryKey: ['managed-complex-drafts', actorId, companyId] });
       void queryClient.invalidateQueries({ queryKey: ['property-complexes', actorId] });
     } catch (error) {
+      if (error instanceof AuthoringCreationResumeRequired && lifetime.isActive) setOpen(false);
       if (lifetime.isActive) {
         // A transport error may follow a committed create. Do not duplicate it.
         setMustReload(true);
@@ -109,11 +122,12 @@ function ComplexDraftWorkspace({ actorId, companyId }: { actorId: string; compan
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><h2 className="font-semibold">{text('Complex data entry', 'Заполнение комплексов', 'กรอกข้อมูลโครงการ')}</h2>
         <p className="text-sm text-muted-foreground">{text('Save catalogue content, then send it for publication review.', 'Сохраните данные каталога и отправьте их на проверку перед публикацией.', 'บันทึกข้อมูลแค็ตตาล็อก แล้วส่งให้ตรวจสอบก่อนเผยแพร่')}</p></div>
-      <Button className="gap-2" disabled={drafts.isLoading || !!drafts.error || opening} onClick={() => { setEditing(null); setSpaceId(''); setMustReload(false); setOpenError(false); setOpen(true); }}><Plus className="h-4 w-4" />{text('New complex', 'Новый комплекс', 'โครงการใหม่')}</Button>
+      <Button className="gap-2" disabled={drafts.isLoading || !!drafts.error || opening} onClick={() => { clearConfirmedAuthoringCreateIntents('complex', actorId, companyId); setEditing(null); setSpaceId(spaces.data?.spaces.length === 1 ? spaces.data.spaces[0].id : ''); setMustReload(false); setOpenError(false); setOpen(true); }}><Plus className="h-4 w-4" />{text('New complex', 'Новый комплекс', 'โครงการใหม่')}</Button>
     </div>
     {drafts.isLoading && <p role="status">{text('Loading drafts…', 'Загружаем черновики…', 'กำลังโหลดฉบับร่าง…')}</p>}
     {drafts.error && <div role="alert" className="space-y-2"><p>{text('Complex data entry is unavailable. Your administrator needs to verify the checked workflow and your assignment.', 'Заполнение комплексов недоступно. Администратору нужно проверить защищённый процесс и ваше назначение.', 'ยังกรอกข้อมูลโครงการไม่ได้ ผู้ดูแลต้องตรวจสอบขั้นตอนที่ตรวจสอบสิทธิ์และการมอบหมายของคุณ')}</p><Button variant="outline" onClick={() => void drafts.refetch()}>{text('Retry', 'Повторить', 'ลองอีกครั้ง')}</Button></div>}
     {openError && <p role="alert">{text('This complex could not be opened. Refresh the list and check your access.', 'Не удалось открыть комплекс. Обновите список и проверьте доступ.', 'เปิดโครงการนี้ไม่ได้ โปรดรีเฟรชรายการและตรวจสอบสิทธิ์')}</p>}
+    {recoveredDraft && <div role="status" className="space-y-2"><p>{text('The previous creation was saved. Reopen it to continue editing.', 'Предыдущее создание сохранено. Откройте его, чтобы продолжить редактирование.', 'บันทึกการสร้างก่อนหน้าแล้ว เปิดอีกครั้งเพื่อแก้ไขต่อ')}</p><Button variant="outline" onClick={() => void openDraft(recoveredDraft)}>{text('Reopen saved draft', 'Открыть сохранённый черновик', 'เปิดฉบับร่างที่บันทึกแล้ว')}</Button></div>}
     {!drafts.isLoading && !drafts.error && !drafts.data?.length && <p>{text('No drafts in this workspace.', 'В этой рабочей области нет черновиков.', 'ไม่มีฉบับร่างในพื้นที่ทำงานนี้')}</p>}
     {!drafts.error && drafts.data?.map(draft => <div key={draft.id} className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
       <div className="min-w-0"><p className="break-words font-medium">{language === 'ru' ? draft.name_ru || draft.name : draft.name}</p><p className="text-sm text-muted-foreground">{

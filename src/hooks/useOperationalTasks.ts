@@ -1,12 +1,14 @@
 import { bangkokTodayISO } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startOfDay, endOfDay, addDays, format, isToday } from 'date-fns';
+import { CompanyAccessLifetime, StaleCompanyAccessOperation, bindCompanyAccessOperation, type BoundCompanyAccessOperation } from '@/lib/companyAccessOperation';
+import { createManagedOperationalTask, editManagedOperationalTask } from '@/lib/managedTaskCommands';
 
 export interface OperationalTask {
   id: string;
@@ -42,6 +44,8 @@ export interface OperationalTask {
 }
 
 export interface CreateTaskInput {
+  /** Reuse on uncertain-response retry; canonical task ID, not a property ID. */
+  request_id?: string;
   property_id: string;
   booking_id?: string;
   task_type: OperationalTask['task_type'];
@@ -67,6 +71,32 @@ export function useOperationalTasks(options?: {
   const queryClient = useQueryClient();
   const { allProperties, isLoading: propsLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const allPropertyIds = useMemo(() => allProperties.map(p => p.property_id), [allProperties]);
+  const operationLifetimes=useRef(new Set<CompanyAccessLifetime>());
+  const pendingTaskCreates=useRef(new Map<string,string>());
+  const operationScope=allProperties.map(p=>`${p.property_id}:${p.management_company_id}:${p.checked_task_commands_enforced}`).join(',');
+  const mutationScope=JSON.stringify([user?.id,operationScope]);
+  const mutationScopeRef=useRef(mutationScope);
+  if(mutationScopeRef.current!==mutationScope){
+    mutationScopeRef.current=mutationScope;
+    for(const lifetime of operationLifetimes.current)lifetime.invalidate();
+    operationLifetimes.current.clear();pendingTaskCreates.current.clear();
+  }
+  useEffect(()=>()=>{for(const lifetime of operationLifetimes.current)lifetime.invalidate();operationLifetimes.current.clear();pendingTaskCreates.current.clear();},[]);
+  const withManagedOperation=async<T,>(companyId:string,action:(operation:BoundCompanyAccessOperation)=>Promise<T>)=>{
+    if(mutationScopeRef.current!==mutationScope)throw new StaleCompanyAccessOperation();
+    const lifetime=new CompanyAccessLifetime(user?.id,companyId);operationLifetimes.current.add(lifetime);
+    const lease=lifetime.begin();
+    try{return await action(await bindCompanyAccessOperation(lease));}
+    finally{lease.finish();lifetime.invalidate();operationLifetimes.current.delete(lifetime);}
+  };
+  const propertyForMutation=(propertyId:string)=>{
+    if(mutationScopeRef.current!==mutationScope)throw new StaleCompanyAccessOperation();
+    if(propertiesError||propsLoading)throw new Error('Property access is not ready. Reload before changing a task.');
+    const property=allProperties.find(p=>p.property_id===propertyId);
+    if(!property||property.management_company_id===undefined)throw new Error('Property company scope could not be verified. Reload before changing a task.');
+    if(property.management_company_id&&typeof property.checked_task_commands_enforced!=='boolean')throw new Error('Property task-command activation could not be verified. Reload before changing a task.');
+    return property;
+  };
   
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
@@ -79,7 +109,7 @@ export function useOperationalTasks(options?: {
   const typeArr = options?.taskType ? (Array.isArray(options.taskType) ? options.taskType : [options.taskType]).sort().join(',') : undefined;
   const propertyIdsKey = allPropertyIds.join(',');
 
-  const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr, propertyIdsKey];
+  const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr, propertyIdsKey,operationScope];
   
   const { data: tasks = [], isLoading: tasksLoading, error: tasksError, refetch } = useQuery({
     queryKey,
@@ -165,10 +195,19 @@ export function useOperationalTasks(options?: {
   // Create task
   const createTask = useMutation({
     mutationFn: async (input: CreateTaskInput) => {
+      const property=propertyForMutation(input.property_id);
+      if(property.management_company_id&&property.checked_task_commands_enforced){
+        const intent=JSON.stringify({actor:user?.id,company:property.management_company_id,input});
+        const request=input.request_id??pendingTaskCreates.current.get(intent)??crypto.randomUUID();
+        pendingTaskCreates.current.set(intent,request);
+        const saved=await withManagedOperation(property.management_company_id,operation=>createManagedOperationalTask(operation,input,request));
+        pendingTaskCreates.current.delete(intent);return saved;
+      }
+      const {request_id:_requestId,...legacyInput}=input;
       const { data, error } = await supabase
         .from('property_operational_tasks')
         .insert({
-          ...input,
+          ...legacyInput,
           status: 'pending',
         })
         .select()
@@ -190,6 +229,11 @@ export function useOperationalTasks(options?: {
   // Update task status
   const updateTaskStatus = useMutation({
     mutationFn: async ({ taskId, status, notes }: { taskId: string; status: OperationalTask['status']; notes?: string }) => {
+      if(tasksError)throw tasksError;
+      const task=tasks.find(row=>row.id===taskId);
+      if(!task)throw new Error('Task not saved or access denied. Reload this task before changing it.');
+      const property=propertyForMutation(task.property_id);
+      if(property.management_company_id&&property.checked_task_commands_enforced)return withManagedOperation(property.management_company_id,operation=>editManagedOperationalTask(operation,task,{status,...(notes!==undefined?{notes}:{})}));
       const updates: Record<string, any> = { status };
       
       if (status === 'completed') {
@@ -222,6 +266,30 @@ export function useOperationalTasks(options?: {
   });
 
   // Complete task
+  const editTask=useMutation({
+    mutationFn:async({taskId,patch}:{taskId:string;patch:Record<string,unknown>})=>{
+      if(tasksError)throw tasksError;
+      const task=tasks.find(row=>row.id===taskId);
+      if(!task)throw new Error('Reload this task before changing it');
+      const property=propertyForMutation(task.property_id);
+      if(property.management_company_id&&property.checked_task_commands_enforced)return withManagedOperation(property.management_company_id,operation=>editManagedOperationalTask(operation,task,patch));
+      const {data,error}=await supabase.from('property_operational_tasks').update(patch as never).eq('id',taskId).select().single();
+      if(error)throw error;if(!data)throw new Error('Task change was not confirmed');return data;
+    },
+    onSuccess:()=>{queryClient.invalidateQueries({queryKey:['operational-tasks']});},
+  });
+  const deleteTask=useMutation({
+    mutationFn:async(taskId:string)=>{
+      if(tasksError)throw tasksError;
+      const task=tasks.find(row=>row.id===taskId);
+      if(!task)throw new Error('Reload this task before changing it');
+      const property=propertyForMutation(task.property_id);
+      if(property.management_company_id&&property.checked_task_commands_enforced)throw new Error('Cancel this managed task instead of deleting its operational history');
+      const {data,error}=await supabase.from('property_operational_tasks').delete().eq('id',taskId).select().single();
+      if(error)throw error;if(!data)throw new Error('Task deletion was not confirmed');return data;
+    },
+    onSuccess:()=>{queryClient.invalidateQueries({queryKey:['operational-tasks']});},
+  });
   const completeTask = useMutation({
     mutationFn: async (taskId: string) => {
       return updateTaskStatus.mutateAsync({ taskId, status: 'completed' });
@@ -245,6 +313,8 @@ export function useOperationalTasks(options?: {
       return refetch();
     },
     createTask,
+    editTask,
+    deleteTask,
     updateTaskStatus,
     completeTask,
   };

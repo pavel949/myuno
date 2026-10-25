@@ -41,9 +41,11 @@ vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefr
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: fixture.company ? { company_id: fixture.company } : null, isLoading: fixture.companyLoading }) }));
 vi.mock('@/hooks/useMyProperties', () => ({ useMyProperties: () => ({
   activeProperties: fixture.properties.map(id => ({ property_id: id, id, title: id })),
-  allProperties: fixture.properties.map(id => ({ property_id: id, id, title: id })), isLoading: fixture.propertiesLoading, error: fixture.propertyError,
+  allProperties: fixture.properties.map(id => ({ property_id: id, id, title: id,management_company_id:null })), isLoading: fixture.propertiesLoading, error: fixture.propertyError,
 }) }));
 vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: async () => ({ allIds: fixture.accessible }) }));
+vi.mock('@/lib/propertyReservationReceipt', () => ({ bindPropertyReservationReader: async (_actor: string, assertCurrent: () => void) => { assertCurrent(); return {}; } }));
+vi.mock('@/lib/propertyReservation', async original => ({ ...await original<typeof import('@/lib/propertyReservation')>(), listPropertyReservations: async () => [] }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn() }) }));
 
 import { usePmsToday } from '../usePmsToday';
@@ -133,12 +135,13 @@ describe('PMS real hooks / in-memory request adapter, NOT hosted E2E', () => {
     // This does NOT transition a booking/order: report the lifecycle gap, never fake it.
     expect(fixture.trace.some(t => t.table === 'orders' || t.table === 'property_bookings')).toBe(false);
   });
-  it('denied task completion rejects without successful invalidation', async () => {
+  it('an unavailable task rejects before a writer and without successful invalidation', async () => {
     const { result, client } = mount(() => useOperationalTasks());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     fixture.errors.property_operational_tasks = new Error('task denied');
     const invalidate = vi.spyOn(client, 'invalidateQueries');
-    await act(async () => { await expect(result.current.completeTask.mutateAsync('foreign-task')).rejects.toThrow('task denied'); });
+    await act(async () => { await expect(result.current.completeTask.mutateAsync('foreign-task')).rejects.toThrow('Reload this task'); });
+    expect(fixture.trace.some(row=>row.op==='update')).toBe(false);
     expect(invalidate).not.toHaveBeenCalled();
   });
   it('report read passes property filter and propagates denied read; RLS authority is not simulated', async () => {

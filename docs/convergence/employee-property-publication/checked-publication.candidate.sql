@@ -47,6 +47,7 @@ GRANT EXECUTE ON FUNCTION public.managed_property_booking_fields() TO authentica
 -- A content-author relation is not an operational manager assignment. No default,
 -- backfill, base-table SELECT policy, ownership grant or manager assignment is added.
 ALTER TABLE public.properties ADD COLUMN content_author_user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.properties ADD COLUMN checked_task_commands_enforced boolean NOT NULL DEFAULT false;
 COMMENT ON COLUMN public.properties.content_author_user_id IS
  'Checked draft creator only; not ownership, management, booking, finance or base-row read authority';
 CREATE INDEX properties_content_author_company_idx ON public.properties(content_author_user_id,management_company_id)
@@ -68,7 +69,8 @@ CREATE FUNCTION public.actor_can_author_managed_property(p_property_id uuid,p_ac
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  SELECT auth.uid() IS NOT NULL AND p_action IN ('view','edit') AND EXISTS(
   SELECT 1 FROM public.properties p WHERE p.id=p_property_id AND p.deleted_at IS NULL
-  AND p.management_company_id IS NOT NULL AND (
+  AND p.management_company_id IS NOT NULL
+  AND EXISTS(SELECT 1 FROM public.management_companies co WHERE co.id=p.management_company_id AND co.is_active IS TRUE) AND (
    public.actor_has_platform_admin() OR (
     public.mc_can_access_e28_private(auth.uid(),p.management_company_id,'properties','view')
     AND public.mc_can_access_e28_private(auth.uid(),p.management_company_id,'properties',p_action)
@@ -91,6 +93,7 @@ CREATE FUNCTION public.list_managed_property_authoring_spaces_checked(p_company_
 RETURNS TABLE(id uuid,name_en text,name_ru text) LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 BEGIN
  IF auth.uid() IS NULL OR p_company_id IS NULL
+ OR NOT EXISTS(SELECT 1 FROM public.management_companies co WHERE co.id=p_company_id AND co.is_active IS TRUE)
  OR public.mc_can_access_e28_private(auth.uid(),p_company_id,'properties','edit') IS NOT TRUE
  OR public.mc_can_access_e28_private(auth.uid(),p_company_id,'properties','view') IS NOT TRUE THEN
   RAISE EXCEPTION 'company properties edit permission required' USING ERRCODE='42501'; END IF;
@@ -352,8 +355,8 @@ RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor uuid:=auth.uid();new_id uuid;
 BEGIN
  IF actor IS NULL THEN RAISE EXCEPTION 'authentication required' USING ERRCODE='42501'; END IF;
- IF NOT EXISTS(SELECT 1 FROM public.management_companies WHERE id=p_company_id) THEN
-  RAISE EXCEPTION 'company not found' USING ERRCODE='42501'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.management_companies WHERE id=p_company_id AND is_active IS TRUE) THEN
+  RAISE EXCEPTION 'active company required' USING ERRCODE='42501'; END IF;
  IF public.actor_has_platform_admin() IS NOT TRUE AND NOT EXISTS(
   SELECT 1 FROM public.management_company_members m WHERE m.company_id=p_company_id AND m.user_id=actor
   AND m.is_active IS TRUE AND m.role IN ('director','admin','manager','staff')
@@ -372,8 +375,8 @@ BEGIN
    AND m.is_active IS TRUE AND m.user_id=actor)))
  THEN RAISE EXCEPTION 'operating space not authorized' USING ERRCODE='42501'; END IF;
  INSERT INTO public.properties(title_en,title_ru,property_type,listing_type,management_company_id,
-  is_active,approval_status,owner_id,provider_id,instant_booking,content_author_user_id)
- VALUES(p_title_en,p_title_ru,p_property_type,p_listing_type,p_company_id,false,'draft',NULL,NULL,false,actor)
+  is_active,approval_status,owner_id,provider_id,instant_booking,content_author_user_id,checked_task_commands_enforced)
+ VALUES(p_title_en,p_title_ru,p_property_type,p_listing_type,p_company_id,false,'draft',NULL,NULL,false,actor,true)
  RETURNING id INTO new_id;
  PERFORM set_config('myuno.assignment_reason','onboarding',true);
  INSERT INTO public.operating_space_properties(operating_space_id,property_id,management_company_id)

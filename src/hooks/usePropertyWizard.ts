@@ -6,6 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { readPropertyCreationScope } from '@/lib/propertyAuthoring';
+import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
+import { bindCompanyAccessOperation } from '@/lib/companyAccessOperation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import {
@@ -50,6 +52,7 @@ export function usePropertyWizard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeCompany, isLoading: companyLoading, error: companyError, refetch: retryCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id || null;
+  const authoringLifetime = useCompanyAccessLifetime(user?.id, companyId || undefined);
   const { canAccess, isLoading: permissionsLoading } = useTeamPermissions();
   const authoringCapabilities = useMemo(() => ({ pricing: !companyId || (!permissionsLoading && canAccess('pricing', 'edit')), bookings: !companyId || (!permissionsLoading && canAccess('bookings', 'edit')) }), [companyId, permissionsLoading, canAccess]);
   const submitLock = useRef(false);
@@ -66,7 +69,12 @@ export function usePropertyWizard() {
   const creationScope = useQuery({
     queryKey: ['property-creation-scope', user?.id, companyId],
     enabled: !!user && !!companyId,
-    queryFn: ({ signal }) => readPropertyCreationScope(companyId!, signal),
+    queryFn: async ({ signal }) => {
+      const lease = authoringLifetime.begin();
+      signal.addEventListener('abort', lease.finish, { once: true });
+      try { return await readPropertyCreationScope(companyId!, signal, await bindCompanyAccessOperation(lease)); }
+      finally { signal.removeEventListener('abort', lease.finish); lease.finish(); }
+    },
   });
   const isRu = language === 'ru';
 
@@ -336,6 +344,7 @@ export function usePropertyWizard() {
     creationScope,
     companyLoading, companyError, retryCompany,
     managedCreation: !!companyId,
+    authoringMediaScope: actorScope,
     authoringCapabilities,
     operatingSpaces: creationScope.data?.spaces || [],
     operatingSpaceId,

@@ -12,6 +12,8 @@ vi.mock('@/hooks/useTeamPermissions', () => ({ useTeamPermissions: () => ({ canA
 vi.mock('@/hooks/usePropertyOwnership', () => ({ useSendOwnershipInvite: () => ({ mutateAsync: mocks.invite }) }));
 vi.mock('@/hooks/usePropertyCare', () => ({ useOwnerProperty: () => ({ data: null, isLoading: false }), useUpdateOwnerProperty: () => ({ mutateAsync: mocks.submit, isPending: false }) }));
 vi.mock('@/lib/propertyAuthoring', () => ({ readPropertyCreationScope: async () => ({ companyId: 'company-a', spaces: [] }) }));
+vi.mock('@/hooks/useCompanyAccessLifetime', () => ({ useCompanyAccessLifetime: () => ({ begin: () => ({ finish: vi.fn() }) }) }));
+vi.mock('@/lib/companyAccessOperation', () => ({ bindCompanyAccessOperation: vi.fn(async () => ({})) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from, auth: { getUser: async () => ({ data: { user: { id: mocks.actor } } }) } } }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock('@/hooks/property-wizard/usePropertyWizardDraft', () => ({ usePropertyWizardDraft: (args: unknown) => { mocks.draftInputs(args); return { persistDraft: mocks.saveDraft, clearDraft: mocks.clearDraft, resetDraftSnapshot: vi.fn(), markUnsaved: vi.fn(), isSavingDraft: false, isLoadingDraft: false }; } }));

@@ -11,6 +11,8 @@ import { useActiveCompany } from '@/hooks/useActiveCompany';
 export interface AssignedProperty {
   id: string;
   property_id: string;
+  management_company_id?: string | null;
+  checked_task_commands_enforced?: boolean;
   title: string;
   title_ru: string;
   cover_image: string | null;
@@ -76,7 +78,8 @@ export function useAssignedProperties() {
             complex_id,
             project_id,
             deleted_at,
-            management_company_id
+            management_company_id,
+            checked_task_commands_enforced
           )
         `)
         .eq('manager_user_id', user.id)
@@ -144,6 +147,8 @@ export function useAssignedProperties() {
         return {
           id: assignment.id,
           property_id: assignment.property_id,
+          management_company_id: property.management_company_id,
+          checked_task_commands_enforced: property.checked_task_commands_enforced,
           title: property.title_en || 'Untitled',
           title_ru: property.title_ru || property.title_en || 'Без названия',
           cover_image: property.cover_image,
