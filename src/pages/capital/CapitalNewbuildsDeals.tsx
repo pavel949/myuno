@@ -20,6 +20,9 @@ import { typedFrom as from } from '@/lib/untypedTables';
 import { Building2, Clock, DollarSign, FileText, Send, Users, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { PageShell } from '@/components/page/PageShell';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -80,6 +83,7 @@ function useNewbuildsPipelineStats() {
           .eq('fee_status', 'paid'),
       ]);
 
+      for (const response of [rlnRes, holdsRes, reservationsRes]) if (response.error) throw response.error;
       const totalRlns = rlnRes.count ?? 0;
       const activeSoftHolds = holdsRes.count ?? 0;
       const bookingFeesPaid = (reservationsRes.data ?? []) as Array<{ id: string; fee_amount_thb: number }>;
@@ -120,10 +124,11 @@ function useAttributionLeads() {
       const attrIds = rows.map(r => r.id);
       if (attrIds.length === 0) return rows;
 
-      const { data: leads } = await (supabase.from('nb_leads' as any) as any)
+      const { data: leads, error: leadsError } = await (supabase.from('nb_leads' as any) as any)
         .select('attribution_id, email, phone, name')
         .in('attribution_id', attrIds);
 
+      if (leadsError) throw leadsError;
       const leadMap: Record<string, Array<{ email: string | null; phone: string | null; name: string | null }>> = {};
       ((leads ?? []) as Array<Record<string, string | null>>).forEach((l) => {
         const aid = l.attribution_id as string;
@@ -207,16 +212,23 @@ function useSendManualRln() {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function TimeLeft({ expiresAt }: { expiresAt: string | null }) {
-  if (!expiresAt) return <span className="text-gray-400">—</span>;
+  if (!expiresAt) return <span className="text-muted-foreground">—</span>;
   const ms = new Date(expiresAt).getTime() - Date.now();
-  if (ms <= 0) return <span className="text-red-500 text-xs">Истёк</span>;
+  if (ms <= 0) return <span className="whitespace-nowrap text-danger text-xs">Истёк</span>;
   const m = Math.floor(ms / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   return (
-    <span className="font-mono text-xs text-accent">
+    <span className="whitespace-nowrap font-mono text-xs text-accent">
       {m}:{s.toString().padStart(2, '0')}
     </span>
   );
+}
+
+function ReadFailure({ label, retryLabel, retry, pending }: { label: string; retryLabel: string; retry: () => unknown; pending: boolean }) {
+  return <Alert aria-label={label} className="space-y-3 text-foreground">
+    <p>{label}. Не удалось проверить данные. Ранее загруженные значения не показаны.</p>
+    <Button type="button" variant="outline" disabled={pending} onClick={() => void retry()}>{retryLabel}</Button>
+  </Alert>;
 }
 
 function Kpi({ icon: Icon, label, value, sub }: {
@@ -226,15 +238,16 @@ function Kpi({ icon: Icon, label, value, sub }: {
   sub?: string;
 }) {
   return (
-    <div className="bg-white rounded-none p-4 border border-gray-100 shadow-sm">
+    <div className="min-w-0 bg-card rounded-none p-4 border border-border shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <div className="p-2 rounded-none bg-success/10">
           <Icon className="w-4 h-4 text-success" />
         </div>
-        <span className="text-xs text-gray-500">{label}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard access to horizontally overflowing numeric text. */}
+      <p tabIndex={0} className="max-w-full overflow-x-auto whitespace-nowrap text-2xl font-bold text-foreground">{value}</p>
+      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -244,40 +257,42 @@ function Kpi({ icon: Icon, label, value, sub }: {
 export default function CapitalNewbuildsDeals() {
   const [activeTab, setActiveTab] = useState<'leads' | 'holds' | 'rln' | 'commissions'>('leads');
 
-  const { data: stats } = useNewbuildsPipelineStats();
-  const { data: rlnEvents = [], isLoading: rlnLoading, refetch: refetchRln } = useRlnEvents();
-  const { data: attributions = [], isLoading: leadsLoading } = useAttributionLeads();
-  const { data: holds = [], isLoading: holdsLoading } = useActiveHolds();
+  const { data: stats, isLoading: statsLoading, isError: statsError, isFetching: statsFetching, refetch: retryStats } = useNewbuildsPipelineStats();
+  const { data: rlnEvents = [], isLoading: rlnLoading, isError: rlnError, isFetching: rlnFetching, refetch: refetchRln } = useRlnEvents();
+  const { data: attributions = [], isLoading: leadsLoading, isError: leadsError, isFetching: leadsFetching, refetch: retryLeads } = useAttributionLeads();
+  const { data: holds = [], isLoading: holdsLoading, isError: holdsError, isFetching: holdsFetching, refetch: retryHolds } = useActiveHolds();
   const sendRln = useSendManualRln();
 
   const TABS: Array<{ key: typeof activeTab; label: string; count?: number }> = [
-    { key: 'leads', label: 'Лиды / Attribution', count: attributions.length },
-    { key: 'holds', label: 'Удержания', count: holds.filter(h => !h.released_at).length },
-    { key: 'rln', label: 'RLN журнал', count: rlnEvents.length },
+    { key: 'leads', label: 'Лиды / Attribution', count: leadsLoading || leadsError ? undefined : attributions.length },
+    { key: 'holds', label: 'Удержания', count: holdsLoading || holdsError ? undefined : holds.filter(h => !h.released_at).length },
+    { key: 'rln', label: 'RLN журнал', count: rlnLoading || rlnError ? undefined : rlnEvents.length },
     { key: 'commissions', label: 'Комиссии' },
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <PageShell width="wide" noBottomPad className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-success" />
-            Newbuilds — Broker Console
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="break-words text-2xl font-bold text-foreground flex items-center gap-2">
+            <Building2 className="w-6 h-6 shrink-0 text-success" />
+            <span className="min-w-0 break-words">Newbuilds — Broker Console</span>
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Кросс-девелоперский пайплайн · Ignatev Capital</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Кросс-девелоперский пайплайн · Ignatev Capital</p>
         </div>
         <button
+          aria-label="Обновить журнал RLN"
+          title="Обновить журнал RLN"
           onClick={() => refetchRln()}
-          className="p-2 rounded-none hover:bg-gray-100 text-gray-500"
+          className="min-h-11 min-w-11 shrink-0 p-2 rounded-none hover:bg-muted text-muted-foreground"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
       {/* KPI strip */}
-      {stats && (
+      {statsError ? <ReadFailure label="Сводка недоступна" retryLabel="Повторить загрузку сводки" retry={retryStats} pending={statsFetching} /> : statsLoading ? <p role="status" className="text-sm text-muted-foreground">Загрузка сводки...</p> : stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Kpi icon={FileText} label="Всего RLN" value={stats.totalRlns} />
           <Kpi icon={Clock} label="Активных удержаний" value={stats.activeSoftHolds} />
@@ -292,23 +307,23 @@ export default function CapitalNewbuildsDeals() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-none w-fit">
+      <div role="group" aria-label="Разделы брокерской консоли" className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto bg-muted p-1 rounded-none">
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              'px-4 py-2 rounded-none text-sm transition-all flex items-center gap-2',
+              'min-h-11 shrink-0 whitespace-nowrap px-4 py-2 rounded-none text-sm transition-all flex items-center gap-2',
               activeTab === t.key
-                ? 'bg-white shadow-sm text-gray-900 font-medium'
-                : 'text-gray-500 hover:text-gray-700',
+                ? 'bg-card shadow-sm text-foreground font-medium'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {t.label}
             {t.count != null && t.count > 0 && (
               <span className={cn(
                 'text-xs px-1.5 py-0.5 rounded-full',
-                activeTab === t.key ? 'bg-success/10 text-success' : 'bg-gray-200 text-gray-500',
+                activeTab === t.key ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground',
               )}>
                 {t.count}
               </span>
@@ -319,51 +334,52 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Leads / Attribution ── */}
       {activeTab === 'leads' && (
-        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Users className="w-4 h-4 text-success" />
-              Attribution Records — {attributions.length} лидов
+              Attribution Records{!leadsLoading && !leadsError ? ` — ${attributions.length} лидов` : ''}
             </h2>
           </div>
-          {leadsLoading ? (
-            <div className="p-8 text-center text-gray-400">Загрузка...</div>
+          {leadsError ? <ReadFailure label="Лиды недоступны" retryLabel="Повторить загрузку лидов" retry={retryLeads} pending={leadsFetching} /> : leadsLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Загрузка...</div>
           ) : attributions.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">Нет лидов</div>
+            <div className="p-8 text-center text-muted-foreground">Нет лидов</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named table scroll regions need keyboard arrow access.
+            <div role="region" aria-label="Лиды и атрибуция" tabIndex={0} className="max-w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <table className="w-full min-w-max text-sm">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Контакт</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Проект</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">First Touch</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Last Touch</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">UTM</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Действия</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Контакт</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Проект</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">First Touch</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Last Touch</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">UTM</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Действия</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-border">
                   {attributions.map(a => {
                     const lead = a.nb_leads?.[0];
                     const isExpired = new Date(a.expires_at) < new Date();
                     return (
-                      <tr key={a.id} className={cn('hover:bg-gray-50 transition-colors', isExpired && 'opacity-50')}>
+                      <tr key={a.id} className={cn('hover:bg-muted/50 transition-colors', isExpired && 'opacity-50')}>
                         <td className="p-3">
-                          <div className="font-medium text-gray-900">{lead?.name || '—'}</div>
-                          <div className="text-xs text-gray-500">{lead?.email || '—'}</div>
-                          <div className="text-xs text-gray-400">{lead?.phone || '—'}</div>
+                          <div className="font-medium text-foreground">{lead?.name || '—'}</div>
+                          <div className="text-xs text-muted-foreground">{lead?.email || '—'}</div>
+                          <div className="text-xs text-muted-foreground">{lead?.phone || '—'}</div>
                         </td>
-                        <td className="p-3 text-xs text-gray-600">
+                        <td className="p-3 text-xs text-muted-foreground">
                           {a.property_projects?.name_en ?? '—'}
                         </td>
-                        <td className="p-3 text-xs text-gray-500">
+                        <td className="p-3 text-xs text-muted-foreground">
                           {new Date(a.first_touch_at).toLocaleDateString('ru-RU')}
                         </td>
-                        <td className="p-3 text-xs text-gray-500">
+                        <td className="p-3 text-xs text-muted-foreground">
                           {new Date(a.last_touch_at).toLocaleDateString('ru-RU')}
                         </td>
-                        <td className="p-3 text-xs text-gray-400">{a.utm_source ?? '—'}</td>
+                        <td className="p-3 text-xs text-muted-foreground">{a.utm_source ?? '—'}</td>
                         <td className="p-3">
                           {a.project_id && (
                             <button
@@ -393,46 +409,47 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Holds ── */}
       {activeTab === 'holds' && (
-        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Clock className="w-4 h-4 text-accent" />
-              Удержания — {holds.length} записей
+              Удержания{!holdsLoading && !holdsError ? ` — ${holds.length} записей` : ''}
             </h2>
           </div>
-          {holdsLoading ? (
-            <div className="p-8 text-center text-gray-400">Загрузка...</div>
+          {holdsError ? <ReadFailure label="Удержания недоступны" retryLabel="Повторить загрузку удержаний" retry={retryHolds} pending={holdsFetching} /> : holdsLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Загрузка...</div>
           ) : holds.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">Нет активных удержаний</div>
+            <div className="p-8 text-center text-muted-foreground">Нет активных удержаний</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named table scroll regions need keyboard arrow access.
+            <div role="region" aria-label="Удержания и суммы" tabIndex={0} className="max-w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <table className="w-full min-w-max text-sm">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Юнит</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Проект</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Тип</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Статус оплаты</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">TTL</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Сумма</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Юнит</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Проект</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Тип</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Статус оплаты</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">TTL</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Сумма</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-border">
                   {holds.map(h => {
                     const unit = h.project_units;
                     const isActive = !h.released_at;
                     const isSoftHold = h.hold_type === 'soft_hold';
                     return (
-                      <tr key={h.id} className={cn('hover:bg-gray-50', !isActive && 'opacity-40')}>
-                        <td className="p-3 font-medium text-gray-900">
+                      <tr key={h.id} className={cn('hover:bg-muted/50', !isActive && 'opacity-40')}>
+                        <td className="p-3 font-medium text-foreground">
                           {unit?.unit_code ?? unit?.unit_type ?? '—'}
                         </td>
-                        <td className="p-3 text-xs text-gray-600">
+                        <td className="p-3 text-xs text-muted-foreground">
                           {(unit?.property_projects as { name_en: string } | undefined)?.name_en ?? '—'}
                         </td>
                         <td className="p-3">
                           <span className={cn(
-                            'text-xs px-2 py-0.5 rounded-full',
+                            'whitespace-nowrap text-xs px-2 py-0.5 rounded-full',
                             isSoftHold ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary',
                           )}>
                             {h.hold_type === 'soft_hold' ? 'Soft Hold' : 'Booking Fee'}
@@ -440,8 +457,8 @@ export default function CapitalNewbuildsDeals() {
                         </td>
                         <td className="p-3">
                           <span className={cn(
-                            'text-xs px-2 py-0.5 rounded-full',
-                            h.fee_status === 'paid' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-500',
+                            'whitespace-nowrap text-xs px-2 py-0.5 rounded-full',
+                            h.fee_status === 'paid' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground',
                           )}>
                             {h.fee_status}
                           </span>
@@ -450,12 +467,12 @@ export default function CapitalNewbuildsDeals() {
                           {isActive && isSoftHold ? (
                             <TimeLeft expiresAt={h.expires_at} />
                           ) : (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               {h.released_at ? 'Освобождён' : '—'}
                             </span>
                           )}
                         </td>
-                        <td className="p-3 font-mono text-xs text-gray-600">
+                        <td className="whitespace-nowrap p-3 font-mono text-xs text-muted-foreground">
                           {h.fee_amount_thb > 0 ? `฿${h.fee_amount_thb.toLocaleString()}` : '—'}
                         </td>
                       </tr>
@@ -470,37 +487,38 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: RLN Journal ── */}
       {activeTab === 'rln' && (
-        <div className="bg-white rounded-none border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+          <div className="p-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-success" />
-              RLN Журнал — {rlnEvents.length} записей
+              RLN Журнал{!rlnLoading && !rlnError ? ` — ${rlnEvents.length} записей` : ''}
             </h2>
           </div>
-          {rlnLoading ? (
-            <div className="p-8 text-center text-gray-400">Загрузка...</div>
+          {rlnError ? <ReadFailure label="Журнал RLN недоступен" retryLabel="Повторить загрузку RLN" retry={refetchRln} pending={rlnFetching} /> : rlnLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Загрузка...</div>
           ) : rlnEvents.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">Нет RLN</div>
+            <div className="p-8 text-center text-muted-foreground">Нет RLN</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Named table scroll regions need keyboard arrow access.
+            <div role="region" aria-label="Журнал RLN" tabIndex={0} className="max-w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <table className="w-full min-w-max text-sm">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">RLN №</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Проект</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Отправлен</th>
-                    <th className="text-left p-3 text-xs font-medium text-gray-500">Получатель</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">RLN №</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Проект</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Отправлен</th>
+                    <th className="text-left p-3 text-xs font-medium text-muted-foreground">Получатель</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-border">
                   {rlnEvents.map(r => (
-                    <tr key={r.id} className="hover:bg-gray-50">
+                    <tr key={r.id} className="hover:bg-muted/50">
                       <td className="p-3 font-mono text-xs font-semibold text-success">{r.rln_number}</td>
-                      <td className="p-3 text-xs text-gray-600">{r.property_projects?.name_en ?? '—'}</td>
-                      <td className="p-3 text-xs text-gray-500">
+                      <td className="p-3 text-xs text-muted-foreground">{r.property_projects?.name_en ?? '—'}</td>
+                      <td className="p-3 text-xs text-muted-foreground">
                         {new Date(r.sent_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}
                       </td>
-                      <td className="p-3 text-xs text-gray-400">{r.sent_to_email}</td>
+                      <td className="p-3 text-xs text-muted-foreground">{r.sent_to_email}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -512,22 +530,22 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Commissions ── */}
       {activeTab === 'commissions' && (
-        <div className="bg-white rounded-none border border-gray-100 p-6">
+        <div className="bg-card rounded-none border border-border p-6">
           <div className="flex items-center gap-2 mb-4">
             <DollarSign className="w-5 h-5 text-success" />
-            <h2 className="font-semibold text-gray-900">Commission Forecast</h2>
+            <h2 className="font-semibold text-foreground">Commission Forecast</h2>
           </div>
           <CommissionForecast />
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
 
 // ── Commission Forecast sub-component ─────────────────────────────────────────
 
 function CommissionForecast() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['capital-commission-forecast'],
     queryFn: async () => {
       const [agreementsRes, holdsRes] = await Promise.all([
@@ -540,6 +558,7 @@ function CommissionForecast() {
           .eq('fee_status', 'paid'),
       ]);
 
+      for (const response of [agreementsRes, holdsRes]) if (response.error) throw response.error;
       const agreements = (agreementsRes.data ?? []) as Array<{
         id: string;
         myuno_retained_rate: number;
@@ -561,18 +580,20 @@ function CommissionForecast() {
     },
   });
 
-  if (isLoading) return <div className="text-gray-400 text-sm">Загрузка...</div>;
+  if (isError) return <ReadFailure label="Прогноз недоступен" retryLabel="Повторить загрузку прогноза" retry={refetch} pending={isFetching} />;
+  if (isLoading) return <div role="status" className="text-muted-foreground text-sm">Загрузка...</div>;
   if (!data) return null;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-none bg-success/10 border border-success/40">
+      <div className="grid min-w-0 grid-cols-2 gap-4">
+        <div className="min-w-0 p-4 rounded-none bg-success/10 border border-success/40">
           <p className="text-xs text-success mb-1">Booking Fees получено</p>
-          <p className="text-2xl font-bold text-success">฿{data.earnedFees.toLocaleString()}</p>
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Keyboard access to horizontally overflowing numeric text. */}
+          <p tabIndex={0} className="max-w-full overflow-x-auto whitespace-nowrap text-2xl font-bold text-success">฿{data.earnedFees.toLocaleString()}</p>
           <p className="text-xs text-success mt-1">{data.paidCount} транзакций</p>
         </div>
-        <div className="p-4 rounded-none bg-primary/10 border border-primary/40">
+        <div className="min-w-0 p-4 rounded-none bg-primary/10 border border-primary/40">
           <p className="text-xs text-primary mb-1">Активных соглашений</p>
           <p className="text-2xl font-bold text-primary">{data.agreements.length}</p>
           <p className="text-xs text-primary mt-1">с застройщиками</p>
@@ -580,20 +601,20 @@ function CommissionForecast() {
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Комиссионные соглашения</h3>
+        <h3 className="text-sm font-medium text-foreground mb-3">Комиссионные соглашения</h3>
         {data.agreements.length === 0 ? (
-          <div className="text-sm text-gray-400">Нет активных соглашений</div>
+          <div className="text-sm text-muted-foreground">Нет активных соглашений</div>
         ) : (
           <div className="space-y-2">
             {data.agreements.map(a => (
-              <div key={a.id} className="flex items-center justify-between p-3 rounded-none border border-gray-100 hover:bg-gray-50">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{a.developers?.name_en ?? 'Застройщик'}</p>
-                  <p className="text-xs text-gray-400">{a.property_projects?.name_en ?? 'Все проекты'}</p>
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-none border border-border hover:bg-muted/50">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm font-medium text-foreground">{a.developers?.name_en ?? 'Застройщик'}</p>
+                  <p className="break-words text-xs text-muted-foreground">{a.property_projects?.name_en ?? 'Все проекты'}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-success">{a.myuno_retained_rate}%</p>
-                  <p className="text-xs text-gray-400">myUNO retains</p>
+                <div className="shrink-0 text-right">
+                  <p className="whitespace-nowrap text-sm font-semibold text-success">{a.myuno_retained_rate}%</p>
+                  <p className="text-xs text-muted-foreground">myUNO retains</p>
                 </div>
               </div>
             ))}

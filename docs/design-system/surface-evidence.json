@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source/component evidence; never certifies all route declarations as executed journeys",
+  "foundationCommit": "5d6d8fe4604a4efabc156337f3b700dbb9ab50d5",
+  "routeInventory": "route-surface-register.json",
+  "defaultForUnlistedRoutes": "NOT_TESTED, even where shared CSS is inherited",
+  "legacyFindings": 4299,
+  "legacyMeaning": "retained source inventory, not confirmed visible defects",
+  "screenshots": "Future CI artifacts under design-system/core, portals, shared and shared-rebrand. Local reviewed images use synthetic data and blocked external fonts.",
+  "surfaces": [
+    {
+      "surface": "public home",
+      "module": "src/pages/Landing.tsx",
+      "kind": "page component",
+      "sharedTheme": "ADOPTED",
+      "localRender": "PASS, normal/rebrand and loading/error",
+      "proof": "core/results.json; source-provenance.json",
+      "mountedRoute": "NOT_TESTED by this design fixture",
+      "live": "NOT_DEPLOYED",
+      "languages": [
+        "ru",
+        "en",
+        "th"
+      ],
+      "remaining": [
+        "loaded production fonts",
+        "full protected route/data integration"
+      ]
+    },
+    {
+      "surface": "PMS today",
+      "module": "src/pages/mc/operations/PmsTodayPage.tsx",
+      "kind": "page component",
+      "sharedTheme": "ADOPTED",
+      "localRender": "PASS, normal/rebrand and loading/error",
+      "proof": "core/results.json; source-provenance.json",
+      "mountedRoute": "NOT_TESTED by this design fixture",
+      "live": "NOT_DEPLOYED",
+      "languages": [
+        "ru",
+        "en",
+        "th"
+      ],
+      "remaining": [
+        "loaded production fonts",
+        "full protected route/data integration"
+      ]
+    },
+    {
+      "surface": "platform admin",
+      "module": "src/pages/admin/AdminDashboard.tsx",
+      "kind": "page component with synthetic sidebar boundary",
+      "sharedTheme": "ADOPTED",
+      "localRender": "PASS, normal/rebrand and loading/error",
+      "proof": "core/results.json; source-provenance.json",
+      "mountedRoute": "NOT_TESTED by this design fixture",
+      "live": "NOT_DEPLOYED",
+      "languages": [
+        "ru",
+        "en",
+        "th"
+      ],
+      "remaining": [
+        "loaded production fonts",
+        "full protected route/data integration"
+      ]
+    },
+    {
+      "surface": "owner",
+      "module": "src/pages/owner-portal/OwnerPortalDashboard.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "vendor",
+      "module": "src/components/vendor/VendorLayout.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "guest",
+      "module": "src/components/guest/GuestLayout.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "team",
+      "module": "src/components/team/TeamLayout.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "capital",
+      "module": "src/components/capital/CapitalLayout.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "developer",
+      "module": "src/components/newbuilds/DeveloperPortalLayout.tsx",
+      "kind": "actual layout; synthetic identity/read data and Outlet except actual owner page",
+      "sharedTheme": "INHERITS_EXISTING_THEME; named frame adoption where applicable",
+      "localRender": "PASS in prior180 plus rapid12/180 runs; revised source matrix pending",
+      "ci": "First foundation head has12 unresolved portal failures; not accepted",
+      "proof": "portals/results.json and manifest.json",
+      "mountedRoute": "NOT_TESTED",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "leaf pages",
+        "real authorization contexts",
+        "locale copy completeness",
+        "loaded fonts",
+        "physical safe area"
+      ]
+    },
+    {
+      "surface": "property evidence chips",
+      "module": "src/components/property/TrustStrip.tsx",
+      "sharedTheme": "ADOPTED in separate local follow-on batch",
+      "localRegression": "PASS in27 focused tests and32 shared scenarios; counts overlap by scope",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "combined source screenshots",
+        "exact-head CI",
+        "all real route consumers"
+      ]
+    },
+    {
+      "surface": "signup integrity",
+      "module": "src/components/auth/SignupIntegrityModal.tsx",
+      "sharedTheme": "ADOPTED in separate local follow-on batch",
+      "localRegression": "PASS in27 focused tests and32 shared scenarios; counts overlap by scope",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "combined source screenshots",
+        "exact-head CI",
+        "all real route consumers"
+      ]
+    },
+    {
+      "surface": "media authoring",
+      "module": "src/components/upload/modes/GalleryMode.tsx",
+      "sharedTheme": "ADOPTED in separate local follow-on batch",
+      "localRegression": "PASS in27 focused tests and32 shared scenarios; counts overlap by scope",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "combined source screenshots",
+        "exact-head CI",
+        "all real route consumers"
+      ]
+    },
+    {
+      "surface": "order status map",
+      "module": "src/types/orders.ts",
+      "sharedTheme": "ADOPTED in separate local follow-on batch",
+      "localRegression": "PASS in27 focused tests and32 shared scenarios; counts overlap by scope",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "combined source screenshots",
+        "exact-head CI",
+        "all real route consumers"
+      ]
+    },
+    {
+      "surface": "form errors",
+      "module": "src/components/ui/form.tsx",
+      "sharedTheme": "ADOPTED in separate local follow-on batch",
+      "localRegression": "PASS in27 focused tests and32 shared scenarios; counts overlap by scope",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "combined source screenshots",
+        "exact-head CI",
+        "all real route consumers"
+      ]
+    },
+    {
+      "surface": "outline destructive Button text",
+      "module": "src/components/ui/button.tsx",
+      "sharedTheme": "Existing danger text/border role; filled destructive pairs unchanged",
+      "localRegression": "32 actual scenarios PASS; default text >= 7.21:1, hover >= 6.08:1; prior dark 4.09:1 reproduced",
+      "live": "NOT_DEPLOYED",
+      "ci": "NOT_RUN for follow-on branch",
+      "remaining": [
+        "full route consumers",
+        "physical device text scaling"
+      ]
+    },
+    {
+      "surface": "Capital Newbuilds Deals",
+      "module": "src/pages/capital/CapitalNewbuildsDeals.tsx",
+      "kind": "actual page with synthetic read-only SDK",
+      "sharedTheme": "ADOPTED",
+      "localRender": "PASS: 11 regression tests; 12 normal/loading/error browser contexts plus 2 populated-lead keyboard cases",
+      "mountedRoute": "NOT_TESTED: standalone page, CapitalLayout/auth not mounted",
+      "live": "NOT_DEPLOYED",
+      "remaining": [
+        "loaded production fonts",
+        "authorized Capital workspace and actual backend",
+        "complete locale copy"
+      ],
+      "proof": "capital-adoption/results.json; lead-results.json; provenance.json"
+    }
+  ]
+}
