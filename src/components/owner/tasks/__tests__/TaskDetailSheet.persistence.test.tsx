@@ -15,7 +15,7 @@ describe('task detail persistence result',()=>{
  it.each([null,'09:00:00'])('does not invent or rewrite operational time %s while completing',async scheduled_time=>{
   const update=vi.fn().mockResolvedValue(undefined);
   render(<TaskDetailSheet task={{...task,raw:{scheduled_date:'2026-10-25',scheduled_time,actual_cost:0}}} open onOpenChange={vi.fn()} members={[]} properties={[]} onUpdate={update} onDelete={vi.fn()}/>);
-  fireEvent.click(screen.getByRole('button',{name:'Completed',exact:true}));
+  fireEvent.click(screen.getByRole('button',{name:/^Completed$/}));
   fireEvent.click(screen.getByRole('button',{name:'Save'}));
   await waitFor(()=>expect(update).toHaveBeenCalledOnce());
   const patch=update.mock.calls[0][2];

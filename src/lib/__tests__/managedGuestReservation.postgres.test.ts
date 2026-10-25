@@ -665,7 +665,7 @@ describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
    const editorTasks=await sql`SELECT id,updated_at::text AS revision FROM property_operational_tasks WHERE booking_id=${editorHold.id} ORDER BY id`;
    expect(editorTasks).toHaveLength(3);
    for(const t of editorTasks)await asActor(operator,tx=>tx`SELECT assign_managed_task_checked(${t.id},${t.revision}::text::timestamptz,${staff})`);
-   const output=join(directory,'task-editor'),allowed=new Set(editorTasks.map(t=>t.id));
+   const output=join(process.env.PROPERTY_LIFECYCLE_ARTIFACT_DIR||directory,'task-editor'),allowed=new Set(editorTasks.map(t=>t.id));
    const server=createServer(async(req,res)=>{
     const send=(value:unknown)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value));};
     try{
