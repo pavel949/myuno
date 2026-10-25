@@ -9,11 +9,12 @@ import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const root = process.cwd();
-const output = '/tmp/browser/services-discovery-isolated';
+const output = process.env.SERVICES_DISCOVERY_OUTPUT || '/tmp/browser/services-discovery-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:(s)=>s});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
+  '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[{id:'flowers',labelRu:'Цветы',labelEn:'Flowers',labelTh:'ดอกไม้',status:'available',services:[]}],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
   '@/lib/analytics/track': `export const trackEvent=()=>{};`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main>{children}</main>;`,
   '@/components/filters/UniversalFilter': `export const UniversalFilter=()=>null;`,
@@ -43,7 +44,7 @@ const result = await build({
     b.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:virtual[args.path],loader:'tsx',resolveDir:root}));
   }}],
 });
-if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/useServiceMarketplace\.ts$/.test(p))) throw Error('Production data module included');
+if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/useServiceMarketplace\.ts$|lib\/catalog\/useCatalogFromDB\.ts$/.test(p))) throw Error('Production data module included');
 const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
   .process(await readFile(path.join(root, 'src/index.css'), 'utf8'), { from: path.join(root, 'src/index.css') });
 await writeFile(path.join(output,'fixture.css'),css.css);

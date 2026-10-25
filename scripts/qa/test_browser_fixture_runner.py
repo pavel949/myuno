@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def declared_fixture_output(source):
     """Resolve supported static declarations with the CI default temporary root."""
-    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.(?:HOME_GALLERY_OUTPUT|SHARED_SURFACES_OUTPUT)\s*\|\|\s*)?'([^']+)'\s*;", source)
+    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.(?:HOME_GALLERY_OUTPUT|SHARED_SURFACES_OUTPUT|SERVICES_DISCOVERY_OUTPUT)\s*\|\|\s*)?'([^']+)'\s*;", source)
     if literal:
         return literal.group(1)
     portable = re.search(
@@ -65,17 +65,47 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
             'admin-review-queues moderation-queue-ui ui-backlog-salvage pms-dashboard-ui '
             'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui trip-planner-ui '
             'unified-property-search-ui bookings-list-ui pms-detail-ui calendar-ui today-ui '
-            'property-browse-ui home-search-ui homepage-galleries-ui guest-complex-ui shared-surfaces-ui'
+            'property-browse-ui home-search-ui homepage-galleries-en-ui homepage-galleries-ru-ui homepage-galleries-th-ui guest-complex-ui shared-surfaces-ui'
         ).split()
         self.assertEqual([name for name, _ in runner.FIXTURE_SPECS], expected)
-        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 22)
+        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 24)
         self.assertEqual(runner.MAX_WORKERS, 2)
         self.assertEqual(runner.FIXTURE_TIMEOUT_SECONDS, 180)
         for name, output in runner.FIXTURE_SPECS:
             source = (ROOT / f'scripts/qa/{name}.mjs').read_text(encoding='utf-8')
             actual = declared_fixture_output(source)
             self.assertEqual(actual, f'/tmp/browser/{output}', name)
-            self.assertTrue((ROOT / f'scripts/qa/{name}.py').is_file())
+            shards = {f'homepage-galleries-{lang}-ui': lang for lang in ['en', 'ru', 'th']}
+            if name in shards:
+                self.assertIn(f"runGalleryShard('{shards[name]}', output)", source)
+                self.assertTrue((ROOT / 'scripts/qa/homepage-galleries-ui.py').is_file())
+            else:
+                self.assertTrue((ROOT / f'scripts/qa/{name}.py').is_file())
+
+    def write_homepage_matrix(self):
+        rows = {lang: [{'language': lang, 'width': width, 'state': 'data', 'pageOverflow': False} for width in [320,360,375,390,430,768,1440,1920]] for lang in ['en','ru','th']}
+        rows['en'] += [{'language':'en','width':390,'state':state,'pageOverflow':False} for state in ['empty','error','loading']]
+        for lang, data in rows.items():
+            folder=self.root/f'homepage-galleries-{lang}-isolated';folder.mkdir(exist_ok=True)
+            (folder/'results.json').write_text(json.dumps(data))
+        return rows
+
+    def test_homepage_shards_retain_the_complete_27_case_matrix(self):
+        self.write_homepage_matrix()
+        result=runner.verify_homepage_matrix(self.root)
+        self.assertEqual((result['dataCases'],result['stateCases'],result['total']),(24,3,27))
+        self.assertEqual((result['workers'],result['perFixtureTimeout']),(2,180))
+
+    def test_homepage_matrix_rejects_missing_duplicate_and_wrong_language_results(self):
+        for mutation in ['missing','duplicate','wrong-language','missing-layout']:
+            with self.subTest(mutation=mutation):
+                rows=self.write_homepage_matrix()
+                if mutation=='missing':rows['en'].pop()
+                if mutation=='duplicate':rows['en'][-1]=rows['en'][0]
+                if mutation=='wrong-language':rows['en'][0]['language']='ru'
+                if mutation=='missing-layout':rows['en'][0].pop('pageOverflow')
+                (self.root/'homepage-galleries-en-isolated/results.json').write_text(json.dumps(rows['en']))
+                with self.assertRaises(ValueError):runner.verify_homepage_matrix(self.root)
 
     def test_output_contract_accepts_portable_paths_but_still_checks_exact_destination(self):
         literal = "const output = '/tmp/browser/moderation-queue-isolated';"

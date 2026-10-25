@@ -19,6 +19,19 @@ async def main():
     await context.route('**/*',route);page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));prefix=('BEFORE-' if BEFORE else '')+f'{lang}-{width}';row={'lang':lang,'width':width,'outcome':'FAIL'}
     async def goto(**query):await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,**query}),wait_until='domcontentloaded');await page.evaluate('document.fonts.ready')
     try:
+     if not BEFORE and width in [390,1440]:
+      await goto(mode='groups')
+      group=page.locator('[aria-labelledby=service-catalog-groups]')
+      await expect(group.locator('article')).to_have_count(4)
+      await expect(group.locator('a[href="/transport/airport-transfer"]')).to_be_visible()
+      await expect(group.locator('a[href="/transport/fast-track"]')).to_be_visible()
+      search=page.get_by_role('searchbox')
+      await search.fill('Flowers')
+      await expect(group.locator('article')).to_have_count(1)
+      await expect(group.locator('a[href="/flowers"]')).to_be_visible()
+      await expect(page.get_by_test_id('location')).to_contain_text('q=Flowers')
+      assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+      await page.screenshot(path=str(OUTPUT/f'{prefix}-groups-search.png'),full_page=True)
      await goto();await expect(page.get_by_test_id('service-request-grid')).to_be_visible();assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');await page.screenshot(path=str(OUTPUT/f'{prefix}-catalogue.png'),full_page=True)
      if BEFORE:
       await goto(entry='/services/order/deep_cleaning');await expect(page.locator('form')).to_be_visible();await page.screenshot(path=str(OUTPUT/f'{prefix}-form.png'),full_page=True);row['outcome']='BEFORE_CAPTURE'
