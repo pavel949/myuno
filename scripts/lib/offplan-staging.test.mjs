@@ -1,0 +1,98 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { stageImport, mapPriceRows, normalizeSourceDate, refreshFailure, stageLegacyProjects, undoBatch } from './offplan-staging.mjs';
+const source = { sourceId: 'synthetic-source', developerId: 'd', projectId: 'p', fileId: 'file', revision: 'v1', effectiveDate: '2026-10-24', parserVersion: 'test-v1', coverage: 'complete', type: 'price_availability', publicationRights: 'approved', modifiedAt: '2026-10-25T01:00:00Z' };
+const current = [{ id: 'catalogue-row-uuid', propertyId: 'canonical-property-uuid', propertyProjectId: 'p', projectId: 'p', unitCode: 'A-1', amount: 10000000, currency: 'THB', priceUnit: 'total', priceKind: 'base', availability: 'available', version: 4 }];
+const rows = [{ ...current[0], amount: 11000000, availability: 'reserved' }];
+test('stages exact physical match with before-image, provenance and no publication', () => { const b = stageImport({ source, rows, current }); assert.equal(b.changes.length, 1); assert.equal(b.changes[0].after.id, 'catalogue-row-uuid'); assert.equal(b.changes[0].sourceEffectiveDate, source.effectiveDate); assert.equal(b.publicationEnabled, false); assert.equal(b.changes[0].before.amount, 10000000); });
+test('only terminally deduplicates identical confirmed applied context', () => { const b = stageImport({ source, rows, current }); assert.notEqual(stageImport({ source, rows, current, previousBatch: b }).status, 'duplicate'); const applied = {...b,status:'applied',appliedReceipt:'synthetic-confirmed-commit'}; assert.equal(stageImport({ source, rows, current, previousBatch: applied }).status, 'duplicate'); assert.notEqual(stageImport({ source, rows, current, previousBatch: {...applied,appliedReceipt:null} }).status, 'duplicate'); });
+test('missing rows never imply sold or deletion', () => { const b = stageImport({ source, rows: [], current }); assert.equal(b.changes.length, 0); assert.deepEqual(b.missing, ['catalogue-row-uuid']); });
+test('quarantines uncertain units, currency, units and large changes', () => { for (const patch of [{ unitCode: 'other' }, { amount: 1 }, { currency: 'USD' }, { priceUnit: 'million' }, { availability: 'nonsense' }]) { const b = stageImport({ source, rows: [{ ...rows[0], ...patch }], current }); assert.equal(b.changes.length, 0); assert.equal(b.review.length, 1); } });
+test('duplicate codes never create automatic changes', () => { const b = stageImport({ source, rows: [rows[0], rows[0]], current }); assert.equal(b.changes.length, 0); assert.equal(b.review.length, 2); });
+test('technical folder access does not grant publication', () => { const b = stageImport({ source: { ...source, publicationRights: 'pending' }, rows, current }); assert.equal(b.changes.length, 0); assert.ok(b.errors.includes('publication_rights_pending')); });
+test('parse failure preserves last-good and records stale health', () => { assert.throws(() => stageImport({ source, rows: null })); const f = refreshFailure(current, 'parse failed'); assert.equal(f.lastGood, current); assert.equal(f.health, 'stale'); assert.deepEqual(f.changes, []); });
+test('undo produces version-checked before-image plan and blocks concurrent edits', () => { const b = stageImport({ source, rows, current }); assert.equal(undoBatch(b, [{ ...b.changes[0].after, version: 5 }])[0].restore.amount, 10000000); assert.throws(() => undoBatch(b, [{ ...b.changes[0].after, version: 6 }])); assert.throws(() => undoBatch(b, [{ ...b.changes[0].after, amount: 12000000, version: 5 }])); });
+test('legacy pN=10.1 is quarantined, raw p.src retained', () => { const [r] = stageLegacyProjects([{ id: 'legacy', n: 'Synthetic', pN: 10.1, pT: '฿10.1M', src: 'source' }]); assert.ok(r.reasons.includes('unverified_price_unit')); assert.equal(r.raw.pN, 10.1); assert.equal(r.source, 'source'); assert.equal(r.publicationEnabled, false); });
+
+test('unconfirmed source expiry, future dates and unknown coverage require review', () => { for (const patch of [{validUntil:'2026-02-28'}, {effectiveDate:'2099-01-01'}, {coverage:'unknown'}]) { const b=stageImport({source:{...source,...patch},rows,current}); assert.equal(b.changes.length,0); assert.equal(b.status,'review'); } });
+test('mapping preserves leading zeroes and scales only explicit reviewed units', () => { const mapping={version:'v1',projectId:'p',unitCodeColumn:'code',amountColumn:'price',statusColumn:'state',priceScale:'million',priceUnit:'total',currency:'THB',statusMap:{'Open':'available'}}; const [row]=mapPriceRows([{code:'020701',price:3.102,state:'Open'}],mapping); assert.equal(row.unitCode,'020701'); assert.equal(row.amount,3102000); assert.throws(()=>mapPriceRows([], {...mapping,priceScale:undefined})); });
+test('ambiguous existing key and numeric unit code require review', () => { assert.equal(stageImport({source,rows,current:[...current,...current]}).changes.length,0); assert.equal(stageImport({source,rows:[{...rows[0],unitCode:20701}],current}).changes.length,0); });
+
+test('owner confirmation permits base prices in old partial working sources, never expired promotions', () => { const working={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28',promoValidUntil:'2026-02-28',ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'owner message 2026-10-25 03:10 UTC',coverage:'partial'}; assert.equal(stageImport({source:working,rows:[{...rows[0],priceKind:'base'}],current}).changes.length,1); for(const priceKind of ['promotion','promotional_total']) { const b=stageImport({source:working,rows:[{...rows[0],priceKind}],current});assert.equal(b.changes.length,0);assert.equal(b.review.length,1); } });
+test('Telegram message identity is accepted without inventing a Drive file ID',()=>{const telegram={...source,fileId:undefined,messageId:'synthetic-channel:42',provider:'telegram'};assert.equal(stageImport({source:telegram,rows,current}).changes.length,1);});
+
+test('owner confirmation is distinct from an unknown effective date',()=>{const confirmed={...source,effectiveDate:null,ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'owner message'};const b=stageImport({source:confirmed,rows,current});assert.equal(b.changes.length,1);assert.equal(b.effectiveDate,null);assert.equal(stageImport({source:{...confirmed,ownerConfirmationProvenance:null},rows,current}).changes.length,0);});
+
+test('staging ignores spoofed physical/operational writes and emits an offer-only update plan',()=>{
+  const persisted=Object.freeze({...current[0],documents:Object.freeze(['existing-document']),owner_id:'existing-owner'});
+  const input=[{...rows[0],propertyId:'spoofed-property',id:'spoofed-inventory',documents:[],owner_id:'spoofed-owner',constructionStage:'completed',managementStatus:'active'}];
+  const batch=stageImport({source,rows:input,current:[persisted]});
+  assert.equal(batch.changes.length,1);
+  const change=batch.changes[0];
+  assert.equal(change.after.propertyId,persisted.propertyId);assert.equal(change.after.id,persisted.id);
+  assert.deepEqual(Object.keys(change.after).sort(),['id','propertyId','propertyProjectId','projectId','unitCode','amount','currency','priceUnit','availability'].sort());
+  assert.equal(change.before,persisted);assert.deepEqual(persisted.documents,['existing-document']);
+  const next={...persisted,...change.after,version:persisted.version+1};
+  assert.equal(stageImport({source,rows:input,current:[next]}).changes.length,0);
+});
+test('unlinked project catalogue rows cannot become a second physical registry',()=>{const batch=stageImport({source,rows,current:[{...current[0],propertyId:null}]});assert.equal(batch.changes.length,0);assert.ok(batch.review[0].reasons.includes('unmapped_canonical_property'));});
+
+test('conflicting canonical project link cannot be silently overwritten',()=>{const b=stageImport({source,rows,current:[{...current[0],propertyProjectId:'another-project'}]});assert.equal(b.changes.length,0);assert.ok(b.review[0].reasons.includes('canonical_project_mismatch'));});
+
+const parserMapping={version:'parser-v2',projectId:'p',unitCodeColumn:'code',amountColumn:'price',statusColumn:'state',priceScale:'base',priceUnit:'total',currency:'THB',statusMap:{Open:'available'},priceKindColumn:'kind',priceKindMap:{Base:'base',Promo:'promotion',PromoTotal:'promotional_total'}};
+test('full mapping pipeline preserves price kind/provenance and never renews expired promotions through owner confirmation',()=>{
+  const working={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28',ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+  for(const kind of ['Base','Promo','PromoTotal','Unrecognized']){
+    const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind}],parserMapping);
+    const batch=stageImport({source:working,rows:mapped,current});
+    assert.equal(batch.changes.length,kind==='Base'?1:0);
+    if(kind==='Base'){assert.equal(batch.changes[0].priceKind,'base');assert.equal(batch.changes[0].priceProvenance.parserVersion,'parser-v2');}
+    else assert.equal(batch.review.length,1);
+  }
+  const unknown=mapPriceRows([{code:'A-1',price:11000000,state:'Open'}],{...parserMapping,priceKindColumn:undefined});
+  assert.ok(stageImport({source:working,rows:unknown,current}).review[0].reasons.includes('unknown_price_kind'));
+});
+test('quarantined same bytes can be re-evaluated after owner confirmation or canonical mapping repair',()=>{
+  const old={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28'};
+  const quarantined=stageImport({source:old,rows,current});assert.equal(quarantined.status,'review');
+  const confirmed={...old,ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+  assert.equal(stageImport({source:confirmed,rows,current,previousBatch:quarantined}).changes.length,1);
+  const orphan=stageImport({source,rows,current:[{...current[0],propertyId:null}]});assert.equal(orphan.status,'review');
+  assert.equal(stageImport({source,rows,current,previousBatch:orphan}).changes.length,1);
+  const failed={...quarantined,status:'failed'};assert.equal(stageImport({source:confirmed,rows,current,previousBatch:failed}).changes.length,1);
+});
+test('applied receipt is invalidated by parser, permission or identity validation changes',()=>{
+  const before=stageImport({source,rows,current});const applied={...before,status:'applied',appliedReceipt:'synthetic-applied'};
+  for(const patch of [{parserVersion:'parser-v3'},{publicationRights:'pending'}])assert.notEqual(stageImport({source:{...source,...patch},rows,current,previousBatch:applied}).status,'duplicate');
+  assert.notEqual(stageImport({source,rows,current:[{...current[0],propertyId:null}],previousBatch:applied}).status,'duplicate');
+});
+
+const dateWorkingSource={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28',ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+for (const [cell, format, expected, normalized] of [
+  ['28/02/2026', undefined, 'invalid_promotion_validity', null],
+  ['TBC', undefined, 'invalid_promotion_validity', null],
+  ['2026-02-30', 'YYYY-MM-DD', 'invalid_promotion_validity', null],
+  ['2026-12-31', 'YYYY-MM-DD', null, '2026-12-31'],
+  ['28/02/2026', 'DD/MM/YYYY', 'expired_promotion', '2026-02-28'],
+  ['03/04/2026', undefined, 'invalid_promotion_validity', null],
+  ['03/04/2026', 'DD/MM/YYYY', 'expired_promotion', '2026-04-03'],
+  ['03/04/2026', 'MM/DD/YYYY', 'expired_promotion', '2026-03-04'],
+]) test(`mapping → staging validates promo expiry ${cell} with explicit format ${format || 'ISO-only'}`,()=>{
+  const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Promo',expires:cell}],{...parserMapping,promoValidUntilColumn:'expires',promoDateFormat:format});
+  assert.equal(mapped[0].promoValidUntil,normalized);
+  const batch=stageImport({source:dateWorkingSource,rows:mapped,current,now:'2026-10-25T12:00:00Z'});
+  assert.equal(batch.changes.length,expected?0:1);
+  if(expected)assert.ok(batch.review[0].reasons.includes(expected));
+});
+test('invalid row expiry cannot fall back to a valid source expiry; base prices ignore promo-only uncertainty',()=>{
+  const mapping={...parserMapping,promoValidUntilColumn:'expires'};
+  const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Promo',expires:'TBC'}],mapping);
+  const feed={...dateWorkingSource,promoValidUntil:'2026-12-31'};
+  const batch=stageImport({source:feed,rows:mapped,current});assert.equal(batch.changes.length,0);assert.ok(batch.review[0].reasons.includes('invalid_promotion_validity'));
+  const base=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Base',expires:'TBC'}],mapping);
+  assert.equal(stageImport({source:dateWorkingSource,rows:base,current}).changes.length,1);
+});
+test('normalization verifies real calendar days and never accepts unsupported auto formats',()=>{
+  assert.equal(normalizeSourceDate('2024-02-29').status,'valid');assert.equal(normalizeSourceDate('2026-02-29').status,'invalid');
+  assert.equal(normalizeSourceDate('03/04/2026','AUTO').status,'invalid');
+});
