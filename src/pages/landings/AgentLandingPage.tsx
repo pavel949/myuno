@@ -1,57 +1,59 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Handshake, Users, Percent, FileSignature, LayoutDashboard, MessageSquare, ArrowRight, Award } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const STEPS = [
-  { icon: Users, labelEn: 'Bring your buyers', labelRu: 'Приводите своих клиентов', descEn: 'Investors, second-home, relocators', descRu: 'Инвесторы, вторые дома, релоканты', path: '/agent/join', color: 'primary' },
-  { icon: Percent, labelEn: '50/50 commission split', labelRu: 'Делёжка комиссии 50/50', descEn: 'Half of our 5% goes to you', descRu: 'Половина нашей 5% — вам', path: '/agent/join#commission', color: 'cluster-invest' },
-  { icon: FileSignature, labelEn: 'We close the deal', labelRu: 'Закрытие сделки — на нас', descEn: 'Legal, escrow, due diligence', descRu: 'Юрист, эскроу, due diligence', path: '/legal', color: 'accent-purple' },
-  { icon: LayoutDashboard, labelEn: 'Agent dashboard', labelRu: 'Кабинет агента', descEn: 'Track leads, deals, payouts', descRu: 'Лиды, сделки, выплаты', path: '/agent/dashboard', color: 'cluster-manage' },
-  { icon: MessageSquare, labelEn: 'Co-marketing assets', labelRu: 'Маркетинговые материалы', descEn: 'Listings, decks, RU+EN content', descRu: 'Листинги, презентации, RU+EN', path: '/agent/resources', color: 'accent-amber' },
-  { icon: Award, labelEn: 'Verified Partner badge', labelRu: 'Бейдж Verified Partner', descEn: 'Boost trust with your clients', descRu: 'Повышает доверие клиентов', path: '/g-trust', color: 'cluster-arrive' },
-];
-
-const STATS = [
-  { numRu: '50/50', numEn: '50/50', labelEn: 'Commission split', labelRu: 'Доля комиссии' },
-  { numRu: '14 дн', numEn: '14 days', labelEn: 'Payout window', labelRu: 'Срок выплаты' },
-  { numRu: '500+', numEn: '500+', labelEn: 'Listings', labelRu: 'Листингов' },
+  { icon: Users, labelEn: 'Bring your buyers', labelRu: 'Приводите своих клиентов', descEn: 'Investors, second-home, relocators', descRu: 'Инвесторы, вторые дома, релоканты', path: '?agentIntent=cooperation#agent-contact', color: 'primary' },
+  { icon: Percent, labelEn: 'Discuss cooperation terms', labelRu: 'Обсудить условия сотрудничества', descEn: 'Commission and payment terms agreed individually', descRu: 'Комиссия и сроки согласуются индивидуально', path: '#commission', color: 'cluster-invest' },
+  { icon: FileSignature, labelEn: 'Legal enquiries', labelRu: 'Юридические вопросы', descEn: 'Discuss the support your transaction needs', descRu: 'Обсудить необходимое сопровождение сделки', path: '/for/legal', color: 'accent-purple' },
+  { icon: LayoutDashboard, labelEn: 'Ask about workspace access', labelRu: 'Уточнить доступ к рабочему пространству', descEn: 'Access requires separate confirmation', descRu: 'Доступ требует отдельного подтверждения', path: '?agentIntent=workspace#agent-contact', color: 'cluster-manage' },
+  { icon: MessageSquare, labelEn: 'Public property catalogue', labelRu: 'Открытый каталог недвижимости', descEn: 'Browse published property listings', descRu: 'Посмотреть опубликованные объекты', path: '/property/browse', color: 'accent-amber' },
+  { icon: Award, labelEn: 'About verification', labelRu: 'О проверке', descEn: 'Learn about verification; no status is granted here', descRu: 'Информация о проверке; статус здесь не присваивается', path: '/g-trust', color: 'cluster-arrive' },
 ];
 
 export default function AgentLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
+  const location = useLocation();
+  const intent = new URLSearchParams(location.search).get('agentIntent') === 'workspace' ? 'workspace' : 'cooperation';
+  useEffect(() => {
+    if (location.hash === '#agent-contact' || location.hash === '#commission') {
+      document.getElementById(location.hash.slice(1))?.scrollIntoView?.({ block: 'start' });
+    }
+  }, [location.hash, location.key]);
+  const enquiryTo = (path: string) => {
+    if (path.startsWith('#')) return { pathname: location.pathname, search: location.search, hash: path };
+    if (!path.startsWith('?')) return path;
+    const [search, hash] = path.split('#');
+    const params = new URLSearchParams(location.search);
+    new URLSearchParams(search).forEach((value, key) => params.set(key, value));
+    return { pathname: location.pathname, search: params.toString(), hash: '#' + hash };
+  };
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Я агент и хочу сотрудничать с myUNO' : 'Hello! I am an agent and I want to partner with myUNO');
 
   return (
     <>
       <SEOHead
         title={t ? 'Для агентов недвижимости — myUNO Partners' : 'For property agents, myUNO Partners'}
-        description={t ? 'Приводите клиентов на Пхукет — делим комиссию 50/50. Закрытие сделки, юрист, эскроу — на нас.' : 'Bring buyers to Phuket, we split 5% commission 50/50. Closing, legal, escrow, on us.'}
+        description={t ? 'Обсудите сотрудничество с недвижимостью на Пхукете. Условия и доступ согласуются отдельно.' : 'Discuss property cooperation in Phuket. Terms and workspace access require separate agreement.'}
         url="https://www.myuno.app/for/agent"
       />
       <LandingLayout
         icon={Handshake}
         title={t ? 'Для агентов недвижимости' : 'For property agents'}
-        subtitle={t ? 'Приводите клиента — закрываем сделку — делим комиссию 50/50' : 'Bring the client, we close the deal, split commission 50/50'}
+        subtitle={t ? 'Обсудите сотрудничество, условия и доступ с командой' : 'Discuss cooperation, terms and access with the team'}
         gradient="from-primary via-accent to-cluster-invest"
-        heroCta={{ label: t ? 'Стать партнёром' : 'Become a partner', onClick: () => navigate('/agent/join') }}
+        heroCta={{ label: t ? 'Обсудить сотрудничество' : 'Discuss cooperation', onClick: () => navigate(enquiryTo('?agentIntent=cooperation#agent-contact'), { state: location.state }) }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Обсудить условия' : 'Discuss terms'}
       >
-        <div className="px-4 py-8 grid grid-cols-3 gap-3 max-w-lg mx-auto">
-          {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <p className="text-base font-bold font-display text-foreground tabular-nums">{t ? s.numRu : s.numEn}</p>
-              <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{t ? s.labelRu : s.labelEn}</p>
-            </div>
-          ))}
-        </div>
-
         <div className="px-4 py-6 max-w-lg mx-auto space-y-3">
           <h2 className="text-xl font-bold font-display text-foreground mb-4 text-center">
             {t ? 'Как мы работаем с агентами' : 'How we work with agents'}
@@ -59,7 +61,7 @@ export default function AgentLandingPage() {
           {STEPS.map((s, i) => {
             const Icon = s.icon;
             return (
-              <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
+              <Link key={i} to={enquiryTo(s.path)} state={location.state} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
                 <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
                   <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
                 </div>
@@ -68,17 +70,23 @@ export default function AgentLandingPage() {
                   <p className="text-xs text-muted-foreground">{t ? s.descRu : s.descEn}</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
-              </button>
+              </Link>
             );
           })}
-        </div>
 
-        <div className="px-4 py-10 text-center bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">{t ? 'Пример выплаты с типичной сделки $400K' : 'Sample payout on a $400K deal'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">$10,000</p>
-          <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Сделка $400K × 5% = $20,000 → ваша доля 50% = $10,000.' : 'Deal $400K × 5% = $20,000 → your 50% share = $10,000.'}
-          </p>
+        <section id="commission" className="py-6">
+          <h2 className="text-xl font-semibold">{t ? 'Условия сотрудничества' : 'Cooperation terms'}</h2>
+          <p className="text-sm text-muted-foreground">{t ? 'Комиссия, сроки и обязанности обсуждаются отдельно. Эта страница не подтверждает договор или статус партнёра.' : 'Commission, timing and responsibilities are discussed individually. This page does not confirm an agreement or partner status.'}</p>
+        </section>
+        <section id="agent-contact" className="py-6">
+          <h2 className="text-xl font-semibold">{t ? 'Запрос команде' : 'Enquire with the team'}</h2>
+          <p className="text-sm text-muted-foreground">{t ? 'Это запрос на обсуждение, а не регистрация агента или предоставление доступа. Сохранение заявки не подтверждает доставку уведомления или ответ команды.' : 'This is an enquiry, not agent enrolment or workspace access. Saving a request does not confirm notification delivery or a team reply.'}</p>
+          <LandingLeadForm variant="universal" verticalId="properties" universalRequestType="property_consultation"
+            entryPoint={`/for/agent?agentIntent=${intent}`}
+            messagePlaceholder={{ en: 'Tell us about your agent cooperation or workspace question', ru: 'Расскажите о сотрудничестве или вопросе доступа', th: 'แจ้งเรื่องความร่วมมือหรือการเข้าถึงพื้นที่ทำงาน' }}
+            submitLabel={{ en: 'Save enquiry', ru: 'Сохранить запрос', th: 'บันทึกคำขอ' }}
+            successText={{ en: 'Enquiry saved. Agent approval, access and a team reply are not confirmed.', ru: 'Запрос сохранён. Одобрение агента, доступ и ответ команды не подтверждены.', th: 'บันทึกคำขอแล้ว ยังไม่ยืนยันการอนุมัติตัวแทน สิทธิ์เข้าถึง หรือคำตอบจากทีม' }} />
+        </section>
         </div>
       </LandingLayout>
     </>
