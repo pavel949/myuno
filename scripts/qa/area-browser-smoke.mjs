@@ -41,12 +41,12 @@ for (const width of [320, 390, 430, 1440]) {
  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
  await page.screenshot({ path: `${out}/area-${width}.png`, fullPage: true });
  await page.getByRole('link', { name: 'Open search →', exact: true }).first().click();
- await page.waitForURL(url => url.pathname.includes('/property/') && url.searchParams.get('district') === 'kamala');
+ await page.waitForURL(url => url.pathname === '/property/search' && url.searchParams.get('district') === 'kamala');
  const rentalSearch = page.url();
  await page.goBack();
  await page.getByRole('heading', { name: 'Kamala', exact: true }).waitFor();
  const projectQueryStart = queries.length;
- await page.getByRole('link', { name: 'Open search →', exact: true }).nth(1).click();
+ await page.locator('a[href^="/property/offplan?"]').click();
  await page.waitForURL(url => url.pathname === '/property/offplan' && url.searchParams.get('district') === 'Kamala');
  // Reload clears the guide preview cache, proving the search's own request.
  await page.reload();
