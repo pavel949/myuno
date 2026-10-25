@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   categories: [] as object[],
   fromDB: true,
 }));
+vi.mock('@/hooks/useAreaInventory', () => ({ useAreaInventory: () => { const query = { data: 0, isPending: false, isError: false, refetch: state.retry }; return { rentals: query, projects: query, resale: query }; } }));
 vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({ language: state.language }),
 }));
@@ -66,8 +67,8 @@ const show = () =>
 it('keeps successful empty catalogues distinct from errors and category requests', () => {
   show();
   expect(
-    screen.getByRole('link', { name: /Kamala/ }),
-  ).toBeVisible();
+    screen.queryByRole('link', { name: /Kamala/ }),
+  ).toBeNull();
   expect(document.querySelector('.home-experiences')).toBeNull();
   expect(document.querySelector('.home-services')).toBeNull();
   expect(screen.queryByRole('alert')).toBeNull();
@@ -148,8 +149,8 @@ it('keeps verified guide routes independent of project records and photos', () =
   state.projects = [{ district: 'unknown_district', name_en: 'Unknown', cover_image: 'https://example.invalid/project.jpg' }];
   show();
   const areaLinks = Array.from(document.querySelectorAll('.home-area-guide-link')).map(link => link.getAttribute('href'));
-  expect(areaLinks).toEqual(['/area/kamala', '/area/surin', '/area/bang-tao']);
-  expect(screen.getAllByText('Area guide')).toHaveLength(3);
+  expect(areaLinks).toEqual([]);
+  expect(screen.queryByText('Explore the area →')).toBeNull();
   expect(document.querySelector('.home-locations img')).toBeNull();
   expect(screen.queryByText(/photograph not available|Unknown|available units|popular|rating/i)).toBeNull();
 });
@@ -159,7 +160,7 @@ it('never relabels a project photo or title as area evidence', () => {
   show();
   expect(document.querySelector('.home-locations img')).toBeNull();
   expect(screen.queryByText(/Published Surin community/)).toBeNull();
-  expect(screen.getByRole('link', { name: /Surin/ })).toHaveAttribute('href', '/area/surin');
+  expect(screen.queryByRole('link', { name: /Surin/ })).toBeNull();
 });
 
 it.each([

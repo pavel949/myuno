@@ -74,30 +74,7 @@ function CatalogPhoto({ image, onUnavailable }: { image?: string | null; onUnava
   );
 }
 
-// Guide routes are verified navigation, not supply or photographic evidence.
-// Project photos cannot establish what an entire neighborhood looks like.
-const AREA_GUIDES = [
-  { slug: 'kamala', name: { ru: 'Камала', en: 'Kamala', th: 'กมลา' } },
-  { slug: 'surin', name: { ru: 'Сурин', en: 'Surin', th: 'สุรินทร์' } },
-  { slug: 'bang-tao', name: { ru: 'Банг Тао', en: 'Bang Tao', th: 'บางเทา' } },
-];
-
-export function HomeLocationGallery() {
-  const { language } = useLanguage();
-  const t = (value: LangValues) => pickLang(language, value);
-  return <section className="home-locations home-container" aria-labelledby="home-locations-title">
-    <div className="home-section-heading"><div>
-      <h2 id="home-locations-title">{t({ ru: 'Где остановиться на Пхукете?', en: 'Where to stay in Phuket?', th: 'พักที่ไหนดีในภูเก็ต' })}</h2>
-      <p className="home-section-lead">{t({ ru: 'Не знаете район? Познакомьтесь с островом до выбора жилья.', en: 'Not sure about the area? Get to know the island before choosing a home.', th: 'ยังไม่แน่ใจเรื่องย่าน ทำความรู้จักเกาะก่อนเลือกที่พัก' })}</p>
-    </div><Link className="home-text-link" to={R.AREA_INDEX}>{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-    <div className="home-area-guide-links">
-      {AREA_GUIDES.map(area => <Link className="home-area-guide-link" key={area.slug} to={R.AREA_DETAIL(area.slug)}>
-        <span>{t(area.name)}</span>
-        <span>{t({ ru: 'Гид по району', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span>
-      </Link>)}
-    </div>
-  </section>;
-}
+export { HomeAreaGallery as HomeLocationGallery } from './HomeAreaGallery';
 
 export function HomeExperienceGallery() {
   const { language } = useLanguage();

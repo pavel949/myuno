@@ -2,6 +2,7 @@
  * ResaleIndex — Secondary market & assignment catalog
  * /property/resale
  */
+import { useSearchParams } from 'react-router-dom';
 import React, { useState, useMemo } from 'react';
 import { Building2, MapPin, ArrowRightLeft, SlidersHorizontal, X, TrendingUp, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,10 @@ export default function ResaleIndex() {
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
+  const [params, setParams] = useSearchParams();
   const [tab, setTab] = useState<TabFilter>('all');
-  const [zone, setZone] = useState('');
+  const zone = params.get('zone') ?? '';
+  const setZone = (value: string) => setParams(previous => { const next = new URLSearchParams(previous); if (value) next.set('zone', value); else next.delete('zone'); return next; });
   const [propertyType, setPropertyType] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
 

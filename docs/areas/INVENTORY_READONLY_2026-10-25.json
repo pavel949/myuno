@@ -1,0 +1,114 @@
+{
+  "checkedAt": "2026-10-25",
+  "projectId": "dcc2b024-7627-4ad9-a915-a3df3dd839f0",
+  "channel": "Lovable get_database_status/query_database; SELECT only",
+  "limits": [
+    "SQL inspection context is not an anonymous browser session or date-specific rental availability acceptance.",
+    "No writes, migrations, role/ACL changes or credential creation.",
+    "Counts match existing active/public catalog predicates, not an inferred geographic union.",
+    "public_listing_enabled is a distinct flag; current public project SELECT policies also independently permit is_active=true."
+  ],
+  "inventory": [
+    {
+      "approved_count": 22,
+      "category": "projects",
+      "count": 22,
+      "location_key": "Bang Tao",
+      "public_enabled_count": 13
+    },
+    {
+      "approved_count": 23,
+      "category": "projects",
+      "count": 23,
+      "location_key": "Kamala",
+      "public_enabled_count": 1
+    },
+    {
+      "approved_count": 11,
+      "category": "projects",
+      "count": 11,
+      "location_key": "Laguna",
+      "public_enabled_count": 1
+    },
+    {
+      "approved_count": 4,
+      "category": "projects",
+      "count": 4,
+      "location_key": "Nai Yang",
+      "public_enabled_count": 1
+    },
+    {
+      "approved_count": null,
+      "category": "rentals",
+      "count": 14,
+      "location_key": "Bang Tao",
+      "public_enabled_count": null
+    },
+    {
+      "approved_count": null,
+      "category": "rentals",
+      "count": 1,
+      "location_key": "Laguna",
+      "public_enabled_count": null
+    },
+    {
+      "approved_count": null,
+      "category": "rentals",
+      "count": 3,
+      "location_key": "Nai Yang",
+      "public_enabled_count": null
+    },
+    {
+      "approved_count": null,
+      "category": "resale",
+      "count": 1,
+      "location_key": "Bang Tao",
+      "public_enabled_count": null
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "policyname": "Anyone can view active projects",
+      "qual": "(is_active = true)",
+      "roles": "{public}",
+      "tablename": "property_projects"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "devmod: broker admin full access projects",
+      "qual": "devmod_is_broker_or_admin()",
+      "roles": "{public}",
+      "tablename": "property_projects"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "devmod: developer manages own projects",
+      "qual": "(developer_id = devmod_my_developer_id())",
+      "roles": "{authenticated}",
+      "tablename": "property_projects"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "devmod: public read listed projects",
+      "qual": "(public_listing_enabled = true)",
+      "roles": "{public}",
+      "tablename": "property_projects"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "Admin can manage resale properties",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'admin'::app_role))))",
+      "roles": "{authenticated}",
+      "tablename": "resale_properties"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "Anyone can view active resale properties",
+      "qual": "(status = 'active'::text)",
+      "roles": "{public}",
+      "tablename": "resale_properties"
+    }
+  ],
+  "publicPropertyCatalogPredicate": "is_active IS TRUE AND approval_status = 'approved'::text AND deleted_at IS NULL;"
+}
