@@ -1,0 +1,58 @@
+name: CRM deal recovery isolated verification
+on:
+  pull_request:
+    paths:
+      - 'src/components/owner/sales/CreateDealSheet.tsx'
+      - 'src/components/owner/sales/__tests__/CreateDealSheet.recovery.test.tsx'
+      - 'src/lib/crm/dealCreationRecovery*'
+      - 'src/lib/crm/getOrCreateContact.ts'
+      - 'scripts/qa/crm-deal-recovery.*'
+      - '.github/workflows/crm-deal-recovery-isolated.yml'
+      - 'package*.json'
+permissions:
+  contents: read
+concurrency:
+  group: crm-deal-recovery-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+      CRM_RECOVERY_OUTPUT: /tmp/crm-deal-recovery
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked test dependencies
+        run: |
+          npm ci
+          pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Focused recovery and context regressions
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: npx vitest run src/lib/crm/dealCreationRecovery.test.ts src/components/owner/sales/__tests__/CreateDealSheet.recovery.test.tsx
+      - name: Actual sheet browser checks with intercepted synthetic persistence
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: |
+          node scripts/qa/crm-deal-recovery.mjs
+          python3 scripts/qa/crm-deal-recovery.py "$CRM_RECOVERY_OUTPUT"
+          python3 -c 'import json,os; from pathlib import Path; rows=json.loads((Path(os.environ["CRM_RECOVERY_OUTPUT"])/"evidence.json").read_text()); expected={(width,mode) for width in (390,1440) for mode in ("before","lost-contact","lost-deal","context","snapshot","missing-contact","rejected-patch","ambiguous-patch","legacy")}; assert len(rows)==len(expected) and {(r["width"],r["mode"]) for r in rows}==expected and all(r["outcome"]=="PASS" for r in rows)'
+      - name: Retain exact-head browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-deal-recovery-${{ github.sha }}
+          path: /tmp/crm-deal-recovery
+          retention-days: 14
+          if-no-files-found: warn
