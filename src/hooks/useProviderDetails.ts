@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { sameRecordId } from '@/lib/recordIdentity';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -97,11 +97,23 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
   const [snapshot, setSnapshot] = useState(() => emptySnapshot(providerId, visibility));
   const generation = useRef(0);
   const mounted = useRef(false);
+  const committedCohort = useRef<{ providerId: string | null; visibility: 'private' | 'public' } | null>(null);
+  useLayoutEffect(() => {
+    committedCohort.current = { providerId, visibility };
+    return () => { committedCohort.current = null; };
+  }, [providerId, visibility]);
 
   const fetchProviderDetails = useCallback(async () => {
-    if (!mounted.current) return;
+    const belongsToCurrentCohort = () => {
+      const cohort = committedCohort.current;
+      if (!cohort || cohort.visibility !== visibility) return false;
+      return providerId === null ? cohort.providerId === null : sameRecordId(cohort.providerId, providerId);
+    };
+    // Awaited callers may retain a callback after navigation or visibility change.
+    // Reject it before starting reads or superseding the current request generation.
+    if (!mounted.current || !belongsToCurrentCohort()) return;
     const request = ++generation.current;
-    const current = () => mounted.current && generation.current === request;
+    const current = () => mounted.current && belongsToCurrentCohort() && generation.current === request;
     if (!providerId) {
       setSnapshot({ ...emptySnapshot(null, visibility), isLoading: false, isFetching: false });
       return;

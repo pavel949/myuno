@@ -15,6 +15,24 @@ function deferred() { let resolve!: (value: unknown) => void;const promise = new
 const settled = async (hook: { result: { current: { isFetching: boolean } } }) => waitFor(() => expect(hook.result.current.isFetching).toBe(false));
 beforeEach(() => { fixture.tables=[];fixture.filters=[];fixture.read.mockReset();fixture.read.mockImplementation(async(t,id)=>ok(t,id)); });
 afterEach(cleanup);
+it.each([
+ { initialId: 'A', initialVisibility: 'public' as const, nextId: 'B' },
+ { initialId: 'A', initialVisibility: 'private' as const, nextId: 'A' },
+])('ignores retained refetch after $initialId/$initialVisibility changes cohort', async ({initialId,initialVisibility,nextId}) => {
+ const h=renderHook(({id,visibility})=>useProviderDetails(id,visibility),{initialProps:{id:initialId,visibility:initialVisibility as 'private'|'public'}});
+ await settled(h);const obsolete=h.result.current.refetch;
+ h.rerender({id:nextId,visibility:'public'});await settled(h);const reads=fixture.read.mock.calls.length;
+ await act(async()=>{await obsolete();});
+ expect(fixture.read.mock.calls.length).toBe(reads);expect(h.result.current.provider?.id).toBe(nextId);
+ expect(h.result.current.isFetching).toBe(false);expect(h.result.current.error).toBeNull();
+});
+it('does not let a retained callback supersede the current pending cohort', async () => {
+ const h=renderHook(({id})=>useProviderDetails(id,'public'),{initialProps:{id:'A'}});await settled(h);const obsolete=h.result.current.refetch;
+ const pending=deferred();fixture.read.mockImplementation((t,id)=>id==='B'&&t==='public_provider_catalog'?pending.promise:Promise.resolve(ok(t,id)));
+ h.rerender({id:'B'});await waitFor(()=>expect(fixture.read).toHaveBeenCalledWith('public_provider_catalog','B'));
+ const reads=fixture.read.mock.calls.length;await act(async()=>{await obsolete();});expect(fixture.read.mock.calls.length).toBe(reads);
+ await act(async()=>{pending.resolve(ok('public_provider_catalog','B'));});await settled(h);expect(h.result.current.provider?.id).toBe('B');
+});
 it('distinguishes provider failure from a confirmed missing row', async () => {
  fixture.read.mockResolvedValueOnce({data:null,error:new Error('Read failed')});const h=renderHook(()=>useProviderDetails('A','public'));await settled(h);expect(h.result.current.provider).toBeNull();expect(h.result.current.error).toBe('Read failed');
  fixture.read.mockResolvedValueOnce({data:null,error:null});await act(async()=>{await h.result.current.refetch();});expect(h.result.current.provider).toBeNull();expect(h.result.current.error).toBeNull();
