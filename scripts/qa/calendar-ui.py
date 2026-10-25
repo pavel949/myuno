@@ -1,14 +1,21 @@
 """Synthetic calendar QA: real calendar rendering, no auth/network/writers."""
-import asyncio, json, sys
+import asyncio, json, os, sys
 from pathlib import Path
 from playwright.async_api import async_playwright, expect
 OUTPUT=Path(sys.argv[1])
 async def main():
     results=[]
     async with async_playwright() as p:
-        browser=await p.chromium.launch(headless=True)
-        for tz,lang,width in [(tz,lang,width) for tz in ['UTC','Asia/Bangkok','America/New_York'] for lang in ['ru','en'] for width in [375,390,430,1280]]:
+        bundled=Path(p.chromium.executable_path)
+        executable=str(bundled) if bundled.exists() else ('/usr/bin/chromium' if not os.environ.get('CI') and Path('/usr/bin/chromium').exists() else None)
+        if not executable: raise RuntimeError('Installed Playwright Chromium required in CI')
+        browser=await p.chromium.launch(executable_path=executable,headless=True)
+        cases=[(tz,lang,width,None) for tz in ['UTC','Asia/Bangkok','America/New_York'] for lang in ['ru','en'] for width in [375,390,430,1280]]
+        cases += [('UTC','ru',375,'2026-10-26T12:00:00Z'),('Asia/Bangkok','en',1280,'2026-10-26T12:00:00Z')]
+        for tz,lang,width,clock in cases:
                 context=await browser.new_context(viewport={'width':width,'height':1800},has_touch=width<640,service_workers='block',timezone_id=tz)
+                if clock:
+                    await context.add_init_script("const RealDate=Date;window.Date=class extends RealDate{constructor(...args){super(...(args.length?args:["+json.dumps(clock)+"]))}static now(){return new RealDate("+json.dumps(clock)+").getTime()}}")
                 blocked=[]; errors=[]
                 async def route(r):
                     url=r.request.url
@@ -48,6 +55,11 @@ async def main():
                 await expect(page.get_by_role('dialog',name='CalendarDayEventsSheet')).to_contain_text('fixture-booking')
                 await page.get_by_role('button',name='Close fixture').click()
                 checkout_label=await page.evaluate('window.fixtureCheckoutLabel')
+                checkout_month=await page.evaluate('window.fixtureCheckoutMonthLabel')
+                crossed_month=await period.get_by_role('heading').inner_text()!=checkout_month
+                if crossed_month:
+                    await page.get_by_role('button',name='Следующий месяц' if lang=='ru' else 'Next month').click()
+                await expect(period.get_by_role('heading')).to_have_text(checkout_month)
                 await page.get_by_role('button',name=checkout_label,exact=True).click()
                 events=page.get_by_role('dialog',name='CalendarDayEventsSheet')
                 await expect(events).to_contain_text('fixture-booking')
@@ -79,8 +91,10 @@ async def main():
                 await bounds('portfolio'); await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-portfolio.png'))
                 assert not errors,errors
                 assert not blocked,blocked
-                results.append({'timezone':tz,'language':lang,'width':width,'checkoutEventNotOccupied':'pass','modes':'pass','scope':'pass','navigation':'pass','bookingTaskBoundaries':'pass','overflow':'none','runtimeErrors':errors,'externalRequests':len(blocked)})
+                results.append({'clock':clock,'checkoutMonthNavigation':'next-month' if crossed_month else 'same-month','timezone':tz,'language':lang,'width':width,'checkoutEventNotOccupied':'pass','modes':'pass','scope':'pass','navigation':'pass','bookingTaskBoundaries':'pass','overflow':'none','runtimeErrors':errors,'externalRequests':len(blocked)})
                 await context.close()
         await browser.close()
+    assert len(results)==26 and len({(r['timezone'],r['language'],r['width'],r['clock']) for r in results})==26
+    assert all(r['checkoutMonthNavigation']=='next-month' for r in results if r['clock'])
     (OUTPUT/'results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)); print(json.dumps(results,ensure_ascii=False,indent=2))
 asyncio.run(main())
