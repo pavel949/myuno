@@ -1,0 +1,14 @@
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { HomeAreaGallery } from './HomeAreaGallery';
+const state = vi.hoisted(() => ({ pending: false, error: false, count: 0, retry: vi.fn() }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/hooks/useAreaInventory', () => ({ useAreaInventory: () => ({ rentals: { data: state.count, isPending: state.pending, isError: state.error, refetch: state.retry }, projects: { data: 0, refetch: state.retry }, resale: { data: 0, refetch: state.retry } }) }));
+beforeEach(() => { state.pending = false; state.error = false; state.count = 0; state.retry.mockClear(); });
+afterEach(cleanup);
+const show = () => render(<MemoryRouter><HomeAreaGallery /></MemoryRouter>);
+it('omits locations with no published supply', () => { show(); expect(screen.queryAllByRole('article')).toHaveLength(0); expect(screen.queryAllByRole('img')).toHaveLength(0); });
+it('shows independent property counts with attributed location photos', () => { state.count = 3; show(); expect(screen.getAllByText('Rental properties: 3')).toHaveLength(4); expect(screen.queryByText(/New-build projects:/)).toBeNull(); expect(screen.getAllByRole('img')).toHaveLength(4); expect(screen.getByRole('link', { name: 'Kamala' })).toHaveAttribute('href', '/area/kamala'); expect(screen.getByRole('link', { name: 'Anton Zelenov' })).toHaveAttribute('href', expect.stringContaining('commons.wikimedia.org')); fireEvent.error(screen.getAllByRole('img')[0]); expect(screen.getByText('Photo unavailable')).toBeVisible(); });
+it('keeps failures retryable and separate from empty supply', () => { state.error = true; show(); expect(screen.getAllByRole('alert')).toHaveLength(4); expect(screen.queryAllByRole('article')).toHaveLength(0); fireEvent.click(screen.getAllByRole('button', { name: 'Try again' })[0]); expect(state.retry).toHaveBeenCalled(); });
+it('announces loading', () => { state.pending = true; show(); expect(screen.getAllByRole('status')).toHaveLength(4); });

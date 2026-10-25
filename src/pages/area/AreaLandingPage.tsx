@@ -1,3 +1,5 @@
+import CuratedAreaGuide from './CuratedAreaGuide';
+import { findAreaGuide } from '@/content/areas/areaRegistry';
 /**
  * @file AreaLandingPage.tsx
  * @description Public area landing at `/area/:slug`.
@@ -530,4 +532,8 @@ const AreaLandingPage = () => {
   );
 };
 
-export default AreaLandingPage;
+export default function AreaPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const guide = slug ? findAreaGuide(slug) : undefined;
+  return guide ? <CuratedAreaGuide key={guide.key} area={guide} /> : <AreaLandingPage />;
+}

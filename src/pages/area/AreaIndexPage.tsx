@@ -1,3 +1,4 @@
+import { AREA_GUIDES, areaName, findAreaGuide } from '@/content/areas/areaRegistry';
 /**
  * @file AreaIndexPage.tsx
  * @description Public index of Phuket area landings at `/area`.
@@ -19,8 +20,8 @@ const AreaIndexPage = () => {
     ? 'Районы Пхукета — гид по локациям · myUNO'
     : 'Phuket areas — location guide · myUNO';
   const description = isRu
-    ? 'Сравните 10 районов Пхукета: средняя цена за м², доходность, инфраструктура, плюсы и минусы. Аренда и новостройки в каждом районе.'
-    : 'Compare 10 Phuket areas: price per sqm, rental yield, infrastructure, pros and cons. Rentals and off-plan in every district.';
+    ? 'Знакомство с районами Пхукета, местной инфраструктурой и опубликованными предложениями недвижимости.'
+    : 'Get to know Phuket areas, explore local essentials and browse published property listings.';
 
   return (
     <AppLayout>
@@ -38,13 +39,14 @@ const AreaIndexPage = () => {
           </h1>
           <p className="mt-3 max-w-2xl text-base text-muted-foreground">
             {isRu
-              ? 'Цена за м², доходность, инфраструктура и связки с проверенными проектами — по каждому из 10 ключевых районов острова.'
-              : 'Price per sqm, rental yield, infrastructure and curated projects — for each of the 10 key districts.'}
+              ? 'Познакомьтесь с локациями перед выбором жилья.'
+              : 'Get to know the area before choosing a home.'}
           </p>
         </header>
 
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {AREA_LANDINGS.map(({ slug, area }) => {
+          {AREA_GUIDES.map(guide => <li key={guide.key}><Link className="block h-full border border-border p-5 hover:border-primary/60" to={`/area/${guide.slug}`}><h2 className="mb-3 text-lg font-semibold">{areaName(guide, language)}</h2><p className="text-sm">{guide.content[isRu ? 'ru' : 'en'].intro}</p><span className="mt-4 block text-sm underline">{isRu ? 'О районе →' : 'About the area →'}</span></Link></li>)}
+          {AREA_LANDINGS.filter(landing => !findAreaGuide(landing.slug)).map(({ slug, area }) => {
             const beach =
               area.distance_beach_km < 1
                 ? `${(area.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : 'm'}`
