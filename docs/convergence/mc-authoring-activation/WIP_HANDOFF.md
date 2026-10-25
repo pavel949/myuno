@@ -19,6 +19,8 @@ Saved isolated runs included passing authoring/property PostgreSQL and task-comm
 
 The narrow task type fix passed repository typecheck and 97 targeted unit tests at its checkpoint. Its standard build stopped at a receipt design precheck. The receipt was subsequently changed to the normal PageContainer primitive and design check passed, but **a final consolidated typecheck, complete unit/PostgreSQL suite and production build after all saved guest/task edits have not been certified**. Do not infer an all-green build from earlier scoped results. Existing lint warnings remain.
 
+The complete staged snapshot check also reports trailing whitespace in the imported synthetic `managed-guest-reservation-layer.sql` fixture. It is preserved verbatim at this handoff rather than modified during a save-only operation; the final diff check is not claimed clean.
+
 ## Remaining release blockers
 
 1. Review the final combined source and exact deployment equivalence; run all required checks, including real browser request and task scenarios.
