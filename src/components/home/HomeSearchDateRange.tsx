@@ -33,10 +33,16 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     if (!ownerDocument) return;
     const closeOutside = (event: MouseEvent) => {
       if (event.button !== 0 || event.ctrlKey) return;
+      // A foreign modal may own a sibling overlay rather than contain the click.
+      // Native access-recheck curtains and Radix body locks take precedence over
+      // this public, non-modal popover's local outside-click shortcut.
+      if (ownerDocument.querySelector('dialog[open]') ||
+          Number(ownerDocument.body.getAttribute('data-scroll-locked')) > 0 ||
+          ownerDocument.body.style.pointerEvents === 'none') return;
       const target = event.target as Node | null;
       if (!target || triggerRef.current?.contains(target) || contentRef.current?.contains(target)) return;
       const element = target.nodeType === 1 ? target as Element : target.parentElement;
-      if (element?.closest('[role="dialog"]')) return;
+      if (element?.closest('[role="dialog"], [role="alertdialog"], dialog')) return;
       setOpen(false);
     };
     ownerDocument.addEventListener('click', closeOutside, true);
