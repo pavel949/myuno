@@ -8,7 +8,8 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 vi.mock('@/components/newbuilds/NbProjectStatusBadge', () => ({ NbProjectStatusBadge: () => null }));
 vi.mock('@/components/newbuilds/NbConstructionProgress', () => ({ NbConstructionProgress: () => null }));
 vi.mock('@/components/newbuilds/NbPriceDisplay', () => ({ NbPriceDisplay: () => null }));
-vi.mock('@/components/newbuilds/NbLeadForm', () => ({ NbLeadForm: () => null }));
+vi.mock('@/components/newbuilds/BuyerRequestForm', () => ({ BuyerRequestForm: () => null }));
+vi.mock('@/components/newbuilds/BuyerProjectUnits', () => ({ BuyerProjectUnits: () => null }));
 vi.mock('@/components/newbuilds/NbROICalculator', () => ({ NbROICalculator: () => null }));
 vi.mock('@/components/newbuilds/NbServicesSection', () => ({ NbServicesSection: () => null }));
 vi.mock('@/components/newbuilds/PublicFloorPlan', () => ({ PublicFloorPlan: () => null }));
@@ -17,7 +18,7 @@ vi.mock('@/components/newbuilds/ProjectDealsTab', () => ({ ProjectDealsTab: () =
 vi.mock('@/components/newbuilds/ProjectMarketingTab', () => ({ ProjectMarketingTab: () => null }));
 vi.mock('@/components/newbuilds/tabs/NbInventoryTab', () => ({ NbInventoryTab: () => null }));
 vi.mock('@/components/newbuilds/tabs/NbPlansTab', () => ({ NbPlansTab: () => null }));
-vi.mock('@/components/newbuilds/tabs/NbTermsTab', () => ({ NbTermsTab: () => null }));
+vi.mock('@/components/newbuilds/BuyerProjectTerms', () => ({ BuyerProjectTerms: () => null }));
 vi.mock('@/components/newbuilds/tabs/NbUpdatesTab', () => ({ NbUpdatesTab: () => null }));
 vi.mock('@/components/newbuilds/tabs/NbReportsTab', () => ({ NbReportsTab: () => null }));
 vi.mock('@/components/newbuilds/tabs/NbDeveloperTab', () => ({ NbDeveloperTab: () => null }));

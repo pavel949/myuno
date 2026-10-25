@@ -51,9 +51,10 @@ import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectD
 import { pickLang } from '@/lib/i18n/pickLang';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
-import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
 import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
-import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
+import { BuyerRequestForm } from '@/components/newbuilds/BuyerRequestForm';
+import { BuyerProjectUnits } from '@/components/newbuilds/BuyerProjectUnits';
+import type { BuyerIntent } from '@/lib/offplan/buyerContract';
 import { cn } from '@/lib/utils';
 
 const STATUS_CONFIG: Record<ProjectStatus, { 
@@ -88,9 +89,10 @@ export default function OffplanDetail() {
   const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [requestIntent, setRequestIntent] = useState<BuyerIntent>('consultation');
   const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
-  const { data: nbProject } = useNewbuildProject(id);
+  const { data: nbProject } = useNewbuildProject(id, 'buyer');
   const { data: allDocs = [] } = useProjectDocuments(id);
   const publicDocs = allDocs.filter((d) => d.visibility === 'public');
 
@@ -125,14 +127,14 @@ export default function OffplanDetail() {
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} Сведения о проекте и опубликованные отчёты.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} Project information and published reports.`.trim();
+    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}.  Сведения о проекте и опубликованные отчёты.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}.  Project information and published reports.`.trim();
   const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
     description: seoDescription,
-    price: project.priceFrom ?? undefined,
+    price: undefined,
     currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'THB').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
@@ -220,7 +222,7 @@ export default function OffplanDetail() {
               {isRu ? 'Цена от' : 'Price from'}
             </span>
             <span className="text-xl font-bold text-primary">
-              {project.priceFrom ? formatPrice(project.priceFrom) : '—'}
+              {pickLang(language, { ru: 'Цена требует подтверждения', en: 'Price requires confirmation', th: 'ราคาต้องยืนยัน' })}
             </span>
           </div>
           {project.minInvestment && (
@@ -233,16 +235,7 @@ export default function OffplanDetail() {
               </span>
             </div>
           )}
-          {project.unitsAvailable > 0 && (
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-muted-foreground">
-                {isRu ? 'Доступно юнитов' : 'Units available'}
-              </span>
-              <Badge variant="secondary">
-                {project.unitsAvailable} / {project.unitsAvailable + project.unitsSold}
-              </Badge>
-            </div>
-          )}
+
         </div>
 
         {/* Construction Progress */}
@@ -294,7 +287,7 @@ export default function OffplanDetail() {
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             {/* Development Units / Floor Plans */}
-            {id && <DevelopmentUnitsSection developmentId={id} />}
+            {id && <BuyerProjectUnits projectId={id} />}
 
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
@@ -364,7 +357,7 @@ export default function OffplanDetail() {
                     ? 'Публичные документы пока не опубликованы.'
                     : 'No public documents have been published yet.'}
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setRequestIntent('documents'); setShowLeadForm(true); }} className="gap-2">
                   <FileSearch className="w-4 h-4" />
                   {isRu ? 'Запросить пакет документов' : 'Request document package'}
                 </Button>
@@ -452,15 +445,10 @@ export default function OffplanDetail() {
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={isRu ? 'Оценка рисков и консультация' : 'Risk Assessment & Consultation'}
+        title={pickLang(language, { ru: 'Запрос по проекту', en: 'Project enquiry', th: 'สอบถามโครงการ' })}
         size="md"
       >
-        <UniversalLeadForm
-          verticalId="property"
-          entryPoint={`offplan_risk_assessment_${project.id}`}
-          leadSource="risk_assessment"
-          onSuccess={() => setShowLeadForm(false)}
-        />
+        <BuyerRequestForm key={`${project.id}:${requestIntent}`} projectId={project.id} intent={requestIntent} />
       </ResponsiveModal>
     </div>
   );
