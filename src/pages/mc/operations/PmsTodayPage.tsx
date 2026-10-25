@@ -148,7 +148,7 @@ export default function PmsTodayPage() {
   const attentionTitle = t({ en: 'Needs attention', ru: 'Требует внимания', th: 'ต้องดำเนินการ' });
   const todayTitle = t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' });
 
-  return <PageShell width="wide" className="space-y-6 text-foreground">
+  return <PageShell width="wide" stack="default" className="text-foreground">
     <PageHeader
       title={todayTitle}
       subtitle={`${dateLabel} · ${t({ en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' })}`}

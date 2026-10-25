@@ -7,8 +7,8 @@ export function HomeGallery({ id, title, description, href, linkLabel, children,
   id: string; title: string; description?: string; href: string; linkLabel: string;
   children?: ReactNode; state?: ReactNode; className?: string;
 }) {
-  return <section className={`home-gallery home-container ${className}`} aria-labelledby={id}>
-    <SectionHeader title={title} subtitle={description} headingId={id} action={{ label: linkLabel, to: href }} size="lg" density="public" className="home-gallery-heading" />
+  return <section className={`home-gallery home-container ds-section-surface--public ${className}`} aria-labelledby={id}>
+    <SectionHeader title={title} subtitle={description} headingId={id} action={{ label: linkLabel, to: href }} size="lg" density="public" className="home-gallery-heading ds-section-header-with-content" />
     {state ?? <HorizontalRail label={title}>{children}</HorizontalRail>}
   </section>;
 }

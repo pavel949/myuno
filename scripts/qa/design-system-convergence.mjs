@@ -17,7 +17,7 @@ const output = path.resolve(process.argv[2]);
 const baseline = process.argv.includes('--baseline');
 const tokensPath = path.join(root, 'src/styles/tokens.css');
 const originalTokens = await readFile(tokensPath, 'utf8');
-const variants = baseline ? ['normal'] : ['normal', 'rebrand'];
+const variants = baseline ? ['normal'] : ['normal', 'compact', 'rebrand'];
 await mkdir(output, { recursive: true });
 const run = (args, env = {}) => new Promise((resolve, reject) => {
   const child = spawn(process.execPath, args, { cwd: root, env: { ...process.env, ...env }, stdio: 'inherit' });
@@ -31,10 +31,12 @@ const rebrand = originalTokens.replace(/--brand-hue:\s*213;/, '--brand-hue: 160;
   .replace(/--card-padding:\s*1rem;/, '--card-padding: 1.5rem;')
   .replace(/--layout-width-wide:\s*80rem;/, '--layout-width-wide: 72rem;');
 if (!baseline && rebrand === originalTokens) throw Error('Canonical rebrand tokens not found');
+const compact=originalTokens.replace(/--section-space-scale:\s*1;/, '--section-space-scale: 0.25;');
+if(!baseline&&compact===originalTokens)throw Error('Canonical spacing source not found');
 const cssByVariant = {};
 for (const variant of variants) {
   const source = await readFile(path.join(root, 'src/index.css'), 'utf8');
-  const css = await postcss([postcssImport({ load: async file => file === tokensPath && variant === 'rebrand' ? rebrand : readFile(file, 'utf8') }), tailwindcss(path.join(root, 'tailwind.config.ts')), autoprefixer()]).process(source, { from: path.join(root, 'src/index.css') });
+  const css = await postcss([postcssImport({ load: async file => file === tokensPath && variant === 'rebrand' ? rebrand : file === tokensPath && variant === 'compact' ? compact : readFile(file, 'utf8') }), tailwindcss(path.join(root, 'tailwind.config.ts')), autoprefixer()]).process(source, { from: path.join(root, 'src/index.css') });
   cssByVariant[variant] = css.css;
 }
 // Local CSS-only producer, never the SPA/auth/backend. The existing home builder
