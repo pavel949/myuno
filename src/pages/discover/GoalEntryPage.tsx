@@ -7,6 +7,7 @@
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SEOHead } from '@/components/seo/SEOHead';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';

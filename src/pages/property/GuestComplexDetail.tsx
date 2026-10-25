@@ -54,7 +54,7 @@ export default function GuestComplexDetail() {
     .filter(id => Object.prototype.hasOwnProperty.call(PROJECT_FACILITY_LABELS, id));
 
   return <>
-    <SEOHead title={`${name} — myUNO`} description={description || name} />
+    <SEOHead title={name} description={description || name} />
     <section data-testid="complex-hero" className={`relative isolate overflow-hidden bg-foreground text-background ${photos[0] ? 'min-h-[420px] h-[60svh] max-h-[680px]' : 'min-h-[280px]'}`}>
       {photos[0] ? <img src={photos[0]} alt={name} loading="eager" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-foreground via-foreground/90 to-primary/50"><Building2 className="h-32 w-32 opacity-10" /></div>}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40" />
