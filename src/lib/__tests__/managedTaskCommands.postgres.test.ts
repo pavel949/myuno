@@ -17,7 +17,7 @@ const root=process.getuid?.()===0,owner=root?'nobody':process.env.USER??'';
 const id=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const C=id(1),OTHER=id(2),SPACE=id(3),OTHER_SPACE=id(4),P=id(5),OTHER_P=id(6);
 const U={admin:id(10),manager:id(11),staff:id(12),otherStaff:id(13),outsider:id(14),otherCompany:id(15)};
-let directory='',started=false,sql:ReturnType<typeof postgres>,sequence=1000;
+let directory='',started=false,sql:ReturnType<typeof postgres>,financeRelaxed:ReturnType<typeof postgres>,sequence=1000;
 function run(bin:string,args:string[]) {
  const executable=existsSync(join(pgRoot,'bin',bin))?join(pgRoot,'bin',bin):bin;
  return root?execFileSync('runuser',['-u',owner,'--',executable,...args],{encoding:'utf8'}):execFileSync(executable,args,{encoding:'utf8'});
@@ -45,6 +45,35 @@ async function complete(actor:string,task:{id:string;updated_at:string},notes='C
 async function assign(actor:string,task:{id:string;updated_at:string},assignee:string) {
  return as(actor,async tx=>(await tx`SELECT assign_managed_task_checked(${task.id},${task.updated_at}::text::timestamptz,${assignee}) row`)[0].row);
 }
+async function installFinancialComposition(db:ReturnType<typeof postgres>,relaxedCostSource:boolean){
+ // Source trigger bodies use these real column types and live relevant owner /
+ // amount dimensions. This is a bounded supporting shape, not a schema clone.
+ // Only the explicitly labelled relaxed variant permits the legacy auto_task
+ // value; the main fixture retains the observed live rejecting CHECK.
+ await db.unsafe(`CREATE TABLE org_members(org_id uuid,user_id uuid);
+  CREATE TABLE property_financials(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),property_id uuid NOT NULL REFERENCES properties(id),owner_id uuid NOT NULL REFERENCES auth.users(id),
+   transaction_type text NOT NULL,category text,amount numeric NOT NULL CHECK(amount>=0),currency text DEFAULT 'THB',description text,
+   reference_type text,reference_id uuid,transaction_date date NOT NULL DEFAULT CURRENT_DATE,status text,cost_source text DEFAULT 'external',
+   verification_status text DEFAULT 'unverified' CHECK(verification_status IN ('unverified','pending','verified','rejected')),
+   CONSTRAINT task_finance_cost_source_check CHECK(cost_source IN ('internal','external','mixed'${relaxedCostSource?",'auto_task'":''})));
+  CREATE TABLE ledger_accounts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),account_type text NOT NULL,management_company_id uuid,owner_user_id uuid,owner_org_id uuid,
+   currency text DEFAULT 'THB',is_active boolean DEFAULT true,
+   CHECK((owner_user_id IS NOT NULL AND owner_org_id IS NULL AND management_company_id IS NULL)
+    OR(owner_user_id IS NULL AND owner_org_id IS NOT NULL AND management_company_id IS NULL)
+    OR(owner_user_id IS NULL AND owner_org_id IS NULL AND management_company_id IS NOT NULL)
+    OR(owner_user_id IS NULL AND owner_org_id IS NULL AND management_company_id IS NULL AND account_type IN ('platform_revenue','escrow','refund_reserve','platform_cashback','income'))));
+  CREATE TABLE ledger_entries(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),debit_account_id uuid NOT NULL REFERENCES ledger_accounts(id),credit_account_id uuid NOT NULL REFERENCES ledger_accounts(id),
+   amount numeric NOT NULL,currency text DEFAULT 'THB',entry_type text NOT NULL,description text);
+  ALTER TABLE property_financials ENABLE ROW LEVEL SECURITY;ALTER TABLE ledger_accounts ENABLE ROW LEVEL SECURITY;ALTER TABLE ledger_entries ENABLE ROW LEVEL SECURITY;
+  GRANT SELECT,INSERT,UPDATE,DELETE ON property_financials,ledger_accounts,ledger_entries TO authenticated;`);
+ await db.unsafe(sourceFunction('supabase/migrations/20260228003351_afbbacc8-2a87-4ade-b22e-c28e7761268d.sql','fn_sync_financial_to_ledger'));
+ await db.unsafe('CREATE TRIGGER trg_sync_financial_to_ledger AFTER INSERT ON property_financials FOR EACH ROW EXECUTE FUNCTION fn_sync_financial_to_ledger()');
+ await applyTransactionScript(db,readFileSync('docs/convergence/mc-finance-scope-containment/finance-capability.candidate.sql','utf8'));
+ await db`UPDATE management_companies SET finance_capabilities_enforced=true WHERE id=${C}`;
+}
+async function financialCounts(db:ReturnType<typeof postgres>){return (await db`SELECT
+ (SELECT count(*)::int FROM property_financials) financials,(SELECT count(*)::int FROM ledger_accounts) accounts,
+ (SELECT count(*)::int FROM ledger_entries) entries`)[0];}
 suite('managed task commands on isolated PostgreSQL',()=>{
  beforeAll(async()=>{
   directory=mkdtempSync(join(tmpdir(),'myuno-task-commands-'));chmodSync(directory,0o700);if(root)chownSync(directory,65534,65534);
@@ -98,9 +127,15 @@ suite('managed task commands on isolated PostgreSQL',()=>{
   // Existing-property first-case activation: no content-author relation is
   // fabricated. This trusted opt-in is synthetic setup, never a live seed.
   await sql`UPDATE properties SET checked_task_commands_enforced=true WHERE id=${P}`;
+  await sql`UPDATE properties SET owner_id=${U.outsider} WHERE id=${P}`;
   await sql.unsafe('CREATE POLICY task_fixture_property_admin ON properties FOR ALL TO authenticated USING(actor_has_platform_admin()) WITH CHECK(actor_has_platform_admin())');
+  await sql.end();const snapshot=postgres({host:directory,port:55459,database:'template1',username:owner,password:'',max:1,onnotice:()=>{}});
+  try{await snapshot.unsafe('CREATE DATABASE task_finance_relaxed TEMPLATE postgres');}finally{await snapshot.end();}
+  sql=postgres({host:directory,port:55459,database:'postgres',username:owner,password:'',max:4,onnotice:()=>{}});
+  financeRelaxed=postgres({host:directory,port:55459,database:'task_finance_relaxed',username:owner,password:'',max:4,onnotice:()=>{}});
+  await installFinancialComposition(sql,false);await installFinancialComposition(financeRelaxed,true);
  },60000);
- afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
+ afterAll(async()=>{if(sql)await sql.end();if(financeRelaxed)await financeRelaxed.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
  it('manager creates, assigned employee completes, manager reloads server actor/time and source audit',async()=>{
   const task=await create();const done=await complete(U.staff,task);
   expect(done).toMatchObject({id:task.id,status:'completed',assigned_to:U.staff,completed_by:U.staff,notes:'Checked and clean'});
@@ -154,7 +189,7 @@ suite('managed task commands on isolated PostgreSQL',()=>{
   const current=(await sql`SELECT id,updated_at::text FROM property_operational_tasks WHERE id=${task.id}`)[0];
   await expect(complete(U.staff,current as {id:string;updated_at:string})).rejects.toThrow(/financial workflow/);
   expect((await sql`SELECT status FROM property_operational_tasks WHERE id=${task.id}`)[0].status).toBe('pending');
-  expect((await sql`SELECT to_regclass('public.property_financials') name`)[0].name).toBeNull();
+  expect(await financialCounts(sql)).toEqual({financials:0,accounts:0,entries:0});
  });
  it('allows manager content/status CAS while limiting staff edits to own notes and progress',async()=>{
   const task=await create();
@@ -170,6 +205,35 @@ suite('managed task commands on isolated PostgreSQL',()=>{
   const done=await edit(U.staff,progress,{status:'completed',notes:'Done'});
   expect(done).toMatchObject({status:'completed',completed_by:U.staff});
   await expect(complete(U.staff,progress,'Different notes')).rejects.toThrow(/changed/);
+ });
+ it('retains the exact live cost_source rejection and atomically rolls a raw expense attempt back',async()=>{
+  const task=await create();const before=await financialCounts(sql);
+  await expect(as(U.staff,tx=>tx`UPDATE property_operational_tasks SET status='done',actual_cost=250 WHERE id=${task.id}`)).rejects.toMatchObject({code:'23514',constraint_name:'task_finance_cost_source_check'});
+  expect(await financialCounts(sql)).toEqual(before);
+  expect((await sql`SELECT status,actual_cost,expense_created FROM property_operational_tasks WHERE id=${task.id}`)[0]).toEqual({status:'pending',actual_cost:'0',expense_created:false});
+ });
+ it('synthetic relaxed cost_source proves the later checked-task guard rolls source expense and ledger writes back',async()=>{
+  const original=sql;sql=financeRelaxed;
+  try{
+   // Positive control uses source expense/sync bodies and proves this target is
+   // executable. Finance RLS alone does not contain SECURITY DEFINER side effects
+   // on an unselected legacy property. No production cost constraint is widened.
+   const legacy=id(801),control=id(802),governed=id(803);
+   await sql`INSERT INTO properties(id,management_company_id,owner_id) VALUES(${legacy},${C},${U.outsider}),(${governed},${C},${U.otherCompany})`;
+   await sql`INSERT INTO operating_space_properties VALUES(${SPACE},${legacy},${C}),(${SPACE},${governed},${C})`;
+   await sql`INSERT INTO property_manager_assignments VALUES(${legacy},${U.staff},true,'{}'::jsonb),(${governed},${U.staff},true,'{}'::jsonb)`;
+   await sql`UPDATE properties SET checked_task_commands_enforced=true WHERE id=${governed}`;
+   await as(U.manager,tx=>tx`INSERT INTO property_operational_tasks(id,property_id,assigned_to,title,task_type,scheduled_date)
+    VALUES(${control},${legacy},${U.staff},'Synthetic source control','inspection','2026-10-25')`);
+   await as(U.staff,tx=>tx`UPDATE property_operational_tasks SET status='done',actual_cost=100 WHERE id=${control}`);
+   expect(await financialCounts(sql)).toEqual({financials:1,accounts:2,entries:1});
+   const task=await create(U.manager,U.staff,governed),before=await financialCounts(sql);
+   await expect(as(U.staff,tx=>tx`UPDATE property_operational_tasks SET status='done',actual_cost=250 WHERE id=${task.id}`)).rejects.toMatchObject({code:'42501'});
+   expect(await financialCounts(sql)).toEqual(before);
+   expect(await sql`SELECT id FROM property_financials WHERE reference_id=${task.id}`).toEqual([]);
+   expect(await sql`SELECT id FROM ledger_accounts WHERE owner_user_id=${U.otherCompany}`).toEqual([]);
+   expect((await sql`SELECT status,actual_cost,expense_created FROM property_operational_tasks WHERE id=${task.id}`)[0]).toEqual({status:'pending',actual_cost:'0',expense_created:false});
+  }finally{sql=original;}
  });
  it('retains fail-closed guards and task history after explicit command rollback',async()=>{
   const task=await create();await applyTransactionScript(sql,readFileSync('docs/hardening/rollback/mc_task_commands.candidate.sql','utf8'));

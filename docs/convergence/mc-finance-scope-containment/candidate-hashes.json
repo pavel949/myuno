@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_CANDIDATE_NOT_ACTIVATED",
+  "base_commit": "a7f801f798d52ef0bfc73cd2f1d3d5c9c432acd1",
+  "files": [
+    {
+      "path": "docs/convergence/mc-finance-scope-containment/finance-capability.candidate.sql",
+      "sha256": "0abb5149ff6d927f28882894f5d9a35caf57601cbd8bd367e05d2ef9851c8b85"
+    },
+    {
+      "path": "docs/convergence/mc-finance-scope-containment/booking-initiator.candidate.sql",
+      "sha256": "a98397229d2820e7683cf8993b6d9d80fde2039cd080181d049d6cbc13da72c3"
+    },
+    {
+      "path": "docs/hardening/rollback/mc_finance_scope_stop.candidate.sql",
+      "sha256": "c8c555640055f7eb2678e1bfc46ad2d5ad7e4f2be6458e7ad766b63bc20d936a"
+    }
+  ],
+  "approval_boundaries": [
+    "schema/RLS/trigger/helper privileges",
+    "named company rollout and cross-company actor impact",
+    "identity/membership/property linkage",
+    "publication",
+    "controlled live-role test writes"
+  ],
+  "verification": "66 isolated PostgreSQL actor/trigger tests; bounded supporting schema; no production acceptance"
+}
