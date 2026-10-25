@@ -31,8 +31,16 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     if (!open || isMobile) return;
     const ownerDocument = triggerRef.current?.ownerDocument;
     if (!ownerDocument) return;
+    let pointerStartedInside = false;
+    const rememberPointerOrigin = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      pointerStartedInside = !!target && !!(triggerRef.current?.contains(target) || contentRef.current?.contains(target));
+    };
+    const cancelPointer = () => { pointerStartedInside = false; };
     const closeOutside = (event: MouseEvent) => {
-      if (event.button !== 0 || event.ctrlKey) return;
+      const startedInside = pointerStartedInside;
+      pointerStartedInside = false;
+      if (startedInside || event.button !== 0 || event.ctrlKey) return;
       // A foreign modal may own a sibling overlay rather than contain the click.
       // Native access-recheck curtains and Radix body locks take precedence over
       // this public, non-modal popover's local outside-click shortcut.
@@ -45,8 +53,15 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
       if (element?.closest('[role="dialog"], [role="alertdialog"], dialog')) return;
       setOpen(false);
     };
+    ownerDocument.addEventListener('pointerdown', rememberPointerOrigin, true);
+    ownerDocument.addEventListener('pointercancel', cancelPointer, true);
     ownerDocument.addEventListener('click', closeOutside, true);
-    return () => ownerDocument.removeEventListener('click', closeOutside, true);
+    return () => {
+      pointerStartedInside = false;
+      ownerDocument.removeEventListener('pointerdown', rememberPointerOrigin, true);
+      ownerDocument.removeEventListener('pointercancel', cancelPointer, true);
+      ownerDocument.removeEventListener('click', closeOutside, true);
+    };
   }, [open, isMobile]);
   const titleId = useId();
   const hintId = useId();

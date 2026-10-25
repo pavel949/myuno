@@ -27,7 +27,7 @@ describe('calendar-owned early outside clicks', () => {
   const add = vi.spyOn(document, 'addEventListener');const remove = vi.spyOn(document, 'removeEventListener');const dialog = mount();
   const registration = add.mock.calls.find(([type,,capture]) => type === 'click' && capture === true);expect(registration).toBeDefined();
   const listener = registration![1] as EventListener;const event = new MouseEvent('click', { button: 0 });Object.defineProperty(event, 'target', { value: screen.getByRole('button', { name: 'Stay dates' }) });listener(event);
-  expect(dialog).toBeInTheDocument();cleanup();expect(remove).toHaveBeenCalledWith('click', listener, true);
+  expect(dialog).toBeInTheDocument();cleanup();expect(remove).toHaveBeenCalledWith('click', listener, true);expect(remove.mock.calls.some(([type,,capture]) => type === 'pointerdown' && capture === true)).toBe(true);expect(remove.mock.calls.some(([type,,capture]) => type === 'pointercancel' && capture === true)).toBe(true);
  });
  it('ignores a foreign alertdialog target without swallowing its action', () => {
   const dialog = mount();const action = vi.fn();
@@ -51,6 +51,23 @@ describe('calendar-owned early outside clicks', () => {
   document.body.removeAttribute('data-scroll-locked');document.body.style.pointerEvents = '';
   // Mounted role=dialog alone is not a blanket modal signal.
   fireEvent.click(overlay);expect(dialog).not.toBeInTheDocument();overlay.remove();
+ });
+ it('keeps a desktop drag originating inside from dismissing on its body click', () => {
+  const dialog = mount();
+  fireEvent.pointerDown(dialog);fireEvent.pointerUp(document.body);fireEvent.click(document.body);
+  expect(dialog).toBeInTheDocument();
+  fireEvent.pointerDown(document.body);fireEvent.pointerUp(document.body);fireEvent.click(document.body);
+  expect(dialog).not.toBeInTheDocument();
+ });
+ it('resets a cancelled inside pointer so the next genuine outside click still closes', () => {
+  const dialog = mount();fireEvent.pointerDown(dialog);fireEvent.pointerCancel(dialog);fireEvent.click(document.body);
+  expect(dialog).not.toBeInTheDocument();
+ });
+ it('preserves the outside input focus when its early click closes the desktop calendar', async () => {
+  const dialog = mount();const input = document.createElement('input');input.setAttribute('aria-label', 'Outside focus probe');document.body.append(input);
+  input.focus();fireEvent.click(input);
+  expect(dialog).not.toBeInTheDocument();
+  await vi.waitFor(() => expect(input).toHaveFocus());input.remove();
  });
  it('closes mobile only on a primary overlay click, retaining inside and context interaction', () => {
   mode.mobile = true;const dialog = mount();const overlay = document.querySelector('[data-state="open"].inset-0')!;expect(overlay).toBeTruthy();
