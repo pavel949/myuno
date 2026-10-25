@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { dealAttemptKey, readDealAttempt, saveDealAttempt, recoverDealCreation, type DealCreationAttempt } from '@/lib/crm/dealCreationRecovery';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,8 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle, Crown, Handshake, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
-import { useCreateContact, useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
+import { useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
+import type { CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
 import { PropertySearchInput, PropertySearchResult } from '@/components/owner/sales/PropertySearchInput';
 import { useNavigate } from 'react-router-dom';
@@ -45,14 +48,24 @@ const CONTACT_TYPE_BY_DEAL_TYPE: Record<string, string> = {
   offplan: 'buyer',
 };
 
-export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new', pipelineId = null }: Props) {
+function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new', pipelineId = null }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
   const navigate = useNavigate();
-  const createDeal = useCreateDeal();
-  const createContact = useCreateContact();
-  const updateContact = useUpdateContact();
+  const qc = useQueryClient();
+  const current = useRef({ actorId: user?.id, companyId, mounted: true });
+  current.current.actorId = user?.id;
+  current.current.companyId = companyId;
+  useLayoutEffect(() => { const context = current.current; context.mounted = true; return () => { context.mounted = false; }; }, []);
+  const inFlight = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [recoveryError, setRecoveryError] = useState('');
+  const [attempt, setAttempt] = useState<DealCreationAttempt | null>(() => {
+    try { return user?.id ? readDealAttempt(user.id, companyId) : null; }
+    catch { return null; }
+  });
+  const attemptRef = useRef(attempt);
   const [selectedContact, setSelectedContact] = useState<CrmContact | null>(prefilledContact || null);
   const [selectedProperty, setSelectedProperty] = useState<PropertySearchResult | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
@@ -166,23 +179,32 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    // Ref latch covers the contact stage and two activations before React rerenders.
+    if (inFlight.current || !user?.id) return;
+    if (!attemptRef.current && !validateForm()) {
       toast.error(isRu ? 'Проверьте обязательные поля' : 'Please fix required fields');
       return;
     }
+    inFlight.current = true;
+    setBusy(true);
+    setRecoveryError('');
+    const actorId = user.id;
+    const isCurrent = () => current.current.mounted && current.current.actorId === actorId && current.current.companyId === companyId;
     try {
-      let contactId: string | null = selectedContact?.id || null;
-      const normalizedPhone = selectedContact ? selectedContact.phone : normalizePhone(form.client_phone);
-      const normalizedEmail = selectedContact ? selectedContact.email : (form.client_email.trim().toLowerCase() || null);
-      const clientName = selectedContact
-        ? `${selectedContact.first_name} ${selectedContact.last_name}`.trim()
-        : form.client_name.trim();
-
-      // ALWAYS create a contact when none is linked (no orphan deals).
-      if (!contactId) {
-        try {
-          const nameParts = form.client_name.trim().split(' ');
-          const newContact = await createContact.mutateAsync({
+      let saved = attemptRef.current;
+      if (!saved) {
+        // Never overwrite an unreadable/corrupt journal with a fresh operation.
+        saved = readDealAttempt(actorId, companyId);
+      }
+      if (!saved) {
+        const contactId = selectedContact?.id || crypto.randomUUID();
+        const normalizedPhone = selectedContact ? selectedContact.phone : normalizePhone(form.client_phone);
+        const normalizedEmail = selectedContact ? selectedContact.email : (form.client_email.trim().toLowerCase() || null);
+        const clientName = selectedContact ? `${selectedContact.first_name} ${selectedContact.last_name}`.trim() : form.client_name.trim();
+        const nameParts = form.client_name.trim().split(' ');
+        saved = {
+          version: 1, actorId, companyId, contactId, dealId: crypto.randomUUID(),
+          contact: selectedContact ? null : {
             company_id: companyId,
             first_name: nameParts[0] || '',
             last_name: nameParts.slice(1).join(' ') || '',
@@ -206,19 +228,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             is_archived: false,
             is_vip: form.also_mark_contact_vip,
             created_by: user?.id || null,
-          } as any);
-          contactId = (newContact as any)?.id || null;
-        } catch (contactError: any) {
-          toast.error(isRu ? 'Не удалось создать контакт' : 'Failed to create contact', {
-            description: contactError?.message || String(contactError),
-          });
-          return; // Hard stop — no orphan deals.
-        }
-      } else if (syncBackToContact) {
-        // Push deal-level preferences/budget back into the linked contact.
-        try {
-          await updateContact.mutateAsync({
-            id: contactId,
+          },
+          contactPatch: selectedContact && syncBackToContact ? {
             budget_min: form.budget_min ? Number(form.budget_min) : null,
             budget_max: form.budget_max ? Number(form.budget_max) : null,
             currency: form.currency,
@@ -226,13 +237,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             preferred_types: form.preferred_types.length ? form.preferred_types : null,
             bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
             ...(form.also_mark_contact_vip ? { is_vip: true } : {}),
-          } as any);
-        } catch {
-          /* non-fatal — toast handled inside hook */
-        }
-      }
-
-      const createdDeal = await createDeal.mutateAsync({
+          } : null,
+          deal: {
         company_id: companyId,
         agent_id: user!.id,
         property_id: selectedProperty && !selectedProperty.is_project ? selectedProperty.id : null,
@@ -257,37 +263,67 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         commission_percent: null, commission_amount: null,
         closed_at: null, lost_reason: null, won_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
-      } as any);
+      },
+        };
+        saveDealAttempt(saved); // Storage failure stops before any business write.
+      }
+      attemptRef.current = saved;
+      setAttempt(saved);
+      const result = await recoverDealCreation(saved, isCurrent, saveDealAttempt, kind => {
+        if (isCurrent()) {
+          qc.invalidateQueries({ queryKey: ['crm-contacts'] });
+          qc.invalidateQueries({ queryKey: ['crm-contact', saved.contactId] });
+          fireCrmWorkflowTrigger({ trigger_type: kind === 'created' ? 'contact_created' : 'contact_updated',
+            company_id: companyId, entity_id: saved.contactId, entity_type: 'contact',
+            metadata: { contact_type: saved.contact?.contact_type, source: saved.contact?.source } });
+        }
+      });
+      if (!isCurrent()) return;
+      qc.invalidateQueries({ queryKey: ['crm-contacts'] });
+      qc.invalidateQueries({ queryKey: ['agent-deals'] });
+      qc.setQueryData(['agent-deal', result.deal.id], result.deal);
+      // Replays never repeat non-transactional workflow dispatch. A lost acknowledgement
+      // does not prove whether an external workflow ran; it needs separate reconciliation.
+      if (result.createdDeal) fireCrmWorkflowTrigger({ trigger_type: 'deal_created', company_id: companyId,
+        entity_id: saved.dealId, entity_type: 'deal', metadata: { deal_type: saved.deal.deal_type, stage: saved.deal.stage } });
+      sessionStorage.removeItem(dealAttemptKey(actorId, companyId));
+      attemptRef.current = null;
+      setAttempt(null);
       toast(isRu ? 'Сделка создана' : 'Deal created', {
         description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.',
       });
       onOpenChange(false);
       resetForm();
-      if (createdDeal?.id) {
-        navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
-      }
-    } catch (dealError: any) {
-      toast.error(isRu ? 'Ошибка при создании сделки' : 'Failed to create deal', {
-        description: dealError?.message || String(dealError),
-      });
+      navigate(`${APP_ROUTES.MC_SALES}/${saved.dealId}`);
+    } catch {
+      if (isCurrent()) setRecoveryError(isRu
+        ? 'Сохранение сделки не подтверждено. Повторите ту же попытку: контакт и сделка не будут созданы заново. Если контакт уже сохранён, он останется в CRM.'
+        : 'Deal saving was not confirmed. Retry this same attempt using its saved IDs. A contact already saved remains in CRM.');
+    } finally {
+      inFlight.current = false;
+      if (isCurrent()) setBusy(false);
     }
   };
 
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => { if (!busy) onOpenChange(next); }}
       title={isRu ? 'Новая сделка' : 'New Deal'}
       icon={<Handshake className="w-5 h-5 text-primary" />}
       size="2xl"
       mobileHeight="max-h-[92vh]"
       footer={
-        <Button onClick={handleSubmit} disabled={createDeal.isPending} className="w-full sm:w-auto min-w-[200px]">
-          {createDeal.isPending ? '...' : (isRu ? 'Создать сделку' : 'Create Deal')}
+        <Button onClick={handleSubmit} disabled={busy || !user} className="w-full sm:w-auto min-w-[200px]">
+          {busy ? '...' : attempt ? (isRu ? 'Повторить сохранённую попытку' : 'Retry saved attempt') : (isRu ? 'Создать сделку' : 'Create Deal')}
         </Button>
       }
     >
-      <div className="space-y-4 pr-1">
+      {recoveryError && <p role="alert" className="text-sm text-destructive">{recoveryError}</p>}
+      {attempt && <p role="status" className="text-sm text-muted-foreground">
+        {isRu ? 'Сохранённая попытка' : 'Saved attempt'}: {String(attempt.deal.client_name)} · {attempt.dealId}
+      </p>}
+      <fieldset disabled={busy || !!attempt} className="space-y-4 pr-1">
         {/* Duplicate warning */}
         {duplicates.length > 0 && (
           <div className="p-3 rounded-none border border-warning/50 bg-warning/10 text-sm">
@@ -553,7 +589,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             />
           </label>
         )}
-      </div>
+      </fieldset>
     </ResponsiveModal>
   );
 }
@@ -567,3 +603,10 @@ const DEAL_STAGE_LABELS_LOOKUP: Record<string, { en: string; ru: string }> = {
   closed_won: { en: 'Won', ru: 'Успех' },
   closed_lost: { en: 'Lost', ru: 'Проигрыш' },
 };
+
+/** Actor/company transitions remount private form state; old async work cannot advance. */
+export function CreateDealSheet(props: Props) {
+  const { user } = useAuth();
+  const prefilledContact = props.prefilledContact?.company_id === props.companyId ? props.prefilledContact : null;
+  return <CreateDealSheetContent key={`${user?.id || 'signed-out'}:${props.companyId}`} {...props} prefilledContact={prefilledContact} />;
+}

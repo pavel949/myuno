@@ -28,6 +28,7 @@ type ContactPayload = Record<string, any>;
 
 export async function getOrCreateContactByEmail<T = ContactPayload>(
   payload: ContactPayload,
+  beforeWrite: () => void = () => {},
 ): Promise<GetOrCreateContactResult<T>> {
   const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : null;
   const companyId = (payload.company_id as string | null | undefined) ?? null;
@@ -47,6 +48,8 @@ export async function getOrCreateContactByEmail<T = ContactPayload>(
     if (existing) return { contact: existing as T, existed: true };
   }
 
+  // Callers with actor/company-bound attempts can stop after an awaited lookup.
+  beforeWrite();
   // Insert
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from('crm_contacts') as any)
