@@ -4,13 +4,15 @@ from pathlib import Path
 from datetime import datetime,timezone
 from urllib.parse import urlparse,urlencode
 from playwright.async_api import async_playwright,expect
+from search_browser_selection import select_search_browser
 OUT=Path(sys.argv[1])
 async def main():
  rows=[]
  async with async_playwright()as p:
-  browser=await p.chromium.launch(headless=True,executable_path='/usr/bin/chromium'if Path('/usr/bin/chromium').exists()else None,args=['--no-sandbox'])
+  selection=select_search_browser(p.chromium.executable_path)
+  browser=await p.chromium.launch(executable_path=selection['executable_path'],headless=True,args=['--no-sandbox'])
   for width in [390,1180]:
-   height=740 if width==390 else 757;context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block',timezone_id='Pacific/Honolulu');blocked=[];errors=[];row={'language':'th','theme':'dark','width':width,'outcome':'FAIL'}
+   height=740 if width==390 else 757;context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block',timezone_id='Pacific/Honolulu');blocked=[];errors=[];row={'language':'th','theme':'dark','width':width,'browserSelection':selection,'browserVersion':browser.version,'outcome':'FAIL'}
    async def route(r):
     u=urlparse(r.request.url);name='fixture.html'if u.path in ['/fixture','/property/search']else u.path.lstrip('/');types={'fixture.html':'text/html','fixture.js':'text/javascript','fixture.css':'text/css','synthetic-property.svg':'image/svg+xml'}
     if u.netloc=='localhost:8080'and r.request.method=='GET'and name in types:await r.fulfill(path=str(OUT/name),content_type=types[name])

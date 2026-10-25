@@ -4,11 +4,13 @@ from datetime import datetime,timezone
 from pathlib import Path
 from urllib.parse import urlparse,urlencode,parse_qs
 from playwright.async_api import async_playwright,expect
+from search_browser_selection import select_search_browser
 OUT=Path(sys.argv[1])
 async def main():
  rows=[]
  async with async_playwright()as p:
-  browser=await p.chromium.launch(executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None,headless=True,args=['--no-sandbox'])
+  selection=select_search_browser(p.chromium.executable_path)
+  browser=await p.chromium.launch(executable_path=selection['executable_path'],headless=True,args=['--no-sandbox'])
   for lang in ['en','ru']:
    for width in [320,375,390,430,1180]:
     height=757 if width==1180 else 740;context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block',timezone_id='Pacific/Honolulu');blocked=[];errors=[]
@@ -16,7 +18,14 @@ async def main():
      u=urlparse(r.request.url);name='fixture.html'if u.path in ['/fixture','/property/search','/property/browse']else u.path.lstrip('/');types={'fixture.html':'text/html','fixture.js':'text/javascript','fixture.css':'text/css','synthetic-property.svg':'image/svg+xml'}
      if u.netloc=='localhost:8080'and r.request.method=='GET'and name in types:await r.fulfill(path=str(OUT/name),content_type=types[name])
      else:blocked.append(r.request.url);await r.abort()
-    await context.route('**/*',route);page=await context.new_page();await page.clock.set_fixed_time(datetime(2026,10,24,23,30,tzinfo=timezone.utc));page.on('pageerror',lambda e:errors.append(str(e)));prefix=f'{lang}-{width}';row={'lang':lang,'width':width,'height':height,'outcome':'FAIL'}
+    await context.route('**/*',route);page=await context.new_page()
+    await page.add_init_script("""window.fixturePointerEvents=[];addEventListener('pointerdown',event=>{
+      window.fixturePointerEvents.push({x:event.clientX,y:event.clientY,trusted:event.isTrusted,
+        target:event.target?.outerHTML?.slice(0,350),
+        dialogs:[...document.querySelectorAll('[role="dialog"]')].map(e=>({state:e.getAttribute('data-state'),containsTarget:e.contains(event.target),rect:e.getBoundingClientRect().toJSON()}))});
+      if(window.fixturePointerEvents.length>12)window.fixturePointerEvents.shift();
+    },{capture:true,passive:true});""")
+    await page.clock.set_fixed_time(datetime(2026,10,24,23,30,tzinfo=timezone.utc));page.on('pageerror',lambda e:errors.append(str(e)));prefix=f'{lang}-{width}';row={'lang':lang,'width':width,'height':height,'browserSelection':selection,'browserVersion':browser.version,'outcome':'FAIL'}
     try:
      q={'lang':lang,'checkIn':'2027-05-01','checkOut':'2027-05-03','opaque':'keep','q':'Synthetic','guests':'3','district':'unknown-fixture','f.amenities':'wifi','cats':'pool'}
      await page.goto('http://localhost:8080/fixture?'+urlencode(q)+'#results',wait_until='domcontentloaded');await page.evaluate('document.fonts.ready');sort=page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка');await expect(sort).to_be_visible();await sort.click();await page.get_by_role('option',name='Price: Low → High'if lang=='en'else'Цена: по возрастанию',exact=True).click();await expect(page.get_by_test_id('location')).to_contain_text('sort=price_asc');assert urlparse(page.url).fragment=='results';assert json.loads(await page.get_by_test_id('navigation-state').text_content())=={'origin':'synthetic-home'};await page.get_by_test_id('history-back').click();await expect(sort).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые');assert urlparse(page.url).fragment=='results';assert json.loads(await page.get_by_test_id('navigation-state').text_content())=={'origin':'synthetic-home'};await page.get_by_test_id('history-forward').click();await expect(sort).to_contain_text('Price: Low'if lang=='en'else'Цена: по возрастанию');assert urlparse(page.url).fragment=='results';assert json.loads(await page.get_by_test_id('navigation-state').text_content())=={'origin':'synthetic-home'};state=await page.get_by_test_id('location').text_content();assert 'opaque=keep'in state and 'f.amenities=wifi'in state and 'cats=pool'in state
@@ -54,7 +63,21 @@ async def main():
       assert await control.get_attribute('aria-label');await expect(control).to_be_visible();await inside(control,panel.locator('[data-date-calendar-scroll]'));assert await control.evaluate('(e)=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'), 'month navigation hit target blocked'
      await next_month.click();await expect(next_month).to_be_focused();await expect(panel.locator('[data-day="2027-06-15"]')).to_be_visible();await inside(next_month,panel.locator('[data-date-calendar-scroll]'));await page.screenshot(path=str(OUT/f'{prefix}-calendar-next-month.png'))
      await previous.click();await expect(previous).to_be_focused();await expect(panel.locator('[data-day="2027-05-15"]')).to_be_visible();assert await panel.locator('[aria-selected="true"][data-day]').evaluate_all('(nodes)=>nodes.map(e=>e.dataset.day).sort()')==selected_before;await inside(previous,panel.locator('[data-date-calendar-scroll]'));await page.screenshot(path=str(OUT/f'{prefix}-calendar-range-after-navigation.png'));row['monthNavigationPreservesRangeFocus']='PASS'
-     await panel.locator('[data-day="2027-05-30"] button').press('Enter');await panel.locator('[data-day="2027-05-31"] button').press('Space');await expect(panel).to_have_count(0);await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();await expect(page.get_by_test_id('location')).to_contain_text('checkIn=2027-05-30');await expect(page.get_by_test_id('location')).to_contain_text('checkOut=2027-05-31');await dates.click();await expect(panel).to_be_visible();clear=panel.get_by_role('button',name='Clear dates'if lang=='en'else'Сбросить даты',exact=True);await clear.scroll_into_view_if_needed();await clear.focus();await clear.press('Enter');await expect(panel).to_be_visible();close=panel.get_by_role('button',name='Close'if lang=='en'else'Закрыть',exact=True).last;await close.scroll_into_view_if_needed();await page.screenshot(path=str(OUT/f'{prefix}-calendar-bottom.png'));await close.click();await expect(panel).to_have_count(0);await dates.click();await page.keyboard.press('Escape');await expect(panel).to_have_count(0);await expect(dates).to_be_focused();await dates.click();await page.mouse.click(2,2);await expect(panel).to_have_count(0)
+     row['dismissalStage']='range-completion';await panel.locator('[data-day="2027-05-30"] button').press('Enter');await panel.locator('[data-day="2027-05-31"] button').press('Space');await expect(panel).to_have_count(0);await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();await expect(page.get_by_test_id('location')).to_contain_text('checkIn=2027-05-30');await expect(page.get_by_test_id('location')).to_contain_text('checkOut=2027-05-31');await dates.click();await expect(panel).to_be_visible();clear=panel.get_by_role('button',name='Clear dates'if lang=='en'else'Сбросить даты',exact=True);await clear.scroll_into_view_if_needed();await clear.focus();await clear.press('Enter');await expect(panel).to_be_visible();close=panel.get_by_role('button',name='Close'if lang=='en'else'Закрыть',exact=True).last;await close.scroll_into_view_if_needed();await page.screenshot(path=str(OUT/f'{prefix}-calendar-bottom.png'));row['dismissalStage']='explicit-close';await close.click();await expect(panel).to_have_count(0);await dates.click();row['dismissalStage']='escape-after-open';await page.keyboard.press('Escape');await expect(panel).to_have_count(0);await expect(dates).to_be_focused();await dates.click();await expect(panel).to_be_visible();row['dismissalStage']='outside-after-open';await page.mouse.click(2,2);await expect(panel).to_have_count(0);row['dismissalStage']='completed'
+     if (lang,width) in [('en',320),('ru',1180)]:
+      for cycle in range(10):
+       await dates.click();row['dismissalStage']=f'rapid-escape-{cycle+1}';await page.keyboard.press('Escape');await expect(panel).to_have_count(0);await expect(dates).to_be_focused()
+      row['rapidEscapeCycles']=10
+      for cycle in range(10):
+       await dates.click();await expect(panel).to_be_visible();row['dismissalStage']=f'rapid-outside-{cycle+1}';await page.mouse.click(2,2);await expect(panel).to_have_count(0)
+      row['rapidOutsideCycles']=10;row['dismissalStage']='completed'
+     if width == 1180:
+      outside_input=page.get_by_role('searchbox',name='Property name'if lang=='en'else'Название объекта',exact=True)
+      if not await outside_input.is_visible():await page.locator('summary').first.click()
+      original_draft=await outside_input.input_value();row['dismissalStage']='outside-input-focus'
+      await dates.click();await expect(panel).to_be_visible();await outside_input.click();await expect(panel).to_have_count(0);await expect(outside_input).to_be_focused()
+      await page.keyboard.press('End');await page.keyboard.type(' focus-check',delay=20);await expect(outside_input).to_have_value(original_draft+' focus-check');await expect(outside_input).to_be_focused()
+      await page.screenshot(path=str(OUT/f'{prefix}-outside-input-focus.png'));await outside_input.fill(original_draft);await expect(outside_input).to_have_value(original_draft);row['outsideInputFocusTyping']='PASS';row['dismissalStage']='completed'
      await page.get_by_role('button',name='Clear all'if lang=='en'else'Сбросить всё',exact=True).click();await expect(page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка')).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые')
      if width in [390,1180]:
       await page.get_by_role('button',name='Price & amenities'if lang=='en'else'Цена и удобства',exact=True).click();filters=page.get_by_role('dialog');popular=filters.get_by_role('heading',name='Home preferences'if lang=='en'else'Пожелания к жилью',exact=True).locator('..');broad_pool=popular.get_by_role('button',name='Pool'if lang=='en'else'Бассейн',exact=True);await broad_pool.click();disclosure=filters.get_by_role('button',name='Exact listing details'if lang=='en'else'Точные параметры объявления',exact=True);await expect(disclosure).to_have_attribute('aria-expanded','false');await disclosure.scroll_into_view_if_needed();await filters.evaluate('(e)=>Promise.all(e.getAnimations({subtree:true}).map(a=>a.finished))');await page.screenshot(path=str(OUT/f'{prefix}-primary-preferences.png'));await disclosure.focus();await disclosure.press('Enter');await expect(disclosure).to_have_attribute('aria-expanded','true');await filters.get_by_role('button',name='Shared pool'if lang=='en'else'Общий бассейн',exact=True).click();amenities=filters.get_by_role('heading',name='Amenities'if lang=='en'else'Удобства',exact=True).locator('..');await amenities.get_by_role('button',name='WiFi',exact=True).click();await expect(popular.get_by_role('button',name='WiFi',exact=True)).to_have_attribute('aria-pressed','false');tier=filters.get_by_role('button',name='฿: THB ≤ 3,000 · '+('per night'if lang=='en'else'за ночь'),exact=True);await tier.click();await expect(tier).to_have_attribute('aria-pressed','true');await tier.evaluate('(e)=>Promise.all(e.getAnimations().map(a=>a.finished))');row['priceTierPaint']=await tier.evaluate('(e)=>({background:getComputedStyle(e).backgroundColor,color:getComputedStyle(e).color,classes:e.className})');await page.screenshot(path=str(OUT/f'{prefix}-strict-and-broad-filters.png'));await filters.get_by_role('button',name=re.compile('^Apply'if lang=='en'else'^Применить')).click();await expect(filters).to_have_count(0);await expect(page.get_by_test_id('location')).to_contain_text('cats=pool');await expect(page.get_by_test_id('location')).to_contain_text('f.poolType=shared');await expect(page.get_by_test_id('location')).to_contain_text('f.amenities=wifi');assert await page.evaluate('window.fixtureFilters.poolType==="shared"&&window.fixtureFilters.amenities.includes("wifi")&&window.fixtureFilters.maxPrice===3000')
@@ -64,7 +87,20 @@ async def main():
      if width in [390,1180]:
       await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,'sort':'invalid-sort','checkIn':'bad','checkOut':'2027-02-30'}),wait_until='domcontentloaded');await expect(page.get_by_role('combobox',name='Sort homes'if lang=='en'else'Сортировка')).to_contain_text('Recommended'if lang=='en'else'Рекомендуемые');await page.get_by_role('button',name='Stay dates'if lang=='en'else'Даты проживания',exact=True).click();invalid_panel=page.get_by_role('dialog');await expect(invalid_panel.locator('[data-day="2026-10-24"] button')).to_be_disabled();await expect(invalid_panel.locator('[data-day="2026-10-25"] button')).to_be_enabled();await page.keyboard.press('Escape');await expect(invalid_panel).to_have_count(0);await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();await expect(page.get_by_test_id('location')).not_to_contain_text('district=');await expect(page.get_by_role('alert')).to_have_count(0)
      assert not errors and not blocked,(errors,blocked);assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');row['outcome']='PASS'
-    except Exception as e:row['error']=str(e);row['pageErrors']=errors;row['blocked']=blocked;await page.screenshot(path=str(OUT/f'{prefix}-FAIL.png'))
+    except Exception as e:
+     row['error']=str(e);row['pageErrors']=errors;row['blocked']=blocked
+     row['dialogDiagnostics']=await page.evaluate(r"""()=>({
+      focus:document.activeElement?.outerHTML.slice(0,700),
+      pointerEvents:window.fixturePointerEvents||[],
+      dialogs:[...document.querySelectorAll('[role="dialog"]')].map(e=>({
+       state:e.getAttribute('data-state'),rect:e.getBoundingClientRect().toJSON(),
+       title:(e.getAttribute('aria-labelledby')||'').split(/\s+/).map(id=>document.getElementById(id)?.textContent||'').join(' ').slice(0,500),
+       hint:(e.getAttribute('aria-describedby')||'').split(/\s+/).map(id=>document.getElementById(id)?.textContent||'').join(' ').slice(0,500),
+       containsFocus:e.contains(document.activeElement),
+       animations:e.getAnimations().map(a=>({state:a.playState,pending:a.pending,time:String(a.currentTime)}))
+      }))
+     })""")
+     await page.screenshot(path=str(OUT/f'{prefix}-FAIL.png'))
     rows.append(row);print(json.dumps(row),flush=True);await context.close()
   await browser.close()
  (OUT/'results.json').write_text(json.dumps({'cases':rows,'limits':['Actual page/calendar/filter components; synthetic lookup and catalogue readers','Fallback fonts; no full App chrome or backend acceptance']},indent=2));assert all(r['outcome']=='PASS'for r in rows)

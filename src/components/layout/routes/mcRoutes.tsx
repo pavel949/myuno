@@ -7,11 +7,12 @@ import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { Suspense } from 'react';
 import * as Pages from '../pageRegistry';
 import { PageTransition } from '../PageTransition';
+import { MCPropertyManageRedirect } from './MCPropertyManageRedirect';
 
 // Local LazyPage helper — kept private to avoid leaking layout helpers across files
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>
-    <Suspense fallback={<LoadingState />}>{children}</Suspense>
+    <Suspense fallback={<LoadingState scope="content" />}>{children}</Suspense>
   </PageTransition>
 );
 
@@ -40,7 +41,7 @@ export const mcRoutes = (
         canonical editor (shared CanonicalPropertyForm, MCLayout shell). The hub
         spawned its own shell and its dashboard deep-links used a ?tab= scheme it
         never read. Redirect keeps every existing /manage link working. */}
-    <Route path="properties/:id/manage" element={<Navigate to="../editor" replace />} />
+    <Route path="properties/:id/manage" element={<MCPropertyManageRedirect />} />
     <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
     <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
     <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useState, useLayoutEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { enUS, ru, th } from 'date-fns/locale';
 import { CalendarDays } from 'lucide-react';
@@ -23,6 +23,46 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [selectingEnd, setSelectingEnd] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  // The non-modal popover must accept a real outside click from its first paint,
+  // including while Radix's entrance animation/dismissable layer is starting.
+  useLayoutEffect(() => {
+    if (!open || isMobile) return;
+    const ownerDocument = triggerRef.current?.ownerDocument;
+    if (!ownerDocument) return;
+    let pointerStartedInside = false;
+    const rememberPointerOrigin = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      pointerStartedInside = !!target && !!(triggerRef.current?.contains(target) || contentRef.current?.contains(target));
+    };
+    const cancelPointer = () => { pointerStartedInside = false; };
+    const closeOutside = (event: MouseEvent) => {
+      const startedInside = pointerStartedInside;
+      pointerStartedInside = false;
+      if (startedInside || event.button !== 0 || event.ctrlKey) return;
+      // A foreign modal may own a sibling overlay rather than contain the click.
+      // Native access-recheck curtains and Radix body locks take precedence over
+      // this public, non-modal popover's local outside-click shortcut.
+      if (ownerDocument.querySelector('dialog[open]') ||
+          Number(ownerDocument.body.getAttribute('data-scroll-locked')) > 0 ||
+          ownerDocument.body.style.pointerEvents === 'none') return;
+      const target = event.target as Node | null;
+      if (!target || triggerRef.current?.contains(target) || contentRef.current?.contains(target)) return;
+      const element = target.nodeType === 1 ? target as Element : target.parentElement;
+      if (element?.closest('[role="dialog"], [role="alertdialog"], dialog')) return;
+      setOpen(false);
+    };
+    ownerDocument.addEventListener('pointerdown', rememberPointerOrigin, true);
+    ownerDocument.addEventListener('pointercancel', cancelPointer, true);
+    ownerDocument.addEventListener('click', closeOutside, true);
+    return () => {
+      pointerStartedInside = false;
+      ownerDocument.removeEventListener('pointerdown', rememberPointerOrigin, true);
+      ownerDocument.removeEventListener('pointercancel', cancelPointer, true);
+      ownerDocument.removeEventListener('click', closeOutside, true);
+    };
+  }, [open, isMobile]);
   const titleId = useId();
   const hintId = useId();
   const locale = language === 'ru' ? ru : language === 'th' ? th : enUS;
@@ -38,7 +78,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     if (value) setSelectingEnd(!!checkIn && !checkOut);
   };
   const trigger = (
-    <button type="button" className="home-search-date-trigger" aria-label={title}>
+    <button ref={triggerRef} type="button" className="home-search-date-trigger" aria-label={title}>
       <span><span className="home-field-label">{pickLang(language, { ru: 'Заезд', en: 'Check-in', th: 'เช็กอิน' })}</span>{display(checkIn)}</span>
       <span><span className="home-field-label">{pickLang(language, { ru: 'Выезд', en: 'Check-out', th: 'เช็กเอาต์' })}</span>{display(checkOut)}</span>
       <CalendarDays size={18} aria-hidden="true" />
@@ -88,7 +128,9 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     {isMobile ? (
       <Sheet open={open} onOpenChange={changeOpen}>
         <SheetTrigger asChild>{trigger}</SheetTrigger>
-        <SheetContent side="bottom" className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-0 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <SheetContent onOverlayClick={event => {
+          if (event.button === 0 && !event.ctrlKey && event.target === event.currentTarget) setOpen(false);
+        }} side="bottom" className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-0 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
           <SheetTitle className="shrink-0 px-3 pr-8">{title}</SheetTitle>
           <SheetDescription className="sr-only">{hint}</SheetDescription>
           {calendar}
@@ -97,7 +139,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     ) : (
       <Popover open={open} onOpenChange={changeOpen}>
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-        <PopoverContent align="start" collisionPadding={12} className="z-[130] flex w-auto flex-col gap-0 overflow-hidden p-0" style={{ maxWidth: 'calc(100vw - 2 * var(--layout-gutter))' }} aria-labelledby={titleId} aria-describedby={hintId}>
+        <PopoverContent ref={contentRef} align="start" collisionPadding={12} className="z-[130] flex w-auto flex-col gap-0 overflow-hidden p-0" style={{ maxWidth: 'calc(100vw - 2 * var(--layout-gutter))' }} aria-labelledby={titleId} aria-describedby={hintId}>
           <h3 id={titleId} className="shrink-0 px-3 pt-3 font-medium">{title}</h3>
           {calendar}
         </PopoverContent>
