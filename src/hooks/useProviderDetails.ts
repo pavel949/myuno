@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { sameRecordId } from '@/lib/recordIdentity';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProviderDetails {
@@ -71,147 +72,124 @@ export interface ProviderBooking {
   service_name?: string;
 }
 
+interface ProviderSnapshot {
+  providerId: string | null;
+  visibility: 'private' | 'public';
+  provider: ProviderDetails | null;
+  services: ProviderService[];
+  products: ProviderProduct[];
+  contracts: ProviderContract[];
+  bookings: ProviderBooking[];
+  isLoading: boolean;
+  isFetching: boolean;
+  error: string | null;
+  servicesError: string | null;
+}
+const emptySnapshot = (providerId: string | null, visibility: 'private' | 'public'): ProviderSnapshot => ({
+  providerId, visibility, provider: null, services: [], products: [], contracts: [], bookings: [],
+  isLoading: !!providerId, isFetching: !!providerId, error: null, servicesError: null,
+});
+const matchesSnapshot = (snapshot: ProviderSnapshot, id: string | null, visibility: 'private' | 'public') =>
+  snapshot.visibility === visibility && (id === null ? snapshot.providerId === null : sameRecordId(snapshot.providerId, id));
+const readError = (error: unknown) => error instanceof Error ? error.message : 'Failed to fetch provider details';
+
 export function useProviderDetails(providerId: string | null, visibility: 'private' | 'public' = 'private') {
-  const [provider, setProvider] = useState<ProviderDetails | null>(null);
-  const [services, setServices] = useState<ProviderService[]>([]);
-  const [products, setProducts] = useState<ProviderProduct[]>([]);
-  const [contracts, setContracts] = useState<ProviderContract[]>([]);
-  const [bookings, setBookings] = useState<ProviderBooking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [snapshot, setSnapshot] = useState(() => emptySnapshot(providerId, visibility));
+  const generation = useRef(0);
+  const mounted = useRef(false);
 
   const fetchProviderDetails = useCallback(async () => {
+    if (!mounted.current) return;
+    const request = ++generation.current;
+    const current = () => mounted.current && generation.current === request;
     if (!providerId) {
-      setProvider(null);
-      setServices([]);
-      setProducts([]);
-      setContracts([]);
-      setBookings([]);
-      setIsLoading(false);
+      setSnapshot({ ...emptySnapshot(null, visibility), isLoading: false, isFetching: false });
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
+    setSnapshot(previous => {
+      if (!current()) return previous;
+      const prior = matchesSnapshot(previous, providerId, visibility) ? previous : emptySnapshot(providerId, visibility);
+      return { ...prior, isLoading: visibility === 'private' || !prior.provider, isFetching: true,
+        error: prior.provider ? prior.error : null, servicesError: prior.provider ? prior.servicesError : null };
+    });
 
     try {
-      // Fetch provider details
+      // Preserve the existing public projections and private object-authorized reads.
       const providerQuery = visibility === 'public' ? supabase.from('public_provider_catalog') : supabase.from('providers');
-      const { data: providerData, error: providerError } = await providerQuery
-        .select('*')
-        .eq('id', providerId)
-        .maybeSingle();
-
+      const { data: providerData, error: providerError } = await providerQuery.select('*').eq('id', providerId).maybeSingle();
+      if (!current()) return;
       if (providerError) throw providerError;
-      
       if (!providerData) {
-        setProvider(null);
-        setServices([]);
-        setProducts([]);
-        setContracts([]);
-        setBookings([]);
-        setIsLoading(false);
+        setSnapshot({ ...emptySnapshot(providerId, visibility), isLoading: false, isFetching: false });
         return;
       }
-      
-      setProvider(providerData as unknown as ProviderDetails);
-
-      // Fetch services
+      if (!sameRecordId(providerData.id, providerId)) throw new Error('Provider read returned a different identity');
       const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
       const { data: servicesData, error: servicesError } = await serviceQuery
         .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (!servicesError) {
-        setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
-      }
-
-      if (visibility === 'public') {
-        setProducts([]);
-        setContracts([]);
-        setBookings([]);
-        return;
-      }
-
-      // Fetch products (if provider is linked to marketplace vendor)
-      // Use the already-fetched providerData instead of a redundant query
-      if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
-        const { data: productsData, error: productsError } = await supabase
-          .from('marketplace_products')
-          .select('id, name_en, name_ru, price, currency, is_active, created_at')
-          .eq('vendor_id', providerData.marketplace_vendor_id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        if (!productsError) {
-          setProducts((productsData || []).map((p) => ({ ...p, stock_quantity: 0 })));
+        .eq('provider_id', providerId).order('created_at', { ascending: false });
+      if (!current()) return;
+      const services = servicesError ? undefined : (servicesData || []).map(s => ({ ...s, is_featured: false, rating: null, review_count: null }));
+      let products: ProviderProduct[] | undefined = [];
+      let contracts: ProviderContract[] | undefined = [];
+      let bookings: ProviderBooking[] | undefined = [];
+      if (visibility !== 'public') {
+        if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
+          const { data: productsData, error: productsError } = await supabase.from('marketplace_products')
+            .select('id, name_en, name_ru, price, currency, is_active, created_at')
+            .eq('vendor_id', providerData.marketplace_vendor_id).order('created_at', { ascending: false }).limit(50);
+          if (!current()) return;
+          products = productsError ? undefined : (productsData || []).map(p => ({ ...p, stock_quantity: 0 }));
         }
-      } else {
-        setProducts([]);
-      }
-
-      // Fetch contracts
-      const { data: contractsData, error: contractsError } = await supabase
-        .from('provider_contracts')
-        .select('id, contract_type, status, commission_rate, valid_from, valid_until, auto_renew, created_at')
-        .eq('entity_type', 'provider')
-        .eq('entity_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (!contractsError) {
-        setContracts((contractsData || []) as ProviderContract[]);
-      }
-
-      // Fetch recent bookings
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select(`
-          id, 
-          status, 
-          total_amount, 
-          currency, 
-          scheduled_at, 
+        const { data: contractsData, error: contractsError } = await supabase.from('provider_contracts')
+          .select('id, contract_type, status, commission_rate, valid_from, valid_until, auto_renew, created_at')
+          .eq('entity_type', 'provider').eq('entity_id', providerId).order('created_at', { ascending: false });
+        if (!current()) return;
+        contracts = contractsError ? undefined : (contractsData || []) as ProviderContract[];
+        const { data: bookingsData, error: bookingsError } = await supabase.from('bookings')
+          .select(`
+          id,
+          status,
+          total_amount,
+          currency,
+          scheduled_at,
           created_at,
           services:service_id (name_en, name_ru)
-        `)
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (!bookingsError) {
-        setBookings(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (bookingsData || []).map((b: Record<string, any>) => ({
-            id: b.id,
-            status: b.status,
-            total_amount: b.total_amount,
-            currency: b.currency,
-            scheduled_at: b.scheduled_at,
-            created_at: b.created_at,
-            service_name: b.services?.name_en || b.services?.name_ru,
-          }))
-        );
+        `).eq('provider_id', providerId).order('created_at', { ascending: false }).limit(20);
+        if (!current()) return;
+        bookings = bookingsError ? undefined : (bookingsData || []).map((row) => { const b = row as unknown as ProviderBooking & { services?: { name_en?: string; name_ru?: string } | null }; return ({
+          id: b.id, status: b.status, total_amount: b.total_amount, currency: b.currency,
+          scheduled_at: b.scheduled_at, created_at: b.created_at, service_name: b.services?.name_en || b.services?.name_ru,
+        }); });
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch provider details');
-    } finally {
-      setIsLoading(false);
+      // Provider and child rows commit as one request cohort, never independently.
+      setSnapshot(previous => {
+        if (!current()) return previous;
+        const prior = matchesSnapshot(previous, providerId, visibility) ? previous : emptySnapshot(providerId, visibility);
+        return { ...prior, providerId, visibility, provider: providerData as unknown as ProviderDetails,
+          services: services ?? prior.services, products: products ?? prior.products,
+          contracts: contracts ?? prior.contracts, bookings: bookings ?? prior.bookings,
+          isLoading: false, isFetching: false, error: null, servicesError: servicesError ? readError(servicesError) : null,
+        };
+      });
+    } catch (error: unknown) {
+      if (!current()) return;
+      setSnapshot(previous => current() ? ({ ...(matchesSnapshot(previous, providerId, visibility) ? previous : emptySnapshot(providerId, visibility)),
+        isLoading: false, isFetching: false, error: readError(error),
+      }) : previous);
     }
   }, [providerId, visibility]);
 
+  const invalidateRequests = useCallback(() => { mounted.current = false; generation.current++; }, []);
   useEffect(() => {
-    fetchProviderDetails();
-  }, [fetchProviderDetails]);
+    mounted.current = true;
+    void fetchProviderDetails();
+    return invalidateRequests;
+  }, [fetchProviderDetails, invalidateRequests]);
 
-  return {
-    provider,
-    services,
-    products,
-    contracts,
-    bookings,
-    isLoading,
-    error,
-    refetch: fetchProviderDetails,
-  };
+  // Suppress old identity/visibility data on the render before effect cleanup too.
+  const active = matchesSnapshot(snapshot, providerId, visibility) ? snapshot : emptySnapshot(providerId, visibility);
+  return { provider: active.provider, services: active.services, products: active.products,
+    contracts: active.contracts, bookings: active.bookings, isLoading: active.isLoading,
+    isFetching: active.isFetching, error: active.error, servicesError: active.servicesError, refetch: fetchProviderDetails };
 }

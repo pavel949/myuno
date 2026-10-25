@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ru, enUS } from "date-fns/locale";
@@ -32,6 +32,9 @@ import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { useReviews } from "@/hooks/useReviews";
 import { ServiceBookingSheet, type BookableService } from "@/components/services/ServiceBookingSheet";
 
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { sameRecordId } from '@/lib/recordIdentity';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
 interface CartService {
@@ -44,6 +47,7 @@ interface CartService {
 const ServiceProviderDetail = () => {
   const { language } = useLanguage();
   const isRu = language === "ru";
+  const t = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
   const { addItem, removeItem, items } = useCart();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -53,7 +57,9 @@ const ServiceProviderDetail = () => {
   const [booking, setBooking] = useState<BookableService | null>(null);
 
   // Real DB data
-  const { provider, services, isLoading } = useProviderDetails(id || null, 'public');
+  const { provider, services, isLoading, isFetching, error, servicesError, refetch } = useProviderDetails(id || null, 'public');
+  const activeBooking = booking && sameRecordId(booking.providerId, id) ? booking : null;
+  useEffect(() => { setBooking(previous => previous && !sameRecordId(previous.providerId, id) ? null : previous); }, [id]);
   const { reviews, stats, isLoading: reviewsLoading } = useReviews({
     itemType: "provider",
     itemId: id || "",
@@ -115,10 +121,14 @@ const ServiceProviderDetail = () => {
     (item) => item.type === "service" && item.providerId === id
   );
 
-  if (isLoading) {
+  const retryLabel = t('Try again', 'Повторить', 'ลองอีกครั้ง');
+  const retry = <Button onClick={() => { void refetch(); }} disabled={isFetching}>{retryLabel}</Button>;
+  if (!provider && error) return <AppLayout><div className="p-4"><Alert aria-labelledby="provider-read-error-title"><AlertTitle id="provider-read-error-title">{t('Provider could not be loaded', 'Не удалось загрузить специалиста', 'ไม่สามารถโหลดผู้ให้บริการได้')}</AlertTitle><AlertDescription><p>{t('Please try again to check this profile.', 'Повторите попытку, чтобы посмотреть профиль.', 'โปรดลองอีกครั้งเพื่อดูโปรไฟล์นี้')}</p><div className="mt-4 flex flex-wrap gap-2">{retry}<Button variant="outline" onClick={() => navigate(returnTo)}>{t('Browse providers', 'К списку мастеров', 'ดูผู้ให้บริการ')}</Button></div></AlertDescription></Alert></div></AppLayout>;
+
+  if (isLoading && !provider) {
     return (
       <AppLayout>
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4" role="status" aria-busy="true" aria-label={t('Loading provider…', 'Загрузка специалиста…', 'กำลังโหลดผู้ให้บริการ…')}>
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-24 w-24 rounded-full" />
           <Skeleton className="h-6 w-48" />
@@ -138,7 +148,7 @@ const ServiceProviderDetail = () => {
       <AppLayout>
         <div className="p-6 text-center space-y-3">
           <BackButton fallbackPath={returnTo} />
-          <p className="text-lg font-medium">{isRu ? "Мастер не найден" : "Provider not found"}</p>
+          <p className="text-lg font-medium">{t('Provider not found', 'Мастер не найден', 'ไม่พบผู้ให้บริการ')}</p>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? "Возможно, профиль удалён или ссылка устарела."
@@ -155,6 +165,8 @@ const ServiceProviderDetail = () => {
   return (
     <AppLayout>
       <div className="pb-32">
+        {error && <Alert className="my-4" aria-labelledby="provider-refresh-error-title"><AlertTitle id="provider-refresh-error-title">{t('Provider update could not be loaded', 'Не удалось обновить профиль', 'ไม่สามารถอัปเดตโปรไฟล์ได้')}</AlertTitle><AlertDescription><p>{t('Showing the last loaded profile. Try again to refresh it.', 'Показан последний загруженный профиль. Повторите попытку обновления.', 'กำลังแสดงโปรไฟล์ที่โหลดล่าสุด โปรดลองอัปเดตอีกครั้ง')}</p>{retry}</AlertDescription></Alert>}
+        {isFetching && <p role="status" className="p-4">{t('Refreshing provider…', 'Обновление профиля…', 'กำลังอัปเดตโปรไฟล์…')}</p>}
         {/* Header */}
         <div className="relative">
           <BackButton fallbackPath={returnTo} variant="overlay" className="absolute top-4 left-4 z-10" />
@@ -279,7 +291,8 @@ const ServiceProviderDetail = () => {
           </TabsList>
 
           <TabsContent value="services" className="mt-0 px-4 py-4">
-            {servicesList.length === 0 ? (
+            {servicesError && <Alert className="mb-4" aria-labelledby="provider-services-error-title"><AlertTitle id="provider-services-error-title">{t('Services could not be loaded', 'Не удалось загрузить услуги', 'ไม่สามารถโหลดบริการได้')}</AlertTitle><AlertDescription><p>{services.length ? t('Showing the last loaded services for this provider.', 'Показаны последние загруженные услуги этого специалиста.', 'กำลังแสดงบริการที่โหลดล่าสุดของผู้ให้บริการนี้') : t('Please retry to check this provider’s services.', 'Повторите попытку, чтобы посмотреть услуги специалиста.', 'โปรดลองอีกครั้งเพื่อดูบริการของผู้ให้บริการนี้')}</p>{retry}</AlertDescription></Alert>}
+            {servicesList.length === 0 && !servicesError ? (
               <EmptyState
                 icon={PackageOpen}
                 title={isRu ? "Мастер ещё не добавил услуги" : "No services yet"}
@@ -345,7 +358,7 @@ const ServiceProviderDetail = () => {
               </div>
             )}
           </TabsContent>
-          <ServiceBookingSheet service={booking} open={!!booking} onOpenChange={(o) => !o && setBooking(null)} />
+          <ServiceBookingSheet service={activeBooking} open={!!activeBooking} onOpenChange={(o) => !o && setBooking(null)} />
 
           <TabsContent value="about" className="mt-0 px-4 py-4">
             <div className="space-y-4">
