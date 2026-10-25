@@ -5,11 +5,17 @@ on:
     paths:
       - 'src/**'
       - 'scripts/qa/**'
+      - 'scripts/db/**'
+      - 'scripts/source-bundles/**'
       - 'docs/convergence/**'
       - 'docs/hardening/rollback/**'
       - 'drizzle/migrations/**'
       - 'supabase/migrations/**'
+      - 'supabase/functions/**'
       - 'package*.json'
+      - 'vite.config.ts'
+      - 'vitest.config.ts'
+      - 'tsconfig*.json'
       - '.github/workflows/mc-guest-pilot-isolated.yml'
 permissions:
   contents: read
