@@ -17,8 +17,8 @@ sha256sum /tmp/mc-authoring-forward.sql /tmp/mc-authoring-rollback.sql
 ```
 
 Current forward SHA256: `6c2e6f4243f58a9b1f8715145d5d06d0ffe895239a3ca6c70382080f617f1b52`.
-Current rollback SHA256: `7cbfb5f83ef75639ac3d4e33032c7f78e2dfa030bfc9eb64f486c1414f0f32cd`.
-The generated SQL remains outside both applied migration journals. Do not replay historical migrations or apply unrelated candidate files.
+Current rollback SHA256: `9eaa40b33775cbf9a2f642187642bcc159c0b0a785e9441dc00f4648bde965c1`.
+The generated SQL remains outside both applied migration journals. Rollback excludes removal of the separately governed platform-admin delegation policies, because that delegation is absent from this activation. Do not replay historical migrations or apply unrelated candidate files.
 
 ## What was actually verified
 

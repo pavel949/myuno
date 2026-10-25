@@ -37,6 +37,15 @@ export function buildActivation(kind = 'forward') {
         body = body.replace(before, after);
       }
     }
+    if (kind === 'rollback' && path.endsWith('employee_property_publication.candidate.sql')) {
+      // Permission delegation is not part of this activation. Its independently
+      // governed policies must not be removed by this tranche's rollback.
+      for (const name of ['read', 'insert', 'update']) {
+        const statement = `DROP POLICY IF EXISTS platform_admin_${name}_authoring_permissions ON public.team_member_permissions;`;
+        if (!body.includes(statement)) throw new Error(`Delegation rollback contract drift: ${name}`);
+        body = body.replace(statement, '');
+      }
+    }
     return `-- Source: ${path}\n-- SHA256: ${createHash('sha256').update(source).digest('hex')}\n` + body;
   });
   return `-- REVIEW CANDIDATE. NO-GO until per-action production approval.\n` +
