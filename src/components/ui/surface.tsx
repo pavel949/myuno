@@ -29,7 +29,7 @@ const surfaceStyles: Record<SurfaceVariant, string> = {
 const paddingStyles = {
   none: '',
   sm: 'p-2',
-  md: 'p-4',
+  md: 'p-[var(--card-padding)]',
   lg: 'p-6',
 };
 

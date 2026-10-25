@@ -4,3 +4,18 @@
  * Import this file once at app entry (e.g. before @tailwind in index.css).
  */
 @import '../styles/tokens.css';
+
+/* Purpose-bound frames share geometry with chrome. Canvas layouts remain full. */
+.ds-frame { width: 100%; margin-inline: auto; padding-inline: calc(var(--layout-gutter) * var(--layout-inset-scale)); min-width: 0; }
+.ds-frame-article { max-width: var(--layout-width-article); }
+.ds-frame-content { max-width: var(--layout-width-content); }
+.ds-frame-wide { max-width: var(--layout-width-wide); }
+.ds-frame-workspace { max-width: var(--layout-width-workspace); }
+.ds-frame-catalogue { max-width: var(--layout-width-catalogue); }
+.container, .ds-frame-container { max-width: var(--layout-width-container); }
+.ds-frame-full { max-width: none; }
+.ds-page { padding-block: var(--layout-page-space-y); }
+.ds-page-with-navigation { padding-bottom: calc(var(--bottom-nav-h) + var(--layout-page-space-y)); }
+.ds-shell-with-navigation { padding-bottom: calc(var(--bottom-nav-h) + var(--layout-shell-bottom-space)); }
+@media (min-width: 768px) { .ds-page-with-navigation { padding-bottom: var(--layout-page-bottom); } }
+@media (min-width: 768px) { .ds-shell-with-navigation { padding-bottom: var(--layout-shell-bottom-space-desktop); } }

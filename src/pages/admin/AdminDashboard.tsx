@@ -39,7 +39,7 @@ function AdminToday() {
       client.invalidateQueries({ queryKey: ['admin-dashboard'] }),
     ]).catch(() => setRefreshError(true)).finally(() => { refreshFlight.current = null; });
   };
-  return <PageShell width="full" className="space-y-6 font-sans [&_h1]:font-sans [&_h2]:font-sans [&_h3]:font-sans" >
+  return <PageShell width="full" className="space-y-6" >
     <header className="flex min-w-0 flex-wrap items-start justify-between gap-4">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">{l('Today', 'Сегодня', 'วันนี้')}</h1>

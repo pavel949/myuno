@@ -1,0 +1,61 @@
+name: Design system verification
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: design-system-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  isolated-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install isolated browser dependencies
+        run: |
+          npm ci
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Guard authored theme sources
+        run: |
+          npm run design:check
+          node --test scripts/design-system-audit.test.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual public PMS admin and one-source rebrand
+        run: |
+          node scripts/qa/design-system-convergence.mjs artifacts/design-system/core
+          python scripts/qa/design-system-convergence.py artifacts/design-system/core
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual portal layout surfaces
+        run: DS_PORTALS_CSS="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/normal.css" DS_PORTALS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/portals" node scripts/qa/design-system-portals.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Shared forms dialogs and canonical spacing
+        run: SHARED_SURFACES_CSS_FILE="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/normal.css" SHARED_SURFACES_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/shared" node scripts/qa/shared-surfaces-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: One-source card spacing variant
+        run: SHARED_SURFACES_CSS_FILE="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/rebrand.css" SHARED_SURFACES_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/shared-rebrand" SHARED_SURFACES_REPRESENTATIVE=1 SHARED_SURFACES_EXPECT_CARD_PADDING=24 node scripts/qa/shared-surfaces-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Retain synthetic UI evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: design-system-${{ github.sha }}
+          path: artifacts/design-system
+          if-no-files-found: warn
+          retention-days: 14

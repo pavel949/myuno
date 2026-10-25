@@ -202,9 +202,9 @@
          Locale fallbacks: Unbounded/Golos Text (RU) · Noto Serif/Noto Sans (EN) — kept for legacy callers. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
+    <link rel="preload" as="style" href="__MYUNO_FONT_STYLESHEET_URL__" />
+    <link href="__MYUNO_FONT_STYLESHEET_URL__" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="__MYUNO_FONT_STYLESHEET_URL__" rel="stylesheet" /></noscript>
     
     <!-- Version check with forced reload on mismatch -->
     <script>
@@ -283,19 +283,15 @@
   </head>
 
   <body>
-    <!-- Inline critical CSS for fast FCP — canonical cream + navy.
-          Primary sans = Geist; locale fallbacks (Noto Sans / Golos Text) keep working if Geist hasn't loaded. -->
-    <style>
+    <!-- Boot uses generated canonical tokens, including locale and dark overrides. -->
+    <!-- MYUNO_BOOTSTRAP_TOKENS -->
+    <style id="myuno-critical-style">
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      html{-webkit-text-size-adjust:100%;font-family:'Geist','Noto Sans',system-ui,-apple-system,sans-serif}
-      html[lang="ru"]{font-family:'Geist','Golos Text','Noto Sans',system-ui,sans-serif}
-      body{min-height:100vh;background:#F7F5F1;color:#1C1917;-webkit-font-smoothing:antialiased}
-      html.dark body{background:#051428;color:#F7F5F1}
+      html{-webkit-text-size-adjust:100%;font-family:var(--font-body)}
+      body{min-height:100vh;background:hsl(var(--background));color:hsl(var(--foreground));-webkit-font-smoothing:antialiased}
       #root{min-height:100vh;display:flex;flex-direction:column}
-      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F7F5F1}
-      html.dark .uno-splash{background:#051428}
-      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:#0A2240}
-      html.dark .uno-splash svg{stroke:#D96B1A}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:hsl(var(--background))}
+      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite;stroke:hsl(var(--primary))}
       @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
       @media (prefers-reduced-motion: reduce){.uno-splash svg{animation:none}}
     </style>

@@ -44,14 +44,13 @@ export function TeamLayout({
         {/* Main Content */}
         <main 
           className={cn(
-            "flex-1 overflow-y-auto overflow-x-hidden min-w-0 max-w-full",
-            "pb-20 lg:pb-4",
-            !fullWidth && "container",
+            "flex-1 overflow-y-auto overflow-x-hidden min-w-0",
+            "ds-page-with-navigation",
+            fullWidth ? "max-w-full" : "ds-frame ds-frame-container",
             className
           )}
           style={{ 
             WebkitOverflowScrolling: 'touch',
-            paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
           }}
         >
           {children}

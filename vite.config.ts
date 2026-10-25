@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { themeBootstrapPlugin } from "./scripts/vite-theme-bootstrap";
 import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
 import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
 import { version } from "./package.json";
@@ -75,6 +76,7 @@ export default defineConfig(({ mode, command }) => {
     esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
+      themeBootstrapPlugin(),
       deploymentMetadataPlugin(version),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.

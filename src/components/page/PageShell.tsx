@@ -25,10 +25,10 @@ interface PageShellProps {
 }
 
 const widthClass: Record<PageWidth, string> = {
-  narrow: 'max-w-3xl',
-  default: 'max-w-5xl',
-  wide: 'max-w-7xl',
-  full: 'max-w-full',
+  narrow: 'ds-frame-article',
+  default: 'ds-frame-content',
+  wide: 'ds-frame-wide',
+  full: 'ds-frame-full',
 };
 
 export function PageShell({
@@ -41,12 +41,11 @@ export function PageShell({
     <div
       className={cn(
         // horizontal padding tracks --page-padding-x token
-        'mx-auto w-full',
-        'px-[var(--page-padding-x)]',
+        'ds-frame',
         // vertical rhythm
-        'py-4 md:py-6 lg:py-8',
+        'ds-page',
         // bottom-nav clearance on mobile
-        !noBottomPad && 'pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-10',
+        !noBottomPad && 'ds-page-with-navigation',
         widthClass[width],
         'min-w-0 overflow-x-hidden',
         className,

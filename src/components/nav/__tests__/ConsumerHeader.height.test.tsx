@@ -58,7 +58,7 @@ it.each([false, true])('scopes canonical portal gutters only to non-overlay menu
 });
 
 it.each([
- ['/discover/services', '1760px'], ['/property/search', '1760px'], ['/for-business', '1536px'],
+ ['/discover/services', 'var(--layout-width-catalogue)'], ['/property/search', 'var(--layout-width-catalogue)'], ['/for-business', 'var(--layout-width-workspace)'],
  ['/become-partner', ''], ['/property/one', ''], ['/support', ''],
 ])('aligns header to the explicit page frame at %s without widening forms/details', (route, expected) => {
  const view = render(<MemoryRouter initialEntries={[route]}><ConsumerHeader /></MemoryRouter>);

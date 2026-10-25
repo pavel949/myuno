@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { TYPE_SCALE } from "./src/design-system/typeScale";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 /**
@@ -22,10 +23,8 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      padding: "calc(var(--layout-gutter) * var(--layout-inset-scale))",
+      screens: {},
     },
     screens: {
       'xs': '400px',
@@ -38,26 +37,13 @@ export default {
     extend: {
       fontFamily: {
         // Driven by --font-body / --font-display, which switch by html[lang].
-        sans:    ['var(--font-body)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Georgia', 'serif'],
+        sans:    ['var(--font-body)'],
+        display: ['var(--font-display)'],
         // Legacy `font-serif` kept as alias for canonical heading font.
-        serif:   ['var(--font-display)', 'Georgia', 'serif'],
-        mono:    ['var(--font-mono)', 'monospace'],
+        serif:   ['var(--font-display)'],
+        mono:    ['var(--font-mono)'],
       },
-      fontSize: {
-        // Canon §3.3 — single typographic scale. Use these tokens, not arbitrary values.
-        'display':  ['3rem',     { lineHeight: '1.1',  letterSpacing: '-0.01em', fontWeight: '400' }],
-        'h1':       ['2.25rem',  { lineHeight: '1.2',  letterSpacing: '-0.01em', fontWeight: '400' }],
-        'h2':       ['1.75rem',  { lineHeight: '1.25', fontWeight: '400' }],
-        'h3':       ['1.375rem', { lineHeight: '1.3',  fontWeight: '500' }],
-        'h4':       ['1.125rem', { lineHeight: '1.4',  fontWeight: '500' }],
-        'body-lg':  ['1.0625rem',{ lineHeight: '1.6',  fontWeight: '400' }],
-        'body':     ['0.9375rem',{ lineHeight: '1.7',  fontWeight: '400' }],
-        'body-sm':  ['0.8125rem',{ lineHeight: '1.6',  fontWeight: '400' }],
-        'caption':  ['0.6875rem',{ lineHeight: '1.5',  fontWeight: '500' }],
-        'label':    ['0.625rem', { lineHeight: '1.4',  letterSpacing: '0.25em', fontWeight: '600', textTransform: 'uppercase' as const }],
-        'mono':     ['0.75rem',  { lineHeight: '1.5',  fontWeight: '500' }],
-      },
+      fontSize: TYPE_SCALE,
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -238,13 +224,13 @@ export default {
         // Canon §5 — almost no rounding. 0 is the default.
         // The `lg/md/sm` aliases used to be 8/4/2; they are now collapsed to 0
         // (sm stays at 2px for chips). Phase 4 will remove `rounded-lg` callers.
-        none: "0",
+        none: "var(--radius-none)",
         sm:   "var(--radius-sm)",   /* 2px */
-        md:   "0",
-        lg:   "0",
-        xl:   "0",
-        "2xl": "0",
-        "3xl": "0",
+        md:   "var(--radius-none)",
+        lg:   "var(--radius-none)",
+        xl:   "var(--radius-none)",
+        "2xl": "var(--radius-none)",
+        "3xl": "var(--radius-none)",
         full: "var(--radius-full)",
       },
       boxShadow: {
