@@ -6,10 +6,10 @@
 - [ ] Complete exact-head CI and release review; source/runtime proof is not live activation.
 
 ## 2026-10-22 · Authorized sitemap, metadata and monitoring tranche
-- [ ] First correct the four broken child sitemaps using the existing public catalogue contract; verify without publishing.
-- [ ] Give housing and services distinct accurate search titles/descriptions using existing page metadata.
-- [ ] Record prior three-function deployment evidence and UNKNOWN Auth redirect coverage, with exact read-only manual checks for both setup-password URLs; invitations stay disabled.
-- [ ] Diagnose the remaining Project monitoring finding and minimally correct only a reproduced cause with isolated regressions.
+- [x] Four broken child sitemaps: generate-sitemap edge function does not exist (all four URLs return 404, verified 2026-10-25); entries removed from public/sitemap.xml with a re-add note. Not yet published — live site still serves the old index until Pavel approves a publish.
+- [x] Distinct search titles: GoalEntryPage (/discover/buy, /discover/live) gained per-goal SEOHead; GuestComplexDetail brand-suffix duplication (`name — myUNO | myUNO`) corrected. PropertySearchPage, PropertyIndex (mode-aware), PropertyLanding, ServicesIndex already had distinct titles. Caveat: SPA serves one static index.html title to non-JS crawlers; per-route titles apply after JS rendering (SSR would require the TanStack migration — separate decision).
+- [x] Three-function deployment report with UNKNOWN Auth redirect coverage and read-only manual check steps: docs/qa/EDGE_INVITE_FUNCTIONS_DEPLOYMENT_2026_10_25.md; invitations stay disabled.
+- [x] Project monitoring diagnosis: zero pending findings (2026-10-25). iCal repeated-soft-delete finding reviewed from source: current code filters deleted_at IS NULL, so repeats of the same 162/163 removals are NOT explained by this source; cause unconfirmed — no fix applied, per "fix only confirmed causes".
 - [ ] Record commands, outcomes, changed files and source HEAD; no publication, production business writes, Auth changes or invitation activation. Audience selection and regular-booking assessment are deferred.
 
 ## 2026-10-17 · Connected-system continuation (GitHub verification)
