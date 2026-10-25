@@ -1,138 +1,86 @@
-import { getServiceRequestConfirmationNote, serviceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, Phone } from 'lucide-react';
-import { resolveIcon } from '@/lib/iconMap';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
-import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageShell } from '@/components/page/PageShell';
+import { Button } from '@/components/ui/button';
+import { servicePriceLabel as formatServicePrice } from '@/lib/services/servicePresentation';
+import { pickLang } from '@/lib/i18n/pickLang';
 
-interface OrderData {
+interface OrderReceipt {
   id: string;
+  customer_user_id: string;
   order_number: string | null;
   total_amount: number;
   currency: string | null;
-  status: string | null;
+  status: string;
   start_at: string | null;
-  metadata: {
-    provider_name?: string;
-    address?: string;
-    contact_name?: string;
-    contact_phone?: string;
-    stripe_session_id?: string;
-  } | null;
 }
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** A saved order receipt is distinct from payment or provider confirmation. */
 export default function ServiceOrderSuccess() {
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [params, setParams] = useSearchParams();
+  const { user } = useAuth();
+  const actorId = user?.id;
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const L = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const stateId = (location.state as { orderId?: unknown } | null)?.orderId;
+  const orderId = params.get('order_id') ?? (typeof stateId === 'string' ? stateId : null);
+  const sessionId = params.get('session_id');
+  const validLookup = !!((orderId && uuid.test(orderId)) || (!orderId && sessionId && sessionId.length <= 250));
+  const identity = JSON.stringify([actorId, orderId, sessionId]);
+  const [retry, setRetry] = useState(0);
+  const [snapshot, setSnapshot] = useState<{ identity: string; order: OrderReceipt | null; failed: boolean; loading: boolean }>({ identity, order: null, failed: false, loading: true });
+  const current = snapshot.identity === identity ? snapshot : null;
+  const order = current?.order ?? null;
+  const loading = !!actorId && validLookup && (!current || current.loading);
 
-  const sessionId = searchParams.get('session_id');
-  const navState = (location.state as {
-    functionName?: string;
-    functionIcon?: string;
-    orderId?: string;
-    orderNumber?: string;
-  } | null) || {};
-  const { functionName, functionIcon, orderId: stateOrderId } = navState;
-
-  const [order, setOrder] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(!!(sessionId || stateOrderId));
+  // The saved identifier survives reload without relying on ephemeral router state.
+  useEffect(() => {
+    if (!params.has('order_id') && orderId && uuid.test(orderId)) {
+      const next = new URLSearchParams(params); next.set('order_id', orderId); setParams(next, { replace: true, state: location.state });
+    }
+  }, [orderId, params, setParams, location.state]);
 
   useEffect(() => {
-    if (!sessionId && !stateOrderId) return;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    const fetchOrder = async () => {
-      const baseSelect = 'id, order_number, total_amount, currency, status, start_at, metadata';
-      let query = supabase.from('orders').select(baseSelect).eq('order_type', 'service');
-      query = stateOrderId
-        ? query.eq('id', stateOrderId)
-        : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
-      const { data } = await query.maybeSingle();
-
-      if (data) {
-        setOrder(data as unknown as OrderData);
-        setLoading(false);
-      } else if (++attempts < maxAttempts) {
-        setTimeout(fetchOrder, 2000);
-      } else {
-        setLoading(false);
+    let active = true;
+    setSnapshot({ identity, order: null, failed: false, loading: !!actorId && validLookup });
+    if (!actorId || !validLookup) return () => { active = false; };
+    void (async () => {
+      try {
+        let query = supabase.from('orders').select('id,customer_user_id,order_number,total_amount,currency,status,start_at').eq('order_type', 'service').eq('customer_user_id', actorId).is('deleted_at', null);
+        query = orderId ? query.eq('id', orderId) : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
+        const { data, error } = await query.maybeSingle();
+        if (!active) return;
+        if (error || !data || data.customer_user_id !== actorId || !uuid.test(data.id) || (orderId && data.id !== orderId)) {
+          setSnapshot({ identity, order: null, failed: true, loading: false }); return;
+        }
+        setSnapshot({ identity, order: data as OrderReceipt, failed: false, loading: false });
+      } catch {
+        if (active) setSnapshot({ identity, order: null, failed: true, loading: false });
       }
-    };
+    })();
+    return () => { active = false; };
+  }, [identity, actorId, orderId, sessionId, validLookup, retry]);
 
-    fetchOrder();
-  }, [sessionId, stateOrderId]);
-
-  const details = order ? (
-    <div className="space-y-2 text-sm">
-      {functionName && (
-        <div className="flex items-center gap-2">
-          {(() => { const Icon = resolveIcon(functionIcon); return <Icon className="w-4 h-4 text-muted-foreground shrink-0" />; })()}
-          <span>{functionName}</span>
-        </div>
-      )}
-      {order.metadata?.provider_name && (
-        <div className="font-medium">{order.metadata.provider_name}</div>
-      )}
-      <div className="font-semibold">
-        {order.total_amount.toLocaleString()} {order.currency}
-      </div>
-      {order.start_at && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="w-4 h-4 shrink-0" />
-          <span>{format(new Date(order.start_at), 'dd MMM yyyy, HH:mm')}</span>
-        </div>
-      )}
-      {order.metadata?.address && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <MapPin className="w-4 h-4 shrink-0" />
-          <span className="line-clamp-2">{order.metadata.address}</span>
-        </div>
-      )}
-      {order.metadata?.contact_phone && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Phone className="w-4 h-4 shrink-0" />
-          <span>{order.metadata.contact_phone}</span>
-        </div>
-      )}
-    </div>
-  ) : functionName ? (
-    <div className="flex items-center gap-2 text-sm">
-      {(() => { const Icon = resolveIcon(functionIcon); return <Icon className="w-4 h-4 text-muted-foreground" />; })()}
-      <span>{functionName}</span>
-    </div>
-  ) : null;
-
-  const serviceLabel = order?.metadata?.provider_name || functionName;
-  const whenStr = order?.start_at ? format(new Date(order.start_at), 'dd MMM yyyy, HH:mm') : '';
-  const summaryRu = [serviceLabel && `Услуга: ${serviceLabel}`, whenStr && `Время: ${whenStr}`]
-    .filter(Boolean).join(' · ');
-  const summaryEn = [serviceLabel && `Service: ${serviceLabel}`, whenStr && `When: ${whenStr}`]
-    .filter(Boolean).join(' · ');
-
-  return (
-    <UnifiedSuccessLayout
-      isLoading={loading}
-      orderNumber={order?.order_number || undefined}
-      note={{
-        ru: serviceRequestConfirmationNote.ru,
-        en: getServiceRequestConfirmationNote(language),
-      }}
-      details={details}
-      extras={<CrossSellRecommendations orderType="service" />}
-      primaryHref="/services"
-      primaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
-      secondaryHref="/bookings"
-      secondaryLabel={{ ru: 'Мои заказы', en: 'My orders' }}
-      totalAmount={order?.total_amount}
-      currency={order?.currency || undefined}
-      whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}
-    />
-  );
+  return <AppLayout showHeader={false}><PageShell width="narrow" className="space-y-4">
+    {loading ? <p role="status">{L('Проверяем сохранённый заказ…', 'Checking the saved order…', 'กำลังตรวจสอบคำสั่งซื้อ…')}</p>
+      : order ? <section aria-labelledby="service-receipt-title" className="space-y-3 border border-border bg-card p-4">
+        <h1 id="service-receipt-title" className="font-display text-h2">{L('Заказ сохранён', 'Order saved', 'บันทึกคำสั่งซื้อแล้ว')}</h1>
+        <p>{L('Сохранение заказа не подтверждает оплату, исполнителя или время оказания услуги.', 'Saving the order does not confirm payment, provider or service time.', 'การบันทึกคำสั่งซื้อไม่ได้ยืนยันการชำระเงิน ผู้ให้บริการ หรือเวลาให้บริการ')}</p>
+        {order.order_number && <p>{L('Номер заказа', 'Order number', 'หมายเลขคำสั่งซื้อ')}: {order.order_number}</p>}
+        <p>{L('Статус', 'Status', 'สถานะ')}: {order.status}</p>
+        <p>{formatServicePrice(order.total_amount, order.currency, language)}</p>
+        {order.start_at && <p>{new Date(order.start_at).toLocaleString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { timeZone: 'Asia/Bangkok' })} · {L('Пхукет', 'Phuket', 'ภูเก็ต')}</p>}
+      </section>
+        : <section className="space-y-3"><h1 className="font-display text-h2">{L('Результат пока не подтверждён', 'Result not confirmed', 'ยังไม่ยืนยันผลลัพธ์')}</h1>
+          <p role="alert">{!user ? L('Войдите, чтобы проверить свой заказ.', 'Sign in to check your order.', 'เข้าสู่ระบบเพื่อตรวจสอบคำสั่งซื้อของคุณ') : L('Не удалось подтвердить сохранённый заказ. Повторите проверку; не создавайте новую заявку до уточнения результата.', 'The saved order could not be confirmed. Retry checking before creating another request.', 'ยังยืนยันคำสั่งซื้อไม่ได้ โปรดตรวจสอบอีกครั้งก่อนสร้างคำขอใหม่')}</p>
+          {user && validLookup && <Button onClick={() => setRetry(n => n + 1)}>{L('Проверить ещё раз', 'Check again', 'ตรวจสอบอีกครั้ง')}</Button>}
+        </section>}
+    <div className="flex flex-wrap gap-2"><Button asChild><Link to="/bookings">{L('Мои заказы', 'My orders', 'คำสั่งซื้อของฉัน')}</Link></Button><Button variant="outline" asChild><Link to="/discover/services">{L('К услугам', 'Browse services', 'ดูบริการ')}</Link></Button></div>
+  </PageShell></AppLayout>;
 }
