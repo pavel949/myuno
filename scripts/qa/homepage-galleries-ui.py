@@ -112,8 +112,9 @@ async def main():
                         dialog = page.get_by_role('dialog')
                         await expect(dialog).to_be_visible()
                         await dialog.evaluate('(el)=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})))')
-                        choices = dialog.locator('.home-search-intents a')
+                        choices = dialog.locator('.home-search-intents a[href^="/property/search?"]')
                         await expect(choices).to_have_count(4)
+                        await expect(dialog.locator('a[href^="/owner/management-landing?intent="]')).to_have_count(2)
                         # Every intention, including Buy, fits the current sheet without scrolling.
                         bounds = await dialog.bounding_box()
                         for choice in await choices.all():

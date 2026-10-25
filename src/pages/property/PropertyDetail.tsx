@@ -159,7 +159,7 @@ export default function PropertyDetail() {
     return (
       <div className="space-y-4 py-6">
         <p className="text-center text-sm text-muted-foreground">{loadingLabel}</p>
-        <LoadingState variant="skeleton" rows={3} message={loadingLabel} className="mx-auto w-full max-w-xl" />
+        <LoadingState variant="skeleton" rows={3} message={loadingLabel} className="ds-frame-article mx-auto w-full" />
       </div>
     );
   }
@@ -167,7 +167,7 @@ export default function PropertyDetail() {
   if (!property && isError) {
     return (
       <div className="py-6">
-        <Alert className="max-w-xl" aria-labelledby="property-read-error-title">
+        <Alert className="ds-frame-article" aria-labelledby="property-read-error-title">
           <AlertTitle id="property-read-error-title">{pickLang(language, { en: 'Property could not be loaded', ru: 'Не удалось загрузить объект', th: 'ไม่สามารถโหลดที่พักได้' })}</AlertTitle>
           <AlertDescription>
             <p>{pickLang(language, { en: 'Please try again to check this property.', ru: 'Повторите попытку, чтобы посмотреть объект.', th: 'โปรดลองอีกครั้งเพื่อดูข้อมูลที่พักนี้' })}</p>
