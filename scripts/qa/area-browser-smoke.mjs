@@ -11,6 +11,8 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 const results = [];
 for (const width of [320, 390, 430, 1440]) {
  const page = await browser.newPage({ viewport: { width, height: 900 } });
+ // Previously denied media hosts are blocked locally; never retry transport.
+ await page.route('https://thumb.wikimedia.org/**', route => route.abort());
  const errors = [];
  const queries = [];
  page.on('pageerror', error => errors.push(error.message));
@@ -23,7 +25,7 @@ for (const width of [320, 390, 430, 1440]) {
   const district = url.searchParams.get('district')?.replace(/^eq\./, '') || 'Kamala';
   let data = [];
   if (table === 'public_property_catalog') data = [{ id: '11111111-1111-4111-8111-111111111111', title: 'Synthetic rental', title_en: 'Synthetic rental', title_ru: 'Тестовая аренда', district, listing_type: 'rent', is_active: true, approval_status: 'approved', images: [], amenities: [], equipment: [], price_per_night: 2500, max_guests: 2 }];
-  if (table === 'property_projects') data = [{ id: '22222222-2222-4222-8222-222222222222', name_en: 'Synthetic project', name_ru: 'Тестовый проект', district, is_active: true, project_status: 'construction', amenities: [] }];
+  if (table === 'property_projects') data = [{ id: '22222222-2222-4222-8222-222222222222', name_en: 'Synthetic project', name_ru: 'Тестовый проект', district, is_active: true, project_status: 'under_construction', amenities: [] }];
   if (table === 'resale_properties') data = [{ id: '33333333-3333-4333-8333-333333333333', title: 'Synthetic resale', zone: 'Kamala', status: 'active', asking_price: 5000000, media: [] }];
   return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
  });
@@ -43,17 +45,29 @@ for (const width of [320, 390, 430, 1440]) {
  const rentalSearch = page.url();
  await page.goBack();
  await page.getByRole('heading', { name: 'Kamala', exact: true }).waitFor();
+ const projectQueryStart = queries.length;
+ await page.getByRole('link', { name: 'Open search →', exact: true }).nth(1).click();
+ await page.waitForURL(url => url.pathname === '/property/offplan' && url.searchParams.get('district') === 'Kamala');
+ // Reload clears the guide preview cache, proving the search's own request.
+ await page.reload();
+ try { await page.getByText('Synthetic project', { exact: true }).waitFor(); } catch (error) { await page.screenshot({path:`${out}/offplan-failure-${width}.png`,fullPage:true}); await writeFile(`${out}/offplan-failure.json`,JSON.stringify({errors,text:await page.locator('body').innerText(),queries},null,2)); throw error; }
+ const projectSearch = page.url();
+ const projectRequests = queries.slice(projectQueryStart).filter(query => query.table === 'property_projects' && query.method === 'GET');
+ if (!projectRequests.some(query => query.params.district === 'eq.Kamala')) throw Error('Project search lost exact district');
+ await page.goBack();
+ await page.getByRole('heading', { name: 'Kamala', exact: true }).waitFor();
  await page.getByRole('link', { name: 'Open search →', exact: true }).last().click();
  await page.waitForURL(url => url.pathname === '/property/resale' && url.searchParams.get('zone') === 'Kamala');
  await page.getByText('Synthetic resale', { exact: true }).waitFor();
  const resaleSearch = page.url();
  await page.goBack();
  await page.getByRole('heading', { name: 'Kamala', exact: true }).waitFor();
- results.push({ width, overflow, errors, rentalSearch, resaleSearch, queries, media: await page.locator('img').evaluateAll(images => images.map(image => ({ src: image.src, loaded: image.complete && image.naturalWidth > 0 }))) });
+ results.push({ width, overflow, errors, rentalSearch, projectSearch, resaleSearch, queries, media: await page.locator('img').evaluateAll(images => images.map(image => ({ src: image.src, loaded: image.complete && image.naturalWidth > 0 }))) });
  await page.close();
 }
 // Actual component empty/error/retry states, isolated from production.
 const statePage = await browser.newPage({ viewport: { width: 390, height: 900 } });
+await statePage.route('https://thumb.wikimedia.org/**', route => route.abort());
 let state = 'empty';
 await statePage.route('https://area-fixture.invalid/**', async route => {
  if (state === 'error') return route.fulfill({status:503, contentType:'application/json', body:JSON.stringify({message:'Synthetic read failure'})});
@@ -74,5 +88,5 @@ await statePage.getByRole('heading', {name:'Rental properties · 1',exact:true})
 await statePage.close();
 await browser.close();
 await writeFile(`${out}/results.json`, JSON.stringify(results, null, 2));
-console.log(JSON.stringify(results.map(({ width, overflow, errors, rentalSearch, resaleSearch, media }) => ({ width, overflow, errors, rentalSearch, resaleSearch, media })), null, 2));
+console.log(JSON.stringify(results.map(({ width, overflow, errors, rentalSearch, projectSearch, resaleSearch, media }) => ({ width, overflow, errors, rentalSearch, projectSearch, resaleSearch, media })), null, 2));
 if (results.some(result => result.overflow || result.errors.length)) process.exitCode = 1;

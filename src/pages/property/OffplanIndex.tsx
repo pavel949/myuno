@@ -5,7 +5,7 @@ import '@/styles/public-commerce.css';
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Building2,
   TrendingUp,
@@ -86,7 +86,14 @@ export default function OffplanIndex() {
   const isRu = language === 'ru';
 
   const [selectedStatus, setSelectedStatus] = useState<ProjectStatus[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDistrict = searchParams.get('district')?.trim() ?? '';
+  const setSelectedDistrict = (district: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (district) next.set('district', district);
+    else next.delete('district');
+    return next;
+  });
   const [selectedDeveloper, setSelectedDeveloper] = useState<string>('');
   const [minScore, setMinScore] = useState<number>(0);
   const [ui, setUi] = useState<OffplanUiFilterState>(() => defaultOffplanUiFilterState());
