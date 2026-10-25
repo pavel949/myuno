@@ -44,10 +44,15 @@ it('renders the delegated report destination as a native focusable link', () => 
  render(<MemoryRouter><PropertyMySection /></MemoryRouter>);
  const link = screen.getByRole('link', { name: /Delegated Villa/ }); expect(link).toHaveAttribute('href', '/owner/transparency/property-one'); link.focus(); expect(link).toHaveFocus();
 });
-it('renders native insurance links and preserves redirect markers and partner callbacks', () => {
- const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+it.each([false, true])('preserves native insurance activation and redirect markers (control modifier: %s)', ctrlKey => {
  render(<MemoryRouter><TravelInsurance /></MemoryRouter>);
  for (const [name, url] of [['Cherehapa', 'https://cherehapa.ru/country/thailand?partnerid=MYUNO'], ['SafetyWing', 'https://safetywing.com/nomad-insurance?referenceID=myuno']]) {
-  const link = screen.getByRole('link', { name: new RegExp(name) }); expect(link).toHaveAttribute('href', url); link.focus(); expect(link).toHaveFocus(); fireEvent.click(link); expect(open).toHaveBeenLastCalledWith(url, '_blank'); expect(sessionStorage.getItem('insurance_redirect')).toBe('true');
+  const link = screen.getByRole('link', { name: new RegExp(name) });
+  expect(link).toHaveAttribute('href', url); expect(link).toHaveAttribute('target', '_blank'); expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  link.focus(); expect(link).toHaveFocus();
+  const activation = new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey });
+  fireEvent(link, activation);
+  expect(activation.defaultPrevented).toBe(false);
+  expect(sessionStorage.getItem('insurance_redirect')).toBe('true');
  }
 });
