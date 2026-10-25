@@ -10,14 +10,44 @@ const root = process.cwd();
 const output = '/tmp/browser/bookings-list-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
+  '@/contexts/AuthContext': `import {useSyncExternalStore} from 'react';
+    const listeners=new Set();window.fixtureScope={actor:'synthetic-manager-a',company:'synthetic-company-a',revision:0};
+    window.fixtureNotify=()=>{window.fixtureScope={...window.fixtureScope,revision:window.fixtureScope.revision+1};listeners.forEach(fn=>fn());};
+    window.fixtureSetScope=patch=>{window.fixtureScope={...window.fixtureScope,...patch};window.fixtureNotify();};
+    const subscribe=fn=>{listeners.add(fn);return()=>listeners.delete(fn);};
+    export const useFixtureScope=()=>useSyncExternalStore(subscribe,()=>window.fixtureScope);
+    export const useAuth=()=>({user:{id:useFixtureScope().actor}});`,
+  '@/hooks/useActiveCompany': `import {useFixtureScope} from '@/contexts/AuthContext';export const useActiveCompany=()=>({activeCompany:{company_id:useFixtureScope().company}});`,
   '@/contexts/LanguageContext': `export const useLanguage = () => ({language: new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ru'});`,
   '@/contexts/CurrencyContext': `export const useCurrency = () => ({formatPrice: n => new Intl.NumberFormat(new URLSearchParams(location.search).get('lang') === 'en' ? 'en-US' : 'ru-RU', {style:'currency',currency:'THB'}).format(n)});`,
   '@/hooks/useCityCurrency': `export const useCityCurrency = () => ({code:'THB'});`,
-  '@/hooks/usePropertyBookings': `import {bookingsListFixtures} from '${root}/src/pages/owner/__tests__/bookingsList.fixtures.ts'; export const useAllPropertyBookings = () => ({bookings:bookingsListFixtures(new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ru'),isLoading:false});`,
+  '@/hooks/usePropertyBookings': `import {bookingsListFixtures} from '${root}/src/pages/owner/__tests__/bookingsList.fixtures.ts';import {useFixtureScope} from '@/contexts/AuthContext';
+    window.fixtureRows=bookingsListFixtures(new URLSearchParams(location.search).get('lang')==='en'?'en':'ru');window.fixtureRefetches=[];
+    export const useAllPropertyBookings=()=>{const scope=useFixtureScope();return{bookings:scope.actor==='synthetic-manager-a'&&scope.company==='synthetic-company-a'?window.fixtureRows:[],isLoading:false,error:null,
+      refetch:async()=>{window.fixtureRefetches.push({actor:window.fixtureScope.actor,company:window.fixtureScope.company});window.fixtureRows=[...window.fixtureRows];window.fixtureNotify();return{data:window.fixtureRows,error:null};}};};`,
   '@/hooks/useHapticFeedback': `export const triggerHaptic = () => {};`,
   '@/hooks/useSoundEffects': `export const playSound = () => {}; export const isTypingKey = () => false;`,
-  '@/integrations/supabase/client': `window.fixtureCalls=[]; export const supabase={from: table => ({update: values => ({in: (key,ids) => {window.fixtureCalls.push({table,values,key,ids}); return Promise.resolve({error: new Error('Fixture-only rejection')});}})})};`,
-  'sonner': `export const toast={error:()=>{window.fixtureError=true;}};`,
+  '@/integrations/supabase/client': `window.fixtureCalls=[];window.fixtureDirectWrites=[];window.fixtureMode='reject';window.fixtureHoldBinding=false;window.fixtureBinds=[];window.fixtureBindSettled=0;
+    export const supabase={from(table){window.fixtureDirectWrites.push(table);throw Error('Direct table access forbidden in checked booking fixture');},
+      async rpc(name,args,bound){window.fixtureCalls.push({name,args,bound});
+        if(name!=='change_property_booking')throw Error('Unexpected checked booking command');
+        const row=window.fixtureRows.find(value=>value.id===args.p_order_id);if(!row)throw Error('Foreign fixture order');
+        if(args.p_expected_updated_at!==row.updated_at)return{data:null,error:{code:'40001',message:'stale_reservation'}};
+        if(window.fixtureMode==='reject')return{data:null,error:{code:'42501',message:'Fixture-only rejection'}};
+        if(window.fixtureMode==='malformed')return{data:{success:true},error:null};
+        const revision='2030-01-01T00:00:00.00000'+(row.status==='pending'?'1':'2')+'Z';
+        const order={id:row.id,status:args.p_patch.status,start_at:row.check_in+'T14:00:00+07:00',end_at:row.check_out+'T12:00:00+07:00',updated_at:revision};
+        row.status=order.status;row.updated_at=revision;
+        return{data:{success:true,replayed:false,order,order_items:[{item_type:'property',resource_id:row.property_id}],order_participants:[{role:'guest',name:row.guest_name,phone:row.guest_phone??null,email:row.guest_email??null}]},error:null};
+      }};`,
+  '@/lib/propertyReservationReceipt': `import {supabase} from '@/integrations/supabase/client';
+    export async function bindPropertyReservationReader(actor,assertCurrent){assertCurrent();const bound={actor,company:window.fixtureScope.company};window.fixtureBinds.push(bound);
+      try{if(window.fixtureHoldBinding)await new Promise(resolve=>{window.fixtureResumeBinding=resolve;});
+        assertCurrent();if(actor!==window.fixtureScope.actor)throw Error('Fixture account changed');
+        return{rpc:(name,args)=>{assertCurrent();return supabase.rpc(name,args,bound);}};
+      }finally{window.fixtureBindSettled++;}
+    }`,
+  'sonner': `window.fixtureErrors=[];window.fixtureSuccess=[];export const toast={error:(...args)=>window.fixtureErrors.push(args),success:(...args)=>window.fixtureSuccess.push(args)};`,
   '@/components/owner/BookingDetailSheet': `import React from 'react'; export function BookingDetailSheet({open,booking,onOpenChange}) {return open ? React.createElement('div',{role:'dialog','aria-label':'Fixture booking details'},booking.id,React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`,
 };
 await build({
