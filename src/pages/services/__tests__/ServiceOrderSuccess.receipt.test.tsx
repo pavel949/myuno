@@ -2,11 +2,12 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({
+  language: 'en',
   actor: '00000000-0000-4000-8000-000000000001' as string | null,
   read: vi.fn(), filters: [] as [string, unknown][],
 }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.actor ? { id: state.actor } : null }) }));
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => {
   const q = { select: () => q, eq: (k: string, v: unknown) => { state.filters.push([k, v]); return q; }, filter: (k: string,_operator: string,v: unknown) => { state.filters.push([k,v]); return q; }, is: () => q, maybeSingle: () => state.read() }; return q;
@@ -17,7 +18,7 @@ const row = () => ({ id, customer_user_id: state.actor, order_number: 'SYNTHETIC
 function NextOrder() { const navigate=useNavigate(); return <button onClick={()=>navigate('/services/order/success?order_id=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')}>Next receipt</button>; }
 function Location() { const l = useLocation(); return <><output data-testid="location">{l.pathname+l.search+l.hash}</output><output data-testid="state">{JSON.stringify(l.state)}</output></>; }
 const view = (entry: string | { pathname: string; state: unknown; search?: string; hash?: string } = '/services/order/success?order_id=' + id) => <MemoryRouter initialEntries={[entry]}><ServiceOrderSuccess /><Location /><NextOrder /></MemoryRouter>;
-beforeEach(() => { state.actor = '00000000-0000-4000-8000-000000000001'; state.filters = []; state.read.mockReset().mockResolvedValue({ data: row(), error: null }); });
+beforeEach(() => { state.language='en'; state.actor = '00000000-0000-4000-8000-000000000001'; state.filters = []; state.read.mockReset().mockResolvedValue({ data: row(), error: null }); });
 describe('service receipt readback', () => {
   it('confirms the persisted owned record without claiming payment', async () => {
     render(view()); await screen.findByText('Order saved');
@@ -74,6 +75,14 @@ describe('service receipt readback', () => {
     render(view());await waitFor(()=>expect(complete).toBeTypeOf('function'));
     await act(async()=>screen.getByRole('button',{name:'Next receipt'}).click());await screen.findByText('Order number: SECOND');
     await act(async()=>complete({data:prior,error:null}));expect(screen.getByText('Order number: SECOND')).toBeVisible();expect(screen.queryByText('Order number: SYNTHETIC-1')).toBeNull();
+  });
+
+  it('presents a saved record with nullable status as unknown, never invented pending',async()=>{
+    state.read.mockResolvedValue({data:{...row(),status:null},error:null});render(view());await screen.findByText('Order saved');
+    expect(screen.getByText('Status: Unavailable')).toBeVisible();expect(screen.queryByText('Status: pending')).toBeNull();
+  });
+  it.each([['en','Price, time and provider require confirmation after you submit your request.'],['ru','Цена, время и исполнитель требуют подтверждения после отправки заявки.'],['th','ราคา เวลา และผู้ให้บริการต้องได้รับการยืนยันหลังจากส่งคำขอ']])('retains the factual price/time/provider note in %s',async(language,note)=>{
+    state.language=language;render(view());expect(await screen.findByText(note)).toBeVisible();
   });
 
 });

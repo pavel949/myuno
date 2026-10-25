@@ -8,6 +8,7 @@ import { PageShell } from '@/components/page/PageShell';
 import { Button } from '@/components/ui/button';
 import { servicePriceLabel as formatServicePrice } from '@/lib/services/servicePresentation';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
 
 interface OrderReceipt {
   id: string;
@@ -15,7 +16,7 @@ interface OrderReceipt {
   order_number: string | null;
   total_amount: number;
   currency: string | null;
-  status: string;
+  status: string | null;
   start_at: string | null;
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -73,9 +74,10 @@ export default function ServiceOrderSuccess() {
     {loading ? <p role="status">{L('Проверяем сохранённый заказ…', 'Checking the saved order…', 'กำลังตรวจสอบคำสั่งซื้อ…')}</p>
       : order ? <section aria-labelledby="service-receipt-title" className="space-y-3 border border-border bg-card p-4">
         <h1 id="service-receipt-title" className="font-display text-h2">{L('Заказ сохранён', 'Order saved', 'บันทึกคำสั่งซื้อแล้ว')}</h1>
-        <p>{L('Сохранение заказа не подтверждает оплату, исполнителя или время оказания услуги.', 'Saving the order does not confirm payment, provider or service time.', 'การบันทึกคำสั่งซื้อไม่ได้ยืนยันการชำระเงิน ผู้ให้บริการ หรือเวลาให้บริการ')}</p>
+        <p>{L('Сохранение заказа не подтверждает оплату.', 'Saving the order does not confirm payment.', 'การบันทึกคำสั่งซื้อไม่ได้ยืนยันการชำระเงิน')}</p>
+        <p>{getServiceRequestConfirmationNote(language)}</p>
         {order.order_number && <p>{L('Номер заказа', 'Order number', 'หมายเลขคำสั่งซื้อ')}: {order.order_number}</p>}
-        <p>{L('Статус', 'Status', 'สถานะ')}: {order.status}</p>
+        <p>{L('Статус', 'Status', 'สถานะ')}: {order.status?.trim() || L('Не получен', 'Unavailable', 'ไม่ทราบ')}</p>
         <p>{formatServicePrice(order.total_amount, order.currency, language)}</p>
         {order.start_at && <p>{new Date(order.start_at).toLocaleString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { timeZone: 'Asia/Bangkok' })} · {L('Пхукет', 'Phuket', 'ภูเก็ต')}</p>}
       </section>

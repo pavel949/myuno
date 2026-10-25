@@ -23,7 +23,7 @@ const virtual = {
       window.fixtureReads.push(filters);const mode=new URLSearchParams(location.search).get('mode');
       if(mode==='empty')return{data:null,error:null};
       if(mode==='error'&&window.fixtureReads.length===1)return{data:null,error:new Error('Synthetic offline')};
-      return{error:null,data:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',customer_user_id:mode==='foreign'?'00000000-0000-4000-8000-000000000099':'00000000-0000-4000-8000-000000000001',order_number:'SYNTHETIC-1',total_amount:900,currency:'USD',status:'pending',start_at:null}};
+      return{error:null,data:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',customer_user_id:mode==='foreign'?'00000000-0000-4000-8000-000000000099':'00000000-0000-4000-8000-000000000001',order_number:'SYNTHETIC-1',total_amount:900,currency:'USD',status:mode==='unknown'?null:'pending',start_at:null}};
     }};return q;
   }};`,
 };

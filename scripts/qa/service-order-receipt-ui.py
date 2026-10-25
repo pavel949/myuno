@@ -14,7 +14,7 @@ async def main():
         browser = await p.chromium.launch(executable_path=executable, headless=True, args=['--no-sandbox'])
         for lang in ['en', 'ru', 'th']:
             for width in [390, 1440]:
-                for mode in ['saved', 'empty', 'error', 'foreign', 'uppercase', 'session', 'promotion']:
+                for mode in ['saved', 'empty', 'error', 'foreign', 'uppercase', 'session', 'promotion', 'unknown']:
                     context = await browser.new_context(viewport={'width': width, 'height': 900}, service_workers='block')
                     errors, blocked = [], []
                     async def route(r):
@@ -28,7 +28,7 @@ async def main():
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}&mode={mode}')
                     saved = {'en': 'Order saved', 'ru': 'Заказ сохранён', 'th': 'บันทึกคำสั่งซื้อแล้ว'}[lang]
                     unconfirmed = {'en': 'Result not confirmed', 'ru': 'Результат пока не подтверждён', 'th': 'ยังไม่ยืนยันผลลัพธ์'}[lang]
-                    if mode in ['saved','uppercase','session','promotion']:
+                    if mode in ['saved','uppercase','session','promotion','unknown']:
                         await expect(page.get_by_role('heading', name=saved, exact=True)).to_be_visible()
                         await expect(page.get_by_text('USD 900', exact=True)).to_be_visible()
                     else:
@@ -38,6 +38,10 @@ async def main():
                             await page.get_by_role('button', name={'en': 'Check again', 'ru': 'Проверить ещё раз', 'th': 'ตรวจสอบอีกครั้ง'}[lang], exact=True).click()
                             await expect(page.get_by_role('heading', name=saved, exact=True)).to_be_visible()
                             assert await page.evaluate('window.fixtureReads.length') == 2
+                    if mode not in ['empty','foreign']:
+                        await expect(page.get_by_text({'en':'Price, time and provider require confirmation after you submit your request.','ru':'Цена, время и исполнитель требуют подтверждения после отправки заявки.','th':'ราคา เวลา และผู้ให้บริการต้องได้รับการยืนยันหลังจากส่งคำขอ'}[lang],exact=True)).to_be_visible()
+                    if mode == 'unknown':
+                        await expect(page.get_by_text({'en':'Status: Unavailable','ru':'Статус: Не получен','th':'สถานะ: ไม่ทราบ'}[lang],exact=True)).to_be_visible()
                     assert await page.evaluate("window.fixtureReads.every(r=>r.customer_user_id==='00000000-0000-4000-8000-000000000001'&&r.order_type==='service')")
                     if mode == 'session':
                         assert await page.evaluate("window.fixtureReads.every(r=>r['metadata->>stripe_session_id']==='cs_synthetic')")
@@ -54,7 +58,7 @@ async def main():
                     rows.append({'language': lang, 'width': width, 'mode': mode, 'outcome': 'PASS'})
                     await context.close()
         await browser.close()
-    assert len(rows) == 42 and len({(r['language'], r['width'], r['mode']) for r in rows}) == 42
+    assert len(rows) == 48 and len({(r['language'], r['width'], r['mode']) for r in rows}) == 48
     (OUTPUT / 'results.json').write_text(json.dumps(rows, indent=2))
     print(json.dumps({'passed': len(rows), 'output': str(OUTPUT)}))
 
