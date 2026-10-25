@@ -24,4 +24,12 @@ describe('existing area registry extension', () => {
     expect(areaSearchHref(area, 'projects')).toBe('/property/offplan?district=Nai+Yang');
     expect(areaSearchHref(area, 'resale', '?district=kamala')).toBe('/property/resale?zone=Nai+Yang');
   });
+  it.each(['rent-long', 'rent-month'])('preserves applicable legacy rental intent %s', intent => {
+    const area = findAreaGuide('kamala')!;
+    const params = new URL(areaSearchHref(area, 'rentals', `?mode=buy&intent=${intent}`), 'https://myuno.app').searchParams;
+    expect(params.get('mode')).toBe('rent');
+    expect(params.get('intent')).toBe(intent);
+    expect(new URL(areaSearchHref(area, 'rentals', '?intent=assignment'), 'https://myuno.app').searchParams.has('intent')).toBe(false);
+  });
+
 });

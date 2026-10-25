@@ -68,7 +68,10 @@ export function areaInventoryFilters(area: AreaGuide) {
 export function areaSearchHref(area: AreaGuide, category: 'rentals' | 'projects' | 'resale', current = '') {
   const params = new URLSearchParams(current);
   for (const key of ['zone', 'district', 'f.district', 'page', 'cursor']) params.delete(key);
-  if (category === 'rentals') { params.set('mode', 'rent'); params.delete('intent'); }
+  if (category === 'rentals') {
+    params.set('mode', 'rent');
+    if (!['rent-long', 'rent-month'].includes(params.get('intent') ?? '')) params.delete('intent');
+  }
   else for (const key of [...params.keys()]) if (key !== 'lang') params.delete(key);
   const filters = areaInventoryFilters(area);
   if (category === 'resale') { params.delete('district'); params.set('zone', filters.resale.zone); }
