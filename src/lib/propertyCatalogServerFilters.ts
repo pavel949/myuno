@@ -34,6 +34,19 @@ export function priceLevelToPriceRange(
   return { minPrice: r.min, maxPrice: r.max };
 }
 
+/** Describe the existing canonical THB bands; this does not create a new price rule. */
+export function propertyPriceLevelDescriptions(mode: 'rent' | 'sale', language: string): Record<string, string> {
+  return Object.fromEntries(['1', '2', '3', '4'].map(level => {
+    const range = priceLevelToPriceRange(level, mode)!;
+    const number = (value: number) => value.toLocaleString('en-US');
+    const amount = range.minPrice === 0 ? `≤ ${number(range.maxPrice!)}` : range.maxPrice == null ? `≥ ${number(range.minPrice!)}` : `${number(range.minPrice!)}–${number(range.maxPrice)}`;
+    const basis = mode === 'sale'
+      ? language === 'ru' ? 'цена продажи' : language === 'th' ? 'ราคาขาย' : 'asking price'
+      : language === 'ru' ? 'за ночь' : language === 'th' ? 'ต่อคืน' : 'per night';
+    return [level, `THB ${amount} · ${basis}`];
+  }));
+}
+
 function bedroomsFromFilterValues(
   bedrooms: unknown
 ): Pick<PropertyFilters, 'bedrooms' | 'minBedrooms'> {

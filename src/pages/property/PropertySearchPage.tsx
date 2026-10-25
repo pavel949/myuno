@@ -5,7 +5,7 @@ import '@/styles/public-commerce.css';
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
 import { pickLang } from '@/lib/i18n/pickLang';
-import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,14 +17,15 @@ import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
-import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
+import { readPropertySearchQuery, updatePropertySearchSort } from '@/lib/propertySearchQuery';
+import { propertySearchFeatureLabels } from '@/lib/propertySearchPresentation';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import { serializeFilters } from '@/lib/propertyBrowseFilters';
 import '@/styles/cinematic-home.css';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PROPERTY_DISCOVERY_FEATURE_IDS, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
-import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
+import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues, propertyPriceLevelDescriptions } from '@/lib/propertyCatalogServerFilters';
 import { comparePropertiesForSort } from '@/lib/propertySortPrice';
 import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
@@ -50,7 +51,7 @@ export default function PropertySearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const text = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
@@ -62,6 +63,12 @@ export default function PropertySearchPage() {
   }, [focusResults]);
 
   const queryKey = searchParamsUrl.toString();
+  // Sort changes result presentation, not the unapplied search-editor draft.
+  const searchEditorKey = useMemo(() => {
+    const params = new URLSearchParams(queryKey);
+    params.delete('sort');
+    return params.toString();
+  }, [queryKey]);
   const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
   const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
   const priceBandUnavailable = propertyMode === 'rent' && state.tenancy !== 'short';
@@ -74,7 +81,8 @@ export default function PropertySearchPage() {
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
-  const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
+  const sortKey = state.sort;
+  const setSortKey = (value: PropertySortKey) => navigate({ search: updatePropertySearchSort(searchParamsUrl, value).toString(), hash: location.hash }, { state: location.state });
   const showMap = searchParamsUrl.get('view') === 'map';
   const selectedCompanyId = searchParamsUrl.get('company');
   const searchText = searchParamsUrl.get('q')?.trim() || '';
@@ -129,17 +137,21 @@ export default function PropertySearchPage() {
   // Core criteria have one editor (the search bar). Avoid a second conflicting
   // property type/district/bedroom/party selection inside the advanced filter sheet.
   const advancedFilterConfig = useMemo<FilterConfig>(() => ({
+    secondaryGroup: {
+      title: text('Точные параметры объявления', 'Exact listing details', 'รายละเอียดประกาศ'),
+      description: text('Дополнительные условия из полей объявления. Они уточняют пожелания выше и могут сократить результаты.', 'Additional conditions from listing fields. These refine the preferences above and may reduce results.', 'เงื่อนไขเพิ่มเติมจากประกาศ อาจทำให้ผลการค้นหาลดลง'),
+    },
     sections: [
-      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, titleTh: FILTER_TITLES_TH[section.id] })),
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, secondary: section.id !== 'priceLevel', description: section.id === 'amenities' ? text('В объявлении должны быть все выбранные удобства.', 'The listing must include every selected amenity.', 'ประกาศต้องมีสิ่งอำนวยความสะดวกที่เลือกทั้งหมด') : section.id === 'highlights' ? text('Достаточно хотя бы одной выбранной особенности.', 'At least one selected highlight is enough.', 'มีจุดเด่นที่เลือกอย่างน้อยหนึ่งรายการก็เพียงพอ') : undefined, titleTh: FILTER_TITLES_TH[section.id], ...(section.id === 'priceLevel' ? { priceLevelDescriptions: propertyPriceLevelDescriptions(propertyMode === 'buy' ? 'sale' : 'rent', language) } : {}) })),
       {
-        id: 'guestFeatures', titleEn: 'Popular features', titleRu: 'Популярные удобства', titleTh: 'สิ่งอำนวยความสะดวกยอดนิยม', type: 'multi',
+        id: 'guestFeatures', titleEn: 'Home preferences', titleRu: 'Пожелания к жилью', titleTh: 'ความต้องการที่พัก', type: 'multi',
         options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
           const feature = PROPERTY_FEATURE_MAP.get(id);
-          return feature ? [{ id, labelEn: feature.labelEn, labelRu: feature.labelRu, labelTh: FEATURE_LABELS_TH[id] }] : [];
+          return feature ? [{ id, ...propertySearchFeatureLabels(feature), labelTh: FEATURE_LABELS_TH[id] }] : [];
         }),
       },
     ],
-  }), [filterConfig, propertyMode, priceBandUnavailable]);
+  }), [filterConfig, propertyMode, priceBandUnavailable, language, text]);
   const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
   delete advancedValues.bedrooms;
   if (propertyMode === 'buy') delete advancedValues.instantBooking;
@@ -282,7 +294,7 @@ export default function PropertySearchPage() {
             </div>
           </div>
           <div className="property-search-editor property-discovery-editor">
-            <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
+            <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
           </div>
           <div className="text-body-sm text-muted-foreground" aria-label={text('Текущий поиск', 'Current search', 'การค้นหาปัจจุบัน')}>
             <p>{summaryTypes} · {summaryAreas}{searchParams.bedrooms.length > 0 ? ` · ${text('Спальни', 'Bedrooms', 'ห้องนอน')}: ${searchParams.bedrooms.join(', ')}` : ''}{searchText ? ` · «${searchText}»` : ''}</p>
@@ -300,10 +312,11 @@ export default function PropertySearchPage() {
             <div className="property-discovery-features" role="group" aria-label={text('Популярные удобства', 'Popular features', 'สิ่งอำนวยความสะดวกยอดนิยม')}>
               {QUICK_FEATURE_IDS.map(id => {
                 const feature = PROPERTY_FEATURE_MAP.get(id)!;
+                const labels = propertySearchFeatureLabels(feature);
                 const selected = categoryFilters.includes(id);
                 return <button type="button" key={id} aria-pressed={selected} onClick={() => setCategoryFilters(selected ? categoryFilters.filter(value => value !== id) : [...categoryFilters, id])}>
                   {selected && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
-                  {pickLang(language, { ru: feature.labelRu, en: feature.labelEn, th: FEATURE_LABELS_TH[feature.id] })}
+                  {pickLang(language, { ru: labels.labelRu, en: labels.labelEn, th: FEATURE_LABELS_TH[feature.id] })}
                 </button>;
               })}
             </div>
@@ -312,7 +325,8 @@ export default function PropertySearchPage() {
           {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).length > 0 && <div className="flex flex-wrap gap-2" aria-label={text('Выбранные особенности', 'Selected features', 'สิ่งอำนวยความสะดวกที่เลือก')}>
             {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).map(id => {
               const feature = PROPERTY_FEATURE_MAP.get(id);
-              const label = feature ? (pickLang(language, { ru: feature.labelRu, en: feature.labelEn, th: FEATURE_LABELS_TH[feature.id] })) : id;
+              const labels = feature ? propertySearchFeatureLabels(feature) : undefined;
+              const label = feature && labels ? pickLang(language, { ru: labels.labelRu, en: labels.labelEn, th: FEATURE_LABELS_TH[feature.id] }) : id;
               return <button type="button" key={id} className="min-h-11 border border-primary/30 bg-card px-3 text-body-sm" aria-label={`${text('Убрать', 'Remove', 'นำออก')} ${label}`} onClick={() => setCategoryFilters(categoryFilters.filter(value => value !== id))}>{label} ×</button>;
             })}
           </div>}
