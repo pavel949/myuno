@@ -129,7 +129,11 @@ export default function PropertyDetail() {
   );
 
   const { data: propertyData, isLoading, isError, isFetching, refetch } = usePropertyWithRentalTerms(id);
-  const property = propertyData?.id === id ? propertyData : undefined;
+  // PostgreSQL UUID output is canonical lowercase; route UUID spelling may vary.
+  // Keep non-UUID identities case-sensitive and never expose another listing's cache.
+  const routeUuid = typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const currentProperty = propertyData?.id === id || (routeUuid && typeof propertyData?.id === 'string' && propertyData.id.toLowerCase() === id.toLowerCase());
+  const property = currentProperty ? propertyData : undefined;
   const rentalTerms = property?.rentalTerms;
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);

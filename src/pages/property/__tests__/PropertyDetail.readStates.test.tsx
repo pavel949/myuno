@@ -40,7 +40,7 @@ vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => nul
 beforeEach(() => { state.result = {}; state.language = 'en'; vi.clearAllMocks(); });
 afterEach(() => { cleanup(); localStorage.clear(); });
 function Boundary() { const navigate = useNavigate(); const location = useLocation(); return <><output data-testid="location">{location.pathname + location.search}</output><button onClick={() => navigate('/property/next?guests=2')}>Next property</button></>; }
-function Harness() { return <MemoryRouter initialEntries={['/property/unit?mode=rent&guests=3&checkIn=2099-12-01&checkOut=2099-12-04']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><CompareProvider><Boundary/><div className={ECOSYSTEM_PAGE_CONTAINER} data-testid="parent-frame"><Routes><Route path="/property/:id" element={<PropertyDetail/>}/><Route path="/property" element={<h1>Listings destination</h1>}/></Routes></div></CompareProvider></MemoryRouter>; }
+function Harness({entry='/property/unit?mode=rent&guests=3&checkIn=2099-12-01&checkOut=2099-12-04'}:{entry?:string}) { return <MemoryRouter initialEntries={[entry]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><CompareProvider><Boundary/><div className={ECOSYSTEM_PAGE_CONTAINER} data-testid="parent-frame"><Routes><Route path="/property/:id" element={<PropertyDetail/>}/><Route path="/property" element={<h1>Listings destination</h1>}/></Routes></div></CompareProvider></MemoryRouter>; }
 function mount() { return render(<Harness/>); }
 const copy = {
  en: { loading: 'Loading property…', error: 'Property could not be loaded', missing: 'Property not found', retry: 'Try again', back: 'Back to listings' },
@@ -101,4 +101,18 @@ it('preserves a same-ID child draft through background read failure, retry and s
  state.result={};view.rerender(<Harness/>);
  expect(screen.queryByRole('alert')).not.toBeInTheDocument();expect(screen.getByRole('textbox',{name:'Synthetic inquiry draft'})).toBe(draft);expect(draft).toHaveValue('Keep my inquiry notes');
  expect(screen.getByTestId('location')).toHaveTextContent('guests=3');
+});
+
+it('accepts canonical UUID data for an uppercase UUID route without a permanent loading state', () => {
+ const lower='aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+ state.result={data:{...state.property,id:lower}};
+ render(<Harness entry={'/property/'+lower.toUpperCase()+'?guests=3'}/>);
+ expect(state.reads).toHaveBeenLastCalledWith(lower.toUpperCase());
+ expect(screen.getByRole('heading',{name:'Dual home'})).toBeVisible();
+ expect(screen.queryByRole('status',{name:'Loading property…'})).not.toBeInTheDocument();
+});
+it.each(['Unit','aaaaaaaa-bbbb-4ccc-8ddd-ffffffffffff'])('does not expose retained data for a different identity (%s)', retainedId => {
+ state.result={data:{...state.property,id:retainedId},isError:true};
+ mount();expect(screen.getByRole('alert',{name:'Property could not be loaded'})).toBeVisible();
+ expect(screen.queryByTestId('property-gallery')).not.toBeInTheDocument();
 });
