@@ -61,16 +61,21 @@ MiniAppLayout
 ```
 
 ### Admin Dashboard Template
+
+Current composition: `src/pages/admin/AdminDashboard.tsx`. The former activity
+widget is retired; audit-log storage and writers are independent of this UI.
+
 ```
-Page container (max-w-1536)
-├── SectionHeader (lg, icon) + LaunchSwitch
-├── AdminKPIGrid (KPICard × 4)
-├── Grid(1/3 cols)
-│   ├── AdminOperationalAlerts
-│   ├── AdminRevenueBlock
-│   └── AdminQuickActionsGrid
-├── AdminAllVerticalsGrid
-└── AdminActivityBlock
+AdminDashboard (role check)
+├── AdminToday (admin)
+│   └── PageShell (full)
+│       ├── Heading + refresh + source freshness
+│       ├── Search
+│       ├── AdminOperationalAlerts + AdminWorkQueues
+│       ├── GoLiveChecklist + AdminQuickActionsGrid
+│       └── AdminRevenueBlock
+├── AdminStaffOverview (staff / uno_team)
+└── Access loading / failure / denied states
 ```
 
 ---
