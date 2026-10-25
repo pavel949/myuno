@@ -27,6 +27,7 @@ const rebrand = originalTokens.replace(/--brand-hue:\s*213;/, '--brand-hue: 160;
   .replace(/--font-family-display:\s*'Source Serif 4';/, '--font-family-display: monospace;')
   .replace(/--font-family-body:\s*'Geist';/, '--font-family-body: serif;')
   .replace(/--layout-inset-scale:\s*1;/, '--layout-inset-scale: 1.5;')
+  .replace(/--section-space-scale:\s*1;/, '--section-space-scale: 1.75;')
   .replace(/--card-padding:\s*1rem;/, '--card-padding: 1.5rem;')
   .replace(/--layout-width-wide:\s*80rem;/, '--layout-width-wide: 72rem;');
 if (!baseline && rebrand === originalTokens) throw Error('Canonical rebrand tokens not found');

@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import type { SectionAction } from '@/components/ds/SectionHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -24,10 +25,8 @@ export interface PageBreadcrumb {
   href?: string;
 }
 
-export interface PageAction {
-  label: string;
+export type PageAction = SectionAction & {
   icon?: React.ComponentType<{ className?: string }>;
-  onClick: () => void;
   variant?: 'primary' | 'ghost';
   /** Hide on mobile (collapse into overflow menu). Defaults to true for non-primary. */
   mobileHidden?: boolean;
@@ -79,7 +78,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'mb-[var(--section-gap)]',
+        'ds-section',
         isSticky && 'sticky top-[var(--shell-header-height,0px)] z-30 -mx-[var(--page-padding-x)] px-[var(--page-padding-x)] py-3 bg-background/85 border-b border-border/40',
         className,
       )}
@@ -104,7 +103,7 @@ export function PageHeader({
         </nav>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="ds-page-heading-row flex flex-col sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3 min-w-0 flex-1">
           {showBack && (
             <button
@@ -118,7 +117,7 @@ export function PageHeader({
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               )}
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="ds-section-leading-icon" aria-hidden="true" />
             </button>
           )}
           <div className="min-w-0 flex-1">
@@ -143,12 +142,15 @@ export function PageHeader({
               <>
                 {visibleActions.map((a, i) => {
                   const Icon = a.icon;
+                  const destination = 'to' in a ? a.to : undefined;
+                  const content = <>{Icon && <Icon className="ds-section-action-icon" aria-hidden="true" />}<span className="whitespace-normal break-words text-left leading-snug">{a.label}</span></>;
                   return (
                     <Button
-                      type="button"
+                      asChild={destination !== undefined}
+                      type={destination === undefined ? 'button' : undefined}
                       variant={a.variant === 'primary' ? 'default' : 'secondary'}
                       key={i}
-                      onClick={a.onClick}
+                      onClick={destination === undefined ? a.onClick : undefined}
                       aria-label={a.label}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all ',
@@ -159,8 +161,7 @@ export function PageHeader({
                           : 'bg-secondary text-foreground hover:bg-secondary/80',
                       )}
                     >
-                      {Icon && <Icon className="w-4 h-4" />}
-                      <span className="whitespace-normal break-words text-left leading-snug">{a.label}</span>
+                      {destination !== undefined ? <Link to={destination} onClick={a.onClick}>{content}</Link> : content}
                     </Button>
                   );
                 })}
@@ -177,16 +178,17 @@ export function PageHeader({
                           'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                         )}
                       >
-                        <MoreVertical className="w-5 h-5" />
+                        <MoreVertical className="ds-section-leading-icon" aria-hidden="true" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {overflowActions.map((a, i) => {
                         const Icon = a.icon;
+                        const destination = 'to' in a ? a.to : undefined;
+                        const content = <>{Icon && <Icon className="ds-section-action-icon ds-section-menu-icon mr-2" aria-hidden="true" />}{a.label}</>;
                         return (
-                          <DropdownMenuItem key={i} onClick={a.onClick}>
-                            {Icon && <Icon className="w-4 h-4 mr-2" />}
-                            {a.label}
+                          <DropdownMenuItem key={i} asChild={destination !== undefined} onClick={destination === undefined ? a.onClick : undefined}>
+                            {destination !== undefined ? <Link to={destination} onClick={a.onClick}>{content}</Link> : content}
                           </DropdownMenuItem>
                         );
                       })}

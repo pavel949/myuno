@@ -60,7 +60,7 @@ async def main():
      await page.locator('[data-count-key=pendingProviders][data-count-state=unavailable]').first.wait_for()
      row['stateEvidence']='actual unavailable provider count from synthetic source error'
 
-    metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();return{frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
+    metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();const section=document.querySelector(role==='public'?'.home-gallery-heading':'.ds-section');const sectionStyle=section?getComputedStyle(section):null;return{section:sectionStyle?{gap:sectionStyle.gap,bottom:sectionStyle.marginBottom}:null,frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
     assert not metrics['overflow'],'page overflow'
     # Real mounted input and existing ThemeProvider, not a CSS-class-only toggle.
     draft=page.get_by_test_id('ds-draft');await draft.fill('Synthetic unsaved value')
@@ -75,6 +75,7 @@ async def main():
     if variant=='normal':normal[key]=metrics
     else:
      prior=normal[key]
+     assert metrics['section'] and prior['section'] and metrics['section']!=prior['section'],'section spacing source did not propagate to actual page'
      assert metrics['frame']['inset']>prior['frame']['inset'],'one-source gutter scale did not propagate'
      if role=='pms' and width==1440:assert metrics['frame']['width']<prior['frame']['width'],'named width source did not propagate'
      assert metrics['heading']['font']!=prior['heading']['font'],'display font source did not propagate'

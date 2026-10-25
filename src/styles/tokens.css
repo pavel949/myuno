@@ -326,6 +326,14 @@
   --page-padding-x:    var(--layout-gutter);       /* mobile */
   --section-gap:       1.5rem;
   --section-gap-tight: 1rem;
+  /* Shared UI rhythm. One scale changes existing section/header families together. */
+  --section-space-scale: 1;
+  --section-heading-gap: var(--section-gap-tight);
+  --section-content-gap: calc(var(--section-gap-tight) * .75);
+  --section-title-gap: .375rem;
+  --section-action-gap: .375rem;
+  --section-action-icon-size: 1rem;
+
   --touch-target:      2.75rem;    /* 44px WCAG */
   --nav-icon-size:     1.25rem;
   --bottom-nav-h:      calc(60px + env(safe-area-inset-bottom, 0px));

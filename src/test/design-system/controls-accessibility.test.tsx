@@ -20,9 +20,9 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); sessionStorage.clear(); });
 it('associates vendor labels and preserves save gating and payload', () => {
  const save = vi.fn(); render(<AddVendorDialog open onOpenChange={() => {}} onSave={save} isSaving={false} />);
  for (const label of ['Name (EN)', 'Name (RU)', 'Contact Person', 'Phone', 'WhatsApp', 'Email', 'LINE ID', 'Address', 'Notes', 'Category', 'Source']) expect(screen.getByLabelText(label)).toBeVisible();
- expect(screen.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
+ expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
  fireEvent.change(screen.getByLabelText('Name (EN)'), { target: { value: 'Synthetic Vendor' } });
- fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+ fireEvent.click(screen.getByRole('button', { name: 'Save' }));
  expect(save).toHaveBeenCalledWith(expect.objectContaining({ name: 'Synthetic Vendor', category: 'other', source: 'own' }));
 });
 it('exposes selected property and preserves toggle and clear callbacks', () => {

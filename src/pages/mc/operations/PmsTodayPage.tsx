@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { PageShell } from '@/components/page/PageShell';
+import { PageHeader } from '@/components/page/PageHeader';
 import { Link, useLocation } from 'react-router-dom';
 import { LogIn, LogOut, BedDouble, MessageSquare, RefreshCw, Phone, CalendarDays, ListTodo, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -148,17 +149,18 @@ export default function PmsTodayPage() {
   const todayTitle = t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' });
 
   return <PageShell width="wide" className="space-y-6 text-foreground">
-    <header className="space-y-3 border-b border-border pb-4">
-      <div className="min-w-0">
-        <h1 className="break-words font-display text-h2 sm:text-h1">{todayTitle}</h1>
-        <p className="mt-1 break-words text-sm text-muted-foreground">{dateLabel} · {t({ en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' })}</p>
-      </div>
+    <PageHeader
+      title={todayTitle}
+      subtitle={`${dateLabel} · ${t({ en: 'Phuket', ru: 'Пхукет', th: 'ภูเก็ต' })}`}
+      className="border-b border-border pb-4"
+      actions={
       <nav aria-label={t({ en: 'Operational navigation', ru: 'Навигация по операциям', th: 'การนำทางการดำเนินงาน' })} className="flex flex-wrap gap-1">
         <Button asChild variant="ghost" size="sm" className="min-h-11"><Link to={APP_ROUTES.MC_CALENDAR}><CalendarDays aria-hidden />{t({ en: 'Calendar', ru: 'Календарь', th: 'ปฏิทิน' })}</Link></Button>
         <Button asChild variant="ghost" size="sm" className="min-h-11"><Link to={APP_ROUTES.MC_TASKS}><ListTodo aria-hidden />{t({ en: 'Tasks', ru: 'Задачи', th: 'งาน' })}</Link></Button>
         <Button variant="ghost" size="sm" className="min-h-11" onClick={() => d.refetch()}><RefreshCw aria-hidden />{t({ en: 'Refresh', ru: 'Обновить', th: 'รีเฟรช' })}</Button>
       </nav>
-    </header>
+      }
+    />
 
     {d.error ? <div role="alert" className="border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
       {t({ en: 'Could not load today’s data. Try refreshing.', ru: 'Не удалось загрузить сведения на сегодня. Обновите страницу.', th: 'โหลดข้อมูลไม่สำเร็จ ลองรีเฟรช' })}

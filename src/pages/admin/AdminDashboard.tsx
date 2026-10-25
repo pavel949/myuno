@@ -12,6 +12,7 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 import { AdminStaffOverview } from '@/components/admin/AdminStaffOverview';
 import { GoLiveChecklist } from '@/components/admin/GoLiveChecklist';
 import { PageShell } from '@/components/page';
+import { PageHeader } from '@/components/page/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Search } from 'lucide-react';
@@ -40,18 +41,18 @@ function AdminToday() {
     ]).catch(() => setRefreshError(true)).finally(() => { refreshFlight.current = null; });
   };
   return <PageShell width="full" className="space-y-6" >
-    <header className="flex min-w-0 flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{l('Today', 'Сегодня', 'วันนี้')}</h1>
-        <p className="mt-1 text-muted-foreground">{l('Platform overview · Phuket time', 'Вся платформа · Время Пхукета', 'ภาพรวมแพลตฟอร์ม · เวลาภูเก็ต')}</p>
-      </div>
+    <PageHeader
+      title={l('Today', 'Сегодня', 'วันนี้')}
+      subtitle={l('Platform overview · Phuket time', 'Вся платформа · Время Пхукета', 'ภาพรวมแพลตฟอร์ม · เวลาภูเก็ต')}
+      actions={
       <div className="min-w-0 text-sm sm:text-right">
         <Button variant="outline" onClick={refresh} disabled={stats.isFetching || otherReads > 0} className="min-h-11 gap-2"><RefreshCw className="size-4" />{l('Refresh', 'Обновить', 'รีเฟรช')}</Button>
         <p className="mt-2 text-xs text-muted-foreground" role="status" data-testid="dashboard-freshness">
           {stats.isLoading ? l('Loading sources…', 'Загрузка источников…', 'กำลังโหลดแหล่งข้อมูล…') : !oldest ? l('No successful source read yet', 'Пока нет успешного чтения источников', 'ยังอ่านข้อมูลจากแหล่งข้อมูลไม่สำเร็จ') : `${stale ? l('Stale · last successful reads', 'Устарело · последние успешные чтения', 'ข้อมูลเก่า · อ่านสำเร็จล่าสุด') : l('Sources read', 'Источники прочитаны', 'อ่านแหล่งข้อมูลแล้ว')}: ${new Intl.DateTimeFormat(language, { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }).format(oldest)}`}
         </p>
       </div>
-    </header>
+      }
+    />
     <div className="relative max-w-2xl">
       <Search className="pointer-events-none absolute left-3 top-3 size-5 text-muted-foreground" />
       <Input aria-label={l('Find a work queue', 'Найти рабочую очередь', 'ค้นหาคิวงาน')} placeholder={l('Find a work queue…', 'Найти рабочую очередь…', 'ค้นหาคิวงาน…')} value={search} onChange={event => setSearch(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') setSearch(''); }} className="min-h-11 pl-10" />

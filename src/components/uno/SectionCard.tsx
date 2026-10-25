@@ -1,4 +1,5 @@
 import React, { ReactNode, forwardRef } from 'react';
+import { SectionHeader } from '@/components/ds/SectionHeader';
 import { cn } from '@/lib/utils';
 
 interface SectionCardProps {
@@ -19,7 +20,7 @@ export const SectionCard = forwardRef<HTMLDivElement, SectionCardProps>(
           elevated 
             ? "shadow-[var(--shadow-elevated)]" 
             : "shadow-[var(--shadow-card)]",
-          !noPadding && "p-4",
+          !noPadding && "p-[var(--card-padding)]",
           className
         )}
       >
@@ -38,14 +39,6 @@ interface SectionTitleProps {
 }
 
 export function SectionTitle({ children, className, subtitle }: SectionTitleProps) {
-  return (
-    <div className={cn("mb-3", className)}>
-      <h3 className="text-lg font-semibold font-display tracking-tight">
-        {children}
-      </h3>
-      {subtitle && (
-        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
-      )}
-    </div>
-  );
+  return <SectionHeader title={children} headingAs="h3" subtitle={subtitle}
+    size="lg" density="compact" className={cn('ds-section-header-with-content', className)} />;
 }

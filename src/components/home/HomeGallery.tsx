@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { SectionHeader } from '@/components/ds/SectionHeader';
 import { HorizontalRail } from './HorizontalRail';
 
 /** One section/scroll contract; individual domains own card facts and data states. */
@@ -9,7 +8,7 @@ export function HomeGallery({ id, title, description, href, linkLabel, children,
   children?: ReactNode; state?: ReactNode; className?: string;
 }) {
   return <section className={`home-gallery home-container ${className}`} aria-labelledby={id}>
-    <div className="home-section-heading"><div><h2 id={id}>{title}</h2>{description && <p className="home-section-lead">{description}</p>}</div><Link className="home-text-link" to={href}>{linkLabel}<ArrowRight size={18} aria-hidden="true" /></Link></div>
+    <SectionHeader title={title} subtitle={description} headingId={id} action={{ label: linkLabel, to: href }} size="lg" density="public" className="home-gallery-heading" />
     {state ?? <HorizontalRail label={title}>{children}</HorizontalRail>}
   </section>;
 }
