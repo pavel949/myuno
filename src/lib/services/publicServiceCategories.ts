@@ -18,13 +18,18 @@ export function publicServiceCategories(categories: CategoryEntry[]) {
   return destinations.flatMap(destination => {
     const parent = categories.find(category => destination.aliases.includes(category.id) && enabled(category.status));
     const leaf = children.find(service => destination.aliases.includes(service.id) && service.path === destination.path && enabled(service.status));
-    const record = parent ?? leaf;
-    if (!record || seen.has(destination.path)) return [];
-    seen.add(destination.path);
+    const transfer = parent ?? leaf;
     const fastTrack = destination.id === 'arrival' ? children.find(service => service.id === 'fast-track' && service.path === R.FAST_TRACK && enabled(service.status)) : undefined;
-    const label = destination.id === 'arrival' && fastTrack ? arrivalLabel : { ru: destination.id === 'vehicle' ? 'Авто и байки' : record.labelRu, en: destination.id === 'vehicle' ? 'Cars & bikes' : record.labelEn, th: record.labelTh || destination.labelTh };
-    return [{ id: destination.id, path: destination.path,
-      benefit: destination.id === 'arrival' && !fastTrack ? { ru: 'Поездка из аэропорта — маршрут и условия внутри', en: 'Airport transfers — routes and terms inside', th: 'รถรับส่งสนามบิน ดูเส้นทางและเงื่อนไขด้านใน' } : destination.benefit, labelRu: label.ru, labelEn: label.en, labelTh: label.th,
-      secondary: fastTrack ? { path: fastTrack.path, label: { ru: 'Fast Track в аэропорту', en: 'Airport Fast Track', th: 'ฟาสต์แทร็กที่สนามบิน' } } : undefined }];
+    const record = transfer ?? fastTrack;
+    const path = transfer ? destination.path : fastTrack?.path;
+    if (!record || !path || seen.has(path)) return [];
+    seen.add(path);
+    const combined = Boolean(transfer && fastTrack);
+    const label = destination.id === 'arrival' && combined ? arrivalLabel : { ru: destination.id === 'vehicle' ? 'Авто и байки' : record.labelRu, en: destination.id === 'vehicle' ? 'Cars & bikes' : record.labelEn, th: record.labelTh || (fastTrack && !transfer ? 'ฟาสต์แทร็ก' : destination.labelTh) };
+    const benefit = destination.id !== 'arrival' || combined ? destination.benefit : fastTrack && !transfer
+      ? { ru: 'Проход в аэропорту — подробности и условия внутри', en: 'Airport Fast Track — details and terms inside', th: 'ฟาสต์แทร็กที่สนามบิน ดูรายละเอียดและเงื่อนไขด้านใน' }
+      : { ru: 'Поездка из аэропорта — маршрут и условия внутри', en: 'Airport transfers — routes and terms inside', th: 'รถรับส่งสนามบิน ดูเส้นทางและเงื่อนไขด้านใน' };
+    return [{ id: destination.id, path, benefit, labelRu: label.ru, labelEn: label.en, labelTh: label.th,
+      secondary: combined && fastTrack ? { path: fastTrack.path, label: { ru: 'Fast Track в аэропорту', en: 'Airport Fast Track', th: 'ฟาสต์แทร็กที่สนามบิน' } } : undefined }];
   });
 }
