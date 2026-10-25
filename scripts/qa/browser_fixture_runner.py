@@ -42,6 +42,7 @@ FIXTURE_SPECS = (
     ('homepage-galleries-th-ui', 'homepage-galleries-th-isolated'),
     ('guest-complex-ui', 'guest-complex-isolated'),
     ('shared-surfaces-ui', 'shared-surfaces-isolated'),
+    ('agent-entry-routes', 'agent-entry-isolated'),
 )
 
 

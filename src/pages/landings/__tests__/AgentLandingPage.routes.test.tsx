@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { readFileSync } from 'node:fs';
 import { AgentEntryRedirect, type AgentEntry } from '@/components/landings/AgentEntryRedirect';
 import AgentLandingPage from '../AgentLandingPage';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 const { rpc, invoke } = vi.hoisted(() => ({ rpc: vi.fn(), invoke: vi.fn().mockResolvedValue({ data: {} }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc, functions: { invoke } } }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
@@ -16,13 +17,13 @@ vi.mock('@/components/miniapp/LandingLayout', () => ({ LandingLayout: ({ childre
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 function LocationProof() { const l = useLocation(); return <output data-testid="location">{JSON.stringify({ ...l })}</output>; }
 function mount(entry = '/for/agent') {
- return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { mutations: { retry: false }, queries: { retry: false } } })}><MemoryRouter initialEntries={[{ pathname: entry.split('?')[0], search: entry.includes('?') ? '?' + entry.split('?')[1].split('#')[0] : '', hash: entry.includes('#') ? '#' + entry.split('#')[1] : '', state: { origin: 'synthetic-agent' } }]}><LocationProof /><Routes><Route path="/for/agent" element={<AgentLandingPage />} />{(['join','dashboard','resources'] as AgentEntry[]).map(kind => <Route key={kind} path={'/agent/' + kind} element={<AgentEntryRedirect entry={kind} />} />)}<Route path="/property/browse" element={<p>Public catalogue</p>} /><Route path="*" element={<p>No privileged workspace</p>} /></Routes></MemoryRouter></QueryClientProvider>);
+ return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { mutations: { retry: false }, queries: { retry: false } } })}><MemoryRouter initialEntries={[{ pathname: entry.split('?')[0], search: entry.includes('?') ? '?' + entry.split('?')[1].split('#')[0] : '', hash: entry.includes('#') ? '#' + entry.split('#')[1] : '', state: { origin: 'synthetic-agent' } }]}><LocationProof /><Routes><Route path="/for/agent" element={<AgentLandingPage />} />{(['join','dashboard','resources'] as AgentEntry[]).map(kind => <Route key={kind} path={'/agent/' + kind} element={<AgentEntryRedirect entry={kind} />} />)}<Route path="/property/browse" element={<PropertySearchRedirect />} /><Route path="/property/search" element={<p>Public catalogue</p>} /><Route path="*" element={<p>No privileged workspace</p>} /></Routes></MemoryRouter></QueryClientProvider>);
 }
 beforeEach(() => { rpc.mockReset(); invoke.mockClear(); });
 describe('public agent entry contracts', () => {
  it.each(['join','dashboard','resources'] as AgentEntry[])('redirects exact legacy %s preserving context without privileged destination', async kind => {
   mount('/agent/' + kind + '?ref=campaign#bookmark');
-  await waitFor(() => expect(JSON.parse(screen.getByTestId('location').textContent!).pathname).toBe(kind === 'resources' ? '/property/browse' : '/for/agent'));
+  await waitFor(() => expect(JSON.parse(screen.getByTestId('location').textContent!).pathname).toBe(kind === 'resources' ? '/property/search' : '/for/agent'));
   const location = JSON.parse(screen.getByTestId('location').textContent!);
   expect(location.search).toContain('ref=campaign'); expect(location.hash).toBe('#bookmark'); expect(location.state).toEqual({ origin: 'synthetic-agent' });
   if (kind !== 'resources') expect(location.search).toContain('agentIntent=' + (kind === 'dashboard' ? 'workspace' : 'cooperation'));

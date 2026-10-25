@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { composeProviders } from '@/lib/composeProviders';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { RoleGuard, AuthGuard } from '@/components/auth/RoleGuard';
+import { AgentEntryRedirect } from '@/components/landings/AgentEntryRedirect';
 import { LoadingSpinner, LoadingState } from '@/components/uno/LoadingSpinner';
 const state=vi.hoisted(()=>({retry:vi.fn(),error:null as Error|null,auth:{user:{id:'actor-a'} as {id:string}|null,isLoading:false},resolved:{context:{role:'admin'} as {role:string}|null,isLoading:false,permissions:['*']}}));
 vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
@@ -38,7 +39,7 @@ const Empty=()=>null;
 const pages=new Proxy({} as Record<string,React.ComponentType>,{get(target,key:string){return target[key]??(target[key]=()=> <p>{key}</p>);}});
 function actualRoutes() {
   return sourceModule(readFileSync('src/components/layout/AnimatedRoutes.tsx','utf8'),{
-    React,...Router,Suspense:React.Suspense,AnimatePresence,APP_ROUTES,LoadingState,
+    React,...Router,AgentEntryRedirect,Suspense:React.Suspense,AnimatePresence,APP_ROUTES,LoadingState,
     ActiveCompanyProvider:Wrapper,AdminLayout:Layout,VendorLayout:Layout,GuestLayout:Layout,MCLayout:Layout,StaffLayout:Layout,CapitalLayout:Layout,
     AdminGuard:({children}:{children:React.ReactNode})=><RoleGuard allowedRoles={['admin']}>{children}</RoleGuard>,
     VendorGuard:Wrapper,TeamGuard:Wrapper,AuthGuard,StaffGuard:Wrapper,MCGuard:Wrapper,InvestorGuard:Wrapper,MCPortalGuard:Wrapper,
