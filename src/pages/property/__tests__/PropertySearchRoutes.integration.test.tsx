@@ -5,6 +5,7 @@ import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import PropertySearchPage from '../PropertySearchPage';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
+import { AgentEntryRedirect } from '@/components/landings/AgentEntryRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
@@ -36,7 +37,7 @@ function mount(entry: string, navigationState?: unknown) {
   const result = render(<MemoryRouter initialEntries={[initialEntry]}><Location /><Routes>
     <Route path="/property/search" element={<PropertySearchPage />} />
     <Route path="/property" element={<PropertyHubIndex />} />
-    <Route path="/property/browse" element={<PropertySearchRedirect />} />
+    <Route path="/property/browse" element={<PropertySearchRedirect />} /><Route path="/agent/resources" element={<AgentEntryRedirect entry="resources" />} />
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
@@ -47,6 +48,12 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.propertie
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('retains navigation state and URL through the full legacy agent → browse → search chain', () => {
+    mount('/agent/resources?mode=buy&ref=agent#saved', { origin: 'synthetic-agent', returnTo: '/for/agent' });
+    expect(screen.getByTestId('location')).toHaveTextContent('/property/search?mode=buy&ref=agent#saved');
+    expect(JSON.parse(screen.getByTestId('navigation-state').textContent!)).toEqual({ origin: 'synthetic-agent', returnTo: '/for/agent' });
+    expect(screen.getByRole('button', { name: 'History back' })).toBeInTheDocument();
+  });
   it.each([
     ['en', 'Pool', 'Remove Pool', 'Price & amenities', 'Home preferences'],
     ['ru', 'Бассейн', 'Убрать Бассейн', 'Цена и удобства', 'Пожелания к жилью'],
@@ -354,24 +361,29 @@ describe('one residential results surface', () => {
   });
   it('keeps quick features and the advanced sheet synchronized without leaking editor state into the URL', () => {
     mount('/property/search?f.priceLevel=2&source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
-    expect(screen.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
+    const quickPool = within(screen.getByRole('group', { name: 'Popular features' })).getByRole('button', { name: 'Private pool' });
+    const filtersButton = screen.getByRole('button', { name: /Price & amenities/ });
+    fireEvent.click(quickPool);
+    expect(quickPool).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(filtersButton);
     let dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(dialog.getByRole('button', { name: 'WiFi' }));
-    expect(dialog.getByRole('button', { name: 'Apply (3)' })).toBeVisible();
-    fireEvent.click(dialog.getByRole('button', { name: 'Apply (3)' }));
+    let preferences = within(dialog.getByRole('heading', { name: 'Home preferences' }).parentElement!);
+    expect(preferences.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(preferences.getByRole('button', { name: 'WiFi' }));
+    const apply = dialog.getByRole('button', { name: 'Apply (3)' });
+    expect(apply).toBeVisible();
+    fireEvent.click(apply);
     let url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('cats')).toBe('private_pool,wifi');
     expect(url.searchParams.get('f.priceLevel')).toBe('2');
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.searchParams.has('f.guestFeatures')).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
-    fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
+    fireEvent.click(quickPool);
+    fireEvent.click(filtersButton);
     dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'false');
-    expect(dialog.getByRole('button', { name: 'WiFi' })).toHaveAttribute('aria-pressed', 'true');
+    preferences = within(dialog.getByRole('heading', { name: 'Home preferences' }).parentElement!);
+    expect(preferences.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'false');
+    expect(preferences.getByRole('button', { name: 'WiFi' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
     url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('cats')).toBe('wifi');

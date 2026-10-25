@@ -1,3 +1,4 @@
+import { AgentEntryRedirect } from '@/components/landings/AgentEntryRedirect';
 /**
  * AnimatedRoutes — P3 Consolidated
  *
@@ -813,6 +814,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/for/second-home" element={<LazyPage><Pages.SecondHomeLandingPage /></LazyPage>} />
         <Route path="/for/investor" element={<LazyPage><Pages.InvestorLandingPage /></LazyPage>} />
         <Route path="/for/agent" element={<LazyPage><Pages.AgentLandingPage /></LazyPage>} />
+        <Route path="/agent/join" element={<AgentEntryRedirect entry="join" />} />
+        <Route path="/agent/dashboard" element={<AgentEntryRedirect entry="dashboard" />} />
+        <Route path="/agent/resources" element={<AgentEntryRedirect entry="resources" />} />
         {/* Sprint 2 — Surface marketing landings (Live + Build) under existing /for/* namespace. */}
         <Route path="/for/arrive" element={<LazyPage><Pages.ArriveSurfaceLandingPage /></LazyPage>} />
         <Route path="/for/live" element={<LazyPage><Pages.LiveSurfaceLandingPage /></LazyPage>} />
