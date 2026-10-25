@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -166,6 +168,8 @@ export function useConsultationRequests() {
   const saved = () => toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
   const unconfirmed = () => toast.error(pickLang(language, { ru: 'Сохранение заявки не подтверждено.', en: 'Request saving was not confirmed.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้' }));
   const queryClient = useQueryClient();
+  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createConsultationIntakeAttempt();
 
   // Fetch user's consultation requests
   const { data: requests, isLoading } = useQuery({
@@ -190,14 +194,7 @@ export function useConsultationRequests() {
   // created through the security-definer RPC that returns only the new id.
   const createConsultation = useMutation({
     mutationFn: async (input: CreateConsultationInput): Promise<ConsultationSubmissionReceipt> => {
-      const { data: newId, error } = await supabase.rpc('submit_consultation_request', {
-        payload: input as never,
-      });
-
-
-      if (error) throw error;
-
-      if (typeof newId !== 'string' || !newId.trim()) throw new Error('Consultation request receipt was not confirmed.');
+      const { id: newId } = await intake.current!.submit(supabase, input as unknown as Record<string, unknown>, user?.id);
 
       // The RPC receipt acknowledges the committed insert. Optional PII readback
       // must never turn an accepted request into a failed/retried creation.

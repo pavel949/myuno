@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,6 +46,8 @@ export function useUniversalLead() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createConsultationIntakeAttempt();
 
   const submitLead = useMutation({
     mutationFn: async (input: UniversalLeadInput) => {
@@ -83,26 +87,20 @@ export function useUniversalLead() {
 
       // Guests cannot read consultation_requests (PII), so insert through the
       // security-definer RPC which returns only the new lead id.
-      const { data: leadId, error } = await supabase.rpc('submit_consultation_request', {
-        payload: payload as never,
-      });
-
-      if (error) throw error;
-
-      if (typeof leadId !== 'string' || !leadId.trim()) throw new Error('Lead request receipt was not confirmed.');
-      const data = { id: leadId };
+      const receipt = await intake.current!.submit(supabase, payload, user?.id);
+      const data = { id: receipt.id };
 
       // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
       // silent failure means Pavel never hears about a new lead — log it (with the
       // lead id) so the failure is detectable instead of vanishing.
-      if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
+      if (receipt.shouldDispatch && data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
         supabase.functions.invoke('notify-lead-whatsapp', {
           body: { leadId: data.id },
         }).catch((e) => logger.error(`[useUniversalLead] notify-lead-whatsapp failed for lead ${data.id}:`, e));
       }
 
       // Notify admin about new lead via email (non-blocking, logged on failure).
-      if (data) {
+      if (receipt.shouldDispatch && data) {
         supabase.functions.invoke('notify-admin-order', {
           body: {
             order_id: data.id,
@@ -119,7 +117,7 @@ export function useUniversalLead() {
       }
 
       // Trigger auto lead scoring (non-blocking, logged on failure).
-      if (data) {
+      if (receipt.shouldDispatch && data) {
         supabase.functions.invoke('auto-lead-scoring', {
           body: { leadId: data.id },
         }).catch((e) => logger.error(`[useUniversalLead] auto-lead-scoring failed for lead ${data.id}:`, e));

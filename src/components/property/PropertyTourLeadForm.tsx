@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Users, Phone, User, CheckCircle, MapPin, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface PropertyTourLeadFormProps {
@@ -22,6 +23,8 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
   const isRu = language === 'ru';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createConsultationIntakeAttempt();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -43,8 +46,7 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
       // Guests cannot read back consultation_requests (PII) — use the RPC that
       // returns only the new lead id.
-      const { data: leadId, error } = await supabase.rpc('submit_consultation_request', {
-        payload: {
+      const receipt = await intake.current!.submit(supabase, {
           request_type: 'property_tour',
           name: formData.name,
           phone: formData.phone,
@@ -55,14 +57,10 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
           vertical_id: 'property',
           lead_source: 'website',
           entry_point: source,
-        } as never,
-      });
+      }, user?.id);
+      const data = { id: receipt.id };
 
-      if (error) throw error;
-
-      const data = leadId ? { id: leadId as string } : null;
-
-      if (data) {
+      if (receipt.shouldDispatch && data) {
 
         supabase.functions.invoke('notify-admin-order', {
           body: {
