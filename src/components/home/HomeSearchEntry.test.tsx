@@ -22,3 +22,11 @@ it.each(homeSearchIntents)('navigates $id straight to canonical results and pres
   fireEvent.click(screen.getByRole('button', { name: 'Back' }));
   expect(screen.getByRole('status')).toHaveTextContent('/');
 });
+it.each([{ title: 'Хочу сдавать в аренду', intent: 'rent' }, { title: 'Обсудить управление', intent: 'management' }])('routes owner $intent without authentication or premature onboarding', ({ title, intent }) => {
+ render(<MemoryRouter><HomeSearchEntry /><Location /></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button', { name: /Найти жильё на Пхукете/ }));
+ expect(screen.getByRole('heading', { name: 'У меня есть недвижимость' })).toBeVisible();
+ fireEvent.click(screen.getByRole('link', { name: title }));
+ expect(screen.getByRole('status')).toHaveTextContent(`/owner/management-landing?intent=${intent}`);
+ expect(screen.queryByRole('dialog')).toBeNull();
+});
