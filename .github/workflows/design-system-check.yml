@@ -30,13 +30,21 @@ jobs:
       - name: Guard authored theme sources
         run: |
           npm run design:check
-          node --test scripts/design-system-audit.test.mjs
+          node --test scripts/design-system-audit.test.mjs scripts/design-system-adoption-register.test.mjs
+          node scripts/design-system-adoption-register.mjs --check
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual public PMS admin and one-source rebrand
         run: |
           node scripts/qa/design-system-convergence.mjs artifacts/design-system/core
           python scripts/qa/design-system-convergence.py artifacts/design-system/core
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Canonical sections native links and mobile overflow
+        run: |
+          DS_SECTION_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/section-contracts" node scripts/qa/ds-section-contracts.mjs
+          DS_CONTROLS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/controls" node scripts/qa/ds-controls-fixture.mjs
+          DS_CONTROLS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/controls" node scripts/qa/ds-controls-browser.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual shared public and authoring components

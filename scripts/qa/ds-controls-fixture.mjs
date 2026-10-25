@@ -3,7 +3,7 @@ import { build } from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-const root=process.cwd(), output='/workspace/artifacts/myuno-ds-platform-audit-20261025/controls-browser';
+const root=process.cwd(), output=path.resolve(process.env.DS_CONTROLS_OUTPUT||'/tmp/browser/ds-controls');
 await mkdir(output,{recursive:true});
 const mocks={
  '@/contexts/LanguageContext':`export const useLanguage=()=>({language:'en'});`,

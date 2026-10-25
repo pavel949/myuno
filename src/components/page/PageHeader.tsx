@@ -122,7 +122,7 @@ export function PageHeader({
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-display font-bold tracking-tight text-foreground break-words">
+              <h1 className="text-h1 font-display font-bold tracking-tight text-foreground break-words">
                 {title}
               </h1>
               {badge !== undefined && badge !== 0 && (
