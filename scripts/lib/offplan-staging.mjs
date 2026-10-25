@@ -2,9 +2,12 @@ import { createHash } from 'node:crypto';
 export const SOURCE_TYPES = ['price_availability', 'media', 'floorplans', 'brochure', 'construction_update'];
 export function validateSource(source) {
   const errors = [];
-  for (const key of ['sourceId', 'developerId', 'projectId', 'fileId', 'revision', 'effectiveDate', 'parserVersion']) if (!source?.[key]) errors.push(`missing_${key}`);
+  for (const key of ['sourceId', 'developerId', 'projectId', 'revision', 'parserVersion']) if (!source?.[key]) errors.push(`missing_${key}`);
+  if (!source?.fileId && !source?.messageId && !source?.url) errors.push('missing_resource_identity');
   if (!SOURCE_TYPES.includes(source?.type)) errors.push('invalid_type');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(source?.effectiveDate || '') || !Number.isFinite(Date.parse(source.effectiveDate))) errors.push('invalid_effective_date');
+  if (source?.effectiveDate) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(source.effectiveDate) || !Number.isFinite(Date.parse(source.effectiveDate))) errors.push('invalid_effective_date');
+  } else if (!source?.ownerConfirmedCurrentAt || !source?.ownerConfirmationProvenance) errors.push('effective_date_or_owner_confirmation_required');
   if (source?.publicationRights !== 'approved') errors.push('publication_rights_pending');
   return errors;
 }
@@ -13,11 +16,12 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   // Adapter boundary: download/parser errors must not be converted into an empty inventory.
   if (!Array.isArray(rows)) throw new Error('Parser must return rows; retain last-known-good');
   const hash = createHash('sha256').update(JSON.stringify(rows)).digest('hex');
-  const batchKey = `${source?.sourceId}:${source?.fileId}:${source?.revision}:${hash}`;
+  const batchKey = `${source?.sourceId}:${source?.fileId || source?.messageId || source?.url}:${source?.revision}:${hash}`;
   const errors = validateSource(source);
-  if (source?.validUntil && source.validUntil < now.slice(0, 10)) errors.push('expired_source');
+  const ownerConfirmed = !!source?.ownerConfirmedCurrentAt && !!source?.ownerConfirmationProvenance;
+  if (source?.validUntil && source.validUntil < now.slice(0, 10) && !ownerConfirmed) errors.push('expired_source');
   if (source?.effectiveDate > now.slice(0, 10)) errors.push('future_effective_date');
-  if (source?.coverage !== 'complete') errors.push('partial_or_unknown_coverage');
+  if (!['complete', 'partial'].includes(source?.coverage)) errors.push('unknown_coverage');
   const result = { batchKey, hash, source, importedAt: now, effectiveDate: source?.effectiveDate, status: errors.length ? 'review' : 'staged', errors, changes: [], review: [], missing: [], lastKnownGoodRetained: true, publicationEnabled: false };
   if (previousBatch?.batchKey === batchKey) return { ...result, status: 'duplicate' };
   const existing = new Map(current.map(row => [`${row.projectId}:${row.unitCode}`, row]));
@@ -27,6 +31,8 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   for (const row of rows) {
     const key = `${row.projectId}:${row.unitCode}`;
     const reasons = [...errors];
+    if (row.priceKind === 'promotional_total') reasons.push('base_price_unseparated');
+    if (row.priceKind === 'promotion' && source?.promoValidUntil && source.promoValidUntil < now.slice(0, 10)) reasons.push('expired_promotion');
     if (typeof row.unitCode !== 'string' || !row.unitCode || row.unitCode !== row.unitCode.trim() || row.projectId !== source.projectId) reasons.push('unmatched_unit');
     if (duplicateCodes.has(key)) reasons.push('duplicate_unit_code');
     if (!Number.isFinite(row.amount) || row.amount <= 0 || !['THB', 'USD', 'EUR'].includes(row.currency) || row.priceUnit !== 'total') reasons.push('invalid_price_units');
