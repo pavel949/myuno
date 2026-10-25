@@ -58,6 +58,7 @@ async def main():
        assert await page.evaluate('window.fixture.writes.length')==0
        row['remainingContact']=await page.evaluate('window.fixture.contacts["original-contact"]||null')
        row['updateAttemptsCommitted']=await page.evaluate('window.fixture.updates.length')
+       if mode=='legacy':await expect(page.get_by_role('alert')).to_contain_text('linked contact is unavailable');await expect(page.get_by_role('alert')).to_contain_text('unconfirmed')
        if mode=='ambiguous-patch':assert row['remainingContact']['budget_min']==1700 and row['updateAttemptsCommitted']==1
       await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-final.png'))
       assert not blocked and not errors

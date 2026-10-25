@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { canDiscardUnsubmittedDeal, discardUnsubmittedDeal, dealAttemptKey, readDealAttempt, saveDealAttempt, recoverDealCreation, type DealCreationAttempt } from '@/lib/crm/dealCreationRecovery';
+import { DealRecoveryBlockedError, canDiscardUnsubmittedDeal, discardUnsubmittedDeal, dealAttemptKey, readDealAttempt, saveDealAttempt, recoverDealCreation, type DealCreationAttempt } from '@/lib/crm/dealCreationRecovery';
 import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -295,10 +295,16 @@ function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContac
       onOpenChange(false);
       resetForm();
       navigate(`${APP_ROUTES.MC_SALES}/${saved.dealId}`);
-    } catch {
-      if (isCurrent() && attemptRef.current?.terminalReason) setRecoveryError(attemptRef.current.terminalReason === 'contact_unavailable'
-        ? (isRu ? 'Связанный контакт недоступен. Отправка сделки не начиналась.' : 'The linked contact is unavailable. No deal submission was started.')
-        : (isRu ? 'Обновление контакта отклонено. Отправка сделки не начиналась.' : 'The contact update was rejected. No deal submission was started.'));
+    } catch (error) {
+      const diagnosis = error instanceof DealRecoveryBlockedError ? error.reason : attemptRef.current?.terminalReason;
+      if (isCurrent() && diagnosis) setRecoveryError([
+        diagnosis === 'contact_unavailable'
+          ? (isRu ? 'Связанный контакт недоступен.' : 'The linked contact is unavailable.')
+          : (isRu ? 'Обновление контакта отклонено.' : 'The contact update was rejected.'),
+        attemptRef.current && canDiscardUnsubmittedDeal(attemptRef.current)
+          ? (isRu ? 'Отправка сделки не начиналась.' : 'No deal submission was started.')
+          : (isRu ? 'Статус предыдущей отправки не подтверждён. Сохраните попытку для сверки.' : 'Previous submission status is unconfirmed. Keep this attempt for reconciliation.'),
+      ].join(' '));
       else if (isCurrent()) setRecoveryError(isRu
         ? 'Сохранение сделки не подтверждено. Повторите ту же попытку: контакт и сделка не будут созданы заново. Если контакт уже сохранён, он останется в CRM.'
         : 'Deal saving was not confirmed. Retry this same attempt using its saved IDs. A contact already saved remains in CRM.');

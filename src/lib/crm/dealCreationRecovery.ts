@@ -35,6 +35,13 @@ export function readDealAttempt(actor: string, company: string): DealCreationAtt
   return value;
 }
 
+export class DealRecoveryBlockedError extends Error {
+  constructor(readonly reason: 'contact_unavailable' | 'contact_patch_rejected', readonly code?: string) {
+    super(reason === 'contact_unavailable' ? 'Linked contact is unavailable in this company.' : 'Contact preference update was rejected.');
+    this.name = 'DealRecoveryBlockedError';
+  }
+}
+
 export function canDiscardUnsubmittedDeal(attempt: DealCreationAttempt): boolean {
   return attempt.contact === null && attempt.dealWriteState === 'not_started' &&
     (attempt.terminalReason === 'contact_unavailable' || attempt.terminalReason === 'contact_patch_rejected');
@@ -116,7 +123,7 @@ export async function recoverDealCreation(
   else {
     if (!attempt.contact) {
       terminal('contact_unavailable');
-      throw new Error('Linked contact is unavailable in this company.');
+      throw new DealRecoveryBlockedError('contact_unavailable');
     }
     assertCurrent();
     // Reuse canonical company/email dedupe. Explicit PK also protects no-email retries.
@@ -140,7 +147,10 @@ export async function recoverDealCreation(
     assertCurrent();
     if (error) {
       // PostgreSQL statement rejection rolls back the UPDATE; transport errors prove nothing.
-      if (['42501', '23502', '23503', '23514'].includes(error.code)) terminal('contact_patch_rejected');
+      if (['42501', '23502', '23503', '23514'].includes(error.code)) {
+        terminal('contact_patch_rejected');
+        throw new DealRecoveryBlockedError('contact_patch_rejected', error.code);
+      }
       throw error;
     }
     receipt(data as Record<string, unknown>, 'crm_contacts');
