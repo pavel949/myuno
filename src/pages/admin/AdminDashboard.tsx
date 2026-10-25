@@ -40,7 +40,7 @@ function AdminToday() {
       client.invalidateQueries({ queryKey: ['admin-dashboard'] }),
     ]).catch(() => setRefreshError(true)).finally(() => { refreshFlight.current = null; });
   };
-  return <PageShell width="full" className="space-y-6" >
+  return <PageShell width="full" stack="default">
     <PageHeader
       title={l('Today', 'Сегодня', 'วันนี้')}
       subtitle={l('Platform overview · Phuket time', 'Вся платформа · Время Пхукета', 'ภาพรวมแพลตฟอร์ม · เวลาภูเก็ต')}

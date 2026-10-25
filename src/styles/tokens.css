@@ -330,8 +330,10 @@
   --section-space-scale: 1;
   --section-heading-gap: var(--section-gap-tight);
   --section-content-gap: calc(var(--section-gap-tight) * .75);
+  --section-content-gap-public: var(--section-content-gap);
   --section-title-gap: .375rem;
   --section-action-gap: .375rem;
+  --section-control-gap: calc(var(--section-action-gap) * 2 / 3);
   --section-action-icon-size: 1rem;
 
   --touch-target:      2.75rem;    /* 44px WCAG */
@@ -451,6 +453,9 @@
   --glow-via:   22 79% 47%;
   --glow-to:    213 73% 15%;
 }
+
+/* Named public density preserves the compact mobile rhythm from one source. */
+@media (max-width: 640px) { :root { --section-content-gap-public: calc(var(--section-content-gap) / 3); } }
 
 /* Responsive page padding — canon §7 */
 @media (min-width: 768px) {
