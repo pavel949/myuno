@@ -8,6 +8,7 @@ import { Settings, DollarSign, Target, Wrench, Building2, HardDrive } from 'luci
 import React, { Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { PageShell } from '@/components/page/PageShell';
 
 const PipelineSettingsContent = React.lazy(() => import('@/pages/owner/PipelineSettingsPage'));
 
@@ -57,7 +58,7 @@ export default function MCSettingsPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageShell width="workspace" noBottomPad className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
           <Settings className="h-5 w-5 text-primary" />
@@ -111,6 +112,6 @@ export default function MCSettingsPage() {
           </AccordionItem>
         ))}
       </Accordion>
-    </div>
+    </PageShell>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
+import { PageShell } from '@/components/page/PageShell';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, MapPin, Languages, History, FileText, FolderTree, Database, Bot, Brain, TestTube, Users, Scale, FileEdit, Key, Flag, Building2 } from 'lucide-react';
 import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
@@ -38,7 +39,7 @@ export default function AdminSystemSettings() {
   const isRu = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
+    <PageShell width="workspace" noBottomPad className="space-y-4">
       <SectionHeader
         title={isRu ? 'Настройки системы' : 'System Settings'}
         subtitle={isRu ? 'Конфигурация, логи и системные инструменты' : 'Configuration, logs and system tools'}
@@ -115,6 +116,6 @@ export default function AdminSystemSettings() {
           </ErrorBoundary>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

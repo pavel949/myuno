@@ -8,7 +8,7 @@
  * domain card alongside commercial/hotel/land variants.
  */
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRightLeft, MapPin, Maximize2, BedDouble, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -78,13 +78,13 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1.5 flex-wrap">
           {property.is_assignment && (
-            <Badge className="bg-accent text-accent-foreground text-[10px] px-2 py-0.5">
+            <Badge className="bg-accent text-accent-foreground text-[length:var(--type-label-size)] px-2 py-0.5">
               <ArrowRightLeft className="w-3 h-3 mr-1" />
               {isRu ? 'Переуступка' : 'Assignment'}
             </Badge>
           )}
           {property.featured && (
-            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5">
+            <Badge className="bg-primary text-primary-foreground text-[length:var(--type-label-size)] px-2 py-0.5">
               ⭐ {isRu ? 'Рекомендуем' : 'Featured'}
             </Badge>
           )}
@@ -92,7 +92,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
 
         {/* Title type badge */}
         <div className="absolute bottom-2 right-2">
-          <Badge variant="secondary" className="text-[10px] bg-background/80">
+          <Badge variant="secondary" className="text-[length:var(--type-label-size)] bg-background/80">
             {TITLE_TYPE_LABELS[property.title_type]?.[isRu ? 'ru' : 'en'] || property.title_type}
           </Badge>
         </div>
@@ -100,7 +100,10 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        <h3 className="font-semibold text-foreground line-clamp-1">{title}</h3>
+        <h3 className="font-semibold text-foreground"><Link to={surface.href} onClick={(event) => {
+          event.stopPropagation();
+          if (onClick) { event.preventDefault(); handleClick(); }
+        }} className="block truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">{title}</Link></h3>
 
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="w-3 h-3" />
@@ -132,7 +135,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
             </span>
           )}
           {premiumPercent !== null && premiumPercent > 0 && (
-            <Badge variant="outline" className="text-[10px] text-destructive border-destructive/30">
+            <Badge variant="outline" className="text-[length:var(--type-label-size)] text-danger border-danger/30">
               +{premiumPercent}%
             </Badge>
           )}
@@ -156,14 +159,14 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         )}
 
         {/* Condition */}
-        <div className="flex gap-1 text-[10px]">
+        <div className="flex gap-1 text-[length:var(--type-label-size)]">
           {property.condition && (
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="text-[length:var(--type-label-size)]">
               {CONDITION_LABELS[property.condition]?.[isRu ? 'ru' : 'en'] || property.condition}
             </Badge>
           )}
           {property.furnished && property.furnished !== 'unfurnished' && (
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="text-[length:var(--type-label-size)]">
               {property.furnished === 'fully'
                 ? (isRu ? 'С мебелью' : 'Furnished')
                 : (isRu ? 'Частично' : 'Partial')}

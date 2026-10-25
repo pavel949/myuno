@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Building2, 
   MapPin, 
@@ -45,17 +45,17 @@ const STATUS_CONFIG: Record<ProjectStatus, {
   offplan: {
     label: { en: 'Off-Plan', ru: 'Новостройка' },
     icon: Building2,
-    color: 'bg-primary/10 text-primary border-primary/30',
+    color: 'bg-primary text-primary-foreground border-primary/30',
   },
   under_construction: {
     label: { en: 'Under Construction', ru: 'Строится' },
     icon: HardHat,
-    color: 'bg-accent/10 text-accent-foreground border-accent/30',
+    color: 'bg-accent text-accent-foreground border-accent/30',
   },
   completed: {
     label: { en: 'Completed', ru: 'Готово' },
     icon: CheckCircle2,
-    color: 'bg-secondary/20 text-secondary-foreground border-secondary/30',
+    color: 'bg-secondary text-secondary-foreground border-secondary/30',
   },
 };
 
@@ -137,7 +137,7 @@ export function OffplanProjectCard({
         )}
 
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-media-canvas/60 via-transparent to-transparent" />
 
         {/* Status badge */}
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 max-w-[70%]">
@@ -150,7 +150,7 @@ export function OffplanProjectCard({
           {project.isClearviewRated && project.offplanCatalog?.rec && (
             <Badge
               className={cn(
-                "text-[11px] font-bold border-0 tracking-wide",
+                "text-[length:var(--type-caption-size)] font-bold border-0 tracking-wide",
                 project.offplanCatalog.rec === 'BUY' && 'bg-success text-success-foreground',
                 project.offplanCatalog.rec === 'WATCH' && 'bg-warning text-warning-foreground',
                 project.offplanCatalog.rec === 'AVOID' && 'bg-destructive text-destructive-foreground',
@@ -163,7 +163,7 @@ export function OffplanProjectCard({
 
           {/* Brokered / not ClearView-rated */}
           {!project.isClearviewRated && (
-            <Badge variant="outline" className="text-[10px] bg-background border-warning/40 text-warning">
+            <Badge variant="outline" className="text-[length:var(--type-label-size)] bg-background border-warning/40 text-warning">
               {isRu ? 'Не оценён ClearView' : 'Not ClearView rated'}
             </Badge>
           )}
@@ -182,7 +182,7 @@ export function OffplanProjectCard({
           aria-label={isRu ? 'Добавить в избранное' : 'Add to favourites'}
           onClick={handleFav}
           className={cn(
-            'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px] rounded-full',
+            'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[var(--touch-target)] min-w-[var(--touch-target)] rounded-full',
             'bg-background border border-border/50 shadow-sm',
             'hover:bg-background transition-colors',
             'top-3'
@@ -194,14 +194,16 @@ export function OffplanProjectCard({
         </button>
 
         {project.projectStatus !== 'completed' && project.constructionProgress > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 p-3">
-            <div className="flex items-center justify-between text-xs text-primary-foreground mb-1">
+          <div className="absolute bottom-0 left-0 right-0 bg-media-canvas/70 p-3">
+            <div className="flex items-center justify-between text-xs text-media-foreground mb-1">
               <span>{isRu ? 'Прогресс' : 'Progress'}</span>
               <span className="font-semibold">{project.constructionProgress}%</span>
             </div>
-            <Progress 
+            <Progress
+              aria-label={`${name} — ${isRu ? 'Прогресс строительства' : 'Construction progress'}`}
               value={project.constructionProgress} 
-              className="h-1.5 bg-white/20"
+              className="h-1.5 bg-media-foreground/20"
+              indicatorClassName="bg-media-foreground"
             />
           </div>
         )}
@@ -210,8 +212,8 @@ export function OffplanProjectCard({
       {/* Content */}
       <div className="p-4 space-y-3">
         {/* Title */}
-        <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
-          {name}
+        <h3 className="font-semibold text-base group-hover:text-primary transition-colors">
+          <Link to={surface.href} onClick={(event) => event.stopPropagation()} className="block truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">{name}</Link>
         </h3>
 
         {/* Location + Developer */}
