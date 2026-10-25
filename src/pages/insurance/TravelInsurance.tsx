@@ -55,12 +55,10 @@ export default function TravelInsurance() {
 
   const handleCherehapa = () => {
     sessionStorage.setItem('insurance_redirect', 'true');
-    window.open('https://cherehapa.ru/country/thailand?partnerid=MYUNO', '_blank');
   };
 
   const handleSafetyWing = () => {
     sessionStorage.setItem('insurance_redirect', 'true');
-    window.open('https://safetywing.com/nomad-insurance?referenceID=myuno', '_blank');
   };
 
   return (
@@ -144,61 +142,65 @@ export default function TravelInsurance() {
           </h3>
 
           {/* Russian-speaking option */}
-          <Card variant="interactive" onClick={handleCherehapa} className="border-primary/30">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-xs">
-                      🇷🇺 {isRu ? 'Для граждан РФ/СНГ' : 'For RU/CIS Citizens'}
-                    </Badge>
+          <Card variant="interactive" className="border-primary/30">
+            <a aria-label={isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'} href="https://cherehapa.ru/country/thailand?partnerid=MYUNO" target="_blank" rel="noopener noreferrer" onClick={handleCherehapa} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">
+                        🇷🇺 {isRu ? 'Для граждан РФ/СНГ' : 'For RU/CIS Citizens'}
+                      </Badge>
+                    </div>
+                    <h4 className="font-semibold text-sm">
+                      {isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isRu
+                        ? '18+ страховых компаний. Сравните цены и купите полис за 2 минуты.'
+                        : '18+ insurance companies. Compare prices and buy a policy in 2 minutes.'}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span>{isRu ? 'от 300 ₽/день' : 'from ₽300/day'}</span>
+                      <span>•</span>
+                      <span>{isRu ? 'Мгновенный полис' : 'Instant policy'}</span>
+                    </div>
                   </div>
-                  <h4 className="font-semibold text-sm">
-                    {isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'}
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isRu
-                      ? '18+ страховых компаний. Сравните цены и купите полис за 2 минуты.'
-                      : '18+ insurance companies. Compare prices and buy a policy in 2 minutes.'}
-                  </p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span>{isRu ? 'от 300 ₽/день' : 'from ₽300/day'}</span>
-                    <span>•</span>
-                    <span>{isRu ? 'Мгновенный полис' : 'Instant policy'}</span>
-                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                 </div>
-                <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-              </div>
-            </CardContent>
+              </CardContent>
+            </a>
           </Card>
 
           {/* International option */}
-          <Card variant="interactive" onClick={handleSafetyWing} className="border-primary/30">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-xs">
-                      🌍 {isRu ? 'Международная' : 'International'}
-                    </Badge>
+          <Card variant="interactive" className="border-primary/30">
+            <a aria-label={isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'} href="https://safetywing.com/nomad-insurance?referenceID=myuno" target="_blank" rel="noopener noreferrer" onClick={handleSafetyWing} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">
+                        🌍 {isRu ? 'Международная' : 'International'}
+                      </Badge>
+                    </div>
+                    <h4 className="font-semibold text-sm">
+                      {isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isRu
+                        ? 'Подписочная страховка с покрытием до $250,000. Идеально для digital-номадов.'
+                        : 'Subscription insurance with coverage up to $250,000. Perfect for digital nomads.'}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span>~$45/4 {isRu ? 'недели' : 'weeks'}</span>
+                      <span>•</span>
+                      <span>{isRu ? 'Глобальное покрытие' : 'Global coverage'}</span>
+                    </div>
                   </div>
-                  <h4 className="font-semibold text-sm">
-                    {isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'}
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isRu
-                      ? 'Подписочная страховка с покрытием до $250,000. Идеально для digital-номадов.'
-                      : 'Subscription insurance with coverage up to $250,000. Perfect for digital nomads.'}
-                  </p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span>~$45/4 {isRu ? 'недели' : 'weeks'}</span>
-                    <span>•</span>
-                    <span>{isRu ? 'Глобальное покрытие' : 'Global coverage'}</span>
-                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
                 </div>
-                <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
-              </div>
-            </CardContent>
+              </CardContent>
+            </a>
           </Card>
         </div>
 

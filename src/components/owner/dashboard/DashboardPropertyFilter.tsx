@@ -24,8 +24,9 @@ export function DashboardPropertyFilter() {
         </span>
         {selectedPropertyId && (
           <button
+            type="button"
             onClick={() => setSelectedPropertyId(null)}
-            className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-3 w-3" />
             {isRu ? 'Сбросить' : 'Clear'}
@@ -35,9 +36,11 @@ export function DashboardPropertyFilter() {
       <ScrollArea className="w-full">
         <div className="flex gap-1.5 pb-1">
           <button
+            type="button"
             onClick={() => setSelectedPropertyId(null)}
+            aria-pressed={!selectedPropertyId}
             className={cn(
-              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
               !selectedPropertyId
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card border-border text-muted-foreground hover:border-primary/50'
@@ -53,10 +56,12 @@ export function DashboardPropertyFilter() {
             const title = isRu ? property.title_ru : property.title;
             return (
               <button
+                type="button"
+                aria-pressed={isSelected}
                 key={property.property_id}
                 onClick={() => setSelectedPropertyId(isSelected ? null : property.property_id)}
                 className={cn(
-                  'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+                  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
                   isSelected
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-card border-border text-foreground hover:border-primary/50'

@@ -6,7 +6,7 @@ from playwright.async_api import async_playwright
 
 OUT=Path(sys.argv[1]);BASELINE='--baseline' in sys.argv
 ROLES=['public','pms','admin']
-CASES=[(r,l,w,t,v,'normal') for r in ROLES for l in (['ru'] if BASELINE else ['ru','en','th']) for w in [390,1440] for t in ['light','dark'] for v in (['normal'] if BASELINE else ['normal','rebrand'])]
+CASES=[(r,l,w,t,v,'normal') for r in ROLES for l in (['ru'] if BASELINE else ['ru','en','th']) for w in [390,1440] for t in ['light','dark'] for v in (['normal'] if BASELINE else ['normal','compact','rebrand'])]
 if not BASELINE:
  CASES += [(r,'ru',w,t,'normal','normal') for r in ROLES for w in [320,375,430,768,1920] for t in ['light','dark']]
  CASES += [(r,'ru',390,t,'normal',s) for r in ROLES for t in ['light','dark'] for s in ['loading','error']]
@@ -60,8 +60,11 @@ async def main():
      await page.locator('[data-count-key=pendingProviders][data-count-state=unavailable]').first.wait_for()
      row['stateEvidence']='actual unavailable provider count from synthetic source error'
 
-    metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();return{frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
+    metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,fontSize:parseFloat(s.fontSize),width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();const section=document.querySelector(role==='public'?'.home-gallery-heading':'.ds-section');const sectionStyle=section?getComputedStyle(section):null;return{section:sectionStyle?{gap:sectionStyle.gap,bottom:sectionStyle.marginBottom,effectiveGap:section.nextElementSibling?section.nextElementSibling.getBoundingClientRect().top-section.getBoundingClientRect().bottom:null,outerPadding:getComputedStyle(section.parentElement).paddingTop}:null,frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
     assert not metrics['overflow'],'page overflow'
+    if role in ['pms','admin']:
+     h1token=await page.evaluate('parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--type-h1-size"))*parseFloat(getComputedStyle(document.documentElement).fontSize)')
+     assert abs(metrics['heading']['fontSize']-h1token)<.1,{'canonicalH1':h1token,'actual':metrics['heading']}
     # Real mounted input and existing ThemeProvider, not a CSS-class-only toggle.
     draft=page.get_by_test_id('ds-draft');await draft.fill('Synthetic unsaved value')
     for _ in range(2):await page.get_by_test_id('ds-theme-toggle').click();await page.wait_for_timeout(180)
@@ -73,8 +76,17 @@ async def main():
      assert status['contrast']>=4.5,{'statusContrast':status}
     key=(role,lang,width,theme,state)
     if variant=='normal':normal[key]=metrics
+    elif variant=='compact':
+     prior=normal[key]
+     if role in ['pms','admin']:
+      assert 0<metrics['section']['effectiveGap']<prior['section']['effectiveGap'],{'compactionFloor':metrics['section'],'prior':prior['section']}
+     else:
+      assert metrics['section']['outerPadding']!=prior['section']['outerPadding'],'public section compaction did not propagate'
+     assert metrics['heading']['font']==prior['heading']['font'] and metrics['body']['font']==prior['body']['font'],'spacing-only change altered typography'
+     assert [(s['status'],s['color']) for s in metrics['statuses']]==[(s['status'],s['color']) for s in prior['statuses']],'spacing-only change altered status colors'
     else:
      prior=normal[key]
+     assert metrics['section'] and prior['section'] and metrics['section']!=prior['section'],'section spacing source did not propagate to actual page'
      assert metrics['frame']['inset']>prior['frame']['inset'],'one-source gutter scale did not propagate'
      if role=='pms' and width==1440:assert metrics['frame']['width']<prior['frame']['width'],'named width source did not propagate'
      assert metrics['heading']['font']!=prior['heading']['font'],'display font source did not propagate'
