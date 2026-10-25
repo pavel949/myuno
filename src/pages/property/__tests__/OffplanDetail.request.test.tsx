@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import OffplanDetail from '../OffplanDetail';
@@ -18,4 +18,19 @@ afterEach(cleanup);
 describe('actual project route CTA wiring', () => {
   it('consultation opens canonical buyer form with project context', () => { render(<MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>); fireEvent.click(screen.getByRole('button', { name: 'Consultation' })); expect(screen.getByTestId('request-context')).toHaveTextContent('"projectId":"synthetic-project"'); expect(screen.getByTestId('request-context')).toHaveTextContent('"intent":"consultation"'); expect(screen.queryByText('Vertical not found')).toBeNull(); });
   it('document CTA preserves documents intent', async () => { render(<MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>); fireEvent.mouseDown(screen.getByRole('tab', { name: 'Docs' }), { button: 0, ctrlKey: false }); fireEvent.click(await screen.findByRole('button', { name: 'Request document package' })); expect(screen.getByTestId('request-context')).toHaveTextContent('"intent":"documents"'); });
+  it('resets intent after Documents → Close → Consultation on the same mounted page', async () => {
+    render(<MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>);
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'Docs' }), { button: 0, ctrlKey: false });
+    fireEvent.click(await screen.findByRole('button', { name: 'Request document package' }));
+    expect(screen.getByTestId('request-context')).toHaveTextContent('"intent":"documents"');
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Consultation' }));
+    expect(screen.getByTestId('request-context')).toHaveTextContent('"intent":"consultation"');
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Risk Report' }));
+    expect(screen.getByTestId('request-context')).toHaveTextContent('"intent":"documents"');
+  });
+
 });
