@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-export function BuyerRequestForm({ projectId, unitId, intent = 'consultation' }: { projectId: string; unitId?: string; intent?: BuyerIntent }) {
+export function BuyerRequestForm({ projectId, unitId, propertyId, intent = 'consultation' }: { projectId: string; unitId?: string; propertyId?: string; intent?: BuyerIntent }) {
   const { language } = useLanguage();
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { submitLead, isSubmitting } = useUniversalLead();
@@ -26,7 +26,7 @@ export function BuyerRequestForm({ projectId, unitId, intent = 'consultation' }:
     e.preventDefault(); setError('');
     if (!validateContactIntake(form).ok) { setError(t('Проверьте имя и контактные данные.', 'Check your name and contact details.', 'โปรดตรวจสอบชื่อและข้อมูลติดต่อ')); return; }
     try {
-      const result = await submitLead.mutateAsync({ vertical_id: OFFPLAN_VERTICAL, request_type: 'property_consultation', lead_source: 'cta', entry_point: 'offplan_buyer', name: form.name, phone: form.phone, email: form.email || undefined, preferred_language: language, notes: form.notes, vertical_metadata: buyerRequestContext(projectId, selectedIntent, unitId) });
+      const result = await submitLead.mutateAsync({ vertical_id: OFFPLAN_VERTICAL, request_type: 'property_consultation', lead_source: 'cta', entry_point: 'offplan_buyer', name: form.name, phone: form.phone, email: form.email || undefined, preferred_language: language, notes: form.notes, vertical_metadata: buyerRequestContext(projectId, selectedIntent, unitId, propertyId) });
       if (!result?.id) throw new Error('Missing receipt');
       setReceipt(result.id);
     } catch { setError(t('Сохранение не подтверждено. Попробуйте ещё раз.', 'Saving was not confirmed. Please try again.', 'ยังยืนยันการบันทึกไม่ได้ โปรดลองอีกครั้ง')); }

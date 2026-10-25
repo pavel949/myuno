@@ -9,9 +9,9 @@ export function salesAvailability(status?: string | null): SalesAvailability {
   if (['blocked', 'not_for_sale', 'spa_signed'].includes(status || '')) return 'unavailable';
   return 'unknown';
 }
-export function buyerRequestContext(projectId: string, intent: BuyerIntent, unitId?: string) {
+export function buyerRequestContext(projectId: string, intent: BuyerIntent, unitId?: string, propertyId?: string) {
   if (!projectId.trim()) throw new Error('Project is required');
-  return { schema_version: 1, project_id: projectId, unit_id: unitId || null, offer_id: null, intent, request_only: true };
+  return { schema_version: 1, project_id: projectId, unit_id: unitId || null, property_id: propertyId || null, offer_id: null, intent, request_only: true };
 }
 
 /** Parallel legacy/devmod statuses cannot silently restore availability. */

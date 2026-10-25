@@ -9,7 +9,7 @@ Repository: pavel949/myuno; baseline 775bd61ce. Domain change, not a new site.
 4. Synthetic regression tests; draft PR only. Production acceptance requires verified backend project, privileges, material rights and supplied files.
 
 ## Canonical model / evolutionary target
-Reuse developers, property_projects, project_units, floor_plans, property documents and consultation_requests. Developer brand differs from legal counterparty (explicit org/legal mapping required). Project → optional phase → optional building → physical unit; villa building is optional and has plot/home/pool attributes. Floor-plan/type is not a physical unit. Preserve UUID; myUNO short sequence and developer external code require stable unique constraints, never derive public short IDs from truncated UUIDs.
+Reuse developers, property_projects, project_units, floor_plans, property documents and consultation_requests. Developer brand differs from legal counterparty (explicit org/legal mapping required). Canonical project is property_projects; physical asset is properties.id, with project_units.property_id as its existing sales bridge. Project → optional phase → optional building → physical asset; villa building is optional and has plot/home/pool attributes. Floor-plan/type is not a physical unit. Preserve UUID; myUNO short sequence and developer external code require stable unique constraints, never derive public short IDs from truncated UUIDs.
 
 Offer revisions are immutable evidence linked to the physical unit: amount/currency/unit, source and effective/verified/valid-until dates, ownership/quota, payment schedule, mandatory/recurring costs. Construction, sales availability and transaction lifecycle remain distinct. Existing status and unit_status conflicts are unknown until reconciled. No destructive migration or catalogue deletion in this tranche.
 
@@ -31,3 +31,5 @@ Persistent source registry/import batches, versioned offers, short myUNO number 
 
 ## Owner source confirmation — 2026-10-25 03:10 UTC
 Owner confirms supplied working folders/prices as current business sources within their scope, even where file dates are old. Keep source effective/modified/imported dates and promo expiry, plus owner_confirmed_current_at and confirmation provenance. Old dates alone do not reject base prices; expired promotions are not reactivated. Partial feeds may update confidently matched listed units only, never infer missing units sold. Promotional-only totals with inseparable base prices require field review. Google Drive and Telegram sources share stable revision/message identity, explicit project/field priority and dedup contracts; actual connector/scheduler readiness is unverified.
+
+Identity clarification: see [identity reuse map](identity-reuse.md). `project_units.id` is a sales catalogue identity; immutable `properties.id` is shared with rental/PMS/owner/management. No new physical tables were created.

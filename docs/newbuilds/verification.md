@@ -3,8 +3,8 @@
 2026-10-25; baseline 775bd61cef82011eb1f530bcce8dfe666f661a03. Own branch; no shared header, calendar, workflows, DNS, credentials, roles or production data were changed.
 
 ## Evidence
-- `npx vitest run src/hooks/__tests__/newbuildBuyerProjection.test.ts src/lib/offplan/buyerContract.test.ts src/lib/offplan/newbuildContainment.test.ts src/pages/property/__tests__/OffplanDetail.request.test.tsx src/components/newbuilds/__tests__/BuyerRequestForm.test.tsx src/components/newbuilds/__tests__/NewbuildProjectDeepTabs.locale.test.tsx`: 29 tests. Actual route consultation/documents CTA wiring, RU/EN/TH request form, receipt/failure semantics, explicit public field projection and server gate ordering.
-- `node --test scripts/lib/offplan-staging.test.mjs`: 15 tests. Stable identity, unit scaling with explicit mapping, leading zeroes, ambiguity/duplicates, expiry/partial coverage, failure retention, missing-row semantics, dedup and version-checked undo plan.
+- `npx vitest run src/hooks/__tests__/newbuildBuyerProjection.test.ts src/lib/offplan/buyerContract.test.ts src/lib/offplan/newbuildContainment.test.ts src/pages/property/__tests__/OffplanDetail.request.test.tsx src/components/newbuilds/__tests__/BuyerRequestForm.test.tsx src/components/newbuilds/__tests__/NewbuildProjectDeepTabs.locale.test.tsx`: 30 tests. Actual route consultation/documents CTA wiring, RU/EN/TH request form, receipt/failure semantics, explicit public field projection and server gate ordering.
+- `node --test scripts/lib/offplan-staging.test.mjs`: 18 tests. Stable identity, unit scaling with explicit mapping, leading zeroes, ambiguity/duplicates, expiry/partial coverage, failure retention, missing-row semantics, dedup and version-checked undo plan.
 - `npx playwright test --config e2e/newbuilds/playwright.config.ts`: 2 tests, desktop and 390px mobile. Actual buyer components + real consultation hook, synthetic Supabase adapter and blocked external network. Request → receipt → team metadata; failure retains form with no receipt. This isolated config has no production seed/teardown. System Chromium used; downloading Playwright browser was unavailable (403).
 - `npm run design:check`: 0 new/structural findings (existing baseline 4280).
 - Focused ESLint on new buyer components/hooks/contracts passed.
@@ -26,10 +26,16 @@ Screenshots are synthetic acceptance surfaces with real component CSS and fallba
 No real customer request, notification, reservation, payment or catalogue mutation was performed. No records were deleted or labelled demo. No merge/deploy is authorized by test success. Roll back client code by revert; retain server/browser-write denial until independently reviewed safe replacement exists.
 
 ## Final result
-Final source typecheck and production build both exited 0. Focused suite: 29/29; Node staging: 15/15; browser: 2/2. Build-generated `supabase/functions/mcp/index.ts` drift was restored to baseline and is excluded from the change.
+Final source typecheck and production build both exited 0. Focused suite: 30/30; Node staging: 18/18; browser: 2/2. Build-generated `supabase/functions/mcp/index.ts` drift was restored to baseline and is excluded from the change.
 
 Local commits: `62a6d9182` (buyer), `2b3a79408` (staging including LOCAL-ONLY source registry), `226ea7c19` (server containment). Connector-authored remote commits have different metadata/SHAs: buyer `0f2dc4b109d240c6e03fc9e263213121a039d1d8`, staging `bb59242279d857212a4886fe53b4479f737d788f`, containment `33a576cc56ae97b27fe1619692c2214415631f52` before this evidence-only commit.
 
 Drafts: #175 buyer path; #176 staging code stacked on #175; containment draft follows #176. No merge or deployment performed.
 
 Automatic approval review REJECTED creation of the GitHub tree containing `data/offplan-sources/registry.json`: it would disclose private-source Drive identifiers and metadata about internal commission/bank materials to a destination whose clearance was not established. The denied tree was not created. That action was not retried. A safer tree containing only the three importer code/test files succeeded; the source registry remains only in the local workspace/commit. Explicit clearance is needed before publishing that registry. CLI GitHub token was invalid; the authorized connector successfully created the safe draft branches/PRs.
+
+Final draft chain: [#175](https://github.com/pavel949/myuno/pull/175) head `0f2dc4b109d240c6e03fc9e263213121a039d1d8` → [#176](https://github.com/pavel949/myuno/pull/176) head `be4433cf8e7c6ee60c2669168dd9717da5978e3f` → [#177](https://github.com/pavel949/myuno/pull/177) head `47f928910397c3a3014b4bbb3fa107ad8f76d520`. Owner-confirmation follow-up changes only staging JS/tests and documentation; its final Node suite is 18/18. Prior application typecheck/build/browser results apply to the unchanged application source.
+
+Telegram research handoff confirms an active bot and readable channel metadata/pins, not personal Telegram access, historical archive or delivery of new posts/files. Incoming ingestion remains unverified; no webhook, membership or credentials changed. Known channel references stay in the LOCAL-ONLY registry under the same publication block.
+
+Canonical physical identity follow-up: reader/intake/team context now carry properties.id separately from project_units.id. Staging requires an existing property bridge and preserves it across import/replay. See identity-reuse.md; no new physical registry or migration was created. Application checks and browser screenshots are rerun for this follow-up.

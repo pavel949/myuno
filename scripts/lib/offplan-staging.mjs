@@ -40,10 +40,12 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
     const before = existing.get(key);
     // Automatic updates only match known stable physical identities. New inventory needs review.
     if (!before?.id) reasons.push('new_or_unmatched_unit');
+    if (!before?.propertyId) reasons.push('unmapped_canonical_property');
+    if (before?.propertyId && before.propertyProjectId !== row.projectId) reasons.push('canonical_project_mismatch');
     if (current.filter(candidate => `${candidate.projectId}:${candidate.unitCode}` === key).length > 1) reasons.push('ambiguous_existing_unit');
     if (before && before.currency !== row.currency) reasons.push('currency_changed');
     if (before?.amount > 0 && Math.abs(row.amount / before.amount - 1) > 0.25) reasons.push('large_price_change');
-    const after = { id: before?.id, projectId: row.projectId, unitCode: row.unitCode, amount: row.amount, currency: row.currency, priceUnit: row.priceUnit, availability: row.availability };
+    const after = { id: before?.id, propertyId: before?.propertyId, propertyProjectId: before?.propertyProjectId, projectId: row.projectId, unitCode: row.unitCode, amount: row.amount, currency: row.currency, priceUnit: row.priceUnit, availability: row.availability };
     if (reasons.length) { result.review.push({ key, reasons: [...new Set(reasons)], row }); continue; }
     const beforeComparable = Object.fromEntries(Object.keys(after).map(k => [k, before[k]]));
     if (canonical(after) !== canonical(beforeComparable)) result.changes.push({ key, before, after, expectedVersion: before.version, sourceEffectiveDate: source.effectiveDate });

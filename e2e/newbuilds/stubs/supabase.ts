@@ -1,5 +1,5 @@
 const rows = [
-  { id: 'synthetic-unit-1', project_id: 'synthetic-project', unit_code: 'A-101', unit_type: '1br', area_sqm: 52, price: 10000000, currency: 'THB', status: 'available', unit_status: 'available' },
+  { id: 'synthetic-unit-1', property_id: 'synthetic-physical-property', project_id: 'synthetic-project', unit_code: 'A-101', unit_type: '1br', area_sqm: 52, price: 10000000, currency: 'THB', status: 'available', unit_status: 'available' },
   { id: 'synthetic-unit-2', project_id: 'synthetic-project', unit_code: 'A-102', unit_type: '1br', area_sqm: 52, price: 11000000, currency: 'THB', status: 'available', unit_status: 'reserved' },
   { id: 'synthetic-unit-3', project_id: 'synthetic-project', unit_code: 'A-103', unit_type: 'villa', area_sqm: 150, price: null, currency: 'THB', status: 'available', unit_status: 'sold' },
 ];

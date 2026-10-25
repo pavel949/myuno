@@ -25,7 +25,7 @@ export function BuyerProjectUnits({ projectId, plansOnly = false }: { projectId:
       <Button variant="outline" onClick={() => setUnitId(unit.id)}>{t('Запросить информацию', 'Request information', 'สอบถามข้อมูล')}</Button>
     </article>)}
     <ResponsiveModal open={!!unitId} onOpenChange={open => { if (!open) setUnitId(undefined); }} title={t('Запрос по объекту', 'Unit enquiry', 'สอบถามยูนิต')}>
-      {unitId && <BuyerRequestForm key={unitId} projectId={projectId} unitId={unitId} />}
+      {unitId && <BuyerRequestForm key={unitId} projectId={projectId} unitId={unitId} propertyId={data.find(unit => unit.id === unitId)?.property_id || undefined} />}
     </ResponsiveModal>
   </div>;
 }
