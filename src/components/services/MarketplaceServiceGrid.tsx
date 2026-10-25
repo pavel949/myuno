@@ -38,7 +38,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
       {isLoading ? (
         <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64" />)}</div>
       ) : isError ? (
-        <div className="border border-border p-4 text-sm flex items-center justify-between gap-2">
+        <div role="alert" className="border border-border p-4 text-sm flex items-center justify-between gap-2">
           <span className="text-muted-foreground">{L('Не удалось загрузить услуги.', 'Could not load services.', 'โหลดบริการไม่สำเร็จ')}</span>
           <Button size="sm" variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>
         </div>

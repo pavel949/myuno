@@ -1,6 +1,7 @@
 import '@/styles/public-commerce.css';
+import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
- import { useState, useEffect } from 'react';
+ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
  import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
  import { Clock, MapPin, Calendar, MessageSquare, Check, LocateFixed, Loader2 } from 'lucide-react';
  import { BackButton } from '@/components/uno/BackButton';
@@ -37,6 +38,29 @@ import { toast } from 'sonner';
   const fn = getFunction(functionId || '');
   const rawFn = getRawFunction(functionId || '');
    
+   const actionBarRef = useRef<HTMLDivElement>(null);
+   useLayoutEffect(() => {
+     const actionBar = actionBarRef.current;
+     if (!actionBar) return;
+     const root = document.documentElement;
+     const previous = root.style.getPropertyValue('--service-request-action-height');
+     const priority = root.style.getPropertyPriority('--service-request-action-height');
+     const measure = () => {
+       const height = Math.ceil(actionBar.getBoundingClientRect().height);
+       if (height > 0) root.style.setProperty('--service-request-action-height', `${height}px`);
+     };
+     measure();
+     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+     observer?.observe(actionBar);
+     window.addEventListener('resize', measure);
+     return () => {
+       observer?.disconnect();
+       window.removeEventListener('resize', measure);
+       if (previous) root.style.setProperty('--service-request-action-height', previous, priority);
+       else root.style.removeProperty('--service-request-action-height');
+     };
+   }, [fn?.id]);
+
    const [formData, setFormData] = useState({
      name: '',
      phone: '',
@@ -48,6 +72,16 @@ import { toast } from 'sonner';
    });
    
    const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
+   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+   const [submissionError, setSubmissionError] = useState('');
+   const requestError = isRu ? 'Сохранение заявки не подтверждено. Попробуйте ещё раз.' : 'Request saving was not confirmed. Please try again.';
+   const fieldProps = (key: string) => ({
+     id: `service-request-${key}`,
+     'aria-invalid': fieldErrors[key] ? true as const : undefined,
+     'aria-describedby': fieldErrors[key] ? `service-request-${key}-error` : undefined,
+   });
+   const fieldError = (key: string) => fieldErrors[key] ? <p id={`service-request-${key}-error`} className="text-sm text-danger">{fieldErrors[key]}</p> : null;
+
  
    // Reverse geocode when location is obtained
    useEffect(() => {
@@ -75,6 +109,7 @@ import { toast } from 'sonner';
  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionError('');
 
     if (!fn || !rawFn) return;
 
@@ -85,6 +120,7 @@ import { toast } from 'sonner';
     }
 
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
+      setFieldErrors(Object.fromEntries((['name', 'phone', 'address'] as const).filter(key => !formData[key].trim()).map(key => [key, isRu ? 'Заполните это поле' : 'Please fill this field'])));
       toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
       return;
     }
@@ -145,8 +181,9 @@ import { toast } from 'sonner';
             orderNumber: result.order_number,
           },
         });
-      }
+      } else { setSubmissionError(requestError); }
     } catch (error) {
+      setSubmissionError(requestError);
       console.error('Order submission failed:', error);
     }
   };
@@ -172,7 +209,7 @@ import { toast } from 'sonner';
    ];
  
    return (
-     <div className="public-commerce public-commerce--request min-h-screen bg-background pb-24">
+     <div className={`public-commerce public-commerce--request min-h-screen bg-background ${FLOATING_OFFSET.requestContentClearance}`}>
        {/* Header */}
        <div className="public-commerce-form-header bg-background border-b">
          <div className="flex items-center gap-3 px-4 py-3">
@@ -183,11 +220,14 @@ import { toast } from 'sonner';
          </div>
        </div>
  
-       <form onSubmit={handleSubmit} className="public-commerce-form p-4 space-y-6">
+       <form onSubmit={handleSubmit}
+         onInvalid={(event) => { const input = event.target; if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement || input instanceof HTMLSelectElement)) return; const key = input.id.replace('service-request-', ''); if (key) setFieldErrors(previous => ({ ...previous, [key]: input.validity.valueMissing ? (isRu ? 'Заполните это поле' : 'Please fill this field') : input.validationMessage })); }}
+         onChange={(event) => { const input = event.target; if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement || input instanceof HTMLSelectElement)) return; const key = input.id.replace('service-request-', ''); if (key) setFieldErrors(previous => { const next = { ...previous }; delete next[key]; return next; }); }}
+         className="public-commerce-form p-4 space-y-6">
          {/* Service Info Card */}
          <Card className="border-border bg-card">
            <CardContent className="p-4">
-             <div className="flex gap-4">
+             <div className="flex flex-wrap gap-x-4 gap-y-2">
                <div className="w-14 h-14 rounded-none bg-primary/20 flex items-center justify-center text-2xl shrink-0">
                  {fn.icon}
                </div>
@@ -224,12 +264,13 @@ import { toast } from 'sonner';
  
          {/* Address */}
          <div className="space-y-2">
-           <Label className="flex items-center gap-2">
+           <Label htmlFor="service-request-address" className="flex items-center gap-2">
              <MapPin className="h-4 w-4" />
              {isRu ? 'Адрес' : 'Address'} *
            </Label>
            <div className="relative">
              <Input
+               {...fieldProps('address')}
                value={formData.address}
                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                placeholder={isRu ? 'Введите адрес или выберите на карте' : 'Enter address or use location'}
@@ -252,6 +293,7 @@ import { toast } from 'sonner';
                )}
              </Button>
            </div>
+           {fieldError('address')}
            <button
              type="button"
              onClick={handleUseCurrentLocation}
@@ -265,22 +307,25 @@ import { toast } from 'sonner';
  
          {/* Preferred Date */}
          <div className="space-y-2">
-           <Label className="flex items-center gap-2">
+           <Label htmlFor="service-request-preferredDate" className="flex items-center gap-2">
              <Calendar className="h-4 w-4" />
              {isRu ? 'Предпочтительная дата' : 'Preferred Date'}
            </Label>
            <Input
+             {...fieldProps('preferredDate')}
              type="date"
              value={formData.preferredDate}
              onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
              min={format(new Date(), 'yyyy-MM-dd')}
            />
+           {fieldError('preferredDate')}
          </div>
  
          {/* Preferred Time */}
          <div className="space-y-2">
-           <Label>{isRu ? 'Удобное время' : 'Preferred Time'}</Label>
+           <Label id="service-request-time-label">{isRu ? 'Удобное время' : 'Preferred Time'}</Label>
            <RadioGroup
+             aria-labelledby="service-request-time-label"
              value={formData.preferredTime}
              onValueChange={(value) => setFormData(prev => ({ ...prev, preferredTime: value }))}
              className="grid grid-cols-2 gap-2"
@@ -304,11 +349,12 @@ import { toast } from 'sonner';
  
          {/* Problem Description */}
          <div className="space-y-2">
-           <Label className="flex items-center gap-2">
+           <Label htmlFor="service-request-problemDescription" className="flex items-center gap-2">
              <MessageSquare className="h-4 w-4" />
              {isRu ? 'Опишите проблему' : 'Describe the problem'}
            </Label>
            <Textarea
+             {...fieldProps('problemDescription')}
              value={formData.problemDescription}
              onChange={(e) => setFormData(prev => ({ ...prev, problemDescription: e.target.value }))}
              placeholder={isRu 
@@ -316,6 +362,7 @@ import { toast } from 'sonner';
                : 'Tell us more about the problem...'}
              rows={3}
            />
+           {fieldError('problemDescription')}
          </div>
  
          {/* Contact Info */}
@@ -324,42 +371,49 @@ import { toast } from 'sonner';
              <h3 className="font-medium">{isRu ? 'Контактные данные' : 'Contact Information'}</h3>
              
              <div className="space-y-2">
-               <Label>{isRu ? 'Ваше имя' : 'Your name'} *</Label>
+               <Label htmlFor="service-request-name">{isRu ? 'Ваше имя' : 'Your name'} *</Label>
                <Input
+                 {...fieldProps('name')}
+                 autoComplete="name"
                  value={formData.name}
                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                  placeholder={isRu ? 'Иван Петров' : 'John Smith'}
                  required
                />
+               {fieldError('name')}
              </div>
              
              <div className="space-y-2">
-               <Label>{isRu ? 'Телефон' : 'Phone'} *</Label>
+               <Label htmlFor="service-request-phone">{isRu ? 'Телефон' : 'Phone'} *</Label>
                <Input
+                 {...fieldProps('phone')}
+                 autoComplete="tel"
                  type="tel"
                  value={formData.phone}
                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                  placeholder="+66 XX XXX XXXX"
                  required
                />
+               {fieldError('phone')}
              </div>
              
              <div className="space-y-2">
-               <Label>{isRu ? 'Как с вами связаться?' : 'How to contact you?'}</Label>
+               <Label id="service-request-contact-label">{isRu ? 'Как с вами связаться?' : 'How to contact you?'}</Label>
                <RadioGroup
+                 aria-labelledby="service-request-contact-label"
                  value={formData.contactMethod}
                  onValueChange={(value) => setFormData(prev => ({ ...prev, contactMethod: value }))}
-                 className="flex gap-4"
+                 className="flex flex-wrap gap-x-4 gap-y-2"
                >
-                 <Label htmlFor="contact-whatsapp" className="flex items-center gap-2 cursor-pointer">
+                 <Label htmlFor="contact-whatsapp" className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap cursor-pointer">
                    <RadioGroupItem value="whatsapp" id="contact-whatsapp" />
                    <span className="text-sm">WhatsApp</span>
                  </Label>
-                 <Label htmlFor="contact-phone" className="flex items-center gap-2 cursor-pointer">
+                 <Label htmlFor="contact-phone" className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap cursor-pointer">
                    <RadioGroupItem value="phone" id="contact-phone" />
                    <span className="text-sm">{isRu ? 'Звонок' : 'Phone call'}</span>
                  </Label>
-                 <Label htmlFor="contact-line" className="flex items-center gap-2 cursor-pointer">
+                 <Label htmlFor="contact-line" className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap cursor-pointer">
                    <RadioGroupItem value="line" id="contact-line" />
                    <span className="text-sm">LINE</span>
                  </Label>
@@ -368,8 +422,9 @@ import { toast } from 'sonner';
            </CardContent>
          </Card>
  
+         {submissionError && <p role="alert" className="text-sm text-danger">{submissionError}</p>}
          {/* Submit Button */}
-         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+         <div ref={actionBarRef} data-service-request-action-bar className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
            <Button 
              type="submit" 
              className="w-full h-12 text-base"

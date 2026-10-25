@@ -155,7 +155,10 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
           <p className="mt-2 text-sm text-muted-foreground">{t('Опишите задачу — команда myUNO поможет с подбором.', 'Describe your task and the myUNO team can help you find an option.', "อธิบายสิ่งที่ต้องการ แล้วทีม myUNO จะช่วยค้นหาตัวเลือกให้คุณ")}</p></div>
         <Button className="min-h-11 shrink-0" onClick={() => setHelpOpen(true)}>{t('Описать задачу', 'Describe your task', "อธิบายสิ่งที่ต้องการ")}</Button>
       </section>
-      {helpOpen && <Suspense fallback={<p role="status">{t('Открываем форму…', 'Opening request form…', "กำลังเปิดแบบฟอร์มคำขอ…")}</p>}><ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic="general" initialSubject={query} sourceData={{ source: 'services_catalogue', returnTo }} /></Suspense>}
+      {helpOpen && <Suspense fallback={<p role="status">{t('Открываем форму…', 'Opening request form…', "กำลังเปิดแบบฟอร์มคำขอ…")}</p>}><ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic="general" initialSubject={query}
+        subjectPlaceholder={t('Например: помощь с сантехникой', 'For example: help with plumbing', 'เช่น ต้องการช่างประปา')}
+        messagePlaceholder={t('Какая услуга нужна, где и когда? Опишите задачу и удобный способ связи.', 'What service do you need, where and when? Describe the task and how to contact you.', 'ต้องการบริการอะไร ที่ไหน และเมื่อไหร่? อธิบายงานและช่องทางติดต่อ')}
+ sourceData={{ source: 'services_catalogue', returnTo }} /></Suspense>}
 
       <MarketplaceServiceGrid search={query} returnTo={returnTo} />
 

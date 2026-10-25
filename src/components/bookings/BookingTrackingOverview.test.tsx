@@ -24,6 +24,7 @@ it('shows real record references and statuses without linking order IDs to legac
  expect(screen.getByText('order-a · Pending confirmation')).toBeVisible();
  expect(screen.getByText('SVC-2 · Assigned')).toBeVisible();
  expect(container.querySelector('a[href="/trip/order-a"]')).toBeNull();
+ expect(screen.getByRole('link', { name: 'Order details' })).toHaveAttribute('href', '/orders/order-a/tracking');
  expect(container.querySelector('img')).toBeNull();
 });
 it('keeps a failed reader distinct from empty and retries only that reader', () => {
@@ -40,4 +41,21 @@ it('shows pending state without presenting an empty result', () => {
  show();
  expect(screen.getByRole('status')).toHaveTextContent('Loading');
  expect(screen.queryByText('No service orders yet.')).toBeNull();
+});
+it('never repeats an unavailable property UUID as its primary name', () => {
+ state.homes.bookings = [{ id: 'order-a', check_in: '2026-11-01', check_out: '2026-11-03', status: 'pending', owner_properties: null }];
+ show();
+ expect(screen.getByText('Property name unavailable')).toBeVisible();
+ expect(screen.getAllByText(/order-a/)).toHaveLength(1);
+});
+it('uses a historical human-readable name when current public details are unavailable', () => {
+ state.homes.bookings = [{ id: 'order-a', check_in: '2026-11-01', check_out: '2026-11-03', status: 'pending', owner_properties: null, historicalPropertyName: 'Stored home name' }];
+ show(); expect(screen.getByText('Stored home name')).toBeVisible();
+});
+
+it('keeps section anchors and page links as native navigation, not incomplete ARIA tabs', () => {
+ show();
+ expect(screen.getByRole('link', { name: 'Homes' })).toHaveAttribute('href', '#property-bookings');
+ expect(screen.getByRole('link', { name: 'Service orders' })).toHaveAttribute('href', '#service-orders');
+ expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 });

@@ -61,25 +61,25 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
         <div className="consumer-utilities">
           <Link className="consumer-owner" to={R.FOR_OWNERS}>{t('Собственникам', 'For owners', 'สำหรับเจ้าของ')}</Link>
           {onSearch && <button type="button" onClick={onSearch} className="consumer-icon" aria-label={t('Поиск', 'Search', 'ค้นหา')}><Search aria-hidden="true" /></button>}
-          <GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} />
+          <div className="consumer-secondary-utilities"><GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} /></div>
           {headerActions}
-          {!overlay && <MiniCart />}
-          {user ? <UserAvatarMenu /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
-          <Sheet open={open} onOpenChange={setOpen}>
+          {!overlay && <div className="consumer-secondary-utilities"><MiniCart /></div>}
+          {user ? <UserAvatarMenu consumerNavigation={[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }]} consumerSearch={onSearch} /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
+          {!user && <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild><button type="button" className="consumer-menu" aria-label={t('Открыть меню', 'Open menu', 'เปิดเมนู')}><Menu aria-hidden="true" /></button></SheetTrigger>
             <SheetContent closeLabel={t('Закрыть меню', 'Close menu', 'ปิดเมนู')} className={`w-[min(100vw,24rem)] overflow-y-auto${overlay ? '' : ' consumer-header-menu'}`}>
               <SheetTitle>myUNO</SheetTitle>
               <SheetDescription>{t('Все основные разделы', 'Main destinations', 'เมนูหลัก')}</SheetDescription>
-              {overlay && <div className="consumer-menu-preferences">
-                <p>{t('Язык и оформление', 'Language and appearance', 'ภาษาและรูปแบบ')}</p>
-                <GlobalPreferencesControls showCurrency={false} />
-              </div>}
+              <div className="consumer-menu-preferences">
+                <p>{t('Язык, валюта и оформление', 'Language, currency and appearance', 'ภาษา สกุลเงิน และรูปแบบ')}</p>
+                <GlobalPreferencesControls />
+              </div>
               <nav aria-label={t('Меню', 'Menu', 'เมนู')} className="mt-6 flex flex-col gap-1">
                 {onSearch && <Button variant="outline" className="mb-4 justify-start" onClick={() => { setOpen(false); onSearch(); }}><Search aria-hidden="true" />{t('Поиск по сайту', 'Search the site', 'ค้นหาเว็บไซต์')}</Button>}
-                {[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: R.SUPPORT, label: t('Помощь', 'Help', 'ความช่วยเหลือ') }, { to: user ? R.ACCOUNT : signInPath, label: user ? t('Мой аккаунт', 'My account', 'บัญชีของฉัน') : t('Войти', 'Sign in', 'เข้าสู่ระบบ') }].map(l => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} aria-current={('active' in l ? l.active : pathname === l.to) ? "page" : undefined} className="aria-[current=page]:bg-muted aria-[current=page]:font-semibold flex min-h-12 items-center border-b border-border px-2 py-3 text-base text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{l.label}</Link>)}
+                {[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }, { to: R.SUPPORT, label: t('Помощь', 'Help', 'ความช่วยเหลือ') }, { to: user ? R.ACCOUNT : signInPath, label: user ? t('Мой аккаунт', 'My account', 'บัญชีของฉัน') : t('Войти', 'Sign in', 'เข้าสู่ระบบ') }].map(l => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} aria-current={('active' in l ? l.active : pathname === l.to) ? "page" : undefined} className="aria-[current=page]:bg-muted aria-[current=page]:font-semibold flex min-h-12 items-center border-b border-border px-2 py-3 text-base text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{l.label}</Link>)}
               </nav>
             </SheetContent>
-          </Sheet>
+          </Sheet>}
         </div>
       </div>
 

@@ -1,5 +1,7 @@
 import { parseCivilDate } from '@/lib/hotelDates';
 import { Link } from 'react-router-dom';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { useGuestPropertyBookings } from '@/hooks/usePropertyBookings';
@@ -32,21 +34,23 @@ export function BookingTrackingOverview() {
     const parsed = parseCivilDate(value);
     return Number.isNaN(parsed.getTime()) ? t('Дата не указана', 'Date unavailable', 'ไม่มีข้อมูลวันที่') : parsed.toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { calendar: 'gregory', day: 'numeric', month: 'short', year: 'numeric' });
   };
+  const navigationLink = cn(buttonVariants({ variant: 'outline', size: 'default' }), 'h-auto min-h-11 whitespace-normal text-center leading-snug');
   const loading = t('Загрузка…', 'Loading…', 'กำลังโหลด…');
   const failed = t('Не удалось загрузить. Повторить', 'Could not load. Retry', 'โหลดไม่สำเร็จ ลองอีกครั้ง');
   return <section className="mb-6 space-y-4" aria-label={t('Бронирования и заявки', 'Bookings and requests', 'การจองและคำขอ')}>
-    <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm" aria-label={t('Отслеживание', 'Tracking', 'ติดตาม')}>
-      <a href="#property-bookings" className="inline-flex min-h-11 items-center underline">{t('Жильё', 'Homes', 'ที่พัก')}</a>
-      <a href="#service-orders" className="inline-flex min-h-11 items-center underline">{t('Заказы услуг', 'Service orders', 'คำสั่งบริการ')}</a>
-      <Link to="/me/requests" className="inline-flex min-h-11 items-center underline">{t('Заявки и обращения', 'Requests and enquiries', 'คำขอและการสอบถาม')}</Link>
-      <Link to="/my-stay" className="inline-flex min-h-11 items-center underline">{t('Моё проживание', 'My stay', 'การเข้าพักของฉัน')}</Link>
+    <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" aria-label={t('Отслеживание', 'Tracking', 'ติดตาม')}>
+      <a href="#property-bookings" className={navigationLink}>{t('Жильё', 'Homes', 'ที่พัก')}</a>
+      <a href="#service-orders" className={navigationLink}>{t('Заказы услуг', 'Service orders', 'คำสั่งบริการ')}</a>
+      <Link to="/me/requests" className={navigationLink}>{t('Заявки и обращения', 'Requests and enquiries', 'คำขอและการสอบถาม')}</Link>
+      <Link to="/my-stay" className={navigationLink}>{t('Моё проживание', 'My stay', 'การเข้าพักของฉัน')}</Link>
     </nav>
     <section id="property-bookings" className="scroll-mt-24 border border-border p-4 space-y-2">
       <h2 className="font-semibold">{t('Бронирования жилья', 'Property bookings', 'การจองที่พัก')}</h2>
       {homes.isLoading ? <p role="status">{loading}</p> : homes.error ? <button onClick={() => void homes.refetch()} className="min-h-11 text-sm underline">{failed}</button> : !homes.bookings?.length ? <p className="text-sm text-muted-foreground">{t('Бронирований жилья пока нет.', 'No property bookings yet.', 'ยังไม่มีการจองที่พัก')}</p> : <ul className="divide-y divide-border">{homes.bookings.map(booking => <li key={booking.id} className="py-2 text-sm break-words">
-        <p className="font-medium">{language === 'ru' ? booking.owner_properties?.title_ru || booking.owner_properties?.title || booking.id : booking.owner_properties?.title || booking.id}</p>
+        <p className="font-medium">{language === 'ru' ? booking.owner_properties?.title_ru || booking.owner_properties?.title || booking.historicalPropertyName || t('Название жилья недоступно', 'Property name unavailable', 'ไม่มีชื่อที่พัก') : booking.owner_properties?.title || booking.historicalPropertyName || t('Название жилья недоступно', 'Property name unavailable', 'ไม่มีชื่อที่พัก')}</p>
         <p>{date(booking.check_in)} – {date(booking.check_out)}</p>
         <p>{booking.id} · {status(booking.status)}</p>
+        <Link className="inline-flex min-h-11 items-center underline" to={`/orders/${booking.id}/tracking`}>{t('Подробнее о заказе', 'Order details', 'รายละเอียดคำสั่ง')}</Link>
       </li>)}</ul>}
     </section>
     <section id="service-orders" className="scroll-mt-24 border border-border p-4 space-y-2">

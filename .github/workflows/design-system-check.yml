@@ -67,6 +67,19 @@ jobs:
         run: SHARED_SURFACES_CSS_FILE="$GITHUB_WORKSPACE/artifacts/design-system/core/pms/rebrand.css" SHARED_SURFACES_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/shared-rebrand" SHARED_SURFACES_REPRESENTATIVE=1 SHARED_SURFACES_EXPECT_CARD_PADDING=24 node scripts/qa/shared-surfaces-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual consumer header service forms and order read states
+        run: |
+          node scripts/qa/consumer-mobile-header.mjs artifacts/design-system/consumer-header
+          python scripts/qa/consumer-mobile-header.py artifacts/design-system/consumer-header
+          SERVICES_A11Y_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/services" node scripts/qa/services-compact-accessibility.mjs
+          SERVICES_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/clearance" node scripts/qa/services-floating-clearance.mjs
+          ORDERS_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders" node scripts/qa/orders-readable-names.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual property order actions with bottom navigation and chat
+        run: ORDERS_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders-clearance" node scripts/qa/orders-floating-clearance.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

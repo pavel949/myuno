@@ -22,9 +22,11 @@ export const FLOATING = {
 export const FLOATING_OFFSET = {
   /** Default strip above the mobile bottom bar (compare strip, contextual FAB). */
   aboveBottomNav: 'bottom-[calc(var(--bottom-nav-h)+1rem)]',
-  /**
-   * Chat FAB sits a bit higher than the default row so it does not collide
-   * with the compare strip on property pages.
-   */
-  chatAboveStack: 'bottom-[calc(var(--bottom-nav-h)+1rem)]',
+  /** Launcher dimensions and clearance share the responsive geometry tokens. */
+  chatSize: 'w-[var(--floating-chat-size)] h-[var(--floating-chat-size)]',
+  chatAboveStack: 'bottom-[calc(max(var(--bottom-nav-h,0px),var(--service-request-action-height,0px))+var(--floating-chat-gap))]',
+  /** Keep final in-flow actions above the mobile navigation and chat launcher. */
+  contentClearance: 'pb-[calc(max(var(--bottom-nav-h,0px),var(--service-request-action-height,0px))+var(--floating-chat-size)+var(--floating-chat-gap)+var(--layout-page-space-y))]',
+  /** Keep the final form control above both the measured action bar and launcher. */
+  requestContentClearance: 'pb-[calc(var(--service-request-action-height,0px)+var(--floating-chat-size)+var(--floating-chat-gap)+1rem)]',
 } as const;

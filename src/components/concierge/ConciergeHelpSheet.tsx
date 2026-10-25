@@ -49,6 +49,8 @@ export interface ConciergeHelpSheetProps {
   topic: HelpTopic;
   /** Optional initial subject (auto-filled from page context). */
   initialSubject?: string;
+  subjectPlaceholder?: string;
+  messagePlaceholder?: string;
   /** Optional vendor/listing context. */
   vendorId?: string | null;
   listingId?: string | null;
@@ -72,6 +74,8 @@ export function ConciergeHelpSheet({
   onOpenChange,
   topic,
   initialSubject,
+  subjectPlaceholder,
+  messagePlaceholder,
   vendorId,
   listingId,
   sourceData,
@@ -92,6 +96,9 @@ export function ConciergeHelpSheet({
   );
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [contactError, setContactError] = useState(false);
+  const [messageError, setMessageError] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const topicLabel = t(TOPIC_LABELS[topic]);
 
@@ -99,14 +106,17 @@ export function ConciergeHelpSheet({
     e.preventDefault();
     if (pendingRef.current || submitted) return;
     if (message.trim().length < 5) {
+      setMessageError(true);
       toast.error(t({ ru: 'Опишите запрос подробнее', en: 'Please describe your request', th: 'โปรดอธิบายคำขอเพิ่มเติม' }));
       return;
     }
     if (!user && !email && !phone) {
+      setContactError(true);
       toast.error(t({ ru: 'Укажите email или телефон', en: 'Email or phone is required', th: 'โปรดระบุอีเมลหรือหมายเลขโทรศัพท์' }));
       return;
     }
 
+    setSubmitError(false);
     pendingRef.current = true;
     setLoading(true);
     try {
@@ -143,6 +153,7 @@ export function ConciergeHelpSheet({
       setSubmitted(true);
       toast.success(t({ ru: 'Заявка сохранена', en: 'Request saved', th: 'บันทึกคำขอแล้ว' }));
     } catch (err) {
+      setSubmitError(true);
       console.error('[ConciergeHelpSheet] submit failed:', err);
       toast.error(
         t({ ru: 'Сохранение заявки не подтверждено. Попробуйте ещё раз.', en: 'Request saving was not confirmed. Please try again.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้ โปรดลองอีกครั้ง' }),
@@ -155,6 +166,9 @@ export function ConciergeHelpSheet({
 
   const handleClose = (next: boolean) => {
     if (!next) {
+      setContactError(false);
+      setMessageError(false);
+      setSubmitError(false);
       setTimeout(() => {
         setSubmitted(false);
         setMessage('');
@@ -227,7 +241,7 @@ export function ConciergeHelpSheet({
                 onChange={(e) => setSubject(e.target.value)}
                 maxLength={200}
                 placeholder={
-                  t({ ru: 'Например: учебная виза на год', en: 'For example: education visa for one year', th: 'เช่น วีซ่าการศึกษาหนึ่งปี' })
+                  subjectPlaceholder ?? t({ ru: 'Например: учебная виза на год', en: 'For example: education visa for one year', th: 'เช่น วีซ่าการศึกษาหนึ่งปี' })
                 }
               />
             </div>
@@ -240,12 +254,14 @@ export function ConciergeHelpSheet({
                 <Textarea
                   id="hr-message"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => { setMessage(e.target.value); setMessageError(false); }}
+                  aria-invalid={messageError || undefined}
+                  aria-describedby={messageError ? 'hr-message-error' : undefined}
                   rows={5}
                   maxLength={5000}
                   required
                   placeholder={
-                    t({ ru: 'Что нужно, к какому сроку, есть ли бюджет. Можно записать голосом.', en: 'What you need, by when, and your budget. You can also record it.', th: 'สิ่งที่ต้องการ กำหนดเวลา และงบประมาณ คุณสามารถใช้เสียงได้ด้วย' })
+                    messagePlaceholder ?? t({ ru: 'Что нужно, к какому сроку, есть ли бюджет. Можно записать голосом.', en: 'What you need, by when, and your budget. You can also record it.', th: 'สิ่งที่ต้องการ กำหนดเวลา และงบประมาณ คุณสามารถใช้เสียงได้ด้วย' })
                   }
                   className="pr-12"
                 />
@@ -288,27 +304,34 @@ export function ConciergeHelpSheet({
               </div>
             </div>
 
+            {messageError && <p id="hr-message-error" role="alert" className="text-sm text-danger">{t({ ru: 'Опишите запрос подробнее', en: 'Please describe your request', th: 'โปรดอธิบายคำขอเพิ่มเติม' })}</p>}
+            {!user && <p id="hr-contact-help" className="text-sm text-muted-foreground">{t({ ru: 'Укажите email или телефон — достаточно одного контакта.', en: 'Email or phone is required — one contact is enough.', th: 'ระบุอีเมลหรือหมายเลขโทรศัพท์อย่างใดอย่างหนึ่ง' })}</p>}
+            {contactError && <p id="hr-contact-error" role="alert" className="text-sm text-danger">{t({ ru: 'Укажите email или телефон', en: 'Email or phone is required', th: 'โปรดระบุอีเมลหรือหมายเลขโทรศัพท์' })}</p>}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="hr-email">{t({ ru: 'Email', en: 'Email', th: 'อีเมล' })} {!user && !phone && '*'}</Label>
+                <Label htmlFor="hr-email">{t({ ru: 'Email', en: 'Email', th: 'อีเมล' })}</Label>
                 <Input
                   id="hr-email"
+                  aria-invalid={contactError || undefined}
+                  aria-describedby={!user ? `hr-contact-help${contactError ? ' hr-contact-error' : ''}` : undefined}
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setContactError(false); }}
                   maxLength={255}
                   placeholder="you@example.com"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="hr-phone">
-                  {t({ ru: 'Телефон', en: 'Phone', th: 'หมายเลขโทรศัพท์' })} {!user && !email && '*'}
+                  {t({ ru: 'Телефон', en: 'Phone', th: 'หมายเลขโทรศัพท์' })}
                 </Label>
                 <Input
                   id="hr-phone"
+                  aria-invalid={contactError || undefined}
+                  aria-describedby={!user ? `hr-contact-help${contactError ? ' hr-contact-error' : ''}` : undefined}
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => { setPhone(e.target.value); setContactError(false); }}
                   maxLength={40}
                   placeholder="+66…"
                 />
@@ -322,6 +345,7 @@ export function ConciergeHelpSheet({
               </span>
             </div>
 
+            {submitError && <p role="alert" className="text-sm text-danger">{t({ ru: 'Сохранение заявки не подтверждено. Попробуйте ещё раз.', en: 'Request saving was not confirmed. Please try again.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้ โปรดลองอีกครั้ง' })}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>

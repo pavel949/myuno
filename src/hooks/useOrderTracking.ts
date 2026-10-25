@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,47 +26,37 @@ const STATUS_SEQUENCE: OrderStatus[] = [
 ];
 
 export function useOrderTracking(orderId: string | undefined) {
-  const { user } = useAuth();
-  const [timeline, setTimeline] = useState<OrderTimelineEvent[]>([]);
-
-  // Fetch order details
+  const { user, isLoading: authLoading } = useAuth();
+  const actorId = user?.id;
   const { data: order, isLoading: orderLoading, error, refetch } = useQuery({
-    queryKey: ['order-tracking', orderId],
-    queryFn: async () => {
-      if (!orderId) return null;
-      
+    queryKey: ['order-tracking', actorId, orderId],
+    queryFn: async ({ signal }) => {
+      if (!orderId || !actorId) return null;
       const { data, error } = await supabase
         .from('orders')
-        .select(`
-          *,
-          order_items(*),
-          order_participants(*),
-          order_addresses(*)
-        `)
+        .select(`*, order_items(*), order_participants(*), order_addresses(*)`)
         .eq('id', orderId)
-        .single();
-
+        .abortSignal(signal)
+        .maybeSingle();
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
       if (error) throw error;
-      return data as Order;
+      return data as Order | null;
     },
-    enabled: !!orderId && !!user,
+    enabled: !!orderId && !!actorId && !authLoading,
   });
-
-  // Fetch timeline
-  const fetchTimeline = useCallback(async () => {
-    if (!orderId) return;
-    
-    const { data, error } = await supabase
-      .rpc('get_order_timeline', { p_order_id: orderId });
-
-    if (!error && data) {
-      setTimeline(data as OrderTimelineEvent[]);
-    }
-  }, [orderId]);
-
-  useEffect(() => {
-    fetchTimeline();
-  }, [fetchTimeline]);
+  // No RPC is issued until this actor can read the authoritative order row.
+  const authorizedOrder = actorId && !authLoading && !error ? order ?? null : null;
+  const { data: timeline, error: timelineError, isLoading: timelineLoading, refetch: fetchTimeline } = useQuery({
+    queryKey: ['order-tracking-timeline', actorId, orderId],
+    queryFn: async ({ signal }) => {
+      if (!authorizedOrder || !actorId || !orderId) return [];
+      const { data, error } = await supabase.rpc('get_order_timeline', { p_order_id: orderId }).abortSignal(signal);
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+      if (error) throw error;
+      return (data ?? []) as OrderTimelineEvent[];
+    },
+    enabled: !!authorizedOrder,
+  });
 
   // Keep stable refs for callbacks to avoid re-subscribing on every render
   const refetchRef = useRef(refetch);
@@ -76,7 +66,7 @@ export function useOrderTracking(orderId: string | undefined) {
 
   // Real-time subscription for order updates
   useEffect(() => {
-    if (!orderId || !user) return;
+    if (!orderId || !authorizedOrder) return;
 
     const channel = supabase
       .channel(`order-tracking-${orderId}`)
@@ -109,12 +99,12 @@ export function useOrderTracking(orderId: string | undefined) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orderId, user]);
+  }, [orderId, actorId, authorizedOrder]);
 
   // Calculate progress percentage
-  const getProgressPercentage = useCallback((status: OrderStatus): number => {
+  const getProgressPercentage = useCallback((status: OrderStatus): number | null => {
     const index = STATUS_SEQUENCE.indexOf(status);
-    if (index === -1) return 0;
+    if (index === -1) return null;
     return ((index + 1) / STATUS_SEQUENCE.length) * 100;
   }, []);
 
@@ -122,13 +112,16 @@ export function useOrderTracking(orderId: string | undefined) {
   const isStatusCompleted = useCallback((status: OrderStatus, currentStatus: OrderStatus): boolean => {
     const currentIndex = STATUS_SEQUENCE.indexOf(currentStatus);
     const checkIndex = STATUS_SEQUENCE.indexOf(status);
-    return checkIndex <= currentIndex;
+    return currentIndex >= 0 && checkIndex >= 0 && checkIndex <= currentIndex;
   }, []);
 
   return {
-    order,
-    timeline,
-    isLoading: orderLoading,
+    order: authorizedOrder,
+    timeline: authorizedOrder && !timelineError ? timeline ?? [] : [],
+    timelineError: authorizedOrder ? timelineError : null,
+    timelineLoading: !!authorizedOrder && timelineLoading,
+    retryTimeline: fetchTimeline,
+    isLoading: !!authLoading || (!!actorId && orderLoading),
     error,
     refetch,
     getProgressPercentage,
