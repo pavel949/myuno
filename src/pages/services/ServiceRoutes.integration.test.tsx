@@ -6,6 +6,7 @@ import { Discover, GoalEntryPage, MeServices, ServicesIndex, SituationNavigator 
 import { BackButton } from '@/components/uno/BackButton';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], isFromDB: true, isLoading: false, error: null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en', t: (s: string) => s }) }));
 vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, searchValue, onSearchChange }: { children: ReactNode; searchValue: string; onSearchChange: (value: string) => void }) => <main data-testid="public-catalog-shell"><input aria-label="Search services" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</main> }));

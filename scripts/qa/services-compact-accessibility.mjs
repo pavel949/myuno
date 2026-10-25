@@ -12,6 +12,7 @@ const root = process.cwd();
 const output = process.env.SERVICES_A11Y_OUTPUT || path.join(root, 'artifacts/design-system/services-accessibility');
 await mkdir(output, { recursive: true });
 const virtual = {
+ '@/lib/catalog/useCatalogFromDB': `const leaf=(id,path,labelEn,labelRu)=>({id,path,labelEn,labelRu,status:'available'});const groups=[{id:'cat-leisure',services:[leaf('flowers','/flowers','Flowers','Цветы')]},{id:'cat-transport',services:[leaf('transfer','/transport/airport-transfer','Transfers','Трансфер'),leaf('fast-track','/transport/fast-track','Fast Track','Fast Track'),leaf('vehicle','/transport','Cars & bikes','Авто и байки')]},{id:'cat-home-services',labelEn:'Home services',labelRu:'Услуги для дома',services:[]}];export const useCatalogFromDB=()=>({categories:new URLSearchParams(location.search).get('mode')==='groups'?groups:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:(s)=>s});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:new URLSearchParams(location.search).get('actor')==='member'?{id:'synthetic',email:'synthetic@example.test'}:null});`,
   '@/lib/analytics/track': `export const trackEvent=()=>{};`,

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import ServicesIndex from './ServicesIndex';
 const locale = vi.hoisted(() => ({ language: 'en' }));
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], isFromDB: true, isLoading: false, error: null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
 vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: () => null }));

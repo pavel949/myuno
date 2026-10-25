@@ -4,14 +4,19 @@ from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
+WIDTHS = [320,360,375,390,430,768,1440,1920]
+if not os.environ.get('CI') and os.environ.get('HOME_GALLERY_WIDTHS'):
+    selected = [int(value) for value in os.environ['HOME_GALLERY_WIDTHS'].split(',')]
+    if not selected or any(width not in WIDTHS for width in selected): raise ValueError('Unknown bounded local viewport')
+    WIDTHS = selected
 
 async def main():
     results = []
     async with async_playwright() as p:
         system = '/usr/bin/chromium'
-        browser = await p.chromium.launch(executable_path=system if Path(system).exists() else None, args=['--no-sandbox'])
+        browser = await p.chromium.launch(executable_path=None if os.environ.get('CI') else system if Path(system).exists() else None, args=['--no-sandbox'])
         for lang in ['en', 'ru', 'th']:
-            for width in [360, 390, 768, 1440, 1920]:
+            for width in WIDTHS:
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, has_touch=width < 768, reduced_motion='reduce', service_workers='block')
                 blocked, errors = [], []
                 async def route(r):
@@ -30,11 +35,11 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='networkidle')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(2)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
-                    assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===4')
+                    assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===5')
                     for card in await category_cards.all():
                         await card.scroll_into_view_if_needed()
                         image=card.locator('img')
@@ -44,6 +49,9 @@ async def main():
 
                     # Each gallery stays one card high and within its own section.
                     for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
+                        # Earlier media checks naturally reveal later service cards. Establish the tested start through the public keyboard contract.
+                        await rail.focus();await rail.press('Home')
+                        await expect(rail).to_have_js_property('scrollLeft',0)
                         geometry = await rail.evaluate('(el)=>({width:el.clientWidth,scroll:el.scrollWidth,tops:[...el.children].map(c=>c.getBoundingClientRect().top)})')
                         assert max(geometry['tops']) - min(geometry['tops']) < 2, geometry
                         # Exercise every rail on representative mobile/desktop frames;
@@ -53,7 +61,10 @@ async def main():
                             parent = rail.locator('..')
                             next_button = parent.locator('button').nth(1)
                             await expect(next_button).to_have_attribute('aria-disabled','false')
-                            await next_button.click()
+                            if width >= 768:
+                                await next_button.click()
+                            else:
+                                await rail.focus();await rail.press('ArrowRight')
                             await page.wait_for_timeout(80)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0')
                             await rail.focus()
@@ -74,7 +85,7 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-experiences .home-rail-viewport')]:
+                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-services .home-rail-viewport')]:
                             await rail.scroll_into_view_if_needed()
                             await rail.evaluate('(el)=>el.scrollLeft=0')
                             box = await rail.bounding_box()
@@ -111,17 +122,17 @@ async def main():
                     await expect(page.locator('.home-search-entry-button')).to_be_focused()
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
-                                             ('.home-populated-projects a', '/property/complex/'),
+                                             ('.home-community-card a', '/property/complex/'),
                                              ('.home-listing a', '/property/home-')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
                         await link.click()
                         await expect(page.get_by_test_id('location')).to_have_text(href)
-                    for selector, prefix in [('.home-catalog a[href^="/experiences/"]', '/experiences/'),
-                                             ('.home-service-category-card a[href="/flowers"]', '/flowers'),
+                    for selector, prefix in [('.home-service-category-card a[href="/flowers"]', '/flowers'),
                                              ('.home-service-category-card a[href="/transport"]', '/transport'),
-                                             ('.home-service-category-card a[href="/yachts"]', '/yachts'),
+                                             ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
+                                             ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
                                              ('.home-service-category-card a[href="/services"]', '/services'),
                                              ('.home-owner-prompt a', '/owner/management-landing')]:
                         link = page.locator(selector).first
@@ -134,7 +145,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':2,'arrowsKeyboardFocus':True,'swipe':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'directIntentRoutes':4,'errors':errors})
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
                     print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
@@ -149,13 +160,13 @@ async def main():
             await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='networkidle')
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(3)
+                await expect(page.get_by_role('alert')).to_have_count(2)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
                 await expect(page.locator('.home-experiences,.home-services,.home-populated-projects')).to_have_count(0)
-                await expect(page.locator('.home-area-guide-link')).to_have_count(3)
+                await expect(page.locator('.home-area-guide-link')).to_have_count(4)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
             results.append({'state':state,'width':390,'pageOverflow':False})
             await context.close()

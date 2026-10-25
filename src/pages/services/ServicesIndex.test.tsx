@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import ServicesIndex from './ServicesIndex';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], isFromDB: true, isLoading: false, error: null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input aria-label="Search services" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));

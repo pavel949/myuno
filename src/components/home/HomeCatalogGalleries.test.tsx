@@ -137,9 +137,9 @@ it('retries category errors and keeps product cards out of category discovery', 
 it('omits an experience when its stored photograph fails instead of displaying a placeholder', () => {
   state.experiences = [{ id: 'tour-1', title_en: 'Catalog tour', cover_image: 'https://example.invalid/missing.jpg', images: [] }];
   show();
-  const image = document.querySelector('img')!;
+  const image = document.querySelector('.home-experiences img')!;
   fireEvent.error(image);
-  expect(document.querySelector('img')).toBeNull();
+  expect(document.querySelector('.home-experiences img')).toBeNull();
   expect(screen.queryByRole('link', { name: /Catalog tour/ })).toBeNull();
   expect(document.querySelector('.home-experiences')).toBeNull();
 });
@@ -148,16 +148,20 @@ it('keeps verified guide routes independent of project records and photos', () =
   state.projects = [{ district: 'unknown_district', name_en: 'Unknown', cover_image: 'https://example.invalid/project.jpg' }];
   show();
   const areaLinks = Array.from(document.querySelectorAll('.home-area-guide-link')).map(link => link.getAttribute('href'));
-  expect(areaLinks).toEqual(['/area/kamala', '/area/surin', '/area/bang-tao']);
-  expect(screen.getAllByText('Area guide')).toHaveLength(3);
-  expect(document.querySelector('.home-locations img')).toBeNull();
+  expect(areaLinks).toEqual(['/area/laguna', '/area/kamala', '/area/surin', '/area/bang-tao']);
+  expect(screen.getAllByText('Area guide')).toHaveLength(4);
+  expect(document.querySelectorAll('.home-locations img')).toHaveLength(4);
+  expect(screen.getAllByText('Illustration')).toHaveLength(4);
+  expect([...document.querySelectorAll('.home-locations img')].every(image => Boolean(image.getAttribute('src')) && !image.getAttribute('src')?.startsWith('https://'))).toBe(true);
   expect(screen.queryByText(/photograph not available|Unknown|available units|popular|rating/i)).toBeNull();
 });
 
 it('never relabels a project photo or title as area evidence', () => {
   state.projects = [{ district: 'Surin', name_en: 'Published Surin community', cover_image: 'https://images.unsplash.com/photo-example' }];
   show();
-  expect(document.querySelector('.home-locations img')).toBeNull();
+  expect(document.querySelectorAll('.home-locations img')).toHaveLength(4);
+  expect(screen.getAllByText('Illustration')).toHaveLength(4);
+  expect([...document.querySelectorAll('.home-locations img')].every(image => Boolean(image.getAttribute('src')) && !image.getAttribute('src')?.startsWith('https://'))).toBe(true);
   expect(screen.queryByText(/Published Surin community/)).toBeNull();
   expect(screen.getByRole('link', { name: /Surin/ })).toHaveAttribute('href', '/area/surin');
 });
@@ -171,7 +175,7 @@ it.each([
   state.categories = [{ id: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', services: [] }];
   show();
   expect(screen.getByText(benefit)).toBeVisible();
-  expect(document.querySelector('.home-services a')).toHaveAttribute('href', '/flowers');
+  expect(document.querySelector('.home-service-category-card a')).toHaveAttribute('href', '/flowers');
   expect(screen.queryByText(/available|confirmed|instant/i)).toBeNull();
 });
 

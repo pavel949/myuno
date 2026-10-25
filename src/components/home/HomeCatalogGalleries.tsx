@@ -6,6 +6,8 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
+import { homeAreaCover } from './homeAreaCovers';
+import { HomeGallery } from './HomeGallery';
 import { HorizontalRail } from './HorizontalRail';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { homeServiceCategories } from './homeServiceCategories';
@@ -77,6 +79,7 @@ function CatalogPhoto({ image, onUnavailable }: { image?: string | null; onUnava
 // Guide routes are verified navigation, not supply or photographic evidence.
 // Project photos cannot establish what an entire neighborhood looks like.
 const AREA_GUIDES = [
+  { slug: 'laguna', name: { ru: 'Лагуна', en: 'Laguna', th: 'ลากูน่า' } },
   { slug: 'kamala', name: { ru: 'Камала', en: 'Kamala', th: 'กมลา' } },
   { slug: 'surin', name: { ru: 'Сурин', en: 'Surin', th: 'สุรินทร์' } },
   { slug: 'bang-tao', name: { ru: 'Банг Тао', en: 'Bang Tao', th: 'บางเทา' } },
@@ -85,18 +88,15 @@ const AREA_GUIDES = [
 export function HomeLocationGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
-  return <section className="home-locations home-container" aria-labelledby="home-locations-title">
-    <div className="home-section-heading"><div>
-      <h2 id="home-locations-title">{t({ ru: 'Где остановиться на Пхукете?', en: 'Where to stay in Phuket?', th: 'พักที่ไหนดีในภูเก็ต' })}</h2>
-      <p className="home-section-lead">{t({ ru: 'Не знаете район? Познакомьтесь с островом до выбора жилья.', en: 'Not sure about the area? Get to know the island before choosing a home.', th: 'ยังไม่แน่ใจเรื่องย่าน ทำความรู้จักเกาะก่อนเลือกที่พัก' })}</p>
-    </div><Link className="home-text-link" to={R.AREA_INDEX}>{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-    <div className="home-area-guide-links">
-      {AREA_GUIDES.map(area => <Link className="home-area-guide-link" key={area.slug} to={R.AREA_DETAIL(area.slug)}>
-        <span>{t(area.name)}</span>
-        <span>{t({ ru: 'Гид по району', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span>
-      </Link>)}
-    </div>
-  </section>;
+  return <HomeGallery id="home-locations-title" className="home-locations" title={t({ ru: 'Районы Пхукета', en: 'Phuket areas', th: 'ย่านในภูเก็ต' })}
+    description={t({ ru: 'Сначала познакомьтесь с районом, затем выбирайте жильё.', en: 'Get to know an area before choosing a home.', th: 'ทำความรู้จักย่านก่อนเลือกที่พัก' })}
+    href={R.AREA_INDEX} linkLabel={t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}>
+    {AREA_GUIDES.map(area => { const cover = homeAreaCover(area.slug); return <article className="home-guide-card" key={area.slug}><Link className="home-area-guide-link" to={R.AREA_DETAIL(area.slug)}>
+      <div className="home-area-cover"><img src={cover.src} alt="" width="640" height="360" loading="lazy" decoding="async" />{cover.kind === 'illustration' && <span className="home-area-cover-label">{t({ ru: 'Иллюстрация', en: 'Illustration', th: 'ภาพประกอบ' })}</span>}</div>
+      <div className="home-guide-copy"><h3>{t(area.name)}</h3><p>{t({ ru: 'Знакомство с районом', en: 'Explore the area guide', th: 'ทำความรู้จักย่าน' })}</p>
+      <span>{t({ ru: 'О районе', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
+    </Link></article>; })}
+  </HomeGallery>;
 }
 
 export function HomeExperienceGallery() {
@@ -204,24 +204,19 @@ export function HomeServiceGallery() {
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
   if (!catalog.isLoading && !catalog.error && !categories.length) return null;
-  return <section className="home-catalog home-services home-container" aria-labelledby="home-services-title">
-    <div className="home-section-heading"><div>
-      <h2 id="home-services-title">{title}</h2>
-      <p className="home-section-lead">{t({ ru: 'Начните с категории — варианты и условия найдёте внутри.', en: 'Start with a category, then explore options and details.', th: 'เริ่มจากหมวดหมู่ แล้วดูตัวเลือกและรายละเอียด' })}</p>
-    </div></div>
-    {catalog.isLoading || catalog.error || !categories.length ? <CatalogState
-      loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
-      empty={{ ru: 'Пока нет категорий услуг для просмотра. Загляните позже.', en: 'No service categories to explore yet. Check back later.', th: 'ยังไม่มีหมวดหมู่บริการให้เลือก โปรดกลับมาดูอีกครั้ง' }}
-    /> : <div className="home-service-category-grid">
+  return <HomeGallery id="home-services-title" className="home-services" title={title}
+    description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}
+    href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
+    state={catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
+      empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
       {categories.map(category => <article className="home-service-category-card" key={category.id}>
         <Link to={category.path}>
           <ServiceCategoryArt image={category.image} />
-          <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3>
-            <p>{t(category.benefit)}</p>
-            <span>{t({ ru: 'Открыть категорию', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
+          <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
+            <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>
         </Link>
+        {category.secondary && <Link className="home-service-secondary" to={category.secondary.path}>{pickLang(language, category.secondary.label)}<ArrowRight size={16} aria-hidden="true" /></Link>}
       </article>)}
-    </div>}
-  </section>;
+  </HomeGallery>;
 }
