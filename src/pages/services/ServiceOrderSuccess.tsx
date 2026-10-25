@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,13 +23,15 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 /** A saved order receipt is distinct from payment or provider confirmation. */
 export default function ServiceOrderSuccess() {
   const location = useLocation();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const actorId = user?.id;
   const { language } = useLanguage();
   const L = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const stateId = (location.state as { orderId?: unknown } | null)?.orderId;
-  const orderId = params.get('order_id') ?? (typeof stateId === 'string' ? stateId : null);
+  const suppliedOrderId = params.get('order_id') ?? (typeof stateId === 'string' ? stateId : null);
+  const orderId = suppliedOrderId && uuid.test(suppliedOrderId) ? suppliedOrderId.toLowerCase() : suppliedOrderId;
   const sessionId = params.get('session_id');
   const validLookup = !!((orderId && uuid.test(orderId)) || (!orderId && sessionId && sessionId.length <= 250));
   const identity = JSON.stringify([actorId, orderId, sessionId]);
@@ -42,9 +44,9 @@ export default function ServiceOrderSuccess() {
   // The saved identifier survives reload without relying on ephemeral router state.
   useEffect(() => {
     if (!params.has('order_id') && orderId && uuid.test(orderId)) {
-      const next = new URLSearchParams(params); next.set('order_id', orderId); setParams(next, { replace: true, state: location.state });
+      const next = new URLSearchParams(params); next.set('order_id', orderId); navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true, state: location.state });
     }
-  }, [orderId, params, setParams, location.state]);
+  }, [orderId, params, navigate, location.pathname, location.hash, location.state]);
 
   useEffect(() => {
     let active = true;
@@ -56,7 +58,7 @@ export default function ServiceOrderSuccess() {
         query = orderId ? query.eq('id', orderId) : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
         const { data, error } = await query.maybeSingle();
         if (!active) return;
-        if (error || !data || data.customer_user_id !== actorId || !uuid.test(data.id) || (orderId && data.id !== orderId)) {
+        if (error || !data || data.customer_user_id !== actorId || !uuid.test(data.id) || (orderId && data.id.toLowerCase() !== orderId)) {
           setSnapshot({ identity, order: null, failed: true, loading: false }); return;
         }
         setSnapshot({ identity, order: data as OrderReceipt, failed: false, loading: false });
