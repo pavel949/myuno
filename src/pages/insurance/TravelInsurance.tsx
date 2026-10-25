@@ -55,12 +55,10 @@ export default function TravelInsurance() {
 
   const handleCherehapa = () => {
     sessionStorage.setItem('insurance_redirect', 'true');
-    window.open('https://cherehapa.ru/country/thailand?partnerid=MYUNO', '_blank');
   };
 
   const handleSafetyWing = () => {
     sessionStorage.setItem('insurance_redirect', 'true');
-    window.open('https://safetywing.com/nomad-insurance?referenceID=myuno', '_blank');
   };
 
   return (
@@ -145,7 +143,7 @@ export default function TravelInsurance() {
 
           {/* Russian-speaking option */}
           <Card variant="interactive" className="border-primary/30">
-            <a aria-label={isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'} href="https://cherehapa.ru/country/thailand?partnerid=MYUNO" target="_blank" rel="noopener noreferrer" onClick={(event) => { event.preventDefault(); handleCherehapa(); }} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+            <a aria-label={isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'} href="https://cherehapa.ru/country/thailand?partnerid=MYUNO" target="_blank" rel="noopener noreferrer" onClick={handleCherehapa} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -176,7 +174,7 @@ export default function TravelInsurance() {
 
           {/* International option */}
           <Card variant="interactive" className="border-primary/30">
-            <a aria-label={isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'} href="https://safetywing.com/nomad-insurance?referenceID=myuno" target="_blank" rel="noopener noreferrer" onClick={(event) => { event.preventDefault(); handleSafetyWing(); }} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+            <a aria-label={isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'} href="https://safetywing.com/nomad-insurance?referenceID=myuno" target="_blank" rel="noopener noreferrer" onClick={handleSafetyWing} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

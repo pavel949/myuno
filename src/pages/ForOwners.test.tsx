@@ -25,7 +25,8 @@ it.each(['en', 'ru', 'th'])('preserves both owner journeys and comparison anchor
   expect(cards).toHaveLength(2);
   expect(cards[0].querySelector('a')).toHaveAttribute('href', '/owner/management-landing');
   expect(cards[1].querySelector('a')).toHaveAttribute('href', '/mc/onboarding');
-  expect(cards[0]).toHaveTextContent('70 / 30');
+  expect(cards[0]).not.toHaveTextContent(/70\s*\/\s*30|30%|70%/);
+  expect(cards[0]).toHaveTextContent(language === 'ru' ? 'индивидуальное предложение' : language === 'th' ? 'ข้อเสนอเฉพาะ' : 'individual proposal');
   expect(cards[1]).toHaveTextContent('$25');
   expect(container.querySelector('a[href="/mc/onboarding?plan=starter"]')).not.toBeNull();
   expect(container.querySelector('a[href="/mc/onboarding?plan=pro"]')).not.toBeNull();

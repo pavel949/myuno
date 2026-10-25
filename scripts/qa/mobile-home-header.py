@@ -84,8 +84,10 @@ async def main():
                             assert fixed[0]['top'] - launcher['y'] - launcher['height'] >= 12, (fixed, launcher)
                     await page.locator('.home-search-entry-button').click()
                     await expect(page.get_by_role('dialog')).to_be_visible()
-                    await expect(page.locator('.home-search-intents a')).to_have_count(4)
-                    assert await page.locator('.home-search-intents a').evaluate_all("links=>new Set(links.map(a=>a.search)).size===4 && links.every(a=>a.pathname==='/property/search')")
+                    guest_choices = page.locator('.home-search-intents a[href^="/property/search?"]')
+                    await expect(guest_choices).to_have_count(4)
+                    assert await guest_choices.evaluate_all("links=>new Set(links.map(a=>a.search)).size===4 && links.every(a=>a.pathname==='/property/search')")
+                    await expect(page.locator('.home-search-intents a[href^="/owner/management-landing?intent="]')).to_have_count(2)
                     await page.keyboard.press('Escape')
                     await expect(page.locator('.home-search-entry-button')).to_be_focused()
                     if width == 390:

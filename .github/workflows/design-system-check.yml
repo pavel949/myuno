@@ -88,6 +88,13 @@ jobs:
         run: ORDERS_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders-clearance" node scripts/qa/orders-floating-clearance.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Property read recovery and owner intake without backend access
+        run: |
+          export CHROMIUM_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          PROPERTY_READ_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/property-read" node scripts/qa/ds-property-detail-read-states.mjs
+          OWNER_RECONCILE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/owner-intake" node scripts/qa/ds-owner-intake-reconcile.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual property search history drafts filters and calendar
         run: SEARCH_CONTROLS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/search-controls" node scripts/qa/search-controls-ui.mjs
         env:
