@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { stageImport, mapPriceRows, refreshFailure, stageLegacyProjects, undoBatch } from './offplan-staging.mjs';
+import { stageImport, mapPriceRows, normalizeSourceDate, refreshFailure, stageLegacyProjects, undoBatch } from './offplan-staging.mjs';
 const source = { sourceId: 'synthetic-source', developerId: 'd', projectId: 'p', fileId: 'file', revision: 'v1', effectiveDate: '2026-10-24', parserVersion: 'test-v1', coverage: 'complete', type: 'price_availability', publicationRights: 'approved', modifiedAt: '2026-10-25T01:00:00Z' };
 const current = [{ id: 'catalogue-row-uuid', propertyId: 'canonical-property-uuid', propertyProjectId: 'p', projectId: 'p', unitCode: 'A-1', amount: 10000000, currency: 'THB', priceUnit: 'total', priceKind: 'base', availability: 'available', version: 4 }];
 const rows = [{ ...current[0], amount: 11000000, availability: 'reserved' }];
@@ -65,4 +65,34 @@ test('applied receipt is invalidated by parser, permission or identity validatio
   const before=stageImport({source,rows,current});const applied={...before,status:'applied',appliedReceipt:'synthetic-applied'};
   for(const patch of [{parserVersion:'parser-v3'},{publicationRights:'pending'}])assert.notEqual(stageImport({source:{...source,...patch},rows,current,previousBatch:applied}).status,'duplicate');
   assert.notEqual(stageImport({source,rows,current:[{...current[0],propertyId:null}],previousBatch:applied}).status,'duplicate');
+});
+
+const dateWorkingSource={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28',ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+for (const [cell, format, expected, normalized] of [
+  ['28/02/2026', undefined, 'invalid_promotion_validity', null],
+  ['TBC', undefined, 'invalid_promotion_validity', null],
+  ['2026-02-30', 'YYYY-MM-DD', 'invalid_promotion_validity', null],
+  ['2026-12-31', 'YYYY-MM-DD', null, '2026-12-31'],
+  ['28/02/2026', 'DD/MM/YYYY', 'expired_promotion', '2026-02-28'],
+  ['03/04/2026', undefined, 'invalid_promotion_validity', null],
+  ['03/04/2026', 'DD/MM/YYYY', 'expired_promotion', '2026-04-03'],
+  ['03/04/2026', 'MM/DD/YYYY', 'expired_promotion', '2026-03-04'],
+]) test(`mapping → staging validates promo expiry ${cell} with explicit format ${format || 'ISO-only'}`,()=>{
+  const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Promo',expires:cell}],{...parserMapping,promoValidUntilColumn:'expires',promoDateFormat:format});
+  assert.equal(mapped[0].promoValidUntil,normalized);
+  const batch=stageImport({source:dateWorkingSource,rows:mapped,current,now:'2026-10-25T12:00:00Z'});
+  assert.equal(batch.changes.length,expected?0:1);
+  if(expected)assert.ok(batch.review[0].reasons.includes(expected));
+});
+test('invalid row expiry cannot fall back to a valid source expiry; base prices ignore promo-only uncertainty',()=>{
+  const mapping={...parserMapping,promoValidUntilColumn:'expires'};
+  const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Promo',expires:'TBC'}],mapping);
+  const feed={...dateWorkingSource,promoValidUntil:'2026-12-31'};
+  const batch=stageImport({source:feed,rows:mapped,current});assert.equal(batch.changes.length,0);assert.ok(batch.review[0].reasons.includes('invalid_promotion_validity'));
+  const base=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind:'Base',expires:'TBC'}],mapping);
+  assert.equal(stageImport({source:dateWorkingSource,rows:base,current}).changes.length,1);
+});
+test('normalization verifies real calendar days and never accepts unsupported auto formats',()=>{
+  assert.equal(normalizeSourceDate('2024-02-29').status,'valid');assert.equal(normalizeSourceDate('2026-02-29').status,'invalid');
+  assert.equal(normalizeSourceDate('03/04/2026','AUTO').status,'invalid');
 });
