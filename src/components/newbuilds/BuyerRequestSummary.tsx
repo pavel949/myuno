@@ -9,7 +9,8 @@ export function BuyerRequestSummary({ metadata }: { metadata: Record<string, unk
   return <section className="border p-3 space-y-2" aria-label={t('Заявка по новостройке', 'Newbuild enquiry', 'คำขอโครงการใหม่')}>
     <p>{t('Намерение', 'Intent', 'ความต้องการ')}: {intents[String(metadata.intent)] || t('Уточнить', 'Clarify', 'รอยืนยัน')}</p>
     <p>{t('Проект', 'Project', 'โครงการ')}: <Link className="underline" to={`/property/offplan/${encodeURIComponent(metadata.project_id)}`}>{metadata.project_id}</Link></p>
-    {typeof metadata.unit_id === 'string' && <p>{t('Объект', 'Unit', 'ยูนิต')}: {metadata.unit_id}</p>}
+    {typeof metadata.unit_id === 'string' && <p>{t('Строка каталога', 'Catalogue unit', 'รายการยูนิต')}: {metadata.unit_id}</p>}
+    {typeof metadata.property_id === 'string' && <p>{t('UUID недвижимости', 'Physical property UUID', 'UUID อสังหาริมทรัพย์')}: {metadata.property_id}</p>}
     <p className="text-sm text-muted-foreground">{t('Только запрос. Резерв и оплата не подтверждены.', 'Request only. Reservation and payment are not confirmed.', 'คำขอเท่านั้น ยังไม่ยืนยันการจองและการชำระเงิน')}</p>
   </section>;
 }

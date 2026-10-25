@@ -14,7 +14,7 @@ test('inventory → reserve request → receipt → team structured context', as
   await expect(page.getByTestId('team-queue')).toContainText('Reservation request');
   await expect(page.getByTestId('team-queue')).toContainText('synthetic-unit-1');
   const request = await page.evaluate(() => (window as any).__requests[0]);
-  expect(request.vertical_id).toBe('properties'); expect(request.vertical_metadata.request_only).toBe(true); expect(request.vertical_metadata.unit_id).toBe('synthetic-unit-1');
+  expect(request.vertical_id).toBe('properties'); expect(request.vertical_metadata.request_only).toBe(true); expect(request.vertical_metadata.unit_id).toBe('synthetic-unit-1'); expect(request.vertical_metadata.property_id).toBe('synthetic-physical-property');
   await page.screenshot({ path: 'docs/newbuilds/screenshots/buyer-receipt-desktop.png', fullPage: true });
 });
 test('mobile failed save keeps form and has no success receipt', async ({ page }) => {
