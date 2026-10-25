@@ -1,12 +1,26 @@
 import { createHash } from 'node:crypto';
 export const SOURCE_TYPES = ['price_availability', 'media', 'floorplans', 'brochure', 'construction_update'];
+/** Exact reviewed format only; invalid/ambiguous cells never become dates by guessing. */
+export function normalizeSourceDate(raw, format = 'YYYY-MM-DD') {
+  if (raw === null || raw === undefined || raw === '') return { value: null, status: 'missing' };
+  if (typeof raw !== 'string') return { value: null, status: 'invalid' };
+  const value = raw.trim();
+  const parts = format === 'YYYY-MM-DD' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!parts || !['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'].includes(format)) return { value: null, status: 'invalid' };
+  const [year, month, day] = format === 'YYYY-MM-DD' ? [parts[1], parts[2], parts[3]] : format === 'DD/MM/YYYY' ? [parts[3], parts[2], parts[1]] : [parts[3], parts[1], parts[2]];
+  const iso = `${year}-${month}-${day}`;
+  const date = new Date(`${iso}T00:00:00.000Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== iso) return { value: null, status: 'invalid' };
+  return { value: iso, status: 'valid' };
+}
+
 export function validateSource(source) {
   const errors = [];
   for (const key of ['sourceId', 'developerId', 'projectId', 'revision', 'parserVersion']) if (!source?.[key]) errors.push(`missing_${key}`);
   if (!source?.fileId && !source?.messageId && !source?.url) errors.push('missing_resource_identity');
   if (!SOURCE_TYPES.includes(source?.type)) errors.push('invalid_type');
   if (source?.effectiveDate) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(source.effectiveDate) || !Number.isFinite(Date.parse(source.effectiveDate))) errors.push('invalid_effective_date');
+    if (normalizeSourceDate(source.effectiveDate).status !== 'valid') errors.push('invalid_effective_date');
   } else if (!source?.ownerConfirmedCurrentAt || !source?.ownerConfirmationProvenance) errors.push('effective_date_or_owner_confirmation_required');
   if (source?.publicationRights !== 'approved') errors.push('publication_rights_pending');
   return errors;
@@ -20,7 +34,11 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   const batchKey = `${source?.sourceId}:${source?.fileId || source?.messageId || source?.url}:${source?.revision}:${hash}`;
   const errors = validateSource(source);
   const ownerConfirmed = !!source?.ownerConfirmedCurrentAt && !!source?.ownerConfirmationProvenance;
-  if (source?.validUntil && source.validUntil < now.slice(0, 10) && !ownerConfirmed) errors.push('expired_source');
+  if (source?.validUntil && !ownerConfirmed) {
+    const validity = normalizeSourceDate(source.validUntil);
+    if (validity.status !== 'valid') errors.push('invalid_source_validity');
+    else if (validity.value < now.slice(0, 10)) errors.push('expired_source');
+  }
   if (source?.effectiveDate > now.slice(0, 10)) errors.push('future_effective_date');
   if (!['complete', 'partial'].includes(source?.coverage)) errors.push('unknown_coverage');
   const validationFingerprint = createHash('sha256').update(stableJson({ source, current, validationDate: now.slice(0, 10) })).digest('hex');
@@ -38,9 +56,10 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
     if (!['base', 'promotion', 'promotional_total'].includes(row.priceKind)) reasons.push('unknown_price_kind');
     if (row.priceKind === 'promotional_total') reasons.push('base_price_unseparated');
     if (row.priceKind === 'promotion') {
-      const promoUntil = row.promoValidUntil || source?.promoValidUntil || source?.validUntil;
-      if (!promoUntil) reasons.push('promotion_validity_unknown');
-      else if (promoUntil < now.slice(0, 10)) reasons.push('expired_promotion');
+      const validity = normalizeSourceDate(row.promoValidUntil ?? source?.promoValidUntil ?? source?.validUntil);
+      if (row.promoValidity === 'invalid' || validity.status === 'invalid') reasons.push('invalid_promotion_validity');
+      else if (validity.status === 'missing') reasons.push('promotion_validity_unknown');
+      else if (validity.value < now.slice(0, 10)) reasons.push('expired_promotion');
     }
     if (typeof row.unitCode !== 'string' || !row.unitCode || row.unitCode !== row.unitCode.trim() || row.projectId !== source.projectId) reasons.push('unmatched_unit');
     if (duplicateCodes.has(key)) reasons.push('duplicate_unit_code');
@@ -94,15 +113,20 @@ export function stageLegacyProjects(rows) {
 /** Parser adapter contract. Mapping must be reviewed/versioned for each source. */
 export function mapPriceRows(records, mapping) {
   if (!Array.isArray(records) || !mapping?.version || !['base', 'million'].includes(mapping.priceScale)) throw new Error('Unverified parser mapping');
-  return records.map(record => ({
+  return records.map(record => {
+    const promoRaw = mapping.promoValidUntilColumn ? record[mapping.promoValidUntilColumn] : mapping.promoValidUntil;
+    const promoDate = normalizeSourceDate(promoRaw, mapping.promoDateFormat || 'YYYY-MM-DD');
+    return {
     projectId: mapping.projectId,
     unitCode: record[mapping.unitCodeColumn], // Deliberately never Number(): leading zeroes are identity.
     amount: typeof record[mapping.amountColumn] === 'number' ? record[mapping.amountColumn] * (mapping.priceScale === 'million' ? 1000000 : 1) : null,
     currency: mapping.currency,
     priceUnit: mapping.priceUnit,
     priceKind: mapping.priceKindColumn ? mapping.priceKindMap?.[record[mapping.priceKindColumn]] ?? 'unknown' : mapping.priceKind ?? 'unknown',
-    promoValidUntil: mapping.promoValidUntilColumn ? record[mapping.promoValidUntilColumn] : mapping.promoValidUntil ?? null,
-    priceProvenance: { parserVersion: mapping.version, amountColumn: mapping.amountColumn, priceScale: mapping.priceScale, priceKindOrigin: mapping.priceKindColumn || 'reviewed_constant' },
+    promoValidUntil: promoDate.value,
+    promoValidity: promoDate.status,
+    priceProvenance: { parserVersion: mapping.version, amountColumn: mapping.amountColumn, priceScale: mapping.priceScale, priceKindOrigin: mapping.priceKindColumn || 'reviewed_constant', promoDateFormat: mapping.promoDateFormat || 'YYYY-MM-DD', promoDateRaw: promoRaw ?? null },
     availability: mapping.statusMap?.[record[mapping.statusColumn]] ?? 'unknown',
-  }));
+  };
+  });
 }
