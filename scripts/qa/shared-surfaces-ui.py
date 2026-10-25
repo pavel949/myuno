@@ -74,6 +74,14 @@ async def main():
       assert await page.get_by_test_id('canonical-inset').evaluate('(el)=>getComputedStyle(el).boxShadow') == 'none'
       button_size=await page.get_by_test_id('canonical-button-size').evaluate('(el)=>parseFloat(getComputedStyle(el).fontSize)')
       assert button_size==15,f'Canonical Button inherited parent font size: {button_size}'
+      family=lambda el: el.evaluate('(e)=>getComputedStyle(e).fontFamily')
+      button=page.get_by_test_id('canonical-button-size');probe=page.get_by_test_id('canonical-body-family')
+      assert await family(button)==await family(probe),f'Canonical Button inherited display family: {await family(button)}; expected {await family(probe)}'
+      original_body=await page.evaluate("document.documentElement.style.getPropertyValue('--font-body')")
+      for body_family in ['monospace','sans-serif']:
+       await page.evaluate("v=>document.documentElement.style.setProperty('--font-body',v)",body_family)
+       assert await family(button)==await family(probe)==body_family,'One-source body font did not reach Button inside a display heading'
+      await page.evaluate("v=>{if(v)document.documentElement.style.setProperty('--font-body',v);else document.documentElement.style.removeProperty('--font-body')}",original_body)
       assert await page.get_by_test_id('canonical-button-size').evaluate('(el)=>getComputedStyle(el).fontWeight')=='500'
       await page.evaluate("document.documentElement.style.setProperty('--type-body-size','21px')")
       assert await page.get_by_test_id('canonical-button-size').evaluate('(el)=>parseFloat(getComputedStyle(el).fontSize)')==21

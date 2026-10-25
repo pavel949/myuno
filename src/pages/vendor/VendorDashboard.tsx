@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageShell } from '@/components/page/PageShell';
 import { 
   DollarSign, 
   Calendar, 
@@ -53,7 +54,7 @@ const statusColors: Record<string, string> = {
   confirmed: 'bg-info/20 text-info',
   in_progress: 'bg-warning/20 text-warning',
   completed: 'bg-success/20 text-success',
-  cancelled: 'bg-destructive/20 text-destructive',
+  cancelled: 'bg-danger/10 text-danger',
 };
 
 const VendorDashboard = () => {
@@ -146,7 +147,7 @@ const VendorDashboard = () => {
       cancelled: { en: 'Cancelled', ru: 'Отменён' },
     };
     return (
-      <Badge className={statusColors[status] || 'bg-muted'}>
+      <Badge className={`whitespace-nowrap ${statusColors[status] || 'bg-muted'}`}>
         {labels[status]?.[isRu ? 'ru' : 'en'] || status}
       </Badge>
     );
@@ -199,12 +200,12 @@ const VendorDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
+      <PageShell width="workspace" noBottomPad className="space-y-4">
         <Skeleton className="h-16 w-full" />
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
         </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -212,7 +213,7 @@ const VendorDashboard = () => {
   const currentOrg = activeOrg || vendorOrgs[0]?.org;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 space-y-4 max-w-[1536px] mx-auto w-full">
+    <PageShell width="workspace" noBottomPad className="space-y-4">
       {/* Onboarding Checklist */}
       {showOnboarding && completedOnboardingSteps.length < 3 && (
         <VendorOnboardingChecklist
@@ -322,13 +323,13 @@ const VendorDashboard = () => {
             <p className="text-center py-6 text-sm text-muted-foreground">{isRu ? 'Нет заказов' : 'No orders'}</p>
           ) : (
             recentOrders.map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 rounded-none border bg-muted/30 group">
-                <div>
-                  <p className="font-medium text-sm">{order.order_number || order.id.slice(0, 8)}</p>
+              <div key={order.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 p-3 rounded-none border bg-muted/30 group">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-medium text-sm">{order.order_number || order.id.slice(0, 8)}</p>
                   <p className="text-xs text-muted-foreground">{format(new Date(order.created_at), 'd MMM, HH:mm', { locale })}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{formatCurrency(order.total_amount)}</span>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <span className="whitespace-nowrap text-sm font-medium">{formatCurrency(order.total_amount)}</span>
                   {getStatusBadge(order.status)}
                   
                   {/* Inline Actions */}
@@ -381,7 +382,7 @@ const VendorDashboard = () => {
           return { success: 0, failed: 0 };
         }}
       />
-    </div>
+    </PageShell>
   );
 };
 

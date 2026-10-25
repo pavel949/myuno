@@ -485,7 +485,7 @@ export default function OwnerDashboard() {
 
   return (
     <DashboardFilterProvider>
-      <PageShell width="full" className="max-w-[1536px] space-y-5 overflow-x-hidden">
+      <PageShell width="workspace" className="space-y-5 overflow-x-hidden">
         {/* Greeting followed by real workspace destinations, on every viewport. */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
