@@ -61,10 +61,13 @@ async def main():
                             parent = rail.locator('..')
                             next_button = parent.locator('button').nth(1)
                             await expect(next_button).to_have_attribute('aria-disabled','false')
-                            if width >= 768:
-                                await next_button.click()
+                            await expect(next_button).to_be_visible()
+                            bounds=await next_button.bounding_box();assert bounds['width']>=44 and bounds['height']>=44,bounds
+                            glyph=await next_button.locator('svg').bounding_box();assert glyph['width']<=16 and glyph['height']<=16,glyph
+                            if width < 768:
+                                await next_button.tap()
                             else:
-                                await rail.focus();await rail.press('ArrowRight')
+                                await next_button.click()
                             await page.wait_for_timeout(80)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0')
                             await rail.focus()
@@ -145,7 +148,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
                     print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
