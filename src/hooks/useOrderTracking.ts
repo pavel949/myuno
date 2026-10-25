@@ -102,9 +102,9 @@ export function useOrderTracking(orderId: string | undefined) {
   }, [orderId, actorId, authorizedOrder]);
 
   // Calculate progress percentage
-  const getProgressPercentage = useCallback((status: OrderStatus): number => {
+  const getProgressPercentage = useCallback((status: OrderStatus): number | null => {
     const index = STATUS_SEQUENCE.indexOf(status);
-    if (index === -1) return 0;
+    if (index === -1) return null;
     return ((index + 1) / STATUS_SEQUENCE.length) * 100;
   }, []);
 
@@ -112,7 +112,7 @@ export function useOrderTracking(orderId: string | undefined) {
   const isStatusCompleted = useCallback((status: OrderStatus, currentStatus: OrderStatus): boolean => {
     const currentIndex = STATUS_SEQUENCE.indexOf(currentStatus);
     const checkIndex = STATUS_SEQUENCE.indexOf(status);
-    return checkIndex <= currentIndex;
+    return currentIndex >= 0 && checkIndex >= 0 && checkIndex <= currentIndex;
   }, []);
 
   return {

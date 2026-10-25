@@ -46,6 +46,7 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
   );
   const calendar = (
     <>
+      <div data-date-calendar-scroll className="min-h-0 overflow-y-auto overscroll-contain">
       <p id={hintId} className="px-3 pt-2 text-sm text-muted-foreground" aria-live="polite">{hint}</p>
       <Calendar
         mode="range"
@@ -70,9 +71,10 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
           }
         }}
         className="mx-auto w-fit px-0"
-        classNames={{ weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
+        classNames={{ months: 'relative flex flex-col', nav: 'sticky top-0 z-20 -mb-11 flex h-11 items-center justify-between', month_caption: 'sticky top-0 z-10 flex h-11 items-center justify-center bg-popover', weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
       />
-      <div className="flex justify-between border-t p-3">
+      </div>
+      <div className="flex shrink-0 justify-between border-t p-3">
         <Button type="button" variant="ghost" onClick={() => { onChange('', ''); setSelectingEnd(false); }}>
           {pickLang(language, { ru: 'Сбросить даты', en: 'Clear dates', th: 'ล้างวันที่' })}
         </Button>
@@ -86,8 +88,8 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     {isMobile ? (
       <Sheet open={open} onOpenChange={changeOpen}>
         <SheetTrigger asChild>{trigger}</SheetTrigger>
-        <SheetContent side="bottom" className="max-h-[90dvh] overflow-y-auto px-0 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-          <SheetTitle className="px-3 pr-8">{title}</SheetTitle>
+        <SheetContent side="bottom" className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-0 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          <SheetTitle className="shrink-0 px-3 pr-8">{title}</SheetTitle>
           <SheetDescription className="sr-only">{hint}</SheetDescription>
           {calendar}
         </SheetContent>
@@ -95,8 +97,8 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
     ) : (
       <Popover open={open} onOpenChange={changeOpen}>
         <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-        <PopoverContent align="start" collisionPadding={12} className="z-[130] w-auto max-w-[calc(100vw-24px)] p-0" aria-labelledby={titleId} aria-describedby={hintId}>
-          <h3 id={titleId} className="px-3 pt-3 font-medium">{title}</h3>
+        <PopoverContent align="start" collisionPadding={12} className="z-[130] flex w-auto flex-col gap-0 overflow-hidden p-0" style={{ maxWidth: 'calc(100vw - 2 * var(--layout-gutter))' }} aria-labelledby={titleId} aria-describedby={hintId}>
+          <h3 id={titleId} className="shrink-0 px-3 pt-3 font-medium">{title}</h3>
           {calendar}
         </PopoverContent>
       </Popover>

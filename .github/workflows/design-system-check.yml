@@ -74,7 +74,14 @@ jobs:
           SERVICES_A11Y_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/services" node scripts/qa/services-compact-accessibility.mjs
           SERVICES_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/clearance" node scripts/qa/services-floating-clearance.mjs
           ORDERS_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders" node scripts/qa/orders-readable-names.mjs
-          python scripts/qa/orders-readable-names.py artifacts/design-system/orders
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual property order actions with bottom navigation and chat
+        run: ORDERS_CLEARANCE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/orders-clearance" node scripts/qa/orders-floating-clearance.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual property search history drafts filters and calendar
+        run: SEARCH_CONTROLS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/search-controls" node scripts/qa/search-controls-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual route fallbacks and Team landmark ownership

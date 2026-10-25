@@ -3,6 +3,7 @@
  * Derives icons from the canonical PROPERTY_FEATURE_GROUPS taxonomy
  * so guest filters always match what owners/managers set on properties.
  */
+import { propertySearchFeatureLabels } from '@/lib/propertySearchPresentation';
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,8 +47,7 @@ const CATEGORIES: PropertyCategory[] = PROPERTY_DISCOVERY_FEATURE_IDS
   .map(f => ({
     id: f.id,
     icon: f.icon as React.ElementType,
-    labelEn: f.labelEn,
-    labelRu: f.labelRu,
+    ...propertySearchFeatureLabels(f),
   }));
 
 interface PropertyCategoryIconsProps {
