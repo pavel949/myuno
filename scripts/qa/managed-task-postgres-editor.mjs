@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')).render(<Fixture/>);`,loader:'tsx',re
  b.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:virtual[args.path],loader:'tsx',resolveDir:root}));
 }}]});
 writeFileSync(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']}),results=[];
+const browser=await chromium.launch({executablePath:process.env.MC_PILOT_CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']}),results=[];
 try{for(const[index,timezoneId]of ['UTC','Asia/Bangkok','Europe/London'].entries()){
  const context=await browser.newContext({timezoneId,viewport:{width:390,height:844},serviceWorkers:'block'}),blocked=[],errors=[];
  await context.route('**/*',async route=>{if(new URL(route.request().url()).origin===base)await route.continue();else{blocked.push(route.request().url());await route.abort();}});

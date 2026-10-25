@@ -2,6 +2,7 @@
 import asyncio
 import json
 import sys
+import os
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
@@ -14,7 +15,7 @@ other_guest = '00000000-0000-4000-8000-000000000009'
 
 async def main():
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+        browser = await playwright.chromium.launch(executable_path=os.environ.get('MC_PILOT_CHROMIUM_PATH','/usr/bin/chromium'), args=['--no-sandbox'])
         context = await browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', reduced_motion='reduce')
         errors, blocked = [], []
         async def local_only(route):
