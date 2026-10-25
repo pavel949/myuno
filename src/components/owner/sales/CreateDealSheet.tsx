@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { dealAttemptKey, readDealAttempt, saveDealAttempt, recoverDealCreation, type DealCreationAttempt } from '@/lib/crm/dealCreationRecovery';
+import { canDiscardUnsubmittedDeal, discardUnsubmittedDeal, dealAttemptKey, readDealAttempt, saveDealAttempt, recoverDealCreation, type DealCreationAttempt } from '@/lib/crm/dealCreationRecovery';
 import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -203,7 +203,7 @@ function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContac
         const clientName = selectedContact ? `${selectedContact.first_name} ${selectedContact.last_name}`.trim() : form.client_name.trim();
         const nameParts = form.client_name.trim().split(' ');
         saved = {
-          version: 1, actorId, companyId, contactId, dealId: crypto.randomUUID(),
+          version: 1, actorId, companyId, contactId, dealId: crypto.randomUUID(), dealWriteState: 'not_started',
           contact: selectedContact ? null : {
             company_id: companyId,
             first_name: nameParts[0] || '',
@@ -296,9 +296,34 @@ function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContac
       resetForm();
       navigate(`${APP_ROUTES.MC_SALES}/${saved.dealId}`);
     } catch {
-      if (isCurrent()) setRecoveryError(isRu
+      if (isCurrent() && attemptRef.current?.terminalReason) setRecoveryError(attemptRef.current.terminalReason === 'contact_unavailable'
+        ? (isRu ? 'Связанный контакт недоступен. Отправка сделки не начиналась.' : 'The linked contact is unavailable. No deal submission was started.')
+        : (isRu ? 'Обновление контакта отклонено. Отправка сделки не начиналась.' : 'The contact update was rejected. No deal submission was started.'));
+      else if (isCurrent()) setRecoveryError(isRu
         ? 'Сохранение сделки не подтверждено. Повторите ту же попытку: контакт и сделка не будут созданы заново. Если контакт уже сохранён, он останется в CRM.'
         : 'Deal saving was not confirmed. Retry this same attempt using its saved IDs. A contact already saved remains in CRM.');
+    } finally {
+      inFlight.current = false;
+      if (isCurrent()) setBusy(false);
+    }
+  };
+
+  const handleDiscard = async () => {
+    const saved = attemptRef.current;
+    if (!saved || inFlight.current || !user?.id) return;
+    inFlight.current = true;
+    setBusy(true);
+    const actorId = user.id;
+    const isCurrent = () => current.current.mounted && current.current.actorId === actorId && current.current.companyId === companyId;
+    try {
+      await discardUnsubmittedDeal(saved, isCurrent);
+      if (!isCurrent()) return;
+      attemptRef.current = null;
+      setAttempt(null);
+      setRecoveryError('');
+      resetForm();
+    } catch {
+      if (isCurrent()) setRecoveryError(isRu ? 'Не удалось проверить попытку. Она сохранена для сверки.' : 'Could not reconcile this attempt. It remains saved for recovery.');
     } finally {
       inFlight.current = false;
       if (isCurrent()) setBusy(false);
@@ -314,16 +339,42 @@ function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContac
       size="2xl"
       mobileHeight="max-h-[92vh]"
       footer={
+        <div className="flex flex-wrap gap-2">
+        {attempt && canDiscardUnsubmittedDeal(attempt) && <Button variant="outline" disabled={busy} onClick={handleDiscard}>
+          {isRu ? 'Удалить неотправленную попытку' : 'Discard unsubmitted attempt'}
+        </Button>}
         <Button onClick={handleSubmit} disabled={busy || !user} className="w-full sm:w-auto min-w-[200px]">
           {busy ? '...' : attempt ? (isRu ? 'Повторить сохранённую попытку' : 'Retry saved attempt') : (isRu ? 'Создать сделку' : 'Create Deal')}
         </Button>
+        </div>
       }
     >
       {recoveryError && <p role="alert" className="text-sm text-destructive">{recoveryError}</p>}
-      {attempt && <p role="status" className="text-sm text-muted-foreground">
-        {isRu ? 'Сохранённая попытка' : 'Saved attempt'}: {String(attempt.deal.client_name)} · {attempt.dealId}
-      </p>}
-      <fieldset disabled={busy || !!attempt} className="space-y-4 pr-1">
+      {attempt && <section aria-label={isRu ? 'Данные сохранённой попытки' : 'Saved attempt details'} className="space-y-3 text-sm">
+        <p role="status">{isRu ? 'Повтор будет отправлен с этими сохранёнными данными. Новые предзаполненные данные не используются.' : 'Retry uses this saved snapshot. New prefilled values are not used.'}</p>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 break-words">
+          {[
+            [isRu ? 'Клиент' : 'Client', attempt.deal.client_name],
+            ['ID', attempt.dealId],
+            [isRu ? 'Компания' : 'Company', attempt.companyId],
+            [isRu ? 'Контакт' : 'Contact', attempt.contactId],
+            [isRu ? 'Телефон / email' : 'Phone / email', [attempt.deal.client_phone, attempt.deal.client_email].filter(Boolean).join(' · ')],
+            [isRu ? 'Тип сделки' : 'Deal type', attempt.deal.deal_type],
+            [isRu ? 'Источник' : 'Source', attempt.deal.client_source],
+            [isRu ? 'Создание контакта' : 'Contact creation', attempt.contact ? `${attempt.contact.first_name ?? ''} ${attempt.contact.last_name ?? ''} · VIP: ${Boolean(attempt.contact.is_vip)}` : (isRu ? 'Существующий контакт' : 'Existing contact')],
+            [isRu ? 'Валюта' : 'Currency', attempt.deal.currency],
+            [isRu ? 'Бюджет' : 'Budget', `${attempt.deal.budget_min ?? '—'} – ${attempt.deal.budget_max ?? '—'}`],
+            [isRu ? 'Объект / проект' : 'Property / project', attempt.deal.property_id || attempt.deal.property_project_id],
+            [isRu ? 'Этап / воронка' : 'Stage / pipeline', [attempt.deal.stage, attempt.deal.pipeline_id].filter(Boolean).join(' · ')],
+            [isRu ? 'Предпочтения' : 'Preferences', [attempt.deal.bedrooms_min, ...(attempt.deal.preferred_districts as string[] || []), ...(attempt.deal.preferred_types as string[] || [])].filter(v => v != null).join(' · ')],
+            ['VIP', attempt.deal.is_vip ? (isRu ? 'Да' : 'Yes') : (isRu ? 'Нет' : 'No')],
+            [isRu ? 'Заметки' : 'Notes', attempt.deal.notes],
+            [isRu ? 'Обновление контакта' : 'Contact update', attempt.contactPatch ? Object.entries(attempt.contactPatch).map(([key, value]) => `${({ budget_min: isRu ? 'Бюджет от' : 'Budget min', budget_max: isRu ? 'Бюджет до' : 'Budget max', currency: isRu ? 'Валюта' : 'Currency', preferred_districts: isRu ? 'Районы' : 'Districts', preferred_types: isRu ? 'Типы' : 'Types', bedrooms_min: isRu ? 'Спальни от' : 'Bedrooms min', is_vip: 'VIP' } as Record<string, string>)[key] || key}: ${Array.isArray(value) ? value.join(', ') : value == null ? '—' : String(value)}`).join('; ') : '—'],
+          ].map(([label, value]) => <div key={String(label)} className="contents"><dt className="text-muted-foreground">{String(label)}</dt><dd className="min-w-0 whitespace-pre-wrap">{value == null || value === '' ? '—' : String(value)}</dd></div>)}
+        </dl>
+        {canDiscardUnsubmittedDeal(attempt) && <p>{isRu ? 'Эта попытка не создавала контакт и не отправляла запись сделки. Можно удалить только попытку; контакты и изменения предпочтений сохранятся. Это не откат изменений.' : 'This attempt did not create a contact or submit a deal. Discard removes only this intent; existing contacts and preference changes remain. This is not a rollback.'}</p>}
+      </section>}
+      {!attempt && <fieldset disabled={busy} className="space-y-4 pr-1">
         {/* Duplicate warning */}
         {duplicates.length > 0 && (
           <div className="p-3 rounded-none border border-warning/50 bg-warning/10 text-sm">
@@ -589,7 +640,7 @@ function CreateDealSheetContent({ open, onOpenChange, companyId, prefilledContac
             />
           </label>
         )}
-      </fieldset>
+      </fieldset>}
     </ResponsiveModal>
   );
 }

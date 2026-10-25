@@ -47,7 +47,7 @@ jobs:
         run: |
           node scripts/qa/crm-deal-recovery.mjs
           python3 scripts/qa/crm-deal-recovery.py "$CRM_RECOVERY_OUTPUT"
-          python3 -c 'import json,os; from pathlib import Path; rows=json.loads((Path(os.environ["CRM_RECOVERY_OUTPUT"])/"evidence.json").read_text()); assert len(rows)==8 and len({(r["width"],r["mode"]) for r in rows})==8 and all(r["outcome"]=="PASS" for r in rows)'
+          python3 -c 'import json,os; from pathlib import Path; rows=json.loads((Path(os.environ["CRM_RECOVERY_OUTPUT"])/"evidence.json").read_text()); expected={(width,mode) for width in (390,1440) for mode in ("before","lost-contact","lost-deal","context","snapshot","missing-contact","rejected-patch","ambiguous-patch","legacy")}; assert len(rows)==len(expected) and {(r["width"],r["mode"]) for r in rows}==expected and all(r["outcome"]=="PASS" for r in rows)'
       - name: Retain exact-head browser evidence
         if: always()
         uses: actions/upload-artifact@v4

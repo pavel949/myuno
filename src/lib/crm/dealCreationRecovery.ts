@@ -14,6 +14,9 @@ export interface DealCreationAttempt {
   contact: Record<string, unknown> | null;
   deal: Record<string, unknown>;
   contactPatch: ContactPreferencePatch | null;
+  /** Missing on older journals: unknown, never safe to discard. */
+  dealWriteState?: 'not_started' | 'started';
+  terminalReason?: 'contact_unavailable' | 'contact_patch_rejected';
 }
 export const dealAttemptKey = (actor: string, company: string) => `crm-deal-attempt:v1:${actor}:${company}`;
 
@@ -30,6 +33,29 @@ export function readDealAttempt(actor: string, company: string): DealCreationAtt
     throw new Error('Invalid CRM recovery record. Do not create another deal until the saved attempt is reconciled.');
   }
   return value;
+}
+
+export function canDiscardUnsubmittedDeal(attempt: DealCreationAttempt): boolean {
+  return attempt.contact === null && attempt.dealWriteState === 'not_started' &&
+    (attempt.terminalReason === 'contact_unavailable' || attempt.terminalReason === 'contact_patch_rejected');
+}
+
+/** Discard only a diagnosed pre-insert intent. A successful empty read alone is never proof. */
+export async function discardUnsubmittedDeal(attempt: DealCreationAttempt, isCurrent: () => boolean) {
+  const verify = () => {
+    if (!isCurrent()) throw new Error('CRM context changed.');
+    const stored = readDealAttempt(attempt.actorId, attempt.companyId);
+    if (!stored || stored.dealId !== attempt.dealId || !canDiscardUnsubmittedDeal(stored)) {
+      throw new Error('This attempt requires reconciliation before it can be discarded.');
+    }
+  };
+  verify();
+  const { data, error } = await supabase.from('agent_deals').select('id').eq('id', attempt.dealId)
+    .eq('company_id', attempt.companyId).maybeSingle();
+  if (error || data) throw new Error('Could not confirm that this unsubmitted attempt can be discarded.');
+  // A retry may have started while the read was pending. Recheck durable state after it.
+  verify();
+  sessionStorage.removeItem(dealAttemptKey(attempt.actorId, attempt.companyId));
 }
 
 /** Existing RLS + primary keys remain final authority; this is staged recovery, not a transaction. */
@@ -56,6 +82,30 @@ export async function recoverDealCreation(
     return data as Record<string, unknown> | null;
   };
 
+  let lastSavedContactId = attempt.contactId;
+  const store = () => {
+    assertCurrent();
+    const stored = readDealAttempt(attempt.actorId, attempt.companyId);
+    if (!stored || stored.dealId !== attempt.dealId) throw new Error('Saved attempt is unavailable. Reconcile before retrying.');
+    if (stored.contactId !== lastSavedContactId && attempt.contactId === lastSavedContactId) attempt.contactId = stored.contactId;
+    if (stored.contactPatch === null) attempt.contactPatch = null;
+    // A second mounted recovery must never downgrade a started or legacy-unknown marker.
+    if (stored.dealWriteState === 'started' || attempt.dealWriteState === 'started') attempt.dealWriteState = 'started';
+    else if (stored.dealWriteState !== 'not_started' || attempt.dealWriteState !== 'not_started') attempt.dealWriteState = undefined;
+    if (attempt.dealWriteState !== 'not_started') delete attempt.terminalReason;
+    persist(attempt);
+    lastSavedContactId = attempt.contactId;
+  };
+  // Synchronously revoke a previous discard diagnosis before any awaited retry work.
+  delete attempt.terminalReason;
+  store();
+  const terminal = (reason: NonNullable<DealCreationAttempt['terminalReason']>) => {
+    if (attempt.contact === null && attempt.dealWriteState === 'not_started') {
+      attempt.terminalReason = reason;
+      store();
+    }
+  };
+
   // Recover a committed deal before touching its contact or dispatching any side effect.
   const existingDeal = await read('agent_deals', attempt.dealId);
   if (existingDeal) return { deal: receipt(existingDeal, 'agent_deals'), createdDeal: false, createdContact: false };
@@ -64,7 +114,10 @@ export async function recoverDealCreation(
   const existingContact = await read('crm_contacts', attempt.contactId);
   if (existingContact) receipt(existingContact, 'crm_contacts');
   else {
-    if (!attempt.contact) throw new Error('Linked contact is unavailable in this company. No deal was created.');
+    if (!attempt.contact) {
+      terminal('contact_unavailable');
+      throw new Error('Linked contact is unavailable in this company.');
+    }
     assertCurrent();
     // Reuse canonical company/email dedupe. Explicit PK also protects no-email retries.
     const result = await getOrCreateContactByEmail<Record<string, unknown>>({
@@ -77,7 +130,7 @@ export async function recoverDealCreation(
     attempt.contactId = result.contact.id;
     createdContact = !result.existed;
     // Persist an email-deduped contact identity before proceeding to the deal.
-    persist(attempt);
+    store();
     if (createdContact) onContactSaved('created');
   }
   assertCurrent();
@@ -85,12 +138,20 @@ export async function recoverDealCreation(
     const { data, error } = await supabase.from('crm_contacts').update(attempt.contactPatch)
       .eq('id', attempt.contactId).eq('company_id', attempt.companyId).select('*').single();
     assertCurrent();
-    if (error) throw error;
+    if (error) {
+      // PostgreSQL statement rejection rolls back the UPDATE; transport errors prove nothing.
+      if (['42501', '23502', '23503', '23514'].includes(error.code)) terminal('contact_patch_rejected');
+      throw error;
+    }
     receipt(data as Record<string, unknown>, 'crm_contacts');
     attempt.contactPatch = null;
-    persist(attempt);
+    store();
     onContactSaved('updated');
   }
+  assertCurrent();
+  attempt.dealWriteState = 'started';
+  delete attempt.terminalReason;
+  store(); // Must be durable BEFORE issuing the deal insert, including rejected inserts.
   assertCurrent();
   const { data, error } = await supabase.from('agent_deals').insert({
     ...attempt.deal, id: attempt.dealId, company_id: attempt.companyId,

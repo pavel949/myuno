@@ -12,7 +12,7 @@ async def main():
   if not executable: raise RuntimeError('Installed Playwright Chromium required in CI')
   browser=await p.chromium.launch(executable_path=executable,headless=True,args=['--no-sandbox'])
   for width in [390,1440]:
-   for mode in ['before','lost-contact','lost-deal','context']:
+   for mode in (['before','lost-contact','lost-deal','context'] if BEFORE else ['before','lost-contact','lost-deal','context','snapshot','missing-contact','rejected-patch','ambiguous-patch','legacy']):
     context=await browser.new_context(viewport={'width':width,'height':1000},service_workers='block');blocked=[];errors=[]
     async def route(r):
      u=urlparse(r.request.url);name='fixture.html' if u.path=='/fixture' else u.path.lstrip('/')
@@ -23,6 +23,45 @@ async def main():
     row={'width':width,'mode':mode,'before':BEFORE,'outcome':'FAIL'}
     try:
      await page.goto('http://localhost:8080/fixture?mode='+('before' if mode=='context' else mode));await page.evaluate('document.fonts.ready')
+     if mode in ['snapshot','missing-contact','rejected-patch','ambiguous-patch','legacy']:
+      snapshot=page.get_by_role('region',name='Saved attempt details')
+      for value in ['Original Tenant','USD','rent_long','1700 – 2500','original-property','Original rental note']:await expect(snapshot).to_contain_text(value)
+      await expect(page.get_by_role('dialog').get_by_role('textbox')).to_have_count(0)
+      await expect(snapshot).not_to_contain_text('Different Prefill')
+      await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-snapshot.png'))
+      await page.get_by_role('button',name='Retry saved attempt').scroll_into_view_if_needed()
+      assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+      await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-snapshot-controls.png'))
+      await page.get_by_role('button',name='Retry saved attempt').click()
+      if mode=='snapshot':
+       await expect(page.get_by_test_id('route')).to_contain_text('/mc/sales/original-deal')
+       row['savedDeal']=await page.evaluate("window.fixture.deals['original-deal']")
+       assert row['savedDeal']['currency']=='USD' and row['savedDeal']['budget_min']==1700 and row['savedDeal']['property_id']=='original-property'
+      elif mode in ['missing-contact','rejected-patch']:
+       await expect(page.get_by_role('alert')).to_contain_text('No deal submission was started')
+       await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-diagnosed.png'))
+       assert await page.evaluate('window.fixture.writes.length')==0
+       await page.get_by_role('button',name='Discard unsubmitted attempt').click()
+       await expect(page.get_by_role('button',name='Create Deal',exact=True)).to_be_enabled()
+       assert await page.evaluate('Object.keys(sessionStorage).length')==0
+       await page.get_by_role('dialog').get_by_role('textbox').first.fill('Distinct New Customer')
+       await page.get_by_role('button',name='Create Deal',exact=True).click()
+       await expect(page.get_by_test_id('route')).to_contain_text('/mc/sales/')
+       row['afterDiscard']=await page.evaluate('({writes:window.fixture.writes,deals:Object.values(window.fixture.deals),originalContact:window.fixture.contacts["original-contact"]||null})')
+       assert len(row['afterDiscard']['writes'])==2 and len(row['afterDiscard']['deals'])==1
+       assert row['afterDiscard']['deals'][0]['client_name']=='Distinct New Customer'
+       if mode=='rejected-patch':assert row['afterDiscard']['originalContact']['budget_min']==100
+      else:
+       await expect(page.get_by_role('alert')).to_be_visible()
+       await expect(page.get_by_role('button',name='Discard unsubmitted attempt')).to_have_count(0)
+       assert await page.evaluate('Object.keys(sessionStorage).length')==1
+       assert await page.evaluate('window.fixture.writes.length')==0
+       row['remainingContact']=await page.evaluate('window.fixture.contacts["original-contact"]||null')
+       row['updateAttemptsCommitted']=await page.evaluate('window.fixture.updates.length')
+       if mode=='ambiguous-patch':assert row['remainingContact']['budget_min']==1700 and row['updateAttemptsCommitted']==1
+      await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-final.png'))
+      assert not blocked and not errors
+      row.update(outcome='PASS',blocked=blocked,errors=errors);rows.append(row);await context.close();continue
      await page.get_by_role('dialog').get_by_role('textbox').first.fill('Synthetic CRM Customer')
      await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-initial.png'))
      create=page.get_by_role('button',name='Create Deal',exact=True)
@@ -41,7 +80,8 @@ async def main():
       await page.screenshot(path=str(OUTPUT/f'{width}-{mode}-unconfirmed.png'))
       if not BEFORE:
        await expect(page.get_by_role('alert')).to_contain_text('not confirmed')
-       await expect(page.get_by_role('dialog').get_by_role('textbox').first).to_be_disabled()
+       await expect(page.get_by_role('dialog').get_by_role('textbox')).to_have_count(0)
+       await expect(page.get_by_role('region',name='Saved attempt details')).to_contain_text('Synthetic CRM Customer')
        await page.reload();await expect(page.get_by_role('button',name='Retry saved attempt')).to_be_visible()
        await page.get_by_role('button',name='Retry saved attempt').click()
        await expect(page.get_by_test_id('route')).to_contain_text('/mc/sales/')
