@@ -217,6 +217,13 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   expect(await sql`SELECT approval_status,is_active FROM properties WHERE id IN (${legacy},${linked})`).toEqual([
    {approval_status:'draft',is_active:false},{approval_status:'draft',is_active:false},
   ]);
+  // Capture only this owned synthetic database, before any authoring candidate.
+  // The cumulative acceptance below installs the exact generated transaction.
+  await sql.end();
+  const snapshotConnection=postgres({host:directory,port:55447,database:'template1',username:owner,password:'',max:1,onnotice:()=>{}});
+  try { await snapshotConnection.unsafe('CREATE DATABASE mc_authoring_baseline TEMPLATE postgres'); }
+  finally { await snapshotConnection.end(); }
+  sql=postgres({host:directory,port:55447,database:'postgres',username:owner,password:'',max:4,onnotice:()=>{}});
   await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/checked-publication.candidate.sql','utf8'));
   const permissions='supabase/migrations/20260226072628_e0c74d35-4281-4aad-b700-f89f10dc00ca.sql';
   await sql.unsafe(sourceFunction(permissions,'is_mc_admin'));
@@ -868,6 +875,84 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
    expect(await as(actor,tx=>tx`DELETE FROM inventory_inspections WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
   }
  });
+ it('runs the atomic activation through complex, linked property, publication and scoped task completion', async () => {
+  await sql.unsafe('CREATE DATABASE mc_authoring_acceptance TEMPLATE mc_authoring_baseline');
+  const originalConnection=sql;
+  sql=postgres({host:directory,port:55447,database:'mc_authoring_acceptance',username:owner,password:'',max:4,onnotice:()=>{}});
+  try {
+   await sql.unsafe(`ALTER TABLE management_companies ADD COLUMN is_active boolean DEFAULT true;
+    ALTER TABLE operating_spaces ADD CONSTRAINT acceptance_space_company UNIQUE(id,management_company_id);
+    ALTER TABLE property_complexes ALTER COLUMN id SET DEFAULT gen_random_uuid();
+    ALTER TABLE property_complexes ADD COLUMN owner_id uuid NOT NULL,
+     ADD COLUMN name text NOT NULL, ADD COLUMN name_ru text, ADD COLUMN description text,
+     ADD COLUMN address text, ADD COLUMN district text,
+     ADD COLUMN created_at timestamptz NOT NULL DEFAULT now(), ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now();
+    ALTER TABLE property_complexes ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Users can manage their own complexes" ON property_complexes FOR ALL
+     USING(owner_id=auth.uid()) WITH CHECK(owner_id=auth.uid());`);
+   await sql.unsafe(sourceFunction('supabase/migrations/20260301041138_01d64126-8e9b-4697-b0ab-8fc63be23b55.sql','get_user_company_ids'));
+   await sql.unsafe(sourceFunction('supabase/migrations/20260122131140_1d3722d7-58fb-43f6-a0f9-78e4ac1627b5.sql','is_admin_or_uno_team'));
+   await sql.unsafe(readFileSync('supabase/migrations/20260301042106_75283ce4-2357-49a7-aa57-9d945920f03d.sql','utf8'));
+   await sql.unsafe(readFileSync('supabase/migrations/20260301232547_12c29261-0b7e-48e2-a48f-6b11e87ebf8e.sql','utf8'));
+   await sql.unsafe(`CREATE TABLE admin_audit_logs(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),admin_id uuid NOT NULL,
+    action text NOT NULL,entity_type text,entity_id text,old_data jsonb,new_data jsonb,created_at timestamptz DEFAULT now());
+    ALTER TABLE admin_audit_logs ENABLE ROW LEVEL SECURITY;
+    GRANT SELECT,INSERT,UPDATE,DELETE ON admin_audit_logs TO authenticated;
+    CREATE POLICY audit_logs_admin_only ON admin_audit_logs FOR ALL TO authenticated
+     USING(actor_has_platform_admin()) WITH CHECK(actor_has_platform_admin());
+    GRANT SELECT,INSERT,UPDATE,DELETE ON property_complexes TO authenticated;
+    GRANT SELECT ON property_complexes TO anon;
+    ALTER TABLE property_operational_tasks ADD COLUMN title text, ADD COLUMN task_type text,
+     ADD COLUMN priority text DEFAULT 'normal', ADD COLUMN status text DEFAULT 'pending',
+     ADD COLUMN completed_at timestamptz, ADD COLUMN completed_by uuid, ADD COLUMN notes text;
+    -- Match the live task permissive inventory: only mc_members_manage_tasks.
+    ALTER POLICY owners_and_mc_manage_operational_tasks ON property_operational_tasks USING(false) WITH CHECK(false);`);
+   await sql.unsafe(sourceFunction('supabase/migrations/20260225003935_ed23eb67-167a-469c-b3d1-46d0cf429134.sql','log_task_activity'));
+   await sql.unsafe('CREATE TRIGGER acceptance_task_audit AFTER INSERT OR UPDATE ON property_operational_tasks FOR EACH ROW EXECUTE FUNCTION log_task_activity()');
+   const forward=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation());"],{encoding:'utf8'});
+   const failure=forward.replace(/COMMIT;\s*$/, () => "DO $$ BEGIN RAISE EXCEPTION 'acceptance forced activation failure'; END $$;\nCOMMIT;");
+   await expect(applyTransactionScript(sql,failure)).rejects.toThrow(/forced activation failure/);
+   expect((await sql`SELECT to_regprocedure('public.create_managed_complex_checked(uuid,uuid,jsonb,boolean)') name`)[0].name).toBeNull();
+   expect(await sql`SELECT column_name FROM information_schema.columns WHERE table_name='properties' AND column_name='content_author_user_id'`).toEqual([]);
+   await applyTransactionScript(sql,forward);
+   const complex=(await as(U.editor,async tx=>(await tx`SELECT create_managed_complex_checked(${C},${SPACE},'{"name":"Synthetic acceptance complex"}'::jsonb,false) row`)[0].row));
+   expect(await as(null,tx=>tx`SELECT id FROM public_complex_catalog WHERE id=${complex.id}`)).toEqual([]);
+   const cPending=await as(U.editor,async tx=>(await tx`SELECT save_managed_complex_draft_checked(${complex.id},${complex.updated_at}::text::timestamptz,'{"description_en":"Saved complex"}'::jsonb,true) row`)[0].row);
+   await as(U.admin,tx=>tx`SELECT review_managed_complex_submission_checked(${complex.id},${cPending.updated_at}::text::timestamptz,'approve',NULL)`);
+   const key=await create(U.editor);
+   const draft=await read(U.editor,key);
+   await save(U.editor,key,{complex_id:complex.id,title_en:'Saved physical unit',description_en:'Verified description',images:['https://example.test/unit.jpg'],bedrooms:2,house_rules:'No parties'},false,draft.updated_at);
+   const reopened=await read(U.editor,key);
+   expect(reopened).toMatchObject({complex_id:complex.id,title_en:'Saved physical unit',bedrooms:2,house_rules:'No parties'});
+   await save(U.editor,key,{},false,reopened.updated_at);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE id=${key}`)[0].n).toBe(1);
+   expect(await as(null,tx=>tx`SELECT id FROM public_property_catalog WHERE id=${key}`)).toEqual([]);
+   await expect(save(U.editor,key,{title_en:'Stale'},false,draft.updated_at)).rejects.toThrow(/changed/);
+   await expect(read(U.outsider,key)).rejects.toThrow(/permission|unavailable/);
+   await save(U.editor,key,{},true);
+   await review(U.admin,key);
+   expect(await as(null,tx=>tx`SELECT id,title_en FROM public_property_catalog WHERE id=${key}`)).toEqual([{id:key,title_en:'Saved physical unit'}]);
+   expect(await as(null,tx=>tx`SELECT id FROM public_complex_catalog WHERE id=${complex.id}`)).toHaveLength(1);
+   // Operational assignment is an explicit fixture grant, never a side effect of content creation.
+   await sql`INSERT INTO property_manager_assignments(property_id,manager_user_id,is_active) VALUES(${key},${U.staff},true)`;
+   await sql`INSERT INTO team_member_permissions(company_id,user_id,module,can_view,can_edit,can_export)
+    VALUES(${C},${U.editor},'tasks',true,true,false),(${C},${U.staff},'tasks',true,true,false)`;
+   const task=(await as(U.editor,tx=>tx`INSERT INTO property_operational_tasks(property_id,assigned_to,title,task_type)
+    VALUES(${key},${U.staff},'Inspect synthetic unit','inspection') RETURNING id`))[0].id;
+   expect(await as(U.staff,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toHaveLength(1);
+   expect(await as(U.unassignedStaff,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toEqual([]);
+   expect(await as(U.outsider,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toEqual([]);
+   expect(await as(U.unassignedStaff,tx=>tx`UPDATE property_operational_tasks SET status='completed' WHERE id=${task} RETURNING id`)).toEqual([]);
+   await as(U.staff,tx=>tx`UPDATE property_operational_tasks SET status='completed',completed_by=${U.staff},completed_at=now(),notes='Inspection passed' WHERE id=${task}`);
+   expect(await as(U.editor,tx=>tx`SELECT status,completed_by,notes FROM property_operational_tasks WHERE id=${task}`)).toEqual([{status:'completed',completed_by:U.staff,notes:'Inspection passed'}]);
+   expect(await sql`SELECT action FROM property_activity_log WHERE entity_id=${task} ORDER BY created_at`).toEqual([{action:'task_created'},{action:'task_status_changed'}]);
+   const rollback=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation('rollback'));"],{encoding:'utf8'});
+   await applyTransactionScript(sql,rollback);
+   await expect(read(U.editor,key)).rejects.toThrow(/permission denied/);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE id=${key}`)[0].n).toBe(1);
+   expect(await sql`SELECT policyname FROM pg_policies WHERE policyname='employee_task_view_ceiling'`).toHaveLength(1);
+  } finally { await sql.end(); sql=originalConnection; }
+ },30000);
  // Keep last: the fail-closed rollback intentionally revokes checked workflow RPCs.
  it('rolls back with meters absent while retaining all surviving operational ceilings', async () => {
   const key=await create(U.staff);
