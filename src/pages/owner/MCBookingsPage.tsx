@@ -1,4 +1,4 @@
-import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
+import { propertyBookingStatus, propertyBookingChangeExplanation } from '@/lib/propertyBookingPresentation';
 import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
@@ -207,12 +207,18 @@ export default function MCBookingsPage() {
         row!.id, { status }, row!.updated_at)));
       assertCurrent();
       const failedIds = ids.filter((_,index) => outcomes[index].status === 'rejected');
+      const explanations = [...new Set(outcomes.flatMap(outcome => {
+        if (outcome.status !== 'rejected') return [];
+        const explanation = propertyBookingChangeExplanation(outcome.reason, isRu);
+        return explanation ? [explanation] : [];
+      }))];
       await refetch();
       assertCurrent();
       setSelectedIds(new Set(failedIds)); setPendingBulkAction(null);
       if (failedIds.length) toast.error(isRu
         ? `Подтверждено изменений: ${ids.length-failedIds.length}/${ids.length}. Проверьте оставшиеся бронирования.`
-        : `${ids.length-failedIds.length}/${ids.length} changes confirmed. Review the remaining bookings.`);
+        : `${ids.length-failedIds.length}/${ids.length} changes confirmed. Review the remaining bookings.`,
+        { description: explanations.join(' ') || undefined });
       else toast.success(isRu ? 'Изменения сохранены' : 'Changes saved');
     } catch {
       if (currentOperationScope.current === operationScope) toast.error(isRu ? 'Изменение не подтверждено. Обновите статус.' : 'Change not confirmed. Refresh the status.');

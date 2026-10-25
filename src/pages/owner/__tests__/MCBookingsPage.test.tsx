@@ -173,6 +173,18 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     expect(mocks.from).not.toHaveBeenCalled();
   });
 
+  it.each(['schedule','expense'] as const)('keeps denied %s changes selected and explains the next safe step',async kind=>{
+    mocks.command.mockRejectedValue({message:`reservation task ${kind} reconciliation required`});
+    mount(language);selectFirst(language);
+    fireEvent.click(screen.getByRole('button',{name:language==='ru'?'Отменить':'Cancel'}));
+    await act(async()=>{fireEvent.click(screen.getByRole('button',{name:language==='ru'?'Да':'Yes'}));});
+    await vi.waitFor(()=>expect(mocks.error).toHaveBeenCalledOnce());
+    const options=mocks.error.mock.calls[0][1] as {description:string};
+    expect(options.description).toContain(language==='ru'?'Сначала согласуйте':kind==='schedule'?'Ask the manager':'Reconcile the expenses');
+    expect(mocks.success).not.toHaveBeenCalled();expect(mocks.from).not.toHaveBeenCalled();
+    expect(screen.getByRole('checkbox',{name:`${language==='ru'?'Выбрать бронирование':'Select booking'}: ${bookingsListFixtures(language)[0].guest_name}`})).toHaveAttribute('aria-checked','true');
+  });
+
   it('loading and empty fixtures never load the real client or open details', () => {
     mocks.loading = true; mount(language);
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);

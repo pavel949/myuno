@@ -19,6 +19,17 @@ unmount/response loss; it persists only actor/digest/UUID, never task content. T
 completion metadata remains server owned. The browser task fixture uses the actual
 gateway and editor at 375/390/430/1280, with synthetic authorization and transport.
 
+The portfolio calendar now projects the same scoped checked booking adapter as
+the manager list. Its former independent raw-order query could omit guest orders
+under RLS. Failed booking/task reads hide the calendar with an unknown/retry state.
+The local PostgreSQL browser fixture checks pending/confirmed reserved state and
+cancelled released state through this actual calendar hook. Its title/property
+authorization shell remains synthetic; it does not prove live catalogue discovery.
+
+Known schedule/expense refusals have RU/EN manager explanations and a safe next
+step. Failed rows remain selected; no success is shown. This is a bounded refusal,
+not a completed extension or rebooking workflow.
+
 Two bounded guards from PR160 refuse the unpaid cohort before Stripe construction
 or manual-payment writes, including unknown RPC outcomes. Other cohorts require
 an explicit true eligibility response. DB eligibility must therefore precede edge

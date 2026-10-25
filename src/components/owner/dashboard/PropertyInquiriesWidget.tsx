@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
 import { executePropertyBookingChange } from '@/lib/manualPropertyBooking';
+import { propertyBookingChangeExplanation } from '@/lib/propertyBookingPresentation';
 import { bindPropertyReservationReader } from '@/lib/propertyReservationReceipt';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyProperties } from '@/hooks/useMyProperties';
@@ -97,7 +98,7 @@ export function PropertyInquiriesWidget() {
       await queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
     } catch (err: unknown) {
       if (currentScope.current !== scope) return;
-      const message = err instanceof Error ? err.message : (isRu ? 'неизвестная ошибка' : 'unknown error');
+      const message = propertyBookingChangeExplanation(err,isRu) ?? (err instanceof Error ? err.message : (isRu ? 'неизвестная ошибка' : 'unknown error'));
       console.error('[PropertyInquiriesWidget] status update failed:', err);
       toast.error(
         isRu

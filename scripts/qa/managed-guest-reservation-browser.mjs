@@ -19,13 +19,14 @@ const virtual = {
   '@/hooks/usePropertyAvailability': `const data=[];export const usePropertyBlockedDates=()=>({data});`,
   '@/hooks/usePropertyRateSeasons': `const data=[];export const usePropertyRateSeasons=()=>({data});`,
   '@/hooks/useRareFindBadge': `export const useRareFindBadge=()=>({data:false});`,
+  '@/hooks/useMyProperties': `const allProperties=[{property_id:'00000000-0000-4000-8000-000000000001'}];export const useMyProperties=()=>({allProperties,isLoading:false,error:null,refetch:async()=>{}});`,
   '@/hooks/useActiveCompany': `export const useActiveCompany=()=>({activeCompany:null});`,
   '@/lib/getAccessiblePropertyIds': `export const getAccessiblePropertyIds=async()=>({allIds:['00000000-0000-4000-8000-000000000001'],ownedIds:[],delegatedIds:[],companyIds:[]});`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main>{children}</main>;`,
   '@/components/property/DepositPaymentOptions': `export const DepositPaymentOptions=()=>null;`,
   '@/components/property/PayWhenSelector': `export const PayWhenSelector=()=>null;`,
   '@/lib/propertyReservationReceipt': `export {readPropertyReservationReceipt,propertyReservationReceipt} from ${JSON.stringify(receiptSource)};import{supabase}from'@/integrations/supabase/client';export const bindPropertyReservationReader=async(_actor,assertCurrent)=>{assertCurrent();return supabase;};`,
-  '@/integrations/supabase/client': `export const supabase={async rpc(name,args){if(name==='get_property_date_prices')return{data:[],error:null};const response=await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json','X-Fixture-Actor':new URLSearchParams(location.search).get('actor')},body:JSON.stringify({name,args})});const result=await response.json();if(name==='create_property_reservation_checked'&&result.data?.order?.id)localStorage.setItem('mc-isolated-created-order',JSON.stringify(result.data.order.id));return result;},from(table){if(table!=='orders')throw Error('Raw write forbidden');const q={select(){return q},eq(){return q},is(){return q},order(){return q},in(){return q},then(resolve,reject){return supabase.rpc('fixture_legacy_orders_read',{}).then(resolve,reject)}};return q;}};`,
+  '@/integrations/supabase/client': `export const supabase={async rpc(name,args){if(name==='get_property_date_prices')return{data:[],error:null};const response=await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json','X-Fixture-Actor':new URLSearchParams(location.search).get('actor')},body:JSON.stringify({name,args})});const result=await response.json();if(name==='create_property_reservation_checked'&&result.data?.order?.id)localStorage.setItem('mc-isolated-created-order',JSON.stringify(result.data.order.id));return result;},from(table){if(table==='properties')return{select(){return this},in:async()=>({data:[{id:'00000000-0000-4000-8000-000000000001',title_en:'Synthetic property'}],error:null})};if(table!=='orders')throw Error('Raw write forbidden');const q={select(){return q},eq(){return q},is(){return q},order(){return q},in(){return q},then(resolve,reject){return supabase.rpc('fixture_legacy_orders_read',{}).then(resolve,reject)}};return q;}};`,
 };
 const source = `
 import React from 'react';import {createRoot} from 'react-dom/client';
@@ -35,17 +36,22 @@ import {Toaster} from 'sonner';
 import PropertyInquiry from '@/pages/property/PropertyInquiry';
 import {PropertyReservationReceipt} from '@/components/property/PropertyReservationReceipt';
 import {usePropertyBookings} from '@/hooks/usePropertyBookings';
+import {useMultiPropertyBookings} from '@/hooks/useMultiPropertyBookings';
+import {propertyOrderHoldsInventory} from '@/lib/propertyInventory';
 const property='00000000-0000-4000-8000-000000000001';
 const params=new URLSearchParams(location.search),id=params.get('order');
 function PmsFixture(){
  const {bookings,error,refetch,updateBooking}=usePropertyBookings(property);
+ const calendar=useMultiPropertyBookings(new Date(2026,10,9),7);
+ const calendarBooking=calendar.allBookings.find(row=>row.id===id);
  const [busy,setBusy]=React.useState(false),[failure,setFailure]=React.useState('');
  const booking=bookings?.find(row=>row.id===id);
  async function change(status){setBusy(true);setFailure('');try{await updateBooking({id,status,updated_at:booking.updated_at});await refetch()}catch(error){setFailure(error.message||String(error))}finally{setBusy(false)}}
  return <main><h1>Isolated PMS hook</h1><button disabled={busy} onClick={()=>refetch()}>Read manager reservation</button>
  <button disabled={busy||!booking} onClick={()=>change('confirmed')}>Confirm in PMS</button>
  <button disabled={busy||!booking} onClick={()=>change('cancelled')}>Cancel in PMS</button>
- {(error||failure)&&<p role="alert">{failure||String(error)}</p>}
+ {calendarBooking&&<output data-testid="calendar-state">{calendarBooking.status}:{propertyOrderHoldsInventory(calendarBooking.status)?'reserved':'released'}</output>}
+ {(error||failure||calendar.error)&&<p role="alert">{failure||String(error)}</p>}
  {booking&&<output data-testid="command-result">{JSON.stringify(booking)}</output>}</main>;
 }
 const route=params.get('surface')==='receipt'?'/bookings/'+id:'/property/'+property+'/inquiry?checkIn=2026-11-10&checkOut=2026-11-13&guests=2';
