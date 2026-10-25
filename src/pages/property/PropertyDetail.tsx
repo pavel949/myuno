@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   MapPin, Star, BedDouble, Bath, Users, Maximize,
-  Share2, Loader2, Home, Sofa, Building2, Shield,
+  Share2, Home, Sofa, Building2, Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -15,6 +15,10 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
 import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { LoadingState } from '@/components/page/LoadingState';
+import { EmptyState } from '@/components/page/EmptyState';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -124,7 +128,8 @@ export default function PropertyDetail() {
     [availability],
   );
 
-  const { data: property, isLoading } = usePropertyWithRentalTerms(id);
+  const { data: propertyData, isLoading, isError, isFetching, refetch } = usePropertyWithRentalTerms(id);
+  const property = propertyData?.id === id ? propertyData : undefined;
   const rentalTerms = property?.rentalTerms;
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
@@ -145,22 +150,40 @@ export default function PropertyDetail() {
     try { return JSON.parse(rentalTerms.extra_services as string); } catch { return []; }
   }, [rentalTerms?.extra_services]);
 
-  if (isLoading) {
+  const loadingLabel = pickLang(language, { en: 'Loading property…', ru: 'Загрузка объекта…', th: 'กำลังโหลดที่พัก…' });
+  const backLabel = pickLang(language, { en: 'Back to listings', ru: 'К списку', th: 'กลับไปยังรายการที่พัก' });
+  const backToListings = <Button asChild variant="outline"><Link to="/property">{backLabel}</Link></Button>;
+
+  if (!property && (isLoading || isFetching || (!isError && propertyData))) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="space-y-4 py-6">
+        <p className="text-center text-sm text-muted-foreground">{loadingLabel}</p>
+        <LoadingState variant="skeleton" rows={3} message={loadingLabel} className="mx-auto w-full max-w-xl" />
+      </div>
+    );
+  }
+
+  if (!property && isError) {
+    return (
+      <div className="py-6">
+        <Alert className="max-w-xl" aria-labelledby="property-read-error-title">
+          <AlertTitle id="property-read-error-title">{pickLang(language, { en: 'Property could not be loaded', ru: 'Не удалось загрузить объект', th: 'ไม่สามารถโหลดที่พักได้' })}</AlertTitle>
+          <AlertDescription>
+            <p>{pickLang(language, { en: 'Please try again to check this property.', ru: 'Повторите попытку, чтобы посмотреть объект.', th: 'โปรดลองอีกครั้งเพื่อดูข้อมูลที่พักนี้' })}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button onClick={() => { void refetch(); }} disabled={isFetching}>{pickLang(language, { en: 'Try again', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+              {backToListings}
+            </div>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <Home className="w-16 h-16 text-muted-foreground/50" />
-        <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
-        <Button variant="outline" onClick={() => navigate('/property')}>
-          {isRu ? 'К списку' : 'Back to listings'}
-        </Button>
+      <div className="py-6">
+        <EmptyState compact icon={Home} title={pickLang(language, { en: 'Property not found', ru: 'Объект не найден', th: 'ไม่พบที่พัก' })} action={backToListings} />
       </div>
     );
   }
@@ -283,6 +306,15 @@ export default function PropertyDetail() {
         })}
       />
       <div className="public-commerce public-commerce--property pb-28">
+        {isError && <Alert className="my-6" aria-labelledby="property-refresh-error-title">
+          <AlertTitle id="property-refresh-error-title">{pickLang(language, { en: 'Property update could not be loaded', ru: 'Не удалось обновить сведения об объекте', th: 'ไม่สามารถอัปเดตข้อมูลที่พักได้' })}</AlertTitle>
+          <AlertDescription>
+            <p>{pickLang(language, { en: 'Showing the last loaded details for this property. Try again to refresh them.', ru: 'Показаны последние загруженные сведения об этом объекте. Повторите попытку обновления.', th: 'กำลังแสดงข้อมูลที่โหลดล่าสุดของที่พักนี้ โปรดลองอัปเดตอีกครั้ง' })}</p>
+            <Button className="mt-4" onClick={() => { void refetch(); }} disabled={isFetching}>{pickLang(language, { en: 'Try again', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+            {isFetching && <p className="mt-2" role="status">{pickLang(language, { en: 'Refreshing property…', ru: 'Обновление сведений об объекте…', th: 'กำลังอัปเดตข้อมูลที่พัก…' })}</p>}
+          </AlertDescription>
+        </Alert>}
+
         {/* Property identity and secondary actions */}
         <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
           <BackButton fallbackPath="/property" variant="default" size="md" />
