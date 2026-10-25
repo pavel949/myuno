@@ -12,6 +12,7 @@ export function validateSource(source) {
   return errors;
 }
 const canonical = value => JSON.stringify(value, Object.keys(value).sort());
+const stableJson = value => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? '[' + value.map(stableJson).join(',') + ']' : '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stableJson(value[key])).join(',') + '}';
 export function stageImport({ source, rows, current = [], previousBatch, now = new Date().toISOString() }) {
   // Adapter boundary: download/parser errors must not be converted into an empty inventory.
   if (!Array.isArray(rows)) throw new Error('Parser must return rows; retain last-known-good');
@@ -22,8 +23,11 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   if (source?.validUntil && source.validUntil < now.slice(0, 10) && !ownerConfirmed) errors.push('expired_source');
   if (source?.effectiveDate > now.slice(0, 10)) errors.push('future_effective_date');
   if (!['complete', 'partial'].includes(source?.coverage)) errors.push('unknown_coverage');
-  const result = { batchKey, hash, source, importedAt: now, effectiveDate: source?.effectiveDate, status: errors.length ? 'review' : 'staged', errors, changes: [], review: [], missing: [], lastKnownGoodRetained: true, publicationEnabled: false };
-  if (previousBatch?.batchKey === batchKey) return { ...result, status: 'duplicate' };
+  const validationFingerprint = createHash('sha256').update(stableJson({ source, current, validationDate: now.slice(0, 10) })).digest('hex');
+  const result = { batchKey, hash, validationFingerprint, source, importedAt: now, effectiveDate: source?.effectiveDate, status: errors.length ? 'review' : 'staged', errors, changes: [], review: [], missing: [], lastKnownGoodRetained: true, publicationEnabled: false };
+  // Quarantined/failed/staged plans are always re-evaluated. Only a confirmed applied
+  // receipt with identical validation context can be terminally deduplicated.
+  if (!errors.length && previousBatch?.status === 'applied' && typeof previousBatch.appliedReceipt === 'string' && previousBatch.appliedReceipt.trim() && previousBatch.batchKey === batchKey && previousBatch.validationFingerprint === validationFingerprint) return { ...result, status: 'duplicate' };
   const existing = new Map(current.map(row => [`${row.projectId}:${row.unitCode}`, row]));
   const codes = new Set();
   const duplicateCodes = new Set();
@@ -31,8 +35,13 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   for (const row of rows) {
     const key = `${row.projectId}:${row.unitCode}`;
     const reasons = [...errors];
+    if (!['base', 'promotion', 'promotional_total'].includes(row.priceKind)) reasons.push('unknown_price_kind');
     if (row.priceKind === 'promotional_total') reasons.push('base_price_unseparated');
-    if (row.priceKind === 'promotion' && source?.promoValidUntil && source.promoValidUntil < now.slice(0, 10)) reasons.push('expired_promotion');
+    if (row.priceKind === 'promotion') {
+      const promoUntil = row.promoValidUntil || source?.promoValidUntil || source?.validUntil;
+      if (!promoUntil) reasons.push('promotion_validity_unknown');
+      else if (promoUntil < now.slice(0, 10)) reasons.push('expired_promotion');
+    }
     if (typeof row.unitCode !== 'string' || !row.unitCode || row.unitCode !== row.unitCode.trim() || row.projectId !== source.projectId) reasons.push('unmatched_unit');
     if (duplicateCodes.has(key)) reasons.push('duplicate_unit_code');
     if (!Number.isFinite(row.amount) || row.amount <= 0 || !['THB', 'USD', 'EUR'].includes(row.currency) || row.priceUnit !== 'total') reasons.push('invalid_price_units');
@@ -48,7 +57,7 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
     const after = { id: before?.id, propertyId: before?.propertyId, propertyProjectId: before?.propertyProjectId, projectId: row.projectId, unitCode: row.unitCode, amount: row.amount, currency: row.currency, priceUnit: row.priceUnit, availability: row.availability };
     if (reasons.length) { result.review.push({ key, reasons: [...new Set(reasons)], row }); continue; }
     const beforeComparable = Object.fromEntries(Object.keys(after).map(k => [k, before[k]]));
-    if (canonical(after) !== canonical(beforeComparable)) result.changes.push({ key, before, after, expectedVersion: before.version, sourceEffectiveDate: source.effectiveDate });
+    if (canonical(after) !== canonical(beforeComparable)) result.changes.push({ key, before, after, expectedVersion: before.version, sourceEffectiveDate: source.effectiveDate, priceKind: row.priceKind, priceProvenance: row.priceProvenance || null });
   }
   result.missing = current.filter(row => row.projectId === source.projectId && !codes.has(`${row.projectId}:${row.unitCode}`)).map(row => row.id);
   if (result.review.length) result.status = 'review';
@@ -91,6 +100,9 @@ export function mapPriceRows(records, mapping) {
     amount: typeof record[mapping.amountColumn] === 'number' ? record[mapping.amountColumn] * (mapping.priceScale === 'million' ? 1000000 : 1) : null,
     currency: mapping.currency,
     priceUnit: mapping.priceUnit,
+    priceKind: mapping.priceKindColumn ? mapping.priceKindMap?.[record[mapping.priceKindColumn]] ?? 'unknown' : mapping.priceKind ?? 'unknown',
+    promoValidUntil: mapping.promoValidUntilColumn ? record[mapping.promoValidUntilColumn] : mapping.promoValidUntil ?? null,
+    priceProvenance: { parserVersion: mapping.version, amountColumn: mapping.amountColumn, priceScale: mapping.priceScale, priceKindOrigin: mapping.priceKindColumn || 'reviewed_constant' },
     availability: mapping.statusMap?.[record[mapping.statusColumn]] ?? 'unknown',
   }));
 }

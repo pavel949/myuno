@@ -1,10 +1,19 @@
--- REVIEW CANDIDATE ONLY — not a migration; never applied by this task.
--- First verify actual project, existing grants, policy catalogue and operator paths.
--- Source policies permit arbitrary authenticated project_units DML. UI hiding is not authorization.
--- Request-only release must deny direct browser writes until checked operator RPCs exist.
-BEGIN;
-REVOKE INSERT, UPDATE, DELETE ON TABLE public.project_units FROM anon, authenticated;
-COMMIT;
--- Security-preserving rollback: retain this denial, restore the previous read-only buyer code.
--- Do not restore broad browser grants as a rollback. Re-enable writes only through reviewed,
--- actor/object-authorized operator RPCs. Also deploy edge containment from the same reviewed tranche.
+-- READ-ONLY REVIEW INVENTORY; not a migration and not applied by this task.
+-- Initial April 16 broad policies were removed by later source migrations.
+-- Lovable read-only review found three live scoped project_units policies.
+-- Do not infer policy effect from one historical migration or NULL with_check alone.
+-- No blanket privilege revocation is proposed without positive/negative actor tests.
+SELECT policyname, permissive, roles, cmd, qual, with_check
+FROM pg_policies
+WHERE schemaname = 'public' AND tablename = 'project_units'
+ORDER BY policyname;
+
+SELECT grantee, privilege_type, is_grantable
+FROM information_schema.role_table_grants
+WHERE table_schema = 'public' AND table_name = 'project_units'
+  AND grantee IN ('anon', 'authenticated')
+ORDER BY grantee, privilege_type;
+-- Broad table grants coexist with scoped RLS for row operations. TRUNCATE is not
+-- constrained by RLS and warrants separate privilege review; API exploitability
+-- has not been demonstrated. Never execute TRUNCATE to test this in production.
+-- Preserve request-only edge containment until checked writer/actor tests pass.

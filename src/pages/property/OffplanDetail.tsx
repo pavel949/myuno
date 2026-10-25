@@ -430,11 +430,11 @@ export default function OffplanDetail() {
       {/* Fixed CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t safe-area-bottom">
         <div className="flex gap-3">
-          <Button variant="outline" size="lg" className="flex-1 gap-2" onClick={() => setShowLeadForm(true)}>
+          <Button variant="outline" size="lg" className="flex-1 gap-2" onClick={() => { setRequestIntent('documents'); setShowLeadForm(true); }}>
             <FileSearch className="w-5 h-5" />
             {isRu ? 'Оценка рисков' : 'Risk Report'}
           </Button>
-          <Button size="lg" className="flex-1 gap-2" onClick={() => setShowLeadForm(true)}>
+          <Button size="lg" className="flex-1 gap-2" onClick={() => { setRequestIntent('consultation'); setShowLeadForm(true); }}>
             <MessageCircle className="w-5 h-5" />
             {isRu ? 'Консультация' : 'Consultation'}
           </Button>

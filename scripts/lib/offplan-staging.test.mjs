@@ -2,10 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { stageImport, mapPriceRows, refreshFailure, stageLegacyProjects, undoBatch } from './offplan-staging.mjs';
 const source = { sourceId: 'synthetic-source', developerId: 'd', projectId: 'p', fileId: 'file', revision: 'v1', effectiveDate: '2026-10-24', parserVersion: 'test-v1', coverage: 'complete', type: 'price_availability', publicationRights: 'approved', modifiedAt: '2026-10-25T01:00:00Z' };
-const current = [{ id: 'catalogue-row-uuid', propertyId: 'canonical-property-uuid', propertyProjectId: 'p', projectId: 'p', unitCode: 'A-1', amount: 10000000, currency: 'THB', priceUnit: 'total', availability: 'available', version: 4 }];
+const current = [{ id: 'catalogue-row-uuid', propertyId: 'canonical-property-uuid', propertyProjectId: 'p', projectId: 'p', unitCode: 'A-1', amount: 10000000, currency: 'THB', priceUnit: 'total', priceKind: 'base', availability: 'available', version: 4 }];
 const rows = [{ ...current[0], amount: 11000000, availability: 'reserved' }];
 test('stages exact physical match with before-image, provenance and no publication', () => { const b = stageImport({ source, rows, current }); assert.equal(b.changes.length, 1); assert.equal(b.changes[0].after.id, 'catalogue-row-uuid'); assert.equal(b.changes[0].sourceEffectiveDate, source.effectiveDate); assert.equal(b.publicationEnabled, false); assert.equal(b.changes[0].before.amount, 10000000); });
-test('deduplicates repeated revision/hash', () => { const b = stageImport({ source, rows, current }); assert.equal(stageImport({ source, rows, current, previousBatch: b }).status, 'duplicate'); });
+test('only terminally deduplicates identical confirmed applied context', () => { const b = stageImport({ source, rows, current }); assert.notEqual(stageImport({ source, rows, current, previousBatch: b }).status, 'duplicate'); const applied = {...b,status:'applied',appliedReceipt:'synthetic-confirmed-commit'}; assert.equal(stageImport({ source, rows, current, previousBatch: applied }).status, 'duplicate'); assert.notEqual(stageImport({ source, rows, current, previousBatch: {...applied,appliedReceipt:null} }).status, 'duplicate'); });
 test('missing rows never imply sold or deletion', () => { const b = stageImport({ source, rows: [], current }); assert.equal(b.changes.length, 0); assert.deepEqual(b.missing, ['catalogue-row-uuid']); });
 test('quarantines uncertain units, currency, units and large changes', () => { for (const patch of [{ unitCode: 'other' }, { amount: 1 }, { currency: 'USD' }, { priceUnit: 'million' }, { availability: 'nonsense' }]) { const b = stageImport({ source, rows: [{ ...rows[0], ...patch }], current }); assert.equal(b.changes.length, 0); assert.equal(b.review.length, 1); } });
 test('duplicate codes never create automatic changes', () => { const b = stageImport({ source, rows: [rows[0], rows[0]], current }); assert.equal(b.changes.length, 0); assert.equal(b.review.length, 2); });
@@ -23,23 +23,46 @@ test('Telegram message identity is accepted without inventing a Drive file ID',(
 
 test('owner confirmation is distinct from an unknown effective date',()=>{const confirmed={...source,effectiveDate:null,ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'owner message'};const b=stageImport({source:confirmed,rows,current});assert.equal(b.changes.length,1);assert.equal(b.effectiveDate,null);assert.equal(stageImport({source:{...confirmed,ownerConfirmationProvenance:null},rows,current}).changes.length,0);});
 
-test('same canonical physical UUID survives offplan, resale, rental and management with repeat import dedup',()=>{
-  const property={id:'canonical-property-uuid',complexId:'canonical-complex-uuid'};
-  const assets=new Map([[property.id,property]]);
-  const buildingContainment={property_id:property.id,building_property_id:'existing-building-property-uuid'}; const documents=[{property_id:property.id,document_id:'existing-document'}]; const history=[{property_id:property.id,event_id:'historical-offer-event'}];
-  const booking={property_id:property.id}; const managementTerms={property_id:property.id}; const ownership={property_id:property.id};
-  let inventory=[{...current[0],propertyId:property.id}];
-  for(const [index,lifecycle] of ['offplan','completed','resale','rental','PMS'].entries()){
-    const input=[{...rows[0],amount:11000000+index*100000,propertyId:'spoofed-replacement',id:'do-not-create-asset'}];
-    const batch=stageImport({source:{...source,revision:lifecycle},rows:input,current:inventory});
-    assert.equal(batch.changes.length,1);
-    const change=batch.changes[0];assert.equal(change.after.propertyId,property.id);assert.equal(change.after.id,current[0].id);
-    inventory=[{...inventory[0],...change.after,version:inventory[0].version+1}];
-    const replay=stageImport({source:{...source,revision:lifecycle},rows:input,current:inventory});assert.equal(replay.changes.length,0);
-    for(const relation of [booking,managementTerms,ownership,buildingContainment,...documents,...history])assert.equal(relation.property_id,property.id);
-    assert.equal(buildingContainment.building_property_id,'existing-building-property-uuid');assert.equal(documents.length,1);assert.equal(history[0].event_id,'historical-offer-event');assert.equal(assets.size,1);assert.equal(assets.get(property.id).complexId,'canonical-complex-uuid');
-  }
+test('staging ignores spoofed physical/operational writes and emits an offer-only update plan',()=>{
+  const persisted=Object.freeze({...current[0],documents:Object.freeze(['existing-document']),owner_id:'existing-owner'});
+  const input=[{...rows[0],propertyId:'spoofed-property',id:'spoofed-inventory',documents:[],owner_id:'spoofed-owner',constructionStage:'completed',managementStatus:'active'}];
+  const batch=stageImport({source,rows:input,current:[persisted]});
+  assert.equal(batch.changes.length,1);
+  const change=batch.changes[0];
+  assert.equal(change.after.propertyId,persisted.propertyId);assert.equal(change.after.id,persisted.id);
+  assert.deepEqual(Object.keys(change.after).sort(),['id','propertyId','propertyProjectId','projectId','unitCode','amount','currency','priceUnit','availability'].sort());
+  assert.equal(change.before,persisted);assert.deepEqual(persisted.documents,['existing-document']);
+  const next={...persisted,...change.after,version:persisted.version+1};
+  assert.equal(stageImport({source,rows:input,current:[next]}).changes.length,0);
 });
 test('unlinked project catalogue rows cannot become a second physical registry',()=>{const batch=stageImport({source,rows,current:[{...current[0],propertyId:null}]});assert.equal(batch.changes.length,0);assert.ok(batch.review[0].reasons.includes('unmapped_canonical_property'));});
 
 test('conflicting canonical project link cannot be silently overwritten',()=>{const b=stageImport({source,rows,current:[{...current[0],propertyProjectId:'another-project'}]});assert.equal(b.changes.length,0);assert.ok(b.review[0].reasons.includes('canonical_project_mismatch'));});
+
+const parserMapping={version:'parser-v2',projectId:'p',unitCodeColumn:'code',amountColumn:'price',statusColumn:'state',priceScale:'base',priceUnit:'total',currency:'THB',statusMap:{Open:'available'},priceKindColumn:'kind',priceKindMap:{Base:'base',Promo:'promotion',PromoTotal:'promotional_total'}};
+test('full mapping pipeline preserves price kind/provenance and never renews expired promotions through owner confirmation',()=>{
+  const working={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28',ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+  for(const kind of ['Base','Promo','PromoTotal','Unrecognized']){
+    const mapped=mapPriceRows([{code:'A-1',price:11000000,state:'Open',kind}],parserMapping);
+    const batch=stageImport({source:working,rows:mapped,current});
+    assert.equal(batch.changes.length,kind==='Base'?1:0);
+    if(kind==='Base'){assert.equal(batch.changes[0].priceKind,'base');assert.equal(batch.changes[0].priceProvenance.parserVersion,'parser-v2');}
+    else assert.equal(batch.review.length,1);
+  }
+  const unknown=mapPriceRows([{code:'A-1',price:11000000,state:'Open'}],{...parserMapping,priceKindColumn:undefined});
+  assert.ok(stageImport({source:working,rows:unknown,current}).review[0].reasons.includes('unknown_price_kind'));
+});
+test('quarantined same bytes can be re-evaluated after owner confirmation or canonical mapping repair',()=>{
+  const old={...source,effectiveDate:'2026-02-02',validUntil:'2026-02-28'};
+  const quarantined=stageImport({source:old,rows,current});assert.equal(quarantined.status,'review');
+  const confirmed={...old,ownerConfirmedCurrentAt:'2026-10-25',ownerConfirmationProvenance:'synthetic-owner-confirmation'};
+  assert.equal(stageImport({source:confirmed,rows,current,previousBatch:quarantined}).changes.length,1);
+  const orphan=stageImport({source,rows,current:[{...current[0],propertyId:null}]});assert.equal(orphan.status,'review');
+  assert.equal(stageImport({source,rows,current,previousBatch:orphan}).changes.length,1);
+  const failed={...quarantined,status:'failed'};assert.equal(stageImport({source:confirmed,rows,current,previousBatch:failed}).changes.length,1);
+});
+test('applied receipt is invalidated by parser, permission or identity validation changes',()=>{
+  const before=stageImport({source,rows,current});const applied={...before,status:'applied',appliedReceipt:'synthetic-applied'};
+  for(const patch of [{parserVersion:'parser-v3'},{publicationRights:'pending'}])assert.notEqual(stageImport({source:{...source,...patch},rows,current,previousBatch:applied}).status,'duplicate');
+  assert.notEqual(stageImport({source,rows,current:[{...current[0],propertyId:null}],previousBatch:applied}).status,'duplicate');
+});

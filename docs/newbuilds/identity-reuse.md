@@ -1,6 +1,6 @@
 # Existing property identity and off-plan reuse — source contract
 
-No new physical project/unit registry or physical table is introduced. Existing UUIDs survive construction, resale, rental and management. This is a source audit; actual deployed rows/constraints remain unverified because current backend access is unavailable.
+No new physical project/unit registry or physical table is introduced. Existing UUIDs survive construction, resale, rental and management. This is a source audit; subsequent read-only Lovable inspection confirms the existing bridge and scoped RLS, while full actor/lifecycle behavior remains unverified.
 
 | Entity / flow | Current source contract | Reuse decision |
 |---|---|---|
@@ -20,7 +20,7 @@ Canonical evidence: PROJECT.md §06; migrations beginning 20260820010743 and 202
 
 Buyer request metadata keeps `unit_id` as the selected project catalogue row and adds `property_id` as the canonical physical UUID, or null when unmapped. This metadata is intake context, never inventory authority. The team can distinguish missing mapping. Import staging only emits changes for known catalogue rows with an existing canonical property link and preserves that link from trusted current state; incoming file IDs cannot replace it.
 
-Isolated lifecycle contract test passes one mapped asset through offplan/completed/resale/rental/PMS source revisions, retains the physical/building/project/owner/booking/management/document/history references, rejects a spoofed replacement UUID, and emits no changes on a repeated normalized import. It tests the offline plan, not deployed sales/rental/management transactions. No live transition or physical row was created.
+Offline staging tests preserve the trusted physical/catalogue identity, reject a spoofed replacement, enforce the offer-patch field whitelist and emit no changes on repeat normalized import. This is not a lifecycle integration test: rental/PMS/ownership/building/document/history writers were not exercised. Earlier broader lifecycle claims are withdrawn; that acceptance remains outstanding.
 
 Plan before any additive migration: inspect current IDs/constraints and orphan/alias inventory; backup; reconcile exact stable keys and project consistency; reuse current bridges; propose only missing relational FK extensions and offer/source revisions; isolated DB migration/authorization tests; separate approval/deployment. No current table is merged, deleted or repurposed by this tranche.
 
