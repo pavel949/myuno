@@ -30,6 +30,19 @@ Known schedule/expense refusals have RU/EN manager explanations and a safe next
 step. Failed rows remain selected; no success is shown. This is a bounded refusal,
 not a completed extension or rebooking workflow.
 
+Two independently discovered result-loop mismatches were reproduced and fixed:
+the trusted SQL order projection now includes its persisted customer account for
+the strict guest-list identity guard; a real SQL response is passed through the
+actual list consumer in the regression. The actual guest-list hook is also checked
+in Chromium across pending, confirmed and cancelled states. Operational task dates
+retain their civil date and nullable time. The editor sends schedule fields only
+when actually changed; an unchanged time is not truncated or converted to midnight.
+The shared date field permits date-only for operational tasks, while the existing
+CRM default remains unchanged. Three actual generated auto-tasks are assigned and
+completed by the actual editor/gateway against checked PostgreSQL in UTC, Bangkok
+and London; the only completion patch is status, and time remains NULL. This closes
+the permissive-echo fixture gap without weakening the SQL completion guard.
+
 Two bounded guards from PR160 refuse the unpaid cohort before Stripe construction
 or manual-payment writes, including unknown RPC outcomes. Other cohorts require
 an explicit true eligibility response. DB eligibility must therefore precede edge

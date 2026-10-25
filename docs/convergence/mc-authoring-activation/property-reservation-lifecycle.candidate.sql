@@ -374,7 +374,7 @@ BEGIN
   SELECT jsonb_agg(jsonb_build_object('role',role,'name',name,'phone',phone,'email',email)) INTO participants
     FROM public.order_participants WHERE order_id=saved.id AND role='guest';
   RETURN jsonb_build_object('success',true,'replayed',p_replayed,'order',jsonb_build_object(
-    'id',saved.id,'order_number',saved.order_number,'status',saved.status,'start_at',saved.start_at,'end_at',saved.end_at,
+    'id',saved.id,'customer_user_id',saved.customer_user_id,'order_number',saved.order_number,'status',saved.status,'start_at',saved.start_at,'end_at',saved.end_at,
     'total_amount',saved.total_amount,'currency',saved.currency,'notes',saved.notes,'metadata',saved.metadata,
     'created_at',saved.created_at,'updated_at',saved.updated_at,'source_company_id',saved.source_company_id),
     'order_participants',participants,'order_items',jsonb_build_array(jsonb_build_object('item_type','property','resource_id',prop.id)));

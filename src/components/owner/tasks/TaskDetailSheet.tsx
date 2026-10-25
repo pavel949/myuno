@@ -49,6 +49,12 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', labelEn: 'Cancelled', labelRu: 'Отменено', icon: Trash2, color: 'text-muted-foreground' },
 ];
 
+function opsScheduleValue(task: UnifiedTask): string {
+  const date = task.raw?.scheduled_date || task.due_date?.slice(0,10) || '';
+  const time = typeof task.raw?.scheduled_time === 'string' ? task.raw.scheduled_time.slice(0,5) : '';
+  return date && time ? `${date}T${time}` : date;
+}
+
 export function TaskDetailSheet({ task, open, onOpenChange, members, properties, onUpdate, onDelete }: TaskDetailSheetProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
@@ -73,7 +79,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       setStatus(task.status);
       setPriority(task.priority);
       setAssignedTo(task.assigned_to || 'none');
-      setDueDate(task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
+      setDueDate(task.source === 'ops' ? opsScheduleValue(task) : task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
       setActualCost(String(task.raw?.actual_cost ?? ''));
     }
   }, [task]);
@@ -97,9 +103,12 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
     } else {
       updates.status = status;
       updates.notes = description || null;
-      if (dueDate) {
-        updates.scheduled_date = format(new Date(dueDate), 'yyyy-MM-dd');
-        updates.scheduled_time = format(new Date(dueDate), 'HH:mm');
+      const original = opsScheduleValue(task);
+      if (dueDate && dueDate !== original) {
+        const [date,time = ''] = dueDate.split('T');
+        const [originalDate,originalTime = ''] = original.split('T');
+        if (date !== originalDate) updates.scheduled_date = date;
+        if (time !== originalTime) updates.scheduled_time = time || null;
       }
       if (willBeCompleted) {
         updates.completed_at = existingCompletedAt || new Date().toISOString();
@@ -263,6 +272,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
               value={dueDate}
               onChange={setDueDate}
               allowClear={task.source === 'crm'}
+              allowDateOnly={task.source === 'ops'}
             />
 
             {/* Cost (ops tasks only) */}

@@ -3,7 +3,7 @@
   "publishedBase": "46c05eb0479cee46ff7e4232e19894f2aaad2cca",
   "backup": "7e03ed765c121fc851f21bd3a1167ca696412db7",
   "sources": {
-    "docs/convergence/mc-authoring-activation/property-reservation-lifecycle.candidate.sql": "f8d3faed973b9c1ebc6125e3b889227e97cb98cfa943c1a646bd1e8cd7a67830",
+    "docs/convergence/mc-authoring-activation/property-reservation-lifecycle.candidate.sql": "e168f9e24899cd9d45b214803272fd1bf02be4ef46ab8b8dd097215792baf359",
     "docs/convergence/mc-authoring-activation/reservation-task-bridge.candidate.sql": "acc4c99999e0e4a67f25ebd45287818f8ae0477bbe49246bb13b7006881e282d",
     "docs/hardening/rollback/property-reservation-lifecycle-stop.sql": "b90d14195c56a5f5b0f5179a93b4e69f8ec15f05aa15e9f865f2033b4c990874",
     "docs/hardening/rollback/mc_task_commands.candidate.sql": "da7d8ee753628bbdd3259da5d430bb1feceb12c65dee7a83e4c99a6f92167db4",

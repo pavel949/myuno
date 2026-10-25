@@ -26,7 +26,7 @@ const virtual = {
   '@/components/property/DepositPaymentOptions': `export const DepositPaymentOptions=()=>null;`,
   '@/components/property/PayWhenSelector': `export const PayWhenSelector=()=>null;`,
   '@/lib/propertyReservationReceipt': `export {readPropertyReservationReceipt,propertyReservationReceipt} from ${JSON.stringify(receiptSource)};import{supabase}from'@/integrations/supabase/client';export const bindPropertyReservationReader=async(_actor,assertCurrent)=>{assertCurrent();return supabase;};`,
-  '@/integrations/supabase/client': `export const supabase={async rpc(name,args){if(name==='get_property_date_prices')return{data:[],error:null};const response=await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json','X-Fixture-Actor':new URLSearchParams(location.search).get('actor')},body:JSON.stringify({name,args})});const result=await response.json();if(name==='create_property_reservation_checked'&&result.data?.order?.id)localStorage.setItem('mc-isolated-created-order',JSON.stringify(result.data.order.id));return result;},from(table){if(table==='properties')return{select(){return this},in:async()=>({data:[{id:'00000000-0000-4000-8000-000000000001',title_en:'Synthetic property'}],error:null})};if(table!=='orders')throw Error('Raw write forbidden');const q={select(){return q},eq(){return q},is(){return q},order(){return q},in(){return q},then(resolve,reject){return supabase.rpc('fixture_legacy_orders_read',{}).then(resolve,reject)}};return q;}};`,
+  '@/integrations/supabase/client': `export const supabase={async rpc(name,args){if(name==='get_property_date_prices')return{data:[],error:null};const response=await fetch('/rpc',{method:'POST',headers:{'Content-Type':'application/json','X-Fixture-Actor':new URLSearchParams(location.search).get('actor')},body:JSON.stringify({name,args})});const result=await response.json();if(name==='create_property_reservation_checked'&&result.data?.order?.id)localStorage.setItem('mc-isolated-created-order',JSON.stringify(result.data.order.id));return result;},from(table){if(table==='properties'||table==='public_property_catalog')return{select(){return this},in:async()=>({data:[{id:'00000000-0000-4000-8000-000000000001',title_en:'Synthetic property'}],error:null})};if(table!=='orders')throw Error('Raw write forbidden');const q={select(){return q},eq(){return q},is(){return q},order(){return q},in(){return q},then(resolve,reject){return supabase.rpc('fixture_legacy_orders_read',{}).then(resolve,reject)}};return q;}};`,
 };
 const source = `
 import React from 'react';import {createRoot} from 'react-dom/client';
@@ -35,11 +35,12 @@ import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {Toaster} from 'sonner';
 import PropertyInquiry from '@/pages/property/PropertyInquiry';
 import {PropertyReservationReceipt} from '@/components/property/PropertyReservationReceipt';
-import {usePropertyBookings} from '@/hooks/usePropertyBookings';
+import {usePropertyBookings,useGuestPropertyBookings} from '@/hooks/usePropertyBookings';
 import {useMultiPropertyBookings} from '@/hooks/useMultiPropertyBookings';
 import {propertyOrderHoldsInventory} from '@/lib/propertyInventory';
 const property='00000000-0000-4000-8000-000000000001';
 const params=new URLSearchParams(location.search),id=params.get('order');
+function GuestListFixture(){const {bookings,error,refetch}=useGuestPropertyBookings();return <main><button onClick={()=>refetch()}>Refresh my requests</button>{error&&<p role="alert">{String(error)}</p>}{bookings?.map(row=><output key={row.id} data-testid="guest-list-status">{row.status}</output>)}</main>;}
 function PmsFixture(){
  const {bookings,error,refetch,updateBooking}=usePropertyBookings(property);
  const calendar=useMultiPropertyBookings(new Date(2026,10,9),7);
@@ -56,7 +57,7 @@ function PmsFixture(){
 }
 const route=params.get('surface')==='receipt'?'/bookings/'+id:'/property/'+property+'/inquiry?checkIn=2026-11-10&checkOut=2026-11-13&guests=2';
 createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})}>
-<MemoryRouter initialEntries={[route]}>{params.get('surface')==='pms'?<PmsFixture/>:<Routes>
+<MemoryRouter initialEntries={[route]}>{params.get('surface')==='pms'?<PmsFixture/>:params.get('surface')==='guest-list'?<GuestListFixture/>:<Routes>
 <Route path="/property/:id/inquiry" element={<PropertyInquiry/>}/><Route path="/bookings/:id" element={<PropertyReservationReceipt/>}/>
 </Routes>}</MemoryRouter><Toaster/></QueryClientProvider>);`;
 const result = await build({

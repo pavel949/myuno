@@ -9,6 +9,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, chmodSync, chownSync, rea
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import postgres from 'postgres';
+import { listMyPropertyReservations } from '../propertyReservation';
 
 const room = '00000000-0000-4000-8000-000000000001';
 const actor = '00000000-0000-4000-8000-000000000003';
@@ -137,6 +138,17 @@ beforeEach(async()=>{
  await sql`INSERT INTO owner_properties(id,owner_id,title) VALUES (${room},${actor},'Synthetic owned property')`;
 });
 describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
+ it('passes the actual SQL list projection through the real guest consumer with strict account binding',async()=>{
+  await reserve();
+  const client={rpc:async(name:string)=>{
+   if(name!=='list_my_property_reservations_checked')throw Error('Unexpected guest RPC');
+   const data=await asActor(guest,async tx=>(await tx`SELECT list_my_property_reservations_checked() result`)[0].result);
+   return {data,error:null};
+  }};
+  const rows=await listMyPropertyReservations(client,guest);
+  expect(rows).toHaveLength(1);expect(rows[0].order.customer_user_id).toBe(guest);
+  await expect(listMyPropertyReservations(client,operator)).rejects.toThrow('account mismatch');
+ });
  it('live owner NOT NULL compatibility blocks an ownerless managed authoring shell atomically',async()=>{
   await sql.unsafe('ALTER TABLE property_bookings ALTER COLUMN owner_id SET NOT NULL');
   await sql`UPDATE properties SET owner_id=NULL WHERE id=${room}`;
@@ -535,6 +547,7 @@ describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
      let rows;
      if(name==='fixture_legacy_orders_read')rows=await tx`SELECT COALESCE(jsonb_agg(to_jsonb(o)),'[]'::jsonb) result FROM public.orders o WHERE vertical='property' AND deleted_at IS NULL`;
      else if(name==='list_property_reservations_checked')rows=await tx`SELECT public.list_property_reservations_checked(${args.p_property_ids}::uuid[]) result`;
+     else if(name==='list_my_property_reservations_checked')rows=await tx`SELECT public.list_my_property_reservations_checked() result`;
      else if(name==='create_property_reservation_checked')rows=await tx`SELECT public.create_property_reservation_checked(${args.p_request_id}::uuid,${args.p_property_id}::uuid,${tx.json(args.p_input)}) result`;
      else if(name==='read_property_reservation_checked')rows=await tx`SELECT public.read_property_reservation_checked(${args.p_order_id}::uuid) result`;
      else if(name==='change_property_booking')rows=await tx`SELECT public.change_property_booking(${args.p_request_id}::uuid,${args.p_order_id}::uuid,${args.p_expected_updated_at}::text::timestamptz,${tx.json(args.p_patch)}) result`;
@@ -645,6 +658,43 @@ describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
   expect(['completed','cancelled']).toContain(racedTask.status);
   expect(racedTask.completed_by).toBe(racedTask.status==='completed'?staff:null);
   expect((await read(next.order.id,operator)).order.status).toBe('cancelled');
- });
+  if(process.env.MC_GUEST_RESERVATION_BROWSER==='1'){
+   const editorPending=await reserve(uuid(),guest,{check_in:'2026-11-20',check_out:'2026-11-23'});
+   const editorConfirmed=await change(editorPending,{status:'confirmed'},operator);
+   const[editorHold]=await sql`SELECT id FROM property_bookings WHERE external_id=${editorPending.order.id}`;
+   const editorTasks=await sql`SELECT id,updated_at::text AS revision FROM property_operational_tasks WHERE booking_id=${editorHold.id} ORDER BY id`;
+   expect(editorTasks).toHaveLength(3);
+   for(const t of editorTasks)await asActor(operator,tx=>tx`SELECT assign_managed_task_checked(${t.id},${t.revision}::text::timestamptz,${staff})`);
+   const output=join(directory,'task-editor'),allowed=new Set(editorTasks.map(t=>t.id));
+   const server=createServer(async(req,res)=>{
+    const send=(value:unknown)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value));};
+    try{
+     const url=new URL(req.url||'/','http://127.0.0.1');
+     if(req.method==='GET'&&url.pathname==='/task'){
+      const id=url.searchParams.get('id');if(!id||!allowed.has(id))throw Error('fixture_task_scope');
+      const rows=await asActor(staff,tx=>tx`SELECT to_jsonb(t) row FROM property_operational_tasks t WHERE id=${id}`);
+      if(rows.length!==1)throw Error('fixture_task_not_readable');send(rows[0].row);return;
+     }
+     if(req.method==='GET'){
+      const resource=url.pathname==='/'?'fixture.html':url.pathname==='/fixture.js'?'fixture.js':null;
+      if(!resource){res.statusCode=404;res.end();return;}
+      res.setHeader('Content-Type',resource.endsWith('.js')?'text/javascript':'text/html');res.end(readFileSync(join(output,resource)));return;
+     }
+     let body='';for await(const chunk of req){body+=chunk;if(body.length>16384)throw Error('fixture_payload_too_large');}
+     const{name,args}=JSON.parse(body);
+     if(name!=='edit_managed_task_checked'||!allowed.has(args.p_task_id))throw Error('fixture_task_command_not_allowed');
+     const[row]=await asActor(staff,tx=>tx`SELECT edit_managed_task_checked(${args.p_task_id},${args.p_expected_updated_at}::text::timestamptz,${tx.json(args.p_patch)}) result`);
+     send({data:row.result,error:null});
+    }catch(error){send({data:null,error:{message:error instanceof Error?error.message:String(error)}});}
+   });
+   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+   try{const address=server.address() as {port:number};await promisify(execFile)('node',['scripts/qa/managed-task-postgres-editor.mjs',`http://127.0.0.1:${address.port}`,output,JSON.stringify(editorTasks.map(t=>t.id))],{timeout:60000});}
+   finally{await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
+   expect(JSON.parse(readFileSync(join(output,'results.json'),'utf8'))).toHaveLength(3);
+   const completed=await sql`SELECT status,scheduled_time,completed_by FROM property_operational_tasks WHERE booking_id=${editorHold.id}`;
+   expect(completed.every(t=>t.status==='completed'&&t.scheduled_time===null&&t.completed_by===staff)).toBe(true);
+   await change(editorConfirmed,{status:'cancelled'},operator);
+  }
+ },90000);
 
 });

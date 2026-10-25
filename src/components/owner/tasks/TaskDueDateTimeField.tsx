@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { parseCivilDate } from '@/lib/hotelDates';
 
 const DEFAULT_TIME = '18:00';
 const TIME_PRESETS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '18:00', '20:00'];
@@ -18,12 +19,14 @@ interface TaskDueDateTimeFieldProps {
   value: string;
   onChange: (value: string) => void;
   allowClear?: boolean;
+  allowDateOnly?: boolean;
 }
 
 function parseLocalDateTime(value: string) {
   if (!value) {
     return { selectedDate: undefined as Date | undefined, selectedTime: '' };
   }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return { selectedDate: parseCivilDate(value), selectedTime: '' };
 
   const parsed = parse(value, "yyyy-MM-dd'T'HH:mm", new Date());
   if (Number.isNaN(parsed.getTime())) {
@@ -44,6 +47,7 @@ export function TaskDueDateTimeField({
   value,
   onChange,
   allowClear = true,
+  allowDateOnly = false,
 }: TaskDueDateTimeFieldProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -81,10 +85,10 @@ export function TaskDueDateTimeField({
     }
 
     return {
-      label: format(selectedDate, 'dd MMM, HH:mm', { locale: dateLocale }),
+      label: format(selectedDate, selectedTime ? 'dd MMM, HH:mm' : 'dd MMM', { locale: dateLocale }),
       className: 'border-muted-foreground/20 bg-muted text-foreground',
     };
-  }, [dateLocale, isRu, selectedDate]);
+  }, [dateLocale, isRu, selectedDate, selectedTime]);
 
   const quickDates = useMemo(
     () => [
@@ -97,14 +101,14 @@ export function TaskDueDateTimeField({
 
   const handleDateSelect = (date?: Date) => {
     if (!date) return;
-    const nextTime = selectedTime || DEFAULT_TIME;
-    onChange(buildLocalDateTime(date, nextTime));
+    const nextTime = selectedTime || (allowDateOnly ? '' : DEFAULT_TIME);
+    onChange(nextTime ? buildLocalDateTime(date, nextTime) : format(date,'yyyy-MM-dd'));
     setCalendarOpen(false);
   };
 
   const handleTimeChange = (time: string) => {
     if (!selectedDate) return;
-    onChange(buildLocalDateTime(selectedDate, time));
+    onChange(!time && allowDateOnly ? format(selectedDate,'yyyy-MM-dd') : buildLocalDateTime(selectedDate, time));
   };
 
   const handleClear = () => {
@@ -118,8 +122,8 @@ export function TaskDueDateTimeField({
           <Label>{t('Due Date & Time', 'Срок и время')}</Label>
           <p className="text-xs text-muted-foreground">
             {t(
-              'Pick a date first, then set a time or keep the default 18:00.',
-              'Сначала выберите дату, затем время, либо оставьте стандартное 18:00.',
+              allowDateOnly ? 'Pick a date. Time is optional.' : 'Pick a date first, then set a time or keep the default 18:00.',
+              allowDateOnly ? 'Выберите дату. Время необязательно.' : 'Сначала выберите дату, затем время, либо оставьте стандартное 18:00.',
             )}
           </p>
         </div>
@@ -204,7 +208,7 @@ export function TaskDueDateTimeField({
             <Input
               type="time"
               className="pl-9"
-              value={selectedTime || DEFAULT_TIME}
+              value={selectedTime || (allowDateOnly ? '' : DEFAULT_TIME)}
               onChange={(event) => handleTimeChange(event.target.value)}
               disabled={!selectedDate}
             />

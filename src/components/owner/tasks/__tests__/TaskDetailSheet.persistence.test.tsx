@@ -12,6 +12,15 @@ vi.mock('@/components/ui/responsive-modal',()=>({ResponsiveModal:({children,foot
 const task:UnifiedTask={id:'task',source:'ops',title:'Inspection',description:null,status:'pending',priority:'normal',due_date:'2026-10-25',assigned_to:'staff',property_id:'property',task_type:'inspection',raw:{actual_cost:0}};
 beforeEach(()=>{vi.clearAllMocks();});
 describe('task detail persistence result',()=>{
+ it.each([null,'09:00:00'])('does not invent or rewrite operational time %s while completing',async scheduled_time=>{
+  const update=vi.fn().mockResolvedValue(undefined);
+  render(<TaskDetailSheet task={{...task,raw:{scheduled_date:'2026-10-25',scheduled_time,actual_cost:0}}} open onOpenChange={vi.fn()} members={[]} properties={[]} onUpdate={update} onDelete={vi.fn()}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Completed',exact:true}));
+  fireEvent.click(screen.getByRole('button',{name:'Save'}));
+  await waitFor(()=>expect(update).toHaveBeenCalledOnce());
+  const patch=update.mock.calls[0][2];
+  expect(patch.status).toBe('completed');expect(patch).not.toHaveProperty('scheduled_date');expect(patch).not.toHaveProperty('scheduled_time');
+ });
  it('retains the editor and reports backend rejection without success or assignment notification',async()=>{
   const close=vi.fn(),update=vi.fn().mockRejectedValue(Error('Task version changed'));
   render(<TaskDetailSheet task={task} open onOpenChange={close} members={[{user_id:'staff',name:'Employee'}]} properties={[]} onUpdate={update} onDelete={vi.fn()} />);
