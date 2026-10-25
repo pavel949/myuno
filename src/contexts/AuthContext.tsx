@@ -39,6 +39,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  /** UI continuation lifetime; never an authorization or role claim. */
+  sessionEpoch: number;
   signUp: (data: SignUpData) => Promise<SignUpResult>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null; user?: User | null }>;
   signOut: () => Promise<void>;
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionEpoch, setSessionEpoch] = useState(0);
   const refreshFailureCountRef = useRef(0);
   const sessionRevisionRef = useRef(0);
   const actorRef = useRef<string | null>(null);
@@ -76,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearStoredAuthSession = useCallback(() => {
     sessionRevisionRef.current += 1;
+    setSessionEpoch(epoch => epoch + 1);
     clearAppAuthorityCaches();
     actorRef.current = null;
     setSession(null);
@@ -151,7 +155,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted) {
           const nextActor = session?.user.id ?? null;
           if (event === 'SIGNED_OUT') clearStoredAuthSession();
-          else if (actorRef.current !== nextActor) clearAppAuthorityCaches();
+          else if (actorRef.current !== nextActor) {
+            // Initial anonymous signin completes the current intent. Departure
+            // from an admitted actor starts a new lifetime, even when React
+            // batches an A→B→A sequence into one final render.
+            if (actorRef.current !== null) setSessionEpoch(epoch => epoch + 1);
+            clearAppAuthorityCaches();
+          }
           actorRef.current = nextActor;
           sessionRevisionRef.current += 1;
           refreshFailureCountRef.current = 0;
@@ -273,8 +283,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(() => ({
-    user, session, isLoading, signUp, signIn, signOut, resetPassword, updatePassword,
-  }), [user, session, isLoading, signUp, signIn, signOut, resetPassword, updatePassword]);
+    user, session, isLoading, sessionEpoch, signUp, signIn, signOut, resetPassword, updatePassword,
+  }), [user, session, isLoading, sessionEpoch, signUp, signIn, signOut, resetPassword, updatePassword]);
 
   return (
     <AuthContext.Provider value={value}>

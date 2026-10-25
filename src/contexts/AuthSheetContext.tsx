@@ -37,19 +37,20 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [opts, setOpts] = useState<OpenAuthSheetOptions>({});
   const [sheetRevision, setSheetRevision] = useState(0);
-  const { user, session, isLoading } = useAuth();
-  const currentAuth = useRef({ user, session, isLoading });
+  const { user, session, isLoading, sessionEpoch = 0 } = useAuth();
+  const currentAuth = useRef({ user, session, isLoading, sessionEpoch });
   const attempt = useRef(0);
   const [authenticatedAttempt, setAuthenticatedAttempt] = useState<{ revision: number; actorId: string } | null>(null);
-  const pending = useRef<{ revision: number; options: OpenAuthSheetOptions } | null>(null);
+  const pending = useRef<{ revision: number; epoch: number; options: OpenAuthSheetOptions } | null>(null);
 
   // Any departure from an admitted actor invalidates the old intent, even if
   // the same account subsequently signs in again on this mounted provider.
-  if (currentAuth.current.user && (currentAuth.current.user.id !== user?.id || !session)) {
+  if (currentAuth.current.sessionEpoch !== sessionEpoch ||
+      (currentAuth.current.user && (currentAuth.current.user.id !== user?.id || !session))) {
     pending.current = null;
     attempt.current += 1;
   }
-  currentAuth.current = { user, session, isLoading };
+  currentAuth.current = { user, session, isLoading, sessionEpoch };
 
   const closeAuthSheet = useCallback(() => {
     attempt.current += 1;
@@ -64,14 +65,15 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
     const continuation = pending.current;
     if (!continuation || continuation.revision !== originRevision || attempt.current !== originRevision) return;
     const before = currentAuth.current;
-    if (before.isLoading) return;
+    if (before.isLoading || before.sessionEpoch !== continuation.epoch) return;
     const initialActor = before.user?.id;
     let result;
     try { result = await supabase.auth.getUser(); } catch { return; }
     const { data, error } = result;
     const actorId = data.user?.id;
     if (error || !actorId || (expectedActorId && actorId !== expectedActorId) || (initialActor && initialActor !== actorId) ||
-        pending.current !== continuation || attempt.current !== continuation.revision) return;
+        pending.current !== continuation || attempt.current !== continuation.revision ||
+        currentAuth.current.sessionEpoch !== continuation.epoch) return;
     setAuthenticatedAttempt({ revision: continuation.revision, actorId });
   }, []);
 
@@ -83,7 +85,8 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
     if (after.user && after.user.id !== actorId) { closeAuthSheet(); return; }
     if (after.isLoading ||
         after.user?.id !== actorId || after.session?.user.id !== actorId ||
-        pending.current !== continuation || attempt.current !== continuation.revision) return;
+        pending.current !== continuation || attempt.current !== continuation.revision ||
+        currentAuth.current.sessionEpoch !== continuation.epoch) return;
     pending.current = null; // consume before invoking a potentially synchronous writer
     setIsOpen(false);
     const options = continuation.options;
@@ -91,11 +94,11 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
     if (!options.onSuccess && options.redirectTo) {
       window.location.href = sanitizeAuthReturnPath(options.redirectTo);
     }
-  }, [authenticatedAttempt, user, session, isLoading, closeAuthSheet]);
+  }, [authenticatedAttempt, user, session, isLoading, sessionEpoch, closeAuthSheet]);
 
   const openAuthSheet = useCallback((options: OpenAuthSheetOptions = {}) => {
     const revision = ++attempt.current;
-    pending.current = { revision, options: { ...options } };
+    pending.current = { revision, epoch: currentAuth.current.sessionEpoch, options: { ...options } };
     setOpts(options);
     setSheetRevision(revision);
     const auth = currentAuth.current;
