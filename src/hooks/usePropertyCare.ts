@@ -2,9 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { createManagedPropertyDraft, saveManagedPropertyDraft, propertyAuthoringPatch, isIndependentPropertyProvider, readManagedPropertyDraft, readIndependentPropertyForAuthoring } from '@/lib/propertyAuthoring';
+import { createManagedPropertyDraft, saveManagedPropertyDraft, propertyAuthoringPatch, isIndependentPropertyProvider, readManagedPropertyDraft, readIndependentPropertyForAuthoring, resolveManagedPropertyCreation } from '@/lib/propertyAuthoring';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
+import { bindCompanyAccessOperation } from '@/lib/companyAccessOperation';
+import { authoringCreateRequestId, confirmAuthoringCreateIntent } from '@/lib/authoringCreateIntent';
 
 const errorLog = createErrorHandler('usePropertyCare');
 
@@ -96,6 +99,7 @@ export function useOwnerProperty(id: string | undefined, options?: { authoring?:
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id || null;
+  const lifetime = useCompanyAccessLifetime(user?.id, activeCompanyId || undefined);
 
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   return useQuery({
@@ -106,7 +110,9 @@ export function useOwnerProperty(id: string | undefined, options?: { authoring?:
       if (options?.authoring) {
         const independent = await readIndependentPropertyForAuthoring(id, user.id, isAdmin);
         if (independent) return independent;
-        return readManagedPropertyDraft(id, activeCompanyId || undefined);
+        const lease = lifetime.begin();
+        try { return await readManagedPropertyDraft(id, activeCompanyId || undefined, await bindCompanyAccessOperation(lease)); }
+        finally { lease.finish(); }
       }
 
       // Fire all access checks in parallel instead of waterfall
@@ -157,6 +163,7 @@ export function useCreateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { activeCompany, isLoading: companyLoading, error: companyError } = useActiveCompany();
+  const lifetime = useCompanyAccessLifetime(user?.id, activeCompany?.company_id);
   return useMutation({
     mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string; _operatingSpaceId?: string | null; _silent?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
@@ -170,7 +177,21 @@ export function useCreateOwnerProperty() {
         listing_type: data.listing_type || 'rent',
       };
       if (companyId) {
-        return createManagedPropertyDraft({ companyId, operatingSpaceId: data._operatingSpaceId, patch: payload });
+        if (companyId !== activeCompany?.company_id) throw new Error('The active company changed. Reopen this workspace before creating a property.');
+        const lease = lifetime.begin();
+        let intent: { kind: 'property'; actorId: string; companyId: string; spaceId: string } | undefined;
+        try {
+          const operation = await bindCompanyAccessOperation(lease);
+          const result = await createManagedPropertyDraft({ companyId, operatingSpaceId: data._operatingSpaceId, patch: payload, operation,
+            requestId: async spaceId => {
+              intent = { kind: 'property', actorId: user.id, companyId, spaceId };
+              return authoringCreateRequestId(intent, propertyAuthoringPatch(payload), requestId => resolveManagedPropertyCreation(operation, requestId, spaceId));
+            },
+          });
+          operation.assertCurrent();
+          if (intent) confirmAuthoringCreateIntent(intent, result.id);
+          return result;
+        } finally { lease.finish(); }
       }
       // Independently authorized owner path stays separate from MC employment.
       const { data: result, error } = await supabase.from('properties').insert({
@@ -201,13 +222,17 @@ export function useUpdateOwnerProperty() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const { isAdmin } = useIsAdmin();
+  const lifetime = useCompanyAccessLifetime(user?.id, activeCompany?.company_id);
 
   return useMutation({
     mutationFn: async ({ id, _silent, _authoring, _expectedUpdatedAt, _submitForReview, ...data }: Partial<OwnerProperty> & { id: string; _silent?: boolean; _authoring?: boolean; _expectedUpdatedAt?: string; _submitForReview?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
       
       if (_authoring) {
+        const lease = lifetime.begin();
+        try {
         const independent = await readIndependentPropertyForAuthoring(id, user.id, isAdmin);
+        if (activeCompany?.company_id) lease.assertCurrent();
         if (independent) {
           let update = supabase.from('properties').update(data as never).eq('id', id);
           if (!isAdmin) update = independent.owner_id === user.id ? update.eq('owner_id', user.id) : update.eq('provider_id', independent.provider_id!);
@@ -216,12 +241,14 @@ export function useUpdateOwnerProperty() {
           return result.data;
         }
         if (!_expectedUpdatedAt) throw new Error('Reload the draft before saving; its version is unknown.');
-        const current = await readManagedPropertyDraft(id, activeCompany?.company_id);
-        return saveManagedPropertyDraft({
+        const operation = await bindCompanyAccessOperation(lease);
+        const current = await readManagedPropertyDraft(id, activeCompany?.company_id, operation);
+        return await saveManagedPropertyDraft({
           propertyId: id, companyId: current.management_company_id!,
           expectedUpdatedAt: _expectedUpdatedAt,
-          patch: propertyAuthoringPatch(data as Record<string, unknown>), submit: _submitForReview,
+          patch: propertyAuthoringPatch(data as Record<string, unknown>), submit: _submitForReview, operation,
         });
+        } finally { lease.finish(); }
       }
       // Try update as owner first
       const { data: result } = await supabase

@@ -2,14 +2,15 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ManagedComplexDrafts } from '../ManagedComplexDrafts';
+import { webcrypto } from 'node:crypto';
 
-const mocks = vi.hoisted(() => ({ list: vi.fn(), read: vi.fn(), scope: vi.fn(), save: vi.fn(), legacyCreate: vi.fn(), legacyUpdate: vi.fn(), actor: 'employee-a', company: 'company-a', language: 'en', authCallback: null as null | ((event: string, session: unknown) => void) }));
+const mocks = vi.hoisted(() => ({ list: vi.fn(), read: vi.fn(), scope: vi.fn(), save: vi.fn(), resolve: vi.fn(), legacyCreate: vi.fn(), legacyUpdate: vi.fn(), actor: 'employee-a', company: 'company-a', language: 'en', authCallback: null as null | ((event: string, session: unknown) => void) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: mocks.actor } }) }));
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: mocks.company ? { company_id: mocks.company } : null, isLoading: false, error: null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { onAuthStateChange: vi.fn((callback) => { mocks.authCallback = callback; return { data: { subscription: { unsubscribe: vi.fn() } } }; }) } } }));
 vi.mock('@/lib/companyAccessOperation', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/companyAccessOperation')>(), bindCompanyAccessOperation: vi.fn(async lease => { lease.assertCurrent(); return { ...lease, client: {} }; }) }));
-vi.mock('@/lib/complexAuthoring', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/complexAuthoring')>(), listManagedComplexDrafts: mocks.list, readManagedComplexDraft: mocks.read, readComplexCreationScope: mocks.scope, saveManagedComplexDraft: mocks.save }));
+vi.mock('@/lib/complexAuthoring', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/complexAuthoring')>(), listManagedComplexDrafts: mocks.list, readManagedComplexDraft: mocks.read, readComplexCreationScope: mocks.scope, saveManagedComplexDraft: mocks.save, resolveManagedComplexCreation: mocks.resolve }));
 vi.mock('@/hooks/usePropertyComplexes', () => ({ useCreateComplex: () => ({ mutateAsync: mocks.legacyCreate }), useUpdateComplex: () => ({ mutateAsync: mocks.legacyUpdate }) }));
 vi.mock('@/components/shared/GooglePlacesAutocomplete', () => ({ GooglePlacesAutocomplete: () => <div>Address control</div> }));
 vi.mock('@/components/upload/UnifiedMediaUploader', () => ({ UnifiedMediaUploader: () => <div>Media control</div> }));
@@ -21,10 +22,11 @@ function mount() {
   return { ...result, client, refresh: () => result.rerender(<QueryClientProvider client={client}><ManagedComplexDrafts /></QueryClientProvider>) };
 }
 beforeEach(() => {
+  sessionStorage.clear();
   vi.clearAllMocks(); mocks.actor = 'employee-a'; mocks.company = 'company-a'; mocks.language = 'en';
   mocks.list.mockResolvedValue([]); mocks.read.mockResolvedValue(draft); mocks.scope.mockResolvedValue({ companyId: 'company-a', spaces }); mocks.save.mockResolvedValue(draft);
 });
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 async function openNew() {
   await screen.findByText('No drafts in this workspace.');
   fireEvent.click(screen.getByRole('button', { name: 'New complex' }));
@@ -103,6 +105,21 @@ describe('managed complex UI', () => {
     fireEvent.click(save); fireEvent.click(save);
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
     await act(async () => finish(draft));
+  });
+  it('recovers a previous committed create before allowing changed initial content', async () => {
+    vi.stubGlobal('crypto', webcrypto);
+    mocks.resolve.mockResolvedValue(draft);
+    mocks.save.mockImplementation(async (_operation, args) => { await args.requestId('space-a'); throw new Error('Transport error'); });
+    mount(); await openNew(); fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+    await screen.findByRole('alert');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Close' })[0]);
+    await openNew();
+    fireEvent.change(screen.getByLabelText('Name (EN)'), { target: { value: 'Changed initial content' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
+    const reopen = await screen.findByRole('button', { name: 'Reopen saved draft' });
+    expect(mocks.resolve).toHaveBeenCalledTimes(1);
+    fireEvent.click(reopen);
+    expect(await screen.findByLabelText('Name (EN)')).toHaveValue(draft.name);
   });
   it('closes and invalidates the previous editor on account or company switch', async () => {
     const mounted = mount(); await openNew();

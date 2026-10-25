@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { listManagedPropertyDrafts } from '@/lib/propertyAuthoring';
+import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
+import { bindCompanyAccessOperation } from '@/lib/companyAccessOperation';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { Button } from '@/components/ui/button';
 
@@ -14,12 +16,18 @@ export function ManagedPropertyDrafts() {
   const { activeCompany } = useActiveCompany();
   const { language } = useLanguage();
   const companyId = activeCompany?.company_id;
+  const lifetime = useCompanyAccessLifetime(user?.id, companyId);
   const [offset, setOffset] = useState(0);
   useEffect(() => setOffset(0), [user?.id, companyId]);
   const drafts = useQuery({
     queryKey: ['managed-property-drafts', user?.id, companyId, offset],
     enabled: !!user && !!companyId,
-    queryFn: () => listManagedPropertyDrafts(companyId!, offset),
+    queryFn: async ({ signal }) => {
+      const lease = lifetime.begin();
+      signal.addEventListener('abort', lease.finish, { once: true });
+      try { return await listManagedPropertyDrafts(companyId!, offset, 50, await bindCompanyAccessOperation(lease)); }
+      finally { signal.removeEventListener('abort', lease.finish); lease.finish(); }
+    },
   });
   const text = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
   if (!user || !companyId) return null;

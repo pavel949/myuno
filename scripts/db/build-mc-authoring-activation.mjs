@@ -10,8 +10,12 @@ const forward = [
   'docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql',
   'docs/convergence/employee-property-publication/checked-publication.candidate.sql',
   'docs/convergence/employee-complex-publication/checked-complex-publication.candidate.sql',
+  'docs/convergence/mc-authoring-activation/idempotent-create.candidate.sql',
+  'docs/convergence/mc-authoring-activation/task-commands.candidate.sql',
 ];
 const rollback = [
+  'docs/hardening/rollback/mc_task_commands.candidate.sql',
+  'docs/hardening/rollback/mc_authoring_idempotent_create.candidate.sql',
   'docs/hardening/rollback/employee_complex_publication.candidate.sql',
   'docs/hardening/rollback/employee_property_publication.candidate.sql',
 ];

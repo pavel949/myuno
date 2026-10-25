@@ -23,20 +23,20 @@ describe('InquiryConfirmation', () => {
   it('renders the EN heading', () => {
     renderComponent();
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Viewing request received' }),
+      screen.getByRole('heading', { level: 2, name: 'Request submitted' }),
     ).toBeInTheDocument();
   });
 
-  it('renders the WhatsApp confirmation body copy', () => {
+  it('distinguishes request submission from booking confirmation', () => {
     renderComponent();
     expect(
-      screen.getByText(/WhatsApp within 24 hours/i),
+      screen.getByText(/does not mean the reservation is confirmed/i),
     ).toBeInTheDocument();
   });
 
-  it('renders a "View booking" CTA button linked to the orderId', () => {
+  it('renders a status CTA without assuming legacy order ids are canonical bookings', () => {
     renderComponent('test-order-123');
-    const viewBookingBtn = screen.getByRole('button', { name: 'View booking' });
+    const viewBookingBtn = screen.getByRole('button', { name: 'Check status' });
     expect(viewBookingBtn).toBeInTheDocument();
   });
 

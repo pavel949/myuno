@@ -1,5 +1,5 @@
 import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
@@ -14,7 +14,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { executePropertyBookingChange } from '@/lib/manualPropertyBooking';
+import { bindPropertyReservationReader } from '@/lib/propertyReservationReceipt';
 import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -70,6 +73,11 @@ export default function MCBookingsPage() {
   const { language } = useLanguage();
   const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const operationScope = useMemo(() => ({ actor: user?.id, company: activeCompany?.company_id }), [user?.id, activeCompany?.company_id]);
+  const currentOperationScope = useRef(operationScope); currentOperationScope.current = operationScope;
+  const bulkFlight = useRef(false);
 
   const { bookings, isLoading, error, refetch } = useAllPropertyBookings();
 
@@ -181,21 +189,37 @@ export default function MCBookingsPage() {
     setPendingBulkAction(null);
   };
 
-  const executeBulkAction = (action: BulkAction) => {
+  const executeBulkAction = async (action: BulkAction) => {
+    if (bulkFlight.current || !user?.id) return;
     const ids = Array.from(selectedIds);
+    const rows = ids.map(id => bookings?.find(booking => booking.id === id));
+    if (!ids.length || rows.some(row => !row?.updated_at)) {
+      toast.error(isRu ? 'Обновите бронирования перед изменением.' : 'Refresh bookings before changing them.');
+      return;
+    }
     const status = action === 'confirm' ? 'confirmed' : 'cancelled';
+    const assertCurrent = () => { if (currentOperationScope.current !== operationScope) throw new Error('Account or company changed'); };
+    bulkFlight.current = true;
     setBulkBusy(true);
-    supabase.from('orders').update({ status }).in('id', ids).then(({ error }) => {
-      setBulkBusy(false);
-      if (error) {
-        toast.error(action === 'confirm'
-          ? (isRu ? 'Не удалось подтвердить брони' : 'Failed to confirm bookings')
-          : (isRu ? 'Не удалось отменить брони' : 'Failed to cancel bookings'));
-        return;
-      }
-      clearSelection();
-      window.location.reload();
-    });
+    try {
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const outcomes = await Promise.allSettled(rows.map(row => executePropertyBookingChange(client, user.id,
+        row!.id, { status }, row!.updated_at)));
+      assertCurrent();
+      const failedIds = ids.filter((_,index) => outcomes[index].status === 'rejected');
+      await refetch();
+      assertCurrent();
+      setSelectedIds(new Set(failedIds)); setPendingBulkAction(null);
+      if (failedIds.length) toast.error(isRu
+        ? `Подтверждено изменений: ${ids.length-failedIds.length}/${ids.length}. Проверьте оставшиеся бронирования.`
+        : `${ids.length-failedIds.length}/${ids.length} changes confirmed. Review the remaining bookings.`);
+      else toast.success(isRu ? 'Изменения сохранены' : 'Changes saved');
+    } catch {
+      if (currentOperationScope.current === operationScope) toast.error(isRu ? 'Изменение не подтверждено. Обновите статус.' : 'Change not confirmed. Refresh the status.');
+    } finally {
+      bulkFlight.current = false;
+      if (currentOperationScope.current === operationScope) setBulkBusy(false);
+    }
   };
 
   const exportCSV = () => {

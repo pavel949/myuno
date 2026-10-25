@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useGuestPropertyBookings } from '../usePropertyBookings';
 const s = vi.hoisted(() => ({ actor: 'guest-a' as string | null, projectionError: false, orderError: false, calls: [] as string[], ids: [] as string[], filters: [] as unknown[], orders: [] as unknown[] }));
+vi.mock('@/lib/propertyReservationReceipt', () => ({ bindPropertyReservationReader: async () => ({}) }));
+vi.mock('@/lib/propertyReservation', async original => ({ ...await original<typeof import('@/lib/propertyReservation')>(), listMyPropertyReservations: async () => [] }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: s.actor ? { id: s.actor } : null }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => {
  s.calls.push(table);

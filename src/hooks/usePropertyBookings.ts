@@ -1,5 +1,6 @@
 import { addDays, isValid } from 'date-fns';
-import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate } from '@/lib/hotelDates';
+import { useMemo, useRef } from 'react';
+import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, toBangkokDateKey } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
@@ -9,6 +10,9 @@ import { useStorefront } from '@/contexts/StorefrontContext';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
+import { executePropertyBookingChange } from '@/lib/manualPropertyBooking';
+import { listMyPropertyReservations, listPropertyReservations, mergePropertyReservationRows } from '@/lib/propertyReservation';
+import { bindPropertyReservationReader } from '@/lib/propertyReservationReceipt';
 
 const errorLog = createErrorHandler('usePropertyBookings');
 
@@ -76,7 +80,7 @@ interface OrderWithJoins {
   provider_org_id: string | null;
   metadata: Record<string, unknown> | null;
   order_participants?: Array<{ role: string; name: string | null; phone: string | null; email: string | null }> | null;
-  order_items?: Array<{ item_type: string; resource_id: string | null; metadata: Record<string, unknown> | null }> | null;
+  order_items?: Array<{ item_type: string; resource_id: string | null; item_name?: string | null; metadata: Record<string, unknown> | null }> | null;
 }
 
 /**
@@ -114,8 +118,8 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
     guest_name: guestParticipant?.name || undefined,
     guest_phone: guestParticipant?.phone || undefined,
     guest_email: guestParticipant?.email || undefined,
-    check_in: order.start_at?.split('T')[0] || '',
-    check_out: order.end_at?.split('T')[0] || '',
+    check_in: toBangkokDateKey(order.start_at) || '',
+    check_out: toBangkokDateKey(order.end_at) || '',
     guests_count: meta.guests_count as number | undefined,
     total_amount: order.total_amount ?? undefined,
     currency: order.currency ?? undefined,
@@ -141,6 +145,9 @@ export function usePropertyBookings(propertyId?: string) {
   const { storefront } = useStorefront();
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
+  const operationScope = useMemo(() => ({ actor: user?.id, company: activeCompanyId, propertyId }), [user?.id, activeCompanyId, propertyId]);
+  const currentOperationScope = useRef(operationScope); currentOperationScope.current = operationScope;
+  const assertCurrent = () => { if (currentOperationScope.current !== operationScope) throw new Error('Account or property scope changed'); };
 
   const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['property-bookings', user?.id, activeCompanyId, propertyId],
@@ -179,7 +186,10 @@ export function usePropertyBookings(propertyId?: string) {
         query = query.in('order_items.resource_id', allPropertyIds);
       }
 
-      const { data, error } = await query;
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const [raw, checked] = await Promise.all([query, listPropertyReservations(client, propertyId ? [propertyId] : allPropertyIds)]);
+      assertCurrent();
+      const { data, error } = raw;
 
       if (error) {
         errorLog.silent(error, 'fetch_bookings');
@@ -187,7 +197,7 @@ export function usePropertyBookings(propertyId?: string) {
       }
 
       // Map orders to PropertyBooking format
-      return (data || []).map((order) => 
+      return mergePropertyReservationRows(data || [], checked).map((order) =>
         mapOrderToBooking(order, propertyId || '')
       );
     },
@@ -385,116 +395,16 @@ export function usePropertyBookings(propertyId?: string) {
   });
 
   const updateBooking = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => {
+    mutationFn: async ({ id, updated_at: suppliedRevision, ...updates }: Partial<PropertyBooking> & { id: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
-
-      // P1: Overlap validation when dates change (exclude current booking)
-      if (updates.check_in || updates.check_out) {
-        const { data: currentOrder, error: currentError } = await supabase
-          .from('orders')
-          .select('start_at, end_at, order_items!inner(resource_id)')
-          .eq('id', id)
-          .single();
-        if (currentError) throw currentError;
-        if (!currentOrder) throw new Error('Booking not found or access denied');
-        const curr = currentOrder as { start_at?: string; end_at?: string; order_items?: { resource_id: string }[] } | null;
-        const propertyId = curr?.order_items?.[0]?.resource_id;
-        const checkIn = updates.check_in ?? curr?.start_at?.split('T')[0];
-        const checkOut = updates.check_out ?? curr?.end_at?.split('T')[0];
-        if (!propertyId || !checkIn || !checkOut) throw new Error('Booking dates or property unavailable');
-        requireStayDates(checkIn, checkOut);
-        if (propertyId && checkIn && checkOut) {
-          const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
-          const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
-          const newStart = `${checkIn}T${checkInTime}:00Z`;
-          const newEnd = `${checkOut}T${checkOutTime}:00Z`;
-
-          const { data: ordersInRange, error: availabilityError } = await supabase
-            .from('orders')
-            .select('id')
-            .eq('vertical', 'property')
-            .is('deleted_at', null)
-            .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
-            .neq('id', id)
-            .gt('end_at', newStart)
-            .lt('start_at', newEnd);
-
-          if (availabilityError) throw availabilityError;
-          const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
-          const overlapResult = orderIds.length
-            ? await supabase
-                .from('order_items')
-                .select('order_id')
-                .eq('item_type', 'property')
-                .eq('resource_id', propertyId)
-                .in('order_id', orderIds)
-            : { data: [], error: null };
-          if (overlapResult.error) throw overlapResult.error;
-          if ((overlapResult.data || []).length > 0) {
-            throw new Error('Выбранные даты пересекаются с существующим бронированием');
-          }
-
-          const { data: blockedDates, error: blocksError } = await supabase
-            .from('property_availability')
-            .select('date')
-            .eq('property_id', propertyId)
-            .eq('status', 'blocked')
-            .gte('date', checkIn)
-            .lt('date', checkOut);
-          if (blocksError) throw blocksError;
-          if ((blockedDates || []).length > 0) {
-            throw new Error('Выбранные даты заблокированы в календаре');
-          }
-        }
-      }
-
-      // Update the order
-      const orderUpdates: Record<string, string | number> = {};
-      if (updates.check_in) {
-        // Preserve custom check-in time from metadata if available
-        const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
-        orderUpdates.start_at = `${updates.check_in}T${checkInTime}:00Z`;
-      }
-      if (updates.check_out) {
-        const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
-        orderUpdates.end_at = `${updates.check_out}T${checkOutTime}:00Z`;
-      }
-      if (updates.total_amount !== undefined) orderUpdates.total_amount = updates.total_amount;
-      if (updates.currency) orderUpdates.currency = updates.currency;
-      if (updates.status) orderUpdates.status = updates.status;
-      if (updates.notes !== undefined) orderUpdates.notes = updates.notes;
-
-      const { data, error } = await supabase
-        .from('orders')
-        .update(orderUpdates as never)
-        .eq('id', id)
-        .is('deleted_at', null)
-        .select()
-        .single();
-
-      if (error) {
-        errorLog.silent(error, 'update_booking');
-        throw error;
-      }
-      
-      if (!data) throw new Error('Booking not found or access denied');
-
-      // Update guest participant if provided
-      if (updates.guest_name || updates.guest_phone || updates.guest_email) {
-        await supabase
-          .from('order_participants')
-          .upsert({
-            order_id: id,
-            role: 'guest',
-            name: updates.guest_name || 'Guest',
-            phone: updates.guest_phone,
-            email: updates.guest_email,
-          }, {
-            onConflict: 'order_id,role',
-          });
-      }
-
-      return mapOrderToBooking(data, updates.property_id || '');
+      const allowed = new Set(['check_in','check_out','check_in_time','check_out_time','guest_name','guest_phone','guest_email','guests_count','total_amount','deposit_amount','currency','status','notes']);
+      const patch = Object.fromEntries(Object.entries(updates).filter(([,value]) => value !== undefined));
+      if (Object.keys(patch).some(key => !allowed.has(key))) throw new Error('Unsupported reservation change');
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const reply = await executePropertyBookingChange(client, user.id, id, patch,
+        suppliedRevision || bookings?.find(booking => booking.id === id)?.updated_at);
+      assertCurrent();
+      return mapOrderToBooking({ ...reply.order, order_items: reply.order_items, order_participants: reply.order_participants }, reply.order_items[0].resource_id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
@@ -505,20 +415,9 @@ export function usePropertyBookings(propertyId?: string) {
   const deleteBooking = useMutation({
     mutationFn: async (id: string) => {
       if (!user?.id) throw new Error('Not authenticated');
-      
-      // Soft delete by setting deleted_at
-      const { error } = await supabase
-        .from('orders')
-        .update({ 
-          deleted_at: new Date().toISOString(),
-          deleted_by: user.id,
-        })
-        .eq('id', id);
-
-      if (error) {
-        errorLog.silent(error, 'delete_booking');
-        throw error;
-      }
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      await executePropertyBookingChange(client, user.id, id, { status: 'cancelled' }, bookings?.find(booking => booking.id === id)?.updated_at);
+      assertCurrent();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
@@ -529,16 +428,14 @@ export function usePropertyBookings(propertyId?: string) {
   // Bulk update booking statuses
   const bulkUpdateBookings = useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: string; }) => {
+      if (!user?.id) throw new Error('Not authenticated');
       if (!ids.length) return;
-      // bookings are stored in the orders table; ids are order IDs
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: status as Database['public']['Enums']['order_status'] })
-        .in('id', ids);
-      if (error) {
-        errorLog.silent(error, 'bulk_update_bookings');
-        throw error;
-      }
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const outcomes = await Promise.allSettled(ids.map(id => executePropertyBookingChange(client, user.id, id,
+        { status }, bookings?.find(booking => booking.id === id)?.updated_at)));
+      assertCurrent();
+      const failed = outcomes.filter(result => result.status === 'rejected').length;
+      if (failed) throw new Error(`${ids.length-failed}/${ids.length} reservation changes confirmed; reload before retrying failed items`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
@@ -604,6 +501,8 @@ export function useAllPropertyBookings() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id ?? null;
+  const operationScope = useMemo(() => ({ actor: user?.id, company: activeCompanyId }), [user?.id, activeCompanyId]);
+  const currentOperationScope = useRef(operationScope); currentOperationScope.current = operationScope;
 
   const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['all-property-bookings', user?.id, activeCompanyId],
@@ -619,7 +518,7 @@ export function useAllPropertyBookings() {
       if (!propertyIds.length) return [];
 
       // Get orders for these properties
-      const { data, error } = await supabase
+      const query = supabase
         .from('orders')
         .select(`
           *,
@@ -636,15 +535,21 @@ export function useAllPropertyBookings() {
         .is('deleted_at', null)
         .order('start_at', { ascending: true });
 
+      const assertCurrent = () => { if (currentOperationScope.current !== operationScope) throw new Error('Account or property scope changed'); };
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const [raw, checked] = await Promise.all([query, listPropertyReservations(client, propertyIds)]);
+      assertCurrent();
+      const { data, error } = raw;
       if (error) {
         errorLog.silent(error, 'fetch_all_bookings');
         throw error;
       }
 
       // P1 FIX: Batch property lookup instead of N+1 queries
+      const merged = mergePropertyReservationRows(data || [], checked) as OrderWithJoins[];
       const resourceIds = [...new Set(
-        (data || [])
-          .map(order => order.order_items?.[0]?.resource_id)
+        merged
+          .map(order => order.order_items?.find(item => item.item_type === 'property')?.resource_id)
           .filter(Boolean) as string[]
       )];
 
@@ -663,8 +568,8 @@ export function useAllPropertyBookings() {
       }
 
       // Map orders with pre-fetched property data
-      const enrichedData = (data || []).map(order => {
-        const resourceId = order.order_items?.[0]?.resource_id;
+      const enrichedData = merged.map(order => {
+        const resourceId = order.order_items?.find(item => item.item_type === 'property')?.resource_id;
         const propertyData = resourceId ? propertiesMap[resourceId] || null : null;
         
         return {
@@ -673,6 +578,7 @@ export function useAllPropertyBookings() {
         };
       });
 
+      assertCurrent();
       return enrichedData;
     },
     enabled: !!user?.id,
@@ -702,6 +608,8 @@ export function useAllPropertyBookings() {
 // Hook for guest's bookings (where user is the guest)
 export function useGuestPropertyBookings() {
   const { user } = useAuth();
+  const operationScope = useMemo(() => ({ actor: user?.id }), [user?.id]);
+  const currentOperationScope = useRef(operationScope); currentOperationScope.current = operationScope;
 
   const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['guest-property-bookings', user?.id],
@@ -709,7 +617,7 @@ export function useGuestPropertyBookings() {
       if (!user?.id) return [];
 
       // Get orders where user is the customer
-      const { data, error } = await supabase
+      const query = supabase
         .from('orders')
         .select(`
           *,
@@ -725,15 +633,21 @@ export function useGuestPropertyBookings() {
         .is('deleted_at', null)
         .order('start_at', { ascending: true });
 
+      const assertCurrent = () => { if (currentOperationScope.current !== operationScope) throw new Error('Guest account changed'); };
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      const [raw, checked] = await Promise.all([query, listMyPropertyReservations(client, user.id)]);
+      assertCurrent();
+      const { data, error } = raw;
       if (error) {
         errorLog.silent(error, 'fetch_guest_bookings');
         throw error;
       }
 
       // Display enrichment uses only the public projection. Orders remain authoritative.
-      const propertyItem = (order: NonNullable<typeof data>[number]) =>
+      const merged = mergePropertyReservationRows(data || [], checked) as OrderWithJoins[];
+      const propertyItem = (order: OrderWithJoins) =>
         order.order_items?.find(item => item.item_type === 'property');
-      const resourceIds = [...new Set((data || []).map(order => propertyItem(order)?.resource_id).filter((id): id is string => !!id))];
+      const resourceIds = [...new Set(merged.map(order => propertyItem(order)?.resource_id).filter((id): id is string => !!id))];
       const propertiesMap: Record<string, { id: string; title: string | null; title_ru: string | null; address: string | null; cover_image: string | null; check_in_time: string | null; check_out_time: string | null }> = {};
       let propertyNamesUnavailable = false;
       if (resourceIds.length > 0) {
@@ -746,7 +660,7 @@ export function useGuestPropertyBookings() {
           if (prop.id) propertiesMap[prop.id] = { ...prop, id: prop.id, title: prop.title_en };
         }
       }
-      const enrichedData = (data || []).map(order => {
+      const enrichedData = merged.map(order => {
         const item = propertyItem(order);
         const resourceId = item?.resource_id;
         // A stored human-readable name is a historical snapshot, never an identity/link.
@@ -760,6 +674,7 @@ export function useGuestPropertyBookings() {
         };
       });
 
+      assertCurrent();
       return enrichedData;
     },
     enabled: !!user?.id,

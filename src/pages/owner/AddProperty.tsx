@@ -90,6 +90,7 @@ export default function AddProperty() {
       case 'photos':
         return (
           <PhotosStep
+            key={wizard.authoringMediaScope}
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
           />

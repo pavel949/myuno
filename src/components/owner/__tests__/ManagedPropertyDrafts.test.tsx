@@ -8,6 +8,8 @@ vi.mock('@/lib/propertyAuthoring', () => ({ listManagedPropertyDrafts: mocks.lis
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: mocks.actor } }) }));
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: mocks.company ? { company_id: mocks.company } : null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
+vi.mock('@/hooks/useCompanyAccessLifetime', () => ({ useCompanyAccessLifetime: () => ({ begin: () => ({ finish: vi.fn() }) }) }));
+vi.mock('@/lib/companyAccessOperation', () => ({ bindCompanyAccessOperation: vi.fn(async () => ({})) }));
 function mount() { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter><ManagedPropertyDrafts /></MemoryRouter></QueryClientProvider>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.company = 'company-a'; mocks.language = 'en'; mocks.list.mockResolvedValue([]); });
 afterEach(cleanup);
@@ -17,7 +19,7 @@ describe('catalogue-only data entry list', () => {
     mount();
     expect(await screen.findByText('Awaiting review')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open' })).toHaveAttribute('href', '/mc/properties/draft-a/editor');
-    expect(mocks.list).toHaveBeenCalledWith('company-a', 0);
+    expect(mocks.list).toHaveBeenCalledWith('company-a', 0, 50, expect.anything());
   });
   it('keeps an empty scope empty', async () => {
     mount();

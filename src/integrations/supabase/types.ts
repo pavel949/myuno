@@ -18091,6 +18091,7 @@ export type Database = {
       }
       properties: {
         Row: {
+          checked_task_commands_enforced: boolean
           accepts_installments: boolean | null
           accessibility_features: string[] | null
           acquisition_costs: number | null
@@ -18382,6 +18383,7 @@ export type Database = {
           zoning: string | null
         }
         Insert: {
+          checked_task_commands_enforced?: boolean
           accepts_installments?: boolean | null
           accessibility_features?: string[] | null
           acquisition_costs?: number | null
@@ -18673,6 +18675,7 @@ export type Database = {
           zoning?: string | null
         }
         Update: {
+          checked_task_commands_enforced?: boolean
           accepts_installments?: boolean | null
           accessibility_features?: string[] | null
           acquisition_costs?: number | null
