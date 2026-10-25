@@ -36,6 +36,7 @@ const AuthSheetContext = createContext<AuthSheetContextValue | undefined>(undefi
 export function AuthSheetProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [opts, setOpts] = useState<OpenAuthSheetOptions>({});
+  const [sheetRevision, setSheetRevision] = useState(0);
   const { user, session, isLoading } = useAuth();
   const currentAuth = useRef({ user, session, isLoading });
   const attempt = useRef(0);
@@ -59,9 +60,9 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
 
   // Every entry point, including already-authenticated consumers, verifies the
   // current server actor. A successful signup response alone is not a session.
-  const handleSuccess = useCallback(async (expectedActorId?: string) => {
+  const handleSuccess = useCallback(async (originRevision: number, expectedActorId?: string) => {
     const continuation = pending.current;
-    if (!continuation) return;
+    if (!continuation || continuation.revision !== originRevision || attempt.current !== originRevision) return;
     const before = currentAuth.current;
     if (before.isLoading) return;
     const initialActor = before.user?.id;
@@ -96,9 +97,10 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
     const revision = ++attempt.current;
     pending.current = { revision, options: { ...options } };
     setOpts(options);
+    setSheetRevision(revision);
     const auth = currentAuth.current;
     if (!auth.isLoading && auth.user && auth.session?.user.id === auth.user.id) {
-      void handleSuccess(auth.user.id);
+      void handleSuccess(revision, auth.user.id);
     } else {
       setIsOpen(true);
     }
@@ -113,7 +115,7 @@ export function AuthSheetProvider({ children }: { children: ReactNode }) {
   return (
     <AuthSheetContext.Provider value={value}>
       {children}
-      <AuthSheet open={isOpen} onOpenChange={(open) => { if (!open) closeAuthSheet(); }} onSuccess={handleSuccess} intent={opts.intent} />
+      <AuthSheet key={sheetRevision} open={isOpen} onOpenChange={(open) => { if (!open) closeAuthSheet(); }} onSuccess={(actorId) => { void handleSuccess(sheetRevision, actorId); }} intent={opts.intent} />
     </AuthSheetContext.Provider>
   );
 }
