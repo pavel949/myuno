@@ -209,80 +209,111 @@ async def check_owner_business(page, surface, row, completed):
         await expect(page.get_by_test_id('location')).to_have_text('/for-local-services')
 
 
+MAX_LAYOUT_LANES = 2
+
+
+def validate_layout_matrix(results):
+    expected = {(lang, width, surface) for lang in LANGUAGES for width in WIDTHS for surface in SURFACES}
+    actual = [(row.get('lang'), row.get('width'), row.get('surface')) for row in results]
+    failures = [row for row in results if row.get('outcome') != 'PASS']
+    assert len(actual) == len(expected) and len(set(actual)) == len(actual) and set(actual) == expected and not failures, {
+        'required': len(expected), 'completed': len(actual), 'unique': len(set(actual)),
+        'failed': [(row.get('lang'), row.get('width'), row.get('surface'), row.get('error')) for row in failures],
+    }
+    return {'cases': len(actual), 'outcome': 'PASS', 'maxActiveContexts': MAX_LAYOUT_LANES}
+
+
+async def run_layout_lanes(run_language):
+    # One browser, isolated contexts; do not exceed two active lanes.
+    semaphore = asyncio.Semaphore(MAX_LAYOUT_LANES)
+    async def bounded(lang):
+        async with semaphore:
+            await run_language(lang)
+    await asyncio.gather(*(bounded(lang) for lang in LANGUAGES))
+
+
+async def run_language(browser, lang, results):
+    for width in WIDTHS:
+        for surface in SURFACES:
+            context = await browser.new_context(viewport={'width': width, 'height': 900}, timezone_id='Asia/Bangkok', service_workers='block', reduced_motion='reduce')
+            blocked, errors = [], []
+            async def route(request):
+                parsed = urlparse(request.request.url)
+                name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
+                types = {'fixture.html': 'text/html', 'fixture.js': 'text/javascript', 'fixture.css': 'text/css'}
+                if parsed.netloc == 'localhost:8080' and name in types:
+                    await request.fulfill(path=str(OUTPUT / name), content_type=types[name])
+                else:
+                    blocked.append(request.request.url)
+                    await request.abort()
+            await context.route('**/*', route)
+            page = await context.new_page()
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            row = {'lang': lang, 'width': width, 'surface': surface, 'outcome': 'FAIL'}
+            try:
+                await page.goto(f'http://localhost:8080/fixture?lang={lang}&surface={surface}', wait_until='networkidle')
+                await page.evaluate('document.fonts.ready')
+                await expect(page.locator('h1,main').first).to_be_visible()
+                row['header'] = await check_header(page, surface not in ['property', 'account', 'owners', 'business'])
+                assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'document overflow'
+                if surface in ['property', 'account']:
+                    row['geometry'] = await check_sticky(page, surface)
+                    # A resize must update the observer-owned shared offset.
+                    await page.set_viewport_size({'width': 1280 if width < 768 else 320, 'height': 900})
+                    await page.wait_for_timeout(100)
+                    resized_header = await check_header(page, False)
+                    resized_sticky = await page.locator('main .sticky').first.bounding_box()
+                    assert abs(resized_sticky['y'] - resized_header['height']) <= 2, {'resizedSticky': resized_sticky, 'header': resized_header}
+                    await page.set_viewport_size({'width': width, 'height': 900})
+                    await page.wait_for_timeout(100)
+                    await check_header(page, False)
+                    if width < 768:
+                        bottom = page.locator('nav.fixed.bottom-0')
+                        row['bottomBoundsFailures'] = await bounds(page, bottom.locator('a'))
+                        assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
+                        name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
+                        await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
+                elif surface in ['owners', 'business']:
+                    await check_owner_business(page, surface, row, results)
+                else:
+                    row['ctaBoundsFailures'] = await bounds(page, page.locator('section button'))
+                    assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
+                    # Check hero siblings against each other, allowing wrapped rows.
+                    assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
+                    row['destinations'] = await check_destinations(page, surface, row, results)
+                row['fontStack'] = await page.locator('body').evaluate('e=>getComputedStyle(e).fontFamily')
+                row['fontLimitation'] = 'Canonical Google Fonts are not bundled; network denied; system fallback geometry only.'
+                assert not blocked and not errors, {'blocked': blocked, 'errors': errors}
+                row['outcome'] = 'PASS'
+            except Exception as error:
+                row.update(error=str(error), details=error.args[0] if error.args and isinstance(error.args[0], dict) else None, blocked=blocked, runtimeErrors=errors)
+                results.append(row)
+                (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
+                await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}-FAIL.png'), full_page=True)
+            else:
+                await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}.png'), full_page=True)
+                results.append(row)
+                (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
+            finally:
+                await context.close()
+            print(json.dumps({'completed': len(results), 'language': lang, 'width': width, 'surface': surface, 'outcome': row['outcome']}), flush=True)
+
+
 async def main():
     if not os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Browser execution is remote CI-only')
     results = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        for lang in LANGUAGES:
-            for width in WIDTHS:
-                for surface in SURFACES:
-                    context = await browser.new_context(viewport={'width': width, 'height': 900}, timezone_id='Asia/Bangkok', service_workers='block', reduced_motion='reduce')
-                    blocked, errors = [], []
-                    async def route(request):
-                        parsed = urlparse(request.request.url)
-                        name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
-                        types = {'fixture.html': 'text/html', 'fixture.js': 'text/javascript', 'fixture.css': 'text/css'}
-                        if parsed.netloc == 'localhost:8080' and name in types:
-                            await request.fulfill(path=str(OUTPUT / name), content_type=types[name])
-                        else:
-                            blocked.append(request.request.url)
-                            await request.abort()
-                    await context.route('**/*', route)
-                    page = await context.new_page()
-                    page.on('pageerror', lambda error: errors.append(str(error)))
-                    row = {'lang': lang, 'width': width, 'surface': surface, 'outcome': 'FAIL'}
-                    try:
-                        await page.goto(f'http://localhost:8080/fixture?lang={lang}&surface={surface}', wait_until='networkidle')
-                        await page.evaluate('document.fonts.ready')
-                        await expect(page.locator('h1,main').first).to_be_visible()
-                        row['header'] = await check_header(page, surface not in ['property', 'account', 'owners', 'business'])
-                        assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'document overflow'
-                        if surface in ['property', 'account']:
-                            row['geometry'] = await check_sticky(page, surface)
-                            # A resize must update the observer-owned shared offset.
-                            await page.set_viewport_size({'width': 1280 if width < 768 else 320, 'height': 900})
-                            await page.wait_for_timeout(100)
-                            resized_header = await check_header(page, False)
-                            resized_sticky = await page.locator('main .sticky').first.bounding_box()
-                            assert abs(resized_sticky['y'] - resized_header['height']) <= 2, {'resizedSticky': resized_sticky, 'header': resized_header}
-                            await page.set_viewport_size({'width': width, 'height': 900})
-                            await page.wait_for_timeout(100)
-                            await check_header(page, False)
-                            if width < 768:
-                                bottom = page.locator('nav.fixed.bottom-0')
-                                row['bottomBoundsFailures'] = await bounds(page, bottom.locator('a'))
-                                assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
-                                name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
-                                await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
-                        elif surface in ['owners', 'business']:
-                            await check_owner_business(page, surface, row, results)
-                        else:
-                            row['ctaBoundsFailures'] = await bounds(page, page.locator('section button'))
-                            assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
-                            # Check hero siblings against each other, allowing wrapped rows.
-                            assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
-                            row['destinations'] = await check_destinations(page, surface, row, results)
-                        row['fontStack'] = await page.locator('body').evaluate('e=>getComputedStyle(e).fontFamily')
-                        row['fontLimitation'] = 'Canonical Google Fonts are not bundled; network denied; system fallback geometry only.'
-                        assert not blocked and not errors, {'blocked': blocked, 'errors': errors}
-                        row['outcome'] = 'PASS'
-                    except Exception as error:
-                        row.update(error=str(error), details=error.args[0] if error.args and isinstance(error.args[0], dict) else None, blocked=blocked, runtimeErrors=errors)
-                        results.append(row)
-                        (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
-                        await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}-FAIL.png'), full_page=True)
-                    else:
-                        await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}.png'), full_page=True)
-                        results.append(row)
-                        (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
-                    finally:
-                        await context.close()
-        await browser.close()
+        try:
+            await run_layout_lanes(lambda lang: run_language(browser, lang, results))
+        finally:
+            await browser.close()
+    results.sort(key=lambda row: (LANGUAGES.index(row['lang']), WIDTHS.index(row['width']), SURFACES.index(row['surface'])))
     (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
-    failures = [row for row in results if row['outcome'] != 'PASS']
-    assert len(results) == len(LANGUAGES)*len(WIDTHS)*len(SURFACES) and not failures, {'completed': len(results), 'failed': len(failures), 'cases': [(row['lang'], row['width'], row['surface'], row.get('error')) for row in failures]}
+    matrix = validate_layout_matrix(results)
+    (OUTPUT / 'matrix-coverage.json').write_text(json.dumps(matrix, indent=2), encoding='utf-8')
+    print(json.dumps({'combinedLayoutMatrix': matrix}), flush=True)
 
 
 if __name__ == '__main__':
