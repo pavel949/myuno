@@ -1,5 +1,5 @@
 """Anonymous homepage layout and interaction matrix. Local fixture only; deny backend traffic."""
-import asyncio, json, os, sys
+import asyncio, json, os, sys, time
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
@@ -10,13 +10,18 @@ if not os.environ.get('CI') and os.environ.get('HOME_GALLERY_WIDTHS'):
     if not selected or any(width not in WIDTHS for width in selected): raise ValueError('Unknown bounded local viewport')
     WIDTHS = selected
 
+SHARD=os.environ.get('HOME_GALLERY_SHARD')
+if SHARD not in [None,'en','ru','th']: raise ValueError('Unknown gallery language shard')
+LANGUAGES=[SHARD] if SHARD else ['en','ru','th']
+
 async def main():
     results = []
     async with async_playwright() as p:
         system = '/usr/bin/chromium'
         browser = await p.chromium.launch(executable_path=None if os.environ.get('CI') else system if Path(system).exists() else None, args=['--no-sandbox'])
-        for lang in ['en', 'ru', 'th']:
+        for lang in LANGUAGES:
             for width in WIDTHS:
+                case_started=time.monotonic()
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, has_touch=width < 768, reduced_motion='reduce', service_workers='block')
                 blocked, errors = [], []
                 async def route(r):
@@ -34,7 +39,7 @@ async def main():
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
-                    await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='networkidle')
+                    await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
                     await expect(page.locator('.home-rail-viewport')).to_have_count(4)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
@@ -68,17 +73,16 @@ async def main():
                                 await next_button.tap()
                             else:
                                 await next_button.click()
-                            await page.wait_for_timeout(80)
+                            await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0')
                             await rail.focus()
                             await rail.press('End')
-                            await page.wait_for_timeout(80)
                             await expect(next_button).to_have_attribute('aria-disabled','true')
                             await rail.press('Home')
-                            await page.wait_for_timeout(80)
+                            await expect(rail).to_have_js_property('scrollLeft',0)
                             assert await rail.evaluate('(el)=>el.scrollLeft<2')
                             await rail.press('ArrowRight')
-                            await page.wait_for_timeout(80)
+                            await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0')
                             # Focus a card beyond the first view; native focus must reveal it.
                             await rail.locator('a').last.focus()
@@ -99,7 +103,7 @@ async def main():
                             for step in range(1,8):
                                 await session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x-step*22,'y':y}]})
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-                            await page.wait_for_timeout(120)
+                            await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
                     # One intention choice goes directly to canonical results, without an initial form.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
@@ -115,7 +119,7 @@ async def main():
                         for choice in await choices.all():
                             box = await choice.bounding_box()
                             assert box['y'] >= bounds['y'] and box['y']+box['height'] <= bounds['y']+bounds['height'], box
-                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-intent.png'))
+                        if index == 0: await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-intent.png'))
                         await choices.nth(index).click()
                         await expect(page.get_by_test_id('location')).to_have_text('/property/search?'+query)
                         await expect(dialog).to_have_count(0)
@@ -149,6 +153,7 @@ async def main():
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
                     results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
                     print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
@@ -156,11 +161,13 @@ async def main():
                 finally:
                     await context.close()
         # Failures and genuine empties use the same production components.
-        for state in ['empty','error','loading']:
+        for state in (['empty','error','loading'] if SHARD in [None,'en'] else []):
             context = await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
             await context.route('**/*',route)
             page = await context.new_page()
-            await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='networkidle')
+            await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='domcontentloaded')
+            await expect(page.locator('.home-area-guide-link')).to_have_count(4)
+            if state=='loading': await expect(page.locator('.home-properties-loading[role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
                 await expect(page.get_by_role('alert')).to_have_count(2)
@@ -171,7 +178,7 @@ async def main():
                 await expect(page.locator('.home-experiences,.home-services,.home-populated-projects')).to_have_count(0)
                 await expect(page.locator('.home-area-guide-link')).to_have_count(4)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
-            results.append({'state':state,'width':390,'pageOverflow':False})
+            results.append({'language':'en','state':state,'width':390,'pageOverflow':False})
             await context.close()
         await browser.close()
     (OUTPUT/'results.json').write_text(json.dumps(results,indent=2))

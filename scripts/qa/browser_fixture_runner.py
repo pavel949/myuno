@@ -37,7 +37,9 @@ FIXTURE_SPECS = (
     ('today-ui', 'today-isolated'),
     ('property-browse-ui', 'property-browse-isolated'),
     ('home-search-ui', 'home-search-isolated'),
-    ('homepage-galleries-ui', 'homepage-galleries-isolated'),
+    ('homepage-galleries-en-ui', 'homepage-galleries-en-isolated'),
+    ('homepage-galleries-ru-ui', 'homepage-galleries-ru-isolated'),
+    ('homepage-galleries-th-ui', 'homepage-galleries-th-isolated'),
     ('guest-complex-ui', 'guest-complex-isolated'),
     ('shared-surfaces-ui', 'shared-surfaces-isolated'),
 )
@@ -138,7 +140,34 @@ def run_suite(fixtures, evidence_root, timeout_seconds=FIXTURE_TIMEOUT_SECONDS, 
     return suite_succeeded(fixtures, results)
 
 
+def verify_homepage_matrix(evidence_root):
+    # Sharding changes execution size, never the required responsive/locale matrix.
+    widths = [320, 360, 375, 390, 430, 768, 1440, 1920]
+    expected = {(lang, width, 'data') for lang in ['en', 'ru', 'th'] for width in widths}
+    expected |= {('en', 390, state) for state in ['empty', 'error', 'loading']}
+    actual = []
+    for lang in ['en', 'ru', 'th']:
+        rows = json.loads((evidence_root / f'homepage-galleries-{lang}-isolated' / 'results.json').read_text())
+        if not isinstance(rows, list):
+            raise ValueError('Gallery shard evidence must be a result list')
+        for row in rows:
+            if row.get('language') != lang or row.get('pageOverflow') is not False:
+                raise ValueError('Gallery shard has wrong language or missing layout assertion')
+            actual.append((row.get('language'), row.get('width'), row.get('state')))
+    if len(actual) != len(expected) or len(set(actual)) != len(actual) or set(actual) != expected:
+        raise ValueError(f'Incomplete or duplicate homepage matrix: expected {len(expected)}, got {len(actual)}')
+    return {'outcome': 'PASS', 'dataCases': 24, 'stateCases': 3, 'total': len(actual), 'workers': MAX_WORKERS, 'perFixtureTimeout': FIXTURE_TIMEOUT_SECONDS}
+
+
 if __name__ == '__main__':
     evidence_root = Path('/tmp/browser')
     fixtures = [Fixture(Path(f'scripts/qa/{name}.mjs'), evidence_root / output) for name, output in FIXTURE_SPECS]
-    raise SystemExit(0 if run_suite(fixtures, evidence_root) else 1)
+    passed = run_suite(fixtures, evidence_root)
+    try:
+        matrix = verify_homepage_matrix(evidence_root)
+    except Exception as error:
+        matrix = {'outcome': 'FAIL', 'error': str(error)}
+        passed = False
+    (evidence_root / 'homepage-matrix-coverage.json').write_text(json.dumps(matrix, indent=2))
+    print(json.dumps({'homepageMatrix': matrix}), flush=True)
+    raise SystemExit(0 if passed else 1)
