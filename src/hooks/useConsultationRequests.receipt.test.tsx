@@ -1,3 +1,4 @@
+import { webcrypto } from 'node:crypto';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -19,7 +20,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
 } }));
 const clients: QueryClient[] = [];
 function wrapper({ children }: { children: ReactNode }) { const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } }); clients.push(client); return <QueryClientProvider client={client}>{children}</QueryClientProvider>; }
-beforeEach(() => { vi.clearAllMocks(); fixture.user = null; fixture.row = null; fixture.readError = false; fixture.readThrows = false; fixture.rpc.mockResolvedValue({ data: 'synthetic-receipt', error: null }); fixture.invoke.mockResolvedValue({ data: null, error: null }); });
+beforeEach(() => { vi.stubGlobal('crypto', webcrypto); sessionStorage.clear(); vi.clearAllMocks(); fixture.user = null; fixture.row = null; fixture.readError = false; fixture.readThrows = false; fixture.rpc.mockResolvedValue({ data: 'synthetic-receipt', error: null }); fixture.invoke.mockResolvedValue({ data: null, error: null }); });
 afterEach(() => { cleanup(); clients.forEach(client => client.clear()); clients.length = 0; });
 const input = { request_type: 'full_management', name: 'Synthetic owner', phone: '+66000000000' };
 it.each([null, '', '   ', 42])('rejects an unconfirmed consultation receipt %s without success acknowledgement', async data => {
@@ -52,4 +53,16 @@ it('acknowledges the owner marketing receipt without claiming notification deliv
   const { result } = renderHook(useUniversalLead, { wrapper });
   await act(async () => { expect(await result.current.submitLead.mutateAsync({ ...input, vertical_id: 'properties', lead_source: 'website' as never, entry_point: 'synthetic-owner' })).toEqual({ id: 'synthetic-receipt' }); });
   expect(fixture.rpc).toHaveBeenCalledOnce();
+});
+
+it('reuses the same key after lost response and does not redispatch after acknowledged replay', async () => {
+  fixture.rpc.mockRejectedValueOnce(new Error('synthetic lost response')).mockResolvedValue({data:'synthetic-receipt',error:null});
+  const {result}=renderHook(useUniversalLead,{wrapper});
+  const request={...input,vertical_id:'properties',lead_source:'cta' as const,entry_point:'synthetic-idempotent'};
+  await act(async()=>{await expect(result.current.submitLead.mutateAsync(request)).rejects.toThrow('lost response');});
+  await act(async()=>{await result.current.submitLead.mutateAsync(request);});
+  const notifications=fixture.invoke.mock.calls.length;
+  await act(async()=>{await result.current.submitLead.mutateAsync(request);});
+  expect(fixture.rpc).toHaveBeenCalledTimes(2);expect(fixture.rpc.mock.calls[0][1].payload.intake_request_key).toBe(fixture.rpc.mock.calls[1][1].payload.intake_request_key);
+  expect(fixture.invoke.mock.calls.length).toBe(notifications);
 });
