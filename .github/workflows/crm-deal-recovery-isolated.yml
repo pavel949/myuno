@@ -9,8 +9,6 @@ on:
       - 'scripts/qa/crm-deal-recovery.*'
       - '.github/workflows/crm-deal-recovery-isolated.yml'
       - 'package*.json'
-  push:
-    branches: ['codex/crm-deal-recovery-public-20261025']
 permissions:
   contents: read
 concurrency:
