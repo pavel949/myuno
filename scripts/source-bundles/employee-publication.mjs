@@ -108,7 +108,7 @@ export function buildEmployeePublicationBundle({ rootDir = repositoryRoot, inclu
   });
   return [
     '-- SOURCE CANDIDATE ONLY. NO DATABASE EXECUTION OR ACTIVATION AUTHORIZATION.',
-    `-- Reviewed input reference: ${manifest.sourceCommit}`,
+    `-- Pinned input reference: ${manifest.sourceCommit}`,
     `-- Mode: ${rollback ? 'fail-closed rollback' : 'activation'}; optional admin delegation: ${includeDelegation ? 'included, separate approval required' : 'not included'}.`,
     '-- No employee, identity, membership, Space, enforcement or named-user permission seeds.',
     '-- Runtime tests, deployed equivalence and explicit exact-change approval remain required.',

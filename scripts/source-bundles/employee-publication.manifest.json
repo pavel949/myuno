@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "0ea175ea1887c45cbff3f21b91d535ddd3020038",
+  "sourceCommit": "7e03ed765c121fc851f21bd3a1167ca696412db7",
   "activation": [
     {
       "id": "task-ceiling",
@@ -19,7 +19,7 @@
     {
       "id": "property-publication",
       "path": "docs/convergence/employee-property-publication/checked-publication.candidate.sql",
-      "sha256": "97471957b6cbee06a06776d71dec00d1ada39412f8ecd0095f58b8c50eff2106"
+      "sha256": "e020671fb695cf56032bf1a9516ba11f00a10e8f56c4a168abcc1c866f96e760"
     },
     {
       "id": "complex-publication",
@@ -54,5 +54,6 @@
       "path": "docs/hardening/rollback/employee_property_publication.candidate.sql",
       "sha256": "2e83b8746d39e5cab0bc7015febf3009f4fc1a8f9d1e4e9f801a43302be0ec56"
     }
-  ]
+  ],
+  "previousSourceCommit": "0ea175ea1887c45cbff3f21b91d535ddd3020038"
 }

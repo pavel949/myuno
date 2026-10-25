@@ -8,7 +8,7 @@ $$;
 GRANT USAGE ON SCHEMA auth TO authenticated, anon;
 CREATE TABLE user_roles(user_id uuid, role text);
 CREATE TABLE org_members(org_id uuid,user_id uuid);
-CREATE TABLE management_companies(id uuid PRIMARY KEY, operating_spaces_enforced boolean);
+CREATE TABLE management_companies(id uuid PRIMARY KEY, operating_spaces_enforced boolean, is_active boolean NOT NULL DEFAULT true);
 CREATE TABLE management_company_members(id uuid,company_id uuid,user_id uuid,is_active boolean,role text);
 CREATE TABLE team_member_permissions(company_id uuid,user_id uuid,module text,can_view boolean,can_edit boolean,can_export boolean);
 CREATE TABLE property_manager_assignments(property_id uuid,manager_user_id uuid,is_active boolean);
@@ -22,20 +22,20 @@ ALTER TABLE order_status_history ALTER from_status TYPE order_status USING from_
 ALTER TABLE order_status_history ALTER to_status TYPE order_status USING to_status::order_status;
 CREATE FUNCTION public.actor_property_scope_ceiling(p_property_id uuid,p_company_id uuid) RETURNS boolean
 LANGUAGE sql STABLE AS $$
- SELECT EXISTS(SELECT 1 FROM properties p JOIN management_companies c ON c.id=p.management_company_id
+ SELECT EXISTS(SELECT 1 FROM public.properties p JOIN public.management_companies c ON c.id=p.management_company_id
  WHERE p.id=p_property_id AND c.id=p_company_id AND (c.operating_spaces_enforced IS FALSE OR
- EXISTS(SELECT 1 FROM fixture_space_access a WHERE a.actor_id=auth.uid() AND a.property_id=p_property_id)))
+ EXISTS(SELECT 1 FROM public.fixture_space_access a WHERE a.actor_id=auth.uid() AND a.property_id=p_property_id)))
 $$;
 CREATE FUNCTION public.actor_is_operating_company_overseer(uuid) RETURNS boolean LANGUAGE sql STABLE AS $$SELECT false$$;
 CREATE FUNCTION public.staff_can_access_property_e28_private(actor uuid,prop uuid) RETURNS boolean LANGUAGE sql STABLE AS $$
- SELECT EXISTS(SELECT 1 FROM fixture_property_access WHERE actor_id=actor AND property_id=prop)
+ SELECT EXISTS(SELECT 1 FROM public.fixture_property_access WHERE actor_id=actor AND property_id=prop)
 $$;
 CREATE FUNCTION public.mc_can_access_e28_private(actor uuid,company uuid,mod text,action text) RETURNS boolean LANGUAGE sql STABLE AS $$
- SELECT EXISTS(SELECT 1 FROM team_member_permissions WHERE company_id=company AND user_id=actor AND module=mod
+ SELECT EXISTS(SELECT 1 FROM public.team_member_permissions WHERE company_id=company AND user_id=actor AND module=mod
  AND CASE action WHEN 'edit' THEN can_edit WHEN 'view' THEN can_view ELSE false END)
 $$;
 CREATE FUNCTION public.is_finance_staff_e28_private(actor uuid) RETURNS boolean LANGUAGE sql STABLE AS $$
- SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=actor AND role IN ('admin','staff','finance'))
+ SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=actor AND role IN ('admin','staff','finance'))
 $$;
 -- Direct table writes stay unavailable for the simulated authenticated role.
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;

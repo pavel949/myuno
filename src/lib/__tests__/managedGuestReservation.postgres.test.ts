@@ -132,7 +132,7 @@ async function seedLegacy(options:{customer?:string;status?:string;reconciled?:b
 async function grantManager(){await sql`INSERT INTO fixture_property_access VALUES (${operator},${room})`;await sql`INSERT INTO team_member_permissions VALUES (${company},${operator},'bookings',true,true,false)`;await sql`INSERT INTO management_company_members VALUES (${uuid()},${company},${operator},true,'manager')`;}
 beforeEach(async()=>{
  await sql.unsafe('TRUNCATE pms_commands.manual_booking_receipts,ledger_entries,property_financials,owner_properties,property_activity_log,properties,orders,order_items,order_participants,property_bookings,property_availability,order_status_history,reconciliation_alerts,user_roles,management_companies,management_company_members,team_member_permissions,fixture_property_access,fixture_space_access CASCADE');
- await sql`INSERT INTO management_companies VALUES (${company},false)`;
+ await sql`INSERT INTO management_companies(id,operating_spaces_enforced) VALUES (${company},false)`;
  await sql`INSERT INTO properties(id,owner_id,is_active,management_company_id,approval_status) VALUES (${room},${actor},true,${company},'approved')`;
  await sql`INSERT INTO owner_properties(id,owner_id,title) VALUES (${room},${actor},'Synthetic owned property')`;
 });
@@ -548,5 +548,103 @@ describe('registered unpaid property lifecycle / actual PostgreSQL roles',()=>{
   const[hold]=await sql`SELECT status FROM property_bookings`;expect(hold.status).toBe('cancelled');
   expect((await reserve(uuid(),uuid())).order.status).toBe('pending');
  },90000);
+
+ it('revokes company-based booking authority when the company becomes inactive without replacing independent guest rights',async()=>{
+  const created=await reserve();await grantManager();
+  await sql`UPDATE management_companies SET is_active=false WHERE id=${company}`;
+  await expect(change(created,{status:'confirmed'},operator)).rejects.toThrow('forbidden');
+  await expect(read(request,operator)).rejects.toThrow('forbidden');
+  expect((await read(request,guest)).order.status).toBe('pending');
+  expect((await change(created,{status:'cancelled'},guest)).order.status).toBe('cancelled');
+ });
+
+ it('one canonical guest hold drives manager confirmation, booking tasks, staff completion and cancellation release',async()=>{
+  // Extend this same owned database: real reservation commands + real task
+  // commands and booking-preparation trigger. Auth lookup dependencies remain
+  // explicitly synthetic; this is not a PostgREST/live actor acceptance claim.
+  const space=uuid(),staff=uuid(),otherStaff=uuid();
+  await grantManager();
+  await sql.unsafe(`ALTER TABLE properties ADD content_author_user_id uuid;
+   CREATE TABLE operating_spaces(id uuid PRIMARY KEY,management_company_id uuid,is_active boolean DEFAULT true);
+   CREATE TABLE operating_space_properties(operating_space_id uuid,property_id uuid,management_company_id uuid);
+   CREATE TABLE operating_space_members(operating_space_id uuid,management_company_id uuid,company_member_id uuid,is_active boolean);
+   CREATE TABLE property_operational_tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),property_id uuid NOT NULL REFERENCES properties(id),
+    booking_id uuid REFERENCES property_bookings(id),assigned_to uuid,title text NOT NULL,title_ru text,description text,task_type text NOT NULL,
+    scheduled_date date NOT NULL,scheduled_time time,priority text DEFAULT 'normal',status text DEFAULT 'pending',completed_by uuid,
+    completed_at timestamptz,notes text,actual_cost numeric DEFAULT 0,expense_created boolean DEFAULT false,photo_proof text[] DEFAULT '{}',
+    estimated_cost numeric DEFAULT 0,cost_currency text DEFAULT 'THB',created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());
+   ALTER TABLE property_operational_tasks ENABLE ROW LEVEL SECURITY;
+   GRANT SELECT ON property_operational_tasks TO authenticated;
+   CREATE POLICY synthetic_task_scope ON property_operational_tasks FOR SELECT TO authenticated USING(
+    EXISTS(SELECT 1 FROM fixture_property_access a WHERE a.actor_id=auth.uid() AND a.property_id=property_operational_tasks.property_id));
+   GRANT SELECT ON fixture_property_access TO authenticated;`);
+  await sql`INSERT INTO operating_spaces VALUES(${space},${company},true)`;
+  await sql`INSERT INTO operating_space_properties VALUES(${space},${room},${company})`;
+  for(const who of [operator,staff,otherStaff]){
+   if(who!==operator){await sql`INSERT INTO management_company_members VALUES(${uuid()},${company},${who},true,'staff')`;await sql`INSERT INTO fixture_property_access VALUES(${who},${room})`;}
+   if(who!==operator)await sql`INSERT INTO property_manager_assignments VALUES(${room},${who},true)`;
+   const[m]=await sql`SELECT id FROM management_company_members WHERE user_id=${who}`;
+   await sql`INSERT INTO operating_space_members VALUES(${space},${company},${m.id},true)`;
+   await sql`INSERT INTO team_member_permissions VALUES(${company},${who},'tasks',true,true,false)`;
+  }
+  await script(readFileSync('docs/convergence/mc-authoring-activation/task-commands.candidate.sql','utf8'));
+  await script(readFileSync('docs/convergence/mc-authoring-activation/reservation-task-bridge.candidate.sql','utf8'));
+  await sql`UPDATE properties SET checked_task_commands_enforced=true WHERE id=${room}`;
+  const source=readFileSync('supabase/migrations/20260227233450_bea959b6-ee92-470f-8d68-472c844bc934.sql','utf8');
+  const start=source.indexOf('CREATE OR REPLACE FUNCTION public.auto_create_booking_tasks()');
+  const end=source.indexOf('$$;',start)+3;
+  await sql.unsafe(source.slice(start,end));
+  await sql.unsafe('CREATE TRIGGER trg_auto_create_booking_tasks AFTER INSERT OR UPDATE ON property_bookings FOR EACH ROW EXECUTE FUNCTION auto_create_booking_tasks()');
+  const pending=await reserve();
+  expect(await sql`SELECT id FROM property_operational_tasks`).toHaveLength(0);
+  const confirmed=await change(pending,{status:'confirmed'},operator);
+  const tasks=await sql`SELECT id,booking_id,updated_at::text AS revision FROM property_operational_tasks ORDER BY task_type`;
+  expect(tasks).toHaveLength(3);
+  const[hold]=await sql`SELECT id,status FROM property_bookings WHERE external_id=${request}`;
+  expect(hold.status).toBe('confirmed');expect(tasks.every(t=>t.booking_id===hold.id)).toBe(true);
+  await expect(change(confirmed,{check_out:'2026-11-14'},operator)).rejects.toThrow('task schedule reconciliation required');
+  expect((await read()).order.end_at).toBe(confirmed.order.end_at);
+  const task=tasks[0];
+  const assigned=await asActor(operator,async tx=>(await tx`SELECT assign_managed_task_checked(${task.id},${task.revision}::text::timestamptz,${staff}) row`)[0].row);
+  expect(await asActor(otherStaff,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task.id}`)).toHaveLength(0);
+  await expect(asActor(otherStaff,tx=>tx`SELECT complete_managed_task_checked(${task.id},${assigned.updated_at}::text::timestamptz,'done')`)).rejects.toThrow('assigned task authority');
+  const done=await asActor(staff,async tx=>(await tx`SELECT complete_managed_task_checked(${task.id},${assigned.updated_at}::text::timestamptz,'done') row`)[0].row);
+  expect(done.completed_by).toBe(staff);expect(done.completed_at).toBeTruthy();
+  expect((await asActor(operator,tx=>tx`SELECT status,completed_by FROM property_operational_tasks WHERE id=${task.id}`))[0]).toEqual({status:'completed',completed_by:staff});
+  expect((await read()).order.status).toBe('confirmed');
+  const pendingTask=tasks[1];
+  const unrelated=uuid(),foreignTask=uuid();
+  await sql`INSERT INTO properties(id,owner_id,is_active) VALUES(${otherRoom},${actor},false)`;
+  await sql`INSERT INTO property_operational_tasks(id,property_id,title,task_type,scheduled_date)
+   VALUES(${unrelated},${room},'Unrelated work','inspection','2026-11-10'),
+   (${foreignTask},${otherRoom},'Other property work','inspection','2026-11-10')`;
+  await sql`UPDATE property_operational_tasks SET actual_cost=100 WHERE id=${pendingTask.id}`;
+  await expect(change(confirmed,{status:'cancelled'},operator)).rejects.toThrow('task expense reconciliation required');
+  expect((await read()).order.status).toBe('confirmed');
+  expect((await sql`SELECT status FROM property_bookings WHERE id=${hold.id}`)[0].status).toBe('confirmed');
+  await sql`UPDATE property_operational_tasks SET actual_cost=0 WHERE id=${pendingTask.id}`;
+  const cancellation=uuid();
+  await change(confirmed,{status:'cancelled'},operator,cancellation);
+  expect((await change(confirmed,{status:'cancelled'},operator,cancellation)).replayed).toBe(true);
+  expect((await read()).order.status).toBe('cancelled');
+  const finalTasks=await sql`SELECT status,completed_by FROM property_operational_tasks WHERE booking_id=${hold.id}`;
+  expect(finalTasks.filter(t=>t.status==='cancelled')).toHaveLength(2);
+  expect(finalTasks.filter(t=>t.status==='completed'&&t.completed_by===staff)).toHaveLength(1);
+  expect((await sql`SELECT status FROM property_operational_tasks WHERE id IN (${unrelated},${foreignTask})`).map(t=>t.status)).toEqual(['pending','pending']);
+  const next=await reserve(uuid(),uuid());expect(next.order.status).toBe('pending');
+  const nextConfirmed=await change(next,{status:'confirmed'},operator);
+  const[nextHold]=await sql`SELECT id FROM property_bookings WHERE external_id=${next.order.id}`;
+  const[nextTask]=await sql`SELECT id,updated_at::text AS revision FROM property_operational_tasks WHERE booking_id=${nextHold.id} ORDER BY id LIMIT 1`;
+  const nextAssigned=await asActor(operator,async tx=>(await tx`SELECT assign_managed_task_checked(${nextTask.id},${nextTask.revision}::text::timestamptz,${staff}) row`)[0].row);
+  const race=await Promise.allSettled([
+   asActor(staff,async tx=>(await tx`SELECT complete_managed_task_checked(${nextTask.id},${nextAssigned.updated_at}::text::timestamptz,'race done') row`)[0].row),
+   change(nextConfirmed,{status:'cancelled'},operator),
+  ]);
+  expect(race[1].status).toBe('fulfilled');
+  const[racedTask]=await sql`SELECT status,completed_by FROM property_operational_tasks WHERE id=${nextTask.id}`;
+  expect(['completed','cancelled']).toContain(racedTask.status);
+  expect(racedTask.completed_by).toBe(racedTask.status==='completed'?staff:null);
+  expect((await read(next.order.id,operator)).order.status).toBe('cancelled');
+ });
 
 });

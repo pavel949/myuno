@@ -199,7 +199,7 @@ BEGIN
   END IF;
   SELECT * INTO prop FROM public.properties WHERE id=p_property_id;
   IF NOT FOUND OR NOT ((NOT p_guest AND (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
-    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)))
+    OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false))))
     OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved' AND prop.deleted_at IS NULL
       AND (prop.listing_type='rent' OR 'rent'=ANY(prop.listing_modes))
       AND CASE WHEN COALESCE(cardinality(prop.tenancy_modes),0)>0 THEN 'short'=ANY(prop.tenancy_modes)
@@ -263,7 +263,7 @@ BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(p_request_id::text,0));
   SELECT * INTO prop FROM public.properties WHERE id=p_property_id FOR UPDATE;
   IF NOT FOUND OR NOT ((NOT p_guest AND (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
-    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)))
+    OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false))))
     OR (p_guest AND prop.is_active IS TRUE AND prop.approval_status='approved' AND prop.deleted_at IS NULL
       AND (prop.listing_type='rent' OR 'rent'=ANY(prop.listing_modes))
       AND CASE WHEN COALESCE(cardinality(prop.tenancy_modes),0)>0 THEN 'short'=ANY(prop.tenancy_modes)
@@ -348,7 +348,7 @@ BEGIN
   SELECT * INTO prop FROM public.properties WHERE id=intent.property_id;
   SELECT * INTO saved FROM public.orders WHERE id=p_order_id AND vertical='property' AND deleted_at IS NULL;
   IF NOT FOUND OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=auth.uid()
-    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','view'),false)
+    OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','view'),false))
     OR (saved.customer_user_id=auth.uid() AND (intent.payload->>'guest_mode')::boolean IS TRUE)) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
   END IF;
@@ -416,7 +416,7 @@ BEGIN
   FOREACH requested IN ARRAY p_property_ids LOOP
     SELECT * INTO prop FROM public.properties WHERE id=requested;
     IF NOT FOUND OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=auth.uid()
-      OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','view'),false)) IS TRUE THEN
+      OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','view'),false))) IS TRUE THEN
       RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
     END IF;
   END LOOP;
@@ -443,7 +443,7 @@ BEGIN
   SELECT * INTO saved FROM public.orders WHERE id=p_order_id AND vertical='property' AND deleted_at IS NULL;
   IF saved.id IS NULL OR saved.updated_at IS NULL OR (SELECT count(*) FROM public.order_items WHERE order_id=p_order_id)<>1
     OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=auth.uid()
-      OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)
+      OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false))
       OR (saved.customer_user_id=auth.uid() AND EXISTS(SELECT 1 FROM pms_commands.manual_booking_receipts WHERE order_id=p_order_id AND command_kind='create' AND (payload->>'guest_mode')::boolean IS TRUE))) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
   END IF;
@@ -506,7 +506,7 @@ BEGIN
   END IF;
   SELECT * INTO prop FROM public.properties WHERE id=linked FOR UPDATE;
   IF NOT FOUND OR NOT (COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
-    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false)) IS TRUE THEN
+    OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false))) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';
   END IF;
   SELECT * INTO saved FROM public.orders WHERE id=p_order_id FOR UPDATE;
@@ -607,7 +607,7 @@ BEGIN
   SELECT * INTO prop FROM public.properties WHERE id=intent.property_id FOR UPDATE;
   SELECT * INTO saved FROM public.orders WHERE id=p_order_id FOR UPDATE;
   operator := COALESCE(public.actor_has_platform_admin(),false) OR prop.owner_id=actor
-    OR COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false);
+    OR (EXISTS(SELECT 1 FROM public.management_companies c WHERE c.id=prop.management_company_id AND c.is_active IS TRUE) AND COALESCE(public.actor_can_operate_property(prop.id,prop.management_company_id,'bookings','edit'),false));
   IF NOT (operator OR (saved.customer_user_id=actor AND (intent.payload->>'guest_mode')::boolean IS TRUE
     AND p_patch='{"status":"cancelled"}'::jsonb)) IS TRUE THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE='42501';

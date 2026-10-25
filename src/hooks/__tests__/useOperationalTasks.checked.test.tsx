@@ -25,6 +25,18 @@ import { useOperationalTasks } from '../useOperationalTasks';
 function mount(){const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});const wrapper=({children}:{children:ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>;return {...renderHook(()=>useOperationalTasks(),{wrapper}),client};}
 beforeEach(()=>{cleanup();fixture.actor='staff';fixture.company='company';fixture.flag=true;fixture.writes=[];fixture.bind.mockReset();fixture.bind.mockResolvedValue(undefined);fixture.rpc.mockReset();fixture.rpc.mockImplementation(async(name:string,args:Record<string,unknown>)=>({data:{...row,...(name==='create_managed_task_checked'?{id:args.p_task_id}:{}),...(args.p_patch as object??{}),completed_by:'staff',completed_at:'2026-10-25T05:00:00.654321Z'},error:null}));});
 describe('managed task activation routing',()=>{
+ it('recovers the same task identity after unmount and a lost create response',async()=>{
+  const first=mount();await waitFor(()=>expect(first.result.current.isLoading).toBe(false));
+  const input={property_id:'property',assigned_to:'staff',title:'Restart recovery inspection',task_type:'inspection' as const,scheduled_date:'2026-10-26'};
+  fixture.rpc.mockResolvedValueOnce({data:null,error:{message:'Response lost'}});
+  await act(async()=>{await expect(first.result.current.createTask.mutateAsync(input)).rejects.toThrow('Response lost');});
+  const request=fixture.rpc.mock.calls[0][1].p_task_id;
+  first.unmount();
+  const second=mount();await waitFor(()=>expect(second.result.current.isLoading).toBe(false));
+  await act(async()=>{await second.result.current.createTask.mutateAsync(input);});
+  expect(fixture.rpc.mock.calls[1][1].p_task_id).toBe(request);
+  expect(fixture.writes).toEqual([]);
+ });
  it('uses checked command only for explicit true and never supplies actor/time to the RPC',async()=>{
   const {result}=mount();await waitFor(()=>expect(result.current.isLoading).toBe(false));
   await act(async()=>{await result.current.completeTask.mutateAsync('task');});

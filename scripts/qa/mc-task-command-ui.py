@@ -10,9 +10,9 @@ OUTPUT = Path(sys.argv[1])
 async def main():
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox'])
         for language in ['en', 'ru']:
-            for width in [375, 1280]:
+            for width in [375, 390, 430, 1280]:
                 for state in ['confirmed', 'conflict', 'unknown', 'legacy']:
                     context = await browser.new_context(viewport={'width': width, 'height': 900}, service_workers='block')
                     blocked, errors = [], []

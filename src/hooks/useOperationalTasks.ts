@@ -9,6 +9,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { startOfDay, endOfDay, addDays, format, isToday } from 'date-fns';
 import { CompanyAccessLifetime, StaleCompanyAccessOperation, bindCompanyAccessOperation, type BoundCompanyAccessOperation } from '@/lib/companyAccessOperation';
 import { createManagedOperationalTask, editManagedOperationalTask } from '@/lib/managedTaskCommands';
+import { ManualBookingRequestIdentity } from '@/lib/manualPropertyBooking';
+
+// Reuse the canonical durable command identity mechanism, namespaced by intent.
+// Only its hash/UUID is stored; task text never enters browser persistence.
+const taskCreateIdentity = new ManualBookingRequestIdentity();
 
 export interface OperationalTask {
   id: string;
@@ -72,16 +77,15 @@ export function useOperationalTasks(options?: {
   const { allProperties, isLoading: propsLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const allPropertyIds = useMemo(() => allProperties.map(p => p.property_id), [allProperties]);
   const operationLifetimes=useRef(new Set<CompanyAccessLifetime>());
-  const pendingTaskCreates=useRef(new Map<string,string>());
   const operationScope=allProperties.map(p=>`${p.property_id}:${p.management_company_id}:${p.checked_task_commands_enforced}`).join(',');
   const mutationScope=JSON.stringify([user?.id,operationScope]);
   const mutationScopeRef=useRef(mutationScope);
   if(mutationScopeRef.current!==mutationScope){
     mutationScopeRef.current=mutationScope;
     for(const lifetime of operationLifetimes.current)lifetime.invalidate();
-    operationLifetimes.current.clear();pendingTaskCreates.current.clear();
+    operationLifetimes.current.clear();
   }
-  useEffect(()=>()=>{for(const lifetime of operationLifetimes.current)lifetime.invalidate();operationLifetimes.current.clear();pendingTaskCreates.current.clear();},[]);
+  useEffect(()=>()=>{for(const lifetime of operationLifetimes.current)lifetime.invalidate();operationLifetimes.current.clear();},[]);
   const withManagedOperation=async<T,>(companyId:string,action:(operation:BoundCompanyAccessOperation)=>Promise<T>)=>{
     if(mutationScopeRef.current!==mutationScope)throw new StaleCompanyAccessOperation();
     const lifetime=new CompanyAccessLifetime(user?.id,companyId);operationLifetimes.current.add(lifetime);
@@ -197,11 +201,11 @@ export function useOperationalTasks(options?: {
     mutationFn: async (input: CreateTaskInput) => {
       const property=propertyForMutation(input.property_id);
       if(property.management_company_id&&property.checked_task_commands_enforced){
-        const intent=JSON.stringify({actor:user?.id,company:property.management_company_id,input});
-        const request=input.request_id??pendingTaskCreates.current.get(intent)??crypto.randomUUID();
-        pendingTaskCreates.current.set(intent,request);
+        const request=input.request_id??await taskCreateIdentity.forIntent(user!.id,{
+          operation:'managed-task-create',company:property.management_company_id,input,
+        });
         const saved=await withManagedOperation(property.management_company_id,operation=>createManagedOperationalTask(operation,input,request));
-        pendingTaskCreates.current.delete(intent);return saved;
+        taskCreateIdentity.acknowledge(request);return saved;
       }
       const {request_id:_requestId,...legacyInput}=input;
       const { data, error } = await supabase
