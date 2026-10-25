@@ -2,7 +2,7 @@
  * /for-owners — civic-grade landing for individual property owners and small MCs.
  *
  * Two clear paths on one page:
- *   1. Передать в управление (Full Management 70/30)
+ *   1. Передать в управление (Discuss management, individual terms)
  *   2. Управлять самому (myUNO PMS, $25/property)
  * Plus invite section for logged-in owners (Owner-to-Owner referral).
  *
@@ -13,6 +13,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, BarChart3, Users, Sparkles, CalendarRange, Wallet, FileText } from 'lucide-react';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OwnerReferralCard } from '@/components/referral/OwnerReferralCard';
@@ -63,13 +64,13 @@ const PRICING = [
   {
     kind: 'full',
     name: 'Full Management',
-    price: '70 / 30',
+    price: '',
     period: '',
     periodEn: '',
-    slotsRu: 'мы делаем всё',
-    slotsEn: 'we run everything',
-    items: ['Поиск гостей', 'Уборка', 'Check-in', 'Ежемесячный отчёт', 'Поддержка 24/7'],
-    itemsEn: ['Guest acquisition', 'Cleaning', 'Check-in', 'Monthly report', '24/7 support'],
+    slotsRu: 'после изучения объекта',
+    slotsEn: 'after reviewing your property',
+    items: ['Поиск гостей', 'Уборка', 'Check-in', 'Ежемесячный отчёт', 'Согласованная поддержка'],
+    itemsEn: ['Guest acquisition', 'Cleaning', 'Check-in', 'Monthly report', 'Agreed support'],
     cta: 'Оставить заявку',
     ctaEn: 'Request a call',
     href: '/owner/management-landing',
@@ -81,8 +82,8 @@ const FAQ = [
   {
     qRu: 'Сколько стоит и как работает оплата?',
     qEn: 'How much does it cost and how is it billed?',
-    aRu: 'Самостоятельное управление: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Полное управление: 30% от выручки, удерживается из выплат, ежемесячный отчёт без скрытых комиссий.',
-    aEn: 'Self-Service: flat $199–399/mo subscription, monthly card billing. Full Management: 30% of revenue netted from payouts, monthly statement, no hidden fees.',
+    aRu: 'Самостоятельное управление: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Управление: сначала изучаем объект, ожидания и текущую ситуацию. Если готовы работать с объектом, делаем индивидуальное предложение; комиссия согласуется отдельно.',
+    aEn: 'Self-Service: flat $199–399/mo subscription, monthly card billing. Management: first we review the property, expectations and current situation. If we can manage it, we make an individual proposal; fees are agreed separately.',
   },
   {
     qRu: 'Что если у меня 1–2 объекта?',
@@ -113,11 +114,12 @@ const FAQ = [
 const ForOwnersPage: React.FC = () => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const t = (value: LangValues) => pickLang(language, value);
 
   const title = isRu ? 'Собственникам недвижимости и малым УК — myUNO' : 'For owners & small management companies — myUNO';
   const description = isRu
-    ? 'Управляйте недвижимостью на Пхукете сами через myUNO PMS или передайте нам в управление. Отчёты, гости, уборка, финансы — в одном кабинете.'
-    : 'Manage your Phuket property yourself with myUNO PMS or hand it over to us. Reports, guests, cleaning, finance — one workspace.';
+    ? 'Управляйте недвижимостью на Пхукете сами через myUNO PMS или обсудите с нами управление. Отчёты, гости, уборка, финансы — в одном кабинете.'
+    : 'Manage your Phuket property yourself with myUNO PMS or discuss management with us. Reports, guests, cleaning, finance — one workspace.';
 
   return (
     <AppLayout usePageContainer={false}>
@@ -138,8 +140,8 @@ const ForOwnersPage: React.FC = () => {
           </h1>
           <p className="mt-5 text-body-lg text-muted-foreground max-w-2xl">
             {isRu
-              ? 'Сдавайте сами через myUNO PMS — или передайте нам в полное управление. Отчёты, гости, уборка, финансы и каналы — в одном кабинете.'
-              : 'Self-manage with myUNO PMS — or hand it over for full management. Reports, guests, cleaning, finance and channels in one workspace.'}
+              ? 'Сдавайте сами через myUNO PMS — или обсудите управление с нашей командой. Отчёты, гости, уборка, финансы и каналы — в одном кабинете.'
+              : 'Self-manage with myUNO PMS — or discuss management with our team. Reports, guests, cleaning, finance and channels in one workspace.'}
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -147,7 +149,7 @@ const ForOwnersPage: React.FC = () => {
               href="#paths"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary text-primary-foreground hover:opacity-90 text-[14px] font-medium transition-opacity min-h-[44px]"
             >
-              {isRu ? 'Передать в управление' : 'Hand over to us'}
+              {t({ ru: 'Обсудить управление', en: 'Discuss management', th: 'ปรึกษาเรื่องการจัดการ' })}
               <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </a>
             <a
@@ -167,15 +169,13 @@ const ForOwnersPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
             <article className="flex h-full flex-col border border-border p-6 lg:p-8 bg-card">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
-                {isRu ? 'Передать нам' : 'Hand over'}
+                {t({ ru: 'Сначала познакомимся', en: 'Start with a conversation', th: 'เริ่มจากการพูดคุย' })}
               </p>
               <h3 className="text-h3 font-display text-foreground">
-                {isRu ? 'Полное управление · 70 / 30' : 'Full Management · 70 / 30'}
+                {t({ ru: 'Управление на индивидуальных условиях', en: 'Management with individual terms', th: 'การจัดการตามเงื่อนไขเฉพาะ' })}
               </h3>
               <p className="mt-4 mb-6 text-body-lg text-muted-foreground max-w-prose">
-                {isRu
-                  ? 'Мы находим гостей, убираем, встречаем, ведём финансы и отправляем отчёт раз в месяц. Вы получаете 70% выручки.'
-                  : 'We find guests, clean, check-in, run finance and send a monthly statement. You keep 70% of revenue.'}
+                {t({ ru: 'Обсудим объект, ваши ожидания и текущую ситуацию. После изучения объекта оценим, готовы ли мы им управлять. Если да — подготовим индивидуальное предложение. Заявка не означает принятие в управление.', en: 'We discuss the property, your expectations and current situation, then assess whether we can manage it. If so, we prepare an individual proposal. An inquiry does not mean acceptance for management.', th: 'พูดคุยเกี่ยวกับทรัพย์สิน ความคาดหวัง และสถานการณ์ปัจจุบัน จากนั้นประเมินว่าเราสามารถรับจัดการได้หรือไม่ หากได้จะจัดทำข้อเสนอเฉพาะ การส่งคำขอไม่ได้หมายถึงการรับจัดการ' })}
               </p>
               <Link
                 to="/owner/management-landing"
@@ -254,12 +254,12 @@ const ForOwnersPage: React.FC = () => {
                     )}
                   </div>
                   <div className="mt-1 text-[12.5px] text-muted-foreground">
-                    {isRu ? p.slotsRu : p.slotsEn}
+                    {p.kind === 'full' ? t({ ru: p.slotsRu, en: p.slotsEn, th: 'หลังจากศึกษาทรัพย์สิน' }) : isRu ? p.slotsRu : p.slotsEn}
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-mono text-[18px] text-foreground tabular-nums">
-                    {p.price}<span className="text-[12px] text-muted-foreground">{isRu ? p.period : p.periodEn}</span>
+                    {p.kind === 'full' ? t({ ru: 'По предложению', en: 'Individual proposal', th: 'ข้อเสนอเฉพาะ' }) : p.price}<span className="text-[12px] text-muted-foreground">{isRu ? p.period : p.periodEn}</span>
                   </div>
                   <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground mt-0.5">
                     {isRu ? p.cta : p.ctaEn} →
@@ -314,7 +314,7 @@ const ForOwnersPage: React.FC = () => {
               to="/owner/management-landing"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-primary text-primary-foreground text-[14px] font-medium hover:opacity-90 transition-opacity min-h-[44px]"
             >
-              {isRu ? 'Передать в управление' : 'Hand over to us'}
+              {t({ ru: 'Обсудить управление', en: 'Discuss management', th: 'ปรึกษาเรื่องการจัดการ' })}
               <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </Link>
             <a

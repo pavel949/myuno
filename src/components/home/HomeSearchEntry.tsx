@@ -27,6 +27,13 @@ export function HomeSearchEntry() {
         <div className="home-search-sheet-inner">
           <SheetHeader><SheetTitle>{t({ ru: 'Какие у вас планы?', en: 'What are your plans?', th: 'คุณมีแผนอย่างไร' })}</SheetTitle><SheetDescription>{t({ ru: 'Сразу покажем варианты. Даты и район — по желанию.', en: 'Go straight to homes. Dates and area are optional.', th: 'ดูที่พักได้ทันที วันที่และย่านเป็นตัวเลือก' })}</SheetDescription></SheetHeader>
           <div className="home-search-intents">{homeSearchIntents.map(intent => <Link key={intent.id} to={`${R.PROPERTY_SEARCH}?${intent.query}`} onClick={() => setOpen(false)}><span><strong>{t(intent.title)}</strong><small>{t(intent.detail)}</small></span><ArrowRight size={20} aria-hidden="true" /></Link>)}</div>
+          <section className="home-owner-intents" aria-labelledby="home-owner-intent-title">
+            <h3 id="home-owner-intent-title">{t({ ru: 'У меня есть недвижимость', en: 'I own a property', th: 'ฉันมีอสังหาริมทรัพย์' })}</h3>
+            <div className="home-search-intents">
+              <Link to={`${R.OWNER_MANAGEMENT_LANDING}?intent=rent`} onClick={() => setOpen(false)}><span><strong>{t({ ru: 'Хочу сдавать в аренду', en: 'I want to rent it out', th: 'ฉันต้องการปล่อยเช่า' })}</strong></span><ArrowRight size={20} aria-hidden="true" /></Link>
+              <Link to={`${R.OWNER_MANAGEMENT_LANDING}?intent=management`} onClick={() => setOpen(false)}><span><strong>{t({ ru: 'Обсудить управление', en: 'Discuss management', th: 'ปรึกษาเรื่องการจัดการ' })}</strong></span><ArrowRight size={20} aria-hidden="true" /></Link>
+            </div>
+          </section>
         </div>
       </SheetContent>
     </Sheet>

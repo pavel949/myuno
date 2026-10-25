@@ -1,0 +1,50 @@
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import OwnerManagementLanding from './OwnerManagementLanding';
+const fixture = vi.hoisted(() => ({ language: 'en', submit: vi.fn() }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: fixture.language }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('@/hooks/useUniversalLead', () => ({ useUniversalLead: () => ({ submitLead: { isPending: false, mutateAsync: fixture.submit } }) }));
+vi.mock('@/hooks/useCapitalIntroRequest', () => ({ useCapitalIntroRequest: () => ({ isPending: false }) }));
+vi.mock('@/components/landings/LandingShell', () => ({ LandingShell: ({ formSlot, children }: { formSlot: React.ReactNode; children: React.ReactNode }) => <>{formSlot}{children}</> }));
+function History() { const navigate = useNavigate(); return <button onClick={() => navigate(-1)}>Back</button>; }
+beforeEach(() => { fixture.language = 'en'; fixture.submit.mockReset(); fixture.submit.mockResolvedValue({ id: 'synthetic-only' }); });
+afterEach(cleanup);
+it('preserves contacts across intent changes and history; saves canonical context with a confirmed receipt', async () => {
+ render(<MemoryRouter initialEntries={['/owner/management-landing?intent=rent']}><OwnerManagementLanding /><History /></MemoryRouter>);
+ fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Synthetic owner' } });
+ fireEvent.change(screen.getByLabelText(/Phone/), { target: { value: '+66000000000' } });
+ fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Already rented, discuss next steps' } });
+ fireEvent.click(screen.getByRole('radio', { name: 'Discuss management' }));
+ expect(screen.getByLabelText(/Name/)).toHaveValue('Synthetic owner');
+ fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+ await waitFor(() => expect(screen.getByRole('radio', { name: 'I want to rent it out' })).toBeChecked());
+ expect(screen.getByLabelText('Message')).toHaveValue('Already rented, discuss next steps');
+ fireEvent.click(screen.getByRole('button', { name: 'I want to rent it out' }));
+ expect(await screen.findByText('Request saved')).toBeVisible();
+ expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({ request_type: 'full_management', vertical_id: 'properties', vertical_metadata: { owner_intent: 'rent' }, entry_point: '/owner/management-landing?intent=rent', notes: 'I want to rent it out\nAlready rented, discuss next steps' }));
+});
+it.each(['ru', 'en', 'th'])('renders translated owner intent controls in %s', language => {
+ fixture.language = language;
+ render(<MemoryRouter initialEntries={['/owner/management-landing?intent=unknown']}><OwnerManagementLanding /></MemoryRouter>);
+ expect(screen.getAllByRole('radio')).toHaveLength(2);
+ expect(screen.getAllByRole('radio')[1]).toBeChecked();
+ expect(screen.getAllByRole('radio').every(r => !!r.closest('label')?.textContent)).toBe(true);
+});
+it('locks the accepted intent while pending and after receipt; failure re-enables the original draft', async () => {
+ let reject!: (error: Error) => void;
+ fixture.submit.mockImplementationOnce(() => new Promise((_yes, no) => { reject = no; }));
+ render(<MemoryRouter initialEntries={['/owner/management-landing?intent=rent']}><OwnerManagementLanding /></MemoryRouter>);
+ fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Synthetic owner' } });
+ fireEvent.change(screen.getByLabelText(/Phone/), { target: { value: '+66000000000' } });
+ fireEvent.click(screen.getByRole('button', { name: 'I want to rent it out' }));
+ expect(screen.getByRole('radio', { name: 'Discuss management' })).toBeDisabled();
+ reject(new Error('Synthetic failure'));
+ expect(await screen.findByRole('alert')).toBeVisible();
+ expect(screen.getByRole('radio', { name: 'Discuss management' })).toBeEnabled();
+ fireEvent.click(screen.getByRole('button', { name: 'I want to rent it out' }));
+ expect(await screen.findByText('Request saved')).toBeVisible();
+ expect(screen.getByRole('radio', { name: 'I want to rent it out' })).toBeChecked();
+ expect(screen.getByRole('radio', { name: 'Discuss management' })).toBeDisabled();
+});

@@ -314,3 +314,5 @@
 @media(max-width:767px){.home-service-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.home-service-category-copy{padding:12px}.cinematic-home .home-service-category-copy h3{font-size:20px}.home-service-category-copy p,.home-service-category-copy>span{font-size:12px}.home-service-category-art{aspect-ratio:1.6}}
 .home-listing-copy{min-height:160px}
 .home-experiences .home-catalog-photo{aspect-ratio:2}
+
+.home-owner-intents{margin-top:20px;padding-top:16px;border-top:1px solid hsl(var(--border))}.home-owner-intents h3{font-size:var(--type-body-size);font-weight:500}.home-owner-intents .home-search-intents{margin-top:8px}.home-owner-intents .home-search-intents>a{min-height:44px}

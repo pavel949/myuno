@@ -88,6 +88,18 @@ jobs:
         run: ROUTE_LAYOUT_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/route-layout" node scripts/qa/route-layout.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual owner intent routes and request receipt states
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 8080 > /tmp/owner-intake-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
+            sleep 1
+          done
+          OWNER_INTAKE_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/owner-intake" node scripts/qa/owner-intake.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

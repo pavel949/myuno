@@ -1,3 +1,4 @@
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -72,10 +73,10 @@ const SERVICES = [
   { 
     value: 'support', 
     icon: HeadphonesIcon,
-    labelEn: '24/7 Guest support', 
-    labelRu: 'Поддержка гостей 24/7',
-    descEn: 'Round-the-clock assistance for your guests',
-    descRu: 'Круглосуточная помощь вашим гостям',
+    labelEn: 'Guest support',
+    labelRu: 'Поддержка гостей',
+    descEn: 'Guest support scope agreed in the proposal',
+    descRu: 'Состав поддержки гостей согласуется в предложении',
   },
 ];
 
@@ -90,6 +91,7 @@ export default function FullManagement() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const t = (value: LangValues) => pickLang(language, value);
   
   const { requestFullManagement } = useConsultationRequests();
   const { data: properties } = useOwnerProperties();
@@ -161,8 +163,8 @@ export default function FullManagement() {
           
           <p className="text-muted-foreground mb-8 max-w-sm">
             {isRu 
-              ? 'Наш менеджер свяжется с вами в течение 24 часов для обсуждения условий управления.' 
-              : 'Our manager will contact you within 24 hours to discuss management terms.'}
+              ? 'Заявка сохранена. Ответ команды ожидается; условия и принятие объекта в управление ещё не согласованы.'
+              : 'Your inquiry is saved. A team reply is pending; terms and management acceptance have not been agreed.'}
           </p>
           
           <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -197,26 +199,26 @@ export default function FullManagement() {
                   {isRu ? 'Полное управление' : 'Full Management'}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {isRu ? 'Мы возьмём всё на себя' : 'We take care of everything'}
+                  {t({ ru: 'Сначала изучим вашу задачу', en: 'First we review your needs', th: 'เริ่มจากศึกษาความต้องการของคุณ' })}
                 </p>
               </div>
             </div>
             
             <p className="text-sm text-muted-foreground mb-4">
               {isRu 
-                ? 'Доверьте управление своей недвижимостью команде myUNO. Мы найдём гостей, обеспечим сервис и максимизируем ваш доход.' 
-                : 'Trust your property management to the myUNO team. We find guests, provide service, and maximize your income.'}
+                ? 'Познакомимся, изучим объект, ваши ожидания и текущую ситуацию. Если мы готовы им управлять, подготовим индивидуальное предложение. Заявка не означает принятие объекта в управление.'
+                : 'We discuss your property, expectations and current situation. If we can manage it, we prepare an individual proposal. An inquiry does not mean acceptance for management.'}
             </p>
 
             <div className="flex items-center gap-2 text-sm flex-wrap">
               <Badge variant="secondary" className="bg-primary/20">
-                {isRu ? '70% вам / 30% нам' : '70% you / 30% us'}
+                {t({ ru: 'Индивидуальное предложение', en: 'Individual proposal', th: 'ข้อเสนอเฉพาะ' })}
               </Badge>
               <Badge variant="outline">
-                {isRu ? 'После расходов' : 'After expenses'}
+                {t({ ru: 'После изучения объекта', en: 'After property review', th: 'หลังจากศึกษาทรัพย์สิน' })}
               </Badge>
               <Badge variant="outline">
-                {isRu ? 'Без скрытых платежей' : 'No hidden fees'}
+                {t({ ru: 'Условия согласуем отдельно', en: 'Terms agreed separately', th: 'ตกลงเงื่อนไขแยกต่างหาก' })}
               </Badge>
             </div>
           </CardContent>
@@ -227,8 +229,8 @@ export default function FullManagement() {
           {[
             { 
               icon: TrendingUp, 
-              titleEn: 'Higher Occupancy', 
-              titleRu: 'Загрузка 85%',
+              titleEn: 'Property review',
+              titleRu: 'Изучение объекта',
             },
             { 
               icon: Shield, 
