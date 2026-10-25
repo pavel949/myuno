@@ -1,6 +1,6 @@
 # Master Catalog → myUNO crosswalk (source review, not an import)
 
-Master candidate: `18_G6RN1SG5Yc3vfa56Kos2rI8FZMDBrVGSmrbluncy8`.
+Master candidate: `[MASTER_CATALOG_SOURCE]` (configured only in the private operator source registry).
 Tab names and candidate codes supplied by research handoff; sheet columns/rows have not been directly verified in this implementation workspace. Repo source is verified at baseline 775bd61ce; deployed schema is not verified. No new schema was applied.
 
 | Master candidate | Existing myUNO source | Mapping / gap |
