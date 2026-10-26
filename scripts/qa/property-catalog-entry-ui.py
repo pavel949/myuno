@@ -60,6 +60,7 @@ async def main():
     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     await page.screenshot(path=str(OUT/f'filtered-{lang}-{width}.png'),full_page=False)
     assert not errors,errors
+    assert not blocked,blocked
     results.append({'lang':lang,'width':width,'status':'PASS','published_count':47,'blocked_external':len(blocked),'pageerrors':errors})
     await context.close()
   if not os.environ.get('CATALOG_BEFORE'):
@@ -76,6 +77,7 @@ async def main():
    await more.click();await expect(grid.locator(':scope > *')).to_have_count(47)
    await expect(more).to_have_count(0)
    assert not errors,errors
+   assert not blocked,blocked
    results.append({'lang':'en','width':390,'variant':'manual-pagination','status':'PASS','published_count':47,'pageerrors':errors})
    await context.close()
   await browser.close()

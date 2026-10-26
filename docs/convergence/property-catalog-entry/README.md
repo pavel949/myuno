@@ -1,6 +1,6 @@
 # Public property catalogue entry — 2026-10-26
 
-Base: `4e96c70d67c3b550ca89eb1eabf4acc3bf9b138f`. Local-only candidate; no push, PR, merge, publication, database or permission changes.
+Base: `4e96c70d67c3b550ca89eb1eabf4acc3bf9b138f`. The original local checkpoint had no remote delivery. It is now proposed in draft PR #191; no merge, publication, database or permission changes have been made.
 
 ## Observed defect
 
@@ -42,3 +42,5 @@ The supplied Library JPEG could not be materialized through the supported helper
 128 distinct focused/compatibility/map tests passed (including 12 malformed/optional intent cases). A 16-case browser matrix passed; native auto-scroll pagination and manual button pagination are separate cases to avoid clicking a disappearing auto-load control. No timeout or result assertion was relaxed. The fixture matches current `src/App.tsx` BrowserRouter options: it does not opt into the not-enabled `v7_startTransition` future flag. An earlier fixture with that extra flag exposed draft replacement during rapid submission; enabling it is outside this candidate and is not certified.
 
 The map unit tests render the actual map component with an SDK adapter and verify mixed intent, sale asking price, monthly labels and detail context. This remains different from a live Google Maps acceptance.
+
+The existing search-controls harness now opens the guests disclosure based on the guest field visibility, verifies that clear returns to all intents, and explicitly selects rental before continuing rental date/price assertions. Its full matrix and timeouts are retained. The dedicated 16-case catalogue matrix also runs inside Design system verification and is retained with its synthetic UI artifacts.
