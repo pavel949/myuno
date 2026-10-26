@@ -9,14 +9,22 @@ import { searchStaticIndex } from '@/lib/search/staticIndex';
 const context = { isAuthenticated: false, roles: [], personas: [] };
 
 describe('canonical catalogue projections', () => {
-  it('does not fabricate a category route or silently replace it with its cluster', () => {
+  it('preserves a canonical category ID on the mounted public catalogue route', () => {
     for (const category of CATEGORIES) {
       const projection = projectCatalogCategory(category.id);
-      expect(projection.status).toBe('unavailable');
-      expect(projection.reason).toBe('category-destination-unresolved');
+      if (['cat-real-estate', 'cat-partner-portal'].includes(category.id)) {
+        expect(projection.status).toBe('unavailable');
+        expect(searchStaticIndex(category.labelEn, context, 500).some(result => result.id === `cat-${category.id}`)).toBe(false);
+        continue;
+      }
+      expect(projection.status).toBe('resolved');
+      if (projection.status !== 'resolved') throw new Error('Expected category destination');
+      const url = new URL(projection.href, 'https://fixture.test');
+      expect(url.pathname).toBe('/discover/services');
+      expect(url.searchParams.get('category')).toBe(category.id);
       expect(projection.services.every(service => category.services.includes(service))).toBe(true);
       const results = searchStaticIndex(category.labelEn, context, 500);
-      expect(results.some(result => result.id === `cat-${category.id}`)).toBe(false);
+      expect(results.some(result => result.path === projection.href)).toBe(true);
     }
     expect(projectCatalogCategory('unknown').services).toEqual([]);
     expect(projectCatalogCategory('unknown').reason).toBe('unknown-category');

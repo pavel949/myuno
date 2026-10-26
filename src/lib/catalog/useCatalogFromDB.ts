@@ -186,6 +186,9 @@ function adaptRowToService(
     icon: staticService?.icon ?? staticParent?.icon ?? STATIC_CATEGORIES[0].icon,
     status: ((row.status as ServiceEntry['status']) ?? staticService?.status ?? 'available'),
     verticalId: staticService?.verticalId ?? row.mini_app_type ?? undefined,
+    // Existing canonical service codes are the seed contract for catalog_life_map.
+    // Reuse only an exact parent/leaf slug match; unknown rows gain no invented mapping.
+    situationCodes: staticService?.situationCodes,
     personaTags: row.persona_codes ?? staticService?.personaTags,
     jtbdClusters: row.jtbd_clusters ?? staticService?.jtbdClusters,
   };

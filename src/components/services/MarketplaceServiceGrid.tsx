@@ -1,3 +1,4 @@
+import { filterMarketplaceServices } from '@/lib/services/serviceDiscoveryProjection';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, CalendarCheck } from 'lucide-react';
@@ -17,7 +18,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   const [selected, setSelected] = useState<BookableService | null>(null);
 
   const q = search.trim().toLowerCase();
-  const list = (data ?? []).filter((s) => !q || `${s.name_en} ${s.name_ru ?? ''} ${s.provider?.name ?? ''}`.toLowerCase().includes(q));
+  const list = filterMarketplaceServices(data ?? [], search);
 
   // Confirmed absence is context, not the primary task. Keep failures/loading
   // separate so unavailable supply is never inferred from a failed read.

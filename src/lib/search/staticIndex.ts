@@ -8,7 +8,7 @@
  * Sources (all SSOT, no dead links — every path resolves to a real route):
  *  - micro-apps          src/lib/appRegistry.ts          → app.route
  *  - services            src/lib/catalog/taxonomy.ts     → service.path
- *  - categories          src/lib/catalog/taxonomy.ts     → existing child destinations (category URL unresolved)
+ *  - categories          src/lib/catalog/taxonomy.ts     → canonical category-aware hub
  *  - clusters (public)   src/lib/catalog/taxonomy.ts     → cluster.homeRoute
  *  - life situations     src/lib/catalog/taxonomy.ts     → canonical situation URL builder
  *  - personas (active)   src/lib/taxonomies/master.ts    → /for/:slug
@@ -105,10 +105,16 @@ function buildIndex(): StaticSearchEntry[] {
     });
   }
 
-  // A category has no mounted category-aware destination yet. Index its
-  // existing children with its vocabulary, never a misleading umbrella link.
+  // Category links and child vocabulary share the existing catalogue IDs.
   for (const cat of CATEGORIES) {
-    for (const service of projectCatalogCategory(cat.id).services) {
+    const projection = projectCatalogCategory(cat.id);
+    if (projection.status !== 'resolved') continue;
+    entries.push({
+      id: `cat-${cat.id}`, titleRu: cat.labelRu, titleEn: cat.labelEn, titleTh: cat.labelTh,
+      keywords: kw(cat.valueRu, cat.valueEn), path: projection.href,
+      section: 'category', type: 'category', weight: 3, cluster: cat.clusterId,
+    });
+    for (const service of projection.services) {
       entries.push({
         id: `category-service-${cat.id}-${service.id}`,
         titleRu: service.labelRu,

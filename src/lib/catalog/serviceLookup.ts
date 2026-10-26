@@ -2,6 +2,8 @@
  * O(1) lookups into the static catalog SSOT (`taxonomy.ts`).
  * Used by cluster landing grids for icon + availability resolution.
  */
+import { serviceDiscoveryCategories } from '@/lib/services/serviceDiscoveryProjection';
+import { buildServiceCategoryUrl } from '@/lib/services/serviceDiscoveryQuery';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES, FLAT_SERVICES, type ServiceStatus } from './taxonomy';
 
@@ -27,17 +29,16 @@ export function resolveCatalogServiceDestination(serviceId: string):
   return { status: 'resolved', href: service.path };
 }
 
-/** No mounted UI currently accepts arbitrary canonical category IDs.
- * Keep that limitation explicit; a cluster landing silently loses the filter.
- * Search may project the existing children without inventing a category route.
- */
+/** Project an existing category; the public hub now consumes its canonical ID. */
 export function projectCatalogCategory(categoryId: string) {
   const category = CATEGORIES.find(entry => entry.id === categoryId);
+  if (!category) return { status: 'unavailable' as const, reason: 'unknown-category' as const, services: [] };
+  if (!serviceDiscoveryCategories([category]).length) {
+    return { status: 'unavailable' as const, reason: 'category-not-public' as const, services: [] };
+  }
   return {
-    status: 'unavailable' as const,
-    reason: category ? 'category-destination-unresolved' as const : 'unknown-category' as const,
-    services: category && (!category.status || category.status === 'available' || category.status === 'info')
-      ? category.services.filter(service => resolveCatalogServiceDestination(service.id).status === 'resolved')
-      : [],
+    status: 'resolved' as const,
+    href: buildServiceCategoryUrl(category.id),
+    services: category.services.filter(service => resolveCatalogServiceDestination(service.id).status === 'resolved'),
   };
 }

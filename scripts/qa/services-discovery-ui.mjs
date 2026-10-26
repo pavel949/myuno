@@ -12,9 +12,9 @@ const root = process.cwd();
 const output = process.env.SERVICES_DISCOVERY_OUTPUT || '/tmp/browser/services-discovery-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
-  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:(s)=>s});`,
+  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:window.fixtureLanguage||'ru',t:(s)=>s});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
-  '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[{id:'flowers',labelRu:'Цветы',labelEn:'Flowers',labelTh:'ดอกไม้',status:'available',services:[]}],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
+  '@/lib/catalog/useCatalogFromDB': `import {CATEGORIES,LIFE_SITUATIONS} from '${root}/src/lib/catalog/taxonomy.ts';const phase=new URLSearchParams(location.search).get('phase');export const useCatalogFromDB=()=>({categories:phase==='empty'?[]:CATEGORIES,lifeSituations:LIFE_SITUATIONS,isFromDB:true,isLoading:phase==='loading',error:phase==='error'?new Error('Isolated catalogue failure'):null,refetch:()=>{window.fixtureRetry=(window.fixtureRetry||0)+1}});`,
   '@/lib/analytics/track': `export const trackEvent=()=>{};`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main>{children}</main>;`,
   '@/components/filters/UniversalFilter': `export const UniversalFilter=()=>null;`,
@@ -22,13 +22,15 @@ const virtual = {
   '@/components/seo': `export const SEOHead=()=>null;`,
   '@/components/crosssell/CrossSellSection': `export const CrossSellSection=()=>null;`,
   '@/components/map/UnifiedCatalogMap': `export const UnifiedCatalogMap=()=>null;`,
+  '@/hooks/useOrders': `export const useOrders=()=>({createOrder:()=>{throw Error('Order writes forbidden in navigation QA')},isCreating:false});`,
+  '@/hooks/useGeolocation': `export const useGeolocation=()=>({hasLocation:false,getPosition:()=>{throw Error('Geolocation forbidden in navigation QA')},loading:false});`,
   '@/hooks/useServiceMarketplace': `export const useMarketplaceServices=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/components/services': `export {ServiceFunctionCard} from '${root}/src/components/services/ServiceFunctionCard.tsx';`,
   './ServiceBookingSheet': `export const ServiceBookingSheet=()=>null;`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database forbidden')}});`,
 };
 const result = await build({
-  stdin: { contents: `import React from 'react';import {createRoot} from 'react-dom/client';import {MemoryRouter,Routes,Route,useLocation} from 'react-router-dom';import ServicesIndex from '${root}/src/pages/services/ServicesIndex.tsx';import {BackButton} from '${root}/src/components/uno/BackButton.tsx';import {serviceCatalogueReturnTo} from '${root}/src/lib/services/serviceNavigation.ts';function Detail(){const l=useLocation();return <BackButton fallbackPath={serviceCatalogueReturnTo(new URLSearchParams(l.search).get('returnTo'))}/>;}function Location(){const l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search}</output>;}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/discover/services']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Routes><Route path="/discover/services" element={<ServicesIndex/>}/><Route path="/services/order/:id" element={<Detail/>}/></Routes><Location/></MemoryRouter>);`, loader: 'tsx', resolveDir: root },
+  stdin: { contents: `import React from 'react';import {createRoot} from 'react-dom/client';import {BrowserRouter,Routes,Route,useLocation} from 'react-router-dom';import ServicesIndex from '${root}/src/pages/services/ServicesIndex.tsx';import ServiceFunctionOrder from '${root}/src/pages/services/ServiceFunctionOrder.tsx';import {BackButton} from '${root}/src/components/uno/BackButton.tsx';import {ScrollToTop} from '${root}/src/components/layout/ScrollToTop.tsx';import {serviceCatalogueReturnTo} from '${root}/src/lib/services/serviceNavigation.ts';function Detail(){const l=useLocation();return <BackButton fallbackPath={serviceCatalogueReturnTo(new URLSearchParams(l.search).get('returnTo'))}/>;}function Location(){const l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>;}window.fixtureLanguage=new URLSearchParams(location.search).get('lang')||'ru';history.replaceState(null,'',new URLSearchParams(location.search).get('entry')||'/discover/services');createRoot(document.getElementById('root')).render(<BrowserRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><ScrollToTop/><Routes><Route path="/discover/services" element={<ServicesIndex/>}/><Route path="/services/order/:functionId" element={<ServiceFunctionOrder/>}/><Route path="*" element={<Detail/>}/></Routes><Location/></BrowserRouter>);`, loader: 'tsx', resolveDir: root },
   bundle: true, outfile: path.join(output,'fixture.js'), jsx:'automatic', format:'esm', metafile:true,
   define: { 'process.env.NODE_ENV':'"production"', 'import.meta.env.DEV':'false' },
   plugins:[{name:'isolated-browse-data',setup(b){
@@ -48,7 +50,7 @@ if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integ
 const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
   .process(await readFile(path.join(root, 'src/index.css'), 'utf8'), { from: path.join(root, 'src/index.css') });
 await writeFile(path.join(output,'fixture.css'),css.css);
-await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
+await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><script>const fp=new URLSearchParams(location.search);document.documentElement.lang=fp.get("lang")||"en";document.documentElement.classList.toggle("dark",fp.get("theme")==="dark");</script><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only')) process.exit(0);
 const run=spawnSync('python3',[path.join(root,'scripts/qa/services-discovery-ui.py'),output],{stdio:'inherit'});
 process.exitCode=run.status??1;

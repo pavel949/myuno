@@ -22,6 +22,7 @@ const externalTokens = new Map([
   ['--radix-popover-content-available-height','@radix-ui/react-popover/dist/index.mjs:255; PopoverContent maps --radix-popper-available-height'],
   ['--radix-popover-trigger-width','@radix-ui/react-popover/dist/index.mjs:256; PopoverContent maps --radix-popper-anchor-width'],
   ['--radix-dropdown-menu-content-available-height','@radix-ui/react-dropdown-menu/dist/index.mjs:130,245; content/subcontent maps --radix-popper-available-height'],
+  ['--radix-select-content-available-width','@radix-ui/react-select/dist/index.mjs:715; popper content maps --radix-popper-available-width'],
   ['--radix-select-trigger-width','@radix-ui/react-select/dist/index.mjs:717; popper content maps --radix-popper-anchor-width'],
   ['--radix-select-trigger-height','@radix-ui/react-select/dist/index.mjs:718; popper content maps --radix-popper-anchor-height'],
   ['--radix-accordion-content-height','@radix-ui/react-accordion/dist/index.mjs:290; AccordionContent maps --radix-collapsible-content-height'],
