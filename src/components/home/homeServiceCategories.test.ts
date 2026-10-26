@@ -10,7 +10,7 @@ it('selects each existing category destination once across parent and child leve
     category('cat-tourism', [leaf('yacht', '/yachts')]),
     category('cat-home-services', [leaf('services', '/services')]),
   ]);
-  expect(rows.map(row => row.path)).toEqual(['/flowers', '/transport/airport-transfer', '/transport', '/services']);
+  expect(rows.map(row => row.path)).toEqual(['/flowers', '/transport/airport-transfer', '/transport', '/discover/services?category=cat-home-services']);
   expect(rows.at(-1)?.labelEn).toBe('cat-home-services');
   expect(new Set(rows.map(row => row.id)).size).toBe(4);
 });
@@ -27,9 +27,9 @@ it('omits disabled parents, gated children, external and mismatched destinations
     category('cat-home-services', [], 'soon'),
   ])).toEqual([]);
 });
-it('supports existing flat taxonomy identities without changing public routes', () => {
+it('supports existing flat taxonomy identities and preserves the home category intent', () => {
   expect(homeServiceCategories([category('flowers'), category('transfer'), category('transport'), category('services')]).map(row => row.path))
-    .toEqual(['/flowers', '/transport/airport-transfer', '/transport', '/services']);
+    .toEqual(['/flowers', '/transport/airport-transfer', '/transport', '/discover/services?category=cat-home-services']);
 });
 
 it('only advertises Fast Track when its exact active route exists in the returned taxonomy', () => {
