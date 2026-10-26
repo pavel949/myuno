@@ -26,3 +26,31 @@ describe('catalogue sorting matches displayed offer', () => {
     expect(getEffectivePropertySortPrice(property({ price, price_per_night: price }), 'rent')).toBeNull();
   });
 });
+
+describe('mixed catalogue comparable price groups', () => {
+  const homes = [
+    property({ id: 'sale-high', listing_type: 'sale', sale_price: 3000000, price: 1, currency: 'THB' }),
+    property({ id: 'dual-low', listing_type: 'rent', listing_modes: ['sale', 'rent'], sale_price: 1000000, price_per_night: 99999, currency: 'THB' }),
+    property({ id: 'night-high', listing_type: 'rent', price: 3000, price_period: 'night', currency: 'THB' }),
+    property({ id: 'month-low', listing_type: 'rent', price: 100, price_period: 'month', currency: 'THB' }),
+    property({ id: 'night-low', listing_type: 'rent', price: 1000, price_period: 'night', currency: 'THB' }),
+  ];
+  it.each([
+    ['price_asc', ['dual-low', 'sale-high', 'night-low', 'night-high', 'month-low']],
+    ['price_desc', ['sale-high', 'dual-low', 'night-high', 'night-low', 'month-low']],
+  ] as const)('sorts %s by the visible amount only within comparable offer groups', (sort, expected) => {
+    expect([...homes].sort((a,b)=>comparePropertiesForSort(a,b,sort,'all')).map(home=>home.id)).toEqual(expected);
+  });
+  it.each(['price_asc','price_desc'] as const)('keeps an unknown dual asking amount last within its group for %s', sort => {
+    const unknown = property({ listing_type: 'rent', listing_modes: ['rent','sale'], sale_price: null, price: 10, currency: 'THB' });
+    const known = property({ listing_type: 'sale', sale_price: 5000000, currency: 'THB' });
+    expect(comparePropertiesForSort(unknown, known, sort, 'all')).toBeGreaterThan(0);
+    expect(comparePropertiesForSort(known, unknown, sort, 'all')).toBeLessThan(0);
+  });
+  it('never orders different currencies by their raw numerical amounts', () => {
+    const thb = property({ listing_type: 'sale', sale_price: 9999999, currency: 'THB' });
+    const usd = property({ listing_type: 'sale', sale_price: 1, currency: 'USD' });
+    expect(comparePropertiesForSort(thb, usd, 'price_asc', 'all')).toBeLessThan(0);
+    expect(comparePropertiesForSort(thb, usd, 'price_desc', 'all')).toBeLessThan(0);
+  });
+});

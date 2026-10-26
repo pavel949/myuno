@@ -247,7 +247,6 @@ export function PropertyHubTabs() {
                 params.delete('intent');
                 params.delete('quick');
                 target.forEach((value, key) => params.set(key, value));
-                if (tab.id === 'catalogue') for (const key of ['tenancy', 'checkIn', 'checkOut', 'guests', 'instant', 'f.guestsAtLeast', 'f.instantBooking', 'f.priceLevel']) params.delete(key);
                 navigate(`${propertySearchHref(params.toString())}${location.hash}`, { state: location.state });
               } else navigate(tab.path);
             }}

@@ -7,7 +7,7 @@ import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { bangkokTodayISO, civilDateKey } from '@/lib/hotelDates';
-import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
+import { readPropertySearchQuery, normalizePropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -43,7 +43,6 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
     const params = new URLSearchParams(initialParams);
     for (const key of ['district', 'types', 'f.district', 'f.propertyType', 'f.listingType', 'bedrooms', 'f.bedrooms']) params.delete(key);
     params.set('mode', mode);
-    if (mode === 'all') for (const key of ['tenancy', 'intent', 'quick', 'checkIn', 'checkOut', 'guests', 'f.guestsAtLeast', 'instant', 'f.instantBooking', 'f.priceLevel']) params.delete(key);
     params.delete('q');
     if (query.trim()) params.set('q', query.trim());
     if (district) params.set('district', district);
@@ -59,8 +58,9 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
       if (checkOut) params.set('checkOut', checkOut);
       if (guests) params.set('guests', guests);
     }
-    if (onSearch) onSearch(params);
-    else navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${params.toString()}`);
+    const normalized = normalizePropertySearchQuery(params);
+    if (onSearch) onSearch(normalized);
+    else navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${normalized.toString()}`);
   }
 
   return (

@@ -17,7 +17,17 @@ export function updatePropertySearchSort(params: URLSearchParams, value: Propert
 
 const list = (value: unknown): string[] => Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.split(',').filter(Boolean) : [];
 const arrayFilters = ['district', 'propertyType', 'bedrooms', 'amenities', 'highlights', 'viewType', 'furnishingLevel', 'poolType', 'parkingType', 'ownershipForm'];
-export function readPropertySearchQuery(params: URLSearchParams) {
+/** All intents cannot retain hidden stay, sale-intent or period-specific price criteria. */
+export function normalizePropertySearchQuery(source: URLSearchParams): URLSearchParams {
+  const params = new URLSearchParams(source);
+  if (params.get('mode') === 'all') {
+    for (const key of ['guests', 'instant', 'checkIn', 'checkOut', 'tenancy', 'intent', 'quick', 'f.guestsAtLeast', 'f.instantBooking', 'f.listingType', 'f.priceLevel']) params.delete(key);
+  }
+  return params;
+}
+
+export function readPropertySearchQuery(source: URLSearchParams) {
+  const params = normalizePropertySearchQuery(source);
   const legacy = parseFiltersFromParams(params);
   for (const key of arrayFilters) if (legacy.filterValues[key]) legacy.filterValues[key] = list(legacy.filterValues[key]);
   const pick = (key: string, legacyKey: string) => params.has(key) ? list(params.get(key)) : list(legacy.filterValues[legacyKey]);
@@ -64,7 +74,7 @@ export function readPropertySearchQuery(params: URLSearchParams) {
 export function propertySearchHref(search: string, defaults: Record<string, string> = {}) {
   const params = new URLSearchParams(search);
   Object.entries(defaults).forEach(([key, value]) => params.set(key, value));
-  const query = params.toString();
+  const query = normalizePropertySearchQuery(params).toString();
   return `/property/search${query ? `?${query}` : ''}`;
 }
 

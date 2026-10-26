@@ -17,8 +17,8 @@ import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
-import { readPropertySearchQuery, updatePropertySearchSort, clearPropertySearchQuery } from '@/lib/propertySearchQuery';
-import { propertySearchFeatureLabels } from '@/lib/propertySearchPresentation';
+import { readPropertySearchQuery, updatePropertySearchSort, clearPropertySearchQuery, normalizePropertySearchQuery } from '@/lib/propertySearchQuery';
+import { propertySearchFeatureLabels, propertyPriceSortGroupLabel } from '@/lib/propertySearchPresentation';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import { serializeFilters } from '@/lib/propertyBrowseFilters';
 import '@/styles/cinematic-home.css';
@@ -27,7 +27,7 @@ import { PROPERTY_DISCOVERY_FEATURE_IDS, matchesCategory } from '@/components/pr
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues, propertyPriceLevelDescriptions } from '@/lib/propertyCatalogServerFilters';
 import { propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
-import { comparePropertiesForSort } from '@/lib/propertySortPrice';
+import { comparePropertiesForSort, getPropertyPriceSortGroup } from '@/lib/propertySortPrice';
 import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
@@ -73,6 +73,10 @@ export default function PropertySearchPage() {
   const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
   const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
   const catalogueAll = !state.hasIntent;
+  useEffect(() => {
+    const normalized = normalizePropertySearchQuery(new URLSearchParams(queryKey)).toString();
+    if (normalized !== queryKey) navigate({ search: normalized, hash: location.hash }, { replace: true, state: location.state });
+  }, [queryKey, navigate, location.hash, location.state]);
   const priceBandUnavailable = catalogueAll || propertyMode === 'rent' && state.tenancy !== 'short';
   useEffect(() => {
     if (!priceBandUnavailable || !searchParamsUrl.has('f.priceLevel')) return;
@@ -168,11 +172,11 @@ export default function PropertySearchPage() {
 
   const serverFilters = useMemo((): PropertyFilters => {
     const eligibleValues = { ...mergedFilterValues };
-    if (listingCatalogType === 'sale') delete eligibleValues.instantBooking;
+    if (listingCatalogType === 'sale' || catalogueAll) delete eligibleValues.instantBooking;
     const base = filterValuesToPropertyFilters(eligibleValues, {
       listingType: listingCatalogType,
-      minGuestsFromSearch: listingCatalogType === 'rent' && state.hasGuestFilter ? searchParams.guests : undefined,
-      instantBookingFromSearch: listingCatalogType === 'rent' && searchParams.instantBooking,
+      minGuestsFromSearch: !catalogueAll && listingCatalogType === 'rent' && state.hasGuestFilter ? searchParams.guests : undefined,
+      instantBookingFromSearch: !catalogueAll && listingCatalogType === 'rent' && searchParams.instantBooking,
       saleIntent: state.saleIntent,
       isQuickSale: listingCatalogType === 'sale' && state.isQuickSale,
       rentTenancy: listingCatalogType === 'rent' ? rentTenancy : undefined,
@@ -208,7 +212,7 @@ export default function PropertySearchPage() {
     fetchNextPage,
   } = usePropertiesInfinite(serverFilters);
 
-  const isError = queryError && !infiniteData?.pages.length;
+  const isError = queryError && !isFetchNextPageError;
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
@@ -234,12 +238,12 @@ export default function PropertySearchPage() {
       return true;
     }) as unknown as Property[];
 
-    const sortMode = propertyMode === 'buy' ? 'buy' : 'rent';
+    const sortMode = catalogueAll ? 'all' : propertyMode === 'buy' ? 'buy' : 'rent';
     const sorted = [...filtered];
     sorted.sort((a, b) => comparePropertiesForSort(a, b, sortKey, sortMode));
 
     return sorted;
-  }, [infiniteData, sortKey, categoryFilters, propertyMode]);
+  }, [infiniteData, sortKey, categoryFilters, propertyMode, catalogueAll]);
 
   const availability = useSearchPropertyAvailability(
     candidateProperties.map(property => property.id),
@@ -294,8 +298,8 @@ export default function PropertySearchPage() {
                 if (mode === (catalogueAll ? 'all' : propertyMode)) return;
                 const params = new URLSearchParams(searchParamsUrl);
                 params.set('mode', mode);
-                if (mode === 'all') for (const key of ['tenancy', 'intent', 'quick', 'guests', 'checkIn', 'checkOut', 'instant', 'f.guestsAtLeast', 'f.instantBooking', 'f.priceLevel']) params.delete(key);
-                            navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
+                const normalized = normalizePropertySearchQuery(params);
+                navigate({ search: normalized.toString(), hash: location.hash }, { state: location.state });
               }}>{mode === 'all' ? text('Все объекты', 'All homes', 'ที่พักทั้งหมด') : mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
@@ -408,14 +412,16 @@ export default function PropertySearchPage() {
             </div>
           )}
 
+          {catalogueAll && (sortKey === 'price_asc' || sortKey === 'price_desc') && <p role="note" data-testid="property-price-sort-note" className="mb-4 text-body-sm text-muted-foreground">{text('Цена сортируется среди загруженных объектов внутри групп: продажа, аренда за ночь, неделю, месяц и год. Периоды и валюты не сравниваются между собой.', 'Prices sort within loaded offer groups: sale, nightly, weekly, monthly and yearly rent. Different periods and currencies are not compared.', 'เรียงราคาภายในกลุ่มที่โหลดแล้ว: ขาย เช่ารายคืน รายสัปดาห์ รายเดือน และรายปี ไม่เปรียบเทียบข้ามช่วงเวลาหรือสกุลเงิน')}</p>}
           {!isLoading && !isError && properties.length > 0 && (
             <>
 
               <div className={cn(PUBLIC_CATALOG_GRID, 'property-discovery-card-grid')} data-testid="property-results-grid">
                 {properties.map(property => {
                   return (
+                    <div key={property.id} className="min-w-0" data-property-price-group={catalogueAll ? getPropertyPriceSortGroup(property).key : undefined}>
+                    {catalogueAll && (sortKey === 'price_asc' || sortKey === 'price_desc') && <p className="mb-2 text-body-sm text-muted-foreground">{propertyPriceSortGroupLabel(property, language)}</p>}
                     <PropertyListingCard
-                      key={property.id}
                       property={property}
                       mode={catalogueAll ? propertyDetailMode(property) : propertyMode}
                       isHovered={hoveredProperty === property.id}
@@ -424,6 +430,7 @@ export default function PropertySearchPage() {
                       onSelect={showMap ? selectFocused : undefined}
                       nights={nights > 0 ? nights : undefined}
                     />
+                    </div>
                   );
                 })}
 

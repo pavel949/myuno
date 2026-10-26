@@ -9,14 +9,14 @@ import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 import { PropertyHubTabs } from '@/pages/property/PropertyHub';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
-const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en', loading: false, properties: [] as Record<string, unknown>[] }));
+const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en', loading: false, failed: false, nextPageError: false, properties: [] as Record<string, unknown>[] }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
 vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
 vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ personas: [] }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
-vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
+vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: state.failed, isFetchNextPageError: state.nextPageError, refetch: vi.fn(), hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
@@ -47,7 +47,7 @@ function mount(entry: string, navigationState?: unknown) {
   if (summary) fireEvent.click(summary);
   return result;
 }
-beforeEach(() => { state.language = 'en'; state.loading = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
+beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = false; state.nextPageError = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
@@ -464,6 +464,30 @@ describe('one residential results surface', () => {
     fireEvent.click(screen.getByRole('button', { name: 'All homes' }));
     expect(screen.getByTestId('location')).toHaveTextContent('/property/search?mode=all&q=Needle&opaque=keep#results');
     expect(screen.getByTestId('navigation-state')).toHaveTextContent('hub');
+  });
+
+  it('cleans direct All stay criteria without dropping bookmark state or narrowing the first read', () => {
+    mount('/property/search?mode=all&guests=8&instant=1&f.guestsAtLeast=10&f.instantBooking=yes&tenancy=long&checkIn=2027-05-01&checkOut=2027-05-03&opaque=keep#results', { origin:'direct-all' });
+    expect(state.filters.minGuests).toBeUndefined(); expect(state.filters.instantBooking).toBeUndefined(); expect(state.filters.rentTenancy).toBeUndefined();
+    expect(screen.getByTestId('location')).not.toHaveTextContent('guests='); expect(screen.getByTestId('location')).not.toHaveTextContent('instant=');
+    expect(screen.getByTestId('location')).toHaveTextContent('opaque=keep#results'); expect(screen.getByTestId('navigation-state')).toHaveTextContent('direct-all');
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+  });
+
+  it('shows a failed full read rather than a false empty catalogue when cached rows are empty', () => {
+    state.failed = true;
+    mount('/property/search?mode=all&q=Needle');
+    expect(screen.getByRole('alert')).toHaveTextContent('Homes could not be loaded');
+    expect(screen.queryByText('No properties found')).toBeNull();
+    expect(screen.getByRole('searchbox', { name: 'Property name' })).toHaveValue('Needle');
+  });
+  it('keeps loaded cards on a next-page error and exposes a manual retry', () => {
+    state.failed = true; state.nextPageError = true; calendar.hasNextPage = true;
+    state.properties = [{ id:'synthetic-retained',listing_type:'rent' }];
+    mount('/property/search?mode=all');
+    expect(screen.getByTestId('property-results-grid')).toBeVisible();
+    expect(screen.getByRole('alert')).toHaveTextContent('Loaded homes are kept');
+    expect(screen.getByRole('button', { name:'Load more' })).toBeVisible();
   });
 
 });
