@@ -25,7 +25,7 @@ describe('public property journey', () => {
     const item = { href: '/property/unit-1?mode=rent&guests=3', title: 'Home' };
     expect(readPropertyJourneyReturn({ propertyJourney: item })).toEqual(item);
   });
-  it.each(['https://evil.example', '//evil.example', '/admin/users', '/property/../admin', '/property/unit#bad'])('rejects unsafe return destination %s', href => {
+  it.each(['https://evil.example', '//evil.example', '/admin/users', '/property/../admin', '/property/unit#section'])('rejects unsafe return destination %s', href => {
     expect(readPropertyJourneyReturn({ propertyJourney: { href, title: 'Home' } })).toBeUndefined();
   });
   it.each([null, {}, { propertyJourney: null }, { propertyJourney: { href: '/property/unit', title: 3 } }])('handles malformed navigation state', state => {

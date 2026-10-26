@@ -2,7 +2,7 @@ import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import type { PropertyIntentFields } from './propertyDetailIntent';
 import { propertyDetailHref } from './propertyDetailIntent';
 
-const normalize = (value: string) => value.toLocaleLowerCase().replace(/[\s_\-]+/g, '');
+const normalize = (value: string) => value.toLocaleLowerCase().replace(/[-\s_]+/g, '');
 
 /** Resolve only known guide routes. Unknown locations never receive an invented slug. */
 export function propertyArea(district?: string | null) {
