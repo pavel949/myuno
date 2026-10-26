@@ -10,7 +10,7 @@
  *  - services            src/lib/catalog/taxonomy.ts     → service.path
  *  - categories          src/lib/catalog/taxonomy.ts     → cluster.homeRoute
  *  - clusters (public)   src/lib/catalog/taxonomy.ts     → cluster.homeRoute
- *  - life situations     src/lib/catalog/taxonomy.ts     → /discover/:code
+ *  - life situations     src/lib/catalog/taxonomy.ts     → canonical situation URL builder
  *  - personas (active)   src/lib/taxonomies/master.ts    → /for/:slug
  *  - Phuket areas        src/lib/config/phuketAreas.ts   → /area/:slug
  *  - curated nav targets src/lib/search/navigationIndex  → target.path
@@ -18,6 +18,7 @@
  * Ranking is shared with the navigation index via scoring.ts.
  */
 
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
 import { getActiveApps } from '@/lib/appRegistry';
 import {
   AVAILABLE_SERVICES,
@@ -168,7 +169,7 @@ function buildIndex(): StaticSearchEntry[] {
     });
   }
 
-  // Life situations (active) → /discover/:code.
+  // Life situations (active) → canonical situation URL builder.
   for (const s of LIFE_SITUATIONS) {
     if (!s.isActive) continue;
     entries.push({
@@ -176,7 +177,7 @@ function buildIndex(): StaticSearchEntry[] {
       titleRu: s.titleRu,
       titleEn: s.titleEn,
       keywords: kw(s.code),
-      path: `/discover/${s.code}`,
+      path: buildSituationListUrl(s.code),
       section: 'action',
       type: 'action',
       weight: 2,
