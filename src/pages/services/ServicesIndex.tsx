@@ -92,9 +92,9 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     <section aria-label={t('Подбор услуг', 'Find services', 'ค้นหาบริการ')} className="space-y-4">
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-          <TabsList aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
-            <TabsTrigger value="situations">{t('По ситуации', 'By situation', 'ตามสถานการณ์')}</TabsTrigger>
-            <TabsTrigger value="categories">{t('По категориям', 'By category', 'ตามหมวดหมู่')}</TabsTrigger>
+          <TabsList className="h-auto min-h-11" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
+            <TabsTrigger className="min-h-11 whitespace-normal overflow-visible text-clip" value="situations">{t('По ситуации', 'By situation', 'ตามสถานการณ์')}</TabsTrigger>
+            <TabsTrigger className="min-h-11 whitespace-normal overflow-visible text-clip" value="categories">{t('По категориям', 'By category', 'ตามหมวดหมู่')}</TabsTrigger>
           </TabsList>
         <Button asChild variant="ghost" className="w-11 px-0 sm:w-auto sm:px-3"><Link to="/bookings" aria-label={t('Мои заявки', 'My requests', 'คำขอของฉัน')} title={t('Мои заявки', 'My requests', 'คำขอของฉัน')}><ClipboardList className="size-4 shrink-0 sm:mr-2" aria-hidden="true" /><span className="hidden sm:inline">{t('Мои заявки', 'My requests', 'คำขอของฉัน')}</span></Link></Button>
       </div>

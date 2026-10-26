@@ -56,6 +56,9 @@ async def main():
                 await page.get_by_role('button',name={'ru':'Сбросить всё','en':'Reset all','th':'รีเซ็ตทั้งหมด'}[lang],exact=True).click()
                 # Switch via keyboard: actual Radix tabs, no force click.
                 tabs=page.get_by_role('tab')
+                for tab in await tabs.all():
+                    metrics=await tab.evaluate('e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth})')
+                    assert metrics['width']>=44 and metrics['height']>=44 and metrics['scrollWidth']<=metrics['clientWidth']+1,(lang,width,'tab clipping or target',metrics)
                 await tabs.nth(1).focus()
                 await tabs.nth(1).press('ArrowLeft')
                 await expect(tabs.nth(0)).to_have_attribute('aria-selected','true')
