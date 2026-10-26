@@ -166,18 +166,18 @@ const navigate = useNavigate();
 
       if (error) throw error;
 
-      if (inserted?.id) {
-        supabase.functions.invoke('notify-admin-partner-application', {
-          body: { application_id: inserted.id },
-        }).catch(() => {});
-      }
+      if (!inserted?.id) throw new Error('Application persistence was not confirmed');
+
+      supabase.functions.invoke('notify-admin-partner-application', {
+        body: { application_id: inserted.id },
+      }).catch(() => {});
 
       try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
       setIsSubmitted(true);
       toast(isRu ? 'Заявка отправлена!' : 'Application submitted!', {
         description: isRu
-          ? 'Мы отправили подтверждение на ваш email и ответим в течение 24 часов'
-          : 'Confirmation sent to your email. We will reply within 24 hours',
+          ? 'Ваша заявка сохранена для рассмотрения.'
+          : 'Your application has been saved for review.',
       });
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -210,8 +210,8 @@ const navigate = useNavigate();
             </h1>
             <p className="text-muted-foreground mb-6">
               {language === 'ru' 
-                ? 'Наша команда рассмотрит вашу заявку и свяжется с вами в течение 2-3 рабочих дней для верификации.' 
-                : 'Our team will review your application and contact you within 2-3 business days for verification.'}
+                ? 'Ваша заявка сохранена. Наша команда рассмотрит её и свяжется с вами для верификации.'
+                : 'Your application has been saved. Our team will review it and contact you for verification.'}
             </p>
             <PremiumButton onClick={() => navigate('/')}>
               {language === 'ru' ? 'На главную' : 'Go to Home'}
@@ -397,8 +397,8 @@ const navigate = useNavigate();
               </h4>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' 
-                  ? 'После подачи заявки наша команда свяжется с вами для проверки документов и подписания договора. Обычно это занимает 2-3 рабочих дня.' 
-                  : 'After submitting your application, our team will contact you to verify documents and sign an agreement. This usually takes 2-3 business days.'}
+                  ? 'После подачи заявки наша команда свяжется с вами для проверки документов и подписания договора.'
+                  : 'After submitting your application, our team will contact you to verify documents and sign an agreement.'}
               </p>
             </div>
           </div>

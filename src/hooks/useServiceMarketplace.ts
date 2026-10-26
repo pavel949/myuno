@@ -132,7 +132,7 @@ export function useCreateServiceOrder() {
     },
     onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ['provider-busy', v.providerId] });
-      qc.invalidateQueries({ queryKey: ['my-service-orders'] });
+      qc.invalidateQueries({ queryKey: ['guest-service-orders', v.guestId] });
     },
   });
 }
