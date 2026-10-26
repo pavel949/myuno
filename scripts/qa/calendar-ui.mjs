@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, statSync } from 'node:fs';
 
 const root = process.cwd();
-const output = process.env.CALENDAR_QA_OUTPUT || '/tmp/browser/calendar-isolated';
+const output = '/tmp/browser/calendar-isolated';
 await mkdir(output, { recursive: true });
 const fixture = `import {format, startOfWeek, addDays} from 'date-fns';
 import {ru,enUS} from 'date-fns/locale';
