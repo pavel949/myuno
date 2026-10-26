@@ -3,6 +3,7 @@
  * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
  */
 import { useNavigate } from 'react-router-dom';
+import { useLayoutEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -54,6 +55,35 @@ export function PropertyDetailMobileBar({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const actionBarRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const bar = actionBarRef.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const variable = '--property-detail-action-clearance';
+    const previous = root.style.getPropertyValue(variable);
+    const priority = root.style.getPropertyPriority(variable);
+    let active = true;
+    const measure = () => {
+      if (!active) return;
+      const rect = bar.getBoundingClientRect();
+      // Includes the existing bottom-nav/safe-area offset, not just bar height.
+      const clearance = rect.height > 0 ? Math.max(0, Math.ceil(window.innerHeight - rect.top)) : 0;
+      root.style.setProperty(variable, `${clearance}px`);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(bar);
+    window.addEventListener('resize', measure);
+    return () => {
+      active = false;
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+      if (previous) root.style.setProperty(variable, previous, priority);
+      else root.style.removeProperty(variable);
+    };
+  }, []);
 
   const handleReserve = () => {
     if (dateRange?.from && dateRange?.to) {
@@ -68,7 +98,7 @@ export function PropertyDetailMobileBar({
   };
 
   return (
-    <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
+    <div ref={actionBarRef} data-property-detail-action-bar className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
       <div className="max-w-[1536px] mx-auto flex items-center gap-3">
         {isSaleListing || isLongStayOnly ? (
           <>
