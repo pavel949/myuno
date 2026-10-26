@@ -11,7 +11,10 @@
  *    LIVE_CLUSTER_SLUGS in areaLandings.ts so links never resolve to a 404.
  */
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
+import { readPropertyJourneyReturn } from '@/lib/real-estate/propertyJourney';
+import { propertySearchHref } from '@/lib/propertySearchQuery';
+import '@/styles/property-journey.css';
 import { Helmet } from 'react-helmet-async';
 import {
   AlertTriangle,
@@ -100,6 +103,8 @@ const AreaLandingPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const location = useLocation();
+  const returnProperty = readPropertyJourneyReturn(location.state);
 
   const landing = slug ? findAreaLandingBySlug(slug) : undefined;
 
@@ -149,7 +154,7 @@ const AreaLandingPage = () => {
       : `${area.distance_beach_km} ${isRu ? 'км' : 'km'}`;
 
   const districtParam = encodeURIComponent(area.name_en);
-  const rentSearchHref = `/property/browse?district=${districtParam}`;
+  const rentSearchHref = propertySearchHref(returnProperty?.href.split('?')[1] || '', { mode: 'rent', district: area.name_en });
   const offplanSearchHref = `/property/offplan?district=${districtParam}`;
   // Both map deep-links share the canonical `/property/map?district=…` entry
   // (PropertyMap reads the param, filters server-side, and recenters on it).
@@ -230,7 +235,8 @@ const AreaLandingPage = () => {
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
       </Helmet>
 
-      <PageShell width="wide">
+      <PageShell width="wide" className="premium-area">
+        {returnProperty && <Link className="property-journey-return" to={returnProperty.href}>← {isRu ? 'Вернуться к объекту' : language === 'th' ? 'กลับไปที่ที่พัก' : 'Back to the property'}: {returnProperty.title}</Link>}
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
           <Link to="/area" className="hover:text-foreground">

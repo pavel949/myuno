@@ -1,4 +1,5 @@
 import '@/styles/public-commerce.css';
+import { PropertyJourneyNav, PropertyAreaGuide } from '@/components/property/PropertyJourney';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
@@ -282,7 +283,8 @@ export default function PropertyDetail() {
           address: property.district || undefined,
         })}
       />
-      <div className="public-commerce public-commerce--property pb-28">
+      <div className="public-commerce public-commerce--property premium-property pb-28">
+        <PropertyJourneyNav property={propertyExt} mode={isSaleListing ? 'buy' : 'rent'} />
         {/* Property identity and secondary actions */}
         <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
           <BackButton fallbackPath="/property" variant="default" size="md" />
@@ -395,7 +397,8 @@ export default function PropertyDetail() {
         {/* Main Content with Sidebar Layout for Desktop */}
         <div className="px-4 md:px-0 py-6 lg:py-10">
           <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
-            <article className="space-y-6 min-w-0">
+            <article className="property-detail-story space-y-6 min-w-0">
+              {propertyDesc && <section className="property-detail-intro"><h2>{isRu ? 'Дом для вашего ритма' : 'A home for your rhythm'}</h2><p>{propertyDesc}</p></section>}
 
               {isSaleListing && (
                 <>
@@ -535,14 +538,7 @@ export default function PropertyDetail() {
 
               <Separator />
 
-              <div>
-                <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
-                  {isRu ? 'Об этом жилье' : 'About this place'}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
-                  {isRu ? property.description_ru : property.description_en}
-                </p>
-              </div>
+
 
               {/* Pricing breakdown intentionally not rendered publicly.
                   Base/seasonal pricing belongs to the host workspace.
@@ -678,6 +674,7 @@ export default function PropertyDetail() {
               />
 
               <Separator />
+              <PropertyAreaGuide property={propertyExt} />
               <PropertyLocationMap
                 lat={property.lat}
                 lng={property.lng}
