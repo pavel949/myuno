@@ -48,11 +48,18 @@ async def main():
                 await expect(page.get_by_role('dialog',name='CalendarDayEventsSheet')).to_contain_text('fixture-booking')
                 await page.get_by_role('button',name='Close fixture').click()
                 checkout_label=await page.evaluate('window.fixtureCheckoutLabel')
-                await page.get_by_role('button',name=checkout_label,exact=True).click()
+                checkout_day=page.get_by_role('button',name=checkout_label,exact=True)
+                # The fixture week starts on the current Monday, so its checkout day (+7) can fall in the next month; open that month first, then restore the original one.
+                opened_next=await checkout_day.count()==0
+                if opened_next: await page.get_by_role('button',name='Следующий месяц' if lang=='ru' else 'Next month').click()
+                await checkout_day.click()
                 events=page.get_by_role('dialog',name='CalendarDayEventsSheet')
                 await expect(events).to_contain_text('fixture-booking')
                 await expect(events).to_have_attribute('data-occupied','false')
                 await page.get_by_role('button',name='Close fixture').click()
+                if opened_next:
+                    await page.get_by_role('button',name='Предыдущий месяц' if lang=='ru' else 'Previous month').click()
+                    assert await period.get_by_role('heading').inner_text()==before
                 await bounds('single'); await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-single.png'))
                 await portfolio.click(); await expect(portfolio).to_have_attribute('aria-pressed','true')
                 await page.get_by_role('combobox').click()
