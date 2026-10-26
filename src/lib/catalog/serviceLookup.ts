@@ -4,6 +4,7 @@
  */
 import { serviceDiscoveryCategories } from '@/lib/services/serviceDiscoveryProjection';
 import { buildServiceCategoryUrl } from '@/lib/services/serviceDiscoveryQuery';
+import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES, FLAT_SERVICES, type ServiceStatus } from './taxonomy';
 import { CATALOG_SERVICE_SLUG_BY_LIFE_ID } from './serviceLifeIdentities.generated';
@@ -36,7 +37,7 @@ export function resolveCatalogServiceDestination(serviceId: string):
 
 /** Normalize only the seeded generic home entry; preserve other DB destinations. */
 export function catalogServicePath(parentId: string, serviceId: string, appPath: string | null | undefined): string | undefined {
-  if (parentId === 'cat-home-services' && serviceId === 'services'
+  if (isHomeServiceCategoryId(parentId) && serviceId === 'services'
     && (appPath === '/services' || appPath === '/discover/services')) {
     return buildServiceCategoryUrl(parentId);
   }

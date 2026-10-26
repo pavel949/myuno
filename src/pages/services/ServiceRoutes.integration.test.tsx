@@ -36,7 +36,7 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.
 afterEach(cleanup);
 
 describe('integrated direct service route ownership', () => {
-  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves combined filters and request/provider return paths at %s', async path => {
+  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);
     await act(async () => { await vi.dynamicImportSettled(); });
@@ -54,6 +54,13 @@ describe('integrated direct service route ownership', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
     expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent(original);
+
+  });
+  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves provider offer filters and return path at %s', async path => {
+    const original = `${path}?category=ac&q=cleaning&ref=fixture`;
+    mount(original);
+    await act(async () => { await vi.dynamicImportSettled(); });
+    expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     // Provider rows have no category metadata: the UI makes this limitation
     // explicit and preserves text/ref when the user chooses to remove it.
     expect(screen.queryByRole('link', { name: 'Fixture provider' })).not.toBeInTheDocument();

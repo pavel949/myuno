@@ -1,13 +1,21 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import ServicesIndex from './ServicesIndex';
 import { isKnownRoute } from '@/lib/nav/routeRegistry';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
-import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
-const state = vi.hoisted(() => ({ loading: false, error: false, fallback: false, providerOnly: false }));
-vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: CATEGORIES, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() }) }));
+import { CATEGORIES, LIFE_SITUATIONS, type CategoryEntry } from '@/lib/catalog/taxonomy';
+const state = vi.hoisted(() => ({ loading: false, error: false, fallback: false, providerOnly: false, legacyHome: false, homeShape: '' }));
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => {
+  const original = CATEGORIES.find(category => category.id === 'cat-home-services')!;
+  const legacy = { ...original, id: 'cat-home-living' as CategoryEntry['id'], labelEn: 'Home & Living' };
+  let categories = state.legacyHome ? CATEGORIES.map(category => category.id === original.id ? legacy : category) : CATEGORIES;
+  if (state.homeShape === 'dual') categories = [...CATEGORIES, legacy];
+  if (state.homeShape === 'inactive') categories = [...CATEGORIES.map(category => category.id === original.id ? { ...category, status: 'soon' as const } : category), legacy];
+  if (state.homeShape === 'empty') categories = [{ ...legacy, services: [] }];
+  return { categories, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() };
+} }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
@@ -15,9 +23,23 @@ vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServ
 vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
 function Location() { const l = useLocation(); const navigate = useNavigate(); return <><output data-testid="location">{l.pathname}{l.search}{l.hash}|{JSON.stringify(l.state)}</output><button onClick={() => navigate(-1)}>Back fixture</button><button onClick={() => navigate(1)}>Forward fixture</button></>; }
 function mount(path = '/discover/services') { return render(<MemoryRouter initialEntries={[{ pathname: path.split('?')[0], search: path.includes('?') ? '?'+path.split('?')[1] : '', state: { from: 'trip' } }]}><Routes><Route path="/discover/services" element={<ServicesIndex />} /><Route path="/services/order/:id" element={<div>Request details</div>} /></Routes><Location /></MemoryRouter>); }
-beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
+beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; state.legacyHome = false; state.homeShape = ''; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
 const select = (name: string, option: string) => { fireEvent.keyDown(screen.getByRole('combobox', { name }), { key: 'Enter' }); fireEvent.click(screen.getByRole('option', { name: option })); };
 describe('canonical services hub', () => {
+  it('preserves the selected child when search follows before the router commits', () => {
+    state.legacyHome = true;
+    mount('/discover/services?category=cat-home-living&ref=rapid');
+    act(() => {
+      fireEvent.click(document.querySelector('[data-home-category-id="ac"]')!);
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Cleaning' } });
+    });
+    const route = screen.getByTestId('location').textContent!;
+    expect(route).toContain('category=ac');
+    expect(route).toContain('home=cat-home-living');
+    expect(route).toContain('q=Cleaning');
+    expect(screen.getByRole('button', { name: 'AC Cleaning' })).toBeVisible();
+  });
+
   it('offers equal views and real specialised routes without duplicate services', () => {
     mount();
     expect(screen.getByRole('tab', { name: 'By category' })).toHaveAttribute('aria-selected', 'true');
@@ -71,6 +93,82 @@ describe('canonical services hub', () => {
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: '' } });
     expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
     expect(screen.getByRole('button', { name: 'All home services', pressed: true })).toBeVisible();
+  });
+  it.each(['cat-home-services', 'cat-home-living', 'home-services', 'services'])('opens eleven home choices through %s against legacy runtime inventory', id => {
+    state.legacyHome = true;
+    mount('/discover/services?category='+id+'&ref=legacy');
+    expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
+    expect(screen.getByTestId('location')).toHaveTextContent('category='+id);
+    fireEvent.click(screen.getByRole('button', { name: 'Air Conditioning' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=ac&ref=legacy');
+    fireEvent.click(screen.getByText('AC Cleaning'));
+    expect(screen.getByTestId('location')).toHaveTextContent('/services/order/');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-home-living&ref=legacy');
+  });
+  it('shows the returned legacy home category in the initial primary menu', () => {
+    state.legacyHome = true;
+    mount();
+    const menu = screen.getByTestId('service-discovery-menu');
+    expect(menu.querySelector('[data-category-id="cat-home-living"]')).not.toBeNull();
+    fireEvent.click(menu.querySelector('[data-category-id="cat-home-living"]')!);
+    expect(screen.getByTestId('home-category-menu')).toBeVisible();
+  });
+  it('keeps an active empty legacy parent discoverable with all request choices', () => {
+    state.homeShape = 'empty';
+    mount();
+    expect(screen.queryByText('No services found')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Home & Living' }));
+    expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
+    expect(screen.getByTestId('service-request-grid')).toBeVisible();
+  });
+  it('retains the selected second parent through child URL, Back and All home services', () => {
+    state.homeShape = 'dual';
+    mount('/discover/services?category=cat-home-living&ref=second');
+    fireEvent.click(screen.getByRole('button', { name: 'Air Conditioning' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('home=cat-home-living');
+    fireEvent.click(screen.getByText('AC Cleaning'));
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByRole('combobox', { name: 'Category' })).toHaveTextContent('Home & Living');
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-home-living');
+    expect(screen.getByTestId('location').textContent).not.toContain('home=');
+  });
+  it('uses explicit child parent context when both aliases are active', () => {
+    state.homeShape = 'dual';
+    mount('/discover/services?category=ac&home=cat-home-living');
+    expect(screen.getByRole('combobox', { name: 'Category' })).toHaveTextContent('Home & Living');
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-home-living');
+  });
+  it.each(['category=ac', 'category=home-services'])('requires a choice for ambiguous Home URL %s', query => {
+    state.homeShape = 'dual';
+    mount('/discover/services?'+query);
+    expect(screen.getByText(/Several home categories/)).toBeVisible();
+    expect(screen.queryByTestId('service-request-grid')).toBeNull();
+  });
+  it.each(['category=cat-home-services', 'category=ac&home=cat-home-services', 'category=ac&home=unknown'])('does not replace unavailable exact parent in %s', query => {
+    state.homeShape = 'inactive';
+    mount('/discover/services?'+query);
+    expect(screen.getByText(/selected home category is unavailable/)).toBeVisible();
+    expect(screen.queryByTestId('service-request-grid')).toBeNull();
+  });
+  it('records a pointer/focus tab selection only once and restores the prior view with Back', () => {
+    mount('/discover/services?ref=history');
+    const situation = screen.getByRole('tab', { name: 'By situation' });
+    act(() => { fireEvent.mouseDown(situation, { button: 0 }); fireEvent.focus(situation); });
+    expect(situation).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
+    expect(screen.getByTestId('location')).toHaveTextContent('/discover/services?ref=history|');
+    fireEvent.click(screen.getByText('Forward fixture'));
+    expect(screen.getByTestId('service-situation-menu')).toBeVisible();
+    const category = screen.getByRole('tab', { name: 'By category' });
+    act(() => { fireEvent.mouseDown(category, { button: 0 }); fireEvent.focus(category); });
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByTestId('service-situation-menu')).toBeVisible();
   });
   it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
     mount('/discover/services?ref=trip');

@@ -1,10 +1,35 @@
 import type { CategoryEntry, LifeSituationEntry, ServiceEntry } from '@/lib/catalog/taxonomy';
+import { isHomeServiceCategoryId } from './publicServiceCategories';
 
 const visible = (status: string | undefined) => !status || status === 'available' || status === 'info';
 export function serviceDiscoveryCategories(categories: CategoryEntry[]) {
   return categories.filter(category => !['cat-real-estate', 'cat-partner-portal'].includes(category.id) && visible(category.status))
     .map(category => ({ ...category, services: category.services.filter(service => visible(service.status) && service.path.startsWith('/') && !service.path.startsWith('//')) }))
-    .filter(category => category.services.length > 0 || category.id === 'cat-home-services');
+    .filter(category => category.services.length > 0 || isHomeServiceCategoryId(category.id));
+}
+
+/** Resolve against returned inventory, not the first member of an alias family.
+ * Compatibility links may use another declared alias only when the requested ID
+ * was not returned and exactly one active Home parent exists. Stored child
+ * context is exact: a removed/inactive parent never becomes a sibling.
+ */
+export function resolveHomeServiceCategory(source: CategoryEntry[], requestedId = '', allowAliasFallback = false):
+  | { status: 'resolved'; category: CategoryEntry }
+  | { status: 'unavailable'; reason: 'unknown' | 'inactive' | 'missing' | 'ambiguous' } {
+  const active = serviceDiscoveryCategories(source).filter(category => isHomeServiceCategoryId(category.id));
+  if (requestedId) {
+    if (!isHomeServiceCategoryId(requestedId)) return { status: 'unavailable', reason: 'unknown' };
+    const returned = source.filter(category => category.id === requestedId);
+    if (returned.length) {
+      const exact = active.filter(category => category.id === requestedId);
+      if (!exact.length) return { status: 'unavailable', reason: 'inactive' };
+      if (returned.length === 1 && exact.length === 1) return { status: 'resolved', category: exact[0] };
+      return { status: 'unavailable', reason: 'ambiguous' };
+    }
+    if (!allowAliasFallback) return { status: 'unavailable', reason: 'missing' };
+  }
+  if (active.length === 1) return { status: 'resolved', category: active[0] };
+  return { status: 'unavailable', reason: active.length ? 'ambiguous' : 'missing' };
 }
 export function serviceDiscoverySituations(categories: CategoryEntry[], situations: LifeSituationEntry[]) {
   const codes = new Set(categories.flatMap(category => category.services.flatMap(service => service.situationCodes ?? [])));
@@ -14,9 +39,10 @@ export function serviceDiscoverySituations(categories: CategoryEntry[], situatio
 /** Presentation order only: these are references to existing canonical entities. */
 export function serviceDiscoveryMenu(categories: CategoryEntry[]) {
   const available = serviceDiscoveryCategories(categories);
-  const primaryIds = ['cat-home-services', 'cat-transport', 'cat-tourism'];
-  const primary = primaryIds.flatMap(id => available.find(category => category.id === id) ?? []);
-  const more = available.filter(category => !primaryIds.includes(category.id))
+  const home = available.find(category => isHomeServiceCategoryId(category.id));
+  const primary = [home, ...['cat-transport', 'cat-tourism'].map(id => available.find(category => category.id === id))]
+    .filter((category): category is CategoryEntry => Boolean(category));
+  const more = available.filter(category => !primary.some(item => item.id === category.id))
     .sort((a, b) => Number(a.id === 'cat-emergency') - Number(b.id === 'cat-emergency'));
   const yacht = available.flatMap(category => category.services).find(service => service.id === 'yacht');
   return { primary, more, yacht };

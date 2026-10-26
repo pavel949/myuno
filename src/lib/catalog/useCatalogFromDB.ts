@@ -26,6 +26,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { catalogServicePath } from './serviceLookup';
+import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import {
   CLUSTERS as STATIC_CLUSTERS,
   CATEGORIES as STATIC_CATEGORIES,
@@ -152,7 +153,8 @@ function staticClusterBySlug(slug: string | null): ClusterEntry | undefined {
 }
 
 function staticCategoryBySlug(slug: string): CategoryEntry | undefined {
-  return STATIC_CATEGORIES.find((c) => c.id === slug);
+  const referenceId = isHomeServiceCategoryId(slug) ? 'cat-home-services' : slug;
+  return STATIC_CATEGORIES.find((c) => c.id === referenceId);
 }
 
 function adaptGroupToCluster(row: DBGroupRow): ClusterEntry {
