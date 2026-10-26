@@ -40,7 +40,7 @@ Property rental: `Property → Availability → Rate → Quote → checked/atomi
 
 Do not infer a fixed ordering between creation/mutation of `orders` and `property_bookings` from this diagram. Follow the verified canonical writer contract. Commercial transaction ≠ inventory commitment; successful `orders` state does not prove successful inventory reservation; payment confirmation ≠ booking confirmation.
 
-Property purchase: `Project/Unit → Terms → Enquiry → Qualification → Viewing/DD → Transaction → Ownership/PM`. Never force Buy into rental semantics.
+Property purchase: `Project/Unit → Terms → Enquiry → Qualification → Viewing/DD → Transaction → Ownership/PM`. Never force Buy into rental semantics. The physical UUID is properties.id across off-plan, resale, rental and management; project_units.property_id is the existing sales bridge, not a new physical identity. Newbuild buyer enquiries use structured project/unit/physical-property/offer/intent context in the existing consultation intake; a reservation request commits neither inventory nor payment. Source refreshes stage provenance and explicit units, preserve last-known-good on failure and never infer sold from missing rows. See [first-release contract](docs/newbuilds/2026-10-25-first-release.md) for implementation and activation boundaries.
 
 Services: `Discovery → Provider/Offering → Availability/Slot where applicable → Price → Service Request/Booking → Fulfilment → Payment/Settlement where applicable → CRM`.
 

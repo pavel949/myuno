@@ -140,23 +140,24 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
   });
 }
 
-export function useNewbuildProject(slugOrId?: string) {
+export const NEWBUILD_BUYER_PROJECT_FIELDS = 'id,slug,name_en,name_ru,tagline,description_en,description_ru,cover_image,gallery_urls,images,video_url,location_area,district,address,lat,lng,unit_types,total_units,completion_date,construction_progress,project_status,is_featured,is_active,is_approved,developer_id,developer_name,amenities,muuno_score,created_at';
+export function useNewbuildProject(slugOrId?: string, audience: 'operator' | 'buyer' = 'operator') {
   return useQuery({
-    queryKey: ['newbuild-project', slugOrId],
+    queryKey: ['newbuild-project', slugOrId, audience],
     queryFn: async (): Promise<NewbuildProject | null> => {
       if (!slugOrId) return null;
 
+      const query = () => {
+        const base = supabase.from('property_projects').select(audience === 'buyer' ? NEWBUILD_BUYER_PROJECT_FIELDS : '*');
+        return audience === 'buyer' ? base.eq('is_active', true).eq('is_approved', true) : base;
+      };
       // Try slug first, fall back to id
-      let { data, error } = await supabase
-        .from('property_projects')
-        .select('*')
+      let { data, error } = await query()
         .eq('slug', slugOrId)
         .maybeSingle();
 
       if (!data && !error) {
-        ({ data, error } = await supabase
-          .from('property_projects')
-          .select('*')
+        ({ data, error } = await query()
           .eq('id', slugOrId)
           .maybeSingle());
       }

@@ -1,0 +1,30 @@
+import { test, expect } from '@playwright/test';
+test.beforeEach(async ({ page }) => { await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, route => route.abort()); });
+test('inventory → reserve request → receipt → team structured context', async ({ page }) => {
+  await page.goto('/e2e/newbuilds/index.html');
+  await expect(page.getByText('Available: 1 · Reserved: 1 · Sold: 1')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Add Unit|Delete|CSV/ })).toHaveCount(0);
+  await page.screenshot({ path: 'docs/newbuilds/screenshots/buyer-inventory-desktop.png', fullPage: true });
+  await page.getByRole('button', { name: 'Request information' }).first().click();
+  await page.getByLabel('Request', { exact: true }).selectOption('reserve_request');
+  await page.getByLabel('Name', { exact: true }).fill('Synthetic Buyer');
+  await page.getByLabel('Phone', { exact: true }).fill('+66000000000');
+  await page.getByRole('button', { name: 'Send request' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Request saved' })).toContainText('synthetic-persisted-receipt');
+  await expect(page.getByTestId('team-queue')).toContainText('Reservation request');
+  await expect(page.getByTestId('team-queue')).toContainText('synthetic-unit-1');
+  const request = await page.evaluate(() => (window as any).__requests[0]);
+  expect(request.vertical_id).toBe('properties'); expect(request.vertical_metadata.request_only).toBe(true); expect(request.vertical_metadata.unit_id).toBe('synthetic-unit-1'); expect(request.vertical_metadata.property_id).toBe('synthetic-physical-property');
+  await page.screenshot({ path: 'docs/newbuilds/screenshots/buyer-receipt-desktop.png', fullPage: true });
+});
+test('mobile failed save keeps form and has no success receipt', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/e2e/newbuilds/index.html'); await page.evaluate(() => { (window as any).__failSave = true; });
+  await page.getByRole('button', { name: 'Request information' }).first().click();
+  await page.getByLabel('Name', { exact: true }).fill('Synthetic Buyer'); await page.getByLabel('Phone', { exact: true }).fill('+66000000000'); await page.getByRole('button', { name: 'Send request' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Saving was not confirmed' })).toBeVisible();
+  await expect(page.getByText('synthetic-persisted-receipt')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Send request' }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'Send request' })).toBeInViewport();
+  await page.screenshot({ path: 'docs/newbuilds/screenshots/buyer-error-mobile.png', fullPage: true });
+});

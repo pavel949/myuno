@@ -1,4 +1,6 @@
-# Unit table consolidation — migration plan
+# Unit table consolidation — historical migration plan
+
+> Superseded for physical identity and project ownership on 2026-10-25 by the [canonical identity reuse ADR](../../newbuilds/identity-reuse.md). The plan below contains outdated table names and must not be used to merge/drop tables or replace UUIDs. Current source uses property_projects, properties.id and the existing project_units.property_id bridge; see the ADR and 20260820010743 / 20260820014650 SQL. Historical content is retained as evidence, not activation authority.
 
 Status: in progress · Owner: platform · Last updated: 2026-08-20
 

@@ -9,19 +9,13 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
-import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
 import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { NbServicesSection } from '@/components/newbuilds/NbServicesSection';
-import { NbInventoryTab } from '@/components/newbuilds/tabs/NbInventoryTab';
-import { NbPlansTab } from '@/components/newbuilds/tabs/NbPlansTab';
-import { PublicFloorPlan } from '@/components/newbuilds/PublicFloorPlan';
-import { NbTermsTab } from '@/components/newbuilds/tabs/NbTermsTab';
+import { BuyerProjectTerms } from './BuyerProjectTerms';
 import { NbUpdatesTab } from '@/components/newbuilds/tabs/NbUpdatesTab';
-import { NbReportsTab } from '@/components/newbuilds/tabs/NbReportsTab';
 import { NbDeveloperTab } from '@/components/newbuilds/tabs/NbDeveloperTab';
-import { ProjectUnitsGrid } from '@/components/newbuilds/ProjectUnitsGrid';
-import { ProjectDealsTab } from '@/components/newbuilds/ProjectDealsTab';
-import { ProjectMarketingTab } from '@/components/newbuilds/ProjectMarketingTab';
+import { BuyerProjectUnits } from './BuyerProjectUnits';
+import { BuyerRequestForm } from './BuyerRequestForm';
 import type { NewbuildProject } from '@/hooks/useNewbuildProjects';
 import '@/styles/newbuilds-theme.css';
 
@@ -29,13 +23,9 @@ const TABS = [
   { key: 'overview', label: { ru: 'Обзор', en: 'Overview', th: 'ภาพรวม' } },
   { key: 'availability', label: { ru: 'Доступность', en: 'Availability', th: 'ห้องที่ว่าง' } },
   { key: 'units', label: { ru: 'Юниты', en: 'Units', th: 'ยูนิต' } },
-  { key: 'inventory', label: { ru: 'Инвентарь', en: 'Inventory', th: 'รายการยูนิต' } },
   { key: 'plans', label: { ru: 'Планировки', en: 'Floor plans', th: 'แปลนห้อง' } },
   { key: 'terms', label: { ru: 'Условия', en: 'Terms', th: 'เงื่อนไข' } },
-  { key: 'marketing', label: { ru: 'Маркетинг', en: 'Marketing', th: 'การตลาด' } },
-  { key: 'deals', label: { ru: 'Сделки', en: 'Deals', th: 'ข้อเสนอ' } },
   { key: 'updates', label: { ru: 'Обновления', en: 'Updates', th: 'อัปเดต' } },
-  { key: 'reports', label: { ru: 'Отчёты', en: 'Reports', th: 'รายงาน' } },
   { key: 'developer', label: { ru: 'О девелопере', en: 'Developer', th: 'ผู้พัฒนา' } },
 ] as const;
 
@@ -100,7 +90,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
 
           <section className="max-w-7xl mx-auto px-4 mb-8">
             <div className="nb-glass p-5 flex flex-wrap gap-6 md:gap-10 items-center">
-              <NbPriceDisplay price={project.price_from} priceTo={project.price_to} size="md" />
+              <p>{t({ ru: 'Цена требует подтверждения', en: 'Price requires confirmation', th: 'ราคาต้องยืนยัน' })}</p>
             </div>
           </section>
         </>
@@ -138,7 +128,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
       <div className={`flex gap-8 ${variant === 'embedded' ? 'flex-col' : ''}`}>
         <div className="flex-1 min-w-0">
           {activeTab === 'availability' && (
-            <PublicFloorPlan projectId={project.id} developerId={project.developer_id} />
+            <BuyerProjectUnits projectId={project.id} />
           )}
 
           {activeTab === 'overview' && (
@@ -152,8 +142,6 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: t({ ru: 'Всего юнитов', en: 'Total units', th: 'ยูนิตทั้งหมด' }), value: project.total_units },
-                  { label: t({ ru: 'Доступно', en: 'Available', th: 'ว่าง' }), value: project.units_available },
-                  { label: t({ ru: 'Продано', en: 'Sold', th: 'ขายแล้ว' }), value: project.units_sold },
                   { label: t({ ru: 'Типы', en: 'Types', th: 'ประเภท' }), value: project.unit_types?.join(', ') },
                 ]
                   .filter(s => s.value != null && s.value !== '')
@@ -199,27 +187,11 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
             </div>
           )}
 
-          {activeTab === 'units' && <ProjectUnitsGrid projectId={project.id} />}
+          {activeTab === 'units' && <BuyerProjectUnits projectId={project.id} />}
 
-          {activeTab === 'inventory' && (
-            <NbInventoryTab projectId={project.id} developerId={project.developer_id || undefined} />
-          )}
+          {activeTab === 'plans' && <BuyerProjectUnits projectId={project.id} plansOnly />}
 
-          {activeTab === 'marketing' && (
-            <ProjectMarketingTab
-              commissionPct={project.commission_pct}
-              paymentPlan={project.payment_plan}
-              marketingMaterials={project.marketing_materials}
-              ownershipTypes={project.ownership_types}
-              exclusive={project.exclusive}
-            />
-          )}
-
-          {activeTab === 'deals' && <ProjectDealsTab projectId={project.id} />}
-
-          {activeTab === 'plans' && <NbPlansTab projectId={project.id} />}
-
-          {activeTab === 'terms' && <NbTermsTab projectId={project.id} />}
+          {activeTab === 'terms' && <BuyerProjectTerms projectId={project.id} />}
 
           {activeTab === 'updates' && (
             <NbUpdatesTab
@@ -228,8 +200,6 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
               completionDate={project.completion_date}
             />
           )}
-
-          {activeTab === 'reports' && <NbReportsTab projectId={project.id} />}
 
           {activeTab === 'developer' && project.developer_id && (
             <NbDeveloperTab developerId={project.developer_id} currentProjectId={project.id} />
@@ -247,7 +217,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
         {showSidebar && (
           <div className="hidden lg:block w-[340px] flex-shrink-0 space-y-6">
             <div id="lead-form">
-              <NbLeadForm projectId={project.id} developerId={project.developer_id || undefined} source="project_page" />
+              <BuyerRequestForm projectId={project.id} />
             </div>
             <div className="nb-glass p-5">
               <NbROICalculator

@@ -1,0 +1,3 @@
+import { defineConfig } from '@playwright/test';
+import { existsSync } from 'node:fs';
+export default defineConfig({ testDir: '.', testMatch: 'buyer.spec.ts', workers: 1, retries: 0, use: { launchOptions: existsSync('/usr/bin/chromium') ? { executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] } : {}, baseURL: 'http://127.0.0.1:8107', viewport: { width: 1280, height: 900 } }, reporter: 'list', webServer: { cwd: process.cwd(), command: 'npx vite --config e2e/newbuilds/vite.config.ts', url: 'http://127.0.0.1:8107/e2e/newbuilds/index.html', reuseExistingServer: false }, outputDir: '../../test-results/newbuilds' });

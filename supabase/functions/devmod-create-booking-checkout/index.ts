@@ -19,6 +19,7 @@
  * Deploy: supabase functions deploy devmod-create-booking-checkout
  */
 
+import { newbuildRequestOnlyResponse } from "../_shared/newbuild-request-only.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
@@ -46,6 +47,9 @@ function err(message: string, status = 400) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+
+  // Containment precedes auth helpers, service-role access and Stripe.
+  return newbuildRequestOnlyResponse(CORS);
 
   try {
     // Auth guard — buyer must be authenticated
