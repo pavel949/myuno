@@ -211,7 +211,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
   it('home umbrella preserves its category intent and catalog SSOT label', () => {
     const cat = CATEGORIES.find((c) => c.id === 'cat-home-services')!;
     const umbrella = cat.services.find((s) => s.id === 'services');
-    expect(umbrella?.path).toBe('/services?category=cat-home-services');
+    expect(umbrella?.path).toBe('/discover/services?category=cat-home-services');
     expect(umbrella, '/services umbrella entry missing from SSOT').toBeTruthy();
     const label = getClusterServiceLocalizedLabel(
       {
