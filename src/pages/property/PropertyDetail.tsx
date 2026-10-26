@@ -1,6 +1,6 @@
 import '@/styles/public-commerce.css';
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
   MapPin, Star, BedDouble, Bath, Users, Maximize,
   Share2, Loader2, Home, Sofa, Building2, Shield,
@@ -19,7 +19,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
-import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyCatalogHref, propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { publicJourneyState, readPublicJourneyOrigin, propertyAreaHref } from '@/lib/real-estate/publicJourney';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -92,6 +93,9 @@ const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const journeyOrigin = readPublicJourneyOrigin(location.state);
+  const returnToResults = () => journeyOrigin ? navigate(-1) : navigate(propertyCatalogHref(searchParams.get('mode') === 'buy' ? 'buy' : 'rent', searchParams.toString()), { replace: true });
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -158,7 +162,7 @@ export default function PropertyDetail() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Home className="w-16 h-16 text-muted-foreground/50" />
         <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
-        <Button variant="outline" onClick={() => navigate('/property')}>
+        <Button variant="outline" onClick={returnToResults}>
           {isRu ? 'К списку' : 'Back to listings'}
         </Button>
       </div>
@@ -285,7 +289,7 @@ export default function PropertyDetail() {
       <div className="public-commerce public-commerce--property pb-28">
         {/* Property identity and secondary actions */}
         <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
-          <BackButton fallbackPath="/property" variant="default" size="md" />
+          <BackButton onClick={returnToResults} fallbackPath="/property/browse" variant="default" size="lg" />
           {/* Title */}
           <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
             <h1 className="public-commerce-title text-foreground break-words">
@@ -419,7 +423,7 @@ export default function PropertyDetail() {
               <TrustStrip
                 titleDeedType={propertyExt.title_deed_type}
                 escrowOffered={propertyExt.escrow_offered}
-                ownerVerified={property.is_verified}
+                ownerVerified={null}
                 isRu={isRu}
               />
 
@@ -678,6 +682,12 @@ export default function PropertyDetail() {
               />
 
               <Separator />
+              {propertyAreaHref(property.district) && (
+                <Link to={propertyAreaHref(property.district)!} state={publicJourneyState(location)} className="inline-flex min-h-11 items-center gap-2 text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring">
+                  <MapPin className="h-4 w-4" aria-hidden />
+                  {isRu ? `О районе ${property.district}` : `Explore ${property.district}`}
+                </Link>
+              )}
               <PropertyLocationMap
                 lat={property.lat}
                 lng={property.lng}

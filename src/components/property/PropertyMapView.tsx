@@ -1,4 +1,6 @@
-import { propertyDetailMode, propertyDetailHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { propertyDetailMode, propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 /**
  * PropertyMapView — Airbnb-style map with price markers
  * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
@@ -177,11 +179,10 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
         onClick={() => setOpenId(null)}
       >
         {validProps.map((property) => {
-          const price =
-            (mode === 'all' ? propertyDetailMode(property) : mode) === 'buy'
-              ? (propertySaleAskingPrice(property) ?? 0)
-              : property.price || 0;
-          const priceLabel = Number.isFinite(price) && price > 0 ? `฿${shortPrice(price)}` : '—';
+          const surface = surfaceFromProperty(property, mode === 'all' ? propertyDetailMode(property) : mode);
+          const price = surface.priceHintThb;
+          const suffix = ({ per_night: '/n', per_week: '/wk', per_month: '/mo', per_year: '/yr' } as Record<string, string>)[surface.priceMode] ?? '';
+          const priceLabel = price !== null ? `฿${shortPrice(price)}${suffix}` : '—';
           const isActive = openId === property.id;
 
           return (
@@ -226,7 +227,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
             <div className="w-[260px] text-foreground">
               <button
                 type="button"
-                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search))}
+                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search), { state: publicJourneyState(location) })}
                 className="block w-full text-left group"
               >
                 <div className="aspect-[16/10] bg-muted overflow-hidden mb-2">
@@ -244,16 +245,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                   <p className="text-[11px] text-muted-foreground mt-0.5">{openProperty.district}</p>
                 )}
                 <p className="text-sm font-semibold mt-1">
-                  {(mode === 'all' ? propertyDetailMode(openProperty) : mode) === 'buy'
-                    ? (propertySaleAskingPrice(openProperty) === null ? (isRu ? 'По запросу' : 'On request') : formatPrice(propertySaleAskingPrice(openProperty)!))
-                    : (
-                      <>
-                        {formatPrice(openProperty.price_per_night ?? openProperty.price ?? 0)}
-                        <span className="font-normal text-muted-foreground">
-                          {' '}/ {({ night: isRu ? 'ночь' : 'night', week: isRu ? 'нед.' : 'week', month: isRu ? 'мес.' : 'month', year: isRu ? 'год' : 'year' } as Record<string, string>)[openProperty.price_per_night ? 'night' : openProperty.price_period || 'night'] || openProperty.price_period}
-                        </span>
-                      </>
-                    )}
+                  {(() => {
+                    const surface = surfaceFromProperty(openProperty, mode === 'all' ? propertyDetailMode(openProperty) : mode);
+                    const suffix = ({ per_night: isRu ? '/ ночь' : '/ night', per_week: isRu ? '/ нед.' : '/ week', per_month: isRu ? '/ мес.' : '/ month', per_year: isRu ? '/ год' : '/ year' } as Record<string, string>)[surface.priceMode] ?? '';
+                    return surface.priceHintThb === null ? (isRu ? 'По запросу' : 'On request') : `${formatPrice(surface.priceHintThb)} ${suffix}`;
+                  })()}
                 </p>
               </button>
 
@@ -263,14 +259,14 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                 clearviewBadge={openProperty.clearview_badge ?? null}
                 clearviewRecommendation={openProperty.clearview_recommendation ?? null}
                 floodRisk={openProperty.flood_risk ?? null}
-                ownerVerified={openProperty.is_verified ?? null}
+                ownerVerified={null}
                 isRu={isRu}
                 className="mt-2 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
               />
 
               <button
                 type="button"
-                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search))}
+                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search), { state: publicJourneyState(location) })}
                 className="mt-2 w-full text-[11px] font-semibold uppercase tracking-wide bg-foreground text-background py-1.5 hover:opacity-90"
               >
                 {isRu ? 'Открыть' : 'View details'}

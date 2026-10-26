@@ -1,11 +1,12 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { price_per_night: 2000, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
+const state = vi.hoisted(() => ({ property: { id: 'unit', district: 'Bang Tao', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { price_per_night: 2000, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -18,7 +19,7 @@ vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraSer
 vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ open, guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { open?: boolean; dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-date-sheet-open">{String(open)}</output><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing, isLongStayOnly }: { isSaleListing: boolean; isLongStayOnly: boolean }) => <span data-testid="mobile-intent" data-long-stay={isLongStayOnly}>{isSaleListing ? 'buy' : 'rent'}</span> }));
 vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: ({ children }: { children: React.ReactNode }) => <>{children}</>}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
-vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
+vi.mock('@/components/uno/BackButton', () => ({BackButton: ({ onClick }: { onClick?: () => void }) => <button onClick={onClick}>Go back</button>}));
 vi.mock('@/components/property/ProjectInfoCard', () => ({ProjectInfoCard: ({ mode }: { mode: string }) => <span data-testid="complex-mode">{mode}</span>}));
 vi.mock('@/components/crosssell', () => ({RelatedServicesSection: () => null}));
 vi.mock('@/components/property/UnitSpecs', () => ({UnitSpecs: () => null}));
@@ -148,4 +149,36 @@ describe('actual property detail purchase/rental intent', () => {
     const link = propertyDetailHref('unit','rent','?checkIn=2026-12-01&checkOut=2026-12-04&guests=2&managementCompanyId=operator');
     expect(link).toBe('/property/unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-04&guests=2');
   });
+});
+
+function SearchJourneyEntry() {
+  const navigate = useNavigate(); const location = useLocation();
+  return <><output data-testid="journey-search">{location.search + location.hash}</output><button onClick={() => navigate(propertyDetailHref('unit', 'rent', location.search), { state: publicJourneyState(location) })}>Open home</button></>;
+}
+function JourneyAreaEntry() {
+  const navigate = useNavigate();
+  return <button onClick={() => navigate(-1)}>Return from area</button>;
+}
+it('returns from the real property district link to the original filtered search without duplicate entries', () => {
+  const query = '?mode=rent&tenancy=long&guests=3&view=map&f.bedrooms=2#results';
+  render(<MemoryRouter initialEntries={['/property/search' + query]}><Routes>
+    <Route path="/property/search" element={<SearchJourneyEntry />} />
+    <Route path="/property/:id" element={<CompareProvider><PropertyDetail /></CompareProvider>} />
+    <Route path="/area/bang-tao" element={<JourneyAreaEntry />} />
+  </Routes></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Open home' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Explore Bang Tao' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Return from area' }));
+  expect(screen.getByRole('link', { name: 'Explore Bang Tao' })).toHaveAttribute('href', '/area/bang-tao');
+  fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+  expect(screen.getByTestId('journey-search')).toHaveTextContent(query);
+});
+it('keeps guest criteria when a direct property link returns to the catalogue', () => {
+  render(<MemoryRouter initialEntries={['/property/unit?mode=rent&tenancy=long&guests=4&intent=relocate']}><Routes>
+    <Route path="/property/browse" element={<SearchJourneyEntry />} />
+    <Route path="/property/:id" element={<CompareProvider><PropertyDetail /></CompareProvider>} />
+  </Routes></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+  const params = new URLSearchParams(screen.getByTestId('journey-search').textContent ?? '');
+  expect(Object.fromEntries(params)).toEqual({ mode: 'rent', tenancy: 'long', guests: '4', intent: 'relocate' });
 });

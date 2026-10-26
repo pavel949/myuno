@@ -11,7 +11,8 @@
  *    LIVE_CLUSTER_SLUGS in areaLandings.ts so links never resolve to a 404.
  */
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { publicJourneyState, readPublicJourneyOrigin } from '@/lib/real-estate/publicJourney';
 import { Helmet } from 'react-helmet-async';
 import {
   AlertTriangle,
@@ -20,8 +21,6 @@ import {
   Map as MapIcon,
   MapPin,
   Plane,
-  Star,
-  TrendingUp,
   Waves,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -57,16 +56,18 @@ interface SeedCardProps {
 }
 
 const SeedCard = ({ surface, isRu }: SeedCardProps) => {
+  const location = useLocation();
   const title = isRu ? surface.titleRu : surface.titleEn;
   const priceLine =
     surface.priceHintThb != null
       ? `฿${surface.priceHintThb.toLocaleString('en-US')}${
-          surface.priceMode === 'per_night' ? (isRu ? ' / ночь' : ' / night') : ''
+          ({ per_night: isRu ? ' / ночь' : ' / night', per_week: isRu ? ' / нед.' : ' / week', per_month: isRu ? ' / мес.' : ' / month', per_year: isRu ? ' / год' : ' / year' } as Record<string, string>)[surface.priceMode] ?? ''
         }`
       : null;
   return (
     <Link
       to={surface.href}
+      state={publicJourneyState(location)}
       className="group block overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary/60"
     >
       {surface.coverImageUrl ? (
@@ -98,6 +99,9 @@ const SeedCard = ({ surface, isRu }: SeedCardProps) => {
 
 const AreaLandingPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const journeyOrigin = readPublicJourneyOrigin(location.state);
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -231,6 +235,11 @@ const AreaLandingPage = () => {
       </Helmet>
 
       <PageShell width="wide">
+        {journeyOrigin && (
+          <Button variant="ghost" className="mb-3 min-h-11" onClick={() => navigate(-1)}>
+            ← {isRu ? 'Вернуться к объекту' : 'Back to property'}
+          </Button>
+        )}
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-4 text-xs text-muted-foreground">
           <Link to="/area" className="hover:text-foreground">
@@ -244,22 +253,6 @@ const AreaLandingPage = () => {
             <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               {name}
             </h1>
-            <div
-              className="flex gap-0.5"
-              aria-label={`${area.investment_rating}/5`}
-            >
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={
-                    i < area.investment_rating
-                      ? 'h-4 w-4 fill-primary text-primary'
-                      : 'h-4 w-4 text-muted-foreground/40'
-                  }
-                  aria-hidden
-                />
-              ))}
-            </div>
           </div>
           {isRu ? <p className="text-xs text-muted-foreground">{area.name_en}</p> : null}
           <p className="mt-3 max-w-3xl text-base text-foreground/90">{description}</p>
@@ -291,24 +284,11 @@ const AreaLandingPage = () => {
           </div>
         </header>
 
-        {/* Stats */}
-        <section className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-none border border-border bg-card p-4 text-center">
-            <TrendingUp className="mx-auto mb-2 h-4 w-4 text-primary" aria-hidden />
-            <p className="text-lg font-semibold text-foreground">
-              ฿{(area.avg_price_sqm / 1000).toFixed(0)}K
-            </p>
-            <p className="text-[11px] text-muted-foreground">
-              {isRu ? 'Средняя цена за м²' : 'Average price / sqm'}
-            </p>
-          </div>
-          <div className="rounded-none border border-border bg-card p-4 text-center">
-            <TrendingUp className="mx-auto mb-2 h-4 w-4 text-primary" aria-hidden />
-            <p className="text-lg font-semibold text-foreground">{area.avg_yield}%</p>
-            <p className="text-[11px] text-muted-foreground">
-              {isRu ? 'Средняя доходность' : 'Average yield'}
-            </p>
-          </div>
+        <p className="mb-5 text-sm text-muted-foreground">
+          {isRu ? 'Редакционный путеводитель. Актуальные цены и доходность требуют отдельной проверки; расстояния ориентировочные.' : 'Editorial area guide. Current prices and yields require separate verification; distances are approximate.'}
+        </p>
+        {/* Guide distances */}
+        <section className="mb-10 grid grid-cols-2 gap-3">
           <div className="rounded-none border border-border bg-card p-4 text-center">
             <Plane className="mx-auto mb-2 h-4 w-4 text-muted-foreground" aria-hidden />
             <p className="text-lg font-semibold text-foreground">

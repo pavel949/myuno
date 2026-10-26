@@ -25,6 +25,10 @@ export interface Property {
   price?: number;
   /** Sale / total asking when listing is for purchase */
   sale_price?: number;
+  sale_currency?: string | null;
+  tenancy_modes?: string[] | null;
+  price_per_month?: number | null;
+  price_per_year?: number | null;
   price_period?: string;
   currency?: string;
   bedrooms?: number;
@@ -249,7 +253,8 @@ const PROPERTY_LIST_COLUMNS = `
   available_from, min_stay_nights, rating, review_count,
   created_at, updated_at, project_id, floor, unit_number,
   view_type, furnishing_level, highlights, monthly_discount,
-  weekly_discount, management_company_id, sale_price,
+  weekly_discount, management_company_id, sale_price, sale_currency,
+  tenancy_modes, price_per_month, price_per_year,
   ownership_form, pool_type, parking_type, is_for_sale
 `;
 

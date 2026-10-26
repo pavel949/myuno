@@ -1,4 +1,4 @@
-import { propertySaleAskingPrice, propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
+import { propertySaleAskingPrice, propertyDetailMode, propertyRentalDisplayPrice } from '@/lib/real-estate/propertyDetailIntent';
 import type { Property } from '@/hooks/useProperties';
 
 export type PropertySortKey =
@@ -16,8 +16,7 @@ export function getEffectivePropertySortPrice(
   mode: 'rent' | 'buy'
 ): number | null {
   if (mode === 'buy') return propertySaleAskingPrice(property);
-  const positive = (value: number | null | undefined) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
-  return positive(property.price_per_night) ?? positive(property.price);
+  return propertyRentalDisplayPrice(property)?.amount ?? null;
 }
 
 /** Stable comparison for property grids — rent uses nightly rate, buy uses asking price. */
@@ -54,10 +53,9 @@ export function comparePropertiesForSort(
 /** Fixed offer/period/currency groups; only comparable amounts change direction. */
 export function getPropertyPriceSortGroup(property: Property) {
   const mode = propertyDetailMode(property);
-  const hasNightly = typeof property.price_per_night === 'number' && Number.isFinite(property.price_per_night) && property.price_per_night > 0;
-  const period = mode === 'buy' ? 'asking' : hasNightly ? 'night' : property.price_period || 'night';
+  const period = mode === 'buy' ? 'asking' : propertyRentalDisplayPrice(property)?.period ?? 'unknown';
   const periodRank = ({ asking: '0', night: '1', week: '2', month: '3', year: '4', total: '5' } as Record<string, string>)[period] || '9';
-  const rawCurrency = property.currency?.trim().toUpperCase() || '';
+  const rawCurrency = (mode === 'buy' && property.sale_currency ? property.sale_currency : property.currency)?.trim().toUpperCase() || '';
   const currency = /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : 'UNKNOWN';
   return { mode, period, currency, key: `${mode === 'buy' ? '0' : '1'}:${periodRank}:${period}:${currency}` };
 }

@@ -54,3 +54,10 @@ describe('mixed catalogue comparable price groups', () => {
     expect(comparePropertiesForSort(thb, usd, 'price_desc', 'all')).toBeLessThan(0);
   });
 });
+
+it('sorts a long stay by its explicit monthly tariff, not the unrelated nightly field', () => {
+  expect(getEffectivePropertySortPrice(property({ tenancy_modes: ['long'], price_period: 'month', price_per_night: 2000, price_per_month: 45000 }), 'rent')).toBe(45000);
+});
+it('does not guess a legacy amount without a billing period', () => {
+  expect(getEffectivePropertySortPrice(property({ price: 2500 }), 'rent')).toBeNull();
+});
