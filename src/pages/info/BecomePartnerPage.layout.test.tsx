@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import BecomePartnerPage from './BecomePartnerPage';
 
-const fixture = vi.hoisted(() => ({ error: false, missingId: false, insert: vi.fn(), notify: vi.fn(), toastError: vi.fn(), toast: vi.fn() }));
+const fixture = vi.hoisted(() => ({ error: false, missingId: false, returned: undefined as undefined | Record<string,string>, insert: vi.fn(), notify: vi.fn(), toastError: vi.fn(), toast: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-user' } }) }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children, usePageContainer }: { children: React.ReactNode; usePageContainer?: boolean }) => <main data-auto-frame={String(usePageContainer)}>{children}</main> }));
@@ -11,13 +11,14 @@ vi.mock('sonner', () => ({ toast: Object.assign(fixture.toast, { error: fixture.
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
  from: () => ({
   select: () => ({ eq: () => ({ in: () => ({ gte: () => ({ limit: async () => ({ data: [] }) }) }) }) }),
-  insert: (payload: unknown) => { fixture.insert(payload); return { select: () => ({ single: async () => fixture.error ? { data: null, error: new Error('Synthetic error') } : { data: fixture.missingId ? null : { id: 'synthetic-only' }, error: null } }) }; },
+  insert: (payload: unknown) => { fixture.insert(payload); return { select: () => ({ single: async () => fixture.error ? { data: null, error: new Error('Synthetic error') } : { data: fixture.returned ?? (fixture.missingId ? null : { id: 'synthetic-only' }), error: null } }) }; },
  }),
  functions: { invoke: fixture.notify },
 } }));
 beforeEach(() => {
  fixture.error = false;
  fixture.missingId = false;
+ fixture.returned = undefined;
  vi.clearAllMocks();
  fixture.notify.mockResolvedValue({ data: null, error: null });
  localStorage.clear(); // isolated JSDOM storage, never the connected browser.
@@ -62,4 +63,21 @@ it.each([{error:false,notifyError:false},{error:false,notifyError:true},{error:t
   expect(fixture.notify).toHaveBeenCalledWith('notify-admin-partner-application', { body: { application_id: 'synthetic-only' } });
  }
  assertFrame(container);
+});
+
+it.each([{}, {id:''}])('retains the draft and form without success for an unconfirmed insert %j',async returned=>{
+ fixture.returned=returned;vi.spyOn(console,'error').mockImplementation(()=>{});
+ const {container}=render(<MemoryRouter><BecomePartnerPage/></MemoryRouter>);
+ const form=container.querySelector('form')!;fireEvent.click(form.querySelector('button[type="button"]')!);
+ const fields=form.querySelectorAll('input[required]');
+ ['Synthetic business','Synthetic contact','fixture@example.invalid','123456789'].forEach((value,index)=>fireEvent.change(fields[index],{target:{value}}));
+ fireEvent.change(form.querySelector('textarea')!,{target:{value:'Synthetic retained draft'}});
+ await waitFor(()=>expect(localStorage.getItem('become_partner_draft_v1')).toContain('Synthetic retained draft'));
+ const draft=localStorage.getItem('become_partner_draft_v1');fireEvent.submit(form);
+ await waitFor(()=>expect(fixture.toastError).toHaveBeenCalledOnce());
+ expect(fixture.insert).toHaveBeenCalledOnce();expect(fixture.notify).not.toHaveBeenCalled();expect(fixture.toast).not.toHaveBeenCalled();
+ expect(screen.queryByRole('heading',{name:'Application Received!'})).toBeNull();
+ expect(form).toBeInTheDocument();expect(form.querySelector('button[type="submit"]')).not.toBeDisabled();
+ expect(fields[0]).toHaveValue('Synthetic business');expect(form.querySelector('textarea')).toHaveValue('Synthetic retained draft');
+ expect(localStorage.getItem('become_partner_draft_v1')).toBe(draft);
 });
