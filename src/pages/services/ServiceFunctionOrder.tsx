@@ -14,7 +14,7 @@ import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequest
  import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
  import { useLanguage } from '@/contexts/LanguageContext';
 import { useServiceFunctions } from '@/hooks/useServiceFunctions';
-import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
+import { serviceCatalogueReturnContext, serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 import { useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -27,6 +27,7 @@ import { toast } from 'sonner';
    const [searchParams] = useSearchParams();
    const location = useLocation();
    const returnTo = serviceCatalogueReturnTo(searchParams.get('returnTo'));
+   const returnContext = serviceCatalogueReturnContext(searchParams.get('returnTo'), location.state);
    const { language, t } = useLanguage();
    const isRu = language === 'ru';
    
@@ -213,7 +214,7 @@ import { toast } from 'sonner';
        {/* Header */}
        <div className="public-commerce-form-header bg-background border-b">
          <div className="flex items-center gap-3 px-4 py-3">
-           <BackButton fallbackPath={returnTo} variant="ghost" />
+           <BackButton fallbackPath={returnTo} onClick={() => navigate(returnContext.to, { state: returnContext.state })} variant="ghost" />
            <div className="flex-1">
              <h1 className="font-semibold">{isRu ? 'Заказать услугу' : 'Order Service'}</h1>
            </div>

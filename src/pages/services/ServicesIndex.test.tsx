@@ -1,109 +1,132 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import ServicesIndex from './ServicesIndex';
+import { isKnownRoute } from '@/lib/nav/routeRegistry';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
-
-vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], isFromDB: true, isLoading: false, error: null }) }));
+import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
+const state = vi.hoisted(() => ({ loading: false, error: false, fallback: false, providerOnly: false }));
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: CATEGORIES, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
-vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input aria-label="Search services" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
-vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: () => <div>Providers</div> }));
-vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick, catalogue }: { fn: { name: string }; onClick: () => void; catalogue?: boolean }) => <button data-catalogue={catalogue} onClick={onClick}>{fn.name}</button> }));
-function Location() { const l = useLocation(); return <output data-testid="location">{l.pathname}{l.search}</output>; }
-function mount(path = '/discover/services', embedded = false) {
-  return render(<MemoryRouter initialEntries={[path]}><Routes>
-    <Route path="/discover/services" element={<ServicesIndex embedded={embedded} />} />
-    <Route path="/services/order/:id" element={<div>Request details</div>} />
-  </Routes><Location /></MemoryRouter>);
-}
-beforeAll(() => {
-  Element.prototype.scrollIntoView = vi.fn();
-  Element.prototype.hasPointerCapture = vi.fn(() => false);
-});
-describe('simplified service discovery', () => {
-  it('uses one coherent grid with explicit canonical categories when expanding the catalogue', () => {
+vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
+vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
+vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: () => null }));
+vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
+function Location() { const l = useLocation(); const navigate = useNavigate(); return <><output data-testid="location">{l.pathname}{l.search}{l.hash}|{JSON.stringify(l.state)}</output><button onClick={() => navigate(-1)}>Back fixture</button><button onClick={() => navigate(1)}>Forward fixture</button></>; }
+function mount(path = '/discover/services') { return render(<MemoryRouter initialEntries={[{ pathname: path.split('?')[0], search: path.includes('?') ? '?'+path.split('?')[1] : '', state: { from: 'trip' } }]}><Routes><Route path="/discover/services" element={<ServicesIndex />} /><Route path="/services/order/:id" element={<div>Request details</div>} /></Routes><Location /></MemoryRouter>); }
+beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
+const select = (name: string, option: string) => { fireEvent.keyDown(screen.getByRole('combobox', { name }), { key: 'Enter' }); fireEvent.click(screen.getByRole('option', { name: option })); };
+describe('canonical services hub', () => {
+  it('offers equal views and real specialised routes without duplicate services', () => {
     mount();
-    fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
-    const grid = screen.getByTestId('service-request-grid');
-    expect(grid).toHaveClass('min-[1440px]:grid-cols-4');
-    const cleaning = grid.querySelector('[data-service-category="cleaning"]') as HTMLElement;
-    expect(within(cleaning).getAllByRole('button').length).toBeGreaterThan(0);
-    expect(within(cleaning).getByText('Cleaning')).toBeInTheDocument();
-    expect(within(cleaning).queryByText('AC Installation')).toBeNull();
-    expect(screen.getAllByText('AC Installation')).toHaveLength(1);
+    expect(screen.getByRole('tab', { name: 'By category' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'By situation' })).toBeVisible();
+    const menu = screen.getByTestId('service-discovery-menu');
+    expect(within(menu).getByRole('button', { name: 'Home services' })).toBeVisible();
+    expect(within(menu).getByRole('button', { name: 'Transport' })).toBeVisible();
+    expect(within(menu).getByRole('button', { name: 'Tourism & Activities' })).toBeVisible();
+    expect(within(menu).getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
+    expect(screen.queryByTestId('service-catalogue-results')).toBeNull();
+    expect(menu.querySelector('[data-category-id="cat-emergency"]')).toBeNull();
+    fireEvent.click(within(menu).getByRole('button', { name: 'Transport' }));
+    const links = within(screen.getByTestId('service-catalogue-results')).getAllByRole('link');
+    expect(new Set(links.map(link => link.getAttribute('href'))).size).toBe(links.length);
+    expect(links.some(link => link.getAttribute('href') === '/transport/airport-transfer')).toBe(true);
+    expect(screen.getByRole('link', { name: 'My requests' })).toHaveAttribute('href', '/bookings');
   });
-  it('opens the full catalogue and finds services outside the initial preview', () => {
-    mount();
-    expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue'))).toHaveLength(8);
-    expect(screen.queryByText('CCTV Installation')).toBeNull();
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'CCTV' } });
-    expect(screen.getByText('CCTV Installation')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
-    expect(screen.getByText('CCTV Installation')).toBeInTheDocument();
-    expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue')).length).toBeGreaterThan(8);
+  it.each(CATEGORIES.filter(parent => !['cat-real-estate', 'cat-partner-portal'].includes(parent.id) && (!parent.status || ['available', 'info'].includes(parent.status)) && parent.services.some(item => !item.status || ['available', 'info'].includes(item.status))).map(parent => [parent.id]))('keeps registered active destinations for expanded category %s', id => {
+    mount('/discover/services?category='+id);
+    while (screen.queryByRole('button', { name: 'Show more' })) fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
+    const grid = screen.getByTestId('service-catalogue-results');
+    for (const link of within(grid).getAllByRole('link')) expect(isKnownRoute(link.getAttribute('href')!)).toBe(true);
+    const renderedHeadings = new Set(within(grid).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent));
+    for (const parent of CATEGORIES) for (const service of parent.services.filter(item => item.status === 'soon' || item.status === 'pro')) expect(renderedHeadings.has(service.labelEn)).toBe(false);
+    expect(screen.queryByRole('button', { name: /role/i })).toBeNull();
   });
-  it('keeps quick categories in sync with the URL and detailed category selector', () => {
-    mount('/discover/services?ref=fixture');
-    fireEvent.click(screen.getByRole('button', { name: /^Air conditioning$/ }));
-    expect(screen.getByRole('button', { name: /^Air conditioning$/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('combobox')).toHaveTextContent('Air Conditioning');
-    expect(screen.getByTestId('location')).toHaveTextContent('ref=fixture&category=ac');
-    expect(screen.getByText('AC Installation')).toBeInTheDocument();
-    expect(screen.queryByText('Leak Repair')).toBeNull();
+  it.each(['/services?category=ac', '/discover/services?q=cleaning'])('accepts an existing catalogue return %s', path => {
+    expect(serviceCatalogueReturnTo(path)).toBe(path);
   });
-  it('renders each request once without gateway or repeated popular blocks', () => {
-    mount();
-    expect(screen.getAllByText('AC Cleaning')).toHaveLength(1);
-    expect(screen.getByText('AC Cleaning')).toHaveAttribute('data-catalogue', 'true');
-    expect(screen.queryByText('Popular Services')).toBeNull();
-    expect(screen.queryByText('Guided help')).toBeNull();
+  it.each([null, '//evil.test', 'https://evil.test', '/services/order/123', '/discover/services#outside'])('rejects unsafe catalogue return %s', path => {
+    expect(serviceCatalogueReturnTo(path)).toBe('/discover/services');
   });
-  it('keeps the same catalogue and filters when embedded in My Services', () => {
-    mount('/discover/services?category=ac&q=cleaning', true);
-    expect(screen.getByRole('searchbox')).toHaveValue('cleaning');
-    expect(screen.getByRole('combobox')).toHaveTextContent('Air Conditioning');
-    expect(screen.getByText('AC Cleaning')).toHaveAttribute('data-catalogue', 'true');
-    expect(screen.getByText(/Prices are estimates/)).toBeVisible();
+  it('uses category and situation as projections over identical service destinations', () => {
+    mount('/discover/services?q=transfer');
+    const original = within(screen.getByTestId('service-catalogue-results')).getAllByRole('link').map(link => link.getAttribute('href'));
+    fireEvent.click(screen.getByRole('tab', { name: 'By situation' }));
+    expect(within(screen.getByTestId('service-catalogue-results')).getAllByRole('link').map(link => link.getAttribute('href'))).toEqual(original);
+    expect(screen.getByRole('searchbox')).toHaveValue('transfer');
   });
-  it('uses the themed category menu with keyboard selection and URL state', () => {
-    mount();
-    const trigger = screen.getByRole('combobox', { name: 'Request category' });
-    expect(trigger.tagName).toBe('BUTTON');
-    fireEvent.keyDown(trigger, { key: 'Enter' });
-    fireEvent.click(screen.getByRole('option', { name: 'Air Conditioning' }));
-    expect(trigger).toHaveTextContent('Air Conditioning');
-    expect(screen.getByTestId('location')).toHaveTextContent('/discover/services?category=ac');
-    expect(screen.queryByRole('listbox')).toBeNull();
-  });
-  it('restores combined category and query filters from URL', () => {
+  it('groups the eleven home children and restores legacy category requests', () => {
     mount('/discover/services?category=ac&q=cleaning');
-    expect(screen.getByRole('combobox', { name: 'Request category' })).toHaveTextContent('Air Conditioning');
-    expect(screen.getByRole('textbox')).toHaveValue('cleaning');
-    expect(screen.getByText('AC Cleaning')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
+    expect(screen.getByText('AC Cleaning')).toBeVisible();
     expect(screen.queryByText('AC Installation')).toBeNull();
     fireEvent.click(screen.getByText('AC Cleaning'));
     expect(screen.getByTestId('location').textContent).toContain('returnTo=%2Fdiscover%2Fservices%3Fcategory%3Dac%26q%3Dcleaning');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByRole('searchbox')).toHaveValue('cleaning');
+    expect(screen.getByText(/Prices are estimates/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '' } });
+    expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
+    expect(screen.getByRole('button', { name: 'All home services', pressed: true })).toBeVisible();
   });
-  it('keeps unsupported categories empty rather than substituting a different trade', () => {
-    mount('/discover/services?category=photography&ref=test');
-    expect(screen.getByText('No services found')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Clear search and category'));
-    expect(screen.getByTestId('location')).toHaveTextContent('/discover/services?ref=test');
-    expect(screen.getByText('AC Cleaning')).toBeInTheDocument();
+  it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
+    mount('/discover/services?ref=trip');
+    fireEvent.click(screen.getByRole('button', { name: 'Tourism & Activities' }));
+    expect(screen.getByTestId('location').textContent).toContain('category=cat-tourism');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
+    fireEvent.click(screen.getByText('Forward fixture'));
+    expect(screen.getByRole('combobox', { name: 'Category' })).toHaveTextContent('Tourism & Activities');
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zz-unmatched' } });
+    expect(screen.getByText('No services found')).toBeVisible();
+    fireEvent.click(screen.getByText('Clear search and filters'));
+    expect(screen.getByTestId('location')).toHaveTextContent('ref=trip|{"from":"trip"}');
   });
-  it('supports equivalent legacy category names and keeps unrelated URL context', () => {
-    mount('/discover/services?type=ac-repair&ref=test');
-    expect(screen.getByRole('combobox', { name: 'Request category' })).toHaveTextContent('Air Conditioning');
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'repair' } });
-    expect(screen.getByTestId('location')).toHaveTextContent('ref=test&q=repair');
+  it('shows hidden-view filters and combines them deterministically', () => {
+    mount('/discover/services?category=cat-transport&situation=arrival&browse=situations');
+    expect(screen.getByRole('combobox', { name: 'Situation' })).not.toHaveTextContent('All');
+    fireEvent.click(screen.getByRole('tab', { name: 'By category' }));
+    expect(screen.getByLabelText('Applied filters')).toBeDefined();
   });
-  it.each(['/services?category=ac', '/discover/services?q=cleaning'])('accepts catalogue return %s', path => {
-    expect(serviceCatalogueReturnTo(path)).toBe(path);
+  it.each(['photography', 'cat-unknown'])('does not silently replace unsupported category %s', category => {
+    mount('/discover/services?category='+category);
+    expect(screen.getByText('No services found')).toBeVisible();
+    expect(screen.queryByText('AC Cleaning')).toBeNull();
   });
-  it.each([null, '//evil.test', 'https://evil.test', '/services/order/123', '/discover/services#outside'])('rejects unsafe or non-catalogue return %s', path => {
-    expect(serviceCatalogueReturnTo(path)).toBe('/discover/services');
+  it('does not show a false empty state when only a provider offer matches', () => {
+    state.providerOnly = true;
+    mount('/discover/services?q=synthetic');
+    expect(screen.queryByText('No services found')).toBeNull();
+  });
+  it('makes the unresolved provider filter limitation explicit and preserves the search when clearing it', () => {
+    state.providerOnly = true;
+    mount('/discover/services?category=cat-home-services&situation=resident&q=synthetic&ref=trip');
+    expect(screen.getByText(/Clear the category and situation/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse provider offers' }));
+    expect(screen.getByRole('searchbox')).toHaveValue('synthetic');
+    expect(screen.getByTestId('location')).toHaveTextContent('q=synthetic&ref=trip');
+    expect(screen.queryByText('No services found')).toBeNull();
+  });
+  it('does not assign all home request templates to a situation from one sibling service tag', () => {
+    mount('/discover/services?situation=emergency&q=AC&ref=review');
+    expect(screen.queryByText('AC Cleaning')).toBeNull();
+    expect(screen.getByText(/Specific home requests are not classified by situation/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse home requests' }));
+    expect(screen.getByText('AC Cleaning')).toBeVisible();
+    expect(screen.getByRole('searchbox')).toHaveValue('AC');
+    expect(screen.getByTestId('location')).toHaveTextContent('ref=review');
+    expect(screen.getByTestId('location').textContent).not.toContain('situation=');
+  });
+  it('keeps unknown situations empty instead of broadening results', () => {
+    mount('/discover/services?situation=unknown');
+    expect(screen.getByText('No services found')).toBeVisible();
+  });
+  it.each(['loading', 'error', 'fallback'])('does not show fallback supply in %s state', phase => {
+    state.loading = phase === 'loading'; state.error = phase === 'error'; state.fallback = phase === 'fallback'; mount();
+    expect(screen.queryByTestId('service-catalogue-results')).toBeNull();
+    expect(phase === 'loading' ? screen.getByText('Loading catalogue…') : screen.getByRole('alert')).toBeVisible();
   });
 });

@@ -16,10 +16,10 @@ beforeEach(() => { data = []; isLoading = false; isError = false; refetch.mockCl
 describe('provider catalogue states', () => {
   it('distinguishes absent supply even when there is a search', () => {
     mount('cleaning');
-    expect(screen.getByText(/Online booking is not available yet/)).toBeInTheDocument();
+    expect(screen.getByText(/No published provider offers yet/)).toBeInTheDocument();
     expect(screen.queryByText(/No services match/)).toBeNull();
-    expect(screen.getByRole('status')).toHaveTextContent('Online booking is not available yet');
-    expect(screen.queryByRole('heading', { name: 'Book a provider' })).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('No published provider offers yet');
+    expect(screen.queryByRole('heading', { name: 'Provider offers' })).toBeNull();
   });
   it('shows no matches only when supply exists', () => {
     data = [service]; mount('plumbing');
@@ -27,13 +27,13 @@ describe('provider catalogue states', () => {
   });
   it('keeps loading distinct from empty', () => {
     isLoading = true; mount();
-    expect(screen.queryByText(/Online booking is not available/)).toBeNull();
+    expect(screen.queryByText(/No published provider offers/)).toBeNull();
   });
   it('offers retry on failure without claiming empty inventory', () => {
     isError = true; mount();
     expect(screen.getByRole('alert')).toHaveTextContent('Could not load services.');
     fireEvent.click(screen.getByText('Retry')); expect(refetch).toHaveBeenCalledOnce();
-    expect(screen.queryByText(/Online booking is not available/)).toBeNull();
+    expect(screen.queryByText(/No published provider offers/)).toBeNull();
   });
   it('keeps the filtered catalogue on provider links', () => {
     data = [service]; mount('cleaning');
@@ -45,6 +45,6 @@ describe('provider catalogue states', () => {
     expect(screen.getByText('USD 35')).toBeVisible();
     expect(screen.getByText('Recorded scope')).toBeVisible();
     expect(screen.getByText('60 min')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Book' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Request service' })).toBeVisible();
   });
 });

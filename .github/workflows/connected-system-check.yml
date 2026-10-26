@@ -13,7 +13,7 @@ concurrency:
 permissions:
   contents: read
 jobs:
-  verify:
+  source:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -203,6 +203,7 @@ jobs:
           node scripts/qa/transfer-operator-conflicts.mjs
           node scripts/qa/final-order-handlers.mjs
           python3 -m unittest discover -s scripts/qa -p 'test_browser_fixture_runner.py'
+          node --test scripts/qa/connected-workflow-contract.check.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Production build with synthetic configuration
@@ -228,6 +229,74 @@ jobs:
         run: timeout 180s node scripts/qa/compact-personal-home-ui.mjs --run-browser
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: connected-system-evidence
+          path: |
+            unit-results.json
+            architecture-results.json
+            /tmp/browser/
+            /tmp/isolated-vite.log
+          retention-days: 14
+      - name: Enforce source verification outcomes
+        if: always()
+        env:
+          TYPES: ${{ steps.types.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          FOCUSED: ${{ steps.focused.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          HOME_BROWSER: ${{ steps.home_browser.outcome }}
+          LAYOUT_BROWSER: ${{ steps.layout_browser.outcome }}
+          HEADER_PARTNER_BROWSER: ${{ steps.header_partner_browser.outcome }}
+          DASHBOARD_BROWSER: ${{ steps.dashboard_browser.outcome }}
+          DASHBOARD_SHELL_BROWSER: ${{ steps.dashboard_shell_browser.outcome }}
+          PUBLIC_WIDE_BROWSER: ${{ steps.public_wide_browser.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+        run: |
+          printf 'types=%s unit=%s focused=%s build=%s home_browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$HOME_BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'layout_browser=%s\n' "$LAYOUT_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'header_partner_browser=%s\n' "$HEADER_PARTNER_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'dashboard_browser=%s\n' "$DASHBOARD_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'dashboard_shell_browser=%s\n' "$DASHBOARD_SHELL_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-isolated/results.json 60
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-shell-isolated/results.json 18
+          printf 'public_wide_browser=%s\n' "$PUBLIC_WIDE_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
+          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$DASHBOARD_BROWSER" = success && test "$DASHBOARD_SHELL_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
+
+  # Separate runners keep dependency setup and the full browser matrix inside
+  # the existing 45-minute budget. No fixture/step limits or coverage change.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked dependencies and isolated test tools
+        run: |
+          npm ci
+          pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+          if ! ls /usr/lib/postgresql/*/bin/postgres >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          for binary in /usr/lib/postgresql/*/bin/postgres; do
+            dirname "$binary" >> "$GITHUB_PATH"
+            break
+          done
       - name: Network-denying PMS browser fixtures
         timeout-minutes: 30
         id: browser
@@ -246,40 +315,36 @@ jobs:
           timeout 180s python3 scripts/qa/admin-tools-ui.py /tmp/browser/admin-tools-isolated
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
-      - name: Upload validation evidence
+      - name: Upload browser validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: connected-system-evidence
+          name: connected-browser-evidence
           path: |
-            unit-results.json
-            architecture-results.json
             /tmp/browser/
             /tmp/isolated-vite.log
           retention-days: 14
-      - name: Enforce verification outcomes
+      - name: Enforce browser verification outcomes
         if: always()
         env:
-          TYPES: ${{ steps.types.outcome }}
-          UNIT: ${{ steps.unit.outcome }}
-          FOCUSED: ${{ steps.focused.outcome }}
-          BUILD: ${{ steps.build.outcome }}
           BROWSER: ${{ steps.browser.outcome }}
-          HOME_BROWSER: ${{ steps.home_browser.outcome }}
-          LAYOUT_BROWSER: ${{ steps.layout_browser.outcome }}
-          HEADER_PARTNER_BROWSER: ${{ steps.header_partner_browser.outcome }}
-          DASHBOARD_BROWSER: ${{ steps.dashboard_browser.outcome }}
-          DASHBOARD_SHELL_BROWSER: ${{ steps.dashboard_shell_browser.outcome }}
-          PUBLIC_WIDE_BROWSER: ${{ steps.public_wide_browser.outcome }}
-          LINT: ${{ steps.lint.outcome }}
         run: |
-          printf 'types=%s unit=%s focused=%s build=%s browser=%s home_browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$HOME_BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
-          printf 'layout_browser=%s\n' "$LAYOUT_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          printf 'header_partner_browser=%s\n' "$HEADER_PARTNER_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          printf 'dashboard_browser=%s\n' "$DASHBOARD_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          printf 'dashboard_shell_browser=%s\n' "$DASHBOARD_SHELL_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-isolated/results.json 60
-          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-shell-isolated/results.json 18
-          printf 'public_wide_browser=%s\n' "$PUBLIC_WIDE_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
-          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$DASHBOARD_BROWSER" = success && test "$DASHBOARD_SHELL_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
+          printf 'browser=%s\n' "$BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          test "$BROWSER" = success
+
+  # Preserve the required check name and fail closed on either job, including
+  # skipped/cancelled outcomes. A green source job alone cannot authorize merge.
+  verify:
+    name: verify
+    needs: [source, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enforce all connected verification jobs
+        env:
+          SOURCE: ${{ needs.source.result }}
+          BROWSER: ${{ needs.browser.result }}
+        run: |
+          printf 'source=%s browser=%s\n' "$SOURCE" "$BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          test "$SOURCE" = success && test "$BROWSER" = success

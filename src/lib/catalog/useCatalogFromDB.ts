@@ -25,6 +25,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { catalogServicePath } from './serviceLookup';
 import {
   CLUSTERS as STATIC_CLUSTERS,
   CATEGORIES as STATIC_CATEGORIES,
@@ -180,12 +181,15 @@ function adaptRowToService(
   const staticService = staticParent?.services.find((s) => s.id === row.slug);
   return {
     id: row.slug,
-    path: row.app_path ?? staticService?.path ?? '#',
+    path: catalogServicePath(parentSlug, row.slug, row.app_path) ?? staticService?.path ?? '#',
     labelRu: row.name_ru || staticService?.labelRu || row.name_en,
     labelEn: row.name_en || staticService?.labelEn || row.slug,
     icon: staticService?.icon ?? staticParent?.icon ?? STATIC_CATEGORIES[0].icon,
     status: ((row.status as ServiceEntry['status']) ?? staticService?.status ?? 'available'),
     verticalId: staticService?.verticalId ?? row.mini_app_type ?? undefined,
+    // Existing canonical service codes are the seed contract for catalog_life_map.
+    // Reuse only an exact parent/leaf slug match; unknown rows gain no invented mapping.
+    situationCodes: staticService?.situationCodes,
     personaTags: row.persona_codes ?? staticService?.personaTags,
     jtbdClusters: row.jtbd_clusters ?? staticService?.jtbdClusters,
   };

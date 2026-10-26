@@ -8,9 +8,9 @@
  * Sources (all SSOT, no dead links — every path resolves to a real route):
  *  - micro-apps          src/lib/appRegistry.ts          → app.route
  *  - services            src/lib/catalog/taxonomy.ts     → service.path
- *  - categories          src/lib/catalog/taxonomy.ts     → cluster.homeRoute
+ *  - categories          src/lib/catalog/taxonomy.ts     → canonical category-aware hub
  *  - clusters (public)   src/lib/catalog/taxonomy.ts     → cluster.homeRoute
- *  - life situations     src/lib/catalog/taxonomy.ts     → /discover/:code
+ *  - life situations     src/lib/catalog/taxonomy.ts     → canonical situation URL builder
  *  - personas (active)   src/lib/taxonomies/master.ts    → /for/:slug
  *  - Phuket areas        src/lib/config/phuketAreas.ts   → /area/:slug
  *  - curated nav targets src/lib/search/navigationIndex  → target.path
@@ -18,14 +18,15 @@
  * Ranking is shared with the navigation index via scoring.ts.
  */
 
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
 import { getActiveApps } from '@/lib/appRegistry';
 import {
   AVAILABLE_SERVICES,
   CATEGORIES,
   CLUSTERS,
   LIFE_SITUATIONS,
-  getClusterById,
 } from '@/lib/catalog/taxonomy';
+import { projectCatalogCategory } from '@/lib/catalog/serviceLookup';
 import { PERSONAS } from '@/lib/taxonomies/master';
 import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { NAVIGATION_INDEX } from './navigationIndex';
@@ -104,20 +105,26 @@ function buildIndex(): StaticSearchEntry[] {
     });
   }
 
-  // Categories → cluster umbrella route.
+  // Category links and child vocabulary share the existing catalogue IDs.
   for (const cat of CATEGORIES) {
+    const projection = projectCatalogCategory(cat.id);
+    if (projection.status !== 'resolved') continue;
     entries.push({
-      id: `cat-${cat.id}`,
-      titleRu: cat.labelRu,
-      titleEn: cat.labelEn,
-      titleTh: cat.labelTh,
-      keywords: kw(cat.valueEn, cat.valueRu),
-      path: getClusterById(cat.clusterId)?.homeRoute ?? '/discover',
-      section: 'category',
-      type: 'category',
-      weight: 3,
-      cluster: cat.clusterId,
+      id: `cat-${cat.id}`, titleRu: cat.labelRu, titleEn: cat.labelEn, titleTh: cat.labelTh,
+      keywords: kw(cat.valueRu, cat.valueEn), path: projection.href,
+      section: 'category', type: 'category', weight: 3, cluster: cat.clusterId,
     });
+    for (const service of projection.services) {
+      entries.push({
+        id: `category-service-${cat.id}-${service.id}`,
+        titleRu: service.labelRu,
+        titleEn: service.labelEn,
+        titleTh: service.labelTh,
+        keywords: kw(cat.labelRu, cat.labelEn, cat.labelTh ?? '', cat.valueEn, cat.valueRu),
+        path: service.path,
+        section: 'category', type: 'category', weight: 3, cluster: cat.clusterId,
+      });
+    }
   }
 
   // Public clusters (umbrella surfaces).
@@ -168,7 +175,7 @@ function buildIndex(): StaticSearchEntry[] {
     });
   }
 
-  // Life situations (active) → /discover/:code.
+  // Life situations (active) → canonical situation URL builder.
   for (const s of LIFE_SITUATIONS) {
     if (!s.isActive) continue;
     entries.push({
@@ -176,7 +183,7 @@ function buildIndex(): StaticSearchEntry[] {
       titleRu: s.titleRu,
       titleEn: s.titleEn,
       keywords: kw(s.code),
-      path: `/discover/${s.code}`,
+      path: buildSituationListUrl(s.code),
       section: 'action',
       type: 'action',
       weight: 2,
@@ -190,7 +197,11 @@ function buildIndex(): StaticSearchEntry[] {
   const byPath = new Map<string, StaticSearchEntry>();
   for (const e of entries) {
     const existing = byPath.get(e.path);
-    if (!existing || (e.weight ?? 0) > (existing.weight ?? 0)) byPath.set(e.path, e);
+    if (!existing) byPath.set(e.path, e);
+    else {
+      const winner = (e.weight ?? 0) > (existing.weight ?? 0) ? e : existing;
+      byPath.set(e.path, { ...winner, keywords: kw(...existing.keywords, ...e.keywords) });
+    }
   }
   return [...byPath.values()];
 }

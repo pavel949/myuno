@@ -12,7 +12,7 @@ const root = process.cwd();
 const output = process.env.SERVICES_CLEARANCE_OUTPUT || path.join(root, 'artifacts/design-system/services-clearance');
 await mkdir(output, { recursive: true });
 const virtual = {
- '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
+ '@/lib/catalog/useCatalogFromDB': `import{CATEGORIES,LIFE_SITUATIONS}from'${root}/src/lib/catalog/taxonomy.ts';export const useCatalogFromDB=()=>({categories:CATEGORIES,lifeSituations:LIFE_SITUATIONS,isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:(s)=>s});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:new URLSearchParams(location.search).get('actor')==='member'?{id:'synthetic',email:'synthetic@example.test'}:null});`,
   '@/lib/analytics/track': `export const trackEvent=()=>{};`,
