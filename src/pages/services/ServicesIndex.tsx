@@ -18,8 +18,8 @@ import { useServiceFunctions } from '@/hooks/useServiceFunctions';
 import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoverySituations, serviceMatchesSituation } from '@/lib/services/serviceDiscoveryProjection';
-import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
+import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
@@ -62,10 +62,9 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
   const knownSituation = !filters.situation || situations.some(item => item.code === filters.situation);
   const knownCategory = !category || categories.some(item => item.id === category);
-  const homeMatches = Boolean(home && home.services.some(service => serviceMatchesSituation(service, filters.situation)));
   // Home functions remain request templates with indicative prices, not live supply.
-  // Their parent is the existing home category; no per-function LifeOS mapping is invented.
-  const showRequests = Boolean((category === 'cat-home-services' || filters.query.trim()) && (!category || category === 'cat-home-services') && homeMatches && knownSituation);
+  // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
+  const showRequests = Boolean((category === 'cat-home-services' || filters.query.trim()) && (!category || category === 'cat-home-services') && home && !filters.situation && knownSituation);
   const requests = showRequests ? functions.filter(fn => (!child || fn.category === child.id) && matchesServiceQuery(filters.query, [fn.raw.nameRu, fn.raw.nameEn, fn.raw.descriptionRu, fn.raw.descriptionEn, homeServiceCategoryLabel(fn.category, language)])) : [];
   const requestPreviews = SERVICE_CATEGORIES.flatMap(item => {
     const matches = requests.filter(fn => fn.category === item.id);
@@ -137,7 +136,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {ready && !noResults && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 id="service-results-title" className="font-display text-h3">{t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
       <p className="text-sm text-muted-foreground">{t('Условия, цена и способ заказа — на странице услуги.', 'See conditions, prices and how to order on the service page.', 'ดูเงื่อนไข ราคา และวิธีสั่งบริการในหน้าบริการ')}</p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="service-catalogue-results">
+      <div className={PUBLIC_CATALOG_COMPACT_GRID} data-testid="service-catalogue-results">
         {rows.slice(0, limit).map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <service.icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><div className="min-w-0 flex-1"><p className="text-sm text-muted-foreground">{label(parent)}</p><h3 className="font-medium">{label(service)}</h3></div><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>)}
@@ -145,6 +144,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       {rows.length > limit && <Button variant="outline" onClick={() => setLimit(value => value + 12)}>{t('Показать ещё', 'Show more', 'แสดงเพิ่มเติม')}</Button>}
     </section>}
     {noResults && <div className="space-y-3"><EmptyState icon={Search} title={t('Услуги не найдены', 'No services found', 'ไม่พบบริการ')} /><Button variant="outline" onClick={clear}>{t('Сбросить поиск и фильтры', 'Clear search and filters', 'ล้างการค้นหาและตัวกรอง')}</Button></div>}
+    {ready && home && knownSituation && filters.situation && (category === 'cat-home-services' || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
+      <h2 id="home-situation-note" className="font-display text-h3">{t('Бытовые заявки', 'Home requests', 'คำขอบริการสำหรับบ้าน')}</h2>
+      <p className="text-sm text-muted-foreground">{t('Для конкретных бытовых заявок связь с ситуациями не задана. Уберите ситуацию, чтобы выбрать работу; текст поиска сохранится.', 'Specific home requests are not classified by situation yet. Clear the situation to choose a task; your search text will stay.', 'คำขอบริการสำหรับบ้านยังไม่ได้จัดตามสถานการณ์ ล้างสถานการณ์เพื่อเลือกงาน ข้อความค้นหาจะยังคงอยู่')}</p>
+      <Button variant="outline" onClick={() => update('situation', '')}>{t('Выбрать бытовую заявку', 'Browse home requests', 'เลือกคำขอบริการสำหรับบ้าน')}</Button>
+    </section>}
     {ready && requests.length > 0 && <section aria-labelledby="service-requests" className="space-y-4">
       <header className="space-y-2"><h2 id="service-requests" className="font-display text-h3">{t('Услуги для дома по запросу', 'Home service requests', 'คำขอบริการสำหรับบ้าน')}</h2><p className="text-sm text-muted-foreground">{t('Цены ориентировочные. Исполнитель, время и итоговая стоимость подтверждаются после заявки.', 'Prices are estimates. The provider, time and final price are confirmed after your request.', 'ราคาเป็นเพียงประมาณการ ผู้ให้บริการ เวลา และราคาสุดท้ายจะได้รับการยืนยันหลังจากส่งคำขอ')}</p></header>
       <div className={PUBLIC_CATALOG_GRID} data-testid="service-request-grid">{visibleRequests.map(fn => <div key={fn.id} data-service-category={fn.category} className="min-w-0"><ServiceFunctionCard fn={fn} catalogue onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`, { state: { returnTo, catalogueState: location.state, catalogueHash: location.hash } })} /></div>)}</div>

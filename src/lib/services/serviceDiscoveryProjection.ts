@@ -20,7 +20,7 @@ export function projectServiceDiscovery(categories: CategoryEntry[], filters: { 
   return categories.flatMap(category => {
     if (filters.category && category.id !== filters.category) return [];
     return category.services.filter(service => {
-      if (filters.situation && !service.situationCodes?.includes(filters.situation)) return false;
+      if (!serviceMatchesSituation(service, filters.situation)) return false;
       return matchesServiceQuery(filters.query, [service.labelRu, service.labelEn, service.labelTh, category.labelRu, category.labelEn, category.labelTh]);
     }).flatMap(service => {
       // Same canonical service may be associated with multiple categories.

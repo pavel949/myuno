@@ -102,6 +102,16 @@ describe('canonical services hub', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('q=synthetic&ref=trip');
     expect(screen.queryByText('No services found')).toBeNull();
   });
+  it('does not assign all home request templates to a situation from one sibling service tag', () => {
+    mount('/discover/services?situation=emergency&q=AC&ref=review');
+    expect(screen.queryByText('AC Cleaning')).toBeNull();
+    expect(screen.getByText(/Specific home requests are not classified by situation/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse home requests' }));
+    expect(screen.getByText('AC Cleaning')).toBeVisible();
+    expect(screen.getByRole('searchbox')).toHaveValue('AC');
+    expect(screen.getByTestId('location')).toHaveTextContent('ref=review');
+    expect(screen.getByTestId('location').textContent).not.toContain('situation=');
+  });
   it('keeps unknown situations empty instead of broadening results', () => {
     mount('/discover/services?situation=unknown');
     expect(screen.getByText('No services found')).toBeVisible();

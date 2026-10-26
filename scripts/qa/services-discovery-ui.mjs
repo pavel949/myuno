@@ -48,7 +48,7 @@ const result = await build({
 });
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/useServiceMarketplace\.ts$|lib\/catalog\/useCatalogFromDB\.ts$/.test(p))) throw Error('Production data module included');
 const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
-  .process(await readFile(path.join(root, 'src/index.css'), 'utf8'), { from: path.join(root, 'src/index.css') });
+  .process(['src/index.css','src/styles/public-commerce.css'].map(file=>'@import "./'+file+'";').join('\n'), { from: path.join(root, 'services-qa.css') });
 await writeFile(path.join(output,'fixture.css'),css.css);
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><script>const fp=new URLSearchParams(location.search);document.documentElement.lang=fp.get("lang")||"en";document.documentElement.classList.toggle("dark",fp.get("theme")==="dark");</script><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only')) process.exit(0);

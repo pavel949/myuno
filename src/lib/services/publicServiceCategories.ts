@@ -12,13 +12,14 @@ const destinations = [
 ];
 const arrivalLabel = { ru: 'Трансфер и Fast Track', en: 'Transfers & Fast Track', th: 'รถรับส่งและฟาสต์แทร็ก' };
 const enabled = (status?: ServiceEntry['status']) => status == null || status === 'available' || status === 'info';
+const homeEntryPaths = new Set([R.SERVICES, `${R.SERVICES}?category=cat-home-services`, buildServiceCategoryUrl('cat-home-services')]);
 
 export function publicServiceCategories(categories: CategoryEntry[]) {
   const children = categories.filter(category => enabled(category.status)).flatMap(category => category.services);
   const seen = new Set<string>();
   return destinations.flatMap(destination => {
     const parent = categories.find(category => destination.aliases.includes(category.id) && enabled(category.status));
-    const leaf = children.find(service => destination.aliases.includes(service.id) && service.path === destination.path && enabled(service.status));
+    const leaf = children.find(service => destination.aliases.includes(service.id) && (destination.id === 'home' ? homeEntryPaths.has(service.path) : service.path === destination.path) && enabled(service.status));
     const transfer = parent ?? leaf;
     const fastTrack = destination.id === 'arrival' ? children.find(service => service.id === 'fast-track' && service.path === R.FAST_TRACK && enabled(service.status)) : undefined;
     const record = transfer ?? fastTrack;

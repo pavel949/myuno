@@ -58,15 +58,16 @@ async def main():
                 bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
                 assert not bad, {'controlBounds': bad}
                 if surface == 'services':
-                    grid = page.get_by_test_id('service-request-grid')
+                    grid = page.get_by_test_id('service-catalogue-results')
                     await expect(grid).to_be_visible()
                     metrics = await geometry(grid)
                     expected = 4 if width >= 1440 else 3 if width >= 1024 else 2 if width >= 640 else 1
                     assert len(metrics['columns'].split()) == expected, metrics
                     parent = await geometry(grid.locator('xpath=../..'))
                     assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
-                    await expect(grid.locator('[data-service-category]')).to_have_count(8)
-                    await expect(grid.get_by_test_id('service-request-card')).to_have_count(8)
+                    await expect(grid.get_by_role('link')).to_have_count(12)
+                    await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
+                    await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
                     # Actual keyboard category filtering preserves URL context.
                     category = page.get_by_role('combobox')
                     await category.press('Enter')

@@ -6,7 +6,10 @@ from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
 async def main():
     provider_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='provider'
-    expected=2 if provider_only else 35
+    themes=os.environ.get('SERVICES_DISCOVERY_THEMES','light,dark').split(',')
+    languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
+    widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
+    expected=2 if provider_only else len(themes)*len(languages)*len(widths)+6
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -66,7 +69,14 @@ async def main():
                 option=page.get_by_role('option').filter(has_text=home)
                 if await option.count()!=1:
                     option=page.get_by_role('option').filter(has_text='Home').first if lang=='th' else option
+                await page.get_by_role('listbox').evaluate('(el)=>Promise.all(el.getAnimations().map(a=>a.finished))')
                 await option.click()
+                try:
+                    await expect(parent).to_have_text(home)
+                except Exception:
+                    print(json.dumps({'selectionFailure':await page.get_by_test_id('location').text_content(),'parent':await parent.text_content(),'lang':lang,'width':width}),flush=True)
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-selection-failure.png'),full_page=True)
+                    raise
                 child=page.get_by_role('combobox').nth(1)
                 await child.scroll_into_view_if_needed()
                 await child.press('Enter')
@@ -98,10 +108,10 @@ async def main():
                 await expect(page.get_by_test_id('location')).to_contain_text('ref=fixture')
                 assert not errors, errors
                 results.append({'lang':lang,'width':width,'theme':appearance,'scenario':'interactive','registeredFontFaces':await page.evaluate('document.fonts.size'),'passed':True})
-                print(json.dumps({'completed':len(results),'expected':35,'lang':lang,'width':width,'theme':appearance}),flush=True)
+                print(json.dumps({'completed':len(results),'expected':expected,'lang':lang,'width':width,'theme':appearance}),flush=True)
                 await context.close()
         if not provider_only:
-            await asyncio.gather(*(run_case(theme,lang,width) for theme in ['light','dark'] for lang in ['ru','en','th'] for width in [320,375,390,430,1440]))
+            await asyncio.gather(*(run_case(theme,lang,width) for theme in themes for lang in languages for width in widths))
             # Distinct states must be real, not populated screenshots labelled loading.
             for phase in ['loading','error','empty']:
                 context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
@@ -144,6 +154,22 @@ async def main():
             await expect(page.get_by_role('heading',name='Provider offers',exact=True)).to_have_count(0)
             assert not errors, errors
             results.append({'lang':'en','width':width,'scenario':'provider-layer','passed':True})
+            await context.close()
+        if not provider_only:
+            context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
+            await context.route('**/*',route)
+            page=await context.new_page()
+            await page.goto('http://localhost:8080/fixture?lang=en&entry='+quote('/discover/services?situation=emergency&q=AC&ref=review',safe=''),wait_until='networkidle')
+            await expect(page.get_by_text('AC Cleaning',exact=True)).to_have_count(0)
+            await expect(page.get_by_text('Specific home requests are not classified by situation',exact=False)).to_be_visible()
+            await page.screenshot(path=str(OUTPUT/'en-390-home-situation-unresolved.png'),full_page=True)
+            await page.get_by_role('button',name='Browse home requests',exact=True).click()
+            await expect(page.get_by_text('AC Cleaning',exact=True)).to_be_visible()
+            await expect(page.get_by_role('searchbox')).to_have_value('AC')
+            await expect(page.get_by_test_id('location')).to_contain_text('ref=review')
+            await expect(page.get_by_test_id('location')).not_to_contain_text('situation=')
+            assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            results.append({'lang':'en','width':390,'scenario':'home-situation-boundary','passed':True})
             await context.close()
         await browser.close()
     assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
