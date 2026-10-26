@@ -1,3 +1,4 @@
+import { propertyDetailMode, propertyDetailHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 /**
  * PropertyMapView — Airbnb-style map with price markers
  * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
@@ -9,7 +10,7 @@
 
 import React, { useRef, useCallback, useState, useMemo, forwardRef } from 'react';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,7 +18,6 @@ import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 import { DEFAULT_MAP_CENTER } from '@/lib/googleMaps';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { TrustStrip } from './TrustStrip';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
@@ -40,7 +40,7 @@ interface PropertyMapViewProps {
   onHover: (id: string | null) => void;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
-  mode?: 'rent' | 'buy';
+  mode?: 'rent' | 'buy' | 'all';
   nights?: number;
   className?: string;
 }
@@ -74,6 +74,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
 }, ref) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
@@ -176,12 +177,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
         onClick={() => setOpenId(null)}
       >
         {validProps.map((property) => {
-          const ext = property as PropertyTrustExt;
           const price =
-            mode === 'buy'
-              ? (ext.sale_price || property.price || 0)
+            (mode === 'all' ? propertyDetailMode(property) : mode) === 'buy'
+              ? (propertySaleAskingPrice(property) ?? 0)
               : property.price || 0;
-          const priceLabel = `฿${shortPrice(price)}`;
+          const priceLabel = Number.isFinite(price) && price > 0 ? `฿${shortPrice(price)}` : '—';
           const isActive = openId === property.id;
 
           return (
@@ -226,7 +226,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
             <div className="w-[260px] text-foreground">
               <button
                 type="button"
-                onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(openProperty.id))}
+                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search))}
                 className="block w-full text-left group"
               >
                 <div className="aspect-[16/10] bg-muted overflow-hidden mb-2">
@@ -244,13 +244,13 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                   <p className="text-[11px] text-muted-foreground mt-0.5">{openProperty.district}</p>
                 )}
                 <p className="text-sm font-semibold mt-1">
-                  {mode === 'buy'
-                    ? formatPrice(openProperty.sale_price ?? openProperty.price ?? 0)
+                  {(mode === 'all' ? propertyDetailMode(openProperty) : mode) === 'buy'
+                    ? (propertySaleAskingPrice(openProperty) === null ? (isRu ? 'По запросу' : 'On request') : formatPrice(propertySaleAskingPrice(openProperty)!))
                     : (
                       <>
                         {formatPrice(openProperty.price_per_night ?? openProperty.price ?? 0)}
                         <span className="font-normal text-muted-foreground">
-                          {' '}/ {isRu ? 'ночь' : 'night'}
+                          {' '}/ {({ night: isRu ? 'ночь' : 'night', week: isRu ? 'нед.' : 'week', month: isRu ? 'мес.' : 'month', year: isRu ? 'год' : 'year' } as Record<string, string>)[openProperty.price_per_night ? 'night' : openProperty.price_period || 'night'] || openProperty.price_period}
                         </span>
                       </>
                     )}
@@ -270,7 +270,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
 
               <button
                 type="button"
-                onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(openProperty.id))}
+                onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search))}
                 className="mt-2 w-full text-[11px] font-semibold uppercase tracking-wide bg-foreground text-background py-1.5 hover:opacity-90"
               >
                 {isRu ? 'Открыть' : 'View details'}

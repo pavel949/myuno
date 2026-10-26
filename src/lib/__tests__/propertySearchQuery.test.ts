@@ -94,3 +94,12 @@ describe('validated sort URL contract', () => {
  });
 
  it('treats invalid civil dates as optional unset criteria without inventing an area',()=>{const state=readPropertySearchQuery(new URLSearchParams('checkIn=2027-02-30&checkOut=bad'));expect(state.search.checkIn).toBeUndefined();expect(state.search.checkOut).toBeUndefined();expect(state.search.locations).toEqual([]);});
+
+describe('catalogue intent is explicit', () => {
+  it.each(['', 'q=Needle', 'guests=', 'guests=invalid', 'tenancy=unknown', 'intent=unknown', 'f.priceLevel=unknown'])('does not inject a rental intent for %s', query => {
+    expect(readPropertySearchQuery(new URLSearchParams(query)).hasIntent).toBe(false);
+  });
+  it.each(['mode=rent', 'mode=buy', 'tenancy=medium', 'guests=3', 'f.listingType=sale'])('retains supported bookmarks %s', query => {
+    expect(readPropertySearchQuery(new URLSearchParams(query)).hasIntent).toBe(true);
+  });
+});

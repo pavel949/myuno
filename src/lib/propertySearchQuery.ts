@@ -43,12 +43,21 @@ export function readPropertySearchQuery(params: URLSearchParams) {
   delete legacy.filterValues.instantBooking;
   if (search.bedrooms.length) legacy.filterValues.bedrooms = search.bedrooms;
   if (search.instantBooking) legacy.filterValues.instantBooking = 'yes';
+  // Optional or malformed criteria must not silently select nightly rentals.
+  const hasIntent = params.get('mode') !== 'all' && (
+    ['rent', 'buy'].includes(params.get('mode') || '') ||
+    ['rent', 'sale'].includes(params.get('f.listingType') || '') ||
+    ['short', 'medium', 'long'].includes(params.get('tenancy') || '') ||
+    ['rent-month', 'rent-long', 'standard', 'assignment', 'quick_sale'].includes(params.get('intent') || '') ||
+    !!search.checkIn || !!search.checkOut || hasGuestFilter || search.instantBooking ||
+    /^[1-4]$/.test(params.get('f.priceLevel') || '')
+  );
   const mode: 'rent' | 'buy' = params.get('mode') === 'buy' || (!params.has('mode') && params.get('f.listingType') === 'sale') ? 'buy' : 'rent';
   const intent = params.get('intent');
   const tenancyValue = params.get('tenancy') ?? (intent === 'rent-month' ? 'medium' : intent === 'rent-long' ? 'long' : 'short');
   const tenancy: 'short' | 'medium' | 'long' = tenancyValue === 'medium' ? 'medium' : tenancyValue === 'long' ? 'long' : 'short';
   const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined = intent === 'standard' || intent === 'assignment' || intent === 'quick_sale' ? intent : undefined;
-  return { search, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
+  return { search, hasIntent, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
 }
 
 /** Preserve bookmark parameters; a route alias only supplies its owned defaults. */
@@ -57,4 +66,12 @@ export function propertySearchHref(search: string, defaults: Record<string, stri
   Object.entries(defaults).forEach(([key, value]) => params.set(key, value));
   const query = params.toString();
   return `/property/search${query ? `?${query}` : ''}`;
+}
+
+/** Clear only catalogue criteria, retaining unrelated bookmark/view context. */
+export function clearPropertySearchQuery(source: URLSearchParams) {
+  const params = new URLSearchParams(source);
+  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'q', 'cats', 'sort']);
+  [...params.keys()].forEach(key => { if (owned.has(key) || key.startsWith('f.')) params.delete(key); });
+  return params;
 }

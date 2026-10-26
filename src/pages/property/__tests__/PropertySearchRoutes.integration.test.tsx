@@ -6,11 +6,14 @@ import PropertySearchPage from '../PropertySearchPage';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
+import { PropertyHubTabs } from '@/pages/property/PropertyHub';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
 const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en', loading: false, properties: [] as Record<string, unknown>[] }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
 vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ personas: [] }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
@@ -40,7 +43,8 @@ function mount(entry: string, navigationState?: unknown) {
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
-  fireEvent.click(result.container.querySelector('summary')!);
+  const summary = result.container.querySelector('summary');
+  if (summary) fireEvent.click(summary);
   return result;
 }
 beforeEach(() => { state.language = 'en'; state.loading = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
@@ -53,7 +57,7 @@ describe('one residential results surface', () => {
     ['th', 'สระว่ายน้ำ', 'นำออก สระว่ายน้ำ', 'ราคาและสิ่งอำนวยความสะดวก', 'ความต้องการที่พัก'],
   ])('uses the broad pool intent consistently in actual %s selected chip and sheet', (language, label, remove, trigger, group) => {
     state.language = language;
-    mount('/property/search?cats=pool');
+    mount('/property/search?mode=rent&cats=pool');
     expect(screen.getByRole('button', { name: remove })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${trigger}`) }));
     const section = screen.getByRole('heading', { name: group }).parentElement!;
@@ -63,7 +67,7 @@ describe('one residential results surface', () => {
   });
 
   it('preserves a result bookmark hash and unapplied editor draft through sort history', async () => {
-    mount('/property/search?q=sea&guests=3&opaque=keep#results', { origin: 'synthetic-home' });
+    mount('/property/search?mode=rent&q=sea&guests=3&opaque=keep#results', { origin: 'synthetic-home' });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Draft Synthetic' } });
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Number of guests' }), { target: { value: '5' } });
     fireEvent.keyDown(screen.getByRole('combobox', { name: 'Sort homes' }), { key: 'Enter' });
@@ -141,7 +145,7 @@ describe('one residential results surface', () => {
     localStorage.removeItem('myuno_compare_properties');
   });
   it.each([1, 2, 3, 4])('maps the %s+ bookmark to a minimum and preserves it when secondary filters reset', minimum => {
-    mount(`/property/search?bedrooms=${minimum}%2B&cats=pool`);
+    mount(`/property/search?mode=rent&bedrooms=${minimum}%2B&cats=pool`);
     expect(state.filters.minBedrooms).toBe(minimum);
     fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
     const dialog = within(screen.getByRole('dialog'));
@@ -238,7 +242,9 @@ describe('one residential results surface', () => {
   it('shows no implied guest restriction for legacy unfiltered browsing', () => {
     state.mobile = true;
     mount('/property/browse');
-    expect(screen.getByText(/Guests not specified/)).toBeVisible();
+    expect(screen.getByRole('button', { name: 'All homes' })).toHaveAttribute('aria-pressed', 'true');
+    expect(state.filters.listingType).toBeUndefined();
+    expect(state.filters.rentTenancy).toBeUndefined();
     expect(screen.queryByText(/Guests: 2/)).toBeNull();
   });
   it('retains an edited desktop draft and focus when resized to mobile', () => {
@@ -342,7 +348,7 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('source')).toBe('bookmark');
   });
   it('offers only three quick features, with every former ribbon feature inside Filters', () => {
-    mount('/property/search');
+    mount('/property/search?mode=rent');
     const quick = within(screen.getByRole('group', { name: 'Popular features' }));
     expect(quick.getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
@@ -425,6 +431,39 @@ describe('one residential results surface', () => {
     expect(state.filters.instantBooking).toBeUndefined();
     fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
     expect(state.filters.instantBooking).toBe(true);
+  });
+
+  it.each(['/property', '/property/browse', '/property/search'])('opens %s as an unfiltered public catalogue without submitting text', route => {
+    state.properties = [{ id: 'synthetic-sale', listing_type: 'sale' }, { id: 'synthetic-monthly', listing_type: 'rent', price_period: 'month' }];
+    mount(route);
+    expect(state.filters.listingType).toBeUndefined();
+    expect(state.filters.rentTenancy).toBeUndefined();
+    expect(state.filters.district).toBeUndefined();
+    expect(state.filters.propertyType).toBeUndefined();
+    expect(screen.getAllByTestId('synthetic-property-card')).toHaveLength(2);
+    expect(screen.getByRole('searchbox', { name: 'Property name' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'All homes' })).toHaveAttribute('aria-pressed', 'true');
+  });
+  it('narrows all homes by text and clears back to the same catalogue while preserving bookmark context', () => {
+    mount('/property?opaque=keep#results', { origin: 'tab-entry' });
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Needle' } });
+    fireEvent.submit(screen.getByRole('form'));
+    expect(state.filters.search).toBe('Needle'); expect(state.filters.listingType).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+    expect(state.filters.search).toBeUndefined(); expect(state.filters.listingType).toBeUndefined();
+    expect(screen.getByTestId('location')).toHaveTextContent('opaque=keep#results');
+    expect(screen.getByTestId('navigation-state')).toHaveTextContent('tab-entry');
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(state.filters.search).toBe('Needle');
+    fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
+    expect(state.filters.search).toBeUndefined();
+  });
+
+  it('keeps bookmark state/hash and remaining filters when the actual hub tab returns to all intents', () => {
+    render(<MemoryRouter initialEntries={[{ pathname: '/property/search', search: '?mode=rent&tenancy=long&q=Needle&opaque=keep', hash: '#results', state: { origin: 'hub' } }]}><PropertyHubTabs /><Location /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'All homes' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('/property/search?mode=all&q=Needle&opaque=keep#results');
+    expect(screen.getByTestId('navigation-state')).toHaveTextContent('hub');
   });
 
 });
