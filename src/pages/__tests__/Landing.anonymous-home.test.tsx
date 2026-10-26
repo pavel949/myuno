@@ -65,7 +65,7 @@ it.each([
  const bar = screen.getByRole('navigation', { name });
  const links = within(bar).getAllByRole('link');
  expect(links.map(link => link.getAttribute('aria-label'))).toEqual(labels);
- expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/discover/stay', '/bookings', '/discover/services', '/account']);
+ expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/property', '/bookings', '/discover/services', '/account']);
  expect(links[0]).toHaveAttribute('aria-current', 'page');
  expect(bar).toHaveClass('md:hidden', 'fixed', 'bottom-0');
  expect(bar).toHaveStyle({ paddingBottom: 'env(safe-area-inset-bottom, 0px)' });

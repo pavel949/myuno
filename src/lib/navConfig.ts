@@ -43,14 +43,14 @@ export type NavRoleKey =
 // ─────────────────────────────────────────────────────────────
 
 /**
- * GUEST_NAV — One-Stop goal-first nav (Home/Stay/Live/Buy/Services/Me).
- * Mobile bar shows Home · Stay · [Apps] · Services · Me; desktop shows all.
+ * GUEST_NAV — public Home / Homes catalogue / Bookings / Services / Profile.
+ * Homes is the unfiltered catalogue; goal-specific rental links remain separate.
  * Kept as default until `feature_flag:me_shell_v1` is enabled, then
  * `GUEST_NAV_ME_HUB` (Gosuslugi-style 5-tab) takes over via NavShell.
  */
 export const GUEST_NAV: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная', labelTh: 'หน้าแรก', exact: true },
-  { path: APP_ROUTES.GOAL_STAY, icon: BedDouble, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
+  { path: APP_ROUTES.PROPERTY, icon: BedDouble, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
   { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง', mobileLabelRu: 'Брони' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์' },

@@ -452,7 +452,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
     queryKey: ['properties-infinite', filters],
     staleTime: 5 * 60 * 1000,   // 5 min — avoid refetch on every visit
     gcTime: 10 * 60 * 1000,     // 10 min cache
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0, signal }) => {
       let query = supabase
         .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
@@ -460,11 +460,12 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
 
       query = applyPropertyFiltersToQuery(query, filters);
 
-      const { data, error } = await query;
+      const { data, error } = await query.abortSignal(signal);
       if (error) throw error;
 
       const rows = (data || []) as unknown as Property[];

@@ -100,7 +100,10 @@ async def main():
                         controls = await search.locator('.home-search-type,.home-search-location,.home-search-dates,.home-search-bedrooms').evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom}})')
                         # Labels may make a field taller; controls share the
                         # bottom baseline of one real criteria row.
-                        assert submit and len(controls) == 4 and all(abs(box['bottom']-submit['y']-submit['height']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
+                        mode = await page.locator('.property-discovery').get_attribute('data-property-mode')
+                        assert mode in ['all', 'rent', 'buy'], mode
+                        expected_fields = 4 if mode == 'rent' else 3
+                        assert submit and len(controls) == expected_fields and all(abs(box['bottom']-submit['y']-submit['height']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
                     if state == 'error':
                         await expect(page.get_by_role('alert').filter(has_text='could not be loaded')).to_be_visible()
                     if state == 'empty':

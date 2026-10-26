@@ -16,7 +16,8 @@ export const properties=[{property_id:'fixture-home-1',title:'Spacious family ap
 const today=bangkokTodayDate(); const start=startOfWeek(today,{weekStartsOn:1});
 export const booking={id:'fixture-booking',property_id:'fixture-home-1',guest_name:'Alexandra / Александра — synthetic booking',status:'confirmed',check_in:format(start,'yyyy-MM-dd'),check_out:format(addDays(start,7),'yyyy-MM-dd'),total_amount:12345,currency:'THB'};
 export const task={id:'fixture-task',property_id:'fixture-home-1',task_type:'cleaning',status:'pending',scheduled_date:format(today,'yyyy-MM-dd')};
-window.fixtureCheckoutLabel=format(addDays(start,7),'d MMM yyyy',{locale:new URLSearchParams(location.search).get('lang')==='en'?enUS:ru});`;
+window.fixtureCheckoutLabel=format(addDays(start,7),'d MMM yyyy',{locale:new URLSearchParams(location.search).get('lang')==='en'?enUS:ru});
+window.fixtureCheckoutMonthLabel=format(addDays(start,7),'LLLL yyyy',{locale:new URLSearchParams(location.search).get('lang')==='en'?enUS:ru});`;
 const dialog = name => `import React from 'react'; import {civilDateKey,stayOccupiesDate} from '${root}/src/lib/hotelDates.ts'; export function ${name}({open,onOpenChange,booking,task,bookings,date}) {return open ? React.createElement('div',{role:'dialog','aria-label':'${name}','data-occupied':date&&bookings?String(bookings.some(b=>stayOccupiesDate(b,civilDateKey(date)))):undefined},booking?.id||task?.id||bookings?.[0]?.id||'fixture',React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`;
 const virtual = {
   'fixture-data': fixture,
@@ -65,5 +66,7 @@ const css = await fetch('http://localhost:8080/src/index.css?direct');
 if (!css.ok) throw new Error('Preview stylesheet unavailable');
 await writeFile(path.join(output,'fixture.css'),await css.text());
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
+if (!process.argv.includes('--build-only')) {
 const result = spawnSync('python3',[path.join(root,'scripts/qa/calendar-ui.py'),output],{stdio:'inherit'});
 process.exitCode = result.status ?? 1;
+}

@@ -17,8 +17,8 @@ import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
-import { readPropertySearchQuery, updatePropertySearchSort } from '@/lib/propertySearchQuery';
-import { propertySearchFeatureLabels } from '@/lib/propertySearchPresentation';
+import { readPropertySearchQuery, updatePropertySearchSort, clearPropertySearchQuery, normalizePropertySearchQuery } from '@/lib/propertySearchQuery';
+import { propertySearchFeatureLabels, propertyPriceSortGroupLabel } from '@/lib/propertySearchPresentation';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import { serializeFilters } from '@/lib/propertyBrowseFilters';
 import '@/styles/cinematic-home.css';
@@ -26,7 +26,8 @@ import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PROPERTY_DISCOVERY_FEATURE_IDS, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues, propertyPriceLevelDescriptions } from '@/lib/propertyCatalogServerFilters';
-import { comparePropertiesForSort } from '@/lib/propertySortPrice';
+import { propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
+import { comparePropertiesForSort, getPropertyPriceSortGroup } from '@/lib/propertySortPrice';
 import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
@@ -47,7 +48,7 @@ const PropertyMapView = lazy(() => import('@/components/property/PropertyMapView
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
-  const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
+  const [searchParamsUrl] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -71,13 +72,18 @@ export default function PropertySearchPage() {
   }, [queryKey]);
   const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
   const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
-  const priceBandUnavailable = propertyMode === 'rent' && state.tenancy !== 'short';
+  const catalogueAll = !state.hasIntent;
+  useEffect(() => {
+    const normalized = normalizePropertySearchQuery(new URLSearchParams(queryKey)).toString();
+    if (normalized !== queryKey) navigate({ search: normalized, hash: location.hash }, { replace: true, state: location.state });
+  }, [queryKey, navigate, location.hash, location.state]);
+  const priceBandUnavailable = catalogueAll || propertyMode === 'rent' && state.tenancy !== 'short';
   useEffect(() => {
     if (!priceBandUnavailable || !searchParamsUrl.has('f.priceLevel')) return;
     const params = new URLSearchParams(searchParamsUrl);
     params.delete('f.priceLevel');
-    navigate({ search: params.toString(), hash: location.hash }, { replace: true });
-  }, [priceBandUnavailable, searchParamsUrl, navigate, location.hash]);
+    navigate({ search: params.toString(), hash: location.hash }, { replace: true, state: location.state });
+  }, [priceBandUnavailable, searchParamsUrl, navigate, location.hash, location.state]);
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
@@ -89,7 +95,7 @@ export default function PropertySearchPage() {
   const setShowMap = (show: boolean) => {
     const params = new URLSearchParams(searchParamsUrl);
     if (show) params.set('view', 'map'); else params.delete('view');
-    setSearchParamsUrl(params);
+    navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
   };
   const updateFilters = (values: FilterValues, categories = categoryFilters) => {
     const params = new URLSearchParams(searchParamsUrl);
@@ -102,7 +108,7 @@ export default function PropertySearchPage() {
     params.delete('f.instantBooking');
     params.delete('amenities');
     Object.entries(serializeFilters(values, categories)).forEach(([key, value]) => params.set(key, value));
-    setSearchParamsUrl(params);
+    navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
   };
   // Features retain their existing `cats` URL/matching contract. The sheet is
   // another editor for that same state, never a second amenities filter.
@@ -142,7 +148,7 @@ export default function PropertySearchPage() {
       description: text('Дополнительные условия из полей объявления. Они уточняют пожелания выше и могут сократить результаты.', 'Additional conditions from listing fields. These refine the preferences above and may reduce results.', 'เงื่อนไขเพิ่มเติมจากประกาศ อาจทำให้ผลการค้นหาลดลง'),
     },
     sections: [
-      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, secondary: section.id !== 'priceLevel', description: section.id === 'amenities' ? text('В объявлении должны быть все выбранные удобства.', 'The listing must include every selected amenity.', 'ประกาศต้องมีสิ่งอำนวยความสะดวกที่เลือกทั้งหมด') : section.id === 'highlights' ? text('Достаточно хотя бы одной выбранной особенности.', 'At least one selected highlight is enough.', 'มีจุดเด่นที่เลือกอย่างน้อยหนึ่งรายการก็เพียงพอ') : undefined, titleTh: FILTER_TITLES_TH[section.id], ...(section.id === 'priceLevel' ? { priceLevelDescriptions: propertyPriceLevelDescriptions(propertyMode === 'buy' ? 'sale' : 'rent', language) } : {}) })),
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' || catalogueAll ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, secondary: section.id !== 'priceLevel', description: section.id === 'amenities' ? text('В объявлении должны быть все выбранные удобства.', 'The listing must include every selected amenity.', 'ประกาศต้องมีสิ่งอำนวยความสะดวกที่เลือกทั้งหมด') : section.id === 'highlights' ? text('Достаточно хотя бы одной выбранной особенности.', 'At least one selected highlight is enough.', 'มีจุดเด่นที่เลือกอย่างน้อยหนึ่งรายการก็เพียงพอ') : undefined, titleTh: FILTER_TITLES_TH[section.id], ...(section.id === 'priceLevel' ? { priceLevelDescriptions: propertyPriceLevelDescriptions(propertyMode === 'buy' ? 'sale' : 'rent', language) } : {}) })),
       {
         id: 'guestFeatures', titleEn: 'Home preferences', titleRu: 'Пожелания к жилью', titleTh: 'ความต้องการที่พัก', type: 'multi',
         options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
@@ -151,7 +157,7 @@ export default function PropertySearchPage() {
         }),
       },
     ],
-  }), [filterConfig, propertyMode, priceBandUnavailable, language, text]);
+  }), [filterConfig, propertyMode, priceBandUnavailable, catalogueAll, language, text]);
   const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
   delete advancedValues.bedrooms;
   if (propertyMode === 'buy') delete advancedValues.instantBooking;
@@ -166,22 +172,24 @@ export default function PropertySearchPage() {
 
   const serverFilters = useMemo((): PropertyFilters => {
     const eligibleValues = { ...mergedFilterValues };
-    if (listingCatalogType === 'sale') delete eligibleValues.instantBooking;
+    if (listingCatalogType === 'sale' || catalogueAll) delete eligibleValues.instantBooking;
     const base = filterValuesToPropertyFilters(eligibleValues, {
       listingType: listingCatalogType,
-      minGuestsFromSearch: listingCatalogType === 'rent' && state.hasGuestFilter ? searchParams.guests : undefined,
-      instantBookingFromSearch: listingCatalogType === 'rent' && searchParams.instantBooking,
+      minGuestsFromSearch: !catalogueAll && listingCatalogType === 'rent' && state.hasGuestFilter ? searchParams.guests : undefined,
+      instantBookingFromSearch: !catalogueAll && listingCatalogType === 'rent' && searchParams.instantBooking,
       saleIntent: state.saleIntent,
       isQuickSale: listingCatalogType === 'sale' && state.isQuickSale,
       rentTenancy: listingCatalogType === 'rent' ? rentTenancy : undefined,
     });
     return {
       ...base,
+      ...(catalogueAll ? { listingType: undefined, rentTenancy: undefined, saleIntent: undefined, isQuickSale: undefined } : {}),
       search: searchText || undefined,
       managementCompanyId: selectedCompanyId || undefined,
     };
   }, [
     mergedFilterValues,
+    catalogueAll,
     listingCatalogType,
     searchParams.guests,
     searchParams.instantBooking,
@@ -197,24 +205,27 @@ export default function PropertySearchPage() {
     data: infiniteData,
     isLoading,
     isFetchingNextPage,
-    isError,
+    isError: queryError,
+    isFetchNextPageError,
     refetch,
     hasNextPage,
     fetchNextPage,
   } = usePropertiesInfinite(serverFilters);
+
+  const isError = queryError && !isFetchNextPageError;
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage();
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) fetchNextPage();
       },
       { rootMargin: '400px' }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   const candidateProperties = useMemo(() => {
     const allItems = infiniteData?.pages.flatMap((p) => p.properties) || [];
@@ -227,17 +238,17 @@ export default function PropertySearchPage() {
       return true;
     }) as unknown as Property[];
 
-    const sortMode = propertyMode === 'buy' ? 'buy' : 'rent';
+    const sortMode = catalogueAll ? 'all' : propertyMode === 'buy' ? 'buy' : 'rent';
     const sorted = [...filtered];
     sorted.sort((a, b) => comparePropertiesForSort(a, b, sortKey, sortMode));
 
     return sorted;
-  }, [infiniteData, sortKey, categoryFilters, propertyMode]);
+  }, [infiniteData, sortKey, categoryFilters, propertyMode, catalogueAll]);
 
   const availability = useSearchPropertyAvailability(
     candidateProperties.map(property => property.id),
-    propertyMode === 'rent' && nights > 0 ? format(searchParams.checkIn!, 'yyyy-MM-dd') : undefined,
-    propertyMode === 'rent' && nights > 0 ? format(searchParams.checkOut!, 'yyyy-MM-dd') : undefined,
+    !catalogueAll && propertyMode === 'rent' && nights > 0 ? format(searchParams.checkIn!, 'yyyy-MM-dd') : undefined,
+    !catalogueAll && propertyMode === 'rent' && nights > 0 ? format(searchParams.checkOut!, 'yyyy-MM-dd') : undefined,
   );
   const properties = availability.enabled
     ? candidateProperties.filter(property => availability.availableIds.has(property.id))
@@ -249,16 +260,14 @@ export default function PropertySearchPage() {
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
     return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
   }, categoryFilters.length);
-  const activeFilterCount = advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0);
+  const activeFilterCount = advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0) + (state.hasIntent ? 1 : 0);
 
   const clearAllFilters = () => {
-    const resetUrl = new URLSearchParams({ mode: propertyMode });
-    if (propertyMode === 'rent') resetUrl.set('tenancy', rentTenancy);
-    setSearchParamsUrl(resetUrl);
+    navigate({ search: clearPropertySearchQuery(searchParamsUrl).toString(), hash: location.hash }, { state: location.state });
   };
 
   const submitSearch = (params: URLSearchParams) => {
-    setSearchParamsUrl(params);
+    navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
     setFocusResults(true);
   };
   const summaryTypes = searchParams.propertyTypes.map(id => {
@@ -277,28 +286,29 @@ export default function PropertySearchPage() {
   const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('На год', 'Yearly', 'รายปี')) : (text('Посуточно', 'Nightly', 'รายคืน'));
 
   return (
-    <div data-property-mode={propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search property-discovery min-h-screen bg-background')}>
+    <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search property-discovery min-h-screen bg-background')}>
       <SEOHead title={text('Жильё на Пхукете', 'Homes in Phuket', 'ที่พักในภูเก็ต')} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
           <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
-          <p className="text-body-sm text-muted-foreground">{text('Введите название объекта или выберите параметры ниже и нажмите «Найти жильё».', 'Enter a property name or choose your criteria below, then select “Find a home”.', 'กรอกชื่อที่พักหรือเลือกเงื่อนไขด้านล่าง แล้วกด “ค้นหาที่พัก”')}</p>
+          <p className="text-body-sm text-muted-foreground">{text('Все опубликованные объекты показаны ниже. Название и параметры только уточняют каталог.', 'Published homes are shown below. Use a name or criteria to narrow the catalogue.', 'ประกาศที่พักแสดงด้านล่าง ใช้ชื่อหรือเงื่อนไขเพื่อกรองรายการ')}</p>
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />
             <div className="property-discovery-intent" role="group" aria-label={text('Аренда или покупка', 'Rent or buy', 'เช่าหรือซื้อ')}>
-              {(['rent', 'buy'] as const).map(mode => <button key={mode} type="button" aria-pressed={propertyMode === mode} onClick={() => {
-                if (mode === propertyMode) return;
+              {(['all', 'rent', 'buy'] as const).map(mode => <button key={mode} type="button" aria-pressed={(catalogueAll ? 'all' : propertyMode) === mode} onClick={() => {
+                if (mode === (catalogueAll ? 'all' : propertyMode)) return;
                 const params = new URLSearchParams(searchParamsUrl);
                 params.set('mode', mode);
-                            setSearchParamsUrl(params);
-              }}>{mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
+                const normalized = normalizePropertySearchQuery(params);
+                navigate({ search: normalized.toString(), hash: location.hash }, { state: location.state });
+              }}>{mode === 'all' ? text('Все объекты', 'All homes', 'ที่พักทั้งหมด') : mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
           <div className="property-search-editor property-discovery-editor">
-            <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
+            <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue initialParams={searchParamsUrl} onSearch={submitSearch} />
           </div>
           <div className="text-body-sm text-muted-foreground" aria-label={text('Текущий поиск', 'Current search', 'การค้นหาปัจจุบัน')}>
             <p>{summaryTypes} · {summaryAreas}{searchParams.bedrooms.length > 0 ? ` · ${text('Спальни', 'Bedrooms', 'ห้องนอน')}: ${searchParams.bedrooms.join(', ')}` : ''}{searchText ? ` · «${searchText}»` : ''}</p>
-            {propertyMode === 'rent' && <p>{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : (text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก'))}</p>}
+            {!catalogueAll && propertyMode === 'rent' && <p>{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : (text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก'))}</p>}
             {summaryExtraFilters > 0 && <p>{text('Дополнительных фильтров', 'Additional filters', 'ตัวกรองเพิ่มเติม')}: {summaryExtraFilters}</p>}
           </div>
           <div className="flex min-w-0 items-center gap-2">
@@ -321,7 +331,7 @@ export default function PropertySearchPage() {
               })}
             </div>
           </div>
-          {priceBandUnavailable && <p role="note" className="text-body-sm text-muted-foreground">{isRu ? 'Цена уточняется для выбранного срока. Фильтр по цене недоступен; в карточках указан базовый тариф за соответствующий период.' : language === 'th' ? 'สอบถามราคาสำหรับระยะเวลาที่เลือก ตัวกรองราคายังไม่พร้อมใช้งาน การ์ดแสดงราคาเริ่มต้นตามช่วงเวลาที่ระบุ' : 'Confirm pricing for your chosen duration. Price filtering is unavailable; cards show the base rate for the labelled period.'}</p>}
+          {!catalogueAll && priceBandUnavailable && <p role="note" className="text-body-sm text-muted-foreground">{isRu ? 'Цена уточняется для выбранного срока. Фильтр по цене недоступен; в карточках указан базовый тариф за соответствующий период.' : language === 'th' ? 'สอบถามราคาสำหรับระยะเวลาที่เลือก ตัวกรองราคายังไม่พร้อมใช้งาน การ์ดแสดงราคาเริ่มต้นตามช่วงเวลาที่ระบุ' : 'Confirm pricing for your chosen duration. Price filtering is unavailable; cards show the base rate for the labelled period.'}</p>}
           {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).length > 0 && <div className="flex flex-wrap gap-2" aria-label={text('Выбранные особенности', 'Selected features', 'สิ่งอำนวยความสะดวกที่เลือก')}>
             {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).map(id => {
               const feature = PROPERTY_FEATURE_MAP.get(id);
@@ -380,7 +390,7 @@ export default function PropertySearchPage() {
               onHover={setHoveredProperty}
               selectedId={focusedId}
               onSelect={selectFocused}
-              mode={propertyMode}
+              mode={catalogueAll ? 'all' : propertyMode}
               nights={nights > 0 ? nights : undefined}
               className="property-discovery-map"
             />
@@ -402,22 +412,25 @@ export default function PropertySearchPage() {
             </div>
           )}
 
+          {catalogueAll && (sortKey === 'price_asc' || sortKey === 'price_desc') && <p role="note" data-testid="property-price-sort-note" className="mb-4 text-body-sm text-muted-foreground">{text('Цена сортируется среди загруженных объектов внутри групп: продажа, аренда за ночь, неделю, месяц и год. Периоды и валюты не сравниваются между собой.', 'Prices sort within loaded offer groups: sale, nightly, weekly, monthly and yearly rent. Different periods and currencies are not compared.', 'เรียงราคาภายในกลุ่มที่โหลดแล้ว: ขาย เช่ารายคืน รายสัปดาห์ รายเดือน และรายปี ไม่เปรียบเทียบข้ามช่วงเวลาหรือสกุลเงิน')}</p>}
           {!isLoading && !isError && properties.length > 0 && (
             <>
 
               <div className={cn(PUBLIC_CATALOG_GRID, 'property-discovery-card-grid')} data-testid="property-results-grid">
                 {properties.map(property => {
                   return (
+                    <div key={property.id} className="min-w-0" data-property-price-group={catalogueAll ? getPropertyPriceSortGroup(property).key : undefined}>
+                    {catalogueAll && (sortKey === 'price_asc' || sortKey === 'price_desc') && <p className="mb-2 text-body-sm text-muted-foreground">{propertyPriceSortGroupLabel(property, language)}</p>}
                     <PropertyListingCard
-                      key={property.id}
                       property={property}
-                      mode={propertyMode}
+                      mode={catalogueAll ? propertyDetailMode(property) : propertyMode}
                       isHovered={hoveredProperty === property.id}
                       onHover={setHoveredProperty}
                       isSelected={focusedId === property.id}
                       onSelect={showMap ? selectFocused : undefined}
                       nights={nights > 0 ? nights : undefined}
                     />
+                    </div>
                   );
                 })}
 
@@ -425,6 +438,7 @@ export default function PropertySearchPage() {
             </>
           )}
 
+          {isFetchNextPageError && <p role="alert">{text('Не удалось загрузить следующую страницу. Уже загруженные объекты сохранены. Нажмите «Загрузить ещё», чтобы повторить.', 'The next page could not be loaded. Loaded homes are kept. Select “Load more” to retry.', 'โหลดหน้าถัดไปไม่สำเร็จ ที่พักที่โหลดแล้วคงอยู่ กด “โหลดเพิ่มเติม” เพื่อลองอีกครั้ง')}</p>}
           <div ref={loadMoreRef} className={cn("flex justify-center", properties.length > 0 && "py-8")}>
             {hasNextPage && !isFetchingNextPage && <Button variant="outline" onClick={() => fetchNextPage()}>{availabilityText('Загрузить ещё', 'Load more', 'โหลดเพิ่มเติม')}</Button>}
             {isFetchingNextPage && <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />}

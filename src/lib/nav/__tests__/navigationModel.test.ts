@@ -70,7 +70,7 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.guest.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.HOME,
-      APP_ROUTES.GOAL_STAY,
+      APP_ROUTES.PROPERTY,
       APP_ROUTES.BOOKINGS,
       APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.ACCOUNT,
@@ -268,7 +268,7 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
 
   it('guest on /discover/stay highlights Stay', () => {
     const item = getActiveBottomBarItem('guest', '/discover/stay');
-    expect(item?.path).toBe('/discover/stay');
+    expect(item?.path).toBe('/property');
     expect(item?.labelEn).toBe('Homes');
   });
 
@@ -308,9 +308,9 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
 
 describe('consumer journey ownership', () => {
   it.each([
-    ['/property/search', '/discover/stay'],
-    ['/property/browse', '/discover/stay'],
-    ['/discover/buy', '/discover/stay'],
+    ['/property/search', '/property'],
+    ['/property/browse', '/property'],
+    ['/discover/buy', '/property'],
     ['/trip-planner', '/discover/services'],
     ['/transport/airport-transfer', '/discover/services'],
     ['/experiences', '/discover/services'],

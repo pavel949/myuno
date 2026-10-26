@@ -56,3 +56,20 @@
   .property-discovery-results--map .property-discovery-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .property-discovery-results--map .property-discovery-map{height:min(720px,calc(100dvh - var(--consumer-header-height,80px) - 32px));min-height:400px}
 }
+
+/* The optional name is the catalogue filter, including when no rental dates apply. */
+.property-discovery .home-search.home-search--catalogue>.home-search-query{grid-column:1/-1;grid-row:1}
+.property-discovery .home-search.home-search--catalogue>.home-search-duration{grid-row:2}
+@media(min-width:1280px){
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-dates,
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-type,
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-location,
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-bedrooms,
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-submit{grid-row:3}
+  .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-secondary{grid-row:4}
+  .property-discovery:is([data-property-mode=all],[data-property-mode=buy]) .property-discovery-editor .home-search.home-search--catalogue{grid-template-columns:minmax(160px,1fr) minmax(200px,1.2fr) minmax(150px,.8fr) minmax(160px,.8fr)}
+  .property-discovery:is([data-property-mode=all],[data-property-mode=buy]) .property-discovery-editor .home-search.home-search--catalogue>.home-search-type{grid-column:1;grid-row:2}
+  .property-discovery:is([data-property-mode=all],[data-property-mode=buy]) .property-discovery-editor .home-search.home-search--catalogue>.home-search-location{grid-column:2;grid-row:2}
+  .property-discovery:is([data-property-mode=all],[data-property-mode=buy]) .property-discovery-editor .home-search.home-search--catalogue>.home-search-bedrooms{grid-column:3;grid-row:2}
+  .property-discovery:is([data-property-mode=all],[data-property-mode=buy]) .property-discovery-editor .home-search.home-search--catalogue>.home-search-submit{grid-column:4;grid-row:2}
+}

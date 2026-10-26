@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { propertySearchHref } from '@/lib/propertySearchQuery';
+import { propertySearchHref, readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
 import {
   CalendarClock,
@@ -41,6 +41,7 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
+  { id: 'catalogue', labelEn: 'All homes', labelRu: 'Все объекты', icon: Building2, path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=all` },
   {
     id: 'rent_short',
     labelEn: 'Nightly',
@@ -146,6 +147,7 @@ function getActiveTab(pathname: string, search: string): string {
 
   if (isBrowse || isLegacyPropertySearch || pathname.startsWith('/property/complex/')) {
     const params = new URLSearchParams(search);
+    if (!readPropertySearchQuery(params).hasIntent) return 'catalogue';
     if (params.get('mode') === 'buy') return 'buy';
     if (params.get('tenancy') === 'long') return 'rent_long';
     return 'rent_short';
@@ -245,7 +247,7 @@ export function PropertyHubTabs() {
                 params.delete('intent');
                 params.delete('quick');
                 target.forEach((value, key) => params.set(key, value));
-                navigate(propertySearchHref(params.toString()));
+                navigate(`${propertySearchHref(params.toString())}${location.hash}`, { state: location.state });
               } else navigate(tab.path);
             }}
             className={cn(
