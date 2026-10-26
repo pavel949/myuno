@@ -8,7 +8,7 @@
  * Sources (all SSOT, no dead links — every path resolves to a real route):
  *  - micro-apps          src/lib/appRegistry.ts          → app.route
  *  - services            src/lib/catalog/taxonomy.ts     → service.path
- *  - categories          src/lib/catalog/taxonomy.ts     → cluster.homeRoute
+ *  - categories          src/lib/catalog/taxonomy.ts     → existing child destinations (category URL unresolved)
  *  - clusters (public)   src/lib/catalog/taxonomy.ts     → cluster.homeRoute
  *  - life situations     src/lib/catalog/taxonomy.ts     → canonical situation URL builder
  *  - personas (active)   src/lib/taxonomies/master.ts    → /for/:slug
@@ -25,8 +25,8 @@ import {
   CATEGORIES,
   CLUSTERS,
   LIFE_SITUATIONS,
-  getClusterById,
 } from '@/lib/catalog/taxonomy';
+import { projectCatalogCategory } from '@/lib/catalog/serviceLookup';
 import { PERSONAS } from '@/lib/taxonomies/master';
 import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { NAVIGATION_INDEX } from './navigationIndex';
@@ -105,20 +105,20 @@ function buildIndex(): StaticSearchEntry[] {
     });
   }
 
-  // Categories → cluster umbrella route.
+  // A category has no mounted category-aware destination yet. Index its
+  // existing children with its vocabulary, never a misleading umbrella link.
   for (const cat of CATEGORIES) {
-    entries.push({
-      id: `cat-${cat.id}`,
-      titleRu: cat.labelRu,
-      titleEn: cat.labelEn,
-      titleTh: cat.labelTh,
-      keywords: kw(cat.valueEn, cat.valueRu),
-      path: getClusterById(cat.clusterId)?.homeRoute ?? '/discover',
-      section: 'category',
-      type: 'category',
-      weight: 3,
-      cluster: cat.clusterId,
-    });
+    for (const service of projectCatalogCategory(cat.id).services) {
+      entries.push({
+        id: `category-service-${cat.id}-${service.id}`,
+        titleRu: service.labelRu,
+        titleEn: service.labelEn,
+        titleTh: service.labelTh,
+        keywords: kw(cat.labelRu, cat.labelEn, cat.labelTh ?? '', cat.valueEn, cat.valueRu),
+        path: service.path,
+        section: 'category', type: 'category', weight: 3, cluster: cat.clusterId,
+      });
+    }
   }
 
   // Public clusters (umbrella surfaces).
@@ -191,7 +191,11 @@ function buildIndex(): StaticSearchEntry[] {
   const byPath = new Map<string, StaticSearchEntry>();
   for (const e of entries) {
     const existing = byPath.get(e.path);
-    if (!existing || (e.weight ?? 0) > (existing.weight ?? 0)) byPath.set(e.path, e);
+    if (!existing) byPath.set(e.path, e);
+    else {
+      const winner = (e.weight ?? 0) > (existing.weight ?? 0) ? e : existing;
+      byPath.set(e.path, { ...winner, keywords: kw(...existing.keywords, ...e.keywords) });
+    }
   }
   return [...byPath.values()];
 }

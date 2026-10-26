@@ -26,17 +26,8 @@ import { formatServices } from '@/lib/i18n/pluralize';
 import { hexTint, accentColor } from '@/lib/ui/colorTint';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
+import { getEntityType, getEntityTypeLabel, resolveEntityDestination } from '@/lib/config/entityTypes';
 import { cn } from '@/lib/utils';
-
-function resolveItemHref(item: LifeOSCatalogItem): string | null {
-  const def = getEntityType(item.entity_type);
-  // Guard: unknown entity types fall back to '/' — never link a service card to root
-  if (!def.detailRoute && def.route === '/') return null;
-  if (def.detailRoute === null) return def.route;
-  const base = def.detailRoute ?? def.route;
-  return `${base}/${item.entity_id}`;
-}
 
 function formatPrice(item: LifeOSCatalogItem, isRu: boolean): string | null {
   if (item.price == null) return null;
@@ -57,11 +48,19 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
   const typeLabel = getEntityTypeLabel(item.entity_type, isRu ? 'ru' : 'en');
   const price = formatPrice(item, isRu);
   const isVerified = item.trust_level === 'verified';
-  const href = resolveItemHref(item);
+  const destination = resolveEntityDestination(item.entity_type, item.entity_id);
+  const href = destination.status === 'resolved' ? destination.href : null;
   const title = item.title_localized || item.title;
 
-  // Defensive: drop cards with no title or no resolvable destination
-  if (!title || !href) return null;
+  if (!title) return null;
+  if (!href) return (
+    <article className="flex flex-col gap-3 p-4 min-h-[140px] border border-border bg-card text-card-foreground">
+      <h3 className="text-body font-semibold">{title}</h3>
+      <p className="text-sm text-muted-foreground">
+        {isRu ? 'Переход к этому предложению пока недоступен.' : 'This offering is not available to open yet.'}
+      </p>
+    </article>
+  );
 
   return (
     <Link
