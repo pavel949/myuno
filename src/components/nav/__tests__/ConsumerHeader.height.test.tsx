@@ -59,8 +59,8 @@ it.each([false, true])('scopes canonical portal gutters only to non-overlay menu
 
 it.each([
  ['/discover/services', 'var(--layout-width-catalogue)'], ['/property/search', 'var(--layout-width-catalogue)'], ['/for-business', 'var(--layout-width-workspace)'],
- ['/become-partner', ''], ['/property/one', ''], ['/support', ''],
-])('aligns header to the explicit page frame at %s without widening forms/details', (route, expected) => {
+ ['/become-partner', ''], ['/property/one', 'var(--layout-width-catalogue)'], ['/area/bang-tao', 'var(--layout-width-catalogue)'], ['/support', ''],
+])('aligns header to the explicit page frame at %s while keeping form frames bounded', (route, expected) => {
  const view = render(<MemoryRouter initialEntries={[route]}><ConsumerHeader /></MemoryRouter>);
  expect((view.container.querySelector('.consumer-header-inner') as HTMLElement).style.maxWidth).toBe(expected);
 });
