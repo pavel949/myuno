@@ -11,7 +11,7 @@ async def main():
     languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
     widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
     alias_cases=[('cat-home-living',lang,width) for lang in ['ru','th'] for width in [320,390,430]]+[('cat-home-living','en',1440),('home-services','en',390),('services','en',390)]
-    expected=len(alias_cases) if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
+    expected=len(alias_cases)+3 if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -280,6 +280,68 @@ async def main():
                     print(json.dumps({'completed':len(results),'expected':expected,'alias':parent_id,'lang':lang,'width':width}),flush=True)
                     await context.close()
             await asyncio.gather(*(run_home_alias(*case) for case in alias_cases))
+            async def run_home_edge(phase):
+                async with semaphore:
+                    context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
+                    async def edge_route(request):
+                        parsed=urlparse(request.request.url)
+                        if parsed.netloc=='localhost:8080' and parsed.path in ['/fixture','/discover/services']:
+                            config='<script>window.fixtureCataloguePhase='+json.dumps(phase)+';window.fixtureLanguage="en";</script>'
+                            html=(OUTPUT/'fixture.html').read_text().replace('<head>','<head>'+config,1)
+                            await request.fulfill(body=html,content_type='text/html')
+                        else: await route(request)
+                    await context.route('**/*',edge_route)
+                    page=await context.new_page()
+                    errors=[]
+                    page.on('pageerror',lambda error:errors.append(str(error)))
+                    async def open_entry(entry):
+                        await page.goto('http://localhost:8080/fixture?lang=en&entry='+quote(entry,safe=''),wait_until='networkidle')
+                    if phase=='home-empty':
+                        await open_entry('/discover/services')
+                        await expect(page.get_by_text('No services found',exact=True)).to_have_count(0)
+                        await page.locator('[data-category-id=cat-home-living]').click()
+                        await expect(page.locator('[data-home-category-id]')).to_have_count(11)
+                        await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                        await page.locator('[data-home-category-id=ac]').click()
+                        await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-living')
+                        await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                    elif phase=='home-dual':
+                        await open_entry('/discover/services?ref=second')
+                        await page.get_by_role('button',name='All categories',exact=True).click()
+                        await page.locator('[data-category-id=cat-home-living]').click()
+                        await page.locator('[data-home-category-id=ac]').click()
+                        await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-living')
+                        await page.reload(wait_until='networkidle')
+                        await expect(page.get_by_role('combobox')).to_have_text('Home & Living')
+                        await expect(page.locator('[data-home-category-id=ac]')).to_have_attribute('aria-pressed','true')
+                        await page.get_by_test_id('home-category-menu').get_by_role('button').first.click()
+                        await expect(page.get_by_test_id('location')).to_have_text('/discover/services?ref=second&category=cat-home-living')
+                        await page.go_back()
+                        await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-living')
+                        await expect(page.get_by_role('combobox')).to_have_text('Home & Living')
+                        await page.go_forward()
+                        await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-living')
+                        for entry in ['/discover/services?category=ac','/discover/services?category=home-services']:
+                            await open_entry(entry)
+                            await expect(page.get_by_text('Several home categories',exact=False)).to_be_visible()
+                            await expect(page.get_by_test_id('service-request-grid')).to_have_count(0)
+                    else:
+                        for entry in ['/discover/services?category=cat-home-services','/discover/services?category=ac&home=cat-home-services','/discover/services?category=ac&home=unknown']:
+                            await open_entry(entry)
+                            await expect(page.get_by_text('selected home category is unavailable',exact=False)).to_be_visible()
+                            await expect(page.get_by_test_id('service-request-grid')).to_have_count(0)
+                        await page.get_by_role('combobox').press('Enter')
+                        await page.get_by_role('option',name='Home & Living',exact=True).click()
+                        await expect(page.locator('[data-home-category-id]')).to_have_count(11)
+                        await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                    assert not errors,errors
+                    assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                    await page.screenshot(path=str(OUTPUT/f'en-390-{phase}.png'))
+                    results.append({'lang':'en','width':390,'scenario':phase,'passed':True})
+                    print(json.dumps({'completed':len(results),'expected':expected,'scenario':phase}),flush=True)
+                    await context.close()
+            await asyncio.gather(*(run_home_edge(phase) for phase in ['home-empty','home-dual','home-inactive']))
+
         await browser.close()
     assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
     (OUTPUT/'summary.json').write_text(json.dumps({'expected':expected,'scope':'home-aliases' if alias_only else 'provider' if provider_only else 'full','passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))

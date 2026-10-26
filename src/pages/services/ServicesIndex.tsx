@@ -19,7 +19,7 @@ import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
 import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 
@@ -47,16 +47,17 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const [limit, setLimit] = useState(12);
   const [showAllRequests, setShowAllRequests] = useState(false);
   const [showAllMenu, setShowAllMenu] = useState(false);
-  const categories = serviceDiscoveryCategories(catalog.isFromDB ? catalog.categories : []);
+  const returnedCategories = catalog.isFromDB ? catalog.categories : [];
+  const categories = serviceDiscoveryCategories(returnedCategories);
   const situations = serviceDiscoverySituations(categories, catalog.lifeSituations ?? []);
   const menu = serviceDiscoveryMenu(categories);
   const overview = !filters.query.trim() && !filters.category && !filters.situation;
-  const home = categories.find(item => item.id === filters.category && isHomeServiceCategoryId(item.id))
-    ?? categories.find(item => isHomeServiceCategoryId(item.id));
   const child = SERVICE_CATEGORIES.find(category => category.id === filters.category);
-  // Resolve only the already-declared home aliases against returned inventory.
-  // The URL and DB identity remain intact; unknown or inactive categories stay unknown.
-  const category = home && (child || isHomeServiceCategoryId(filters.category)) ? home.id : child ? 'cat-home-services' : filters.category;
+  const homeResolution = resolveHomeServiceCategory(returnedCategories,
+    child ? filters.homeCategory : isHomeServiceCategoryId(filters.category) ? filters.category : '', !child);
+  const home = homeResolution.status === 'resolved' ? homeResolution.category : undefined;
+  const explicitHomeIntent = Boolean(child || isHomeServiceCategoryId(filters.category));
+  const category = home && explicitHomeIntent ? home.id : filters.category;
   const rows = child ? [] : projectServiceDiscovery(categories, { ...filters, category });
   const returnTo = location.pathname + location.search;
   const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
@@ -72,12 +73,12 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     setShowAllMenu(false);
     navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
-  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string) => commit(updateServiceDiscoveryQuery(params, key, value), key === 'q');
+  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(params, key, value, homeCategory), key === 'q');
   const clear = () => commit(clearServiceDiscoveryQuery(params));
   const selectedCategory = categories.find(item => item.id === category);
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
   const knownSituation = !filters.situation || situations.some(item => item.code === filters.situation);
-  const knownCategory = !category || categories.some(item => item.id === category);
+  const knownCategory = !category || (child ? Boolean(home) : categories.some(item => item.id === category));
   // Home functions remain request templates with indicative prices, not live supply.
   // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
   const showRequests = Boolean((category === home?.id || filters.query.trim()) && (!category || category === home?.id) && home && !filters.situation && knownSituation);
@@ -93,7 +94,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const showOffers = !filters.category && !filters.situation;
   const matchingOffers = showOffers ? filterMarketplaceServices(offers.data ?? [], filters.query) : [];
   const renderOffers = showOffers && (offers.isLoading || offers.isError || !filters.query.trim() || matchingOffers.length > 0);
-  const noResults = ready && (!knownSituation || !knownCategory || (!rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
+  const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
+  const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
 
   return <Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
     title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')}
@@ -142,6 +144,9 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
+    {ready && explicitHomeIntent && homeResolution.status === 'unavailable' && <p role="status" className="text-sm text-muted-foreground">{homeResolution.reason === 'ambiguous'
+      ? t('Доступно несколько разделов домашних услуг. Выберите нужный раздел в списке категорий.', 'Several home categories are available. Choose one in the category list.', 'มีหมวดหมู่บริการสำหรับบ้านหลายรายการ โปรดเลือกจากรายการหมวดหมู่')
+      : t('Выбранный раздел домашних услуг недоступен. Выберите другой раздел или сбросьте фильтры.', 'The selected home category is unavailable. Choose another category or reset the filters.', 'หมวดหมู่บริการสำหรับบ้านที่เลือกไม่พร้อมใช้งาน โปรดเลือกหมวดหมู่อื่นหรือรีเซ็ตตัวกรอง')}</p>}
     {ready && !noResults && overview && <section aria-labelledby="service-menu-title" className="space-y-3">
       <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
       {filters.view === 'categories' ? <>
@@ -161,7 +166,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">
         <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', home.id)}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
-        {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
+        {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id, home.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
       </div>
     </section>}
     {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORIES, LIFE_SITUATIONS, type CategoryEntry } from '@/lib/catalog/taxonomy';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '../serviceDiscoveryProjection';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '../serviceDiscoveryProjection';
 import { buildServiceCategoryUrl, clearServiceDiscoveryQuery, readServiceDiscoveryQuery, updateServiceDiscoveryQuery } from '../serviceDiscoveryQuery';
 const categories = serviceDiscoveryCategories(CATEGORIES);
 const blank = { query: '', category: '', situation: '' };
@@ -35,6 +35,35 @@ describe('canonical service projections and URL state', () => {
     expect(projectServiceDiscovery(source, { ...blank, category: legacy.id }).map(row => row.service.id)).toEqual(home.services.map(service => service.id));
     expect(serviceDiscoveryMenu([{ ...legacy, status: 'soon' }]).primary).toEqual([]);
   });
+  it.each(['cat-home-services', 'cat-home-living', 'home-services', 'services'])('retains active empty and filtered Home parent %s', id => {
+    const source = CATEGORIES.find(item => item.id === 'cat-home-services')!;
+    const empty = { ...source, id: id as CategoryEntry['id'], services: [] };
+    expect(serviceDiscoveryCategories([empty])).toHaveLength(1);
+    expect(serviceDiscoveryMenu([empty]).primary[0].id).toBe(id);
+    const filtered = { ...empty, services: source.services.map(service => ({ ...service, status: 'soon' as const })) };
+    expect(serviceDiscoveryCategories([filtered])[0].services).toEqual([]);
+    expect(serviceDiscoveryCategories([{ ...empty, status: 'soon' }])).toEqual([]);
+  });
+  it('resolves exact identities and refuses inactive, missing or ambiguous child context', () => {
+    const canonical = CATEGORIES.find(item => item.id === 'cat-home-services')!;
+    const legacy = { ...canonical, id: 'cat-home-living' as CategoryEntry['id'] };
+    expect(resolveHomeServiceCategory([canonical, legacy], legacy.id)).toMatchObject({ status: 'resolved', category: { id: legacy.id } });
+    expect(resolveHomeServiceCategory([canonical, legacy])).toEqual({ status: 'unavailable', reason: 'ambiguous' });
+    expect(resolveHomeServiceCategory([canonical, legacy], 'home-services', true)).toEqual({ status: 'unavailable', reason: 'ambiguous' });
+    expect(resolveHomeServiceCategory([{ ...canonical, status: 'soon' }, legacy], canonical.id, true)).toEqual({ status: 'unavailable', reason: 'inactive' });
+    expect(resolveHomeServiceCategory([legacy], canonical.id)).toEqual({ status: 'unavailable', reason: 'missing' });
+    expect(resolveHomeServiceCategory([legacy], canonical.id, true)).toMatchObject({ status: 'resolved', category: { id: legacy.id } });
+    expect(resolveHomeServiceCategory([legacy], 'cat-transport', true)).toEqual({ status: 'unavailable', reason: 'unknown' });
+  });
+  it('persists exact home child context until a parent/reset action clears it', () => {
+    const initial = new URLSearchParams('category=cat-home-living&ref=trip');
+    const child = updateServiceDiscoveryQuery(initial, 'category', 'ac', 'cat-home-living');
+    expect(readServiceDiscoveryQuery(child)).toMatchObject({ category: 'ac', homeCategory: 'cat-home-living' });
+    expect(updateServiceDiscoveryQuery(child, 'q', 'cleaning').get('home')).toBe('cat-home-living');
+    expect(updateServiceDiscoveryQuery(child, 'browse', 'situations').get('home')).toBe('cat-home-living');
+    expect(updateServiceDiscoveryQuery(child, 'category', 'cat-home-living').has('home')).toBe(false);
+    expect(clearServiceDiscoveryQuery(child).toString()).toBe('ref=trip');
+  });
   it('never invents associations for unknown service slugs or inactive entities', () => {
     const source = CATEGORIES[0];
     const injected = { ...source, services: [{ ...source.services[0], id: 'unmapped', situationCodes: undefined }] };
@@ -53,7 +82,7 @@ describe('canonical service projections and URL state', () => {
   it('switches views without silently discarding combined filters or unrelated URL parameters', () => {
     const initial = new URLSearchParams('q=boat+%26+tour&category=cat-tourism&situation=tourist&ref=trip');
     const next = updateServiceDiscoveryQuery(initial, 'browse', 'situations');
-    expect(readServiceDiscoveryQuery(next)).toEqual({ query: 'boat & tour', category: 'cat-tourism', situation: 'tourist', view: 'situations' });
+    expect(readServiceDiscoveryQuery(next)).toEqual({ query: 'boat & tour', category: 'cat-tourism', homeCategory: '', situation: 'tourist', view: 'situations' });
     expect(initial.has('browse')).toBe(false);
     const reset = clearServiceDiscoveryQuery(next);
     expect(reset.toString()).toBe('ref=trip&browse=situations');

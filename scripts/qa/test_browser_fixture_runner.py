@@ -82,6 +82,15 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
             else:
                 self.assertTrue((ROOT / f'scripts/qa/{name}.py').is_file())
 
+    def test_failure_diagnostics_are_bounded_and_do_not_turn_failure_green(self):
+        fixture = self.fixture('diagnostics', body="print('x' * 10000)\nprint('Synthetic failure detail')\nraise SystemExit(7)", result=None)
+        result = runner.run_fixture(fixture, executable=sys.executable)
+        self.assertEqual(result['outcome'], 'FAIL')
+        self.assertEqual(result['exit_code'], 7)
+        self.assertLessEqual(len(result['diagnostic_tail']), 8000)
+        self.assertIn('Synthetic failure detail', result['diagnostic_tail'])
+        self.assertFalse(runner.suite_succeeded([fixture], [result]))
+
     def write_homepage_matrix(self):
         rows = {lang: [{'language': lang, 'width': width, 'state': 'data', 'pageOverflow': False} for width in [320,360,375,390,430,768,1440,1920]] for lang in ['en','ru','th']}
         rows['en'] += [{'language':'en','width':390,'state':state,'pageOverflow':False} for state in ['empty','error','loading']]
