@@ -33,15 +33,17 @@ jobs:
           node --test scripts/design-system-audit.test.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
-      - name: Actual public PMS admin and one-source rebrand
-        run: |
-          node scripts/qa/design-system-convergence.mjs artifacts/design-system/core
-          python scripts/qa/design-system-convergence.py artifacts/design-system/core
+      - name: Compile public PMS admin acceptance assets
+        run: node scripts/qa/design-system-convergence.mjs artifacts/design-system/core
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Premium property journey and actual area return
         timeout-minutes: 4
         run: node scripts/qa/property-premium-journey.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual public PMS admin and one-source rebrand
+        run: python scripts/qa/design-system-convergence.py artifacts/design-system/core
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual shared public and authoring components

@@ -12,6 +12,7 @@ const language = "export const useLanguage=()=>({language:new URLSearchParams(wi
 const image = 'https://fixture.invalid/property.svg';
 const property = { id:'synthetic-unit', title_ru:'Тестовая вилла', title_en:'Synthetic villa', listing_type:'rent', listing_modes:['rent','sale'], tenancy_modes:['short','long'], property_type:'villa', district:'Bang Tao', created_at:'2026-10-26', updated_at:'2026-10-26', bedrooms:3, area_sqm:180, images:[image,image+'%20',image+'%20%20'], cover_image:image };
 const virtual = {
+ '@/integrations/supabase/client': "export const supabase=new Proxy({},{get(){throw Error('Production database access forbidden in public journey fixture')}});",
  '@/contexts/LanguageContext': language,
  '@/contexts/CurrencyContext': "export const useCurrency=()=>({formatPrice:value=>'฿'+value});",
  '@/hooks/useProperties': `export const useProperties=()=>({data:[${JSON.stringify(property)}],isLoading:false,isError:false});`,
@@ -42,7 +43,7 @@ const bundle = await build({
 });
 const inputs=Object.keys(bundle.metafile.inputs);
 for(const actual of ['property/PropertyJourney.tsx','property/detail/PropertyDetailGallery.tsx','home/HomeListingCard.tsx','pages/area/AreaLandingPage.tsx'])if(!inputs.some(file=>file.endsWith(actual)))throw Error('Actual component absent: '+actual);
-if(inputs.some(file=>!file.startsWith('virtual-read:')&&['/hooks/useProperties.ts','/hooks/useOffplanProjects.ts'].some(suffix=>file.endsWith(suffix))))throw Error('Production read module bundled');
+if(inputs.some(file=>!file.startsWith('virtual-read:')&&['/hooks/useProperties.ts','/hooks/useOffplanProjects.ts','/integrations/supabase/client.ts'].some(suffix=>file.endsWith(suffix))))throw Error('Production read module bundled');
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 // Use the same compiled Tailwind and theme CSS as existing full public fixtures.
 await writeFile(path.join(output,'theme.css'),await readFile('artifacts/design-system/core/pms/normal.css'));
