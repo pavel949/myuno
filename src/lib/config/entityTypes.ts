@@ -394,7 +394,7 @@ export function isPrimaryEntityType(type: string): boolean {
   return getEntityType(type).priority === 'primary';
 }
 
-/** LifeOS entity IDs are opaque. Never infer a booking/provider route from one. */
+/** Resolve known seeded service identities; never infer a booking/provider ID. */
 export function resolveEntityDestination(type: string, id: string):
   | { status: 'resolved'; href: string }
   | { status: 'unavailable'; reason: string } {

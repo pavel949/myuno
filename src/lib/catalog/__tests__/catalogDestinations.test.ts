@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { CATALOG_SERVICE_SLUG_BY_LIFE_ID } from '../serviceLifeIdentities.generated';
 import { createMemoryRouter, matchRoutes } from 'react-router-dom';
 import { CATEGORIES, FLAT_SERVICES } from '../taxonomy';
 import { projectCatalogCategory, resolveCatalogServiceDestination } from '../serviceLookup';
@@ -50,6 +53,20 @@ describe('canonical catalogue projections', () => {
 });
 
 describe('LifeOS entity navigation boundary', () => {
+  it('resolves every existing seeded LifeOS service UUID through the same catalogue destination', () => {
+    const seed = readFileSync('supabase/migrations/20260616024127_sync_catalog_life_map_from_ssot.sql', 'utf8');
+    expect(seed).toContain("md5('service:' || p.slug)::uuid");
+    expect(Object.keys(CATALOG_SERVICE_SLUG_BY_LIFE_ID)).toHaveLength(FLAT_SERVICES.length);
+    for (const service of FLAT_SERVICES) {
+      const hex = createHash('md5').update(`service:${service.id}`).digest('hex');
+      const uuid = `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+      expect(CATALOG_SERVICE_SLUG_BY_LIFE_ID[uuid]).toBe(service.id);
+      expect(resolveEntityDestination('service', uuid)).toEqual(resolveCatalogServiceDestination(service.id));
+      expect(resolveEntityDestination('service', uuid.toUpperCase())).toEqual(resolveCatalogServiceDestination(service.id));
+    }
+    execFileSync(process.execPath, ['scripts/generate-catalog-service-identities.mjs', '--check']);
+  });
+
   it.each(['unknown-id', 'constructor', '00000000-0000-4000-8000-000000000000'])('does not infer a booking route for unresolved service %s', id => {
     expect(resolveEntityDestination('service', id)).toEqual({ status: 'unavailable', reason: 'unknown-service' });
   });

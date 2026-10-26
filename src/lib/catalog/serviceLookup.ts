@@ -6,6 +6,7 @@ import { serviceDiscoveryCategories } from '@/lib/services/serviceDiscoveryProje
 import { buildServiceCategoryUrl } from '@/lib/services/serviceDiscoveryQuery';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES, FLAT_SERVICES, type ServiceStatus } from './taxonomy';
+import { CATALOG_SERVICE_SLUG_BY_LIFE_ID } from './serviceLifeIdentities.generated';
 
 const SERVICE_BY_ID = Object.fromEntries(FLAT_SERVICES.map((s) => [s.id, s]));
 
@@ -21,12 +22,25 @@ export function getServiceIcon(serviceId: string, fallback: LucideIcon): LucideI
 export function resolveCatalogServiceDestination(serviceId: string):
   | { status: 'resolved'; href: string }
   | { status: 'unavailable'; reason: 'unknown-service' | 'inactive-service' } {
-  const service = Object.prototype.hasOwnProperty.call(SERVICE_BY_ID, serviceId) ? SERVICE_BY_ID[serviceId] : undefined;
+  // The existing LifeOS seed uses md5('service:' || slug)::uuid, not a provider ID.
+  const lifeId = serviceId.toLowerCase();
+  const slug = Object.prototype.hasOwnProperty.call(CATALOG_SERVICE_SLUG_BY_LIFE_ID, lifeId)
+    ? CATALOG_SERVICE_SLUG_BY_LIFE_ID[lifeId] : serviceId;
+  const service = Object.prototype.hasOwnProperty.call(SERVICE_BY_ID, slug) ? SERVICE_BY_ID[slug] : undefined;
   if (!service) return { status: 'unavailable', reason: 'unknown-service' };
   if (service.status !== 'available' && service.status !== 'info') {
     return { status: 'unavailable', reason: 'inactive-service' };
   }
   return { status: 'resolved', href: service.path };
+}
+
+/** Normalize only the seeded generic home entry; preserve other DB destinations. */
+export function catalogServicePath(parentId: string, serviceId: string, appPath: string | null | undefined): string | undefined {
+  if (parentId === 'cat-home-services' && serviceId === 'services'
+    && (appPath === '/services' || appPath === '/discover/services')) {
+    return buildServiceCategoryUrl(parentId);
+  }
+  return appPath ?? undefined;
 }
 
 /** Project an existing category; the public hub now consumes its canonical ID. */

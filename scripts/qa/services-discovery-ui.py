@@ -9,7 +9,7 @@ async def main():
     themes=os.environ.get('SERVICES_DISCOVERY_THEMES','light,dark').split(',')
     languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
     widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
-    expected=2 if provider_only else len(themes)*len(languages)*len(widths)+6
+    expected=2 if provider_only else len(themes)*len(languages)*len(widths)+10
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -94,7 +94,10 @@ async def main():
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-filtered.png'),full_page=True)
                 action=page.get_by_test_id('service-request-card')
                 await action.press('Enter')
+                await expect(page.get_by_test_id('location')).to_contain_text('/services/order/')
+                await expect(page.get_by_role('heading',level=1)).to_be_visible()
                 await page.get_by_role('button',name='Go back').click()
+                await expect(page.get_by_test_id('location')).to_contain_text('/discover/services?')
                 await expect(search).to_have_value('Чистка' if lang=='ru' else 'Cleaning')
                 await expect(child).to_have_text({'ru':'Кондиционеры','en':'Air Conditioning','th':'เครื่องปรับอากาศ'}[lang])
                 # Rapid searches settle synchronously; no stale results / duplicate actions.
@@ -171,6 +174,40 @@ async def main():
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             results.append({'lang':'en','width':390,'scenario':'home-situation-boundary','passed':True})
             await context.close()
+        if not provider_only:
+            for width in [390,1440]:
+                context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
+                await context.route('**/*',route)
+                page=await context.new_page()
+                errors=[]
+                page.on('pageerror',lambda error:errors.append(str(error)))
+                await page.goto('http://localhost:8080/fixture?lang=en&phase=db-home&entry='+quote('/discover/services?category=cat-home-services&ref=db#cards',safe=''),wait_until='networkidle')
+                home=page.get_by_role('link',name='Home services All home services',exact=True)
+                await expect(home).to_have_attribute('href','/discover/services?category=cat-home-services')
+                for repeat in range(2):
+                    await home.click()
+                    await expect(page.get_by_text('Deep Cleaning',exact=True)).to_be_visible()
+                    await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-services')
+                    await page.go_back()
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover/services?category=cat-home-services&ref=db#cards')
+                    await expect(home).to_be_visible()
+                await page.screenshot(path=str(OUTPUT/f'en-{width}-db-home.png'),full_page=True)
+                assert not errors, errors
+                results.append({'lang':'en','width':width,'scenario':'db-home-navigation','passed':True})
+                await page.goto('http://localhost:8080/fixture?lang=en&entry='+quote('/discover/arrival?ref=life#services',safe=''),wait_until='networkidle')
+                await expect(page.get_by_role('link',name='Service transfer')).to_have_attribute('href','/transport/airport-transfer')
+                await expect(page.get_by_role('link',name='Service yacht')).to_have_attribute('href','/yachts')
+                await expect(page.get_by_text('This offering is not available to open yet.')).to_be_visible()
+                await expect(page.get_by_role('link',name='unknown-service')).to_have_count(0)
+                for name,target in [('Service transfer','/transport/airport-transfer'),('Service yacht','/yachts')]:
+                    await page.get_by_role('link',name=name,exact=True).click()
+                    await expect(page.get_by_test_id('location')).to_have_text(target)
+                    await page.go_back()
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover/arrival?ref=life#services')
+                await page.screenshot(path=str(OUTPUT/f'en-{width}-lifeos-identities.png'),full_page=True)
+                assert not errors, errors
+                results.append({'lang':'en','width':width,'scenario':'lifeos-seeded-identities','passed':True})
+                await context.close()
         await browser.close()
     assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
     (OUTPUT/'summary.json').write_text(json.dumps({'expected':expected,'scope':'provider' if provider_only else 'full','passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))
