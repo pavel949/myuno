@@ -18,8 +18,8 @@ import { useServiceFunctions } from '@/hooks/useServiceFunctions';
 import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
-import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
+import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
@@ -43,8 +43,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const [helpOpen, setHelpOpen] = useState(false);
   const [limit, setLimit] = useState(12);
   const [showAllRequests, setShowAllRequests] = useState(false);
+  const [showAllMenu, setShowAllMenu] = useState(false);
   const categories = serviceDiscoveryCategories(catalog.isFromDB ? catalog.categories : []);
   const situations = serviceDiscoverySituations(categories, catalog.lifeSituations ?? []);
+  const menu = serviceDiscoveryMenu(categories);
+  const overview = !filters.query.trim() && !filters.category && !filters.situation;
   const child = SERVICE_CATEGORIES.find(category => category.id === filters.category);
   const category = child ? 'cat-home-services' : filters.category;
   const home = categories.find(item => item.id === 'cat-home-services');
@@ -54,6 +57,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const commit = (next: URLSearchParams, replace = false) => {
     setLimit(12);
     setShowAllRequests(false);
+    setShowAllMenu(false);
     navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state });
   };
   const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string) => commit(updateServiceDiscoveryQuery(params, key, value), key === 'q');
@@ -95,6 +99,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         <Button asChild variant="ghost" className="w-11 px-0 sm:w-auto sm:px-3"><Link to="/bookings" aria-label={t('Мои заявки', 'My requests', 'คำขอของฉัน')} title={t('Мои заявки', 'My requests', 'คำขอของฉัน')}><ClipboardList className="size-4 shrink-0 sm:mr-2" aria-hidden="true" /><span className="hidden sm:inline">{t('Мои заявки', 'My requests', 'คำขอของฉัน')}</span></Link></Button>
       </div>
       <TabsContent value={filters.view}>
+      {!overview && <>
       <div className="grid items-end gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <p id="service-view-filter" className="text-sm font-medium">{filters.view === 'categories' ? t('Категория', 'Category', 'หมวดหมู่') : t('Ситуация', 'Situation', 'สถานการณ์')}</p>
@@ -112,16 +117,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
             </SelectContent>
           </Select>
         </div>
-        {category === 'cat-home-services' && <div className="space-y-2">
-          <p id="home-request-category" className="text-sm font-medium">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</p>
-          <Select value={child?.id ?? 'all'} onValueChange={value => update('category', value === 'all' ? 'cat-home-services' : value)}>
-            <SelectTrigger id="home-request-trigger" aria-labelledby="home-request-category" className="min-h-11"><SelectValue /></SelectTrigger>
-            <SelectContent collisionPadding={12} className="max-w-[var(--radix-select-content-available-width)]"><SelectItem className="min-h-11" value="all">{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</SelectItem>
-              {SERVICE_CATEGORIES.map(item => <SelectItem className="min-h-11" key={item.id} value={item.id}>{homeServiceCategoryLabel(item.id, language)}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>}
       </div>
+      </>}
       </TabsContent>
       </Tabs>
       {filtered && <div className="flex flex-wrap items-center gap-2" aria-label={t('Применённые фильтры', 'Applied filters', 'ตัวกรองที่ใช้')}>
@@ -133,7 +130,29 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
-    {ready && !noResults && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
+    {ready && !noResults && overview && <section aria-labelledby="service-menu-title" className="space-y-3">
+      <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
+      {filters.view === 'categories' ? <>
+        <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-discovery-menu">
+          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left" onClick={() => update('category', item.id)}>
+            <item.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span className="min-w-0"><span className="block font-medium">{label(item)}</span><span id={`service-menu-${item.id}`} className="mt-1 block text-xs font-normal text-muted-foreground">{item.services.slice(0, 2).map(label).join(' · ')}</span></span>
+          </Button>)}
+          {menu.yacht && <Button asChild variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left"><Link to={menu.yacht.path} state={{ returnTo }} aria-label={label(menu.yacht)}><menu.yacht.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span><span className="block font-medium">{label(menu.yacht)}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{t('Открыть раздел', 'Open service', 'เปิดบริการ')}</span></span><ArrowRight className="ml-auto size-4 shrink-0" aria-hidden="true" /></Link></Button>}
+        </div>
+        {menu.more.length > 0 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все категории', 'All categories', 'ทุกหมวดหมู่')}</Button>}
+      </> : <>
+        <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-situation-menu">{situations.slice(0, showAllMenu ? situations.length : 8).map(item => <Button key={item.code} data-situation-code={item.code} variant="outline" className="h-auto min-h-11 justify-start whitespace-normal p-3 text-left" onClick={() => update('situation', item.code)}>{pickLang(language, { ru: item.titleRu, en: item.titleEn })}</Button>)}</div>
+        {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
+      </>}
+    </section>}
+    {ready && home && category === 'cat-home-services' && <section aria-labelledby="home-categories-title" className="space-y-3">
+      <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
+      <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">
+        <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', 'cat-home-services')}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
+        {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
+      </div>
+    </section>}
+    {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 id="service-results-title" className="font-display text-h3">{t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
       <p className="text-sm text-muted-foreground">{t('Условия, цена и способ заказа — на странице услуги.', 'See conditions, prices and how to order on the service page.', 'ดูเงื่อนไข ราคา และวิธีสั่งบริการในหน้าบริการ')}</p>
       <div className={PUBLIC_CATALOG_COMPACT_GRID} data-testid="service-catalogue-results">

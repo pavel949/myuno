@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoverySituations } from '../serviceDiscoveryProjection';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '../serviceDiscoveryProjection';
 import { buildServiceCategoryUrl, clearServiceDiscoveryQuery, readServiceDiscoveryQuery, updateServiceDiscoveryQuery } from '../serviceDiscoveryQuery';
 const categories = serviceDiscoveryCategories(CATEGORIES);
 const blank = { query: '', category: '', situation: '' };
@@ -14,6 +14,16 @@ describe('canonical service projections and URL state', () => {
       expect(filtered.length).toBeGreaterThan(0);
       for (const row of filtered) expect(rows.find(item => item.service.id === row.service.id)?.service.path).toBe(row.service.path);
     }
+  });
+  it('projects the compact menu from active canonical records, keeping yacht identity', () => {
+    const menu = serviceDiscoveryMenu(CATEGORIES);
+    expect(menu.primary.map(item => item.id)).toEqual(['cat-home-services', 'cat-transport', 'cat-tourism']);
+    expect(menu.yacht).toBe(CATEGORIES.flatMap(item => item.services).find(item => item.id === 'yacht'));
+    expect(menu.yacht?.path).toBe('/yachts');
+    const limited = serviceDiscoveryMenu(CATEGORIES.filter(item => item.id !== 'cat-tourism'));
+    expect(limited.yacht).toBeUndefined();
+    expect(limited.primary.some(item => item.id === 'cat-tourism')).toBe(false);
+    expect(serviceDiscoveryMenu(CATEGORIES.map(item => ({ ...item, status: 'soon' })))).toEqual({ primary: [], more: [], yacht: undefined });
   });
   it('never invents associations for unknown service slugs or inactive entities', () => {
     const source = CATEGORIES[0];

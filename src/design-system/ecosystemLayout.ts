@@ -34,6 +34,8 @@ const PUBLIC_CATALOG_COLUMNS = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 m
 export const PUBLIC_CATALOG_GRID = `${PUBLIC_CATALOG_COLUMNS} gap-6`;
 /** Compact navigation rows share catalogue breakpoints without photo-card spacing. */
 export const PUBLIC_CATALOG_COMPACT_GRID = `${PUBLIC_CATALOG_COLUMNS} gap-3`;
+/** Category/situation choices are compact controls, rather than listing cards. */
+export const PUBLIC_DISCOVERY_MENU_GRID = 'grid grid-cols-2 min-[1440px]:grid-cols-4 gap-3';
 
 /** Marketing CTAs retain complete labels inside narrow cards and wrapped rows. */
 export const MARKETING_ACTION_BUTTON = 'h-auto min-h-12 max-w-full whitespace-normal break-words px-4 py-3 leading-snug';

@@ -58,6 +58,15 @@ async def main():
                 bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
                 assert not bad, {'controlBounds': bad}
                 if surface == 'services':
+                    menu = page.get_by_test_id('service-discovery-menu')
+                    await expect(menu).to_be_visible()
+                    menu_metrics = await geometry(menu)
+                    assert len(menu_metrics['columns'].split()) == (4 if width >= 1440 else 2), menu_metrics
+                    await expect(menu.locator('[data-category-id]')).to_have_count(3)
+                    await expect(menu.locator('a[href="/yachts"]')).to_have_count(1)
+                    await expect(menu.locator('[data-category-id=cat-home-services]')).to_be_visible()
+                    await expect(menu.locator('[data-category-id=cat-tourism]')).to_be_visible()
+                    await menu.locator('[data-category-id=cat-tourism]').press('Enter')
                     grid = page.get_by_test_id('service-catalogue-results')
                     await expect(grid).to_be_visible()
                     metrics = await geometry(grid)
@@ -65,17 +74,18 @@ async def main():
                     assert len(metrics['columns'].split()) == expected, metrics
                     parent = await geometry(grid.locator('xpath=../..'))
                     assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
-                    await expect(grid.get_by_role('link')).to_have_count(12)
                     await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
-                    await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
                     # Actual keyboard category filtering preserves URL context.
                     category = page.get_by_role('combobox')
                     await category.press('Enter')
-                    options = page.get_by_role('option')
-                    await expect(options.first).to_be_visible()
-                    await options.nth(1).click()
-                    await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=')
+                    option = page.get_by_role('option', name='Транспортные услуги' if lang=='ru' else 'Transport', exact=True)
+                    await expect(option).to_be_visible()
+                    await option.click()
+                    await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=cat-transport')
+                    await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
+                    await expect(grid.get_by_role('link')).to_have_count(4)
                     await expect(category).to_be_focused()
+                    row['menu'] = menu_metrics
                     row['grid'] = metrics
                 elif surface == 'housing':
                     root = await geometry(page.locator('.property-discovery'))

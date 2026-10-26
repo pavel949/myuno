@@ -10,6 +10,17 @@ export function serviceDiscoverySituations(categories: CategoryEntry[], situatio
   const codes = new Set(categories.flatMap(category => category.services.flatMap(service => service.situationCodes ?? [])));
   return situations.filter(situation => situation.isActive && codes.has(situation.code));
 }
+
+/** Presentation order only: these are references to existing canonical entities. */
+export function serviceDiscoveryMenu(categories: CategoryEntry[]) {
+  const available = serviceDiscoveryCategories(categories);
+  const primaryIds = ['cat-home-services', 'cat-transport', 'cat-tourism'];
+  const primary = primaryIds.flatMap(id => available.find(category => category.id === id) ?? []);
+  const more = available.filter(category => !primaryIds.includes(category.id))
+    .sort((a, b) => Number(a.id === 'cat-emergency') - Number(b.id === 'cat-emergency'));
+  const yacht = available.flatMap(category => category.services).find(service => service.id === 'yacht');
+  return { primary, more, yacht };
+}
 export function matchesServiceQuery(query: string, values: (string | undefined)[]) {
   const normalize = (value: string) => value.normalize('NFKC').toLocaleLowerCase().trim();
   const text = values.filter(Boolean).map(value => normalize(value!)).join(' ');

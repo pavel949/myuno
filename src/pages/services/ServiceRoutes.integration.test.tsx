@@ -43,7 +43,7 @@ describe('integrated direct service route ownership', () => {
     expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^AC Cleaning$/ })).toHaveLength(1);
     expect(screen.queryByRole('button', { name: /^AC Installation$/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Home services' })).toHaveTextContent('Air Conditioning');
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
     if (path === '/me/services') {
       expect(screen.getAllByTestId('account-shell')).toHaveLength(1);
       expect(screen.queryByTestId('public-catalog-shell')).not.toBeInTheDocument();

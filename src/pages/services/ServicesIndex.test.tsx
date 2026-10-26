@@ -22,17 +22,25 @@ describe('canonical services hub', () => {
     mount();
     expect(screen.getByRole('tab', { name: 'By category' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: 'By situation' })).toBeVisible();
+    const menu = screen.getByTestId('service-discovery-menu');
+    expect(within(menu).getByRole('button', { name: 'Home services' })).toBeVisible();
+    expect(within(menu).getByRole('button', { name: 'Transport' })).toBeVisible();
+    expect(within(menu).getByRole('button', { name: 'Tourism & Activities' })).toBeVisible();
+    expect(within(menu).getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
+    expect(screen.queryByTestId('service-catalogue-results')).toBeNull();
+    expect(menu.querySelector('[data-category-id="cat-emergency"]')).toBeNull();
+    fireEvent.click(within(menu).getByRole('button', { name: 'Transport' }));
     const links = within(screen.getByTestId('service-catalogue-results')).getAllByRole('link');
     expect(new Set(links.map(link => link.getAttribute('href'))).size).toBe(links.length);
-    expect(links.some(link => link.getAttribute('href') === '/yachts')).toBe(true);
     expect(links.some(link => link.getAttribute('href') === '/transport/airport-transfer')).toBe(true);
     expect(screen.getByRole('link', { name: 'My requests' })).toHaveAttribute('href', '/bookings');
   });
-  it('keeps only registered active destinations through full catalogue expansion', () => {
-    mount();
+  it.each(CATEGORIES.filter(parent => !['cat-real-estate', 'cat-partner-portal'].includes(parent.id) && (!parent.status || ['available', 'info'].includes(parent.status)) && parent.services.some(item => !item.status || ['available', 'info'].includes(item.status))).map(parent => [parent.id]))('keeps registered active destinations for expanded category %s', id => {
+    mount('/discover/services?category='+id);
     while (screen.queryByRole('button', { name: 'Show more' })) fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
-    for (const link of within(screen.getByTestId('service-catalogue-results')).getAllByRole('link')) expect(isKnownRoute(link.getAttribute('href')!)).toBe(true);
-    const renderedHeadings = new Set(within(screen.getByTestId('service-catalogue-results')).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent));
+    const grid = screen.getByTestId('service-catalogue-results');
+    for (const link of within(grid).getAllByRole('link')) expect(isKnownRoute(link.getAttribute('href')!)).toBe(true);
+    const renderedHeadings = new Set(within(grid).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent));
     for (const parent of CATEGORIES) for (const service of parent.services.filter(item => item.status === 'soon' || item.status === 'pro')) expect(renderedHeadings.has(service.labelEn)).toBe(false);
     expect(screen.queryByRole('button', { name: /role/i })).toBeNull();
   });
@@ -51,7 +59,7 @@ describe('canonical services hub', () => {
   });
   it('groups the eleven home children and restores legacy category requests', () => {
     mount('/discover/services?category=ac&q=cleaning');
-    expect(screen.getByRole('combobox', { name: 'Home services' })).toHaveTextContent('Air Conditioning');
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
     expect(screen.getByText('AC Cleaning')).toBeVisible();
     expect(screen.queryByText('AC Installation')).toBeNull();
     fireEvent.click(screen.getByText('AC Cleaning'));
@@ -59,17 +67,17 @@ describe('canonical services hub', () => {
     fireEvent.click(screen.getByText('Back fixture'));
     expect(screen.getByRole('searchbox')).toHaveValue('cleaning');
     expect(screen.getByText(/Prices are estimates/)).toBeVisible();
-    select('Home services', 'All home services');
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: '' } });
-    fireEvent.keyDown(screen.getByRole('combobox', { name: 'Home services' }), { key: 'Enter' });
-    expect(screen.getAllByRole('option')).toHaveLength(12);
+    expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
+    expect(screen.getByRole('button', { name: 'All home services', pressed: true })).toBeVisible();
   });
   it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
     mount('/discover/services?ref=trip');
-    select('Category', 'Tourism & Activities');
+    fireEvent.click(screen.getByRole('button', { name: 'Tourism & Activities' }));
     expect(screen.getByTestId('location').textContent).toContain('category=cat-tourism');
     fireEvent.click(screen.getByText('Back fixture'));
-    expect(screen.getByRole('combobox', { name: 'Category' })).toHaveTextContent('All');
+    expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
     fireEvent.click(screen.getByText('Forward fixture'));
     expect(screen.getByRole('combobox', { name: 'Category' })).toHaveTextContent('Tourism & Activities');
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zz-unmatched' } });

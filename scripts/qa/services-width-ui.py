@@ -43,6 +43,13 @@ async def main():
                 if surface!='form':
                     expected_frame=min(width,1760)
                     assert abs(metric['width']-expected_frame)<1,(surface,width,metric)
+                    if surface=='services':
+                        menu=page.get_by_test_id('service-discovery-menu')
+                        await expect(menu).to_be_visible()
+                        menu_geometry=await menu.evaluate('e=>({columns:getComputedStyle(e).gridTemplateColumns.split(" ").length,width:e.getBoundingClientRect().width})')
+                        assert menu_geometry['columns']==(4 if width>=1440 else 2),(surface,width,menu_geometry)
+                        row['menu']=menu_geometry
+                        await page.locator('[data-category-id=cat-transport]').click()
                     grid=page.get_by_test_id('property-results-grid' if surface=='housing' else 'service-catalogue-results')
                     await expect(grid).to_be_visible()
                     geometry=await grid.evaluate('e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{width:r.width,columns:s.gridTemplateColumns.split(" ").length,columnWidths:s.gridTemplateColumns,gap:s.gap}}')
@@ -77,6 +84,9 @@ async def main():
                     await page.evaluate('(name)=>document.documentElement.style.removeProperty(name)',token)
                     assert abs(await frame.evaluate('e=>e.getBoundingClientRect().width')-metric['width'])<1
                 assert not errors,errors
+                if surface=='services':
+                    await page.go_back()
+                    await expect(page.get_by_test_id('service-discovery-menu')).to_be_visible()
                 await page.screenshot(path=str(OUT/f'{surface}-{width}.png'),full_page=False)
                 rows.append(row)
                 print(json.dumps(row),flush=True)
