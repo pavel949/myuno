@@ -16,19 +16,26 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 /** Edits the same dated price sources consumed by checkout. Occupancy is read-only. */
-export function CalendarPriceEditor({ property }: { property: UnifiedProperty }) {
+export function CalendarPriceEditor({ property, calendarContext = false }: { property: UnifiedProperty; calendarContext?: boolean }) {
   const { language } = useLanguage();
   const t = (en: string, russian: string) => language === 'ru' ? russian : en;
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const requested = params.get('date');
   const initial = toBangkokDateKey(requested) || bangkokTodayISO();
   const [month, setMonth] = useState(() => startOfMonth(parseCivilDate(initial)));
   const [from, setFrom] = useState(initial);
   const [through, setThrough] = useState(initial);
-  const [category, setCategory] = useState('');
+  const category = params.get('category') || '';
+  const setCategory = (id: string) => {
+    const next = new URLSearchParams(params);
+    if (toBangkokDateKey(from)) next.set('date', from);
+    if(id) next.set('category', id); else next.delete('category');
+    setParams(next, { replace: true });
+  };
   const [price, setPrice] = useState('');
   const [saving, setSaving] = useState(false);
   const categories = useRoomCategories(property.property_id);
+  const categoryKnown = !category || categories.data?.categories.some(c => c.id === category);
   const stays = useStaysUnifiedCalendar(property.property_id);
   const qc = useQueryClient();
   const currency = property.record_currency;
@@ -45,7 +52,7 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
   async function save() {
     setSaving(true);
     try {
-      if (!currency || !rows.data || rows.isFetching) throw new Error(t('Reload prices before saving', 'Обновите цены перед сохранением'));
+      if (!categoryKnown || !currency || !rows.data || rows.isFetching) throw new Error(t('Reload prices before saving', 'Обновите цены перед сохранением'));
       const range = inclusivePriceRange(from, through);
       const amount = parseCalendarPrice(price);
       const { data, error } = await supabase.rpc('set_property_calendar_price', {
@@ -59,18 +66,20 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       toast.success(t('Prices saved', 'Цены сохранены'));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('Could not save. Reload and try again.', 'Не удалось сохранить. Обновите данные и повторите.'));
-      await rows.refetch();
+      await Promise.all([rows.refetch(), visibleRows.refetch()]);
     } finally { setSaving(false); }
   }
   return <section className="border bg-card p-4 md:p-6 space-y-5" aria-label={t('Calendar prices', 'Цены в календаре')}>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><h2 className="font-semibold text-lg">{t('Calendar prices', 'Цены в календаре')}</h2><p className="text-sm text-muted-foreground">{t('Select a date or date range. Existing bookings stay unchanged.', 'Выберите дату или период. Существующие бронирования сохраняются.')}</p></div>
-      <Link className="text-sm underline" to={`/mc/calendar?property=${property.property_id}&date=${from}`}>{t('Open booking calendar', 'Календарь бронирований')}</Link>
+      <Link className="text-sm underline" to={`/mc/calendar?property=${property.property_id}&date=${from}${!calendarContext && category ? '&category=' + encodeURIComponent(category) : ''}`}>{calendarContext ? t('Property booking calendar', 'Календарь бронирований объекта') : t('Open booking calendar', 'Календарь бронирований')}</Link>
     </div>
     <label htmlFor="calendar-price-target" className="block text-sm space-y-2"><span>{t('Apply to', 'Применить к')}</span><select id="calendar-price-target" className="w-full border bg-background p-3" value={category} disabled={saving || categories.isLoading || categories.isError} onChange={e => { setCategory(e.target.value); setPrice(''); }}>
+      {category && categories.data && !categoryKnown && <option value={category} disabled>{t('Unavailable category', 'Недоступная категория')}</option>}
       <option value="">{property.title} · {t('Individual unit', 'Отдельный объект')}</option>
       {categories.data?.categories.map(c => <option key={c.id} value={c.id}>{t('Category', 'Категория')}: {language === 'ru' ? c.name_ru || c.name_en : c.name_en}</option>)}
     </select></label>
+    {category && categories.data && !categoryKnown && <p role="alert">{t('This category is unavailable for the selected property.', 'Эта категория недоступна для выбранного объекта.')}</p>}
     {categories.isError && <p role="alert">{t('Categories could not be loaded. Reload the page.', 'Не удалось загрузить категории. Обновите страницу.')}</p>}
     <div className="flex items-center justify-between"><Button variant="outline" aria-label={t('Previous month', 'Предыдущий месяц')} onClick={() => setMonth(addMonths(month, -1))}>←</Button><h3 className="font-medium">{format(month, 'LLLL yyyy', {locale: language === 'ru' ? ru : enUS})}</h3><Button variant="outline" aria-label={t('Next month', 'Следующий месяц')} onClick={() => setMonth(addMonths(month, 1))}>→</Button></div>
     {visibleRows.isError ? <p role="alert">{t('Prices unavailable. Try reloading.', 'Не удалось загрузить цены. Повторите загрузку.')} <Button variant="outline" onClick={() => visibleRows.refetch()}>{t('Reload', 'Обновить')}</Button></p> : <>
@@ -88,7 +97,7 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
           </button>;
         })}
       </div>
-      <p className="text-xs text-muted-foreground">{t('“Rate” inherits base and seasonal pricing. Numbers are explicit nightly overrides, before discounts. Shift-click extends selection.', '«Тариф» — базовая или сезонная цена. Числа — индивидуальная цена за ночь до скидок. Shift + клик расширяет выделение.')}</p>
+      <p className="text-xs text-muted-foreground">{t('“Rate” inherits base and seasonal pricing. Numbers are explicit nightly overrides before discounts and rate-plan adjustments. Shift-click extends selection.', '«Тариф» — базовая или сезонная цена. Числа — индивидуальная цена за ночь до скидок и корректировок тарифного плана. Shift + клик расширяет выделение.')}</p>
     </>}
     <div className="grid gap-3 sm:grid-cols-3">
       <label htmlFor="calendar-price-from" className="text-sm space-y-2"><span>{t('From', 'С даты')}</span><Input id="calendar-price-from" type="date" value={from} disabled={saving} onChange={e => { setFrom(e.target.value); if(e.target.value > through) setThrough(e.target.value); const day = toBangkokDateKey(e.target.value); if(day) setMonth(startOfMonth(parseCivilDate(day))); }}/></label>
@@ -97,6 +106,6 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
     </div>
     {rows.isError && <p role="alert">{t('Prices for the selected dates could not be loaded. Adjust the range or reload.', 'Не удалось загрузить цены выбранного периода. Измените даты или обновите данные.')} <Button variant="outline" onClick={() => rows.refetch()}>{t('Reload', 'Обновить')}</Button></p>}
     {!currency && <p role="alert">{t('Set the property currency before editing prices.', 'Сначала задайте валюту объекта.')}</p>}
-    <Button onClick={save} disabled={saving || !currency || !price || !from || !through || from > through || !rows.data || rows.isFetching || rows.isError}>{saving ? t('Saving…', 'Сохранение…') : t('Apply nightly price', 'Применить цену за ночь')}</Button>
+    <Button onClick={save} disabled={saving || !categoryKnown || !currency || !price || !from || !through || from > through || !rows.data || rows.isFetching || rows.isError}>{saving ? t('Saving…', 'Сохранение…') : t('Apply nightly price', 'Применить цену за ночь')}</Button>
   </section>;
 }

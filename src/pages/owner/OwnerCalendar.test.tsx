@@ -1,4 +1,4 @@
-vi.mock('@/components/owner/pricing/CalendarPriceEditor', () => ({ CalendarPriceEditor: () => <div data-testid="calendar-price-editor" /> }));
+vi.mock('@/components/owner/pricing/CalendarPriceEditor', () => ({ CalendarPriceEditor: ({property,calendarContext}: {property:{property_id:string};calendarContext?:boolean}) => <div data-testid="calendar-price-editor" data-property={property.property_id} data-calendar-context={String(!!calendarContext)} /> }));
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -152,4 +152,42 @@ describe('owner property navigation', () => {
     expect(screen.getByTestId('url')).toHaveTextContent('/mc/rates?ref=owner');
     expect(state.rates).toHaveBeenLastCalledWith('owner', 'all');
   });
+  it('keeps category pricing in the canonical calendar without a parent-unit booking action', () => {
+    render(<Harness path="/mc/calendar?property=p1&category=category&date=2026-10-21" />);
+    expect(screen.getByTestId('calendar-price-editor')).toHaveAttribute('data-property','p1');
+    expect(screen.getByTestId('calendar-price-editor')).toHaveAttribute('data-calendar-context','true');
+    expect(screen.queryByTestId('calendar-property-id')).toBeNull();
+    expect(screen.queryByRole('button',{name:'Add Booking'})).toBeNull();
+    fireEvent.click(screen.getByRole('button',{name:'Property rates'}));
+    expect(screen.getByTestId('url')).toHaveTextContent('category=category');
+    expect(screen.getByTestId('url')).toHaveTextContent('date=2026-10-21');
+  });
+  it('clears the old category when the calendar property changes explicitly', () => {
+    render(<Harness path="/mc/calendar?property=p1&category=category" />);
+    selectProperty('Second villa');
+    expect(screen.getByTestId('url')).not.toHaveTextContent('category=');
+    expect(screen.getByTestId('calendar-property-id')).toHaveTextContent('p2');
+  });
+
+  it('does not carry a previous property category through the Rates back destination', () => {
+    const returnTo=encodeURIComponent('/mc/calendar?property=p1&category=category&date=2026-10-21');
+    render(<Harness path={'/mc/rates?property=p1&category=category&returnTo='+returnTo} />);
+    selectProperty('Second villa');
+    fireEvent.click(screen.getByRole('button',{name:'Back'}));
+    expect(screen.getByTestId('url')).toHaveTextContent('/mc/calendar?property=p2&date=2026-10-21');
+    expect(screen.getByTestId('url')).not.toHaveTextContent('category=');
+  });
+
+  it('unmounts an already-open unit booking dialog when history returns to category pricing', () => {
+    render(<Harness path="/mc/calendar?property=p1&category=category" />);
+    fireEvent.click(screen.getByRole('button',{name:/^Portfolio$/}));
+    fireEvent.click(screen.getByRole('button',{name:/^Single property$/}));
+    fireEvent.click(screen.getByRole('button',{name:/^Add Booking$/}));
+    expect(screen.getByTestId('booking-property-id')).toHaveTextContent('p1');
+    fireEvent.click(screen.getByText('History back'));
+    fireEvent.click(screen.getByText('History back'));
+    expect(screen.getByTestId('calendar-price-editor')).toBeVisible();
+    expect(screen.queryByTestId('booking-property-id')).toBeNull();
+  });
+
 });
