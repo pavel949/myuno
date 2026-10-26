@@ -24,9 +24,9 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   // separate so unavailable supply is never inferred from a failed read.
   if (!isLoading && !isError && data?.length === 0) {
     return <p role="status" className="text-sm text-muted-foreground">
-      {L('Онлайн-запись пока недоступна. Выберите услугу для дома или опишите задачу.',
-        'Online booking is not available yet. Choose a home service or describe your task.',
-        'ยังไม่มีบริการจองออนไลน์ เลือกบริการสำหรับบ้านหรืออธิบายสิ่งที่ต้องการ')}
+      {L('Пока нет опубликованных предложений специалистов. Выберите раздел каталога или опишите задачу.',
+        'No published provider offers yet. Choose a catalogue section or describe your task.',
+        'ยังไม่มีข้อเสนอที่เผยแพร่ เลือกหมวดหมู่บริการหรืออธิบายสิ่งที่ต้องการ')}
     </p>;
   }
 
@@ -34,8 +34,9 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
     <section aria-labelledby="bookable-services" className="space-y-4">
       <div className="flex items-center gap-2 mb-3">
         <CalendarCheck className="h-4 w-4 text-primary" />
-        <h2 id="bookable-services" className="font-display text-h3">{L('Онлайн-запись к специалистам', 'Book a provider', 'จองผู้ให้บริการ')}</h2>
+        <h2 id="bookable-services" className="font-display text-h3">{L('Предложения специалистов', 'Provider offers', 'ข้อเสนอจากผู้ให้บริการ')}</h2>
       </div>
+      <p className="text-sm text-muted-foreground">{L('Укажите удобное время. Запись нужно подтвердить с исполнителем.', 'Request a suitable time. The provider must confirm the booking.', 'ระบุเวลาที่สะดวก ผู้ให้บริการต้องยืนยันการจอง')}</p>
       {isLoading ? (
         <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64" />)}</div>
       ) : isError ? (
@@ -52,7 +53,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
             const img = s.images?.[0];
             return (
               <article key={s.id} className="flex min-w-0 flex-col border border-border bg-card">
-                {img ? <img src={img} alt="" loading="lazy" className="h-40 w-full border-b border-border object-cover" /> : <div aria-hidden="true" className="flex h-24 items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><CalendarCheck className="h-10 w-10" strokeWidth={1.25} /></div>}
+                {img && <img src={img} alt="" loading="lazy" className="h-40 w-full border-b border-border object-cover" />}
                 <div className="flex flex-1 min-w-0 flex-col gap-2 p-4">
                   <ServiceSummary name={name} description={(language === 'ru' ? s.description_ru : s.description_en) || s.description_en} price={s.price} currency={s.currency} durationMinutes={s.duration_minutes} />
                   {s.provider && (
@@ -65,7 +66,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
                     <Button size="sm" className="min-h-11 w-full" onClick={() => setSelected({
                       id: s.id, providerId: s.provider_id, name, price: s.price, currency: s.currency,
                       durationMinutes: s.duration_minutes, leadTimeHours: s.lead_time_hours,
-                    })}>{L('Записаться на услугу', 'Book', 'จอง')}</Button>
+                    })}>{L('Открыть заявку', 'Request service', 'ส่งคำขอบริการ')}</Button>
                   </div>
                 </div>
               </article>

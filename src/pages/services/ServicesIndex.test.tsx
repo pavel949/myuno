@@ -93,6 +93,15 @@ describe('canonical services hub', () => {
     mount('/discover/services?q=synthetic');
     expect(screen.queryByText('No services found')).toBeNull();
   });
+  it('makes the unresolved provider filter limitation explicit and preserves the search when clearing it', () => {
+    state.providerOnly = true;
+    mount('/discover/services?category=cat-home-services&situation=resident&q=synthetic&ref=trip');
+    expect(screen.getByText(/Clear the category and situation/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse provider offers' }));
+    expect(screen.getByRole('searchbox')).toHaveValue('synthetic');
+    expect(screen.getByTestId('location')).toHaveTextContent('q=synthetic&ref=trip');
+    expect(screen.queryByText('No services found')).toBeNull();
+  });
   it('keeps unknown situations empty instead of broadening results', () => {
     mount('/discover/services?situation=unknown');
     expect(screen.getByText('No services found')).toBeVisible();

@@ -5,6 +5,8 @@ from urllib.parse import urlparse, quote
 from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
 async def main():
+    provider_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='provider'
+    expected=2 if provider_only else 35
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -96,28 +98,56 @@ async def main():
                 await expect(page.get_by_test_id('location')).to_contain_text('ref=fixture')
                 assert not errors, errors
                 results.append({'lang':lang,'width':width,'theme':appearance,'scenario':'interactive','registeredFontFaces':await page.evaluate('document.fonts.size'),'passed':True})
-                print(json.dumps({'completed':len(results),'expected':33,'lang':lang,'width':width,'theme':appearance}),flush=True)
+                print(json.dumps({'completed':len(results),'expected':35,'lang':lang,'width':width,'theme':appearance}),flush=True)
                 await context.close()
-        await asyncio.gather(*(run_case(theme,lang,width) for theme in ['light','dark'] for lang in ['ru','en','th'] for width in [320,375,390,430,1440]))
-        # Distinct states must be real, not populated screenshots labelled loading.
-        for phase in ['loading','error','empty']:
-            context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
+        if not provider_only:
+            await asyncio.gather(*(run_case(theme,lang,width) for theme in ['light','dark'] for lang in ['ru','en','th'] for width in [320,375,390,430,1440]))
+            # Distinct states must be real, not populated screenshots labelled loading.
+            for phase in ['loading','error','empty']:
+                context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
+                await context.route('**/*',route)
+                page=await context.new_page()
+                await page.goto('http://localhost:8080/fixture?lang=en&phase='+phase,wait_until='networkidle')
+                if phase=='loading': await expect(page.get_by_role('status')).to_have_text('Loading catalogue…')
+                elif phase=='error':
+                    await expect(page.get_by_role('alert')).to_be_visible()
+                    await page.get_by_role('button',name='Try again').click()
+                    assert await page.evaluate('window.fixtureRetry')==1
+                else: await expect(page.get_by_text('No services found',exact=True)).to_be_visible()
+                await expect(page.get_by_test_id('service-catalogue-results')).to_have_count(0)
+                await page.screenshot(path=str(OUTPUT/f'en-390-{phase}.png'),full_page=True)
+                results.append({'lang':'en','width':390,'scenario':phase,'passed':True})
+                await context.close()
+        for width in [390,1440]:
+            context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
             await context.route('**/*',route)
             page=await context.new_page()
-            await page.goto('http://localhost:8080/fixture?lang=en&phase='+phase,wait_until='networkidle')
-            if phase=='loading': await expect(page.get_by_role('status')).to_have_text('Loading catalogue…')
-            elif phase=='error':
-                await expect(page.get_by_role('alert')).to_be_visible()
-                await page.get_by_role('button',name='Try again').click()
-                assert await page.evaluate('window.fixtureRetry')==1
-            else: await expect(page.get_by_text('No services found',exact=True)).to_be_visible()
-            await expect(page.get_by_test_id('service-catalogue-results')).to_have_count(0)
-            await page.screenshot(path=str(OUTPUT/f'en-390-{phase}.png'),full_page=True)
-            results.append({'lang':'en','width':390,'scenario':phase,'passed':True})
+            errors=[]
+            page.on('pageerror',lambda error:errors.append(str(error)))
+            await page.goto('http://localhost:8080/fixture?lang=en&phase=provider&entry='+quote('/discover/services?q=synthetic&ref=provider',safe=''),wait_until='networkidle')
+            await expect(page.get_by_role('heading',name='Provider offers',exact=True)).to_be_visible()
+            await expect(page.get_by_text('No services found',exact=True)).to_have_count(0)
+            await expect(page.get_by_text('Synthetic AC service',exact=True)).to_be_visible()
+            await expect(page.get_by_role('link',name='Synthetic team',exact=True)).to_have_attribute('href','/services/provider/provider-synthetic?returnTo=%2Fdiscover%2Fservices%3Fq%3Dsynthetic%26ref%3Dprovider')
+            await expect(page.get_by_text('The provider must confirm',exact=False)).to_be_visible()
+            assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            await page.screenshot(path=str(OUTPUT/f'en-{width}-provider-offer.png'),full_page=True)
+            await page.get_by_role('combobox').press('Enter')
+            await page.get_by_role('option',name='Home services',exact=True).click()
+            await expect(page.get_by_text('Synthetic AC service',exact=True)).to_have_count(0)
+            await expect(page.get_by_text('Clear the category and situation',exact=False)).to_be_visible()
+            await page.get_by_role('button',name='Browse provider offers',exact=True).click()
+            await expect(page.get_by_role('searchbox')).to_have_value('synthetic')
+            await expect(page.get_by_text('Synthetic AC service',exact=True)).to_be_visible()
+            await page.get_by_role('searchbox').fill('zz-no-match')
+            await expect(page.get_by_text('No services found',exact=True)).to_have_count(1)
+            await expect(page.get_by_role('heading',name='Provider offers',exact=True)).to_have_count(0)
+            assert not errors, errors
+            results.append({'lang':'en','width':width,'scenario':'provider-layer','passed':True})
             await context.close()
         await browser.close()
-    assert len(results)==33 and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==33
-    (OUTPUT/'summary.json').write_text(json.dumps({'expected':33,'passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))
+    assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
+    (OUTPUT/'summary.json').write_text(json.dumps({'expected':expected,'scope':'provider' if provider_only else 'full','passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))
     (OUTPUT/'results.json').write_text(json.dumps(results,indent=2))
     print(json.dumps(results))
 asyncio.run(main())
