@@ -26,6 +26,20 @@ function mount(path = '/discover/services') { return render(<MemoryRouter initia
 beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; state.legacyHome = false; state.homeShape = ''; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
 const select = (name: string, option: string) => { fireEvent.keyDown(screen.getByRole('combobox', { name }), { key: 'Enter' }); fireEvent.click(screen.getByRole('option', { name: option })); };
 describe('canonical services hub', () => {
+  it('preserves the selected child when search follows before the router commits', () => {
+    state.legacyHome = true;
+    mount('/discover/services?category=cat-home-living&ref=rapid');
+    act(() => {
+      fireEvent.click(document.querySelector('[data-home-category-id="ac"]')!);
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Cleaning' } });
+    });
+    const route = screen.getByTestId('location').textContent!;
+    expect(route).toContain('category=ac');
+    expect(route).toContain('home=cat-home-living');
+    expect(route).toContain('q=Cleaning');
+    expect(screen.getByRole('button', { name: 'AC Cleaning' })).toBeVisible();
+  });
+
   it('offers equal views and real specialised routes without duplicate services', () => {
     mount();
     expect(screen.getByRole('tab', { name: 'By category' })).toHaveAttribute('aria-selected', 'true');

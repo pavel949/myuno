@@ -39,6 +39,10 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const pendingFilterUrl = useRef<string | null>(null);
   useEffect(() => { pendingFilterUrl.current = null; }, [location.key]);
   const [params] = useSearchParams();
+  // Consecutive controls may fire before a router transition renders. Compose
+  // their changes over the latest intended query, not the previous render.
+  const pendingQuery = useRef({ key: location.key, params });
+  if (pendingQuery.current.key !== location.key) pendingQuery.current = { key: location.key, params };
   const filters = readServiceDiscoveryQuery(params);
   const catalog = useCatalogFromDB();
   const { functions } = useServiceFunctions();
@@ -66,15 +70,16 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     const target = location.pathname + (search ? '?' + search : '') + location.hash;
     // A controlled tab can report the same choice on pointer and focus before
     // the router commits. One filter action must create only one history entry.
-    if (target === location.pathname + location.search + location.hash || pendingFilterUrl.current === target) return;
+    if (pendingFilterUrl.current === target || (!pendingFilterUrl.current && target === location.pathname + location.search + location.hash)) return;
     pendingFilterUrl.current = target;
+    pendingQuery.current.params = next;
     setLimit(12);
     setShowAllRequests(false);
     setShowAllMenu(false);
     navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
-  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(params, key, value, homeCategory), key === 'q');
-  const clear = () => commit(clearServiceDiscoveryQuery(params));
+  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(pendingQuery.current.params, key, value, homeCategory), key === 'q');
+  const clear = () => commit(clearServiceDiscoveryQuery(pendingQuery.current.params));
   const selectedCategory = categories.find(item => item.id === category);
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
   const knownSituation = !filters.situation || situations.some(item => item.code === filters.situation);

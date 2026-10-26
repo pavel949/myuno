@@ -11,7 +11,7 @@ async def main():
     languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
     widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
     alias_cases=[('cat-home-living',lang,width) for lang in ['ru','th'] for width in [320,390,430]]+[('cat-home-living','en',1440),('home-services','en',390),('services','en',390)]
-    expected=len(alias_cases)+3 if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
+    expected=len(alias_cases)+4 if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -296,7 +296,27 @@ async def main():
                     page.on('pageerror',lambda error:errors.append(str(error)))
                     async def open_entry(entry):
                         await page.goto('http://localhost:8080/fixture?lang=en&entry='+quote(entry,safe=''),wait_until='networkidle')
-                    if phase=='home-empty':
+                    if phase=='home-rapid':
+                        await open_entry('/discover/services?category=cat-home-services&ref=rapid')
+                        await expect(page.locator('[data-home-category-id=ac]')).to_be_visible()
+                        # Deliberately dispatch both events in one browser task: no
+                        # wait for the category transition may hide this regression.
+                        await page.evaluate("""() => {
+                            document.querySelector('[data-home-category-id=ac]').click();
+                            const input = document.querySelector('input[type=search]');
+                            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'Cleaning');
+                            input.dispatchEvent(new Event('input', {bubbles:true}));
+                        }""")
+                        await expect(page.get_by_test_id('location')).to_contain_text('category=ac')
+                        await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-services')
+                        await expect(page.get_by_test_id('location')).to_contain_text('q=Cleaning')
+                        await expect(page.get_by_test_id('service-request-card')).to_have_count(1)
+                        await page.get_by_test_id('service-request-card').press('Enter')
+                        await expect(page.locator('form')).to_be_visible()
+                        await page.get_by_role('button',name='Go back',exact=True).click()
+                        await expect(page.get_by_test_id('location')).to_contain_text('category=ac')
+                        await expect(page.get_by_role('searchbox')).to_have_value('Cleaning')
+                    elif phase=='home-empty':
                         await open_entry('/discover/services')
                         await expect(page.get_by_text('No services found',exact=True)).to_have_count(0)
                         await page.locator('[data-category-id=cat-home-living]').click()
@@ -340,7 +360,7 @@ async def main():
                     results.append({'lang':'en','width':390,'scenario':phase,'passed':True})
                     print(json.dumps({'completed':len(results),'expected':expected,'scenario':phase}),flush=True)
                     await context.close()
-            await asyncio.gather(*(run_home_edge(phase) for phase in ['home-empty','home-dual','home-inactive']))
+            await asyncio.gather(*(run_home_edge(phase) for phase in ['home-empty','home-dual','home-inactive','home-rapid']))
 
         await browser.close()
     assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
