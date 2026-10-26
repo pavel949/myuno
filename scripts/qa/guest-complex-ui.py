@@ -46,6 +46,16 @@ async def main():
                         assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), f'Overflow: {lang}/{width}/{empty}'
                     hero = page.get_by_test_id('complex-hero')
                     hero_box = await hero.bounding_box()
+                    if not empty:
+                        gallery=page.locator('.premium-gallery')
+                        await expect(gallery).to_be_visible()
+                        geometry=await gallery.evaluate('(el)=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height,columns:getComputedStyle(el).gridTemplateColumns}}')
+                        if width < 768:
+                            await expect(gallery.locator(':scope > button:visible')).to_have_count(1)
+                            assert abs(geometry['width']/geometry['height']-4/3)<.02,geometry
+                        else:
+                            await expect(gallery.locator(':scope > button:visible')).to_have_count(3)
+                            assert len(geometry['columns'].split())==2,geometry
                     if empty:
                         assert hero_box['height'] < 520, f'Empty hero too tall: {hero_box}'
                     else:

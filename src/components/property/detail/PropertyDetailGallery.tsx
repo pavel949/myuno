@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '@/styles/premium-public.css';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 interface PropertyDetailGalleryProps { images: string[]; alt: string; onOpenLightbox: (startIndex: number) => void }

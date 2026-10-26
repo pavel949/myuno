@@ -169,6 +169,7 @@ async def main():
     if not ARGS.run_browser:
         raise SystemExit('Browser gate not executed. Pass --run-browser only in an authorized environment.')
     from playwright.async_api import async_playwright, expect, TimeoutError as PlaywrightTimeoutError
+    from search_browser_selection import select_search_browser
 
     results = RUN_RESULTS
     started = monotonic()
@@ -179,7 +180,8 @@ async def main():
     (OUTPUT / 'build-report.json').write_text(json.dumps(build_report, indent=2))
     expect.set_options(timeout=4000)
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        selection=select_search_browser(p.chromium.executable_path)
+        browser = await p.chromium.launch(executable_path=selection['executable_path'],headless=True,args=['--no-sandbox'])
         for surface in ['legacy', 'v2']:
             for lang, copy in COPY.items():
                 for width in WIDTHS:
