@@ -42,7 +42,7 @@ const cssServer = createServer((req, res) => {
   if (req.method !== 'GET') { res.writeHead(405); res.end(); return; }
   const file = req.url.split('?')[0];
   if (file === '/src/index.css') { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(cssByVariant.normal); }
-  else if (file === '/src/styles/cinematic-home.css') readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
+  else if (['/src/styles/cinematic-home.css','/src/styles/premium-public.css'].includes(file)) readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
   else { res.writeHead(404); res.end(); }
 });
 await new Promise(resolve => cssServer.listen(0, '127.0.0.1', resolve));
@@ -70,7 +70,7 @@ for (const role of ['public', 'pms', 'admin']) {
   const folder = path.join(output, role); await mkdir(folder, { recursive: true });
   await cp(path.join(output, 'probes.js'), path.join(folder, 'probes.js'));
   for (const variant of variants) {
-    const extra = role === 'public' ? await readFile(path.join(root, 'src/styles/cinematic-home.css'), 'utf8') : role === 'admin' ? workspaceCss : '';
+    const extra = role === 'public' ? (await Promise.all(['src/styles/cinematic-home.css','src/styles/premium-public.css'].map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
     await writeFile(path.join(folder, `${variant}.css`), cssByVariant[variant] + '\n' + extra);
   }
   await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');

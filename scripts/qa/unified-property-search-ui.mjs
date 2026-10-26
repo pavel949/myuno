@@ -57,7 +57,7 @@ const result = await build({
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|useManagementCompanies|usePropertyQuickFilters|usePropertyFilterOptions)\.ts$/.test(p))) throw Error('Production data module included');
 if(process.argv.includes('--compile-only')) { console.log('Network-isolated property search fixture compiled; production data modules excluded.'); process.exit(0); }
 await writeFile(path.join(output,'synthetic-property.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640"><rect width="640" height="640" fill="#cbd5d0"/><path d="M80 400V240L320 100L560 240V400Z" fill="#f7f5f1"/></svg>');
-const css = await Promise.all(['/src/index.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct'].map(async file => {
+const css = await Promise.all(['/src/index.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct','/src/styles/premium-public.css?direct'].map(async file => {
   const response=await fetch('http://localhost:8080'+file);
   if(!response.ok) throw Error('Preview CSS unavailable: '+file);
   return response.text();

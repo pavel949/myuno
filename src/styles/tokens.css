@@ -629,7 +629,8 @@ html:not([lang]) {
   --public-width-detail: 90rem;
   --public-width-reading: 46rem;
   --public-offer-width: 25rem;
-  --public-gutter: 1rem;
+  --public-gutter-base: 1rem;
+  --public-gutter: calc(var(--public-gutter-base) * var(--layout-inset-scale));
   --public-section-gap: 2.5rem;
   --public-detail-gap: 2rem;
   --public-card-gap: 1.25rem;
@@ -642,9 +643,9 @@ html:not([lang]) {
   --public-caption-size: .8125rem;
   --public-width-summary: 38rem;
 }
-@media(min-width:360px) { :root { --public-gutter: 1.25rem; } }
+@media(min-width:360px) { :root { --public-gutter-base: 1.25rem; } }
 @media(min-width:1024px) { :root {
-  --public-gutter: clamp(2rem,calc(6.667vw - 3rem),5rem);
+  --public-gutter-base: clamp(2rem,calc(6.667vw - 3rem),5rem);
   --public-section-gap: 5rem;
   --public-detail-gap: 3rem;
   --public-card-gap: 2rem;

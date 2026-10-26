@@ -24,3 +24,11 @@ Screenshots and JSON live in /workspace/myuno-ui-evidence/spec-first-*; test/bui
 Local Vite port8099 is a consumer-local preview, not an externally accessible published preview. No push, public PR or deployment was performed.
 
 Library delivery attempt for8representative PNGs stopped before preparation: `library upload failed: hosted apps tools/list request failed: network` (exit1). No Library IDs or mutation result were returned. No fallback or retry attempted; local files preserved.
+
+## PR #196 follow-up validation
+
+At a3c05b1fe3c56c53b4b050180295be40a7ba75db, verify CI passed all370files/4594tests (including isolated PostgreSQL),4Lighthouse-evidence tests, typecheck and lint. Local full run passed4133tests with203skips;7PostgreSQL suites could not initialize because this consumer lacks postgres/pg_config. Expanded browser CI exposed stale fixture assumptions around the new disclosure, preserved intent, homepage composition/hook and company association; corrections preserve network denial and behavioral assertions.
+
+Follow-up local browser results: homepage27cases (three locales/eight widths plus loading/error/empty), unified search8cases, browse8cases, complex12cases, canonical theme/rebrand114cases. Affected unit run42tests passed; build passed in2m25s with0new structural design findings. Public gutters now use the existing inset scale; normal pixels remain unchanged. Company association is labelled neutrally on complex surfaces too.
+
+Implemented scope is the shared public foundation and connected housing journey, plus discovery sections below existing signed-in tasks. Owner/developer/partner presentations and their workspace redesigns are not implemented by this PR. The full property content/composition beyond this milestone, real-data acceptance, transaction success, full SEO/CWV acceptance and selected-image comparison remain separate work. Current exact-head CI and review status are recorded in the draft PR; this note does not certify future heads.
