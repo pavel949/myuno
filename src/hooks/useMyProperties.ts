@@ -17,6 +17,9 @@ export type PropertyAccessRole = 'owner' | 'manager' | 'both';
 export interface UnifiedProperty {
   id: string;
   property_id: string;
+  /** Persisted company relation; undefined means metadata was not verified. */
+  management_company_id?: string | null;
+  checked_task_commands_enforced?: boolean;
   title: string;
   title_ru: string;
   cover_image: string | null;
@@ -53,7 +56,7 @@ function useCompanyProperties() {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, asset_class, deposit_currency, lat, lng, approval_status, deleted_at')
+        .select('id, management_company_id, checked_task_commands_enforced, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, asset_class, deposit_currency, lat, lng, approval_status, deleted_at')
         .eq('management_company_id', companyId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
@@ -88,6 +91,8 @@ export function useMyProperties() {
     return filtered.map(p => ({
         id: p.id,
         property_id: p.id,
+        management_company_id: p.management_company_id,
+        checked_task_commands_enforced: p.checked_task_commands_enforced,
         title: p.title_en || p.title || 'Untitled',
         title_ru: p.title_ru || p.title_en || p.title || 'Без названия',
         cover_image: p.cover_image || p.images?.[0] || null,
@@ -114,6 +119,8 @@ export function useMyProperties() {
     return managedRaw.map(p => ({
       id: p.id,
       property_id: p.property_id,
+      management_company_id: p.management_company_id,
+      checked_task_commands_enforced: p.checked_task_commands_enforced,
       title: p.title,
       title_ru: p.title_ru,
       cover_image: p.cover_image,
@@ -141,6 +148,8 @@ export function useMyProperties() {
     return companyRaw.map((p) => ({
       id: p.id,
       property_id: p.id,
+      management_company_id: p.management_company_id,
+      checked_task_commands_enforced: p.checked_task_commands_enforced,
       title: p.title_en || p.title || 'Untitled',
       title_ru: p.title_ru || p.title_en || p.title || 'Без названия',
       cover_image: p.cover_image || p.images?.[0] || null,

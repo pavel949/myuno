@@ -17,8 +17,8 @@ function transactionWords(sql: string) {
 }
 
 describe('employee activation source assembly, never database execution',()=>{
- it('pins every candidate to exact reviewed bytes and names the source commit',()=>{
-  expect(manifest.sourceCommit).toBe('0ea175ea1887c45cbff3f21b91d535ddd3020038');
+ it('pins every candidate to exact checkpoint bytes and names the source commit',()=>{
+  expect(manifest.sourceCommit).toBe('7e03ed765c121fc851f21bd3a1167ca696412db7');
   for(const entry of [...manifest.activation,...manifest.rollback] as Entry[]) {
    expect(createHash('sha256').update(readFileSync(resolve(repositoryRoot,entry.path))).digest('hex')).toBe(entry.sha256);
   }

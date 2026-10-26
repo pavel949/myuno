@@ -2,6 +2,19 @@ import { MANAGED_PROPERTY_DRAFT_FIELDS, MANAGED_PROPERTY_PRICING_FIELDS, MANAGED
 import { supabase } from '@/integrations/supabase/client';
 import { untypedRpc } from '@/lib/untypedTables';
 import type { OwnerProperty } from '@/types/property';
+import type { BoundCompanyAccessOperation } from '@/lib/companyAccessOperation';
+
+async function propertyRpc(name: string, args: Record<string, unknown>, operation?: BoundCompanyAccessOperation) {
+  operation?.assertCurrent();
+  const result = operation ? await operation.client.rpc(name, args) : await untypedRpc(name, args);
+  operation?.assertCurrent();
+  return result;
+}
+
+function assertCompany(companyId: string | undefined, operation?: BoundCompanyAccessOperation) {
+  operation?.assertCurrent();
+  if (operation && companyId && operation.companyId !== companyId) throw new Error('Property operation belongs to a different company');
+}
 
 /** A known inactive shell can be resumed; never create another record on retry. */
 export class PropertyDraftSaveError extends Error {
@@ -13,9 +26,19 @@ export class PropertyDraftSaveError extends Error {
 
 export interface PropertyCreationScope { companyId: string; spaces: Array<{ id: string; name_en: string; name_ru: string }> }
 
-export async function readPropertyCreationScope(companyId: string, signal: AbortSignal): Promise<PropertyCreationScope> {
+export async function resolveManagedPropertyCreation(operation: BoundCompanyAccessOperation, requestId: string, spaceId: string): Promise<OwnerProperty | null> {
+  assertCompany(operation.companyId, operation);
+  const { data, error } = await propertyRpc('resolve_managed_property_creation_checked', {
+    p_company_id: operation.companyId, p_operating_space_id: spaceId, p_request_id: requestId,
+  }, operation);
+  if (error) throw new Error(error.message);
+  return data === null ? null : managedDraftRow(data, undefined, operation.companyId);
+}
+
+export async function readPropertyCreationScope(companyId: string, signal: AbortSignal, operation?: BoundCompanyAccessOperation): Promise<PropertyCreationScope> {
+  assertCompany(companyId, operation);
   signal.throwIfAborted();
-  const { data, error } = await untypedRpc('list_managed_property_authoring_spaces_checked', { p_company_id: companyId });
+  const { data, error } = await propertyRpc('list_managed_property_authoring_spaces_checked', { p_company_id: companyId }, operation);
   signal.throwIfAborted();
   if (error) throw new Error(error.message);
   if (!Array.isArray(data) || data.some(row => !row || typeof row.id !== 'string' || typeof row.name_en !== 'string' || typeof row.name_ru !== 'string')) throw new Error('Property Operating Spaces could not be verified');
@@ -38,14 +61,16 @@ function managedDraftRow(data: unknown, propertyId?: string, companyId?: string)
   return Object.fromEntries(Object.entries(row).filter(([key]) => fields.has(key))) as unknown as OwnerProperty;
 }
 
-export async function readManagedPropertyDraft(propertyId: string, companyId?: string): Promise<OwnerProperty> {
-  const { data, error } = await untypedRpc('read_managed_property_draft_checked', { p_property_id: propertyId });
+export async function readManagedPropertyDraft(propertyId: string, companyId?: string, operation?: BoundCompanyAccessOperation): Promise<OwnerProperty> {
+  assertCompany(companyId, operation);
+  const { data, error } = await propertyRpc('read_managed_property_draft_checked', { p_property_id: propertyId }, operation);
   if (error) throw new Error(error.message);
-  return managedDraftRow(data, propertyId, companyId);
+  return managedDraftRow(data, propertyId, companyId ?? operation?.companyId);
 }
 
-export async function listManagedPropertyDrafts(companyId: string, offset = 0, limit = 50): Promise<OwnerProperty[]> {
-  const { data, error } = await untypedRpc('list_managed_property_drafts_checked', { p_company_id: companyId, p_limit: limit, p_offset: offset });
+export async function listManagedPropertyDrafts(companyId: string, offset = 0, limit = 50, operation?: BoundCompanyAccessOperation): Promise<OwnerProperty[]> {
+  assertCompany(companyId, operation);
+  const { data, error } = await propertyRpc('list_managed_property_drafts_checked', { p_company_id: companyId, p_limit: limit, p_offset: offset }, operation);
   if (error) throw new Error(error.message);
   if (!Array.isArray(data)) throw new Error('Draft list was not confirmed');
   return data.map(row => managedDraftRow(row, undefined, companyId));
@@ -53,13 +78,15 @@ export async function listManagedPropertyDrafts(companyId: string, offset = 0, l
 
 export async function saveManagedPropertyDraft(args: {
   propertyId: string; companyId: string; expectedUpdatedAt: string; patch: Record<string, unknown>; submit?: boolean;
+  operation?: BoundCompanyAccessOperation;
 }): Promise<OwnerProperty> {
-  const { data, error } = await untypedRpc('save_managed_property_draft_checked', {
+  assertCompany(args.companyId, args.operation);
+  const { data, error } = await propertyRpc('save_managed_property_draft_checked', {
     p_property_id: args.propertyId,
     p_expected_updated_at: args.expectedUpdatedAt,
     p_patch: propertyAuthoringPatch(args.patch),
     p_submit: args.submit === true,
-  });
+  }, args.operation);
   if (error) throw new Error(error.message);
   // Save returns its safe canonical projection in the same transaction. No
   // broad properties read or manager assignment is needed to edit content.
@@ -70,22 +97,36 @@ export async function saveManagedPropertyDraft(args: {
 
 export async function createManagedPropertyDraft(args: {
   companyId: string; operatingSpaceId?: string | null; patch: Record<string, unknown>;
+  requestId?: string | ((spaceId: string) => string | Promise<string>); operation?: BoundCompanyAccessOperation;
 }): Promise<OwnerProperty> {
+  assertCompany(args.companyId, args.operation);
+  if (args.requestId && !args.operation) throw new Error('Verified account operation required for retry-safe creation');
   // Revalidate at action time. Query cache and selected Space are never authority.
-  const scope = await readPropertyCreationScope(args.companyId, new AbortController().signal);
+  const scope = await readPropertyCreationScope(args.companyId, new AbortController().signal, args.operation);
   const spaceId = propertyCreationSpace(scope, args.operatingSpaceId);
-  const { data: propertyId, error } = await untypedRpc('create_managed_property_checked', {
+  if (args.requestId) {
+    const requestId = typeof args.requestId === 'function' ? await args.requestId(spaceId) : args.requestId;
+    const { data, error } = await propertyRpc('create_managed_property_idempotent_checked', {
+      p_company_id: args.companyId, p_operating_space_id: spaceId, p_request_id: requestId,
+      p_patch: propertyAuthoringPatch(args.patch),
+    }, args.operation);
+    if (error) throw new Error(error.message);
+    const result = managedDraftRow(data, undefined, args.companyId);
+    if (result.is_active || result.approval_status !== 'draft') throw new Error('Creation request already resolved to a noneditable property. Reopen it from the property list.');
+    return result;
+  }
+  const { data: propertyId, error } = await propertyRpc('create_managed_property_checked', {
     p_company_id: args.companyId, p_operating_space_id: spaceId,
     p_title_en: args.patch.title_en, p_title_ru: args.patch.title_ru,
     p_property_type: args.patch.property_type || 'apartment', p_listing_type: args.patch.listing_type || 'rent',
-  });
+  }, args.operation);
   if (error) throw new Error(error.message);
   if (typeof propertyId !== 'string' || !propertyId) throw new Error('Property creation was not confirmed. Check the property list before retrying.');
   let shellVersion: string | undefined;
   try {
-    const shell = await readManagedPropertyDraft(propertyId, args.companyId);
+    const shell = await readManagedPropertyDraft(propertyId, args.companyId, args.operation);
     shellVersion = shell.updated_at;
-    return await saveManagedPropertyDraft({ propertyId, companyId: args.companyId, expectedUpdatedAt: shell.updated_at, patch: args.patch });
+    return await saveManagedPropertyDraft({ propertyId, companyId: args.companyId, expectedUpdatedAt: shell.updated_at, patch: args.patch, operation: args.operation });
   } catch (error) {
     throw new PropertyDraftSaveError(propertyId, error, shellVersion);
   }

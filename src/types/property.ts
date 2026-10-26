@@ -47,6 +47,7 @@ export interface PropertyReference {
 export interface OwnerProperty extends BaseProperty {
   owner_id: string;
   management_company_id?: string | null;
+  checked_task_commands_enforced?: boolean;
   provider_id?: string;
   title_en?: string;
   title_ru?: string;

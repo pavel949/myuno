@@ -38,15 +38,22 @@ interface TaskDetailSheetProps {
   onOpenChange: (open: boolean) => void;
   members: { user_id: string; name: string }[];
   properties: { property_id: string; title: string }[];
-  onUpdate: (id: string, source: 'crm' | 'ops', updates: Record<string, any>) => void;
-  onDelete: (id: string, source: 'crm' | 'ops') => void;
+  onUpdate: (id: string, source: 'crm' | 'ops', updates: Record<string, any>) => void | Promise<void>;
+  onDelete: (id: string, source: 'crm' | 'ops') => void | Promise<void>;
 }
 
 const STATUS_OPTIONS = [
   { value: 'pending', labelEn: 'Pending', labelRu: 'Ожидает', icon: Clock, color: 'text-warning' },
   { value: 'in_progress', labelEn: 'In Progress', labelRu: 'В работе', icon: Play, color: 'text-info' },
   { value: 'completed', labelEn: 'Completed', labelRu: 'Выполнено', icon: CheckCircle2, color: 'text-success' },
+  { value: 'cancelled', labelEn: 'Cancelled', labelRu: 'Отменено', icon: Trash2, color: 'text-muted-foreground' },
 ];
+
+function opsScheduleValue(task: UnifiedTask): string {
+  const date = task.raw?.scheduled_date || task.due_date?.slice(0,10) || '';
+  const time = typeof task.raw?.scheduled_time === 'string' ? task.raw.scheduled_time.slice(0,5) : '';
+  return date && time ? `${date}T${time}` : date;
+}
 
 export function TaskDetailSheet({ task, open, onOpenChange, members, properties, onUpdate, onDelete }: TaskDetailSheetProps) {
   const { language } = useLanguage();
@@ -63,6 +70,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
   const [dueDate, setDueDate] = useState('');
   const [actualCost, setActualCost] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [saving,setSaving]=useState(false);
 
   useEffect(() => {
     if (task) {
@@ -71,14 +79,15 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       setStatus(task.status);
       setPriority(task.priority);
       setAssignedTo(task.assigned_to || 'none');
-      setDueDate(task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
+      setDueDate(task.source === 'ops' ? opsScheduleValue(task) : task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
       setActualCost(String(task.raw?.actual_cost ?? ''));
     }
   }, [task]);
 
   if (!task) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if(saving)return;
     const updates: Record<string, any> = { title, priority };
     const prevAssignee = task.assigned_to;
     const willBeCompleted = isTaskCompletedStatus(status);
@@ -94,9 +103,12 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
     } else {
       updates.status = status;
       updates.notes = description || null;
-      if (dueDate) {
-        updates.scheduled_date = format(new Date(dueDate), 'yyyy-MM-dd');
-        updates.scheduled_time = format(new Date(dueDate), 'HH:mm');
+      const original = opsScheduleValue(task);
+      if (dueDate && dueDate !== original) {
+        const [date,time = ''] = dueDate.split('T');
+        const [originalDate,originalTime = ''] = original.split('T');
+        if (date !== originalDate) updates.scheduled_date = date;
+        if (time !== originalTime) updates.scheduled_time = time || null;
       }
       if (willBeCompleted) {
         updates.completed_at = existingCompletedAt || new Date().toISOString();
@@ -109,14 +121,16 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
     }
     updates.assigned_to = assignedTo !== 'none' ? assignedTo : null;
 
-    // Notify if assignee changed
-    if (assignedTo !== 'none' && assignedTo !== prevAssignee && assignedTo !== user?.id) {
-      notifyAssignment({ assigneeId: assignedTo, taskTitle: title, taskId: task.id, taskSource: task.source, propertyId: task.property_id });
-    }
-
-    onUpdate(task.id, task.source, updates);
-    onOpenChange(false);
-    toast.success(t('Task updated', 'Задача обновлена'));
+    setSaving(true);
+    try {
+      await onUpdate(task.id, task.source, updates);
+      if (task.source==='crm'&&assignedTo !== 'none' && assignedTo !== prevAssignee && assignedTo !== user?.id) {
+        notifyAssignment({ assigneeId: assignedTo, taskTitle: title, taskId: task.id, taskSource: task.source, propertyId: task.property_id });
+      }
+      onOpenChange(false);
+      toast.success(t('Task updated', 'Задача обновлена'));
+    }catch(error){toast.error(error instanceof Error?error.message:t('Task was not saved','Задача не сохранена'));}
+    finally{setSaving(false);}
   };
 
   const handleRequestStatus = async () => {
@@ -136,11 +150,13 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
     toast.success(t('Status request sent', 'Запрос статуса отправлен'));
   };
 
-  const handleDelete = () => {
-    onDelete(task.id, task.source);
-    setConfirmDelete(false);
-    onOpenChange(false);
-    toast.success(t('Task deleted', 'Задача удалена'));
+  const handleDelete = async () => {
+    if(saving)return;setSaving(true);
+    try {
+      await onDelete(task.id, task.source);
+      setConfirmDelete(false);onOpenChange(false);toast.success(t('Task deleted', 'Задача удалена'));
+    }catch(error){toast.error(error instanceof Error?error.message:t('Task was not deleted','Задача не удалена'));}
+    finally{setSaving(false);}
   };
 
   const memberName = members.find(m => m.user_id === task.assigned_to)?.name;
@@ -148,10 +164,10 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
 
   const footer = (
     <div className="flex gap-2 w-full">
-      <Button onClick={handleSave} className="flex-1">
+      <Button onClick={handleSave} disabled={saving} className="flex-1">
         {t('Save', 'Сохранить')}
       </Button>
-      <Button variant="destructive" size="icon" aria-label={t('Delete', 'Удалить')} onClick={() => setConfirmDelete(true)}>
+      <Button variant="destructive" size="icon" disabled={saving} aria-label={t('Delete', 'Удалить')} onClick={() => setConfirmDelete(true)}>
         <Trash2 className="h-4 w-4" />
       </Button>
     </div>
@@ -256,6 +272,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
               value={dueDate}
               onChange={setDueDate}
               allowClear={task.source === 'crm'}
+              allowDateOnly={task.source === 'ops'}
             />
 
             {/* Cost (ops tasks only) */}

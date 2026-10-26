@@ -7,6 +7,8 @@ vi.mock('@/lib/propertyAuthoring', async original => ({ ...(await original<typeo
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'employee-a' } }) }));
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: { company_id: 'company-a' }, isLoading: false, error: mocks.companyError }) }));
 vi.mock('@/hooks/useIsAdmin', () => ({ useIsAdmin: () => ({ isAdmin: false, isLoading: false }) }));
+vi.mock('@/hooks/useCompanyAccessLifetime', () => ({ useCompanyAccessLifetime: () => ({ begin: () => ({ assertCurrent: vi.fn(), finish: vi.fn() }) }) }));
+vi.mock('@/lib/companyAccessOperation', () => ({ bindCompanyAccessOperation: vi.fn(async () => ({ assertCurrent: vi.fn() })) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from, functions: { invoke: mocks.notify } } }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 const safe = { id: 'property-a', management_company_id: 'company-a', updated_at: 'version-2', approval_status: 'draft', is_active: false };
@@ -29,7 +31,7 @@ describe('managed authoring mutations', () => {
   it('uses only safe reads and checked save for an employee, stripping authority fields', async () => {
     const { result } = renderHook(useUpdateOwnerProperty, { wrapper });
     await act(async () => { await result.current.mutateAsync({ id: 'property-a', title: 'Edit', _authoring: true, _expectedUpdatedAt: 'version-1', _silent: true, owner_id: 'employee-a', is_active: true }); });
-    expect(mocks.save).toHaveBeenCalledWith({ propertyId: 'property-a', companyId: 'company-a', expectedUpdatedAt: 'version-1', patch: { title: 'Edit' }, submit: undefined });
+    expect(mocks.save).toHaveBeenCalledWith({ propertyId: 'property-a', companyId: 'company-a', expectedUpdatedAt: 'version-1', patch: { title: 'Edit' }, submit: undefined, operation: expect.anything() });
     expect(mocks.from).not.toHaveBeenCalled();
   });
   it('never falls back to a direct update if the checked workflow is unavailable', async () => {

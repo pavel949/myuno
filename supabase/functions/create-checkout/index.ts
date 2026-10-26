@@ -66,6 +66,15 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
        );
      }
 
+     // Unpaid request-only property commands have no activated payment path.
+     // Verify the trusted cohort before constructing Stripe or creating a customer.
+     const { data: checkoutAllowed, error: checkoutGateError } = await serviceClient.rpc(
+       'property_checkout_allowed_checked', { p_order_id: order_id }
+     );
+     if (checkoutGateError || checkoutAllowed !== true) {
+       throw new Error('Property checkout is unavailable pending payment activation');
+     }
+
      const amount = Number(order.total_amount);
      if (!Number.isFinite(amount) || amount <= 0) {
        throw new Error("Order has no valid amount to charge");

@@ -27,7 +27,8 @@ import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
 import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
-import { useOrders } from '@/hooks/useOrders';
+import { reserveProperty } from '@/lib/propertyReservation';
+import { bindPropertyReservationReader } from '@/lib/propertyReservationReceipt';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
@@ -49,7 +50,6 @@ export default function PropertyInquiry() {
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
   const isRu = language === 'ru';
-  const { createOrder } = useOrders();
 
   // Draft persistence — survives the AuthSheet round-trip (including OAuth
   // full-page redirects) so guests never lose contact info / message after
@@ -115,8 +115,8 @@ export default function PropertyInquiry() {
   const checkOutParam = searchParams.get('checkOut');
   const guestsParam = searchParams.get('guests');
 
-  const checkIn = checkInParam ? parseISO(checkInParam) : null;
-  const checkOut = checkOutParam ? parseISO(checkOutParam) : null;
+  const checkIn = useMemo(() => checkInParam ? parseISO(checkInParam) : null, [checkInParam]);
+  const checkOut = useMemo(() => checkOutParam ? parseISO(checkOutParam) : null, [checkOutParam]);
   const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
 
   const hasDates = checkIn && checkOut;
@@ -154,8 +154,17 @@ export default function PropertyInquiry() {
   });
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
+  const requestContext = useMemo(() => ({ actor: user?.id, property: id, checkInParam, checkOutParam, guestsParam,
+    name: formData.name, email: formData.email, phone: formData.phone, message: formData.message }),
+    [user?.id, id, checkInParam, checkOutParam, guestsParam, formData.name, formData.email, formData.phone, formData.message]);
+  const currentRequestContext = useRef(requestContext);
+  currentRequestContext.current = requestContext;
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const [submittingContext, setSubmittingContext] = useState<typeof requestContext | null>(null);
+  const isSubmitting = submittingContext === requestContext;
+  const [submitted, setSubmitted] = useState<{ context: typeof requestContext; orderId: string } | null>(null);
+  const [requestFailure, setRequestFailure] = useState<{ context: typeof requestContext; message: string } | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
   // Default 'split' preserves the legacy behavior (charge prepay only).
@@ -172,7 +181,7 @@ export default function PropertyInquiry() {
         rentalExt?.currency?.trim?.() ||
         currentCity?.default_currency ||
         'USD') as string,
-    [property, rentalTerms, currentCity?.default_currency],
+    [propertyExt?.currency, rentalExt?.currency, currentCity?.default_currency],
   );
 
   const { data: isRareFind } = useRareFindBadge(id);
@@ -323,7 +332,10 @@ export default function PropertyInquiry() {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
     return calculatePricing({ ...baseRules, dateOverrides }, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency, dateOverrides]);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, propertyExt?.seasonal_pricing,
+    rentalExt?.custom_length_discounts, rentalExt?.early_booking_days, rentalExt?.early_booking_discount,
+    rentalExt?.last_minute_days, rentalExt?.last_minute_discount, rentalExt?.payment_policy,
+    rentalExt?.prepay_percent, listingCurrency, dateOverrides]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = getStayRuleErrors(
@@ -351,9 +363,9 @@ export default function PropertyInquiry() {
     strict: { en: 'Non-refundable after booking', ru: 'Невозвратная после бронирования' },
   };
 
-  // Show confirmation screen after a successful viewing request submission.
-  if (submittedOrderId) {
-    return <InquiryConfirmation orderId={submittedOrderId} />;
+  // Show a receipt link only after a complete canonical reservation acknowledgment.
+  if (submitted?.context === requestContext) {
+    return <InquiryConfirmation orderId={submitted.orderId} propertyReservation />;
   }
 
   // If no dates, prompt the user to go back
@@ -379,6 +391,9 @@ export default function PropertyInquiry() {
 
   return (
     <div className="public-commerce public-commerce--inquiry pb-28">
+        {requestFailure?.context === requestContext && <div role="alert" className="border border-destructive/30 bg-destructive/5 p-4 text-sm">
+          {requestFailure.message}
+        </div>}
         {/* Sticky Header */}
         <div className="public-commerce-form-header bg-background border-b">
           <div className="flex items-center gap-4 p-4">
@@ -584,8 +599,8 @@ export default function PropertyInquiry() {
               <div className="p-3 rounded-none bg-muted/50 border">
                 <p className="text-sm text-muted-foreground">
                   {isRu
-                    ? 'Оплата не списывается сейчас. Хозяин рассмотрит ваш запрос в течение 24 часов.'
-                    : "You won't be charged yet. The host will review your request within 24 hours."}
+                    ? 'Запрос не оплачен. Управляющий проверит оценку стоимости и подтвердит бронирование.'
+                    : 'This request is unpaid. The manager verifies the estimated price and confirms the reservation.'}
                 </p>
               </div>
             )}
@@ -820,6 +835,12 @@ export default function PropertyInquiry() {
               disabled={isSubmitting}
               onClick={async () => {
                 if (isSubmitting) return;
+                const attempt = requestContext;
+                setRequestFailure(null);
+                const assertCurrent = () => {
+                  if (!mounted.current || currentRequestContext.current !== attempt) throw new Error('Account or request changed');
+                };
+                const isCurrent = () => mounted.current && currentRequestContext.current === attempt;
 
                 // Strict e-mail validation: confirmations and voucher emails are
                 // sent to this address, so a typo means a silently lost booking.
@@ -846,143 +867,45 @@ export default function PropertyInquiry() {
                     paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return;
                   }
-                  setIsSubmitting(true);
+                  setSubmittingContext(attempt);
                   try {
                     await depositPaymentRef.current.submit();
                   } finally {
-                    setIsSubmitting(false);
+                    if (isCurrent()) setSubmittingContext(null);
                   }
                   return;
                 }
 
-                // === REQUEST BOOKING PATH ===
-                setIsSubmitting(true);
+                // The registered PR160 command commits order, participant,
+                // property item and exact inventory hold in one transaction.
+                // Missing/unactivated RPCs fail closed; no inquiry/raw-order fallback.
+                setSubmittingContext(attempt);
                 try {
-                  // 0. Atomic availability check — prevents race conditions
-                  // when multiple guests try to book the same dates simultaneously.
-                  const { data: isAvailable, error: availErr } = await supabase.rpc(
-                    'check_property_dates_available',
-                    {
-                      p_property_id: id!,
-                      p_check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      p_check_out: format(checkOut!, 'yyyy-MM-dd'),
-                    },
-                  );
-                  if (availErr) {
-                    console.error('[PropertyInquiry] availability check error:', availErr);
-                    toast.error(
-                      isRu
-                        ? 'Не удалось проверить доступность дат. Попробуйте ещё раз.'
-                        : 'Could not verify date availability. Please try again.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-                  if (isAvailable === false) {
-                    toast.error(
-                      isRu
-                        ? 'Эти даты только что были забронированы. Выберите другие.'
-                        : 'These dates were just booked. Please pick different dates.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 1. Save to property_inquiries for owner dashboard visibility
-                  const { error: inquiryError } = await supabase
-                    .from('property_inquiries')
-                    .insert({
-                      property_id: id!,
-                      user_id: user!.id,
-                      check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      check_out: format(checkOut!, 'yyyy-MM-dd'),
-                      guests,
-                      name: formData.name,
-                      email: formData.email || null,
-                      phone: formData.phone || null,
-                      message: formData.message || null,
-                      status: 'pending',
-                    });
-                  if (inquiryError) {
-                    console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
-                    toast.error(
-                      isRu
-                        ? `Не удалось сохранить запрос: ${inquiryError.message}`
-                        : `Failed to save inquiry: ${inquiryError.message}`,
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 2. Create order for booking tracking
-                  const result = await createOrder({
-                    order_type: 'property',
-                    provider_org_id: propertyExt?.provider_id || undefined,
-                    start_at: checkIn!,
-                    end_at: checkOut!,
+                  const client = await bindPropertyReservationReader(user!.id, assertCurrent);
+                  const result = await reserveProperty(client, user!.id, {
+                    property_id: id!,
+                    check_in: format(checkIn!, 'yyyy-MM-dd'),
+                    check_out: format(checkOut!, 'yyyy-MM-dd'),
+                    guests_count: guests,
+                    guest_name: formData.name,
+                    guest_phone: formData.phone || undefined,
+                    guest_email: formData.email || undefined,
+                    notes: formData.message || undefined,
                     total_amount: pricing.total,
                     currency: listingCurrency,
-                    notes: formData.message || undefined,
-                    metadata: {
-                      property_id: id,
-                      property_title: propertyTitle,
-                      guests,
-                      nights,
-                      price_per_night: pricePerNight,
-                      // Bug #4 fix: this field is the *security* deposit
-                      // (refundable on checkout), NOT the prepayment.
-                      // Renaming it stops it being confused in finance reports.
-                      security_deposit_amount: rentalTerms?.deposit_amount || 0,
-                      discount_percent: pricing.lengthDiscountPercent,
-                      length_discount: pricing.lengthDiscount,
-                      early_bird_discount: pricing.earlyBirdDiscount,
-                      last_minute_discount: pricing.lastMinuteDiscount,
-                      seasonal_adjustment: pricing.seasonalAdjustment,
-                      prepay_amount: pricing.prepayAmount,
-                      prepay_percent: pricing.prepayPercent,
-                      booking_mode: 'request',
-                      ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
-                      ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
-                    },
-                    items: [{
-                      item_name: propertyTitle || 'Property booking',
-                      item_type: 'property_rental',
-                      qty: nights,
-                      unit_price: pricePerNight,
-                      amount: pricing.total,
-                      start_at: checkIn!,
-                      end_at: checkOut!,
-                      metadata: { source_id: id },
-                    }],
-                    participants: [{
-                      role: 'primary',
-                      name: formData.name,
-                      phone: formData.phone,
-                      email: formData.email || undefined,
-                    }],
-                    serviceName: propertyTitle || 'Property',
                   });
-                  if (result.success && result.order_id) {
-                    if (draftKey) {
-                      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
-                    }
-                    toast.success(isRu
-                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
-                      : "Request sent! We'll WhatsApp you within 24 hours.");
-                    setSubmittedOrderId(result.order_id);
-                  } else {
-                    // Bug #3 fix: surface failures from createOrder so the user
-                    // is never left staring at a silent footer.
-                    toast.error(
-                      isRu
-                        ? 'Не удалось создать запрос на бронирование. Попробуйте ещё раз.'
-                        : 'Could not create the booking request. Please try again.',
-                    );
+                  assertCurrent();
+                  if (draftKey) {
+                    try { localStorage.removeItem(draftKey); } catch { /* Retain committed status even if local cleanup fails. */ }
                   }
-                } catch (err) {
-                  // Error toast is handled by useOrders
+                  toast.success(isRu ? 'Бронирование сохранено. Проверьте его актуальный статус.' : 'Reservation saved. Check its current status.');
+                  setSubmitted({ context: attempt, orderId: result.order.id });
+                } catch {
+                  if (isCurrent()) setRequestFailure({ context: attempt, message: isRu
+                    ? 'Сохранение не подтверждено. Повторите запрос: его идентификатор сохранён.'
+                    : 'Save not confirmed. Retry the request: its identity has been retained.' });
                 } finally {
-                  setIsSubmitting(false);
+                  if (isCurrent()) setSubmittingContext(null);
                 }
               }}
             >
@@ -1005,8 +928,8 @@ export default function PropertyInquiry() {
                       ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
                       : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
                 : (isRu
-                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
-                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
+                    ? 'Оплата не списывается. Подтверждение управляющего смотрите в сохранённом статусе.'
+                    : 'No payment is collected. Check the saved status for manager confirmation.')}
             </p>
           </div>
         )}

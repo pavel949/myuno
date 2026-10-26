@@ -93,9 +93,9 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
   const [detailBooking, setDetailBooking] = useState<PropertyBooking | null>(null);
   const [detailTask, setDetailTask] = useState<OperationalTask | null>(null);
 
-  const { bookingsByProperty, isLoading: bookingsLoading } = useMultiPropertyBookings(startDate, DAYS_TO_SHOW);
+  const { bookingsByProperty, isLoading: bookingsLoading, error: bookingsError, refetch: retryBookings } = useMultiPropertyBookings(startDate, DAYS_TO_SHOW);
 
-  const { tasks, completeTask, updateTaskStatus } = useOperationalTasks({
+  const { tasks, completeTask, updateTaskStatus, isLoading: tasksLoading, error: tasksError, refetch: retryTasks } = useOperationalTasks({
     dateRange: { from: startDate, to: addDays(startDate, DAYS_TO_SHOW) },
   });
 
@@ -211,11 +211,17 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     return p ? (isRu ? p.title_ru : p.title) : '';
   };
 
-  const isLoadingAll = propsLoading || bookingsLoading;
+  const isLoadingAll = propsLoading || bookingsLoading || tasksLoading;
 
-  if (isLoadingAll && properties.length === 0) {
+  if (bookingsError || tasksError) return <div role="alert" className="space-y-3 py-5">
+    <p>{isRu ? 'Не удалось проверить бронирования и задания календаря. Занятость неизвестна.' : 'Calendar bookings and tasks could not be verified. Availability is unknown.'}</p>
+    <Button variant="outline" onClick={() => { void retryBookings(); void retryTasks(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </div>;
+
+  if (isLoadingAll) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2" role="status">
+        <p>{isRu ? 'Проверяем бронирования и задания. Занятость пока неизвестна.' : 'Checking bookings and tasks. Availability is not verified yet.'}</p>
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-40 w-full" />
       </div>

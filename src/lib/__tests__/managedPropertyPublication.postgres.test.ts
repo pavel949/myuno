@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import postgres from 'postgres';
 import { applyTransactionScript } from '../../test/applyTransactionScript';
 import { MANAGED_PROPERTY_DRAFT_FIELDS } from '../managedPropertyDraftFields';
+import { installManagedAuthoringTriggerFixture } from '../../test/managedAuthoringTriggerFixture';
 
 // Never accepts a DATABASE_URL or hosted credentials. Own Unix-socket-only cluster.
 const lookup = spawnSync('which', ['postgres'], { encoding: 'utf8' });
@@ -186,7 +187,7 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
    CREATE POLICY existing_space_update ON properties AS RESTRICTIVE FOR UPDATE TO authenticated USING(actor_private_property_ceiling(id)) WITH CHECK(actor_private_property_ceiling(id));
   `);
   await sql`INSERT INTO auth.users ${sql(Object.values(U).map(id=>({id})))}`;
-  await sql`INSERT INTO management_companies VALUES (${C},true),(${OTHER},true)`;
+  await sql`INSERT INTO management_companies(id,operating_spaces_enforced) VALUES (${C},true),(${OTHER},true)`;
   await sql`INSERT INTO operating_spaces(id,management_company_id,is_active) VALUES (${SPACE},${C},true),(${OTHER_SPACE},${OTHER},true),(${DEAD_SPACE},${C},false),(${UNAUTHORIZED_SPACE},${C},true)`;
   await sql`INSERT INTO user_roles VALUES (${U.admin},'admin'),(${U.team},'uno_team')`;
   for (const [i, user] of [U.editor,U.viewer,U.staff,U.unassignedStaff,U.inactive].entries()) {
@@ -217,6 +218,13 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   expect(await sql`SELECT approval_status,is_active FROM properties WHERE id IN (${legacy},${linked})`).toEqual([
    {approval_status:'draft',is_active:false},{approval_status:'draft',is_active:false},
   ]);
+  // Capture only this owned synthetic database, before any authoring candidate.
+  // The cumulative acceptance below installs the exact generated transaction.
+  await sql.end();
+  const snapshotConnection=postgres({host:directory,port:55447,database:'template1',username:owner,password:'',max:1,onnotice:()=>{}});
+  try { await snapshotConnection.unsafe('CREATE DATABASE mc_authoring_baseline TEMPLATE postgres'); }
+  finally { await snapshotConnection.end(); }
+  sql=postgres({host:directory,port:55447,database:'postgres',username:owner,password:'',max:4,onnotice:()=>{}});
   await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/checked-publication.candidate.sql','utf8'));
   const permissions='supabase/migrations/20260226072628_e0c74d35-4281-4aad-b700-f89f10dc00ca.sql';
   await sql.unsafe(sourceFunction(permissions,'is_mc_admin'));
@@ -265,6 +273,18 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   expect(p).toEqual({approval_status:'draft',is_active:false,owner_id:null,provider_id:null,management_company_id:C,instant_booking:false});
   expect(await sql`SELECT property_id FROM operating_space_properties WHERE property_id=${key}`).toHaveLength(1);
   expect(await save(U.editor,key,{title_en:'Saved by editor'})).toMatchObject({id:key,approval_status:'draft',is_active:false});
+ });
+ it('blocks inactive-company creation, Space selection, read and save without changing existing rows', async () => {
+  const key=await create(U.editor);
+  const before=await version(key);
+  await sql`UPDATE management_companies SET is_active=false WHERE id=${C}`;
+  try {
+   await expect(create(U.editor)).rejects.toThrow(/active company/);
+   await expect(read(U.editor,key)).rejects.toThrow(/permission|unavailable/);
+   await expect(save(U.editor,key,{title_en:'Inactive company write'})).rejects.toThrow(/permission|unavailable/);
+   await expect(as(U.editor,tx=>tx`SELECT list_managed_property_authoring_spaces_checked(${C})`)).rejects.toThrow(/permission|authority/);
+   expect(await version(key)).toBe(before);
+  } finally { await sql`UPDATE management_companies SET is_active=true WHERE id=${C}`; }
  });
  it('does not let a content-only creator choose an alternate booking mode through RPC inputs', async () => {
   for(const actor of [U.editor,U.staff]) await expect(as(actor,tx=>tx`SELECT create_managed_property_checked(${C},${SPACE},'Sale','Продажа','villa','sale')`)).rejects.toThrow(/bookings edit/);
@@ -868,6 +888,167 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
    expect(await as(actor,tx=>tx`DELETE FROM inventory_inspections WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
   }
  });
+ it('runs the atomic activation through complex, linked property, publication and scoped task completion', async () => {
+  await sql.unsafe('CREATE DATABASE mc_authoring_acceptance TEMPLATE mc_authoring_baseline');
+  const originalConnection=sql;
+  sql=postgres({host:directory,port:55447,database:'mc_authoring_acceptance',username:owner,password:'',max:4,onnotice:()=>{}});
+  try {
+   await sql.unsafe(`ALTER TABLE operating_spaces ADD CONSTRAINT acceptance_space_company UNIQUE(id,management_company_id);
+    ALTER TABLE property_complexes ALTER COLUMN id SET DEFAULT gen_random_uuid();
+    ALTER TABLE property_complexes ADD COLUMN owner_id uuid NOT NULL,
+     ADD COLUMN name text NOT NULL, ADD COLUMN name_ru text, ADD COLUMN description text,
+     ADD COLUMN address text, ADD COLUMN district text,
+     ADD COLUMN created_at timestamptz NOT NULL DEFAULT now(), ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now();
+    ALTER TABLE property_complexes ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Users can manage their own complexes" ON property_complexes FOR ALL
+     USING(owner_id=auth.uid()) WITH CHECK(owner_id=auth.uid());`);
+   await sql.unsafe(sourceFunction('supabase/migrations/20260301041138_01d64126-8e9b-4697-b0ab-8fc63be23b55.sql','get_user_company_ids'));
+   await sql.unsafe(sourceFunction('supabase/migrations/20260122131140_1d3722d7-58fb-43f6-a0f9-78e4ac1627b5.sql','is_admin_or_uno_team'));
+   await sql.unsafe(readFileSync('supabase/migrations/20260301042106_75283ce4-2357-49a7-aa57-9d945920f03d.sql','utf8'));
+   await sql.unsafe(readFileSync('supabase/migrations/20260301232547_12c29261-0b7e-48e2-a48f-6b11e87ebf8e.sql','utf8'));
+   await sql.unsafe(`CREATE TABLE admin_audit_logs(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),admin_id uuid NOT NULL,
+    action text NOT NULL,entity_type text,entity_id text,old_data jsonb,new_data jsonb,created_at timestamptz DEFAULT now());
+    ALTER TABLE admin_audit_logs ENABLE ROW LEVEL SECURITY;
+    GRANT SELECT,INSERT,UPDATE,DELETE ON admin_audit_logs TO authenticated;
+    CREATE POLICY audit_logs_admin_only ON admin_audit_logs FOR ALL TO authenticated
+     USING(actor_has_platform_admin()) WITH CHECK(actor_has_platform_admin());
+    GRANT SELECT,INSERT,UPDATE,DELETE ON property_complexes TO authenticated;
+    GRANT SELECT ON property_complexes TO anon;
+    ALTER TABLE property_operational_tasks ALTER COLUMN property_id SET NOT NULL,
+     ADD COLUMN booking_id uuid, ADD COLUMN title text NOT NULL, ADD COLUMN title_ru text,
+     ADD COLUMN description text, ADD COLUMN task_type text NOT NULL,
+     ADD COLUMN scheduled_date date NOT NULL, ADD COLUMN scheduled_time time,
+     ADD COLUMN priority text DEFAULT 'normal', ADD COLUMN status text DEFAULT 'pending',
+     ADD COLUMN completed_at timestamptz, ADD COLUMN completed_by uuid, ADD COLUMN notes text,
+     ADD COLUMN created_at timestamptz DEFAULT now(), ADD COLUMN updated_at timestamptz DEFAULT now(),
+     ADD COLUMN photo_proof text[] DEFAULT '{}', ADD COLUMN estimated_cost numeric DEFAULT 0,
+     ADD COLUMN actual_cost numeric DEFAULT 0, ADD COLUMN cost_currency text DEFAULT 'THB',
+     ADD COLUMN expense_created boolean DEFAULT false,
+     ADD CONSTRAINT acceptance_task_property FOREIGN KEY(property_id) REFERENCES properties(id) ON DELETE CASCADE;
+    -- Match the live task permissive inventory: only mc_members_manage_tasks.
+    ALTER POLICY owners_and_mc_manage_operational_tasks ON property_operational_tasks USING(false) WITH CHECK(false);`);
+   await sql.unsafe(sourceFunction('supabase/migrations/20260225003935_ed23eb67-167a-469c-b3d1-46d0cf429134.sql','log_task_activity'));
+   await sql.unsafe('CREATE TRIGGER acceptance_task_audit AFTER INSERT OR UPDATE ON property_operational_tasks FOR EACH ROW EXECUTE FUNCTION log_task_activity()');
+   await installManagedAuthoringTriggerFixture(sql);
+   // Read-only metadata confirmed this automatically updatable live view has
+   // legacy DML grants. Reproduce only in the owned synthetic database.
+   await sql.unsafe('GRANT INSERT,UPDATE,DELETE ON public_property_catalog TO anon,authenticated');
+   const publicKey=await property({approval_status:'approved',is_active:true});
+   expect(await as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Pre-activation catalogue writer' WHERE id=${publicKey} RETURNING id`)).toHaveLength(1);
+   const forward=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation());"],{encoding:'utf8'});
+   const failure=forward.replace(/COMMIT;\s*$/, () => "DO $$ BEGIN RAISE EXCEPTION 'acceptance forced activation failure'; END $$;\nCOMMIT;");
+   await expect(applyTransactionScript(sql,failure)).rejects.toThrow(/forced activation failure/);
+   expect((await sql`SELECT to_regprocedure('public.create_managed_complex_checked(uuid,uuid,jsonb,boolean)') name`)[0].name).toBeNull();
+   expect(await sql`SELECT column_name FROM information_schema.columns WHERE table_name='properties' AND column_name='content_author_user_id'`).toEqual([]);
+   await applyTransactionScript(sql,forward);
+   await expect(as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Forbidden' WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
+   await expect(as(U.editor,tx=>tx`DELETE FROM public_property_catalog WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
+   const createPropertyOnce=(actor:string,request:string,patch:Record<string,postgres.JSONValue>)=>as(actor,async tx=>(await tx`SELECT create_managed_property_idempotent_checked(${C},${SPACE},${request},${tx.json(patch)}) row`)[0].row);
+   const createComplexOnce=(request:string,patch:Record<string,postgres.JSONValue>)=>as(U.editor,async tx=>(await tx`SELECT create_managed_complex_idempotent_checked(${C},${SPACE},${request},${tx.json(patch)},false) row`)[0].row);
+   const request=id(80001),requestComplex=id(80002),invalidRequest=id(80003);
+   const initialPatch={title_en:'Retry-safe physical property',title_ru:'Повторяемый запрос',property_type:'apartment'};
+   const repeated=await Promise.all(Array.from({length:4},()=>createPropertyOnce(U.editor,request,initialPatch)));
+   expect(new Set(repeated.map(row=>row.id)).size).toBe(1);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE authoring_create_key=${request}`)[0].n).toBe(1);
+   expect(repeated[0]).not.toHaveProperty('authoring_create_key');
+   await expect(createPropertyOnce(U.editor,request,{...initialPatch,title_en:'Changed retry payload'})).rejects.toThrow(/different property input/);
+   await expect(createPropertyOnce(U.editor,invalidRequest,{...initialPatch,owner_id:U.editor})).rejects.toThrow(/unsupported/);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE authoring_create_key=${invalidRequest}`)[0].n).toBe(0);
+   await sql`UPDATE management_company_members SET is_active=false WHERE user_id=${U.editor}`;
+   await expect(createPropertyOnce(U.editor,request,initialPatch)).rejects.toThrow(/permission|unavailable/);
+   await sql`UPDATE management_company_members SET is_active=true WHERE user_id=${U.editor}`;
+   await expect(as(U.admin,tx=>tx`UPDATE properties SET authoring_create_key=${id(80004)} WHERE id=${repeated[0].id}`)).rejects.toThrow(/retry identity/);
+   const repeatedComplex=await Promise.all(Array.from({length:4},()=>createComplexOnce(requestComplex,{name:'Retry-safe complex'})));
+   expect(new Set(repeatedComplex.map(row=>row.id)).size).toBe(1);
+   expect((await sql`SELECT count(*)::int n FROM property_complexes WHERE authoring_create_key=${requestComplex}`)[0].n).toBe(1);
+   await expect(createComplexOnce(requestComplex,{name:'Changed complex request'})).rejects.toThrow(/different complex input/);
+   const resolveProperty=(actor:string,requestId:string)=>as(actor,async tx=>(await tx`SELECT resolve_managed_property_creation_checked(${C},${SPACE},${requestId}) row`)[0].row);
+   const resolveComplex=(actor:string,requestId:string)=>as(actor,async tx=>(await tx`SELECT resolve_managed_complex_creation_checked(${C},${SPACE},${requestId}) row`)[0].row);
+   expect((await resolveProperty(U.editor,request)).id).toBe(repeated[0].id);
+   expect((await resolveComplex(U.editor,requestComplex)).id).toBe(repeatedComplex[0].id);
+   expect(await resolveProperty(U.editor,id(80100))).toBeNull();
+   expect(await resolveComplex(U.editor,id(80100))).toBeNull();
+   // A known request key cannot resolve another creator's object, even for an
+   // independently authorized same-Space content author.
+   expect(await resolveProperty(U.staff,request)).toBeNull();
+   expect(await resolveComplex(U.staff,requestComplex)).toBeNull();
+   await expect(resolveProperty(U.outsider,request)).rejects.toThrow(/authority|permission/);
+   await expect(resolveComplex(U.outsider,requestComplex)).rejects.toThrow(/authority|permission/);
+   const countBeforeInvalid=(await sql`SELECT count(*)::int n FROM properties`)[0].n;
+   await expect(createPropertyOnce(U.editor,id(80005),{...initialPatch,owner_id:U.editor})).rejects.toThrow(/unsupported/);
+   expect((await sql`SELECT count(*)::int n FROM properties`)[0].n).toBe(countBeforeInvalid);
+   await sql`UPDATE team_member_permissions SET can_edit=false WHERE company_id=${C} AND user_id=${U.editor} AND module='properties'`;
+   try {
+    // View remains allowed; mutation replay must still recheck current edit.
+    expect((await read(U.editor,repeated[0].id)).id).toBe(repeated[0].id);
+    await expect(createPropertyOnce(U.editor,request,initialPatch)).rejects.toThrow(/edit authority/);
+    await expect(createComplexOnce(requestComplex,{name:'Retry-safe complex'})).rejects.toThrow(/edit authority/);
+   } finally {
+    await sql`UPDATE team_member_permissions SET can_edit=true WHERE company_id=${C} AND user_id=${U.editor} AND module='properties'`;
+   }
+   await sql`UPDATE management_companies SET is_active=false WHERE id=${C}`;
+   try {
+    await expect(createPropertyOnce(U.editor,request,initialPatch)).rejects.toThrow(/active company/);
+    await expect(createPropertyOnce(U.editor,id(80006),initialPatch)).rejects.toThrow(/active company/);
+    await expect(createComplexOnce(requestComplex,{name:'Retry-safe complex'})).rejects.toThrow(/active company/);
+   } finally { await sql`UPDATE management_companies SET is_active=true WHERE id=${C}`; }
+   await expect(as(U.editor,tx=>tx`SELECT create_managed_property_idempotent_checked(${OTHER},${OTHER_SPACE},${request},${tx.json(initialPatch)})`)).rejects.toThrow(/different property input/);
+   await expect(as(U.editor,tx=>tx`SELECT create_managed_complex_idempotent_checked(${OTHER},${OTHER_SPACE},${requestComplex},'{"name":"Retry-safe complex"}'::jsonb,false)`)).rejects.toThrow(/different complex input/);
+   const submittedRequest=id(80007);
+   const submitOnce=()=>as(U.editor,async tx=>(await tx`SELECT create_managed_complex_idempotent_checked(${C},${SPACE},${submittedRequest},'{"name":"Retry-safe submitted complex"}'::jsonb,true) row`)[0].row);
+   const submittedComplex=await submitOnce();
+   expect(submittedComplex.approval_status).toBe('pending');
+   expect((await submitOnce()).id).toBe(submittedComplex.id);
+   expect((await as(U.editor,async tx=>(await tx`SELECT read_managed_complex_draft_checked(${submittedComplex.id}) row`)[0].row)).approval_status).toBe('pending');
+   expect((await sql`SELECT count(*)::int n FROM property_complexes WHERE authoring_create_key=${submittedRequest}`)[0].n).toBe(1);
+   const complex=(await as(U.editor,async tx=>(await tx`SELECT create_managed_complex_checked(${C},${SPACE},'{"name":"Synthetic acceptance complex"}'::jsonb,false) row`)[0].row));
+   expect(await as(null,tx=>tx`SELECT id FROM public_complex_catalog WHERE id=${complex.id}`)).toEqual([]);
+   const cPending=await as(U.editor,async tx=>(await tx`SELECT save_managed_complex_draft_checked(${complex.id},${complex.updated_at}::text::timestamptz,'{"description_en":"Saved complex"}'::jsonb,true) row`)[0].row);
+   await as(U.admin,tx=>tx`SELECT review_managed_complex_submission_checked(${complex.id},${cPending.updated_at}::text::timestamptz,'approve',NULL)`);
+   const key=await create(U.editor);
+   const draft=await read(U.editor,key);
+   await save(U.editor,key,{complex_id:complex.id,title_en:'Saved physical unit',description_en:'Verified description',images:['https://example.test/unit.jpg'],bedrooms:2,house_rules:'No parties'},false,draft.updated_at);
+   const reopened=await read(U.editor,key);
+   expect(reopened).toMatchObject({complex_id:complex.id,title_en:'Saved physical unit',bedrooms:2,house_rules:'No parties'});
+   await save(U.editor,key,{},false,reopened.updated_at);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE id=${key}`)[0].n).toBe(1);
+   expect(await as(null,tx=>tx`SELECT id FROM public_property_catalog WHERE id=${key}`)).toEqual([]);
+   await expect(save(U.editor,key,{title_en:'Stale'},false,draft.updated_at)).rejects.toThrow(/changed/);
+   await expect(read(U.outsider,key)).rejects.toThrow(/permission|unavailable/);
+   await save(U.editor,key,{},true);
+   await review(U.admin,key);
+   expect(await as(null,tx=>tx`SELECT id,title_en FROM public_property_catalog WHERE id=${key}`)).toEqual([{id:key,title_en:'Saved physical unit'}]);
+   expect(await as(null,tx=>tx`SELECT id FROM public_complex_catalog WHERE id=${complex.id}`)).toHaveLength(1);
+   // Operational assignment is an explicit fixture grant, never a side effect of content creation.
+   await sql`INSERT INTO property_manager_assignments(property_id,manager_user_id,is_active) VALUES(${key},${U.staff},true)`;
+   await sql`INSERT INTO property_manager_assignments(property_id,manager_user_id,is_active) VALUES(${key},${U.unassignedStaff},true)`;
+   await sql`INSERT INTO team_member_permissions(company_id,user_id,module,can_view,can_edit,can_export)
+    VALUES(${C},${U.editor},'tasks',true,true,false),(${C},${U.staff},'tasks',true,true,false),(${C},${U.unassignedStaff},'tasks',true,true,false)`;
+   const createdTask=await as(U.editor,async tx=>(await tx`SELECT create_managed_task_checked(${id(80010)},${key},${U.staff},'Inspect synthetic unit','inspection','2026-10-25'::date,'normal') row`)[0].row);
+   const task=createdTask.id;
+   expect(await as(U.staff,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toHaveLength(1);
+   expect(await as(U.unassignedStaff,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toEqual([]);
+   expect(await as(U.outsider,tx=>tx`SELECT id FROM property_operational_tasks WHERE id=${task}`)).toEqual([]);
+   expect(await as(U.unassignedStaff,tx=>tx`UPDATE property_operational_tasks SET status='completed' WHERE id=${task} RETURNING id`)).toEqual([]);
+   await expect(as(U.staff,tx=>tx`UPDATE property_operational_tasks SET completed_by=${U.editor},completed_at=now() WHERE id=${task}`)).rejects.toThrow(/checked commands/);
+   await expect(as(U.unassignedStaff,tx=>tx`SELECT complete_managed_task_checked(${task},${createdTask.updated_at}::text::timestamptz,'Forged completion')`)).rejects.toThrow(/assigned task authority/);
+   await as(U.staff,tx=>tx`SELECT complete_managed_task_checked(${task},${createdTask.updated_at}::text::timestamptz,'Inspection passed')`);
+   expect(await as(U.editor,tx=>tx`SELECT status,completed_by,notes FROM property_operational_tasks WHERE id=${task}`)).toEqual([{status:'completed',completed_by:U.staff,notes:'Inspection passed'}]);
+   expect(await sql`SELECT actual_cost,expense_created FROM property_operational_tasks WHERE id=${task}`).toEqual([{actual_cost:'0',expense_created:false}]);
+   expect((await sql`SELECT count(*)::int n FROM property_financials`)[0].n).toBe(0);
+   expect(await sql`SELECT action FROM property_activity_log WHERE entity_id=${task} ORDER BY created_at`).toEqual([{action:'task_created'},{action:'task_status_changed'}]);
+   const rollback=execFileSync(process.execPath,['--input-type=module','-e',"import {buildActivation} from './scripts/db/build-mc-authoring-activation.mjs'; process.stdout.write(buildActivation('rollback'));"],{encoding:'utf8'});
+   await applyTransactionScript(sql,rollback);
+   await expect(resolveProperty(U.editor,request)).rejects.toThrow(/permission denied/);
+   await expect(resolveComplex(U.editor,requestComplex)).rejects.toThrow(/permission denied/);
+   await expect(createPropertyOnce(U.editor,request,initialPatch)).rejects.toThrow(/permission denied/);
+   await expect(createComplexOnce(requestComplex,{name:'Retry-safe complex'})).rejects.toThrow(/permission denied/);
+   await expect(as(null,tx=>tx`UPDATE public_property_catalog SET title_en='Forbidden after rollback' WHERE id=${publicKey}`)).rejects.toThrow(/permission denied/);
+   await expect(read(U.editor,key)).rejects.toThrow(/permission denied/);
+   expect((await sql`SELECT count(*)::int n FROM properties WHERE id=${key}`)[0].n).toBe(1);
+   expect(await sql`SELECT policyname FROM pg_policies WHERE policyname='employee_task_view_ceiling'`).toHaveLength(1);
+  } finally { await sql.end(); sql=originalConnection; }
+ },30000);
  // Keep last: the fail-closed rollback intentionally revokes checked workflow RPCs.
  it('rolls back with meters absent while retaining all surviving operational ceilings', async () => {
   const key=await create(U.staff);

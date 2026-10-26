@@ -1,7 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
+import { executePropertyBookingChange } from '@/lib/manualPropertyBooking';
+import { propertyBookingChangeExplanation } from '@/lib/propertyBookingPresentation';
+import { bindPropertyReservationReader } from '@/lib/propertyReservationReceipt';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +31,7 @@ const STATUS_CONFIG = {
   accepted:  { icon: CheckCircle2,  color: 'bg-success/10 text-success',         label: 'Accepted',  labelRu: 'Принято' },
   confirmed: { icon: CheckCircle2,  color: 'bg-success/10 text-success',         label: 'Confirmed', labelRu: 'Подтверждён' },
   rejected:  { icon: XCircle,       color: 'bg-destructive/10 text-destructive', label: 'Rejected',  labelRu: 'Отклонён' },
+  unknown: { icon: Clock, color: 'bg-muted text-muted-foreground', label: 'Unknown', labelRu: 'Неизвестно' },
   cancelled: { icon: XCircle,       color: 'bg-muted text-muted-foreground',     label: 'Cancelled', labelRu: 'Отменено' },
 } as const;
 
@@ -35,12 +42,17 @@ export function PropertyInquiriesWidget() {
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { allProperties } = useMyProperties();
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const { allProperties, isLoading: propertiesLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
+  const { bookings: bookingRequests, isLoading: bookingsLoading, error: bookingsError, refetch: refetchBookings } = useAllPropertyBookings();
+  const scope = useMemo(() => ({ actor: user?.id, company: activeCompany?.company_id }), [user?.id, activeCompany?.company_id]);
+  const currentScope = useRef(scope); currentScope.current = scope;
   const propertyIds = allProperties.map(p => p.id);
   const [actingId, setActingId] = useState<string | null>(null);
 
-  const { data: inquiries, isLoading } = useQuery({
-    queryKey: ['property-inquiries-widget', propertyIds],
+  const { data: inquiries, isLoading, error: inquiriesError, refetch: refetchInquiries } = useQuery({
+    queryKey: ['property-inquiries-widget', user?.id, activeCompany?.company_id, propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
       const { data, error } = await supabase
@@ -52,41 +64,29 @@ export function PropertyInquiriesWidget() {
       if (error) throw error;
       return data || [];
     },
-    enabled: propertyIds.length > 0,
-  });
-
-  // Also fetch recent property orders (booking requests) for visibility.
-  const { data: bookingRequests } = useQuery({
-    queryKey: ['property-booking-requests-widget', propertyIds],
-    queryFn: async () => {
-      if (!propertyIds.length) return [];
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('order_type', 'property')
-        .in('status', ['pending', 'confirmed', 'in_progress'])
-        .order('created_at', { ascending: false })
-        .limit(10);
-      if (error) throw error;
-      return (data || []).filter(order => {
-        const meta = order.metadata as any;
-        return meta?.property_id && propertyIds.includes(meta.property_id);
-      });
-    },
-    enabled: propertyIds.length > 0,
+    enabled: !!user && !propertiesLoading && !propertiesError && propertyIds.length > 0,
   });
 
   const updateInquiryStatus = async (
     inquiryId: string,
     nextStatus: 'accepted' | 'rejected',
+    kind: 'inquiry' | 'booking',
+    revision: string,
   ) => {
+    if (!user || actingId) return;
     setActingId(inquiryId);
     try {
-      const { error } = await supabase
-        .from('property_inquiries')
-        .update({ status: nextStatus })
-        .eq('id', inquiryId);
-      if (error) throw error;
+      const assertCurrent = () => { if (currentScope.current !== scope) throw new Error('Account or company changed'); };
+      const client = await bindPropertyReservationReader(user.id, assertCurrent);
+      if (kind === 'booking') {
+        await executePropertyBookingChange(client,user.id,inquiryId,{status:nextStatus==='accepted'?'confirmed':'cancelled'},revision);
+      } else {
+        const { data, error } = await client.from('property_inquiries').update({ status: nextStatus })
+          .eq('id',inquiryId).eq('updated_at',revision).select('id,status').single();
+        if (error) throw error;
+        if (data?.id!==inquiryId || data.status!==nextStatus) throw new Error('Inquiry change not confirmed');
+      }
+      assertCurrent();
       toast.success(
         nextStatus === 'accepted'
           ? (isRu ? 'Запрос принят' : 'Inquiry accepted')
@@ -94,19 +94,28 @@ export function PropertyInquiriesWidget() {
       );
       await queryClient.invalidateQueries({ queryKey: ['property-inquiries-widget'] });
       await queryClient.invalidateQueries({ queryKey: ['my-requests'] });
-    } catch (err: any) {
+      await queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
+      await queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
+    } catch (err: unknown) {
+      if (currentScope.current !== scope) return;
+      const message = propertyBookingChangeExplanation(err,isRu) ?? (err instanceof Error ? err.message : (isRu ? 'неизвестная ошибка' : 'unknown error'));
       console.error('[PropertyInquiriesWidget] status update failed:', err);
       toast.error(
         isRu
-          ? `Не удалось обновить статус: ${err?.message ?? 'неизвестная ошибка'}`
-          : `Could not update status: ${err?.message ?? 'unknown error'}`,
+          ? `Не удалось обновить статус: ${message}`
+          : `Could not update status: ${message}`,
       );
     } finally {
       setActingId(null);
     }
   };
 
-  if (isLoading) {
+  if (propertiesError || inquiriesError || bookingsError) return <Card><CardContent className="space-y-3 py-5" role="alert">
+    <p>{isRu ? 'Не удалось проверить очередь запросов.' : 'Could not verify the request queue.'}</p>
+    <Button variant="outline" onClick={() => { void refetchProperties?.(); void refetchInquiries(); void refetchBookings(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </CardContent></Card>;
+
+  if (isLoading || propertiesLoading || bookingsLoading) {
     return <Skeleton className="h-[180px] rounded-none" />;
   }
 
@@ -123,27 +132,14 @@ export function PropertyInquiriesWidget() {
       checkOut: inq.check_out,
       guests: inq.guests,
       propertyId: inq.property_id,
-      createdAt: inq.created_at,
+      createdAt: inq.created_at, revision: inq.updated_at,
     })),
-    ...(bookingRequests || []).map(order => {
-      const meta = order.metadata as any;
-      const participant = (order as any).participants?.[0];
-      const status = (order.status === 'pending' ? 'pending' : order.status) as StatusKey;
-      return {
-        id: order.id,
-        type: 'booking' as const,
-        name: participant?.name || meta?.guest_name || 'Guest',
-        phone: participant?.phone || meta?.guest_phone || null,
-        email: participant?.email || meta?.guest_email || null,
-        message: order.notes,
-        status,
-        checkIn: meta?.check_in || null,
-        checkOut: meta?.check_out || null,
-        guests: meta?.guests || null,
-        propertyId: meta?.property_id,
-        createdAt: order.created_at,
-      };
-    }),
+    ...(bookingRequests || []).filter(booking => propertyIds.includes(booking.property_id)).map(booking => ({
+      id:booking.id,type:'booking' as const,name:booking.guest_name || 'Guest',phone:booking.guest_phone || null,
+      email:booking.guest_email || null,message:booking.notes || null,status:(booking.status || 'unknown') as StatusKey,
+      checkIn:booking.check_in,checkOut:booking.check_out,guests:booking.guests_count || null,
+      propertyId:booking.property_id,createdAt:booking.created_at,revision:booking.updated_at,
+    })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
    .slice(0, 8);
 
@@ -190,12 +186,12 @@ export function PropertyInquiriesWidget() {
         <div className="space-y-1">
           {allItems.slice(0, 5).map(item => {
             const property = propertyMap.get(item.propertyId);
-            const propertyName = isRu ? (property as any)?.title_ru : (property as any)?.title_en;
-            const statusKey: StatusKey = STATUS_CONFIG[item.status] ? item.status : 'pending';
+            const propertyName = isRu ? property?.title_ru : property?.title;
+            const statusKey: StatusKey = STATUS_CONFIG[item.status] ? item.status : 'unknown';
             const statusCfg = STATUS_CONFIG[statusKey];
             const StatusIcon = statusCfg.icon;
             const isPending = statusKey === 'pending';
-            const canAct = item.type === 'inquiry' && isPending;
+            const canAct = isPending;
             const isActing = actingId === item.id;
 
             return (
@@ -204,8 +200,9 @@ export function PropertyInquiriesWidget() {
                 className="flex items-center gap-2.5 p-2 hover:bg-muted/50 transition-colors"
               >
                 <button
+                  aria-label={`${item.name} · ${propertyName || (isRu ? 'Объект' : 'Property')}`}
                   onClick={() => {
-                    if (item.type === 'booking') navigate(`/bookings/${item.id}`);
+                    if (item.type === 'booking') navigate('/mc/bookings');
                     else navigate(`/mc/messages`);
                   }}
                   className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
@@ -259,7 +256,7 @@ export function PropertyInquiriesWidget() {
                       disabled={isActing}
                       onClick={(e) => {
                         e.stopPropagation();
-                        updateInquiryStatus(item.id, 'accepted');
+                        void updateInquiryStatus(item.id, 'accepted', item.type, item.revision);
                       }}
                       aria-label={isRu ? 'Принять' : 'Accept'}
                     >
@@ -272,7 +269,7 @@ export function PropertyInquiriesWidget() {
                       disabled={isActing}
                       onClick={(e) => {
                         e.stopPropagation();
-                        updateInquiryStatus(item.id, 'rejected');
+                        void updateInquiryStatus(item.id, 'rejected', item.type, item.revision);
                       }}
                       aria-label={isRu ? 'Отклонить' : 'Reject'}
                     >

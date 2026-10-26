@@ -22,6 +22,8 @@ const virtual = {
     export const readManagedComplexDraft=async(_,id)=>{const row=window.fixtureRows.find(r=>r.id===id);if(!row)throw new Error('Unavailable');return {...row};};
     export const readComplexCreationScope=async()=>({companyId:'synthetic-company',spaces:state==='unassigned'?[]:[{id:'synthetic-space',name_en:'Assigned portfolio',name_ru:'Назначенный портфель'}]});
     export const complexAuthoringDelta=(next,previous)=>Object.fromEntries(Object.entries(next).filter(([key,value])=>JSON.stringify(value)!==JSON.stringify(previous[key])).map(([key,value])=>[key,value===undefined?null:value]));
+    export const complexAuthoringPatch=value=>({...value});
+    export const resolveManagedComplexCreation=async()=>null;
     export const listManagedComplexSubmissions=async()=>window.fixtureRows.filter(row=>row.approval_status==='pending');
     export const readManagedComplexSubmission=async(_,row)=>({...window.fixtureRows.find(current=>current.id===row.id)});
     export const reviewManagedComplexSubmission=async(_,row,decision,reason)=>{window.fixtureWrites++;const current=window.fixtureRows.find(current=>current.id===row.id);Object.assign(current,{approval_status:decision==='approve'?'approved':'rejected',is_active:decision==='approve',rejection_reason:reason||null});return {...current};};

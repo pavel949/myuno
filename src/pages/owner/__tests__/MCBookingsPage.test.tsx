@@ -9,10 +9,14 @@ const mocks = vi.hoisted(() => ({
   empty: false,
   queryError: null as Error | null, refetch: vi.fn(),
   customBookings: null as ReturnType<typeof bookingsListFixtures> | null,
-  from: vi.fn(), update: vi.fn(), in: vi.fn(), error: vi.fn(),
+  from: vi.fn(), update: vi.fn(), in: vi.fn(), error: vi.fn(), command: vi.fn(), bind: vi.fn(), success: vi.fn(),
 }));
 
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'operator' } }) }));
+vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: { company_id: 'company' } }) }));
+vi.mock('@/lib/manualPropertyBooking', () => ({ executePropertyBookingChange: mocks.command }));
+vi.mock('@/lib/propertyReservationReceipt', () => ({ bindPropertyReservationReader: mocks.bind }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => `${n} THB` }) }));
 vi.mock('@/hooks/useCityCurrency', () => ({ useCityCurrency: () => ({ code: 'THB' }) }));
 vi.mock('@/hooks/usePropertyBookings', () => ({
@@ -21,7 +25,7 @@ vi.mock('@/hooks/usePropertyBookings', () => ({
 // The real client and detail queries never load. An in-memory rejected response
 // exercises submission without a write, success notification or window reload.
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from } }));
-vi.mock('sonner', () => ({ toast: { error: mocks.error } }));
+vi.mock('sonner', () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn(), isTypingKey: () => false }));
 vi.mock('@/components/owner/BookingDetailSheet', () => ({
@@ -50,6 +54,7 @@ beforeEach(() => {
   mocks.from.mockReturnValue({ update: mocks.update });
   mocks.update.mockReturnValue({ in: mocks.in });
   mocks.in.mockResolvedValue({ error: new Error('Isolated fixture rejection') });
+  mocks.bind.mockResolvedValue({}); mocks.command.mockRejectedValue(new Error('Isolated checked command rejection'));
 });
 afterEach(cleanup);
 
@@ -153,9 +158,9 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Да' : 'Yes' }));
     });
-    expect(mocks.from).toHaveBeenCalledExactlyOnceWith('orders');
-    expect(mocks.update).toHaveBeenCalledExactlyOnceWith({ status: action === 'confirm' ? 'confirmed' : 'cancelled' });
-    expect(mocks.in).toHaveBeenCalledExactlyOnceWith('id', ['fixture-booking-01']);
+    expect(mocks.from).not.toHaveBeenCalled();
+    expect(mocks.command).toHaveBeenCalledExactlyOnceWith({}, 'operator', 'fixture-booking-01',
+      { status: action === 'confirm' ? 'confirmed' : 'cancelled' }, bookingsListFixtures(language)[0].updated_at);
     await vi.waitFor(() => expect(mocks.error).toHaveBeenCalledOnce());
   });
 
@@ -166,6 +171,18 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Снять выбор' : 'Clear' }));
     expect(screen.getAllByRole('checkbox').every(el => el.getAttribute('aria-checked') === 'false')).toBe(true);
     expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it.each(['schedule','expense'] as const)('keeps denied %s changes selected and explains the next safe step',async kind=>{
+    mocks.command.mockRejectedValue({message:`reservation task ${kind} reconciliation required`});
+    mount(language);selectFirst(language);
+    fireEvent.click(screen.getByRole('button',{name:language==='ru'?'Отменить':'Cancel'}));
+    await act(async()=>{fireEvent.click(screen.getByRole('button',{name:language==='ru'?'Да':'Yes'}));});
+    await vi.waitFor(()=>expect(mocks.error).toHaveBeenCalledOnce());
+    const options=mocks.error.mock.calls[0][1] as {description:string};
+    expect(options.description).toContain(language==='ru'?'Сначала согласуйте':kind==='schedule'?'Ask the manager':'Reconcile the expenses');
+    expect(mocks.success).not.toHaveBeenCalled();expect(mocks.from).not.toHaveBeenCalled();
+    expect(screen.getByRole('checkbox',{name:`${language==='ru'?'Выбрать бронирование':'Select booking'}: ${bookingsListFixtures(language)[0].guest_name}`})).toHaveAttribute('aria-checked','true');
   });
 
   it('loading and empty fixtures never load the real client or open details', () => {

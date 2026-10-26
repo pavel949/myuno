@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -115,7 +115,7 @@ export function UnifiedTaskHub() {
   const [description, setDescription] = useState('');
   const [taskCategory, setTaskCategory] = useState<'business' | 'operations'>('business');
   const [taskType, setTaskType] = useState('follow_up');
-  const [opsTaskType, setOpsTaskType] = useState('cleaning');
+  const [opsTaskType, setOpsTaskType] = useState<OperationalTask['task_type']>('cleaning');
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate] = useState('');
   const [assignedTo, setAssignedTo] = useState<string>('self');
@@ -131,7 +131,8 @@ export function UnifiedTaskHub() {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, companyId, user]);
   const { data: crmTasks = [], isLoading: crmLoading, error: crmError, refetch: refetchCrm } = useCrmTasks();
-  const { tasks: opsTasks, isLoading: opsLoading, error: opsError, refetch: refetchOps } = useOperationalTasks();
+  const { tasks: opsTasks, isLoading: opsLoading, error: opsError, refetch: refetchOps,createTask:createOpsTask,editTask:editOpsTask,deleteTask:deleteOpsTask } = useOperationalTasks();
+  const opsCreateRequest=useRef<string | null>(null);
   const { data: members = [] } = useCompanyMembers(companyId);
   const { activeProperties, isLoading: propertiesLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const allProperties = activeProperties || [];
@@ -282,24 +283,20 @@ export function UnifiedTaskHub() {
         }
       } else {
         if (propertyId === 'none') { toast.error(t('Select property', 'Выберите объект')); return; }
-        const { data, error } = await supabase.from('property_operational_tasks').insert({
+        opsCreateRequest.current??=crypto.randomUUID();
+        await createOpsTask.mutateAsync({
+          request_id:opsCreateRequest.current,
           property_id: propertyId,
           task_type: opsTaskType,
           title: title.trim(),
-          description: description || null,
+          description: description || undefined,
           scheduled_date: dueDate ? format(new Date(dueDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
-          scheduled_time: dueDate ? format(new Date(dueDate), 'HH:mm') : null,
+          scheduled_time: dueDate ? format(new Date(dueDate), 'HH:mm') : undefined,
           priority: priority === 'medium' ? 'normal' : priority as any,
           assigned_to: assignedTo === 'self' ? user.id : assignedTo,
-          status: 'pending',
-        } as any).select('id').single();
-        if (error) throw error;
+        });
+        opsCreateRequest.current=null;
         invalidateOverviewQueries();
-        logActivity('task_created', 'ops_task', data?.id, { title: title.trim(), task_type: opsTaskType });
-        const realAssignee = assignedTo === 'self' ? user.id : assignedTo;
-        if (realAssignee !== user.id) {
-          notifyAssignment({ assigneeId: realAssignee, taskTitle: title.trim(), taskId: data?.id, taskSource: 'ops', propertyId: propertyId });
-        }
       }
       toast.success(t('Task created', 'Задача создана'));
       setSheetOpen(false);
@@ -309,10 +306,12 @@ export function UnifiedTaskHub() {
     }
   };
 
-  const handleQuickComplete = (task: UnifiedTask) => {
-    handleUpdate(task.id, task.source, { status: 'completed', completed_at: new Date().toISOString() });
-    logActivity('task_completed', task.source === 'crm' ? 'crm_task' : 'ops_task', task.id, { title: task.title });
-    toast.success(t('Done', 'Выполнено'));
+  const handleQuickComplete = async (task: UnifiedTask) => {
+    try {
+      await handleUpdate(task.id, task.source, { status: 'completed', completed_at: new Date().toISOString() });
+      if(task.source==='crm')logActivity('task_completed', 'crm_task', task.id, { title: task.title });
+      toast.success(t('Done', 'Выполнено'));
+    }catch(error){toast.error(error instanceof Error?error.message:t('Task was not saved','Задача не сохранена'));}
   };
 
   const handleUpdate = async (id: string, source: 'crm' | 'ops', updates: Record<string, any>) => {
@@ -321,7 +320,7 @@ export function UnifiedTaskHub() {
       if (next.status && next.status !== 'completed' && next.completed_at === undefined) {
         next.completed_at = null;
       }
-      updateCrmTask.mutate({ id, ...next });
+      await updateCrmTask.mutateAsync({ id, ...next });
     } else {
       const next = { ...updates };
       if (next.status === 'completed' && next.completed_by === undefined) {
@@ -331,7 +330,7 @@ export function UnifiedTaskHub() {
         if (next.completed_at === undefined) next.completed_at = null;
         if (next.completed_by === undefined) next.completed_by = null;
       }
-      await supabase.from('property_operational_tasks').update(next as any).eq('id', id);
+      await editOpsTask.mutateAsync({taskId:id,patch:next});
       invalidateOverviewQueries();
     }
     queryClient.invalidateQueries({ queryKey: ['day-briefing'] });
@@ -339,9 +338,9 @@ export function UnifiedTaskHub() {
 
   const handleDelete = async (id: string, source: 'crm' | 'ops') => {
     if (source === 'crm') {
-      deleteCrmTask.mutate(id);
+      await deleteCrmTask.mutateAsync(id);
     } else {
-      await supabase.from('property_operational_tasks').delete().eq('id', id);
+      await deleteOpsTask.mutateAsync(id);
       invalidateOverviewQueries();
     }
     logActivity('task_deleted', source === 'crm' ? 'crm_task' : 'ops_task', id);
@@ -349,7 +348,7 @@ export function UnifiedTaskHub() {
 
   const propertiesList = allProperties.map(p => ({ property_id: p.property_id, title: isRu ? (p.title_ru || p.title) : p.title }));
 
-  const OPS_TYPES = ['cleaning', 'maintenance', 'check_in', 'check_out', 'inspection', 'meter_reading'];
+  const OPS_TYPES: OperationalTask['task_type'][] = ['cleaning', 'maintenance', 'check_in', 'check_out', 'inspection', 'meter_reading'];
 
   return (
     <PageContainer>
@@ -395,7 +394,7 @@ export function UnifiedTaskHub() {
           icon={<ClipboardPlus className="w-5 h-5 text-primary" />}
           size="lg"
           footer={
-            <Button className="w-full sm:w-auto min-w-[200px]" onClick={handleCreate} disabled={createCrmTask.isPending}>
+            <Button className="w-full sm:w-auto min-w-[200px]" onClick={handleCreate} disabled={createCrmTask.isPending||createOpsTask?.isPending}>
               {t('Create Task', 'Создать задачу')}
             </Button>
           }

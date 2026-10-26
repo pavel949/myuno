@@ -1,0 +1,96 @@
+name: MC guest pilot actual editor PostgreSQL
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'scripts/qa/**'
+      - 'scripts/db/**'
+      - 'scripts/source-bundles/**'
+      - 'docs/convergence/**'
+      - 'docs/hardening/rollback/**'
+      - 'drizzle/migrations/**'
+      - 'supabase/migrations/**'
+      - 'supabase/functions/**'
+      - 'package*.json'
+      - 'vite.config.ts'
+      - 'vitest.config.ts'
+      - 'tsconfig*.json'
+      - '.github/workflows/mc-guest-pilot-isolated.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mc-guest-pilot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  actual-editor-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked tools and owned database runtime
+        run: |
+          npm ci
+          pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+          if ! ls /usr/lib/postgresql/*/bin/postgres >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          for binary in /usr/lib/postgresql/*/bin/postgres; do
+            dirname "$binary" >> "$GITHUB_PATH"
+            break
+          done
+          python - <<'PY'
+          import os
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              with open(os.environ['GITHUB_ENV'], 'a') as f:
+                  f.write('MC_PILOT_CHROMIUM_PATH=' + p.chromium.executable_path + '\n')
+          PY
+      - name: Build with synthetic configuration and outbound denial
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: npm run build
+      - name: Actual guest adapter and generated task editor against checked SQL
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+          MC_GUEST_RESERVATION_BROWSER: '1'
+          PROPERTY_LIFECYCLE_ARTIFACT_DIR: /tmp/mc-guest-pilot-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mc-guest-pilot-evidence
+          git rev-parse HEAD > /tmp/mc-guest-pilot-evidence/source-sha.txt
+          postgres --version > /tmp/mc-guest-pilot-evidence/postgres-version.txt
+          npx vitest run src/lib/__tests__/managedGuestReservation.postgres.test.ts --maxWorkers=1 2>&1 | tee /tmp/mc-guest-pilot-evidence/vitest.log
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const root='/tmp/mc-guest-pilot-evidence/';
+          assert.equal(JSON.parse(readFileSync(root+'browser-results.json')).result,'PASS');
+          const editor=JSON.parse(readFileSync(root+'task-editor/results.json'));
+          assert.deepEqual(editor.map(row=>row.timezoneId),['UTC','Asia/Bangkok','Europe/London']);
+          for(const row of editor){assert.equal(row.result,'PASS');assert.deepEqual(row.patch,{status:'completed'});}
+          JS
+      - name: Retain exact-head isolated evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mc-guest-pilot-${{ github.event.pull_request.head.sha }}
+          path: /tmp/mc-guest-pilot-evidence/
+          if-no-files-found: error
+          retention-days: 14

@@ -234,6 +234,8 @@ export function GalleryMode({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
+  const uploadScopeRef = useRef({ actorId: user?.id });
+  if (uploadScopeRef.current.actorId !== user?.id) uploadScopeRef.current = { actorId: user?.id };
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showUrlPicker, setShowUrlPicker] = useState(false);
@@ -258,6 +260,12 @@ export function GalleryMode({
       uploadingImages.forEach(img => URL.revokeObjectURL(img.preview));
     };
   }, []);
+  useEffect(() => {
+    setUploadingImages([]);
+    setEditingImage(null);
+    setShowUrlPicker(false);
+    setShowCloudPicker(false);
+  }, [user?.id]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
@@ -290,6 +298,9 @@ export function GalleryMode({
   };
 
   const processFile = useCallback(async (file: File, id: string): Promise<string | null> => {
+    const scope = uploadScopeRef.current;
+    const current = () => isMountedRef.current && uploadScopeRef.current === scope && scope.actorId === user?.id;
+    if (!current()) return null;
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic'];
     if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.heic')) {
       setUploadingImages(prev => prev.map(img => 
@@ -322,6 +333,7 @@ export function GalleryMode({
           }
         }
       });
+      if (!current()) return null;
 
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'uploading' as const, progress: 30 } : img
@@ -338,6 +350,7 @@ export function GalleryMode({
         });
 
       if (uploadError) throw uploadError;
+      if (!current()) return null;
 
       for (let p = 30; p <= 100; p += 10) {
         if (!isMountedRef.current) break;
@@ -348,6 +361,7 @@ export function GalleryMode({
       }
 
       const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      if (!current()) return null;
 
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'done' as const, url: publicUrl } : img
@@ -355,6 +369,7 @@ export function GalleryMode({
 
       return publicUrl;
     } catch (error) {
+      if (!current()) return null;
       console.error('Upload error:', error);
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : img
@@ -364,6 +379,9 @@ export function GalleryMode({
   }, [user, folder, bucket, compressionOptions]);
 
   const handleFiles = useCallback(async (files: File[]) => {
+    const scope = uploadScopeRef.current;
+    const current = () => isMountedRef.current && uploadScopeRef.current === scope && scope.actorId === user?.id;
+    if (!current()) return;
     if (!user) {
       toast.error(isRu ? 'Необходимо авторизоваться' : 'Please sign in');
       return;
@@ -393,10 +411,11 @@ export function GalleryMode({
     for (let i = 0; i < newUploadingImages.length; i += batchSize) {
       const batch = newUploadingImages.slice(i, i + batchSize);
       const batchResults = await Promise.all(batch.map(img => processFile(img.file, img.id)));
+      if (!current()) return;
       results.push(...batchResults.filter((url): url is string => url !== null));
     }
 
-    if (isMountedRef.current && results.length > 0) {
+    if (current() && results.length > 0) {
       onChange([...value, ...results]);
       setTimeout(() => {
         if (isMountedRef.current) {
@@ -408,6 +427,9 @@ export function GalleryMode({
   }, [user, value, onChange, maxItems, processFile]);
 
   const handleExternalImages = useCallback(async (images: ExternalImageResult[]) => {
+    const scope = uploadScopeRef.current;
+    const current = () => isMountedRef.current && uploadScopeRef.current === scope && scope.actorId === user?.id;
+    if (!current()) return;
     if (!user) {
       toast.error(isRu ? 'Необходимо авторизоваться' : 'Please sign in');
       return;
@@ -438,6 +460,7 @@ export function GalleryMode({
           : img.originalUrl;
         
         const response = await fetch(fetchUrl);
+        if (!current()) return;
         if (!response.ok) throw new Error('Failed to fetch');
         
         const blob = await response.blob();
@@ -448,6 +471,7 @@ export function GalleryMode({
         ));
         
         const compressedFile = await imageCompression(file, compressionOptions);
+        if (!current()) return;
         
         setUploadingImages(prev => prev.map(u => 
           u.id === uploadingId ? { ...u, status: 'uploading' as const, progress: 50 } : u
@@ -462,6 +486,7 @@ export function GalleryMode({
         });
         
         if (error) throw error;
+        if (!current()) return;
         
         const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
         
@@ -471,6 +496,7 @@ export function GalleryMode({
           u.id === uploadingId ? { ...u, status: 'done' as const, progress: 100 } : u
         ));
       } catch (error) {
+        if (!current()) return;
         console.error('External upload error:', error);
         setUploadingImages(prev => prev.map(u => 
           u.id === uploadingId ? { ...u, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : u
@@ -478,7 +504,7 @@ export function GalleryMode({
       }
     }
 
-    if (isMountedRef.current && results.length > 0) {
+    if (current() && results.length > 0) {
       onChange([...value, ...results]);
       setTimeout(() => {
         if (isMountedRef.current) {

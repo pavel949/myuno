@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { complexAuthoringDelta, complexAuthoringPatch, listManagedComplexSubmissions, readManagedComplexSubmission, reviewManagedComplexSubmission, listManagedComplexDrafts, readComplexCreationScope, readManagedComplexDraft, saveManagedComplexDraft } from '../complexAuthoring';
+import { complexAuthoringDelta, complexAuthoringPatch, listManagedComplexSubmissions, readManagedComplexSubmission, reviewManagedComplexSubmission, listManagedComplexDrafts, readComplexCreationScope, readManagedComplexDraft, saveManagedComplexDraft, resolveManagedComplexCreation } from '../complexAuthoring';
 import type { BoundCompanyAccessOperation } from '../companyAccessOperation';
 import type { ManagedComplexDraft } from '../complexAuthoring';
 import { MANAGED_COMPLEX_DRAFT_FIELDS } from '../managedComplexDraftFields';
@@ -102,6 +102,41 @@ describe('canonical managed complex authoring', () => {
   });
   it('saves only actual changes and preserves cleared optional values and media references', () => {
     expect(complexAuthoringDelta({ name: 'New', images: [] }, { name: 'Old', total_floors: 7, images: ['someone-else/photo.webp'] })).toEqual({ name: 'New', total_floors: null, images: [] });
+  });
+});
+
+describe('retry-safe managed complex create dispatch', () => {
+  it('resolves a persisted request with the frozen client and preserves unknown as null', async () => {
+    expect(await resolveManagedComplexCreation(operation, 'request-complex-a', 'space-a')).toEqual(saved);
+    expect(rpc).toHaveBeenCalledExactlyOnceWith('resolve_managed_complex_creation_checked', { p_company_id: 'company-a', p_operating_space_id: 'space-a', p_request_id: 'request-complex-a' });
+    rpc.mockResolvedValueOnce({ data: null, error: null });
+    expect(await resolveManagedComplexCreation(operation, 'unknown-request', 'space-a')).toBeNull();
+    expect(mocks.sharedRpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it('resolves the persisted request key after Space verification and uses the atomic keyed RPC', async () => {
+    const requestId = vi.fn(async (spaceId: string) => {
+      expect(spaceId).toBe('space-a');
+      expect(rpc).toHaveBeenCalledTimes(1);
+      await Promise.resolve();
+      return 'request-complex-a';
+    });
+    expect(await saveManagedComplexDraft(operation, { patch: { name: saved.name }, requestId })).toEqual(saved);
+    expect(rpc.mock.calls).toEqual([
+      ['list_managed_property_authoring_spaces_checked', { p_company_id: 'company-a' }],
+      ['create_managed_complex_idempotent_checked', { p_company_id: 'company-a', p_operating_space_id: 'space-a', p_request_id: 'request-complex-a', p_patch: { name: saved.name }, p_submit: false }],
+    ]);
+    expect(mocks.sharedRpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+  it('does not dispatch keyed creation after the async request factory invalidates the account operation', async () => {
+    const requestId = vi.fn(async () => {
+      current.mockImplementation(() => { throw new Error('Account changed'); });
+      return 'request-complex-a';
+    });
+    await expect(saveManagedComplexDraft(operation, { patch: { name: saved.name }, requestId })).rejects.toThrow('Account changed');
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.sharedRpc).not.toHaveBeenCalled();
   });
 });
 

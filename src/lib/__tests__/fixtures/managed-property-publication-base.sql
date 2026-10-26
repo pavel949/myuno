@@ -11,7 +11,7 @@ $$;
 GRANT USAGE ON SCHEMA auth,public TO anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION auth.uid() TO anon,authenticated,service_role;
 CREATE TABLE public.user_roles(user_id uuid,role text);
-CREATE TABLE public.management_companies(id uuid PRIMARY KEY,operating_spaces_enforced boolean NOT NULL DEFAULT true);
+CREATE TABLE public.management_companies(id uuid PRIMARY KEY,operating_spaces_enforced boolean NOT NULL DEFAULT true,is_active boolean NOT NULL DEFAULT true);
 CREATE TABLE public.management_company_members(id uuid PRIMARY KEY,company_id uuid,user_id uuid,role text,is_active boolean DEFAULT true);
 CREATE TABLE public.team_member_permissions(company_id uuid,user_id uuid,module text,can_view boolean,can_edit boolean,can_export boolean,granted_by uuid,sub_permissions jsonb DEFAULT '{}'::jsonb,updated_at timestamptz DEFAULT now(),UNIQUE(company_id,user_id,module));
 CREATE TABLE public.operating_spaces(id uuid PRIMARY KEY,management_company_id uuid,is_active boolean DEFAULT true,name_en text DEFAULT 'Space',name_ru text DEFAULT 'Пространство');
