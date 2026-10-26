@@ -140,7 +140,7 @@ async def main():
                                              ('.home-service-category-card a[href="/transport"]', '/transport'),
                                              ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
                                              ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
-                                             ('.home-service-category-card a[href="/services"]', '/services'),
+                                             ('.home-service-category-card a[href="/discover/services?category=cat-home-services"]', '/discover/services?category=cat-home-services'),
                                              ('.home-owner-prompt a', '/owner/management-landing')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
