@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
@@ -72,7 +72,7 @@ describe('canonical services hub', () => {
     expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
     expect(screen.getByRole('button', { name: 'All home services', pressed: true })).toBeVisible();
   });
-  it.each(['cat-home-services', 'cat-home-living'])('opens eleven home choices through %s against legacy runtime inventory', id => {
+  it.each(['cat-home-services', 'cat-home-living', 'home-services', 'services'])('opens eleven home choices through %s against legacy runtime inventory', id => {
     state.legacyHome = true;
     mount('/discover/services?category='+id+'&ref=legacy');
     expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
@@ -93,6 +93,21 @@ describe('canonical services hub', () => {
     expect(menu.querySelector('[data-category-id="cat-home-living"]')).not.toBeNull();
     fireEvent.click(menu.querySelector('[data-category-id="cat-home-living"]')!);
     expect(screen.getByTestId('home-category-menu')).toBeVisible();
+  });
+  it('records a pointer/focus tab selection only once and restores the prior view with Back', () => {
+    mount('/discover/services?ref=history');
+    const situation = screen.getByRole('tab', { name: 'By situation' });
+    act(() => { fireEvent.mouseDown(situation, { button: 0 }); fireEvent.focus(situation); });
+    expect(situation).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
+    expect(screen.getByTestId('location')).toHaveTextContent('/discover/services?ref=history|');
+    fireEvent.click(screen.getByText('Forward fixture'));
+    expect(screen.getByTestId('service-situation-menu')).toBeVisible();
+    const category = screen.getByRole('tab', { name: 'By category' });
+    act(() => { fireEvent.mouseDown(category, { button: 0 }); fireEvent.focus(category); });
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByTestId('service-situation-menu')).toBeVisible();
   });
   it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
     mount('/discover/services?ref=trip');

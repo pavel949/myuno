@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Search, Wrench, X } from 'lucide-react';
 import { SEOHead } from '@/components/seo/SEOHead';
@@ -36,6 +36,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const label = (item: { labelRu: string; labelEn: string; labelTh?: string }) => pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh });
   const location = useLocation();
   const navigate = useNavigate();
+  const pendingFilterUrl = useRef<string | null>(null);
+  useEffect(() => { pendingFilterUrl.current = null; }, [location.key]);
   const [params] = useSearchParams();
   const filters = readServiceDiscoveryQuery(params);
   const catalog = useCatalogFromDB();
@@ -59,10 +61,16 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const returnTo = location.pathname + location.search;
   const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
   const commit = (next: URLSearchParams, replace = false) => {
+    const search = next.toString();
+    const target = location.pathname + (search ? '?' + search : '') + location.hash;
+    // A controlled tab can report the same choice on pointer and focus before
+    // the router commits. One filter action must create only one history entry.
+    if (target === location.pathname + location.search + location.hash || pendingFilterUrl.current === target) return;
+    pendingFilterUrl.current = target;
     setLimit(12);
     setShowAllRequests(false);
     setShowAllMenu(false);
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state });
+    navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
   const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string) => commit(updateServiceDiscoveryQuery(params, key, value), key === 'q');
   const clear = () => commit(clearServiceDiscoveryQuery(params));

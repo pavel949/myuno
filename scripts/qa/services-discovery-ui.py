@@ -6,10 +6,12 @@ from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
 async def main():
     provider_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='provider'
+    alias_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='home-aliases'
     themes=os.environ.get('SERVICES_DISCOVERY_THEMES','light,dark').split(',')
     languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
     widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
-    expected=2 if provider_only else len(themes)*len(languages)*len(widths)+10
+    alias_cases=[('cat-home-living',lang,width) for lang in ['ru','th'] for width in [320,390,430]]+[('cat-home-living','en',1440),('home-services','en',390),('services','en',390)]
+    expected=len(alias_cases) if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -120,7 +122,7 @@ async def main():
                 results.append({'lang':lang,'width':width,'theme':appearance,'scenario':'interactive','registeredFontFaces':await page.evaluate('document.fonts.size'),'passed':True})
                 print(json.dumps({'completed':len(results),'expected':expected,'lang':lang,'width':width,'theme':appearance}),flush=True)
                 await context.close()
-        if not provider_only:
+        if not provider_only and not alias_only:
             await asyncio.gather(*(run_case(theme,lang,width) for theme in themes for lang in languages for width in widths))
             # Distinct states must be real, not populated screenshots labelled loading.
             for phase in ['loading','error','empty']:
@@ -138,7 +140,7 @@ async def main():
                 await page.screenshot(path=str(OUTPUT/f'en-390-{phase}.png'),full_page=True)
                 results.append({'lang':'en','width':390,'scenario':phase,'passed':True})
                 await context.close()
-        for width in [390,1440]:
+        for width in ([] if alias_only else [390,1440]):
             context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
             await context.route('**/*',route)
             page=await context.new_page()
@@ -165,7 +167,7 @@ async def main():
             assert not errors, errors
             results.append({'lang':'en','width':width,'scenario':'provider-layer','passed':True})
             await context.close()
-        if not provider_only:
+        if not provider_only and not alias_only:
             context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
             await context.route('**/*',route)
             page=await context.new_page()
@@ -181,7 +183,7 @@ async def main():
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             results.append({'lang':'en','width':390,'scenario':'home-situation-boundary','passed':True})
             await context.close()
-        if not provider_only:
+        if not provider_only and not alias_only:
             for width in [390,1440]:
                 context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
                 await context.route('**/*',route)
@@ -215,9 +217,72 @@ async def main():
                 assert not errors, errors
                 results.append({'lang':'en','width':width,'scenario':'lifeos-seeded-identities','passed':True})
                 await context.close()
+        if alias_only:
+            async def run_home_alias(parent_id,lang,width):
+                async with semaphore:
+                    context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
+                    await context.route('**/*',route)
+                    page=await context.new_page()
+                    errors=[]
+                    page.on('pageerror',lambda error:errors.append(str(error)))
+                    base='http://localhost:8080/fixture?lang='+lang+'&phase=home-alias&homeParent='+parent_id+'&entry='
+                    entry='/discover/services?ref=alias#cards'
+                    await page.goto(base+quote(entry,safe=''),wait_until='networkidle')
+                    home=page.locator('[data-category-id="'+parent_id+'"]')
+                    await expect(home).to_be_visible()
+                    await home.click()
+                    await expect(page.get_by_test_id('location')).to_contain_text('category='+parent_id)
+                    await expect(page.get_by_test_id('location')).to_contain_text('ref=alias')
+                    await expect(page.locator('[data-home-category-id]')).to_have_count(11)
+                    await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                    await page.locator('[data-home-category-id=ac]').click()
+                    search=page.get_by_role('searchbox')
+                    query='Чистка' if lang=='ru' else 'Cleaning'
+                    await search.fill(query)
+                    await expect(page.get_by_test_id('service-request-card')).to_have_count(1)
+                    await page.get_by_test_id('service-request-card').press('Enter')
+                    await expect(page.get_by_test_id('location')).to_contain_text('/services/order/')
+                    await expect(page.locator('form')).to_be_visible()
+                    await page.get_by_role('button',name='Go back',exact=True).click()
+                    await expect(search).to_have_value(query)
+                    await expect(page.locator('[data-home-category-id=ac]')).to_have_attribute('aria-pressed','true')
+                    await expect(page.get_by_test_id('location')).to_contain_text('ref=alias')
+                    await expect(page.get_by_test_id('location')).to_contain_text('#cards')
+                    await page.get_by_test_id('home-category-menu').get_by_role('button').first.click()
+                    await expect(page.get_by_test_id('location')).to_contain_text('category='+parent_id)
+                    await search.fill('')
+                    await page.get_by_role('tab').first.click()
+                    await page.get_by_role('combobox').press('Enter')
+                    await page.get_by_role('option',name='Резидент' if lang=='ru' else 'Resident',exact=True).click()
+                    await expect(page.get_by_test_id('service-request-grid')).to_have_count(0)
+                    await page.get_by_role('button',name={'ru':'Выбрать бытовую заявку','en':'Browse home requests','th':'เลือกคำขอบริการสำหรับบ้าน'}[lang],exact=True).click()
+                    await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                    await search.fill('zz-no-home-match')
+                    await expect(page.get_by_text({'ru':'Услуги не найдены','en':'No services found','th':'ไม่พบบริการ'}[lang],exact=True)).to_be_visible()
+                    await page.get_by_role('button',name={'ru':'Сбросить поиск и фильтры','en':'Clear search and filters','th':'ล้างการค้นหาและตัวกรอง'}[lang],exact=True).click()
+                    await page.get_by_role('tab').nth(1).click()
+                    await expect(home).to_be_visible()
+                    before_back=page.url
+                    await page.go_back()
+                    print(json.dumps({'aliasHistory':parent_id,'lang':lang,'width':width,'beforeBack':before_back,'afterBack':page.url,'route':await page.get_by_test_id('location').text_content()}),flush=True)
+                    await expect(page.get_by_test_id('service-situation-menu')).to_be_visible()
+                    await page.go_forward()
+                    await expect(home).to_be_visible()
+                    # Old canonical links must resolve against the actual returned parent.
+                    await page.goto(base+quote('/discover/services?category=cat-home-services&ref=canonical',safe=''),wait_until='networkidle')
+                    await expect(page.locator('[data-home-category-id]')).to_have_count(11)
+                    await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
+                    await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-services')
+                    assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(parent_id,lang,width,'overflow')
+                    assert not errors,errors
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-alias-{parent_id}-home.png'),full_page=False)
+                    results.append({'lang':lang,'width':width,'scenario':'home-alias-'+parent_id,'passed':True})
+                    print(json.dumps({'completed':len(results),'expected':expected,'alias':parent_id,'lang':lang,'width':width}),flush=True)
+                    await context.close()
+            await asyncio.gather(*(run_home_alias(*case) for case in alias_cases))
         await browser.close()
     assert len(results)==expected and len({(r['lang'],r['width'],r.get('theme'),r['scenario']) for r in results})==expected
-    (OUTPUT/'summary.json').write_text(json.dumps({'expected':expected,'scope':'provider' if provider_only else 'full','passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))
+    (OUTPUT/'summary.json').write_text(json.dumps({'expected':expected,'scope':'home-aliases' if alias_only else 'provider' if provider_only else 'full','passed':len(results),'configuredConcurrency':2,'elapsedSeconds':round(time.monotonic()-started,2),'evidence':'isolated real components; synthetic readers; no external requests; no registered web fonts'},indent=2))
     (OUTPUT/'results.json').write_text(json.dumps(results,indent=2))
     print(json.dumps(results))
 asyncio.run(main())

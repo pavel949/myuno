@@ -11,7 +11,7 @@ const fixture = vi.hoisted(() => ({ data: {
 vi.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: fixture.data, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 describe('DB-shaped canonical home destination', () => {
-  it.each(['cat-home-services', 'cat-home-living'])('adapts the existing seed path for %s without changing the DB identity', parentId => {
+  it.each(['cat-home-services', 'cat-home-living', 'home-services', 'services'])('adapts the existing seed path for %s without changing the DB identity', parentId => {
     fixture.data.categories[0].slug = parentId;
     const actual = useCatalogFromDB();
     expect(actual.isFromDB).toBe(true);
@@ -21,6 +21,13 @@ describe('DB-shaped canonical home destination', () => {
     expect(service.path).toBe('/discover/services?category='+parentId);
     expect(new URL(service.path, 'https://fixture.test').searchParams.get('category')).toBe(parentId);
     expect(service.situationCodes).toEqual(expected.situationCodes);
+  });
+  it('keeps unknown parents unclassified instead of inventing a home mapping', () => {
+    fixture.data.categories[0].slug = 'cat-home-unknown';
+    const actual = useCatalogFromDB();
+    expect(actual.categories[0].id).toBe('cat-home-unknown');
+    expect(actual.categories[0].services[0].path).toBe('/services');
+    expect(actual.categories[0].services[0].situationCodes).toBeUndefined();
   });
   it('preserves unrelated, unknown and explicit specialized DB destinations', () => {
     expect(catalogServicePath('cat-home-services', 'cleaning', '/services')).toBe('/services');

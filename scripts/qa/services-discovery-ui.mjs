@@ -16,7 +16,7 @@ const lifeId = slug => { const h=createHash('md5').update('service:'+slug).diges
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:window.fixtureLanguage||'ru',t:(s)=>s});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
-  '@/lib/catalog/useCatalogFromDB': `import {CATEGORIES,LIFE_SITUATIONS} from '${root}/src/lib/catalog/taxonomy.ts';import {catalogServicePath} from '${root}/src/lib/catalog/serviceLookup.ts';const phase=new URLSearchParams(location.search).get('phase');export const useCatalogFromDB=()=>({categories:phase==='empty'?[]:phase==='db-home'?CATEGORIES.map(c=>({...c,services:c.services.map(s=>({...s,path:catalogServicePath(c.id,s.id,s.id==='services'?'/services':s.path)}))})):CATEGORIES,lifeSituations:LIFE_SITUATIONS,isFromDB:true,isLoading:phase==='loading',error:phase==='error'?new Error('Isolated catalogue failure'):null,refetch:()=>{window.fixtureRetry=(window.fixtureRetry||0)+1}});`,
+  '@/lib/catalog/useCatalogFromDB': `import {CATEGORIES,LIFE_SITUATIONS} from '${root}/src/lib/catalog/taxonomy.ts';import {catalogServicePath} from '${root}/src/lib/catalog/serviceLookup.ts';const fp=new URLSearchParams(location.search),phase=fp.get('phase'),homeParent=fp.get('homeParent')||'cat-home-living';export const useCatalogFromDB=()=>({categories:phase==='empty'?[]:['db-home','home-alias'].includes(phase)?CATEGORIES.map(c=>{const id=phase==='home-alias'&&c.id==='cat-home-services'?homeParent:c.id;return{...c,id,labelEn:id==='cat-home-living'?'Home & Living':c.labelEn,labelRu:id==='cat-home-living'?'Дом и быт':c.labelRu,services:c.services.map(s=>({...s,path:catalogServicePath(id,s.id,s.id==='services'?'/services':s.path)}))}}):CATEGORIES,lifeSituations:LIFE_SITUATIONS,isFromDB:true,isLoading:phase==='loading',error:phase==='error'?new Error('Isolated catalogue failure'):null,refetch:()=>{window.fixtureRetry=(window.fixtureRetry||0)+1}});`,
   '@/lib/analytics/track': `export const trackEvent=()=>{};`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main>{children}</main>;`,
   '@/components/filters/UniversalFilter': `export const UniversalFilter=()=>null;`,
@@ -58,5 +58,6 @@ const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
 await writeFile(path.join(output,'fixture.css'),css.css);
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><script>const fp=new URLSearchParams(location.search);document.documentElement.lang=fp.get("lang")||"en";document.documentElement.classList.toggle("dark",fp.get("theme")==="dark");</script><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only')) process.exit(0);
-const run=spawnSync('python3',[path.join(root,'scripts/qa/services-discovery-ui.py'),output],{stdio:'inherit'});
+const runnerFile=process.env.SERVICES_DISCOVERY_SCOPE==='home-aliases'?'services-home-alias-ui.py':'services-discovery-ui.py';
+const run=spawnSync('python3',[path.join(root,'scripts/qa',runnerFile),output],{stdio:'inherit'});
 process.exitCode=run.status??1;
