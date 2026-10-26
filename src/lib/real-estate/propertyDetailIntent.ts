@@ -54,3 +54,7 @@ export function propertyCatalogHref(mode: 'rent' | 'buy', search = ''): string {
   const company = source.get('managementCompanyId') || source.get('company');
   return company ? `${href}&company=${encodeURIComponent(company)}` : href;
 }
+
+export function residentialComplexDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {
+  return withGuestContext(APP_ROUTES.RESIDENTIAL_COMPLEX_DETAIL(id), mode, search);
+}

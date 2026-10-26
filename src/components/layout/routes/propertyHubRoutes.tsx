@@ -65,6 +65,7 @@ export const propertyHubRoutes = (
     <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
     <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
     <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
+    <Route path="residential-complex/:id" element={<LazyPage><Pages.GuestResidentialComplexDetail /></LazyPage>} />
     <Route path="complex/:id" element={<LazyPage><Pages.GuestComplexDetail /></LazyPage>} />
     {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
     <Route path="project/:id" element={<PropertyProjectRedirect />} />
