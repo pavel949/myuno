@@ -1,3 +1,7 @@
+import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
+import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import '@/styles/cinematic-home.css';
+import '@/styles/premium-public.css';
 /** Personalized Home uses the same compact personal entry points as legacy Home. */
 import React, { useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
@@ -32,7 +36,7 @@ const IndexV2: React.FC = () => {
 
   return (
     <AppLayout showHeader={false} showFooter>
-      <div className="mx-auto w-full max-w-3xl pb-24">
+      <div className="premium-personal premium-frame">
         {/* Compact personal identity and explicit, verified workspace navigation. */}
         <HeroGreeting
           personas={personas}
@@ -48,6 +52,7 @@ const IndexV2: React.FC = () => {
         <HomePreferencesEntry onOpen={() => setRoleSheetOpen(true)} />
         <PersonalGrid limit={4} />
         <ClusterGridCards personas={activePersonas} />
+        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeServiceGallery /></div>
         <NowInPhuket />
 
         {/* All-apps door */}

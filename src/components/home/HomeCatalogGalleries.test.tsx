@@ -69,7 +69,8 @@ it('keeps successful empty catalogues distinct from errors and category requests
     screen.getByRole('link', { name: /Kamala/ }),
   ).toBeVisible();
   expect(document.querySelector('.home-experiences')).toBeNull();
-  expect(document.querySelector('.home-services')).toBeNull();
+  expect(document.querySelector('.home-services')).not.toBeNull();
+  expect(screen.getByRole('link', { name: /All categories/ })).toBeVisible();
   expect(screen.queryByRole('alert')).toBeNull();
 
 });
@@ -125,7 +126,8 @@ it('does not present the shared static navigation fallback as live categories', 
   state.categories=[{id:'flowers',labelEn:'Flowers',services:[]}];
   show();
   expect(screen.queryByRole('link',{name:/Flowers/})).toBeNull();
-  expect(document.querySelector('.home-services')).toBeNull();
+  expect(document.querySelector('.home-services')).not.toBeNull();
+  expect(screen.getByRole('link', { name: /All categories/ })).toBeVisible();
 });
 it('retries category errors and keeps product cards out of category discovery', () => {
   state.error=true;show();

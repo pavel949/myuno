@@ -1,3 +1,4 @@
+import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 
@@ -19,12 +20,7 @@ export function selectHomeShowcase(properties: Property[], limit = 6): Property[
 
 /** The current public list does not guarantee tenancy_modes. Unknown stays unpriced. */
 export function homeShowcasePrice(property: Property & { tenancy_modes?: string[] | null }) {
-  const modes = property.tenancy_modes ?? [];
-  const nightly = modes.includes('short') && typeof property.price_per_night === 'number' && Number.isFinite(property.price_per_night) && property.price_per_night > 0;
-  const period = nightly ? 'night' : property.price_period;
-  const requiredMode = period === 'night' || period === 'week' ? 'short' : period === 'month' ? 'medium' : period === 'year' ? 'long' : null;
-  const amount = nightly ? property.price_per_night : property.price;
-  const currency = property.currency?.toUpperCase();
-  if (!requiredMode || !modes.includes(requiredMode) || typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0 || !currency || !/^[A-Z]{3}$/.test(currency)) return null;
-  return { amount, currency, period: period! };
+  const surface = surfaceFromProperty(property, 'rent');
+  if (surface.priceHintThb === null) return null;
+  return { amount: surface.priceHintThb, currency: 'THB', period: surface.priceMode.replace('per_', '') };
 }

@@ -38,6 +38,7 @@ import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { differenceInDays, format } from 'date-fns';
 import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailability';
 import '@/styles/property-search.css';
+import '@/styles/premium-public.css';
 import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 
 const FILTER_TITLES_TH: Record<string, string> = {'priceLevel': 'ระดับราคา', 'bedrooms': 'ห้องนอน', 'areaAtLeast': 'พื้นที่', 'instantBooking': 'การจอง', 'viewType': 'วิว', 'furnishingLevel': 'เฟอร์นิเจอร์', 'poolType': 'สระว่ายน้ำ', 'parkingType': 'ที่จอดรถ', 'ownershipForm': 'กรรมสิทธิ์', 'amenities': 'สิ่งอำนวยความสะดวก', 'highlights': 'จุดเด่น'};
@@ -54,6 +55,7 @@ export default function PropertySearchPage() {
   const isRu = language === 'ru';
   const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
+  const criteriaRef = useRef<HTMLDetailsElement>(null);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
   useEffect(() => {
@@ -268,6 +270,7 @@ export default function PropertySearchPage() {
 
   const submitSearch = (params: URLSearchParams) => {
     navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
+    if (criteriaRef.current) criteriaRef.current.open = false;
     setFocusResults(true);
   };
   const summaryTypes = searchParams.propertyTypes.map(id => {
@@ -283,10 +286,10 @@ export default function PropertySearchPage() {
     ? `${dateLabel(searchParams.checkIn)} – ${dateLabel(searchParams.checkOut)}`
     : (text('Без дат', 'Any dates', 'ไม่ระบุวันที่'));
   const summaryExtraFilters = advancedFilterCount + (selectedCompanyId ? 1 : 0);
-  const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('На год', 'Yearly', 'รายปี')) : (text('Посуточно', 'Nightly', 'รายคืน'));
+  const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('Надолго', 'Long stay', 'ระยะยาว')) : (text('Посуточно', 'Nightly', 'รายคืน'));
 
   return (
-    <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search property-discovery min-h-screen bg-background')}>
+    <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search premium-search property-discovery min-h-screen bg-background')}>
       <SEOHead title={text('Жильё на Пхукете', 'Homes in Phuket', 'ที่พักในภูเก็ต')} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
           <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
@@ -303,14 +306,12 @@ export default function PropertySearchPage() {
               }}>{mode === 'all' ? text('Все объекты', 'All homes', 'ที่พักทั้งหมด') : mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
-          <div className="property-search-editor property-discovery-editor">
-            <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue initialParams={searchParamsUrl} onSearch={submitSearch} />
-          </div>
-          <div className="text-body-sm text-muted-foreground" aria-label={text('Текущий поиск', 'Current search', 'การค้นหาปัจจุบัน')}>
-            <p>{summaryTypes} · {summaryAreas}{searchParams.bedrooms.length > 0 ? ` · ${text('Спальни', 'Bedrooms', 'ห้องนอน')}: ${searchParams.bedrooms.join(', ')}` : ''}{searchText ? ` · «${searchText}»` : ''}</p>
-            {!catalogueAll && propertyMode === 'rent' && <p>{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : (text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก'))}</p>}
-            {summaryExtraFilters > 0 && <p>{text('Дополнительных фильтров', 'Additional filters', 'ตัวกรองเพิ่มเติม')}: {summaryExtraFilters}</p>}
-          </div>
+          <details ref={criteriaRef} className="premium-search-criteria">
+            <summary><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
+            <div className="property-search-editor property-discovery-editor">
+              <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue initialParams={searchParamsUrl} onSearch={submitSearch} />
+            </div>
+          </details>
           <div className="flex min-w-0 items-center gap-2">
             <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
               <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>

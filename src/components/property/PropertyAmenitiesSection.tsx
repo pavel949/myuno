@@ -32,7 +32,7 @@ const CATEGORY_LABELS: Record<string, { en: string; ru: string; th: string }> = 
   services: { en: 'Services', ru: 'Услуги', th: 'บริการ' },
 };
 
-const VISIBLE_LIMIT = 10;
+const VISIBLE_LIMIT = 6;
 
 interface PropertyAmenitiesSectionProps {
   propertyId?: string;

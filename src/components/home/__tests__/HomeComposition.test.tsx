@@ -10,6 +10,8 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: s
 vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ personas: ['pet_owner'], effectivePersonas: ['pet_owner'], togglePersona: vi.fn(), setPersonas: vi.fn(), isLoading: false, isToggling: false, isSetting: false, error: null }) }));
 vi.mock('@/hooks/useLifeOS', () => ({ useLifeOSRole: () => 'resident' }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
+vi.mock('../HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => <section>Housing discovery</section>, HomeNewbuildsPreview: () => <section>New developments</section> }));
+vi.mock('../HomeCatalogGalleries', () => ({ HomeServiceGallery: () => <section>Services discovery</section> }));
 vi.mock('../HeroGreeting', () => ({ HeroGreeting: () => <div data-part="identity">Identity</div> }));
 vi.mock('../WorkspaceHomeBanner', () => ({ WorkspaceHomeBanner: () => <div data-part="workspace">Verified workspace</div> }));
 vi.mock('../PersonalHomeActions', () => ({ PersonalHomeActions: () => <div data-part="personal">Personal actions</div> }));

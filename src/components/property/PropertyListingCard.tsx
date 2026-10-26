@@ -141,7 +141,7 @@ function PropertyListingCardBase({
           images={images}
           alt={title}
           isHovered={isHovered}
-          aspectClass="aspect-[4/3] sm:aspect-square"
+          aspectClass="aspect-[4/3]"
         />
 
 
@@ -167,27 +167,7 @@ function PropertyListingCardBase({
             "Guest favorite" supersedes the legacy `is_featured` badge when
             the property meets the rating + review threshold (Airbnb pattern). */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {isGuestFavorite(property.rating, property.review_count) ? (
-            <GuestFavoriteBadge
-              rating={property.rating}
-              reviewsCount={property.review_count}
-            />
-          ) : property.is_featured ? (
-            <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
-              {isRu ? 'Популярное' : 'Popular'}
-            </Badge>
-          ) : null}
-          {primaryViewLabel && (
-            <Badge className="bg-background/90 text-foreground border-0 shadow-sm text-[10px] font-medium px-2 py-0.5 rounded-full max-w-[140px] truncate">
-              {primaryViewLabel}
-            </Badge>
-          )}
-          {property.instant_booking && (
-            <Badge className="bg-accent-amber text-white border-0 text-[11px] gap-1 rounded-full px-2 py-0.5">
-              <Zap className="w-3 h-3" />
-              {isRu ? 'Мгновенное' : 'Instant'}
-            </Badge>
-          )}
+          {primaryViewLabel && <Badge className="bg-background text-foreground border-0 rounded-none">{primaryViewLabel}</Badge>}
         </div>
 
         {/* ClearView grade overlay — bottom-left of image */}

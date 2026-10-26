@@ -1,8 +1,9 @@
 import '@/styles/public-commerce.css';
+import '@/styles/premium-public.css';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
-  MapPin, Star, BedDouble, Bath, Users, Maximize,
+  ChevronLeft, MapPin, Star, BedDouble, Bath, Users, Maximize,
   Share2, Loader2, Home, Sofa, Building2, Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -18,11 +19,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
-import { propertyCatalogHref, propertyDetailHref, propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyCatalogHref, propertyDetailHref, propertyDetailPricing, propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 import { publicJourneyState, publicJourneyReturn, propertyAreaHref } from '@/lib/real-estate/publicJourney';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
-import { BackButton } from '@/components/uno/BackButton';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import {
   IncludedServices,
@@ -129,7 +129,7 @@ export default function PropertyDetail() {
     [availability],
   );
 
-  const { data: property, isLoading } = usePropertyWithRentalTerms(id);
+  const { data: property, isLoading, isError, refetch } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
@@ -152,12 +152,11 @@ export default function PropertyDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <div className="premium-property premium-load-state" role="status" aria-label={isRu ? 'Загружаем объект' : 'Loading home'}><div className="h-8 w-2/3 bg-muted motion-safe:animate-pulse" /><div className="aspect-[4/3] md:aspect-[2/1] bg-muted motion-safe:animate-pulse" /><span className="sr-only">{isRu ? 'Загружаем объект…' : 'Loading home…'}</span></div>
     );
   }
 
+  if (isError) return <div className="premium-property premium-load-state" role="alert"><h1>{isRu ? 'Не удалось загрузить объект' : 'Could not load this home'}</h1><p>{isRu ? 'Параметры поиска сохранены. Попробуйте ещё раз.' : 'Your search criteria are preserved. Please try again.'}</p><Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button><Button variant="ghost" onClick={returnToResults}>{isRu ? 'К результатам' : 'Back to results'}</Button></div>;
   if (!property) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -235,6 +234,11 @@ export default function PropertyDetail() {
     setShowAllPhotos(true);
   };
 
+  const offerChoices = <div className="premium-offer-choices" role="group" aria-label={isRu ? 'Предложение' : 'Offer'}>{(['rent', 'buy'] as const).filter(mode => propertySupportsMode(property, mode)).map(mode => <Link key={mode} replace state={location.state} aria-current={pricing.mode === mode ? 'true' : undefined} to={propertyDetailHref(id || '', mode, searchParams.toString())} onClick={event => { if (pricing.mode === mode) event.preventDefault(); }}>{mode === 'rent' ? (isRu ? 'Аренда' : 'Rent') : (isRu ? 'Покупка' : 'Buy')}</Link>)}</div>;
+  const rentalTenancies = !isSaleListing && Array.isArray(property.tenancy_modes) && property.tenancy_modes.length > 1 ? <div className="premium-offer-choices" role="group" aria-label={isRu ? 'Срок аренды' : 'Rental duration'}>{property.tenancy_modes.filter(mode => ['short', 'medium', 'long'].includes(mode)).map(tenancy => { const params = new URLSearchParams(searchParams); params.set('tenancy', tenancy); return <Link key={tenancy} replace state={location.state} aria-current={searchParams.get('tenancy') === tenancy ? 'true' : undefined} to={propertyDetailHref(id || '', 'rent', params.toString())}>{({ short: isRu ? 'Поездка' : 'Short stay', medium: isRu ? 'Несколько месяцев' : 'A few months', long: isRu ? 'Надолго' : 'Long stay' } as Record<string, string>)[tenancy]}</Link>; })}</div> : null;
+  const depositKnown = rentalTerms?.deposit_amount != null && Number.isFinite(rentalTerms.deposit_amount) && rentalTerms.deposit_amount > 0;
+  const depositLabel = depositKnown && rentalTerms?.deposit_currency ? `${new Intl.NumberFormat(language).format(rentalTerms.deposit_amount!)} ${rentalTerms.deposit_currency}` : (isRu ? 'Уточните условия депозита' : 'Confirm deposit terms');
+
   const handleDateSheetConfirm = () => {
     if (!pricing.canQuoteShortStay || !availabilityQuery.isSuccess || availabilityQuery.isError) return;
     setDateSheetOpen(false);
@@ -278,10 +282,10 @@ export default function PropertyDetail() {
           address: property.district || undefined,
         })}
       />
-      <div className="public-commerce public-commerce--property pb-28">
+      <div className="public-commerce public-commerce--property premium-property pb-28">
         {/* Property identity and secondary actions */}
-        <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
-          <BackButton onClick={returnToResults} fallbackPath="/property/browse" variant="default" size="lg" />
+        <div className="premium-property-identity flex flex-wrap items-start gap-4 py-5 md:py-7">
+          <button type="button" className="premium-return home-text-link" onClick={returnToResults}><ChevronLeft className="h-4 w-4" aria-hidden="true" />{isRu ? 'К результатам' : 'Back to results'}</button>
           {/* Title */}
           <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
             <h1 className="public-commerce-title text-foreground break-words">
@@ -295,7 +299,7 @@ export default function PropertyDetail() {
               maxGuests={property.max_guests || rentalTerms?.max_guests}
             />
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
-              {property.rating != null && property.rating > 0 && (
+              {property.rating != null && property.rating > 0 && property.review_count != null && property.review_count > 0 && (
                 <>
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-primary fill-primary" />
@@ -311,12 +315,6 @@ export default function PropertyDetail() {
                 reviewsCount={property.review_count}
                 variant="inline"
               />
-              {property.is_verified && (
-                <span className="flex items-center gap-1 text-primary">
-                  · <Shield className="w-3.5 h-3.5" />
-                  <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
-                </span>
-              )}
               <span className="text-muted-foreground">
                 · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
               </span>
@@ -382,34 +380,17 @@ export default function PropertyDetail() {
         </div>
 
         {/* Image Gallery */}
-        <PropertyDetailGallery
+        <PropertyDetailGallery key={id}
           images={images}
           alt={galleryFallbackAlt}
           onOpenLightbox={openLightbox}
         />
 
+        {pricing.hasOffer && <section className="premium-offer-mobile" aria-label={isRu ? 'Условия предложения' : 'Offer summary'}>{offerChoices}{rentalTenancies}<p>{isSaleListing ? salePriceLabel : pricing.canQuoteShortStay ? (isRu ? 'Выберите даты для расчёта стоимости' : 'Choose dates to see the total price') : rentalPriceLabel}</p>{!isSaleListing && depositKnown && <p>{isRu ? 'Депозит' : 'Deposit'}: {depositLabel}</p>}{!isSaleListing && propertyExt.min_lease_months && <p>{isRu ? 'Минимальный срок' : 'Minimum lease'}: {propertyExt.min_lease_months} {isRu ? 'мес.' : 'months'}</p>}</section>}
         {/* Main Content with Sidebar Layout for Desktop */}
-        <div className="px-4 md:px-0 py-6 lg:py-10">
-          <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
-            <article className="space-y-6 min-w-0">
-
-              {isSaleListing && (
-                <>
-                  <Separator />
-                  <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
-                    <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
-                    <p className="text-2xl font-bold tracking-tight">{salePriceLabel}</p>
-                    {ownershipLabel && (
-                      <p className="text-sm text-muted-foreground">{ownershipLabel}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {isRu
-                        ? 'Запросите детали сделки, Due Diligence и варианты оплаты у менеджера.'
-                        : 'Ask the manager for transaction details, due diligence, and payment options.'}
-                    </p>
-                  </div>
-                </>
-              )}
+        <div>
+          <div className="premium-detail-grid">
+            <article className="premium-property-content min-w-0">
 
               {/* Trust signals: title deed, escrow, ClearView, owner verified */}
               <TrustStrip
@@ -469,9 +450,18 @@ export default function PropertyDetail() {
                 ))}
               </div>
 
+              {(property.description_ru || property.description_en) && <div>
+                <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
+                  {isRu ? 'Об этом жилье' : 'About this place'}
+                </h2>
+                <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
+                  {isRu ? property.description_ru || property.description_en : property.description_en || property.description_ru}
+                </p>
+              </div>}
+
               {/* Unit Specs */}
               <Separator />
-              <div>
+              {(property.floor || property.unit_number || viewTypes.length || property.furnishing_level || property.equipment?.length) ? <div>
                 <h2 className="text-xl lg:text-2xl font-semibold mb-4">
                   {isRu ? 'Что есть в жилье' : 'What this place offers'}
                 </h2>
@@ -483,11 +473,11 @@ export default function PropertyDetail() {
                   equipment={
                     (property.equipment && property.equipment.length > 0)
                       ? property.equipment
-                      : amenities.length > 0 ? amenities as string[] : undefined
+                      : undefined
                   }
                   propertyType={property.property_type}
                 />
-              </div>
+              </div> : null}
 
               {/* Structured amenities (catalogue-backed, grouped by category) */}
               <Separator />
@@ -531,14 +521,6 @@ export default function PropertyDetail() {
 
               <Separator />
 
-              <div>
-                <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
-                  {isRu ? 'Об этом жилье' : 'About this place'}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
-                  {isRu ? property.description_ru : property.description_en}
-                </p>
-              </div>
 
               {/* Pricing breakdown intentionally not rendered publicly.
                   Base/seasonal pricing belongs to the host workspace.
@@ -559,7 +541,7 @@ export default function PropertyDetail() {
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <UtilitiesInfo
@@ -595,7 +577,7 @@ export default function PropertyDetail() {
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <CheckInDetails
@@ -630,7 +612,7 @@ export default function PropertyDetail() {
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <HouseRules
@@ -706,11 +688,13 @@ export default function PropertyDetail() {
               id="property-pricing"
               tabIndex={-1}
               className={cn(
-                'hidden lg:flex lg:flex-col gap-4 w-full',
+                'premium-offer hidden flex-col gap-4 w-full',
                 'lg:sticky lg:top-[4.75rem] xl:top-[5.25rem] lg:self-start lg:z-10',
                 'lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1',
               )}
             >
+              {offerChoices}
+              {rentalTenancies}
               {!pricing.hasOffer ? (
                 <p role="status">{isRu ? 'Предложение недоступно' : 'Offer unavailable'}</p>
               ) : (isSaleListing || requiresRentalRequest) ? (
@@ -816,7 +800,7 @@ export default function PropertyDetail() {
         </div>
 
         {/* Mobile bottom CTA */}
-        {pricing.hasOffer && <PropertyDetailMobileBar
+        {pricing.hasOffer && !dateSheetOpen && <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
           isLongStayOnly={requiresRentalRequest}

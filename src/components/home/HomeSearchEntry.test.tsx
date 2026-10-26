@@ -1,19 +1,19 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
-import { HomeSearchEntry } from './HomeSearchEntry';
+import { HomeSearchEntry, HomePlanLinks } from './HomeSearchEntry';
 const homeSearchIntents = [
-  { id: 'holiday', query: 'mode=rent&tenancy=short', title: { ru: 'Для отдыха' } },
-  { id: 'monthly', query: 'mode=rent&tenancy=medium', title: { ru: 'Пожить несколько месяцев' } },
+  { id: 'holiday', query: 'mode=rent&tenancy=short', title: { ru: 'На время поездки' } },
+  { id: 'monthly', query: 'mode=rent&tenancy=medium', title: { ru: 'На несколько месяцев' } },
   { id: 'long', query: 'mode=rent&tenancy=long', title: { ru: 'Поселиться надолго' } },
-  { id: 'buy', query: 'mode=buy', title: { ru: 'Купить недвижимость' } },
+  { id: 'buy', query: 'mode=buy', title: { ru: 'Купить дом' } },
 ];
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
 afterEach(cleanup);
 function Location() { const loc = useLocation(); const nav = useNavigate(); return <><output>{loc.pathname + loc.search}</output><button onClick={() => nav(-1)}>Back</button></>; }
 it.each(homeSearchIntents)('navigates $id straight to canonical results and preserves it in history', intent => {
-  render(<MemoryRouter><HomeSearchEntry /><Location /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: /Найти жильё на Пхукете/ }));
+  render(<MemoryRouter><HomeSearchEntry /><HomePlanLinks /><Location /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: /Найти жильё или услугу/ })).toHaveAttribute('href', '/search');
   expect(screen.getAllByRole('link').filter(a => a.getAttribute('href')?.startsWith('/property/search'))).toHaveLength(4);
   expect(screen.queryByRole('form')).toBeNull();
   fireEvent.click(screen.getByRole('link', { name: new RegExp(intent.title.ru) }));

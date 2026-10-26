@@ -1,3 +1,6 @@
+import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import '@/styles/premium-public.css';
+import { homeAreaCover } from '@/components/home/homeAreaCovers';
 /**
  * @file AreaLandingPage.tsx
  * @description Public area landing at `/area/:slug`.
@@ -10,7 +13,7 @@
  *  - All cross-link slugs are pre-filtered against LIVE_PERSONA_SLUGS /
  *    LIVE_CLUSTER_SLUGS in areaLandings.ts so links never resolve to a 404.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { publicJourneyState, readPublicJourneyOrigin, publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
@@ -108,19 +111,23 @@ const AreaLandingPage = () => {
   const journeyOrigin = readPublicJourneyOrigin(location.state);
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [housingMode, setHousingMode] = useState<'rent' | 'buy' | 'projects'>('rent');
 
   const landing = slug ? findAreaLandingBySlug(slug) : undefined;
 
   // Hooks must run unconditionally — pass empty district when landing missing.
   const districtFilter = landing?.area.name_en ?? '';
-  const { data: rentalProps = [] } = useProperties(
+  const rentals = useProperties(
     districtFilter ? { district: districtFilter, listingType: 'rent' } : {},
     SEED_LISTING_LIMIT,
   );
-  const { data: offplanProjects = [] } = useOffplanProjects(
+  const projects = useOffplanProjects(
     districtFilter ? { district: districtFilter } : undefined,
   );
 
+  const purchases = useProperties(districtFilter ? { district: districtFilter, listingType: 'sale' } : {}, SEED_LISTING_LIMIT);
+  const rentalProps = rentals.data ?? [];
+  const offplanProjects = projects.data ?? [];
   const offplanSurfaces = useMemo(
     () => offplanProjects.slice(0, SEED_LISTING_LIMIT).map(surfaceFromOffplanProject),
     [offplanProjects],
@@ -142,22 +149,22 @@ const AreaLandingPage = () => {
       .slice(0, 3);
   }, [landing]);
 
+  const purchaseSurfaces = (purchases.data ?? []).slice(0, SEED_LISTING_LIMIT).map(p => surfaceFromProperty(p, 'buy'));
+  const housing = housingMode === 'rent' ? rentals : housingMode === 'buy' ? purchases : projects;
+  const surfaces = housingMode === 'rent' ? rentalSurfaces : housingMode === 'buy' ? purchaseSurfaces : offplanSurfaces;
   if (!landing) return <NotFound />;
 
   const { area, seo, relatedPersonaSlugs, relatedClusterSlugs } = landing;
   const name = isRu ? area.name_ru : area.name_en;
   const description = isRu ? area.description_ru : area.description_en;
   const highlights = isRu ? area.highlights_ru : area.highlights_en;
-  const pros = isRu ? area.pros_ru : area.pros_en;
   const cons = isRu ? area.cons_ru : area.cons_en;
 
-  const beachLabel =
-    area.distance_beach_km < 1
-      ? `${(area.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : 'm'}`
-      : `${area.distance_beach_km} ${isRu ? 'км' : 'km'}`;
-
   const districtParam = encodeURIComponent(area.name_en);
-  const rentSearchHref = `/property/browse?district=${districtParam}`;
+  const sourceCriteria = journeyOrigin ? new URL(journeyOrigin.href, 'https://myuno.app').search : location.search;
+  const rentCriteria = new URLSearchParams(propertyDetailHref('', 'rent', sourceCriteria).split('?')[1]);
+  rentCriteria.set('district', area.name_en);
+  const rentSearchHref = `/property/browse?${rentCriteria.toString()}`;
   const offplanSearchHref = `/property/offplan?district=${districtParam}`;
   // Both map deep-links share the canonical `/property/map?district=…` entry
   // (PropertyMap reads the param, filters server-side, and recenters on it).
@@ -238,7 +245,7 @@ const AreaLandingPage = () => {
         <script type="application/ld+json">{JSON.stringify(breadcrumb)}</script>
       </Helmet>
 
-      <PageShell width="wide">
+      <PageShell width="full" className="premium-area">
         {journeyOrigin && (
           <Button variant="ghost" className="mb-3 min-h-11" onClick={() => { const plan = publicJourneyReturn(location, rentSearchHref); if ('delta' in plan) navigate(plan.delta); else navigate(plan.href, { replace: plan.replace, state: plan.state }); }}>
             ← {isRu ? 'Вернуться к объекту' : 'Back to property'}
@@ -252,7 +259,7 @@ const AreaLandingPage = () => {
         </nav>
 
         {/* Hero */}
-        <header className="mb-8 border-b border-border pb-6">
+        <header className="premium-area-hero"><div>
           <div className="mb-2 flex items-center gap-3">
             <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               {name}
@@ -286,31 +293,16 @@ const AreaLandingPage = () => {
               </Link>
             </Button>
           </div>
-        </header>
+        </div><div className="premium-area-cover"><img src={homeAreaCover(area.slug).src} alt="" /><span>{isRu ? 'Иллюстрация района' : 'Area illustration'}</span></div></header>
 
         <p className="mb-5 text-sm text-muted-foreground">
           {isRu ? 'Редакционный путеводитель. Актуальные цены и доходность требуют отдельной проверки; расстояния ориентировочные.' : 'Editorial area guide. Current prices and yields require separate verification; distances are approximate.'}
         </p>
-        {/* Guide distances */}
-        <section className="mb-10 grid grid-cols-2 gap-3">
-          <div className="rounded-none border border-border bg-card p-4 text-center">
-            <Plane className="mx-auto mb-2 h-4 w-4 text-muted-foreground" aria-hidden />
-            <p className="text-lg font-semibold text-foreground">
-              {area.distance_airport_km} {isRu ? 'км' : 'km'}
-            </p>
-            <p className="text-[11px] text-muted-foreground">
-              {isRu ? 'До аэропорта' : 'To the airport'}
-            </p>
-          </div>
-          <div className="rounded-none border border-border bg-card p-4 text-center">
-            <Waves className="mx-auto mb-2 h-4 w-4 text-muted-foreground" aria-hidden />
-            <p className="text-lg font-semibold text-foreground">{beachLabel}</p>
-            <p className="text-[11px] text-muted-foreground">
-              {isRu ? 'До пляжа' : 'To the beach'}
-            </p>
-          </div>
+        <section id="area-homes" aria-labelledby="area-homes-title">
+          <div className="home-section-heading"><h2 id="area-homes-title">{isRu ? `Жильё в ${name}` : `Homes in ${name}`}</h2><Link className="home-text-link" to={housingMode === 'projects' ? offplanSearchHref : housingMode === 'buy' ? rentSearchHref.replace('mode=rent', 'mode=buy') : rentSearchHref}>{isRu ? 'Весь каталог района' : 'Explore the area catalogue'} →</Link></div>
+          <div className="premium-offer-choices" role="group" aria-label={isRu ? 'Жильё в районе' : 'Area homes'}>{(['rent', 'buy', 'projects'] as const).map(mode => <button type="button" key={mode} aria-pressed={housingMode === mode} onClick={() => setHousingMode(mode)}>{mode === 'rent' ? (isRu ? 'Аренда' : 'Rent') : mode === 'buy' ? (isRu ? 'Покупка' : 'Buy') : (isRu ? 'Новостройки' : 'New developments')}</button>)}</div>
+          {housing.isLoading ? <p role="status">{isRu ? 'Загружаем предложения…' : 'Loading homes…'}</p> : housing.isError ? <div role="alert"><p>{isRu ? 'Не удалось загрузить предложения.' : 'Could not load homes.'}</p><Button variant="outline" onClick={() => housing.refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button></div> : surfaces.length ? <div className="premium-area-homes">{surfaces.map(surface => <SeedCard key={surface.id} surface={surface} isRu={isRu} />)}</div> : <p>{isRu ? 'Опубликованных предложений для этой подборки пока нет. Можно изменить параметры в каталоге.' : 'No published offers in this selection yet. You can adjust your criteria in the catalogue.'}</p>}
         </section>
-
         {/* Highlights */}
         <section className="mb-10">
           <h2 className="mb-4 text-xl font-semibold text-foreground">
@@ -329,111 +321,8 @@ const AreaLandingPage = () => {
           </ul>
         </section>
 
-        {/* Pros & cons */}
-        <section className="mb-10 grid gap-4 md:grid-cols-2">
-          <div className="rounded-none border border-border bg-card p-5">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {isRu ? 'Преимущества' : 'Pros'}
-            </h3>
-            <ul className="space-y-2">
-              {pros.map((p) => (
-                <li key={p} className="flex items-start gap-2 text-sm text-foreground">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-none border border-border bg-card p-5">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {isRu ? 'Ограничения' : 'Trade-offs'}
-            </h3>
-            <ul className="space-y-2">
-              {cons.map((c) => (
-                <li key={c} className="flex items-start gap-2 text-sm text-foreground">
-                  <AlertTriangle
-                    className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                    aria-hidden
-                  />
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* Rental listings */}
-        <section className="mb-10">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <h2 className="text-xl font-semibold text-foreground">
-              {isRu ? `Аренда в ${name}` : `Rentals in ${name}`}
-            </h2>
-            <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
-              <Link
-                to={rentMapHref}
-                className="inline-flex items-center gap-1 text-primary hover:underline"
-              >
-                <MapIcon className="h-3.5 w-3.5" aria-hidden />
-                {isRu ? 'На карте' : 'Map'}
-              </Link>
-              <Link to={rentSearchHref} className="text-primary hover:underline">
-                {isRu ? 'Все объекты →' : 'View all →'}
-              </Link>
-            </div>
-          </div>
-          {rentalSurfaces.length === 0 ? (
-            <p className="rounded-none border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              {isRu
-                ? 'Пока нет активных объектов. Откройте поиск или загляните позже.'
-                : 'No active listings yet. Try the search or check back later.'}
-            </p>
-          ) : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
-              {rentalSurfaces.map((s) => (
-                <li key={s.id}>
-                  <SeedCard surface={s} isRu={isRu} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Off-plan listings */}
-        <section className="mb-10">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <h2 className="text-xl font-semibold text-foreground">
-              {isRu ? 'Новостройки района' : 'Off-plan in this area'}
-            </h2>
-            <div className="flex shrink-0 items-center gap-3 text-sm font-medium">
-              <Link
-                to={offplanMapHref}
-                className="inline-flex items-center gap-1 text-primary hover:underline"
-              >
-                <MapIcon className="h-3.5 w-3.5" aria-hidden />
-                {isRu ? 'На карте' : 'Map'}
-              </Link>
-              <Link to={offplanSearchHref} className="text-primary hover:underline">
-                {isRu ? 'Все проекты →' : 'View all →'}
-              </Link>
-            </div>
-          </div>
-          {offplanSurfaces.length === 0 ? (
-            <p className="rounded-none border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-              {isRu
-                ? 'Каталог новостроек района обновляется. Напишите нам — подберём вручную.'
-                : 'The off-plan catalogue for this area is being updated. Reach out and we will source manually.'}
-            </p>
-          ) : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
-              {offplanSurfaces.map((s) => (
-                <li key={s.id}>
-                  <SeedCard surface={s} isRu={isRu} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
+        <section><h2>{isRu ? 'Что стоит учесть' : 'Things to consider'}</h2><ul className="premium-area-notes">{cons.map(note => <li key={note}><AlertTriangle className="h-4 w-4" aria-hidden="true" />{note}</li>)}</ul><Link className="home-text-link" to={rentMapHref}>{isRu ? 'Карта района и жилья' : 'Explore the area and homes on the map'} →</Link></section>
+        <HomeServiceGallery />
         {/* Cross-links: personas + clusters */}
         {(personaLinks.length > 0 || clusterLinks.length > 0) && (
           <section className="mb-10 rounded-none border border-border bg-card p-5">
@@ -499,8 +388,7 @@ const AreaLandingPage = () => {
                         {isRu ? na.area.name_ru : na.area.name_en}
                       </span>
                       <span className="block text-xs text-muted-foreground">
-                        ฿{(na.area.avg_price_sqm / 1000).toFixed(0)}K/
-                        {isRu ? 'м²' : 'sqm'} · {na.area.avg_yield}%
+                        {isRu ? 'Познакомиться с районом' : 'Explore the area guide'}
                       </span>
                     </span>
                   </Link>

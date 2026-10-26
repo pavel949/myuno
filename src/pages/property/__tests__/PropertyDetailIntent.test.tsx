@@ -171,7 +171,7 @@ it('returns from the real property district link to the original filtered search
   fireEvent.click(screen.getByRole('link', { name: 'Explore Bang Tao' }));
   fireEvent.click(screen.getByRole('button', { name: 'Return from area' }));
   expect(screen.getByRole('link', { name: 'Explore Bang Tao' })).toHaveAttribute('href', '/area/bang-tao');
-  fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Back to results' }));
   expect(screen.getByTestId('journey-search')).toHaveTextContent(query);
 });
 it('keeps guest criteria when a direct property link returns to the catalogue', () => {
@@ -179,7 +179,7 @@ it('keeps guest criteria when a direct property link returns to the catalogue', 
     <Route path="/property/browse" element={<SearchJourneyEntry />} />
     <Route path="/property/:id" element={<CompareProvider><PropertyDetail /></CompareProvider>} />
   </Routes></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Back to results' }));
   const params = new URLSearchParams(screen.getByTestId('journey-search').textContent ?? '');
   expect(Object.fromEntries(params)).toEqual({ mode: 'rent', tenancy: 'long', guests: '4', intent: 'relocate' });
 });
@@ -187,13 +187,13 @@ it('keeps guest criteria when a direct property link returns to the catalogue', 
 it.each(['medium', 'long'])('shows the explicit monthly tariff for a %s request without a nightly booking card', tenancy => {
   state.property.tenancy_modes = [tenancy]; state.property.price_period = 'month'; state.property.price_per_month = 45000;
   mount(`rent&tenancy=${tenancy}`);
-  expect(screen.getByText('45000 / month')).toBeInTheDocument();
+  expect(screen.getAllByText('45000 / month').length).toBeGreaterThan(0);
   expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
 });
 it.each([null, 'USD'])('keeps unknown/non-THB rental currency %s on the request route', currency => {
   state.property.currency = currency; mount('rent');
-  expect(screen.getByText('Price on request')).toBeInTheDocument();
+  expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0);
   expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
 });
@@ -202,7 +202,7 @@ it('does not relabel a monthly legacy amount as nightly', () => {
   // The explicit property nightly field remains a genuine separate tariff.
   state.property.price_per_night = 0;
   mount('rent');
-  expect(screen.getByText('2000 / month')).toBeInTheDocument();
+  expect(screen.getAllByText('2000 / month').length).toBeGreaterThan(0);
   expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
   state.property.price_per_night = 2000;
 });
