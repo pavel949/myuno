@@ -28,6 +28,7 @@ import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 interface PropertyBookingCardProps {
   propertyId: string;
   initialGuestContext?: PropertyGuestContext;
+  guestSearch?: string;
   pricePerNight: number;
   rentalTerms?: PropertyRentalTerms | null;
   currency?: string;
@@ -48,6 +49,7 @@ interface PropertyBookingCardProps {
 export function PropertyBookingCard({
   propertyId,
   initialGuestContext,
+  guestSearch,
   pricePerNight,
   rentalTerms,
   currency = 'THB',
@@ -191,7 +193,7 @@ export function PropertyBookingCard({
   
   const handleReserve = () => {
     if (!availabilityReady) return;
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(guestSearch);
     if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
     params.set('guests', guests.toString());

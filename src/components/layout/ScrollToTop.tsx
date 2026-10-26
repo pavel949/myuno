@@ -1,3 +1,4 @@
+import { rememberPublicJourneyLocation } from '@/lib/real-estate/publicJourney';
 import { useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
@@ -5,11 +6,13 @@ const publicScrollPositions = new Map<string, number>();
 const isPublicJourney = (path: string) => /^\/(property(?:\/|$)|area\/)/.test(path);
 
 export const ScrollToTop = () => {
-  const { pathname, key } = useLocation();
+  const location = useLocation();
+  const { pathname, key } = location;
   const navigationType = useNavigationType();
   const previousPath = useRef<string | undefined>(undefined);
 
   useLayoutEffect(() => {
+    rememberPublicJourneyLocation(location);
     const pathChanged = previousPath.current !== pathname;
     previousPath.current = pathname;
     if (!isPublicJourney(pathname)) {
@@ -37,7 +40,7 @@ export const ScrollToTop = () => {
       window.removeEventListener('touchstart', stopRestoring);
       window.removeEventListener('keydown', stopRestoring);
     };
-  }, [pathname, key, navigationType]);
+  }, [location, pathname, key, navigationType]);
 
   return null;
 };

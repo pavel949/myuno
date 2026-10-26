@@ -12,15 +12,14 @@ import { CompareButton, PropertyCompareTrigger, type CompareProperty } from '@/c
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
-import { propertyCatalogHref, propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
-import { publicJourneyState, readPublicJourneyOrigin, propertyAreaHref } from '@/lib/real-estate/publicJourney';
+import { propertyCatalogHref, propertyDetailHref, propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
+import { publicJourneyState, publicJourneyReturn, propertyAreaHref } from '@/lib/real-estate/publicJourney';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -94,12 +93,14 @@ export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const journeyOrigin = readPublicJourneyOrigin(location.state);
-  const returnToResults = () => journeyOrigin ? navigate(-1) : navigate(propertyCatalogHref(searchParams.get('mode') === 'buy' ? 'buy' : 'rent', searchParams.toString()), { replace: true });
+  const returnToResults = () => {
+    const plan = publicJourneyReturn(location, propertyCatalogHref(searchParams.get('mode') === 'buy' ? 'buy' : 'rent', searchParams.toString()));
+    if ('delta' in plan) navigate(plan.delta);
+    else navigate(plan.href, { replace: plan.replace, state: plan.state });
+  };
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
   const multiUnitEnabled = useFeatureFlag('multi_unit_properties');
 
@@ -199,28 +200,19 @@ export default function PropertyDetail() {
   const amenities = property.amenities || [];
 
 
-  const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
-  // City-aware currency: prefer listing-level currency, else current city default, else USD.
-  const listingCurrency =
-    ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
-  const isSaleListing = propertyDetailMode(property, searchParams.get('mode')) === 'buy';
-  const salePrice = propertySaleAskingPrice(property);
-  const salePriceLabel = salePrice != null ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request');
-
-  // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
-  // explicitly set, respect it; otherwise fall back to legacy nightly-price
-  // signal so existing listings keep showing the booking card.
-  const tenancyModes: string[] = Array.isArray(propertyExt.tenancy_modes)
-    ? propertyExt.tenancy_modes
-    : [];
-  const supportsShortStay = tenancyModes.length > 0
-    ? tenancyModes.includes('short')
-    : !!pricePerNight;
-  const requestedTenancy = searchParams.get('tenancy');
-  // A supported explicit long/monthly search opens the existing request flow,
-  // including dual short+long offers; URL intent never grants listing eligibility.
-  const longStayRequested = (requestedTenancy === 'medium' || requestedTenancy === 'long') && tenancyModes.includes(requestedTenancy);
-  const isLongStayOnly = (tenancyModes.length > 0 && !supportsShortStay) || longStayRequested;
+  const pricing = propertyDetailPricing(property, rentalTerms, searchParams.get('mode'), searchParams.get('tenancy'));
+  const isSaleListing = pricing.mode === 'buy';
+  const requiresRentalRequest = !pricing.canQuoteShortStay;
+  const pricePerNight = pricing.pricePerNight;
+  const listingCurrency = property.currency?.trim().toUpperCase() ?? '';
+  const priceOnRequest = isRu ? 'Цена по запросу' : 'Price on request';
+  const salePrice = isSaleListing ? pricing.amount : null;
+  const salePriceLabel = salePrice !== null ? formatPrice(salePrice) : priceOnRequest;
+  const periodLabel = ({ night: isRu ? 'ночь' : 'night', week: isRu ? 'нед.' : 'week', month: isRu ? 'мес.' : 'month', year: isRu ? 'год' : 'year', total: '' } as Record<string, string>)[pricing.period ?? ''];
+  const rentalPriceLabel = pricing.amount !== null ? `${formatPrice(pricing.amount)}${periodLabel ? ` / ${periodLabel}` : ''}` : priceOnRequest;
+  const tenancyLabel = pricing.requestedTenancy === 'long' ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
+    : pricing.requestedTenancy === 'medium' ? (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')
+    : (isRu ? 'Условия аренды' : 'Rental terms');
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes.map((vt) => viewTypeLabels[vt]).filter(Boolean);
 
@@ -244,19 +236,19 @@ export default function PropertyDetail() {
   };
 
   const handleDateSheetConfirm = () => {
-    if (!availabilityQuery.isSuccess || availabilityQuery.isError) return;
+    if (!pricing.canQuoteShortStay || !availabilityQuery.isSuccess || availabilityQuery.isError) return;
     setDateSheetOpen(false);
     if (dateRange?.from && dateRange?.to) {
-      const params = new URLSearchParams({
-        checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-        checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-        guests: guestCount.toString(),
-      });
+      const params = new URLSearchParams(propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]);
+      params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+      params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+      params.set('guests', guestCount.toString());
       navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
     }
   };
 
   const handleViewPricing = () => {
+    if (!pricing.canQuoteShortStay) return;
     const panel = document.getElementById('property-pricing');
     if (panel && panel.getClientRects().length > 0) {
       panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -276,8 +268,8 @@ export default function PropertyDetail() {
         jsonLd={createRealEstateListingSchema({
           name: propertyTitle || '',
           description: propertyDesc.slice(0, 300),
-          price: pricePerNight || undefined,
-          currency: listingCurrency,
+          price: isSaleListing ? salePrice ?? undefined : undefined,
+          currency: isSaleListing && salePrice !== null ? 'THB' : undefined,
           image: property.cover_image || undefined,
           url: `https://www.myuno.app/property/${id}`,
           bedrooms: property.bedrooms || undefined,
@@ -533,7 +525,7 @@ export default function PropertyDetail() {
               {rentalTerms?.manager_name && (
                 <>
                   <Separator />
-                  <HostProfileSection rentalTerms={rentalTerms} isVerified={property.is_verified} />
+                  <HostProfileSection rentalTerms={rentalTerms} />
                 </>
               )}
 
@@ -632,7 +624,7 @@ export default function PropertyDetail() {
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
-                    onViewPricing={!isSaleListing && !isLongStayOnly ? handleViewPricing : undefined}
+                    onViewPricing={pricing.canQuoteShortStay ? handleViewPricing : undefined}
                   />
                   <GuestAssuranceCard compact className="lg:hidden mt-2" />
                 </>
@@ -719,7 +711,9 @@ export default function PropertyDetail() {
                 'lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1',
               )}
             >
-              {(isSaleListing || isLongStayOnly) ? (
+              {!pricing.hasOffer ? (
+                <p role="status">{isRu ? 'Предложение недоступно' : 'Offer unavailable'}</p>
+              ) : (isSaleListing || requiresRentalRequest) ? (
                 <Card>
                   <CardContent className="p-4 space-y-3">
                     {isSaleListing ? (
@@ -730,18 +724,9 @@ export default function PropertyDetail() {
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">
-                          {tenancyModes.includes('long')
-                            ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
-                            : (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')}
+                          {tenancyLabel}
                         </p>
-                        {propertyExt.price_per_month && (
-                          <p className="text-2xl font-bold">
-                            {formatPrice(propertyExt.price_per_month)}
-                            <span className="text-sm font-normal text-muted-foreground ml-1">
-                              /{isRu ? 'мес' : 'mo'}
-                            </span>
-                          </p>
-                        )}
+                        <p className="text-2xl font-bold">{rentalPriceLabel}</p>
                         {propertyExt.min_lease_months && (
                           <p className="text-xs text-muted-foreground">
                             {isRu
@@ -782,8 +767,9 @@ export default function PropertyDetail() {
                   <PropertyBookingCard
                     key={id}
                     initialGuestContext={initialGuestContext}
+                    guestSearch={propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]}
                     propertyId={id || 'prop-1'}
-                    pricePerNight={pricePerNight}
+                    pricePerNight={pricePerNight!}
                     rentalTerms={rentalTerms}
                     currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
@@ -830,11 +816,13 @@ export default function PropertyDetail() {
         </div>
 
         {/* Mobile bottom CTA */}
-        <PropertyDetailMobileBar
+        {pricing.hasOffer && <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
-          isLongStayOnly={isLongStayOnly}
-          salePrice={salePrice ?? 0}
+          isLongStayOnly={requiresRentalRequest}
+          salePrice={salePrice}
+          rentalPriceLabel={rentalPriceLabel}
+          guestSearch={propertyDetailHref(id || '', pricing.mode, searchParams.toString()).split('?')[1]}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}
           titleEn={property.title_en}
@@ -843,11 +831,11 @@ export default function PropertyDetail() {
           instantBooking={rentalTerms?.instant_booking}
           dateRange={dateRange}
           guestCount={guestCount}
-          onOpenDatePicker={() => setDateSheetOpen(true)}
-        />
+          onOpenDatePicker={() => { if (pricing.canQuoteShortStay) setDateSheetOpen(true); }}
+        />}
 
         {/* Mobile Date Picker Sheet */}
-        <PropertyDetailDateSheet
+        {pricing.canQuoteShortStay && <PropertyDetailDateSheet
           open={dateSheetOpen}
           onOpenChange={setDateSheetOpen}
           dateRange={dateRange}
@@ -862,7 +850,7 @@ export default function PropertyDetail() {
           onRetryAvailability={() => { void availabilityQuery.refetch(); }}
           unavailableDates={unavailableDates}
           onConfirm={handleDateSheetConfirm}
-        />
+        />}
       </div>
 
       {/* Cross-sell */}

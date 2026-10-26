@@ -19,8 +19,10 @@ interface PropertyDetailMobileBarProps {
   propertyId: string;
   isSaleListing: boolean;
   isLongStayOnly?: boolean;
-  salePrice: number;
-  pricePerNight: number;
+  salePrice: number | null;
+  pricePerNight?: number | null;
+  rentalPriceLabel?: string;
+  guestSearch?: string;
   ownershipLabel?: string;
   titleEn?: string | null;
   titleRu?: string | null;
@@ -37,6 +39,8 @@ export function PropertyDetailMobileBar({
   isLongStayOnly = false,
   salePrice,
   pricePerNight,
+  rentalPriceLabel,
+  guestSearch,
   ownershipLabel,
   titleEn,
   titleRu,
@@ -53,11 +57,10 @@ export function PropertyDetailMobileBar({
 
   const handleReserve = () => {
     if (dateRange?.from && dateRange?.to) {
-      const params = new URLSearchParams({
-        checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-        checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-        guests: guestCount.toString(),
-      });
+      const params = new URLSearchParams(guestSearch);
+      params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+      params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+      params.set('guests', guestCount.toString());
       navigate(`${APP_ROUTES.PROPERTY_INQUIRY(propertyId)}?${params.toString()}`);
     } else {
       onOpenDatePicker();
@@ -72,8 +75,8 @@ export function PropertyDetailMobileBar({
             <div className="flex-1 min-w-0">
               {isSaleListing ? <>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-                <span className="text-xl font-bold text-foreground">{salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
-              </> : <p className="text-sm font-semibold text-foreground">{pickLang(language, { ru: 'Условия аренды', en: 'Rental terms', th: 'เงื่อนไขการเช่า' })}</p>}
+                <span className="text-xl font-bold text-foreground">{typeof salePrice === 'number' && salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
+              </> : <p className="text-sm font-semibold text-foreground">{rentalPriceLabel ?? pickLang(language, { ru: 'Условия аренды', en: 'Rental terms', th: 'เงื่อนไขการเช่า' })}</p>}
               {ownershipLabel && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
               )}

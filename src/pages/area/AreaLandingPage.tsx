@@ -12,7 +12,8 @@
  */
 import { useMemo } from 'react';
 import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
-import { publicJourneyState, readPublicJourneyOrigin } from '@/lib/real-estate/publicJourney';
+import { publicJourneyState, readPublicJourneyOrigin, publicJourneyReturn } from '@/lib/real-estate/publicJourney';
+import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import { Helmet } from 'react-helmet-async';
 import {
   AlertTriangle,
@@ -57,6 +58,9 @@ interface SeedCardProps {
 
 const SeedCard = ({ surface, isRu }: SeedCardProps) => {
   const location = useLocation();
+  const origin = readPublicJourneyOrigin(location.state);
+  const guestSearch = origin ? new URL(origin.href, 'https://myuno.app').search : location.search;
+  const href = surface.kind === 'property_listing' ? propertyDetailHref(surface.id, surface.intent === 'sale' ? 'buy' : 'rent', guestSearch) : surface.href;
   const title = isRu ? surface.titleRu : surface.titleEn;
   const priceLine =
     surface.priceHintThb != null
@@ -66,7 +70,7 @@ const SeedCard = ({ surface, isRu }: SeedCardProps) => {
       : null;
   return (
     <Link
-      to={surface.href}
+      to={href}
       state={publicJourneyState(location)}
       className="group block overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary/60"
     >
@@ -236,7 +240,7 @@ const AreaLandingPage = () => {
 
       <PageShell width="wide">
         {journeyOrigin && (
-          <Button variant="ghost" className="mb-3 min-h-11" onClick={() => navigate(-1)}>
+          <Button variant="ghost" className="mb-3 min-h-11" onClick={() => { const plan = publicJourneyReturn(location, rentSearchHref); if ('delta' in plan) navigate(plan.delta); else navigate(plan.href, { replace: plan.replace, state: plan.state }); }}>
             ← {isRu ? 'Вернуться к объекту' : 'Back to property'}
           </Button>
         )}

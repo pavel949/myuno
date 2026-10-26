@@ -11,11 +11,16 @@ export interface PropertyIntentFields {
   is_for_sale?: boolean | null;
 }
 
+export function propertySupportsMode(property: PropertyIntentFields, mode: 'rent' | 'buy'): boolean {
+  return mode === 'rent'
+    ? property.listing_type === 'rent' || !!property.listing_modes?.includes('rent')
+    : property.listing_type === 'sale' || property.is_for_sale === true || !!property.listing_modes?.includes('sale');
+}
+
 /** URL intent chooses between supported offers; it never makes a property eligible. */
 export function propertyDetailMode(property: PropertyIntentFields, requested?: string | null): 'rent' | 'buy' {
-  const modes = property.listing_modes || [];
-  const canRent = property.listing_type === 'rent' || modes.includes('rent');
-  const canBuy = property.listing_type === 'sale' || property.is_for_sale === true || modes.includes('sale');
+  const canRent = propertySupportsMode(property, 'rent');
+  const canBuy = propertySupportsMode(property, 'buy');
   if (requested === 'rent' && canRent) return 'rent';
   if (requested === 'buy' && canBuy) return 'buy';
   return canBuy ? 'buy' : 'rent';
@@ -63,6 +68,35 @@ export function propertyRentalDisplayPrice(property: {
     if (amount !== null) return { amount, period };
   }
   return null;
+}
+
+/** Public detail presentation; this never establishes availability or a server quote. */
+export function propertyDetailPricing(property: PropertyIntentFields & {
+  currency?: string | null; sale_currency?: string | null; sale_price?: number | null;
+  price?: number | null; price_period?: string | null; price_per_night?: number | null;
+  price_per_month?: number | null; price_per_year?: number | null; tenancy_modes?: string[] | null;
+}, rentalTerms: { price_per_night?: number | null } | null | undefined, requestedMode?: string | null, requestedTenancy?: string | null) {
+  const mode = propertyDetailMode(property, requestedMode);
+  const hasOffer = propertySupportsMode(property, mode);
+  const positive = (value?: number | null) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+  const dedicatedNightly = positive(rentalTerms?.price_per_night) ?? positive(property.price_per_night);
+  const rental = propertyRentalDisplayPrice({ ...property, price_per_night: dedicatedNightly });
+  const nightly = dedicatedNightly ?? (rental?.period === 'night' ? rental.amount : null);
+  const modes = property.tenancy_modes ?? [];
+  const shortEligible = modes.length > 0 ? modes.includes('short') : nightly !== null;
+  const longerStayRequested = (requestedTenancy === 'medium' || requestedTenancy === 'long') && modes.includes(requestedTenancy);
+  const rentalCurrencyKnown = property.currency?.trim().toUpperCase() === 'THB';
+  const saleCurrencyKnown = (property.sale_price != null ? property.sale_currency : property.currency)?.trim().toUpperCase() === 'THB';
+  const canQuoteShortStay = hasOffer && mode === 'rent' && shortEligible && !longerStayRequested && rentalCurrencyKnown && nightly !== null;
+  const amount = !hasOffer ? null : mode === 'buy'
+    ? saleCurrencyKnown ? propertySaleAskingPrice(property) : null
+    : rentalCurrencyKnown ? canQuoteShortStay ? nightly : rental?.amount ?? null : null;
+  return {
+    mode, hasOffer, canQuoteShortStay,
+    amount, period: mode === 'buy' ? 'total' as const : canQuoteShortStay ? 'night' as const : rental?.period ?? null,
+    pricePerNight: canQuoteShortStay ? nightly : null,
+    requestedTenancy: longerStayRequested ? requestedTenancy : null,
+  };
 }
 
 export function propertyDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {

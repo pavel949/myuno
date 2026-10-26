@@ -43,3 +43,15 @@ describe('mobile property action contract', () => {
     expect(screen.queryByRole('button', { name: 'Request rental' })).toBeNull();
   });
 });
+it('keeps validated guest intent on the existing dated inquiry route', () => {
+  render(<PropertyDetailMobileBar {...base} guestSearch="mode=rent&tenancy=short&intent=holiday&guests=4" dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Reserve' }));
+  const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
+  expect(Object.fromEntries(url.searchParams)).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2027-11-10', checkOut: '2027-11-15', guests: '3' });
+});
+it('shows an explicitly monthly long-stay label on the existing request action', () => {
+  render(<PropertyDetailMobileBar {...base} isLongStayOnly rentalPriceLabel="45000 / month" />);
+  expect(screen.getByText('45000 / month')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Select dates' })).toBeNull();
+});
