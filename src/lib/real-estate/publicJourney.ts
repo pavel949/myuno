@@ -1,3 +1,4 @@
+import { normalizeDistrictId } from '@/lib/taxonomies';
 import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 
 interface JourneyLocation { pathname: string; search: string; hash: string; key: string }
@@ -23,6 +24,7 @@ export function readPublicJourneyOrigin(state: unknown): JourneyOrigin | undefin
 export function propertyAreaHref(district?: string | null): string | undefined {
   const value = district?.trim().toLocaleLowerCase();
   if (!value) return;
-  const area = PHUKET_AREAS.find(area => [area.slug, area.name_en, area.name_ru].some(name => name.toLocaleLowerCase() === value));
+  const canonical = normalizeDistrictId(district!.trim());
+  const area = PHUKET_AREAS.find(area => area.slug === canonical || [area.name_en, area.name_ru].some(name => name.toLocaleLowerCase() === value));
   return area ? `/area/${area.slug}` : undefined;
 }

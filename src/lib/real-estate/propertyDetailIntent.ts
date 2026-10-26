@@ -50,7 +50,7 @@ export function propertyRentalDisplayPrice(property: {
     month: 'month', monthly: 'month', year: 'year', yearly: 'year', annual: 'year', total: 'total',
   };
   const rawPeriod = property.price_period?.trim().toLowerCase();
-  const period = rawPeriod ? aliases[rawPeriod] : undefined;
+  const period = rawPeriod && Object.prototype.hasOwnProperty.call(aliases, rawPeriod) ? aliases[rawPeriod] : undefined;
   const explicit = { night: property.price_per_night, month: property.price_per_month, year: property.price_per_year };
   if (period) {
     const amount = positive(period in explicit ? explicit[period as keyof typeof explicit] : null) ?? positive(property.price);

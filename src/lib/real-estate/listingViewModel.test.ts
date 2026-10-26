@@ -32,3 +32,7 @@ describe('catalog price semantics', () => {
     expect(surfaceFromProperty(home, 'buy').href).toContain('mode=buy');
   });
 });
+
+it.each(['constructor', '__proto__', 'toString'])('keeps inherited-object period %s unknown', price_period => {
+  expect(surfaceFromProperty({ ...home, price_period })).toMatchObject({ priceHintThb: null, priceMode: 'unknown' });
+});

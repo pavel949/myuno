@@ -18,6 +18,8 @@ describe('public property journey', () => {
     expect(propertyAreaHref('Bang Tao')).toBe('/area/bang-tao');
     expect(propertyAreaHref('Банг Тао')).toBe('/area/bang-tao');
     expect(propertyAreaHref('bang-tao')).toBe('/area/bang-tao');
+    expect(propertyAreaHref('Bangtao')).toBe('/area/bang-tao');
+    expect(propertyAreaHref('bang_tao')).toBe('/area/bang-tao');
     expect(propertyAreaHref('unknown district')).toBeUndefined();
     expect(propertyAreaHref(null)).toBeUndefined();
   });

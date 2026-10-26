@@ -16,7 +16,7 @@ export const ScrollToTop = () => {
       if (pathChanged) window.scrollTo(0, 0);
       return;
     }
-    const position = navigationType === 'POP' ? publicScrollPositions.get(key) ?? 0 : 0;
+    const position = navigationType === 'POP' ? publicScrollPositions.get(key) ?? 0 : pathChanged ? 0 : window.scrollY;
     window.scrollTo(0, position);
     // Lazy catalogue/detail content can mount after the route shell.
     const observer = new ResizeObserver(() => {
