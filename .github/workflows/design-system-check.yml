@@ -39,6 +39,11 @@ jobs:
           python scripts/qa/design-system-convergence.py artifacts/design-system/core
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Premium property journey and actual area return
+        timeout-minutes: 4
+        run: node scripts/qa/property-premium-journey.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual shared public and authoring components
         run: DS_PUBLIC_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/public-adoption" node scripts/qa/design-system-public-adoption.mjs
         env:
