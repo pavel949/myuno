@@ -32,7 +32,7 @@ function Home(){return <main className="cinematic-home"><div className="home-con
 const initial=new URLSearchParams(window.location.search).get('page')==='home'?'/':'/property/synthetic-unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-08&guests=3';
 createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter initialEntries={[initial]}><Location/><Routes><Route path="/" element={<Home/>}/><Route path="/property/:id" element={<Detail/>}/><Route path="/area/:slug" element={<AreaLandingPage/>}/></Routes></MemoryRouter></HelmetProvider>);`;
 const bundle = await build({
- stdin:{contents:entry,resolveDir:root,loader:'tsx'},bundle:true,format:'iife',jsx:'automatic',outfile:path.join(output,'bundle.js'),
+ stdin:{contents:entry,resolveDir:root,loader:'tsx'},bundle:true,format:'esm',jsx:'automatic',outfile:path.join(output,'bundle.js'),
  define:{'process.env.NODE_ENV':'"production"','import.meta.env':'{}'},metafile:true,
  plugins:[{name:'synthetic-read-boundaries',setup(b){
   b.onResolve({filter:/.*/},args=>args.path in virtual?{path:args.path,namespace:'virtual-read'}:undefined);
@@ -46,6 +46,6 @@ if(inputs.some(file=>!file.startsWith('virtual-read:')&&['/hooks/useProperties.t
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 // Use the same compiled Tailwind and theme CSS as existing full public fixtures.
 await writeFile(path.join(output,'theme.css'),await readFile('artifacts/design-system/core/pms/normal.css'));
-await writeFile(path.join(output,'index.html'),'<!doctype html><html><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/bundle.css"><div id="root"></div><script src="/bundle.js"></script></html>');
+await writeFile(path.join(output,'index.html'),'<!doctype html><html><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/bundle.css"><div id="root"></div><script type="module" src="/bundle.js"></script></html>');
 const result=spawnSync('python',['scripts/qa/property-premium-journey.py',output],{stdio:'inherit',timeout:180000});
 if(result.status!==0)throw Error('Property premium journey browser verification failed: '+(result.error?.message||result.status));

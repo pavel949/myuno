@@ -23,10 +23,10 @@ try:
                     page = browser.new_page(viewport={"width": width, "height": 1000})
                     errors = []
                     forbidden = []
-                    page.on("pageerror", lambda error: errors.append(str(error)))
+                    page.on("pageerror", lambda error: (errors.append(str(error)), print("BROWSER ERROR:", str(error), flush=True)))
                     def guard(route):
                         url = route.request.url
-                        if url.startswith("https://fixture.invalid/"):
+                        if url.startswith("https://fixture.invalid/") or url.startswith("https://www.myuno.app/og/area/"):
                             route.fulfill(status=200, content_type="image/svg+xml", body='<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700"><rect width="900" height="700" fill="lightgrey"/><text x="80" y="350" font-size="36">SYNTHETIC QA PHOTO</text></svg>')
                         elif url.startswith(base + "/") or url.startswith("data:"):
                             route.continue_()
@@ -35,6 +35,7 @@ try:
                             route.abort()
                     page.route("**/*", guard)
                     page.goto(f"{base}/?lang={lang}")
+                    assert not errors, errors
                     page.locator(".property-journey").wait_for()
                     def geometry():
                         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"overflow: {lang} {width}"
