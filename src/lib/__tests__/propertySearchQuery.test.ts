@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readPropertySearchQuery, propertySearchHref, updatePropertySearchSort } from '../propertySearchQuery';
+import { readPropertySearchQuery, propertySearchHref, updatePropertySearchSort, normalizePropertySearchQuery } from '../propertySearchQuery';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '../propertyCatalogServerFilters';
 import { civilDateKey } from '../hotelDates';
 
@@ -94,3 +94,21 @@ describe('validated sort URL contract', () => {
  });
 
  it('treats invalid civil dates as optional unset criteria without inventing an area',()=>{const state=readPropertySearchQuery(new URLSearchParams('checkIn=2027-02-30&checkOut=bad'));expect(state.search.checkIn).toBeUndefined();expect(state.search.checkOut).toBeUndefined();expect(state.search.locations).toEqual([]);});
+
+describe('catalogue intent is explicit', () => {
+  it.each(['', 'q=Needle', 'guests=', 'guests=invalid', 'tenancy=unknown', 'intent=unknown', 'f.priceLevel=unknown'])('does not inject a rental intent for %s', query => {
+    expect(readPropertySearchQuery(new URLSearchParams(query)).hasIntent).toBe(false);
+  });
+  it.each(['mode=rent', 'mode=buy', 'tenancy=medium', 'guests=3', 'f.listingType=sale'])('retains supported bookmarks %s', query => {
+    expect(readPropertySearchQuery(new URLSearchParams(query)).hasIntent).toBe(true);
+  });
+});
+
+it('normalizes direct All bookmarks before any reader can see hidden stay criteria', () => {
+  const params = new URLSearchParams('mode=all&guests=8&instant=1&f.guestsAtLeast=10&f.instantBooking=yes&tenancy=long&checkIn=2027-05-01&checkOut=2027-05-03&f.priceLevel=3&intent=quick_sale&quick=1&q=Needle&district=layan&opaque=keep');
+  const state = readPropertySearchQuery(params);
+  expect(state.hasGuestFilter).toBe(false); expect(state.search.instantBooking).toBe(false);
+  expect(state.search.checkIn).toBeUndefined(); expect(state.filterValues.instantBooking).toBeUndefined(); expect(state.saleIntent).toBeUndefined();
+  expect(Object.fromEntries(normalizePropertySearchQuery(params))).toEqual({ mode:'all',q:'Needle',district:'layan',opaque:'keep' });
+  expect(params.get('guests')).toBe('8');
+});

@@ -1,4 +1,4 @@
-import { propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { propertySaleAskingPrice, propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
 import type { Property } from '@/hooks/useProperties';
 
 export type PropertySortKey =
@@ -25,13 +25,18 @@ export function comparePropertiesForSort(
   a: Property,
   b: Property,
   sortKey: PropertySortKey,
-  mode: 'rent' | 'buy'
+  mode: 'rent' | 'buy' | 'all'
 ): number {
   switch (sortKey) {
     case 'price_asc':
     case 'price_desc': {
-      const aPrice = getEffectivePropertySortPrice(a, mode);
-      const bPrice = getEffectivePropertySortPrice(b, mode);
+      if (mode === 'all') {
+        const aGroup = getPropertyPriceSortGroup(a).key;
+        const bGroup = getPropertyPriceSortGroup(b).key;
+        if (aGroup !== bGroup) return aGroup.localeCompare(bGroup);
+      }
+      const aPrice = getEffectivePropertySortPrice(a, mode === 'all' ? propertyDetailMode(a) : mode);
+      const bPrice = getEffectivePropertySortPrice(b, mode === 'all' ? propertyDetailMode(b) : mode);
       // Unknown is not a free home: keep request-only prices after known amounts.
       if (aPrice === null) return bPrice === null ? 0 : 1;
       if (bPrice === null) return -1;
@@ -44,4 +49,15 @@ export function comparePropertiesForSort(
     default:
       return 0;
   }
+}
+
+/** Fixed offer/period/currency groups; only comparable amounts change direction. */
+export function getPropertyPriceSortGroup(property: Property) {
+  const mode = propertyDetailMode(property);
+  const hasNightly = typeof property.price_per_night === 'number' && Number.isFinite(property.price_per_night) && property.price_per_night > 0;
+  const period = mode === 'buy' ? 'asking' : hasNightly ? 'night' : property.price_period || 'night';
+  const periodRank = ({ asking: '0', night: '1', week: '2', month: '3', year: '4', total: '5' } as Record<string, string>)[period] || '9';
+  const rawCurrency = property.currency?.trim().toUpperCase() || '';
+  const currency = /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : 'UNKNOWN';
+  return { mode, period, currency, key: `${mode === 'buy' ? '0' : '1'}:${periodRank}:${period}:${currency}` };
 }

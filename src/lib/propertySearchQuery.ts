@@ -17,7 +17,17 @@ export function updatePropertySearchSort(params: URLSearchParams, value: Propert
 
 const list = (value: unknown): string[] => Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.split(',').filter(Boolean) : [];
 const arrayFilters = ['district', 'propertyType', 'bedrooms', 'amenities', 'highlights', 'viewType', 'furnishingLevel', 'poolType', 'parkingType', 'ownershipForm'];
-export function readPropertySearchQuery(params: URLSearchParams) {
+/** All intents cannot retain hidden stay, sale-intent or period-specific price criteria. */
+export function normalizePropertySearchQuery(source: URLSearchParams): URLSearchParams {
+  const params = new URLSearchParams(source);
+  if (params.get('mode') === 'all') {
+    for (const key of ['guests', 'instant', 'checkIn', 'checkOut', 'tenancy', 'intent', 'quick', 'f.guestsAtLeast', 'f.instantBooking', 'f.listingType', 'f.priceLevel']) params.delete(key);
+  }
+  return params;
+}
+
+export function readPropertySearchQuery(source: URLSearchParams) {
+  const params = normalizePropertySearchQuery(source);
   const legacy = parseFiltersFromParams(params);
   for (const key of arrayFilters) if (legacy.filterValues[key]) legacy.filterValues[key] = list(legacy.filterValues[key]);
   const pick = (key: string, legacyKey: string) => params.has(key) ? list(params.get(key)) : list(legacy.filterValues[legacyKey]);
@@ -43,18 +53,35 @@ export function readPropertySearchQuery(params: URLSearchParams) {
   delete legacy.filterValues.instantBooking;
   if (search.bedrooms.length) legacy.filterValues.bedrooms = search.bedrooms;
   if (search.instantBooking) legacy.filterValues.instantBooking = 'yes';
+  // Optional or malformed criteria must not silently select nightly rentals.
+  const hasIntent = params.get('mode') !== 'all' && (
+    ['rent', 'buy'].includes(params.get('mode') || '') ||
+    ['rent', 'sale'].includes(params.get('f.listingType') || '') ||
+    ['short', 'medium', 'long'].includes(params.get('tenancy') || '') ||
+    ['rent-month', 'rent-long', 'standard', 'assignment', 'quick_sale'].includes(params.get('intent') || '') ||
+    !!search.checkIn || !!search.checkOut || hasGuestFilter || search.instantBooking ||
+    /^[1-4]$/.test(params.get('f.priceLevel') || '')
+  );
   const mode: 'rent' | 'buy' = params.get('mode') === 'buy' || (!params.has('mode') && params.get('f.listingType') === 'sale') ? 'buy' : 'rent';
   const intent = params.get('intent');
   const tenancyValue = params.get('tenancy') ?? (intent === 'rent-month' ? 'medium' : intent === 'rent-long' ? 'long' : 'short');
   const tenancy: 'short' | 'medium' | 'long' = tenancyValue === 'medium' ? 'medium' : tenancyValue === 'long' ? 'long' : 'short';
   const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined = intent === 'standard' || intent === 'assignment' || intent === 'quick_sale' ? intent : undefined;
-  return { search, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
+  return { search, hasIntent, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
 }
 
 /** Preserve bookmark parameters; a route alias only supplies its owned defaults. */
 export function propertySearchHref(search: string, defaults: Record<string, string> = {}) {
   const params = new URLSearchParams(search);
   Object.entries(defaults).forEach(([key, value]) => params.set(key, value));
-  const query = params.toString();
+  const query = normalizePropertySearchQuery(params).toString();
   return `/property/search${query ? `?${query}` : ''}`;
+}
+
+/** Clear only catalogue criteria, retaining unrelated bookmark/view context. */
+export function clearPropertySearchQuery(source: URLSearchParams) {
+  const params = new URLSearchParams(source);
+  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'q', 'cats', 'sort']);
+  [...params.keys()].forEach(key => { if (owned.has(key) || key.startsWith('f.')) params.delete(key); });
+  return params;
 }

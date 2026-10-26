@@ -127,7 +127,7 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
-  '/property':    ['/property'],
+  '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
   '/my-property': [
     '/my-property',

@@ -88,6 +88,10 @@ jobs:
         run: ROUTE_LAYOUT_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/route-layout" node scripts/qa/route-layout.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Actual property catalogue entry and pagination
+        run: CATALOG_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/property-catalogue-entry" node scripts/qa/property-catalog-entry-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

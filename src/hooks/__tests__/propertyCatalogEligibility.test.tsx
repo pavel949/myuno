@@ -4,7 +4,7 @@ import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useProperties, usePropertiesCount, usePropertiesInfinite, usePropertiesByProject } from '../useProperties';
 import { propertySaleAskingPrice, PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ from: vi.fn(), select: vi.fn(), eq: vi.fn(), or: vi.fn(), gt: vi.fn() }));
+const state = vi.hoisted(() => ({ from: vi.fn(), select: vi.fn(), eq: vi.fn(), or: vi.fn(), gt: vi.fn(), abortSignal: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: state.from } }));
 const rows = [
   { id: 'legacy-sale', price: 7500000, listing_type: 'sale', listing_modes: ['sale'], is_for_sale: false, sale_price: null, management_company_id: 'operator', is_active: true, approval_status: 'approved' },
@@ -24,7 +24,7 @@ beforeEach(() => {
     expect(table).toBe('public_property_catalog');
     let selected = rows.filter(row => row.is_active && row.approval_status === 'approved');
     const query = {
-      select: (columns: string) => { state.select(columns); return query; }, order: () => query, range: () => query, limit: () => query,
+      select: (columns: string) => { state.select(columns); return query; }, order: () => query, abortSignal: (signal: AbortSignal) => { state.abortSignal(signal); return query; }, range: () => query, limit: () => query,
       eq: (key: string, value: unknown) => { state.eq(key,value); selected = selected.filter(row => row[key as keyof typeof row] === value); return query; },
       gt: (key: string, value: number) => { state.gt(key,value); selected = selected.filter(row => Number(row[key as keyof typeof row]) > value); return query; },
       or: (filter: string) => {
@@ -67,6 +67,7 @@ describe('shared Buy catalog eligibility', () => {
   it('uses the same criteria in infinite Buy browse and in the catalog count', async () => {
     const { result } = renderHook(() => ({ list: usePropertiesInfinite(filters), count: usePropertiesCount(filters), complex: usePropertiesByProject('project', 24, { mode: 'buy', managementCompanyId: 'operator' }) }), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.list.isSuccess && result.current.count.isSuccess && result.current.complex.isSuccess).toBe(true));
+    expect(state.abortSignal).toHaveBeenCalledWith(expect.objectContaining({ aborted: false }));
     expect(result.current.list.data?.pages[0].properties.map(row => row.id)).toEqual(['legacy-sale', 'managed-dual']);
     expect(result.current.count.data).toBe(2);
     expect(result.current.complex.data?.properties.map(row => row.id)).toEqual(['legacy-sale', 'managed-dual']);
