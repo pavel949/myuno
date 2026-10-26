@@ -2,11 +2,12 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
+import { readPublicJourneyOrigin } from '@/lib/real-estate/publicJourney';
 import { ProjectInfoCard } from '../ProjectInfoCard';
 import { ALL_LISTING_AMENITY_UI_ITEMS, normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 afterEach(cleanup);
-function Location() { const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}</output>; }
+function Location() { const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}<span data-testid="origin">{readPublicJourneyOrigin(location.state)?.href}</span></output>; }
 describe('unit to informational complex context', () => {
   it('keeps existing admin checkbox keys selectable after the shared read normalization', () => {
     const keys = ALL_LISTING_AMENITY_UI_ITEMS.map(item => item.id);
@@ -35,6 +36,6 @@ describe('unit to informational complex context', () => {
     render(<MemoryRouter initialEntries={['/property/unit?mode=invalid&checkIn=2026-12-01&checkOut=2026-12-05&guests=3&unrelated=value']}><ProjectInfoCard project={{ id: 'complex', name_en: 'Complex', name_ru: '' }} mode={mode} /><Location /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: 'Explore Complex' }));
     expect(screen.getByTestId('location')).toHaveTextContent(`/property/complex/complex?mode=${mode}&checkIn=2026-12-01&checkOut=2026-12-05&guests=3`);
-    expect(screen.getByTestId('location')).not.toHaveTextContent('unrelated');
+    expect(screen.getByTestId('origin')).toHaveTextContent('/property/unit?mode=invalid&checkIn=2026-12-01&checkOut=2026-12-05&guests=3&unrelated=value');
   });
 });

@@ -2,6 +2,7 @@
  * Hook for fetching off-plan property projects with filters
  */
 
+import { knownProjectLifecycle, knownProjectProgress, knownProjectCount } from '@/lib/real-estate/projectPublicFacts';
 import { hasPublicDeveloperProfile } from '@/lib/adapters/developerAdapter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,9 +26,9 @@ export interface OffplanProject {
   developerLogo: string | null;
   developerScore: number | null;
   developerVerified: boolean;
-  projectStatus: ProjectStatus;
+  projectStatus: ProjectStatus | null;
   completionDate: string | null;
-  constructionProgress: number;
+  constructionProgress: number | null;
   priceFrom: number | null;
   priceTo: number | null;
   investmentEnabled: boolean;
@@ -37,8 +38,8 @@ export interface OffplanProject {
   roiProjected: number | null;
   muunoScore: number | null;
   riskLevel: string | null;
-  unitsAvailable: number;
-  unitsSold: number;
+  unitsAvailable: number | null;
+  unitsSold: number | null;
   amenities: string[] | null;
   offplanCatalog: OffplanCatalogFacet | null;
   featuredRank: number | null;
@@ -130,6 +131,8 @@ export function useOffplanProjects(filters?: OffplanFilters) {
     queryFn: async (): Promise<OffplanProject[]> => {
       const commonFilters = {
         isActive: true,
+        isApproved: true,
+        publicListingEnabled: true,
         statuses: filters?.status,
         district: filters?.district,
         minPrice: filters?.minPrice,
@@ -152,9 +155,9 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         developerLogo: null,
         developerScore: null,
         developerVerified: false,
-        projectStatus: (p.project_status as ProjectStatus) || 'offplan',
+        projectStatus: knownProjectLifecycle(p.project_status),
         completionDate: p.completion_date ?? null,
-        constructionProgress: p.construction_progress || 0,
+        constructionProgress: knownProjectProgress(p.construction_progress),
         priceFrom: p.price_from ?? null,
         priceTo: null,
         investmentEnabled: false,
@@ -164,8 +167,8 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         roiProjected: p.roi_projected ?? null,
         muunoScore: p.muuno_score ?? null,
         riskLevel: p.risk_level ?? null,
-        unitsAvailable: 0,
-        unitsSold: 0,
+        unitsAvailable: null,
+        unitsSold: null,
         amenities: p.amenities ?? null,
         offplanCatalog: parseOffplanCatalog(p.offplan_catalog),
         featuredRank: p.featured_rank ?? null,
@@ -173,7 +176,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         descriptionSummary: p.description_summary ?? null,
         yieldEstimate: p.yield_estimate ?? null,
         sourceUrl: p.source_url ?? null,
-        isClearviewRated: p.is_clearview_rated !== false,
+        isClearviewRated: p.is_clearview_rated === true,
       });
 
       const mapRich = (p: ProjectRow): OffplanProject => {
@@ -192,8 +195,8 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           investmentEnabled: Boolean(p.investment_enabled),
           fundingGoal: p.funding_goal ?? null,
           minInvestment: p.min_investment ?? null,
-          unitsAvailable: p.units_available || 0,
-          unitsSold: p.units_sold || 0,
+          unitsAvailable: knownProjectCount(p.units_available),
+          unitsSold: knownProjectCount(p.units_sold),
         };
       };
 
@@ -305,6 +308,8 @@ export function useProjectDistricts() {
         .from('property_projects')
         .select('district')
         .eq('is_active', true)
+        .eq('is_approved', true)
+        .eq('public_listing_enabled', true)
         .not('district', 'is', null);
 
       if (error) throw error;
@@ -368,7 +373,7 @@ export function useOffplanProject(id?: string) {
         `;
 
       const tryFetch = async (selectStr: string) =>
-        supabase.from('property_projects').select(selectStr).eq('id', id).maybeSingle();
+        supabase.from('property_projects').select(selectStr).eq('id', id).eq('is_active', true).eq('is_approved', true).eq('public_listing_enabled', true).maybeSingle();
 
       let { data, error } = await tryFetch(richSelect);
 
@@ -396,9 +401,9 @@ export function useOffplanProject(id?: string) {
         developerLogo: (developer?.logo_url as string | null | undefined) || null,
         developerScore: (developer?.muuno_score as number | null | undefined) ?? null,
         developerVerified: Boolean(developer?.is_verified),
-        projectStatus: (p.project_status as ProjectStatus) || 'offplan',
+        projectStatus: knownProjectLifecycle(p.project_status),
         completionDate: p.completion_date,
-        constructionProgress: p.construction_progress || 0,
+        constructionProgress: knownProjectProgress(p.construction_progress),
         priceFrom: p.price_from,
         priceTo: p.price_to ?? null,
         investmentEnabled: Boolean(p.investment_enabled),
@@ -408,8 +413,8 @@ export function useOffplanProject(id?: string) {
         roiProjected: p.roi_projected,
         muunoScore: p.muuno_score,
         riskLevel: p.risk_level,
-        unitsAvailable: p.units_available || 0,
-        unitsSold: p.units_sold || 0,
+        unitsAvailable: knownProjectCount(p.units_available),
+        unitsSold: knownProjectCount(p.units_sold),
         amenities: p.amenities,
         offplanCatalog: parseOffplanCatalog(p.offplan_catalog),
         featuredRank: p.featured_rank ?? null,
@@ -417,7 +422,7 @@ export function useOffplanProject(id?: string) {
         descriptionSummary: p.description_summary ?? null,
         yieldEstimate: p.yield_estimate ?? null,
         sourceUrl: p.source_url ?? null,
-        isClearviewRated: p.is_clearview_rated !== false,
+        isClearviewRated: p.is_clearview_rated === true,
       };
     },
     enabled: !!id,

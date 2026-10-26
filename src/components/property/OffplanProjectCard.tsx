@@ -74,8 +74,8 @@ export function OffplanProjectCard({
 
   const surface = useMemo(() => surfaceFromOffplanProject(project), [project]);
   const name = isRu ? surface.titleRu : surface.titleEn;
-  const status = STATUS_CONFIG[project.projectStatus];
-  const StatusIcon = status.icon;
+  const status = project.projectStatus ? STATUS_CONFIG[project.projectStatus] : null;
+  const StatusIcon = status?.icon ?? Building2;
 
   const handleClick = () => {
     navigate(surface.href);
@@ -141,10 +141,10 @@ export function OffplanProjectCard({
 
         {/* Status badge */}
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 max-w-[70%]">
-          <Badge className={cn("gap-1 text-xs border", status.color)}>
+          {status && <Badge className={cn("gap-1 text-xs border", status.color)}>
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
-          </Badge>
+          </Badge>}
 
           {/* ClearView recommendation badge (BUY / WATCH / AVOID) */}
           {project.isClearviewRated && project.offplanCatalog?.rec && (
@@ -193,7 +193,7 @@ export function OffplanProjectCard({
           />
         </button>
 
-        {project.projectStatus !== 'completed' && project.constructionProgress > 0 && (
+        {project.projectStatus !== 'completed' && project.constructionProgress != null && project.constructionProgress > 0 && (
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <div className="flex items-center justify-between text-xs text-primary-foreground mb-1">
               <span>{isRu ? 'Прогресс' : 'Progress'}</span>
@@ -257,7 +257,7 @@ export function OffplanProjectCard({
           )}
 
           {/* Units available */}
-          {project.unitsAvailable > 0 && (
+          {project.unitsAvailable != null && project.unitsAvailable > 0 && (
             <div className="text-xs text-muted-foreground ml-auto">
               {project.unitsAvailable} {isRu ? 'доступно' : 'units'}
             </div>

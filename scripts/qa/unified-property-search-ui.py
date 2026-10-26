@@ -1,5 +1,5 @@
 """Canonical property search + real redirect/editor; synthetic reads and deny-all external network."""
-import asyncio, json, sys
+import asyncio, json, re, sys
 from datetime import datetime, timezone
 from pathlib import Path
 from time import monotonic
@@ -228,6 +228,7 @@ async def main():
                         mobile_filters=page.get_by_role('dialog')
                         await mobile_filters.get_by_role('button',name=pool_label,exact=True).click()
                         await mobile_filters.get_by_role('button',name='Применить (1)' if ru else 'Apply (1)',exact=True).click()
+                        await expect(page.get_by_test_id('location')).to_contain_text(re.compile(r'[?&]cats=private_pool(?:&|$)'))
                         assert (await query())['cats']==['private_pool']
                     else:
                         await page.get_by_role('button',name=pool_label,exact=True).click()

@@ -64,7 +64,7 @@ export default function NewbuildsLanding() {
     { id: 'area', title: 'Выберите район', description: 'Bang Tao, Layan, Rawai — у каждого своя экономика.', status: 'todo' },
     { id: 'shortlist', title: 'Соберите шорт-лист', description: 'До 4 проектов в сравнении.', status: 'todo' },
     { id: 'dd', title: 'Due diligence', description: 'Лицензия EIA, escrow, репутация застройщика.', status: 'todo', duration: '1–2 нед' },
-    { id: 'reserve', title: 'Резерв и контракт', description: 'Бронь, SPA, перевод первого транша.', status: 'todo', cost: 'от ฿100k' },
+    { id: 'reserve', title: 'Резерв и контракт', description: 'Бронь, SPA, перевод первого транша.', status: 'todo' },
     { id: 'payments', title: 'График платежей', description: 'Транши по строительной готовности.', status: 'todo' },
     { id: 'handover', title: 'Приёмка и регистрация', description: 'Snagging, оформление чанот / leasehold.', status: 'todo' },
   ];

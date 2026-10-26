@@ -120,13 +120,13 @@ export default function OffplanDetail() {
   }
 
   const name = isRu ? project.nameRu : project.nameEn;
-  const status = STATUS_CONFIG[project.projectStatus];
-  const StatusIcon = status.icon;
+  const status = project.projectStatus ? STATUS_CONFIG[project.projectStatus] : null;
+  const StatusIcon = status?.icon ?? Building2;
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} Сведения о проекте и опубликованные отчёты.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} Project information and published reports.`.trim();
+    ? `${name} — ${project.district || 'Пхукет'}. ${status ? status.label.ru + '.' : ''} ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} Сведения о проекте и опубликованные отчёты.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status ? status.label.en + '.' : ''} ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} Project information and published reports.`.trim();
   const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
@@ -193,10 +193,10 @@ export default function OffplanDetail() {
 
         {/* Bottom info */}
         <div className="absolute bottom-4 left-4 right-4">
-          <Badge className={cn("mb-2 gap-1", status.color)}>
+          {status && <Badge className={cn("mb-2 gap-1", status.color)}>
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
-          </Badge>
+          </Badge>}
           <h1 className="public-commerce-title text-white mb-1">{name}</h1>
           {project.district && (
             <div className="flex items-center gap-1 text-white/80 text-sm">
@@ -233,20 +233,20 @@ export default function OffplanDetail() {
               </span>
             </div>
           )}
-          {project.unitsAvailable > 0 && (
+          {project.unitsAvailable != null && project.unitsAvailable > 0 && (
             <div className="flex items-center justify-between pt-2 border-t">
               <span className="text-muted-foreground">
                 {isRu ? 'Доступно юнитов' : 'Units available'}
               </span>
               <Badge variant="secondary">
-                {project.unitsAvailable} / {project.unitsAvailable + project.unitsSold}
+                {project.unitsAvailable}{project.unitsSold != null ? ` / ${project.unitsAvailable + project.unitsSold}` : ''}
               </Badge>
             </div>
           )}
         </div>
 
         {/* Construction Progress */}
-        {project.projectStatus !== 'completed' && (
+        {project.projectStatus !== 'completed' && project.constructionProgress != null && (
           <div className="rounded-none border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">
@@ -268,7 +268,7 @@ export default function OffplanDetail() {
         )}
 
         {/* Investment Funding Progress */}
-        {project.investmentEnabled && project.fundingGoal && (
+        {project.investmentEnabled && project.fundingGoal && project.amountRaised != null && (
           <div className="rounded-none border bg-card p-4">
             <FundingProgress
               amountRaised={project.amountRaised}
