@@ -80,6 +80,15 @@ async def main():
                 await page.get_by_role('listbox').press('Escape')
                 await expect(parent).to_be_focused()
                 await expect(page.locator('[data-home-category-id]')).to_have_count(11)
+                row=page.get_by_test_id('service-results-heading-row')
+                heading=await row.get_by_role('heading',level=2).bounding_box()
+                counter=await row.get_by_role('status').bounding_box()
+                assert heading and counter,(lang,width,'missing heading or count')
+                assert heading['y']+heading['height']+7<=counter['y'] or heading['x']+heading['width']+7<=counter['x'],(lang,width,'heading/count separation',heading,counter)
+                for text in [row.get_by_role('heading',level=2),row.get_by_role('status')]:
+                    size=await text.evaluate('e=>({width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.clientHeight,scrollHeight:e.scrollHeight,right:e.getBoundingClientRect().right})')
+                    assert size['scrollWidth']<=size['width']+1 and size['scrollHeight']<=size['height']+1 and size['right']<=width,(lang,width,'heading/count clipping',size)
+
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-home-menu.png'))
                 child=page.locator('[data-home-category-id=ac]')
                 await child.focus()

@@ -153,7 +153,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       </div>
     </section>}
     {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 id="service-results-title" className="font-display text-h3">{t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
+      <div data-testid="service-results-heading-row" className="flex flex-col items-start gap-2 sm:flex-row sm:items-baseline sm:justify-between"><h2 id="service-results-title" className="font-display text-h3">{t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
       <p className="text-sm text-muted-foreground">{t('Условия, цена и способ заказа — на странице услуги.', 'See conditions, prices and how to order on the service page.', 'ดูเงื่อนไข ราคา และวิธีสั่งบริการในหน้าบริการ')}</p>
       <div className={PUBLIC_CATALOG_COMPACT_GRID} data-testid="service-catalogue-results">
         {rows.slice(0, limit).map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
