@@ -353,3 +353,14 @@
 .cinematic-home .home-closing h2{font-size:var(--type-h2-size)}
 .cinematic-home .home-owner-prompt{margin-top:var(--section-gap);padding-block:20px!important;gap:12px}
 @media(max-width:640px){.home-gallery .home-section-heading{gap:calc(var(--section-gap-tight) / 4)}.home-gallery .home-rail-controls{top:-48px}.home-gallery .home-rail{margin-top:4px}.home-gallery .home-rail-viewport{padding-top:2px;padding-bottom:10px}.home-guide-copy{padding:14px}}
+
+/* Generous public gallery rhythm, shared with the property journey. */
+.cinematic-home .home-gallery{padding-top:clamp(36px,5vw,72px)}
+.cinematic-home .home-gallery .home-rail{margin-top:24px}
+.cinematic-home .home-listing,.cinematic-home .home-guide-card,.cinematic-home .home-community-card,.cinematic-home .home-service-category-card{border-radius:18px;overflow:hidden}
+.cinematic-home .home-listing>a{display:block;height:auto}
+.cinematic-home .home-listing{display:flex;flex-direction:column}
+.cinematic-home .home-listing-copy{padding:22px;gap:4px}
+.cinematic-home .home-listing .property-offer-links{padding-top:16px}
+.cinematic-home .home-guide-copy,.cinematic-home .home-community-copy,.cinematic-home .home-service-category-copy{padding:22px}
+@media(max-width:640px){.cinematic-home .home-gallery{padding-top:36px}.cinematic-home .home-listing-copy,.cinematic-home .home-guide-copy,.cinematic-home .home-community-copy,.cinematic-home .home-service-category-copy{padding:18px}.cinematic-home .home-gallery .home-rail{margin-top:18px}}

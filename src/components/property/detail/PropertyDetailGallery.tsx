@@ -1,11 +1,9 @@
-/**
- * PropertyDetailGallery — Airbnb-style image grid for the property detail page.
- * 5+ images: 2-column hero + 4 thumbs grid. Fewer: single image with thumbnail strip.
- */
+/** Keyboard-accessible gallery; mobile never renders hidden off-grid photo rows. */
 import { useState } from 'react';
 import { Eye } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
+import '@/styles/property-journey.css';
 
 interface PropertyDetailGalleryProps {
   images: string[];
@@ -15,89 +13,24 @@ interface PropertyDetailGalleryProps {
 
 export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyDetailGalleryProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const [activeImage, setActiveImage] = useState(0);
-
-  if (images.length === 0) return null;
-
-  return (
-    <div className="relative">
-      {images.length >= 5 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
-          <div
-            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-none"
-            onClick={() => onOpenLightbox(0)}
-          >
-            <img
-              src={images[0]}
-              alt={alt}
-              className="w-full h-full object-cover transition-transform duration-300"
-            />
-          </div>
-          {images.slice(1, 5).map((img, i) => (
-            <div
-              key={i}
-              className={cn(
-                'relative cursor-pointer overflow-hidden',
-                i === 1 && 'rounded-none',
-                i === 3 && 'rounded-none',
-              )}
-              onClick={() => onOpenLightbox(i + 1)}
-            >
-              <img
-                src={img}
-                alt=""
-                className="w-full h-full object-cover transition-transform duration-300"
-              />
-              {i === 3 && images.length > 5 && (
-                <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
-                  <span className="text-background font-medium">+{images.length - 5}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div>
-          <div
-            className="aspect-[16/10] overflow-hidden cursor-pointer"
-            onClick={() => onOpenLightbox(activeImage)}
-          >
-            <img
-              src={images[activeImage] || images[0]}
-              alt={alt}
-              className="w-full h-full object-contain bg-muted transition-transform duration-300"
-            />
-          </div>
-          {images.length > 1 && (
-            <div className="flex gap-2 p-3 overflow-x-auto bg-background/50">
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImage(i)}
-                  aria-label={isRu ? `Фото ${i + 1}` : `Photo ${i + 1}`}
-                  className={cn(
-                    'w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all',
-                    activeImage === i
-                      ? 'border-primary ring-2 ring-primary/30'
-                      : 'border-transparent opacity-70 hover:opacity-100',
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <button
-        onClick={() => onOpenLightbox(0)}
-        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
-      >
-        <Eye className="w-4 h-4" />
-        {images.length} {isRu ? 'фото' : 'photos'}
+  if (!images.length) return null;
+  const active = activeImage < images.length ? activeImage : 0;
+  const photoLabel = (index: number) => pickLang(language, { ru: `Открыть фото ${index + 1}`, en: `Open photo ${index + 1}`, th: `เปิดรูปที่ ${index + 1}` });
+  return <div className="property-editorial-gallery">
+    <div className={`property-editorial-photos${images.length === 1 ? ' property-editorial-photos--single' : ''}`}>
+      <button type="button" className="property-editorial-main" onClick={() => onOpenLightbox(active)} aria-label={photoLabel(active)}>
+        <img src={images[active]} alt={alt} width="1200" height="900" decoding="async" fetchPriority="high" />
       </button>
+      {images.length > 1 && <button type="button" className="property-editorial-secondary" onClick={() => onOpenLightbox(active === 1 ? 0 : 1)} aria-label={photoLabel(active === 1 ? 0 : 1)}>
+        <img src={images[active === 1 ? 0 : 1]} alt="" width="900" height="900" decoding="async" />
+      </button>}
     </div>
-  );
+    {images.length > 1 && <div className="property-editorial-thumbnails" aria-label={pickLang(language, { ru: 'Выбор фотографии', en: 'Choose a photo', th: 'เลือกรูปภาพ' })}>
+      {images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => setActiveImage(index)} aria-label={pickLang(language, { ru: `Показать фото ${index + 1}`, en: `Show photo ${index + 1}`, th: `แสดงรูปที่ ${index + 1}` })} aria-pressed={active === index}>
+        <img src={image} alt="" width="96" height="72" loading="lazy" decoding="async" />
+      </button>)}
+    </div>}
+    <button type="button" className="property-editorial-all" onClick={() => onOpenLightbox(active)}><Eye size={16} aria-hidden="true" />{pickLang(language, { ru: `Все фото · ${images.length}`, en: `All photos · ${images.length}`, th: `รูปภาพทั้งหมด · ${images.length}` })}</button>
+  </div>;
 }
