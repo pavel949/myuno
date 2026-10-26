@@ -6,29 +6,11 @@
     <lastmod>2026-04-08</lastmod>
   </sitemap>
 
-  <!-- Dynamic: property listings from database -->
-  <sitemap>
-    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=properties</loc>
-    <lastmod>2026-04-08</lastmod>
-  </sitemap>
+  <!-- Dynamic listing sitemaps (properties/experiences/yachts/restaurants) removed 2026-10-25:
+       the generate-sitemap edge function does not exist, all four URLs returned 404.
+       Re-add only together with a deployed, verified generator. -->
 
-  <!-- Dynamic: experience listings from database -->
-  <sitemap>
-    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=experiences</loc>
-    <lastmod>2026-04-08</lastmod>
-  </sitemap>
 
-  <!-- Dynamic: yacht listings from database -->
-  <sitemap>
-    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=yachts</loc>
-    <lastmod>2026-04-08</lastmod>
-  </sitemap>
-
-  <!-- Dynamic: restaurant listings from database -->
-  <sitemap>
-    <loc>https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/generate-sitemap?type=restaurants</loc>
-    <lastmod>2026-04-08</lastmod>
-  </sitemap>
 
   <!-- M6 · Track B.9 — persona/cluster landings (LIVE only) -->
   <sitemap>

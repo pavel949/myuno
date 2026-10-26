@@ -1,5 +1,5 @@
 """Isolated real catalogue UI; production providers/writers and network excluded."""
-import asyncio, json, sys
+import asyncio, json, sys, os, shutil
 from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
@@ -7,7 +7,7 @@ OUTPUT = Path(sys.argv[1])
 async def main():
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, executable_path=None if os.environ.get("CI") else shutil.which("chromium"))
         for lang in ['ru', 'en']:
             for width in [375, 390, 430, 1280]:
                 context = await browser.new_context(viewport={'width':width,'height':900}, service_workers='block')
@@ -23,6 +23,8 @@ async def main():
                 page=await context.new_page()
                 page.on('pageerror',lambda e:errors.append(str(e)))
                 await page.goto('http://localhost:8080/fixture?lang='+lang,wait_until='networkidle')
+                assert not errors, {'fixturePageErrors':errors}
+                await expect(page.locator('[aria-labelledby=service-catalog-groups] a[href="/flowers"]')).to_be_visible()
                 await expect(page.get_by_role('combobox')).to_be_visible()
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (lang,width,'overflow')
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-catalogue.png'))

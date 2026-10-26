@@ -54,7 +54,7 @@ jobs:
             curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
             sleep 1
           done
-          python3 -m unittest discover -s scripts/qa -p 'test_combined_layout_initializer.py'
+          python3 -m unittest discover -s scripts/qa -p 'test_combined_layout_*.py'
           python3 -m unittest discover -s scripts/qa -p 'test_dialog_readiness.py'
           timeout 240s node scripts/qa/combined-layout-ui.mjs
         env:

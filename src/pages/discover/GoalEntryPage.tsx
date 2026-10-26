@@ -7,6 +7,7 @@
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SEOHead } from '@/components/seo/SEOHead';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -49,8 +50,15 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
     );
   };
 
+  const seoTitles: Record<string, { en: string; ru: string; th: string }> = {
+    buy: { en: 'Property for sale in Phuket', ru: 'Покупка недвижимости на Пхукете', th: 'ซื้ออสังหาริมทรัพย์ในภูเก็ต' },
+    live: { en: 'Moving to and living in Phuket', ru: 'Переезд и проживание на Пхукете', th: 'ย้ายมาและใช้ชีวิตในภูเก็ต' },
+  };
+  const seoTitle = seoTitles[goal] ? t(seoTitles[goal]) : title;
+
   return (
     <AppLayout title={title} usePageContainer={false}>
+      <SEOHead title={seoTitle} description={t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })} />
       <div className="mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12">
         {goal === 'buy' && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
           {(['stay', 'buy'] as const).map((id) => {
