@@ -14,6 +14,11 @@ const arrivalLabel = { ru: 'Трансфер и Fast Track', en: 'Transfers & Fa
 const enabled = (status?: ServiceEntry['status']) => status == null || status === 'available' || status === 'info';
 const homeEntryPaths = new Set([R.SERVICES, `${R.SERVICES}?category=cat-home-services`, buildServiceCategoryUrl('cat-home-services')]);
 
+/** Existing public home aliases identify the same umbrella; keep returned DB IDs intact. */
+export function isHomeServiceCategoryId(categoryId: string) {
+  return destinations.some(destination => destination.id === 'home' && destination.aliases.includes(categoryId));
+}
+
 export function publicServiceCategories(categories: CategoryEntry[]) {
   const children = categories.filter(category => enabled(category.status)).flatMap(category => category.services);
   const seen = new Set<string>();

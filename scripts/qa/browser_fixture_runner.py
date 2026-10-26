@@ -29,6 +29,7 @@ FIXTURE_SPECS = (
     ('mc-workspace-ui', 'mc-workspace-isolated'),
     ('mc-workspace-forms-ui', 'mc-workspace-forms'),
     ('services-discovery-ui', 'services-discovery-isolated'),
+    ('services-home-alias-ui', 'services-home-alias-isolated'),
     ('trip-planner-ui', 'trip-planner-isolated'),
     ('unified-property-search-ui', 'unified-property-search-isolated'),
     ('bookings-list-ui', 'bookings-list-isolated'),
@@ -91,6 +92,20 @@ def run_fixture(fixture, timeout_seconds=FIXTURE_TIMEOUT_SECONDS, executable='no
                 result.update(outcome='PASS', result_count=len(rows))
     except Exception as error:
         result['error'] = f'{type(error).__name__}: {error}'
+    if result['outcome'] != 'PASS':
+        # Future synthetic failures must be diagnosable from the normal job log,
+        # even when an artifact transfer is unavailable. This never changes status.
+        log_path = fixture.output / 'fixture.log'
+        try:
+            with log_path.open('rb') as log:
+                log.seek(0, os.SEEK_END)
+                log.seek(max(0, log.tell() - 16000))
+                tail = '\n'.join(log.read().decode(errors='replace').splitlines()[-40:])[-8000:]
+            result['diagnostic_tail'] = tail
+            if tail:
+                print(f'Failure diagnostics: {fixture.script}\n{tail}', flush=True)
+        except OSError:
+            pass  # Keep the original failed outcome if optional diagnostics cannot be read.
     result['duration_seconds'] = round(time.monotonic() - started, 3)
     return result
 

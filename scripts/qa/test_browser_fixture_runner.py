@@ -63,12 +63,12 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
         expected = (
             'employee-invite-ui complex-authoring-ui home-preferences-ui property-editor-ui '
             'admin-review-queues moderation-queue-ui ui-backlog-salvage pms-dashboard-ui '
-            'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui trip-planner-ui '
+            'mc-workspace-ui mc-workspace-forms-ui services-discovery-ui services-home-alias-ui trip-planner-ui '
             'unified-property-search-ui bookings-list-ui pms-detail-ui calendar-ui today-ui '
             'property-browse-ui home-search-ui homepage-galleries-en-ui homepage-galleries-ru-ui homepage-galleries-th-ui guest-complex-ui shared-surfaces-ui'
         ).split()
         self.assertEqual([name for name, _ in runner.FIXTURE_SPECS], expected)
-        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 24)
+        self.assertEqual(len({output for _, output in runner.FIXTURE_SPECS}), 25)
         self.assertEqual(runner.MAX_WORKERS, 2)
         self.assertEqual(runner.FIXTURE_TIMEOUT_SECONDS, 180)
         for name, output in runner.FIXTURE_SPECS:
@@ -81,6 +81,15 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
                 self.assertTrue((ROOT / 'scripts/qa/homepage-galleries-ui.py').is_file())
             else:
                 self.assertTrue((ROOT / f'scripts/qa/{name}.py').is_file())
+
+    def test_failure_diagnostics_are_bounded_and_do_not_turn_failure_green(self):
+        fixture = self.fixture('diagnostics', body="print('x' * 10000)\nprint('Synthetic failure detail')\nraise SystemExit(7)", result=None)
+        result = runner.run_fixture(fixture, executable=sys.executable)
+        self.assertEqual(result['outcome'], 'FAIL')
+        self.assertEqual(result['exit_code'], 7)
+        self.assertLessEqual(len(result['diagnostic_tail']), 8000)
+        self.assertIn('Synthetic failure detail', result['diagnostic_tail'])
+        self.assertFalse(runner.suite_succeeded([fixture], [result]))
 
     def write_homepage_matrix(self):
         rows = {lang: [{'language': lang, 'width': width, 'state': 'data', 'pageOverflow': False} for width in [320,360,375,390,430,768,1440,1920]] for lang in ['en','ru','th']}

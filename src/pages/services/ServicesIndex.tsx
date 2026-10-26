@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Search, Wrench, X } from 'lucide-react';
 import { SEOHead } from '@/components/seo/SEOHead';
@@ -17,8 +17,9 @@ import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { useServiceFunctions } from '@/hooks/useServiceFunctions';
 import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
+import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 
@@ -35,7 +36,13 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const label = (item: { labelRu: string; labelEn: string; labelTh?: string }) => pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh });
   const location = useLocation();
   const navigate = useNavigate();
+  const pendingFilterUrl = useRef<string | null>(null);
+  useEffect(() => { pendingFilterUrl.current = null; }, [location.key]);
   const [params] = useSearchParams();
+  // Consecutive controls may fire before a router transition renders. Compose
+  // their changes over the latest intended query, not the previous render.
+  const pendingQuery = useRef({ key: location.key, params });
+  if (pendingQuery.current.key !== location.key) pendingQuery.current = { key: location.key, params };
   const filters = readServiceDiscoveryQuery(params);
   const catalog = useCatalogFromDB();
   const { functions } = useServiceFunctions();
@@ -44,31 +51,42 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const [limit, setLimit] = useState(12);
   const [showAllRequests, setShowAllRequests] = useState(false);
   const [showAllMenu, setShowAllMenu] = useState(false);
-  const categories = serviceDiscoveryCategories(catalog.isFromDB ? catalog.categories : []);
+  const returnedCategories = catalog.isFromDB ? catalog.categories : [];
+  const categories = serviceDiscoveryCategories(returnedCategories);
   const situations = serviceDiscoverySituations(categories, catalog.lifeSituations ?? []);
   const menu = serviceDiscoveryMenu(categories);
   const overview = !filters.query.trim() && !filters.category && !filters.situation;
   const child = SERVICE_CATEGORIES.find(category => category.id === filters.category);
-  const category = child ? 'cat-home-services' : filters.category;
-  const home = categories.find(item => item.id === 'cat-home-services');
+  const homeResolution = resolveHomeServiceCategory(returnedCategories,
+    child ? filters.homeCategory : isHomeServiceCategoryId(filters.category) ? filters.category : '', !child);
+  const home = homeResolution.status === 'resolved' ? homeResolution.category : undefined;
+  const explicitHomeIntent = Boolean(child || isHomeServiceCategoryId(filters.category));
+  const category = home && explicitHomeIntent ? home.id : filters.category;
   const rows = child ? [] : projectServiceDiscovery(categories, { ...filters, category });
   const returnTo = location.pathname + location.search;
   const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
   const commit = (next: URLSearchParams, replace = false) => {
+    const search = next.toString();
+    const target = location.pathname + (search ? '?' + search : '') + location.hash;
+    // A controlled tab can report the same choice on pointer and focus before
+    // the router commits. One filter action must create only one history entry.
+    if (pendingFilterUrl.current === target || (!pendingFilterUrl.current && target === location.pathname + location.search + location.hash)) return;
+    pendingFilterUrl.current = target;
+    pendingQuery.current.params = next;
     setLimit(12);
     setShowAllRequests(false);
     setShowAllMenu(false);
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state });
+    navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
-  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string) => commit(updateServiceDiscoveryQuery(params, key, value), key === 'q');
-  const clear = () => commit(clearServiceDiscoveryQuery(params));
+  const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(pendingQuery.current.params, key, value, homeCategory), key === 'q');
+  const clear = () => commit(clearServiceDiscoveryQuery(pendingQuery.current.params));
   const selectedCategory = categories.find(item => item.id === category);
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
   const knownSituation = !filters.situation || situations.some(item => item.code === filters.situation);
-  const knownCategory = !category || categories.some(item => item.id === category);
+  const knownCategory = !category || (child ? Boolean(home) : categories.some(item => item.id === category));
   // Home functions remain request templates with indicative prices, not live supply.
   // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
-  const showRequests = Boolean((category === 'cat-home-services' || filters.query.trim()) && (!category || category === 'cat-home-services') && home && !filters.situation && knownSituation);
+  const showRequests = Boolean((category === home?.id || filters.query.trim()) && (!category || category === home?.id) && home && !filters.situation && knownSituation);
   const requests = showRequests ? functions.filter(fn => (!child || fn.category === child.id) && matchesServiceQuery(filters.query, [fn.raw.nameRu, fn.raw.nameEn, fn.raw.descriptionRu, fn.raw.descriptionEn, homeServiceCategoryLabel(fn.category, language)])) : [];
   const requestPreviews = SERVICE_CATEGORIES.flatMap(item => {
     const matches = requests.filter(fn => fn.category === item.id);
@@ -81,7 +99,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const showOffers = !filters.category && !filters.situation;
   const matchingOffers = showOffers ? filterMarketplaceServices(offers.data ?? [], filters.query) : [];
   const renderOffers = showOffers && (offers.isLoading || offers.isError || !filters.query.trim() || matchingOffers.length > 0);
-  const noResults = ready && (!knownSituation || !knownCategory || (!rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
+  const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
+  const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
 
   return <Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
     title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')}
@@ -130,6 +149,9 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
+    {ready && explicitHomeIntent && homeResolution.status === 'unavailable' && <p role="status" className="text-sm text-muted-foreground">{homeResolution.reason === 'ambiguous'
+      ? t('Доступно несколько разделов домашних услуг. Выберите нужный раздел в списке категорий.', 'Several home categories are available. Choose one in the category list.', 'มีหมวดหมู่บริการสำหรับบ้านหลายรายการ โปรดเลือกจากรายการหมวดหมู่')
+      : t('Выбранный раздел домашних услуг недоступен. Выберите другой раздел или сбросьте фильтры.', 'The selected home category is unavailable. Choose another category or reset the filters.', 'หมวดหมู่บริการสำหรับบ้านที่เลือกไม่พร้อมใช้งาน โปรดเลือกหมวดหมู่อื่นหรือรีเซ็ตตัวกรอง')}</p>}
     {ready && !noResults && overview && <section aria-labelledby="service-menu-title" className="space-y-3">
       <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
       {filters.view === 'categories' ? <>
@@ -145,11 +167,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
       </>}
     </section>}
-    {ready && home && category === 'cat-home-services' && <section aria-labelledby="home-categories-title" className="space-y-3">
+    {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
       <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">
-        <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', 'cat-home-services')}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
-        {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
+        <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', home.id)}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
+        {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id, home.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
       </div>
     </section>}
     {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
@@ -163,7 +185,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       {rows.length > limit && <Button variant="outline" onClick={() => setLimit(value => value + 12)}>{t('Показать ещё', 'Show more', 'แสดงเพิ่มเติม')}</Button>}
     </section>}
     {noResults && <div className="space-y-3"><EmptyState icon={Search} title={t('Услуги не найдены', 'No services found', 'ไม่พบบริการ')} /><Button variant="outline" onClick={clear}>{t('Сбросить поиск и фильтры', 'Clear search and filters', 'ล้างการค้นหาและตัวกรอง')}</Button></div>}
-    {ready && home && knownSituation && filters.situation && (category === 'cat-home-services' || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
+    {ready && home && knownSituation && filters.situation && (category === home?.id || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
       <h2 id="home-situation-note" className="font-display text-h3">{t('Бытовые заявки', 'Home requests', 'คำขอบริการสำหรับบ้าน')}</h2>
       <p className="text-sm text-muted-foreground">{t('Для конкретных бытовых заявок связь с ситуациями не задана. Уберите ситуацию, чтобы выбрать работу; текст поиска сохранится.', 'Specific home requests are not classified by situation yet. Clear the situation to choose a task; your search text will stay.', 'คำขอบริการสำหรับบ้านยังไม่ได้จัดตามสถานการณ์ ล้างสถานการณ์เพื่อเลือกงาน ข้อความค้นหาจะยังคงอยู่')}</p>
       <Button variant="outline" onClick={() => update('situation', '')}>{t('Выбрать бытовую заявку', 'Browse home requests', 'เลือกคำขอบริการสำหรับบ้าน')}</Button>
