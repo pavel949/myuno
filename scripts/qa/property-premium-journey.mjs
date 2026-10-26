@@ -27,8 +27,8 @@ import{HomeListingCard}from'${root}/src/components/home/HomeListingCard.tsx';
 import AreaLandingPage from '${root}/src/pages/area/AreaLandingPage.tsx';
 import '${root}/src/styles/cinematic-home.css';import '${root}/src/styles/public-commerce.css';
 const property=${JSON.stringify(property)};
-function Location(){const l=useLocation();return <output data-testid="qa-location">{l.pathname+l.search}</output>}
-function Detail(){const l=useLocation();const [photo,setPhoto]=React.useState(null);return <main className="public-commerce premium-property"><PropertyJourneyNav property={property} mode={l.search.includes('mode=buy')?'buy':'rent'}/><h1 className="public-commerce-title">Synthetic villa / Тестовая вилла</h1><PropertyDetailGallery images={property.images} alt="Synthetic QA" onOpenLightbox={setPhoto}/><output data-testid="qa-photo">{photo}</output><PropertyAreaGuide property={property}/></main>}
+function Location(){const l=useLocation();return <output hidden data-testid="qa-location">{l.pathname+l.search}</output>}
+function Detail(){const l=useLocation();const [photo,setPhoto]=React.useState(null);return <main className="public-commerce premium-property"><PropertyJourneyNav property={property} mode={l.search.includes('mode=buy')?'buy':'rent'}/><h1 className="public-commerce-title">Synthetic villa / Тестовая вилла</h1><PropertyDetailGallery images={property.images} alt="Synthetic QA" onOpenLightbox={setPhoto}/><output hidden data-testid="qa-photo">{photo}</output><PropertyAreaGuide property={property}/></main>}
 function Home(){return <main className="cinematic-home"><div className="home-container home-gallery"><HomeListingCard property={property}/></div></main>}
 const initial=new URLSearchParams(window.location.search).get('page')==='home'?'/':'/property/synthetic-unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-08&guests=3';
 createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter initialEntries={[initial]}><Location/><Routes><Route path="/" element={<Home/>}/><Route path="/property/:id" element={<Detail/>}/><Route path="/area/:slug" element={<AreaLandingPage/>}/></Routes></MemoryRouter></HelmetProvider>);`;

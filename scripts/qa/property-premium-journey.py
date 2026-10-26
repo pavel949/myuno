@@ -43,28 +43,28 @@ try:
                     guide = "Открыть путеводитель" if lang == "ru" else "Explore the area guide"
                     page.get_by_role("link", name=guide).click()
                     page.locator(".property-journey-return").wait_for()
-                    assert page.get_by_test_id("qa-location").inner_text() == "/area/bang-tao"
+                    assert page.get_by_test_id("qa-location").text_content() == "/area/bang-tao"
                     geometry()
                     page.locator(".property-journey-return").click()
-                    assert page.get_by_test_id("qa-location").inner_text() == "/property/synthetic-unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-08&guests=3"
+                    assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-08&guests=3"
                     thumb = "Показать фото 3" if lang == "ru" else "Show photo 3"
                     photo = "Открыть фото 3" if lang == "ru" else "Open photo 3"
                     page.get_by_role("button", name=thumb).click()
                     page.get_by_role("button", name=photo).click()
-                    assert page.get_by_test_id("qa-photo").inner_text() == "2"
+                    assert page.get_by_test_id("qa-photo").text_content() == "2"
                     long_stay = "Снять надолго" if lang == "ru" else "Long stay"
                     assert "tenancy=long" in page.get_by_role("link", name=long_stay).get_attribute("href")
                     if width in (390, 1440):
                         page.screenshot(path=str(output / f"detail-{lang}-{width}.png"), full_page=True)
                     buy = "Купить" if lang == "ru" else "Buy"
                     page.get_by_role("link", name=buy, exact=True).click()
-                    assert page.get_by_test_id("qa-location").inner_text() == "/property/synthetic-unit?mode=buy"
+                    assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=buy"
                     page.goto(f"{base}/?lang={lang}&page=home")
                     page.locator(".home-listing h3 a").wait_for()
                     geometry()
                     assert page.locator(".home-listing a a").count() == 0, "nested card anchors"
                     page.locator(".home-listing h3 a").click()
-                    assert page.get_by_test_id("qa-location").inner_text() == "/property/synthetic-unit?mode=rent"
+                    assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=rent"
                     assert not errors, errors
                     assert not forbidden, forbidden
                     results.append({"language": lang, "width": width, "outcome": "PASS", "checks": ["geometry", "actual area round trip", "gallery", "offer intent", "home card", "no production network"]})
