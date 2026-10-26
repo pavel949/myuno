@@ -1,4 +1,5 @@
 import type { CategoryEntry, LifeSituationEntry, ServiceEntry } from '@/lib/catalog/taxonomy';
+import { isHomeServiceCategoryId } from './publicServiceCategories';
 
 const visible = (status: string | undefined) => !status || status === 'available' || status === 'info';
 export function serviceDiscoveryCategories(categories: CategoryEntry[]) {
@@ -14,9 +15,10 @@ export function serviceDiscoverySituations(categories: CategoryEntry[], situatio
 /** Presentation order only: these are references to existing canonical entities. */
 export function serviceDiscoveryMenu(categories: CategoryEntry[]) {
   const available = serviceDiscoveryCategories(categories);
-  const primaryIds = ['cat-home-services', 'cat-transport', 'cat-tourism'];
-  const primary = primaryIds.flatMap(id => available.find(category => category.id === id) ?? []);
-  const more = available.filter(category => !primaryIds.includes(category.id))
+  const home = available.find(category => isHomeServiceCategoryId(category.id));
+  const primary = [home, ...['cat-transport', 'cat-tourism'].map(id => available.find(category => category.id === id))]
+    .filter((category): category is CategoryEntry => Boolean(category));
+  const more = available.filter(category => !primary.some(item => item.id === category.id))
     .sort((a, b) => Number(a.id === 'cat-emergency') - Number(b.id === 'cat-emergency'));
   const yacht = available.flatMap(category => category.services).find(service => service.id === 'yacht');
   return { primary, more, yacht };

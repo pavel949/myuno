@@ -6,8 +6,8 @@ import ServicesIndex from './ServicesIndex';
 import { isKnownRoute } from '@/lib/nav/routeRegistry';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
-const state = vi.hoisted(() => ({ loading: false, error: false, fallback: false, providerOnly: false }));
-vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: CATEGORIES, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() }) }));
+const state = vi.hoisted(() => ({ loading: false, error: false, fallback: false, providerOnly: false, legacyHome: false }));
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: state.legacyHome ? CATEGORIES.map(category => category.id === 'cat-home-services' ? { ...category, id: 'cat-home-living' } : category) : CATEGORIES, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
@@ -15,7 +15,7 @@ vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServ
 vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
 function Location() { const l = useLocation(); const navigate = useNavigate(); return <><output data-testid="location">{l.pathname}{l.search}{l.hash}|{JSON.stringify(l.state)}</output><button onClick={() => navigate(-1)}>Back fixture</button><button onClick={() => navigate(1)}>Forward fixture</button></>; }
 function mount(path = '/discover/services') { return render(<MemoryRouter initialEntries={[{ pathname: path.split('?')[0], search: path.includes('?') ? '?'+path.split('?')[1] : '', state: { from: 'trip' } }]}><Routes><Route path="/discover/services" element={<ServicesIndex />} /><Route path="/services/order/:id" element={<div>Request details</div>} /></Routes><Location /></MemoryRouter>); }
-beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
+beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; state.legacyHome = false; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
 const select = (name: string, option: string) => { fireEvent.keyDown(screen.getByRole('combobox', { name }), { key: 'Enter' }); fireEvent.click(screen.getByRole('option', { name: option })); };
 describe('canonical services hub', () => {
   it('offers equal views and real specialised routes without duplicate services', () => {
@@ -71,6 +71,28 @@ describe('canonical services hub', () => {
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: '' } });
     expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
     expect(screen.getByRole('button', { name: 'All home services', pressed: true })).toBeVisible();
+  });
+  it.each(['cat-home-services', 'cat-home-living'])('opens eleven home choices through %s against legacy runtime inventory', id => {
+    state.legacyHome = true;
+    mount('/discover/services?category='+id+'&ref=legacy');
+    expect(screen.getByTestId('home-category-menu').querySelectorAll('[data-home-category-id]')).toHaveLength(11);
+    expect(screen.getByTestId('location')).toHaveTextContent('category='+id);
+    fireEvent.click(screen.getByRole('button', { name: 'Air Conditioning' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=ac&ref=legacy');
+    fireEvent.click(screen.getByText('AC Cleaning'));
+    expect(screen.getByTestId('location')).toHaveTextContent('/services/order/');
+    fireEvent.click(screen.getByText('Back fixture'));
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'All home services' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-home-living&ref=legacy');
+  });
+  it('shows the returned legacy home category in the initial primary menu', () => {
+    state.legacyHome = true;
+    mount();
+    const menu = screen.getByTestId('service-discovery-menu');
+    expect(menu.querySelector('[data-category-id="cat-home-living"]')).not.toBeNull();
+    fireEvent.click(menu.querySelector('[data-category-id="cat-home-living"]')!);
+    expect(screen.getByTestId('home-category-menu')).toBeVisible();
   });
   it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
     mount('/discover/services?ref=trip');

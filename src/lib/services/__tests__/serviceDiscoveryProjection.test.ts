@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
+import { CATEGORIES, LIFE_SITUATIONS, type CategoryEntry } from '@/lib/catalog/taxonomy';
 import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '../serviceDiscoveryProjection';
 import { buildServiceCategoryUrl, clearServiceDiscoveryQuery, readServiceDiscoveryQuery, updateServiceDiscoveryQuery } from '../serviceDiscoveryQuery';
 const categories = serviceDiscoveryCategories(CATEGORIES);
@@ -24,6 +24,16 @@ describe('canonical service projections and URL state', () => {
     expect(limited.yacht).toBeUndefined();
     expect(limited.primary.some(item => item.id === 'cat-tourism')).toBe(false);
     expect(serviceDiscoveryMenu(CATEGORIES.map(item => ({ ...item, status: 'soon' })))).toEqual({ primary: [], more: [], yacht: undefined });
+  });
+  it('promotes the already-declared legacy home alias while preserving its returned ID', () => {
+    const home = CATEGORIES.find(item => item.id === 'cat-home-services')!;
+    const legacy = { ...home, id: 'cat-home-living' as CategoryEntry['id'] };
+    const source = CATEGORIES.map(item => item.id === home.id ? legacy : item);
+    const menu = serviceDiscoveryMenu(source);
+    expect(menu.primary[0].id).toBe('cat-home-living');
+    expect(menu.more.some(item => item.id === legacy.id)).toBe(false);
+    expect(projectServiceDiscovery(source, { ...blank, category: legacy.id }).map(row => row.service.id)).toEqual(home.services.map(service => service.id));
+    expect(serviceDiscoveryMenu([{ ...legacy, status: 'soon' }]).primary).toEqual([]);
   });
   it('never invents associations for unknown service slugs or inactive entities', () => {
     const source = CATEGORIES[0];

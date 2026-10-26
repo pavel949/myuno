@@ -17,6 +17,7 @@ import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { useServiceFunctions } from '@/hooks/useServiceFunctions';
 import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
+import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
 import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
@@ -48,9 +49,12 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const situations = serviceDiscoverySituations(categories, catalog.lifeSituations ?? []);
   const menu = serviceDiscoveryMenu(categories);
   const overview = !filters.query.trim() && !filters.category && !filters.situation;
+  const home = categories.find(item => item.id === filters.category && isHomeServiceCategoryId(item.id))
+    ?? categories.find(item => isHomeServiceCategoryId(item.id));
   const child = SERVICE_CATEGORIES.find(category => category.id === filters.category);
-  const category = child ? 'cat-home-services' : filters.category;
-  const home = categories.find(item => item.id === 'cat-home-services');
+  // Resolve only the already-declared home aliases against returned inventory.
+  // The URL and DB identity remain intact; unknown or inactive categories stay unknown.
+  const category = home && (child || isHomeServiceCategoryId(filters.category)) ? home.id : child ? 'cat-home-services' : filters.category;
   const rows = child ? [] : projectServiceDiscovery(categories, { ...filters, category });
   const returnTo = location.pathname + location.search;
   const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
@@ -68,7 +72,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const knownCategory = !category || categories.some(item => item.id === category);
   // Home functions remain request templates with indicative prices, not live supply.
   // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
-  const showRequests = Boolean((category === 'cat-home-services' || filters.query.trim()) && (!category || category === 'cat-home-services') && home && !filters.situation && knownSituation);
+  const showRequests = Boolean((category === home?.id || filters.query.trim()) && (!category || category === home?.id) && home && !filters.situation && knownSituation);
   const requests = showRequests ? functions.filter(fn => (!child || fn.category === child.id) && matchesServiceQuery(filters.query, [fn.raw.nameRu, fn.raw.nameEn, fn.raw.descriptionRu, fn.raw.descriptionEn, homeServiceCategoryLabel(fn.category, language)])) : [];
   const requestPreviews = SERVICE_CATEGORIES.flatMap(item => {
     const matches = requests.filter(fn => fn.category === item.id);
@@ -145,10 +149,10 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
       </>}
     </section>}
-    {ready && home && category === 'cat-home-services' && <section aria-labelledby="home-categories-title" className="space-y-3">
+    {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
       <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">
-        <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', 'cat-home-services')}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
+        <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', home.id)}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
         {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
       </div>
     </section>}
@@ -163,7 +167,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       {rows.length > limit && <Button variant="outline" onClick={() => setLimit(value => value + 12)}>{t('Показать ещё', 'Show more', 'แสดงเพิ่มเติม')}</Button>}
     </section>}
     {noResults && <div className="space-y-3"><EmptyState icon={Search} title={t('Услуги не найдены', 'No services found', 'ไม่พบบริการ')} /><Button variant="outline" onClick={clear}>{t('Сбросить поиск и фильтры', 'Clear search and filters', 'ล้างการค้นหาและตัวกรอง')}</Button></div>}
-    {ready && home && knownSituation && filters.situation && (category === 'cat-home-services' || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
+    {ready && home && knownSituation && filters.situation && (category === home?.id || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
       <h2 id="home-situation-note" className="font-display text-h3">{t('Бытовые заявки', 'Home requests', 'คำขอบริการสำหรับบ้าน')}</h2>
       <p className="text-sm text-muted-foreground">{t('Для конкретных бытовых заявок связь с ситуациями не задана. Уберите ситуацию, чтобы выбрать работу; текст поиска сохранится.', 'Specific home requests are not classified by situation yet. Clear the situation to choose a task; your search text will stay.', 'คำขอบริการสำหรับบ้านยังไม่ได้จัดตามสถานการณ์ ล้างสถานการณ์เพื่อเลือกงาน ข้อความค้นหาจะยังคงอยู่')}</p>
       <Button variant="outline" onClick={() => update('situation', '')}>{t('Выбрать бытовую заявку', 'Browse home requests', 'เลือกคำขอบริการสำหรับบ้าน')}</Button>
