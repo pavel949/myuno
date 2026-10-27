@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -88,7 +89,7 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      <PageContainer>
+      <PageContainer className="premium-account-frame">
         {/* Profile header */}
         <SectionCard className="space-y-3">
           {/* Profile header row */}

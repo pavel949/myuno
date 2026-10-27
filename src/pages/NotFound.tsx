@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, Search, HelpCircle } from "lucide-react";
@@ -25,19 +26,19 @@ const NotFound = () => {
 
   return (
     <AppLayout showFooter={false}>
-      <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
+      <div className="premium-system flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
         {/* 404 — calm, not aggressive */}
         <div className="mb-8">
           <span className="text-7xl font-bold leading-none tracking-tight text-muted-foreground/30 select-none">
             404
           </span>
         </div>
-        
+
         <h1 className="text-xl font-semibold text-foreground mb-2">
-          {isRu ? 'Страница не найдена' : 'Page not found'}
+          {language === 'th' ? 'ไม่พบหน้านี้' : isRu ? 'Страница не найдена' : 'Page not found'}
         </h1>
         <p className="text-sm text-muted-foreground max-w-sm mb-8">
-          {isRu 
+          {language === 'th' ? 'หน้านี้อาจถูกย้ายหรือไม่พร้อมใช้งานชั่วคราว' : isRu
             ? 'Возможно, страница была перемещена или временно недоступна.'
             : 'This page may have been moved or is temporarily unavailable.'}
         </p>
@@ -48,7 +49,7 @@ const NotFound = () => {
             className="flex-1 gap-2"
           >
             <Home className="w-4 h-4" />
-            {isRu ? 'На главную' : 'Go Home'}
+            {language === 'th' ? 'กลับหน้าหลัก' : isRu ? 'На главную' : 'Go Home'}
           </Button>
           <BackButton fallbackPath={APP_ROUTES.HOME} variant="default" />
         </div>
@@ -59,14 +60,14 @@ const NotFound = () => {
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <Search className="w-3.5 h-3.5" />
-            {isRu ? 'Поиск услуг' : 'Browse Services'}
+            {language === 'th' ? 'ค้นหาบริการ' : isRu ? 'Поиск услуг' : 'Browse Services'}
           </button>
           <button
             onClick={() => navigate(APP_ROUTES.CONTACT)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <HelpCircle className="w-3.5 h-3.5" />
-            {isRu ? 'Помощь' : 'Get Help'}
+            {language === 'th' ? 'ขอความช่วยเหลือ' : isRu ? 'Помощь' : 'Get Help'}
           </button>
         </div>
       </div>

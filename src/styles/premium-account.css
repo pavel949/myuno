@@ -1,0 +1,74 @@
+/* Opt-in account surfaces. Authentication and role contracts remain in their hooks. */
+.premium-auth {
+  position: relative;
+  isolation: isolate;
+  background: hsl(var(--background));
+}
+.premium-auth > .premium-auth-decoration { display: none; }
+.premium-auth > header {
+  width: 100%;
+  max-width: var(--public-width-detail, 1440px);
+  margin-inline: auto;
+  padding: 20px var(--layout-gutter);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.premium-auth > main { padding-inline: var(--layout-gutter); }
+.premium-auth-panel {
+  min-width: 0;
+  max-width: var(--public-offer-width);
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  box-shadow: 0 8px 32px hsl(var(--foreground) / .035);
+}
+.premium-auth :is(h1, h2), .premium-system :is(h1, h2, .premium-system-title) {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.015em;
+  color: hsl(var(--foreground));
+  overflow-wrap: anywhere;
+}
+.premium-auth :is(h1, h2) { font-size: var(--public-section-size); }
+.premium-auth :is(button, a), .premium-system :is(button, a) {
+  min-height: var(--touch-target, 44px);
+}
+.premium-auth button { min-width: var(--touch-target, 44px); }
+.premium-auth input { min-width: 0; font-size: var(--public-body-size); }
+.premium-auth :is(p, label), .premium-system p { overflow-wrap: anywhere; }
+.premium-system { max-width: var(--public-width-reading, 46rem); margin-inline: auto; }
+.premium-system h1 { font-size: var(--public-section-size); }
+.premium-system > :is(div, section) { min-width: 0; }
+.premium-account-menu { max-width: var(--public-width-reading, 46rem); margin-inline: auto; }
+.premium-account-menu > button { min-height: var(--touch-target, 44px); padding-inline: var(--card-padding); }
+:is(.premium-auth, .premium-system, .premium-account-menu) :focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+@media (max-width: 767px) {
+  .premium-auth > main { padding-block: 24px 32px; }
+  .premium-auth > main > aside { order: 2; margin: 24px 0 0; }
+  .premium-auth > main > .premium-auth-panel { order: 1; }
+  .premium-auth-panel { padding: 24px 20px; }
+}
+@media (max-width: 359px) {
+  .premium-auth-panel { padding: 20px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.premium-auth, .premium-system, .premium-account-menu) *,
+  :is(.premium-auth, .premium-system, .premium-account-menu) *::before,
+  :is(.premium-auth, .premium-system, .premium-account-menu) *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Shell-only adoption: nested editors and onboarding steps require separate acceptance. */
+.premium-account-frame { max-width: var(--public-width-reading, 46rem); margin-inline: auto; }
+.premium-onboarding h1 {
+  font-family: var(--font-display);
+  font-size: var(--public-section-size);
+  font-weight: 400;
+  line-height: 1.2;
+}

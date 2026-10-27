@@ -2,8 +2,7 @@
  * AuthValuePanel — calm, informative value proposition shown alongside the auth form.
  *
  * Renders the myUNO wordmark, a soft tagline, six cluster chips (Arrive · Live ·
- * Manage · Invest · Legal · Build), three trust bullets and a quiet social proof
- * line. No marketing shouting — strictly aligned with the "Quiet Trust" Bible §0/§1.
+ * Manage · Invest · Legal · Build), catalogue-backed service count and a quiet feature summary. No marketing shouting — strictly aligned with the "Quiet Trust" Bible §0/§1.
  *
  * On mobile this sits above the form. On desktop (md+) the parent renders it as
  * a sticky left column. When `compact` is true (e.g. long signup step) the panel
@@ -12,7 +11,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check, MapPin } from 'lucide-react';
+import { Plane, Home, Briefcase, TrendingUp, Scale, Hammer, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
@@ -46,11 +45,8 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { categories, clusters } = useCatalogFromDB();
-  // Floor at a sane minimum so a transient empty catalog (e.g. a failed DB read
-  // falling through to an empty list) never renders "0+ services" on the panel.
-  const MIN_HEADLINE_SERVICES = 50;
   const headlineServiceCount = useMemo(
-    () => Math.max(getTotalEligibleServicesForAudience(clusters, categories, {}), MIN_HEADLINE_SERVICES),
+    () => getTotalEligibleServicesForAudience(clusters, categories, {}),
     [clusters, categories],
   );
 
@@ -104,7 +100,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
 
       {/* Trust bullets */}
       <ul className="space-y-2.5">
-        {[1, 2, 3].map((n) => (
+        {[1, 2].filter((n) => n !== 1 || headlineServiceCount > 0).map((n) => (
           <li key={n} className="flex items-start gap-2.5">
             <span className="mt-0.5 inline-flex w-5 h-5 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/25 shrink-0">
               <Check className="w-3 h-3 text-primary" strokeWidth={3} />
@@ -118,15 +114,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
         ))}
       </ul>
 
-      {/* Social proof */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground/80 pt-2 border-t border-border/40">
-        <span>{t('auth.social.users')}</span>
-        <span className="opacity-40">·</span>
-        <span className="inline-flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
-          {t('auth.social.location')}
-        </span>
-      </div>
+
     </div>
   );
 }
