@@ -19,6 +19,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
   const title = (language === 'ru' ? property.title_ru : property.title_en) || property.title_en || property.title_ru;
   const quote = homeShowcasePrice(property);
   const periods: Record<string, LangValues> = {
+    total: { ru: '', en: '', th: '' },
     night: { ru: 'за ночь', en: 'per night', th: 'ต่อคืน' },
     month: { ru: 'в месяц', en: 'per month', th: 'ต่อเดือน' },
     week: { ru: 'в неделю', en: 'per week', th: 'ต่อสัปดาห์' },

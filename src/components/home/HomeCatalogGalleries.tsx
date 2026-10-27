@@ -203,11 +203,11 @@ export function HomeServiceGallery() {
   const categories = catalog.isFromDB ? homeServiceCategories(catalog.categories) : [];
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
-  if (!catalog.isLoading && !catalog.error && !categories.length) return null;
+
   return <HomeGallery id="home-services-title" className="home-services" title={title}
     description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}
-    href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
-    state={catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
+    href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все категории', en: 'All categories', th: 'ทุกหมวดหมู่' })}
+    state={!catalog.isLoading && !catalog.error && !categories.length ? <p className="home-catalog-state">{t({ ru: 'Подборка появится после публикации категорий. Полный каталог доступен по ссылке.', en: 'The preview will appear when categories are published. Explore the full catalogue using the link.', th: 'ตัวอย่างจะแสดงเมื่อเผยแพร่หมวดหมู่ ดูรายการทั้งหมดได้จากลิงก์' })}</p> : catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
       {categories.map(category => <article className="home-service-category-card" key={category.id}>
         <Link to={category.path}>

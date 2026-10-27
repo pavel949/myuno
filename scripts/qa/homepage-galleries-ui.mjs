@@ -31,6 +31,7 @@ const virtual = {
   '@/hooks/usePrefetch': `export const usePrefetchRoute=()=>({prefetchRoute:()=>{}});`,
   '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
   '@/hooks/useUserCollections': `export const useUserCollections=()=>({isInCollection:()=>false,toggleCollection:()=>{}});`,
+  '@/hooks/useOffplanProjects': `import{rows,loading,error,retry}from'home-fixture';export const useOffplanProjects=()=>({data:rows.map((p,i)=>({id:'development-'+i,nameEn:'Fixture development '+(i+1),nameRu:'Тестовая новостройка '+(i+1),district:p.district,coverImage:'http://localhost:8080/fixture-home.svg'})),isLoading:loading,isError:error,refetch:retry});`,
   '@/hooks/usePropertyProjects': `import{rows,loading,error,retry}from'home-fixture';export const usePublicPropertyProjects=()=>({data:rows,isLoading:loading,isError:error,refetch:retry});`,
   '@/hooks/useProperties': `import{rows,loading,error,retry}from'home-fixture';export const useProperties=()=>({data:rows.map((p,i)=>({id:'home-'+i,title_en:'Fixture home '+(i+1),title_ru:'Тестовое жильё '+(i+1),district:p.district,property_type:'villa',listing_type:'rent',project_id:p.id,cover_image:'http://localhost:8080/fixture-home.svg',images:[],bedrooms:2,area_sqm:120,price:2000,price_period:'night',currency:'THB',created_at:'2026-10-01',updated_at:'2026-10-01'})),isLoading:loading,isError:error,refetch:retry});export const usePropertiesByProject=(id,limit,opts)=>({data:{total:opts.mode==='buy'?1:opts.propertyType==='condo'&&id==='project-0'?0:3},isSuccess:!loading&&!error,isLoading:loading,isError:error});`,
   '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
@@ -52,6 +53,7 @@ if (snapshotArg) {
   );
   virtual['home-fixture'] =
     `const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';export const loading=false,error=false,retry=()=>{};export const catalog=${JSON.stringify(snapshot)};export const projects=catalog.projects;export const rows=projects;`;
+  virtual['@/hooks/useOffplanProjects'] = `import{catalog}from'home-fixture';export const useOffplanProjects=()=>({data:catalog.offplanProjects??[],isLoading:false,isError:false,refetch:()=>{}});`;
   virtual['@/hooks/useProperties'] =
     `import{catalog}from'home-fixture';export const useProperties=()=>({data:catalog.homes,isLoading:false,isError:false,refetch:()=>{}});export const usePropertiesByProject=()=>({data:{total:0},isSuccess:true,isLoading:false,isError:false});`;
   virtual['@/hooks/useExperiences'] =
@@ -116,7 +118,7 @@ if (
 )
   throw Error('Production client included');
 const css = await Promise.all(
-  ['/src/index.css?direct', '/src/styles/cinematic-home.css?direct'].map(
+  ['/src/index.css?direct', '/src/styles/cinematic-home.css?direct', '/src/styles/premium-public.css?direct'].map(
     async (file) => {
       const r = await fetch(cssOrigin + file);
       if (!r.ok) throw Error('Missing CSS ' + file);
@@ -125,7 +127,7 @@ const css = await Promise.all(
   ),
 );
 await writeFile(path.join(output, 'fixture.css'), css.join('\n'));
-await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomePopulatedProjects.tsx','src/lib/services/publicServiceCategories.ts','src/styles/cinematic-home.css'].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
+await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/home/HomeSearchEntry.tsx','src/lib/services/publicServiceCategories.ts','src/styles/cinematic-home.css','src/styles/premium-public.css'].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
 await writeFile(
   path.join(output, 'fixture.html'),
   '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>',

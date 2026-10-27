@@ -58,8 +58,8 @@
 }
 
 /* The optional name is the catalogue filter, including when no rental dates apply. */
-.property-discovery .home-search.home-search--catalogue>.home-search-query{grid-column:1/-1;grid-row:1}
-.property-discovery .home-search.home-search--catalogue>.home-search-duration{grid-row:2}
+.property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-query{grid-column:1/-1;grid-row:1}
+.property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-duration{grid-row:2}
 @media(min-width:1280px){
   .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-dates,
   .property-discovery .property-discovery-editor .home-search.home-search--catalogue>.home-search-type,

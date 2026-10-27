@@ -622,3 +622,34 @@ html:not([lang]) {
 @media (min-width: 1024px) {
   :root { --type-page-body-size: 16px; --type-page-h1-size: 2.5rem; --type-page-h2-size: 1.75rem; --type-page-h3-size: 1.25rem; }
 }
+
+/* Public discovery: one responsive scale over the existing theme. */
+:root {
+  --public-width-wide: var(--layout-width-catalogue);
+  --public-width-detail: 90rem;
+  --public-width-reading: 46rem;
+  --public-offer-width: 25rem;
+  --public-gutter-base: 1rem;
+  --public-gutter: calc(var(--public-gutter-base) * var(--layout-inset-scale));
+  --public-section-gap: 2.5rem;
+  --public-detail-gap: 2rem;
+  --public-card-gap: 1.25rem;
+  --public-display-size: 2.25rem;
+  --public-title-size: 2rem;
+  --public-section-size: 1.75rem;
+  --public-motion: 200ms;
+  --public-body-size: 1rem;
+  --public-label-size: .875rem;
+  --public-caption-size: .8125rem;
+  --public-width-summary: 38rem;
+}
+@media(min-width:360px) { :root { --public-gutter-base: 1.25rem; } }
+@media(min-width:1024px) { :root {
+  --public-gutter-base: clamp(2rem,calc(6.667vw - 3rem),5rem);
+  --public-section-gap: 5rem;
+  --public-detail-gap: 3rem;
+  --public-card-gap: 2rem;
+  --public-display-size: 4rem;
+  --public-title-size: 2.75rem;
+  --public-section-size: 2.5rem;
+} }

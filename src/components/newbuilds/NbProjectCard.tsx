@@ -1,3 +1,4 @@
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
@@ -16,14 +17,14 @@ export interface NbProjectCardData {
   district?: string | null;
   price_from?: number | null;
   price_to?: number | null;
-  project_status?: string;
-  construction_progress?: number;
+  project_status?: string | null;
+  construction_progress?: number | null;
   completion_date?: string | null;
   is_featured?: boolean;
   developer_name?: string | null;
   unit_types?: string[] | null;
-  units_available?: number;
-  total_units?: number;
+  units_available?: number | null;
+  total_units?: number | null;
 }
 
 interface Props {
@@ -40,15 +41,11 @@ const unitTypeLabels: Record<string, string> = {
   villa: 'Вилла',
 };
 
-// Projects with dedicated landing pages — link there instead of generic detail
-const CUSTOM_LANDING: Record<string, string> = {
-  peylaa: '/peylaa',
-};
-
-export function NbProjectCard({ project, variant = 'compact' }: Props) {
+export function NbProjectCard({ project: sourceProject, variant = 'compact' }: Props) {
+  const project = publicNewbuildPresentation(sourceProject);
   const slug = project.slug || project.id;
-  const href = (slug && CUSTOM_LANDING[slug]) || APP_ROUTES.OFFPLAN_DETAIL(project.id);
-  const img = project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80';
+  const href = APP_ROUTES.OFFPLAN_DETAIL(project.id);
+  const img = project.cover_image;
 
   if (variant === 'featured') {
     return (
@@ -58,7 +55,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
           <img src={img} alt={project.name_en} className="w-full h-full object-cover transition-transform duration-500" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/60" />
         </div>
-        
+
         {/* Content right */}
         <div className="flex-1 p-6 flex flex-col justify-between relative">
           {project.is_featured && (
@@ -66,7 +63,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
               FEATURED
             </span>
           )}
-          
+
           <div>
             {project.developer_name && (
               <p className="nb-label mb-2">{project.developer_name}</p>
@@ -93,9 +90,9 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
                 ))}
               </div>
             )}
-            <NbConstructionProgress 
-              progress={project.construction_progress || 0} 
-              completionDate={project.completion_date} 
+            <NbConstructionProgress
+              progress={project.construction_progress}
+              completionDate={project.completion_date}
             />
             <span className="text-sm font-medium group-hover:text-[hsl(var(--nb-gold))] transition-colors" style={{ color: 'hsl(var(--nb-text))' }}>
               Подробнее →
@@ -113,7 +110,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
       <div className="relative aspect-[4/3] overflow-hidden">
         <img src={img} alt={project.name_en} className="w-full h-full object-cover transition-transform duration-500" />
         <div className="absolute top-3 left-3 z-10">
-          <NbProjectStatusBadge status={project.project_status || 'under_construction'} />
+          <NbProjectStatusBadge status={project.project_status} />
         </div>
         {project.is_featured && (
           <span className="absolute top-3 right-3 z-10 nb-badge" style={{ background: 'hsl(var(--nb-gold) / 0.15)', color: 'hsl(var(--nb-gold))', border: '1px solid hsl(var(--nb-gold) / 0.3)' }}>
@@ -121,7 +118,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
           </span>
         )}
       </div>
-      
+
       {/* Content */}
       <div className="p-4 flex flex-col gap-2.5 flex-1">
         {project.developer_name && (
@@ -137,7 +134,7 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
           </div>
         )}
         <NbPriceDisplay price={project.price_from || null} size="md" />
-        
+
         {project.unit_types && project.unit_types.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {project.unit_types.slice(0, 3).map(t => (
@@ -147,13 +144,13 @@ export function NbProjectCard({ project, variant = 'compact' }: Props) {
             ))}
           </div>
         )}
-        
-        <NbConstructionProgress 
-          progress={project.construction_progress || 0} 
+
+        <NbConstructionProgress
+          progress={project.construction_progress}
           completionDate={project.completion_date}
           size="sm"
         />
-        
+
         <span className="text-xs font-medium mt-auto group-hover:text-[hsl(var(--nb-gold))] transition-colors" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
           Смотреть проект →
         </span>

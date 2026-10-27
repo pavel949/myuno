@@ -1,3 +1,4 @@
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * NbCompareProvider — Compare context for newbuild projects (max 3)
  * Follows same pattern as PropertyCompare.tsx
@@ -21,9 +22,9 @@ export interface CompareNewbuild {
   price_from?: number | null;
   price_to?: number | null;
   developer_name?: string | null;
-  construction_progress?: number;
+  construction_progress?: number | null;
   completion_date?: string | null;
-  project_status?: string;
+  project_status?: string | null;
   total_units?: number | null;
   amenities?: string[] | null;
   unit_types?: string[] | null;
@@ -50,7 +51,7 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CompareNewbuild[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      return stored ? JSON.parse(stored).map((item: CompareNewbuild) => publicNewbuildPresentation({ ...item, price_from: null })) : [];
     } catch { return []; }
   });
 
@@ -69,7 +70,7 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
         return prev;
       }
       toast.success('Добавлено к сравнению');
-      return [...prev, project];
+      return [...prev, publicNewbuildPresentation({ ...project, price_from: null })];
     });
   }, []);
 

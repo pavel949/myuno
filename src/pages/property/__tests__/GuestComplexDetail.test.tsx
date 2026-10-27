@@ -79,6 +79,8 @@ describe('informational complex detail', () => {
     state.rent.data = { properties: [{ id: 'same-unit', management_company_id: 'operator' }], total: 1 };
     state.sale.data = { properties: [{ id: 'same-unit', management_company_id: 'operator' }], total: 1 };
     mount('?managementCompanyId=operator');
+    expect(screen.getByText('Company: Actual Operator')).toBeVisible();
+    expect(screen.queryByText(/Managed by/)).toBeNull();
     expect(screen.getByRole('link', { name: 'same-unit Actual Operator' })).toHaveAttribute('href', '/property/same-unit');
     fireEvent.click(screen.getByRole('button', { name: 'Buy 1' }));
     expect(screen.getByRole('heading', { name: 'Homes for sale' })).toBeInTheDocument();

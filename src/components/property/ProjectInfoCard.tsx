@@ -12,6 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { complexDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import {
   getProjectFacilityLabel,
@@ -55,7 +56,7 @@ export function ProjectInfoCard({ project, className, mode = 'rent' }: ProjectIn
     .filter(id => Object.prototype.hasOwnProperty.call(PROJECT_FACILITY_LABELS, id));
 
   const handleExploreProject = () => {
-    navigate(complexDetailHref(project.id, mode, location.search));
+    navigate(complexDetailHref(project.id, mode, location.search), { state: publicJourneyState(location) });
   };
 
   return (

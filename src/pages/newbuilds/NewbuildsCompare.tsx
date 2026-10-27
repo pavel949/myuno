@@ -1,3 +1,5 @@
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
+import { useNewbuildProjects } from '@/hooks/useNewbuildProjects';
 /**
  * /newbuilds/compare — Side-by-side project comparison
  */
@@ -19,7 +21,13 @@ const unitTypeLabels: Record<string, string> = {
 };
 
 export default function NewbuildsCompare() {
-  const { items, remove, clear } = useNbCompare();
+  const { items: savedItems, remove, clear } = useNbCompare();
+  const { data: currentProjects } = useNewbuildProjects();
+  // Persist identity only; editable prices must come from the canonical reader.
+  const items = savedItems.map(item => {
+    const current = currentProjects?.find(project => project.id === item.id);
+    return publicNewbuildPresentation({ ...item, ...current, price_from: current?.price_from ?? null });
+  });
   const { track } = useIPPLeadEvent();
 
   // IPP §3 lead event: comparison open (+20). Fires once per item-set change.
@@ -63,7 +71,7 @@ export default function NewbuildsCompare() {
     },
     {
       label: 'Статус',
-      render: item => <NbProjectStatusBadge status={item.project_status || 'under_construction'} />,
+      render: item => <NbProjectStatusBadge status={item.project_status ?? null} />,
     },
     {
       label: 'Цена',
@@ -89,7 +97,7 @@ export default function NewbuildsCompare() {
     },
     {
       label: 'Прогресс',
-      render: item => <NbConstructionProgress progress={item.construction_progress || 0} completionDate={item.completion_date} size="sm" />,
+      render: item => <NbConstructionProgress progress={item.construction_progress ?? null} completionDate={item.completion_date} size="sm" />,
     },
     {
       label: 'Сдача',

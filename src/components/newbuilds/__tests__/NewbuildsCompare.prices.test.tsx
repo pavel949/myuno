@@ -1,0 +1,23 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, expect, it, vi } from 'vitest';
+import NewbuildsCompare from '@/pages/newbuilds/NewbuildsCompare';
+const state = vi.hoisted(() => ({ projects: [{ id: 'project', name_en: 'Canonical project', price_from: 9_100_000 as number | null }], track: vi.fn() }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
+vi.mock('@/components/newbuilds/NewbuildsLayout', () => ({ default: ({ children }: { children: React.ReactNode }) => children }));
+vi.mock('@/components/newbuilds/NbCompareProvider', () => ({ useNbCompare: () => ({ items: [{ id: 'project', name_en: 'Stored project', price_from: 8_000_000, construction_progress: 65, completion_date: '2027-01-01' }], remove: vi.fn(), clear: vi.fn() }) }));
+vi.mock('@/hooks/useNewbuildProjects', () => ({ useNewbuildProjects: () => ({ data: state.projects }) }));
+vi.mock('@/hooks/useIPPLeadEvent', () => ({ useIPPLeadEvent: () => ({ track: state.track }) }));
+vi.mock('@/components/newbuilds/NbLeadForm', () => ({ NbLeadForm: () => null }));
+afterEach(cleanup);
+it('refreshes persisted comparison prices from canonical IDs, including an editor clear', () => {
+  const view = render(<MemoryRouter><NewbuildsCompare /></MemoryRouter>);
+  expect(screen.getByText(/от 9\s100\s000 THB/)).toBeVisible();
+  expect(screen.getByText('Цена требует уточнения')).toBeVisible();
+  expect(screen.queryByText(/8\s000\s000/)).toBeNull();
+  expect(screen.queryByText(/65%|2027/)).toBeNull();
+  state.projects = [{ id: 'project', name_en: 'Canonical project', price_from: null }];
+  view.rerender(<MemoryRouter><NewbuildsCompare /></MemoryRouter>);
+  expect(screen.getByText('Цена уточняется')).toBeVisible();
+  expect(screen.queryByText(/9\s100\s000 THB/)).toBeNull();
+});

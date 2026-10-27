@@ -51,7 +51,7 @@ export default function NewbuildsAreaDetail() {
     .slice(0, 3);
 
   const seoTitle = `${area.name_ru} (${area.name_en}) · ${AREA_TITLE_SUFFIX}`;
-  const seoDescription = `${area.name_ru} — район Пхукета. Средняя цена ฿${(area.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${area.avg_yield}%, ${areaProjects.length} проектов. ${area.description_ru.slice(0, 120)}`;
+  const seoDescription = `${area.name_ru} — район Пхукета. ${area.description_ru.slice(0, 120)}`;
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.NEWBUILDS_AREA(area.slug)}`;
   const placeSchema = {
     '@context': 'https://schema.org',
@@ -87,16 +87,7 @@ export default function NewbuildsAreaDetail() {
             <h1 className="nb-display text-4xl md:text-6xl" style={{ color: 'hsl(var(--nb-gold))' }}>
               {area.name_ru}
             </h1>
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className="w-5 h-5"
-                  fill={i < area.investment_rating ? 'hsl(var(--nb-gold))' : 'none'}
-                  style={{ color: i < area.investment_rating ? 'hsl(var(--nb-gold))' : 'hsl(var(--nb-muted) / 0.3)' }}
-                />
-              ))}
-            </div>
+
           </div>
           <p className="text-sm mb-1" style={{ color: 'hsl(var(--nb-muted))' }}>{area.name_en}</p>
           <p className="text-base max-w-3xl leading-relaxed" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
@@ -106,38 +97,6 @@ export default function NewbuildsAreaDetail() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
-        {/* Market stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="nb-glass p-5 text-center">
-            <TrendingUp className="w-5 h-5 mx-auto mb-2" style={{ color: 'hsl(var(--nb-gold))' }} />
-            <p className="nb-mono text-xl font-bold" style={{ color: 'hsl(var(--nb-gold))' }}>
-              ฿{(area.avg_price_sqm / 1000).toFixed(0)}K
-            </p>
-            <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>Средняя цена за м²</p>
-          </div>
-          <div className="nb-glass p-5 text-center">
-            <TrendingUp className="w-5 h-5 mx-auto mb-2" style={{ color: 'hsl(142 70% 55%)' }} />
-            <p className="nb-mono text-xl font-bold" style={{ color: 'hsl(142 70% 55%)' }}>
-              {area.avg_yield}%
-            </p>
-            <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>Средняя доходность</p>
-          </div>
-          <div className="nb-glass p-5 text-center">
-            <Plane className="w-5 h-5 mx-auto mb-2" style={{ color: 'hsl(var(--nb-gold))' }} />
-            <p className="nb-mono text-xl font-bold" style={{ color: 'hsl(var(--nb-text))' }}>
-              {area.distance_airport_km} км
-            </p>
-            <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>До аэропорта</p>
-          </div>
-          <div className="nb-glass p-5 text-center">
-            <Waves className="w-5 h-5 mx-auto mb-2" style={{ color: 'hsl(215 80% 65%)' }} />
-            <p className="nb-mono text-xl font-bold" style={{ color: 'hsl(var(--nb-text))' }}>
-              {area.distance_beach_km < 1 ? `${(area.distance_beach_km * 1000).toFixed(0)}м` : `${area.distance_beach_km}км`}
-            </p>
-            <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>До пляжа</p>
-          </div>
-        </div>
-
         {/* Highlights */}
         <div>
           <p className="nb-label mb-4">ОСОБЕННОСТИ РАЙОНА</p>
@@ -225,9 +184,7 @@ export default function NewbuildsAreaDetail() {
                 </div>
                 <div className="flex-1">
                   <h4 className="text-sm font-medium" style={{ color: 'hsl(var(--nb-text))' }}>{na.name_ru}</h4>
-                  <p className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>
-                    ฿{(na.avg_price_sqm / 1000).toFixed(0)}K/м² · {na.avg_yield}% доходность
-                  </p>
+
                 </div>
               </Link>
             ))}

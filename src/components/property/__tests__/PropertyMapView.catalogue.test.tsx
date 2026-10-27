@@ -16,9 +16,9 @@ vi.mock('@/lib/googleMaps', () => ({ DEFAULT_MAP_CENTER: { lat: 7.9, lng: 98.3 }
 vi.mock('../TrustStrip', () => ({ TrustStrip: () => null }));
 function Location() { const value = useLocation(); return <output data-testid="location">{value.pathname}{value.search}</output>; }
 const homes = [
-  { id: 'synthetic-sale', title_en: 'Sale home', title_ru: 'Продажа', listing_type: 'sale', price: 8000000, sale_price: 9000000, lat: 7.9, lng: 98.3 },
+  { id: 'synthetic-sale', title_en: 'Sale home', title_ru: 'Продажа', listing_type: 'sale', price: 8000000, sale_price: 9000000, sale_currency: 'THB', lat: 7.9, lng: 98.3 },
   { id: 'synthetic-unpriced', title_en: 'Unpriced home', title_ru: 'Цена по запросу', listing_type: 'sale', lat: 7.9, lng: 98.3 },
-  { id: 'synthetic-month', title_en: 'Monthly home', title_ru: 'На месяц', listing_type: 'rent', price: 30000, price_period: 'month', lat: 7.9, lng: 98.3 },
+  { id: 'synthetic-month', title_en: 'Monthly home', title_ru: 'На месяц', listing_type: 'rent', price: 30000, price_period: 'month', currency: 'THB', lat: 7.9, lng: 98.3 },
 ] as Property[];
 function mount() {
   vi.stubGlobal('google', { maps: { SymbolPath: { CIRCLE: 1 }, Size: class {} } });

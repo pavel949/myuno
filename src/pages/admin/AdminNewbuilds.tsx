@@ -1,3 +1,5 @@
+import { invalidateProjectPriceReaders } from '@/lib/real-estate/invalidateProjectPriceReaders';
+import { projectStartingPrice } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * Admin — Newbuilds management (projects, developers, featured, leads)
  * Inline editing for key fields, featured control, offplan_catalog
@@ -73,13 +75,16 @@ export default function AdminNewbuilds() {
 
   const updateProject = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: ProjectUpdate }) => {
+      if (updates.price_from != null && projectStartingPrice(updates.price_from) == null) throw new Error('Укажите положительную цену в THB или очистите поле.');
       const { error } = await supabase.from('property_projects').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-nb-projects'] });
+      void invalidateProjectPriceReaders(qc);
       toast.success('Обновлено');
     },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Ошибка'),
   });
 
   const updateDeveloper = useMutation({
@@ -95,11 +100,13 @@ export default function AdminNewbuilds() {
 
   const bulkUpdateProjects = useMutation({
     mutationFn: async ({ ids, updates }: { ids: string[]; updates: ProjectUpdate }) => {
+      if (updates.price_from != null && projectStartingPrice(updates.price_from) == null) throw new Error('Укажите положительную цену в THB или очистите поле.');
       const { error } = await supabase.from('property_projects').update(updates).in('id', ids);
       if (error) throw error;
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['admin-nb-projects'] });
+      void invalidateProjectPriceReaders(qc);
       clearSelection();
       toast.success(`Обновлено ${vars.ids.length} проектов`);
     },
@@ -341,7 +348,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
         <td className="p-3 text-muted-foreground text-xs">{p.district || p.location_area || '—'}</td>
         <td className="p-3"><NbProjectStatusBadge status={p.project_status || 'under_construction'} /></td>
         <td className="p-3 text-xs">{catalog.type || '—'}</td>
-        <td className="p-3 text-xs">{p.price_from ? `${curSym}${(p.price_from / 1e6).toFixed(1)}M` : '—'}</td>
+        <td className="p-3 text-xs">{p.price_from ? `${p.price_from.toLocaleString()} THB` : '—'}</td>
         <td className="p-3 text-xs font-mono">{p.muuno_score || '—'}</td>
         <td className="p-3">
           <div className="flex gap-1">
@@ -370,8 +377,8 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
                 <Input size={1} value={edits.developer_name ?? p.developer_name ?? ''} onChange={e => setEdits({ ...edits, developer_name: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">Цена от ({cityCurrencyCode})</Label>
-                <Input type="number" value={edits.price_from ?? p.price_from ?? ''} onChange={e => setEdits({ ...edits, price_from: Number(e.target.value) || null })} />
+                <Label htmlFor={`project-price-${p.id}`} className="text-xs">Цена от (THB)</Label>
+                <Input id={`project-price-${p.id}`} type="number" min="0.01" step="any" value={edits.price_from !== undefined ? edits.price_from ?? '' : p.price_from ?? ''} onChange={e => setEdits({ ...edits, price_from: e.target.value === '' ? null : Number(e.target.value) })} />
               </div>
               <div>
                 <Label className="text-xs">MuUNO Score</Label>

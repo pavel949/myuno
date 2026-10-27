@@ -137,6 +137,12 @@ const virtual = {
       const query=new Proxy(allowed,{get(target,key){if(key in target)return target[key];return()=>deny('database '+String(key));}});return query;
     }},{get(target,key){if(key in target)return target[key];return()=>deny('client '+String(key));}});
   `,
+  '@/hooks/useTaxonomy': `import{deny}from'compact-fixture-state';export const useTaxonomy=()=>deny('unexpected taxonomy read');export const useTaxonomyHierarchy=useTaxonomy,useTaxonomyValue=useTaxonomy,useTaxonomyLabel=useTaxonomy,useTaxonomyLabels=useTaxonomy,formatForSelect=useTaxonomy,formatForChips=useTaxonomy;`,
+  '@/hooks/useProperties': `export const useProperties=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
+  '@/hooks/useOffplanProjects': `export const useOffplanProjects=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
+  '@/hooks/useExperiences': `export const useExperiences=()=>({experiences:[],isLoading:false,error:null,refetch:()=>{}});`,
+  '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
+  '@/contexts/CurrencyContext': `export const useCurrency=()=>({currency:'THB',formatPrice:n=>'THB '+n});`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main data-testid="fixture-home" className="min-h-screen bg-background text-foreground">{children}</main>;`,
   '@/components/nav/AppDrawer': `export const AppDrawer=({open})=>open?<aside data-testid="synthetic-app-drawer">Synthetic app drawer; drawer behavior is outside this fixture.</aside>:null;`,
   '@/components/onboarding/Coachmarks': `export const Coachmarks=()=>null;`,
@@ -162,7 +168,7 @@ const result = await build({
     window.fixtureQueryClient=queryClient;
     createRoot(document.getElementById('root')).render(<QueryClientProvider client={queryClient}><FixtureProvider><MemoryRouter initialEntries={['/']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></FixtureProvider></QueryClientProvider>);
   `, loader: 'tsx', resolveDir: root },
-  bundle: true, outfile: path.join(output, 'fixture.js'), jsx: 'automatic', format: 'esm', metafile: true,
+  bundle: true, loader:{'.svg':'dataurl'}, outfile: path.join(output, 'fixture.js'), jsx: 'automatic', format: 'esm', metafile: true,
   define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.DEV': 'false' },
   plugins: [{ name: 'isolated-compact-home', setup(b) {
     b.onResolve({ filter: /.*/ }, args => {
@@ -199,7 +205,7 @@ const report = {
   actualComponents: required, syntheticModules: Object.keys(virtual),
   stylesheet: 'src/index.css compiled by repository Tailwind CLI',
   fonts: 'Network fonts intentionally excluded; system fallbacks only. A production-font visual gate remains separate.',
-  surfaceScope: 'Actual Index (legacy gate) and IndexV2, actual compact personal components and pending-order query. AppLayout, drawer, onboarding and lower ancillary sections are synthetic.',
+  surfaceScope: 'Actual Index (legacy gate) and IndexV2, actual compact personal components and pending-order query. AppLayout, drawer, onboarding and lower ancillary sections are synthetic. Public discovery readers return explicit empty fixtures.',
   dataScope: 'Synthetic hooks test presentation only; not evidence of production authorization, notification delivery or preference persistence.',
 };
 await writeFile(path.join(output, 'build-report.json'), JSON.stringify(report, null, 2));

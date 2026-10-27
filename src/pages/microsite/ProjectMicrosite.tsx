@@ -1,3 +1,4 @@
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * /p/:slug — Project microsite (standalone page, no app shell).
  *
@@ -25,7 +26,8 @@ import '@/styles/newbuilds-theme.css';
 
 export default function ProjectMicrosite() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: project, isLoading } = useNewbuildProject(slug);
+  const { data: sourceProject, isLoading } = useNewbuildProject(slug);
+  const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const { data: units = [] } = useProjectUnits(project?.id);
 
   // Track view in analytics_events (microsite source)
@@ -43,15 +45,15 @@ export default function ProjectMicrosite() {
 
   // Microsite must be explicitly enabled
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const landingEnabled = (project as any).landing_enabled !== false; // default true if column missing
+  const landingEnabled = project.landing_enabled === true;
   if (!landingEnabled) {
     return <Navigate to={APP_ROUTES.OFFPLAN_DETAIL(project.id)} replace />;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const proj = project as any;
-  const title = proj.meta_title || `${project.name_en}, ${project.location_area || 'Phuket'}`;
-  const description = proj.meta_description || project.description_en || project.tagline || '';
+  const title = `${project.name_en}, ${project.location_area || 'Phuket'}`;
+  const description = `${project.name_en}. Starting prices require confirmation. Contact the project for current terms.`;
   const ogImage = proj.og_image_url || project.cover_image || '';
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : '';
 
@@ -90,7 +92,7 @@ export default function ProjectMicrosite() {
       <section className="relative">
         <div className="aspect-[16/9] md:aspect-[21/9] w-full relative overflow-hidden">
           <img
-            src={project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80'}
+            src={project.cover_image}
             alt={project.name_en}
             className="w-full h-full object-cover"
           />
@@ -147,24 +149,21 @@ export default function ProjectMicrosite() {
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="p-5 rounded-none border border-border bg-card">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Цена от</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Цена</p>
               <NbPriceDisplay price={project.price_from} size="md" />
             </div>
-            <div className="p-5 rounded-none border border-border bg-card">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Прогресс</p>
-              <NbConstructionProgress progress={project.construction_progress} />
-            </div>
+
           </div>
 
           {units.length > 0 && (
             <div>
-              <h2 className="font-display text-h2 font-normal tracking-tight mb-4">Доступные юниты</h2>
+              <h2 className="font-display text-h2 font-normal tracking-tight mb-4">Планировки юнитов</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 {units.slice(0, 6).map((u) => (
                   <div key={u.id} className="p-4 rounded-none border border-border bg-card">
                     <p className="font-semibold mb-1">{u.name}</p>
                     <p className="text-sm text-muted-foreground mb-2">{u.bedrooms ?? 0} BR · {u.area_sqm} m²</p>
-                    <NbPriceDisplay price={u.price} size="sm" />
+                    <NbPriceDisplay price={null} size="sm" />
                   </div>
                 ))}
               </div>

@@ -40,7 +40,7 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(3)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
@@ -48,9 +48,8 @@ async def main():
                     for card in await category_cards.all():
                         await card.scroll_into_view_if_needed()
                         image=card.locator('img')
-                        await expect(image).to_be_visible()
-                        await expect(image).to_have_js_property('complete',True)
-                        assert await image.evaluate('(el)=>el.naturalWidth>0 && getComputedStyle(el).objectFit==="contain"')
+                        await expect(image).not_to_be_visible()
+                        await expect(card.locator('.home-service-category-copy')).to_be_visible()
 
                     # Each gallery stays one card high and within its own section.
                     for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
@@ -105,31 +104,23 @@ async def main():
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                             await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
-                    # One intention choice goes directly to canonical results, without an initial form.
+                    # One universal entry plus four native shortcuts; no intermediate sheet.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
-                    for index, query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
-                        await page.locator('.home-search-entry-button').click()
-                        dialog = page.get_by_role('dialog')
-                        await expect(dialog).to_be_visible()
-                        await dialog.evaluate('(el)=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})))')
-                        choices = dialog.locator('.home-search-intents a')
-                        await expect(choices).to_have_count(4)
-                        # Every intention, including Buy, fits the current sheet without scrolling.
-                        bounds = await dialog.bounding_box()
-                        for choice in await choices.all():
-                            box = await choice.bounding_box()
-                            assert box['y'] >= bounds['y'] and box['y']+box['height'] <= bounds['y']+bounds['height'], box
-                        if index == 0: await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-intent.png'))
-                        await choices.nth(index).click()
-                        await expect(page.get_by_test_id('location')).to_have_text('/property/search?'+query)
-                        await expect(dialog).to_have_count(0)
+                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/search')
                     await page.locator('.home-search-entry-button').click()
-                    await page.keyboard.press('Escape')
-                    await expect(page.get_by_role('dialog')).to_have_count(0)
-                    await expect(page.locator('.home-search-entry-button')).to_be_focused()
+                    await expect(page.get_by_test_id('location')).to_have_text('/search')
+                    choices=page.locator('.premium-plan-links a')
+                    await expect(choices).to_have_count(4)
+                    for index,query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
+                        await choices.nth(index).focus()
+                        await expect(choices.nth(index)).to_be_focused()
+                        await choices.nth(index).press('Enter')
+                        await expect(page.get_by_test_id('location')).to_have_text('/property/search?'+query)
+                        await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await expect(page.locator('.premium-project-grid article')).to_have_count(3)
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
-                                             ('.home-community-card a', '/property/complex/'),
+                                             ('.premium-project-grid a', '/property/offplan/'),
                                              ('.home-listing a', '/property/home-')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
@@ -152,7 +143,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':3,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
@@ -167,15 +158,17 @@ async def main():
             page = await context.new_page()
             await page.goto(f'http://localhost:8080/fixture?state={state}',wait_until='domcontentloaded')
             await expect(page.locator('.home-area-guide-link')).to_have_count(4)
-            if state=='loading': await expect(page.locator('.home-properties-loading[role=status]')).to_be_visible()
+            if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(2)
+                await expect(page.get_by_role('alert')).to_have_count(3)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
-                await expect(page.locator('.home-experiences,.home-services,.home-populated-projects')).to_have_count(0)
+                await expect(page.locator('.home-experiences,.home-populated-projects')).to_have_count(0)
+                await expect(page.locator('.home-services a.home-text-link')).to_be_visible()
+                await expect(page.locator('.premium-newbuilds a.home-text-link')).to_be_visible()
                 await expect(page.locator('.home-area-guide-link')).to_have_count(4)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
             results.append({'language':'en','state':state,'width':390,'pageOverflow':False})

@@ -1,3 +1,4 @@
+import { PUBLIC_NEWBUILD_COLUMNS, publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * NbDeveloperTab — Inline developer profile with their other projects
  */
@@ -35,9 +36,11 @@ function useDeveloperWithProjects(developerId?: string, excludeProjectId?: strin
       if (!developerId) return [];
       let query = supabase
         .from('property_projects')
-        .select('*')
+        .select(PUBLIC_NEWBUILD_COLUMNS)
         .eq('developer_id', developerId)
         .eq('is_active', true)
+        .eq('is_approved', true)
+        .eq('public_listing_enabled', true)
         .order('is_featured', { ascending: false })
         .limit(6);
 
@@ -47,7 +50,7 @@ function useDeveloperWithProjects(developerId?: string, excludeProjectId?: strin
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []).map((p: any) => ({
+      return (data || []).map((p: any) => publicNewbuildPresentation({
         id: p.id, slug: p.slug, name_en: p.name_en, name_ru: p.name_ru,
         tagline: p.tagline, description_en: p.description_en, description_ru: p.description_ru,
         cover_image: p.cover_image, gallery_urls: p.gallery_urls || p.images, images: p.images,

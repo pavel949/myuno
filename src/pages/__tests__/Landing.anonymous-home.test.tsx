@@ -12,7 +12,8 @@ vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: () => <heade
 vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <small>Existing legal footer</small> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
-vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button> }));
+vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button>, HomePlanLinks: () => <nav>Search shortcuts</nav> }));
+vi.mock('@/components/home/HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => <section>Published housing</section>, HomeNewbuildsPreview: () => <section>Published new developments</section> }));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => <section aria-label="Project gallery">Populated public projects</section> }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
@@ -59,8 +60,8 @@ it.each([
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
  expect(screen.getByRole('button', { name: 'Unified home search' })).toBeVisible();
- expect(screen.getByText('Populated public projects')).toBeVisible();
- expect(screen.getByRole('heading', { name: language === 'ru' ? 'Найдите свой дом' : language === 'th' ? 'ที่พักสำหรับคุณ' : 'Find your home' })).toBeVisible();
+ expect(screen.getByText('Published new developments')).toBeVisible();
+ expect(screen.getByText('Published housing')).toBeVisible();
  expect(screen.queryByRole('heading', { name: 'Layantara Villas' })).toBeNull();
  const bar = screen.getByRole('navigation', { name });
  const links = within(bar).getAllByRole('link');

@@ -39,8 +39,9 @@ describe('Project microsite canonical surfaces', () => {
     expect(cta).toHaveAttribute('href', '#lead-form');
     expect(cta).toHaveClass('bg-primary', 'text-primary-foreground');
     expect(screen.getByRole('heading', { level: 1, name: 'Тестовый проект' })).toHaveClass('font-display', 'text-h1');
-    expect(screen.getByText(/฿7.2M/).parentElement).toHaveClass('bg-card', 'border-border');
-    expect(screen.getByText('37%')).toBeInTheDocument();
+    expect(screen.getByText(/от 7\s234\s567 THB/).closest('.bg-card')).toHaveClass('border-border');
+    expect(screen.getByText('Цена требует уточнения')).toBeVisible();
+    expect(screen.queryByText('37%')).toBeNull();
     expect(screen.getByText('Описание тестового проекта')).toBeInTheDocument();
     expect(screen.getByTestId('lead-form')).toHaveAttribute('data-project', 'synthetic-project');
     expect(screen.getByTestId('lead-form')).toHaveAttribute('data-source', 'microsite_synthetic-slug');

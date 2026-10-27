@@ -6,7 +6,7 @@ export function createSyntheticPropertyCatalog(priceCases = false) {
     id: `synthetic-home-${String(i).padStart(3, '0')}`, title_en: `Synthetic ${i === 35 ? 'Needle' : 'Home'} ${i}`, title_ru: `Тестовый ${i === 35 ? 'Needle' : 'объект'} ${i}`,
     listing_type: i % 3 === 0 ? 'sale' : 'rent', price_period: i % 3 === 1 ? 'month' : 'night',
     is_active: true, approval_status: 'approved', property_type: i % 2 ? 'villa' : 'condo', district: i % 2 ? 'layan' : 'rawai',
-    price: 2500 + i, sale_price: i % 3 === 0 ? 9000000 + i : null, currency: 'THB', bedrooms: 2, bathrooms: 2, max_guests: 4,
+    price: 2500 + i, sale_price: i % 3 === 0 ? 9000000 + i : null, sale_currency: 'THB', currency: 'THB', bedrooms: 2, bathrooms: 2, max_guests: 4,
     images: ['/synthetic-property.svg'], cover_image: '/synthetic-property.svg', created_at: '2026-10-20', updated_at: '2026-10-20', lat: 7.9, lng: 98.3,
   }));
   if (priceCases) {

@@ -1,7 +1,9 @@
+import { publicNewbuildPresentation } from './publicNewbuildPresentation';
 /**
  * Unified presentation layer for real-estate catalog cards (offplan / property / resale).
  * Inventory chain: developer → project → unit → listing; operations & transaction roles stay in canonicalModel.
  */
+import { propertySaleAskingPrice, propertyDetailHref, propertyRentalDisplayPrice } from './propertyDetailIntent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { OffplanProject } from '@/hooks/useOffplanProjects';
 import type { Property } from '@/hooks/useProperties';
@@ -32,7 +34,7 @@ export interface UnifiedListingSurface {
   /** Raw numbers for formatPrice in UI */
   priceHintThb: number | null;
   /** sale vs rent context for property */
-  priceMode: 'per_night' | 'total' | 'asking' | 'from_project' | 'unknown';
+  priceMode: 'per_night' | 'per_week' | 'per_month' | 'per_year' | 'total' | 'asking' | 'from_project' | 'unknown';
   developerVerified: boolean | null;
   muunoScore: number | null;
   /** Secondary / investor signals */
@@ -51,7 +53,8 @@ export function hrefResaleListing(id: string): string {
   return APP_ROUTES.RESALE_DETAIL(id);
 }
 
-export function surfaceFromOffplanProject(p: OffplanProject): UnifiedListingSurface {
+export function surfaceFromOffplanProject(source: OffplanProject): UnifiedListingSurface {
+  const p = publicNewbuildPresentation(source);
   return {
     kind: 'offplan_project',
     id: p.id,
@@ -64,7 +67,7 @@ export function surfaceFromOffplanProject(p: OffplanProject): UnifiedListingSurf
     lifecycle: p.projectStatus,
     isFeatured: p.isFeatured,
     priceHintThb: p.priceFrom,
-    priceMode: 'from_project',
+    priceMode: p.priceFrom == null ? 'unknown' : 'from_project',
     developerVerified: p.developerVerified,
     muunoScore: p.muunoScore,
     isAssignment: null,
@@ -80,16 +83,16 @@ function propertyIntent(p: Property, mode: 'rent' | 'buy'): ListingIntentSurface
 }
 
 export function surfaceFromProperty(p: Property, mode: 'rent' | 'buy' = 'rent'): UnifiedListingSurface {
-  const salePrice = p.sale_price ?? p.price;
-  const hint =
-    mode === 'buy'
-      ? salePrice ?? null
-      : p.price_per_night ?? p.price ?? null;
+  const rental = propertyRentalDisplayPrice(p);
+  const amount = mode === 'buy' ? propertySaleAskingPrice(p) : rental?.amount;
+  const currency = (mode === 'buy' && p.sale_price != null ? p.sale_currency : p.currency)?.trim().toUpperCase();
+  // This surface is THB-only; a missing or different currency cannot be relabelled.
+  const hint = currency === 'THB' && typeof amount === 'number' && Number.isFinite(amount) && amount > 0 ? amount : null;
 
   return {
     kind: 'property_listing',
     id: p.id,
-    href: hrefPropertyListing(p.id),
+    href: propertyDetailHref(p.id, mode),
     titleRu: p.title_ru,
     titleEn: p.title_en,
     coverImageUrl: p.cover_image ?? null,
@@ -98,7 +101,7 @@ export function surfaceFromProperty(p: Property, mode: 'rent' | 'buy' = 'rent'):
     lifecycle: null,
     isFeatured: Boolean(p.is_featured),
     priceHintThb: hint,
-    priceMode: mode === 'buy' ? 'total' : 'per_night',
+    priceMode: hint == null ? 'unknown' : mode === 'buy' ? 'total' : rental!.period === 'total' ? 'total' : `per_${rental!.period}`,
     developerVerified: null,
     muunoScore: null,
     isAssignment: null,

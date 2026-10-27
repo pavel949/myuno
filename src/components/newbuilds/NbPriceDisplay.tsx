@@ -1,5 +1,4 @@
-import React from 'react';
-
+import { ProjectStartingPrice } from './ProjectStartingPrice';
 interface Props {
   price: number | null;
   priceTo?: number | null;
@@ -7,31 +6,7 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
-
-function formatThb(value: number): string {
-  if (value >= 1_000_000) return `฿${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-  if (value >= 1_000) return `฿${(value / 1_000).toFixed(0)}K`;
-  return `฿${value.toLocaleString()}`;
-}
-
-const sizes = {
-  sm: 'text-sm',
-  md: 'text-lg',
-  lg: 'text-2xl',
-};
-
-export function NbPriceDisplay({ price, priceTo, showFrom = true, size = 'md', className = '' }: Props) {
-  if (!price) return null;
-  
-  return (
-    <span className={`nb-mono font-bold ${sizes[size]} ${className}`} style={{ color: 'hsl(var(--nb-gold))' }}>
-      {showFrom && <span className="text-xs font-normal mr-1" style={{ color: 'hsl(var(--nb-muted))' }}>от</span>}
-      {formatThb(price)}
-      {priceTo && priceTo > price && (
-        <span className="font-normal text-xs ml-1" style={{ color: 'hsl(var(--nb-muted))' }}>
-          – {formatThb(priceTo)}
-        </span>
-      )}
-    </span>
-  );
+/** Public project/unit preview: unconfirmed starting price, never a firm offer. */
+export function NbPriceDisplay({ price, size = 'md', className = '' }: Props) {
+  return <ProjectStartingPrice price={price} className={`${size === 'lg' ? 'text-2xl' : size === 'sm' ? 'text-sm' : 'text-lg'} ${className}`} />;
 }

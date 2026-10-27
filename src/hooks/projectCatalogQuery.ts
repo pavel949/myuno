@@ -11,6 +11,7 @@ export type ProjectCatalogSort =
 export interface ProjectCatalogFilters {
   isActive?: boolean;
   isApproved?: boolean;
+  publicListingEnabled?: boolean;
   statuses?: string[];
   district?: string;
   locationArea?: string;
@@ -32,6 +33,7 @@ export function applyProjectCatalogFilters(
   let q = query;
 
   if (filters?.isActive !== undefined) q = q.eq('is_active', filters.isActive);
+  if (filters?.publicListingEnabled !== undefined) q = q.eq('public_listing_enabled', filters.publicListingEnabled);
   if (filters?.isApproved !== undefined) q = q.eq('is_approved', filters.isApproved);
   if (filters?.statuses && filters.statuses.length > 0) q = q.in('project_status', filters.statuses);
   if (filters?.district) q = q.eq('district', filters.district);

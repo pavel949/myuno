@@ -12,6 +12,8 @@ from playwright.async_api import async_playwright, expect
 
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [320, 360, 768, 1024, 1440, 1920, 2560]
+# Independent pixel oracle for the approved public gutter scale at these viewports.
+HOUSING_GUTTERS = {320:16, 360:20, 768:20, 1024:32, 1440:48, 1920:80, 2560:80}
 CASES = [(lang, width, surface, 'normal', 'list') for lang in ['ru', 'en', 'th'] for width in WIDTHS for surface in ['services', 'housing', 'business']]
 CASES += [('en', width, 'housing', state, 'list') for width in [360, 1440, 2560] for state in ['loading', 'error', 'empty']]
 CASES += [('ru', width, 'housing', 'normal', 'map') for width in [360, 1024, 1440, 2560]]
@@ -51,7 +53,8 @@ async def main():
                 assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'document overflow'
                 header = await geometry(page.locator('.consumer-header-inner'))
                 frame_limit = 1536 if surface == 'business' else 1760
-                assert abs(header['width'] - min(width, frame_limit)) <= 1, header
+                expected_header = min(width-2*HOUSING_GUTTERS[width],1760) if surface == 'housing' else min(width, frame_limit)
+                assert abs(header['width'] - expected_header) <= 1, header
                 row['header'] = header
                 # Bounds of visible rendered primary controls. The pre-existing
                 # mobile amenities strip intentionally scrolls horizontally.
@@ -90,13 +93,15 @@ async def main():
                 elif surface == 'housing':
                     root = await geometry(page.locator('.property-discovery'))
                     assert abs(root['width']-header['width']) <= 1, {'frame': root, 'header': header}
-                    if state in ['normal', 'loading']:
+                    if state in ['normal', 'loading'] and not (view == 'map' and width < 1280 and state == 'normal'):
                         grid = page.get_by_test_id('property-results-skeleton' if state == 'loading' else 'property-results-grid')
                         metrics = await geometry(grid)
                         expected = 2 if view == 'map' and width >= 1280 else 4 if width >= 1440 else 3 if width >= 1024 else 2 if width >= 640 else 1
                         assert len(metrics['columns'].split()) == expected, metrics
                         row['grid'] = metrics
                     if view == 'map':
+                        if width < 1280 and state == 'normal':
+                            await expect(page.get_by_test_id('property-results-grid')).not_to_be_visible()
                         map_rect = await geometry(page.locator('.property-discovery-map'))
                         list_rect = await geometry(page.locator('.property-discovery-list'))
                         if width >= 1280:
@@ -104,6 +109,9 @@ async def main():
                         row['map'] = map_rect
                     # Full search remains operable with no dates; no calendar
                     # availability proof is claimed by this layout fixture.
+                    criteria=page.locator('.premium-search-criteria')
+                    await expect(criteria).not_to_have_attribute('open','')
+                    await criteria.locator(':scope > summary').click()
                     search = page.locator('.home-search')
                     await expect(search.locator('button[type=submit]')).to_be_visible()
                     if width >= 1280:

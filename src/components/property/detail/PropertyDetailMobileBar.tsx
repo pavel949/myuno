@@ -3,6 +3,7 @@
  * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
  */
 import { useNavigate } from 'react-router-dom';
+import { useLayoutEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -19,8 +20,10 @@ interface PropertyDetailMobileBarProps {
   propertyId: string;
   isSaleListing: boolean;
   isLongStayOnly?: boolean;
-  salePrice: number;
-  pricePerNight: number;
+  salePrice: number | null;
+  pricePerNight?: number | null;
+  rentalPriceLabel?: string;
+  guestSearch?: string;
   ownershipLabel?: string;
   titleEn?: string | null;
   titleRu?: string | null;
@@ -37,6 +40,8 @@ export function PropertyDetailMobileBar({
   isLongStayOnly = false,
   salePrice,
   pricePerNight,
+  rentalPriceLabel,
+  guestSearch,
   ownershipLabel,
   titleEn,
   titleRu,
@@ -50,14 +55,42 @@ export function PropertyDetailMobileBar({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const actionBarRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const bar = actionBarRef.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const variable = '--property-detail-action-clearance';
+    const previous = root.style.getPropertyValue(variable);
+    const priority = root.style.getPropertyPriority(variable);
+    let active = true;
+    const measure = () => {
+      if (!active) return;
+      const rect = bar.getBoundingClientRect();
+      // Includes the existing bottom-nav/safe-area offset, not just bar height.
+      const clearance = rect.height > 0 ? Math.max(0, Math.ceil(window.innerHeight - rect.top)) : 0;
+      root.style.setProperty(variable, `${clearance}px`);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(bar);
+    window.addEventListener('resize', measure);
+    return () => {
+      active = false;
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+      if (previous) root.style.setProperty(variable, previous, priority);
+      else root.style.removeProperty(variable);
+    };
+  }, []);
 
   const handleReserve = () => {
     if (dateRange?.from && dateRange?.to) {
-      const params = new URLSearchParams({
-        checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-        checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-        guests: guestCount.toString(),
-      });
+      const params = new URLSearchParams(guestSearch);
+      params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+      params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+      params.set('guests', guestCount.toString());
       navigate(`${APP_ROUTES.PROPERTY_INQUIRY(propertyId)}?${params.toString()}`);
     } else {
       onOpenDatePicker();
@@ -65,15 +98,15 @@ export function PropertyDetailMobileBar({
   };
 
   return (
-    <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
+    <div ref={actionBarRef} data-property-detail-action-bar className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
       <div className="max-w-[1536px] mx-auto flex items-center gap-3">
         {isSaleListing || isLongStayOnly ? (
           <>
             <div className="flex-1 min-w-0">
               {isSaleListing ? <>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-                <span className="text-xl font-bold text-foreground">{salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
-              </> : <p className="text-sm font-semibold text-foreground">{pickLang(language, { ru: 'Условия аренды', en: 'Rental terms', th: 'เงื่อนไขการเช่า' })}</p>}
+                <span className="text-xl font-bold text-foreground">{typeof salePrice === 'number' && salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
+              </> : <p className="text-sm font-semibold text-foreground">{rentalPriceLabel ?? pickLang(language, { ru: 'Условия аренды', en: 'Rental terms', th: 'เงื่อนไขการเช่า' })}</p>}
               {ownershipLabel && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
               )}

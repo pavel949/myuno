@@ -104,8 +104,8 @@ export default function KnowledgePillarPage() {
     sourceModule: 'knowledge_pillar',
     actionId: 'browse-offplan',
     isLoading: matches.isLoading,
-    count: matches.count,
-    enabled: isPropertyPillar,
+    count: matches.count ?? 0,
+    enabled: isPropertyPillar && matches.count != null,
     context: { pillar_slug: pillar?.slug ?? null, cluster: pillar?.cluster ?? null },
   });
 
@@ -123,7 +123,7 @@ export default function KnowledgePillarPage() {
         transactional: false,
         loading: true,
       });
-    } else if (matches.count > 0) {
+    } else if (matches.count != null && matches.count > 0) {
       list.push({
         id: 'browse-offplan',
         to: matches.href,

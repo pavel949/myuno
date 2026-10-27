@@ -1,103 +1,27 @@
-/**
- * PropertyDetailGallery — Airbnb-style image grid for the property detail page.
- * 5+ images: 2-column hero + 4 thumbs grid. Fewer: single image with thumbnail strip.
- */
 import { useState } from 'react';
-import { Eye } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import '@/styles/premium-public.css';
+import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-interface PropertyDetailGalleryProps {
-  images: string[];
-  alt: string;
-  onOpenLightbox: (startIndex: number) => void;
-}
-
+interface PropertyDetailGalleryProps { images: string[]; alt: string; onOpenLightbox: (startIndex: number) => void }
+/** One large photograph and two supporting photographs; mobile uses one image at a time. */
 export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyDetailGalleryProps) {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const [activeImage, setActiveImage] = useState(0);
-
-  if (images.length === 0) return null;
-
-  return (
-    <div className="relative">
-      {images.length >= 5 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[50vh] min-h-[300px] max-h-[500px]">
-          <div
-            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden rounded-none"
-            onClick={() => onOpenLightbox(0)}
-          >
-            <img
-              src={images[0]}
-              alt={alt}
-              className="w-full h-full object-cover transition-transform duration-300"
-            />
-          </div>
-          {images.slice(1, 5).map((img, i) => (
-            <div
-              key={i}
-              className={cn(
-                'relative cursor-pointer overflow-hidden',
-                i === 1 && 'rounded-none',
-                i === 3 && 'rounded-none',
-              )}
-              onClick={() => onOpenLightbox(i + 1)}
-            >
-              <img
-                src={img}
-                alt=""
-                className="w-full h-full object-cover transition-transform duration-300"
-              />
-              {i === 3 && images.length > 5 && (
-                <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
-                  <span className="text-background font-medium">+{images.length - 5}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div>
-          <div
-            className="aspect-[16/10] overflow-hidden cursor-pointer"
-            onClick={() => onOpenLightbox(activeImage)}
-          >
-            <img
-              src={images[activeImage] || images[0]}
-              alt={alt}
-              className="w-full h-full object-contain bg-muted transition-transform duration-300"
-            />
-          </div>
-          {images.length > 1 && (
-            <div className="flex gap-2 p-3 overflow-x-auto bg-background/50">
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImage(i)}
-                  aria-label={isRu ? `Фото ${i + 1}` : `Photo ${i + 1}`}
-                  className={cn(
-                    'w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all',
-                    activeImage === i
-                      ? 'border-primary ring-2 ring-primary/30'
-                      : 'border-transparent opacity-70 hover:opacity-100',
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <button
-        onClick={() => onOpenLightbox(0)}
-        className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
-      >
-        <Eye className="w-4 h-4" />
-        {images.length} {isRu ? 'фото' : 'photos'}
-      </button>
+  const { language } = useLanguage(); const isRu = language === 'ru';
+  const [active, setActive] = useState(0);
+  const [failed, setFailed] = useState<Set<string>>(() => new Set());
+  const available = images.map((src, index) => ({ src, index })).filter(image => image.src && !failed.has(image.src));
+  const current = Math.min(active, Math.max(available.length - 1, 0));
+  if (!available.length) return <div className="premium-gallery-empty" role="status"><ImageOff aria-hidden="true" /><p>{isRu ? 'Фотографии пока не опубликованы' : 'Photos have not been published yet'}</p></div>;
+  const visible = [available[current], ...available.filter((_, index) => index !== current).slice(0, 2)];
+  return <section aria-label={isRu ? 'Фотографии объекта' : 'Property photos'}>
+    <div className={`premium-gallery${available.length === 2 ? ' premium-gallery--two' : ''}`}>
+      {visible.map((image, i) => <button key={`${i}-${image.src}`} type="button" aria-label={isRu ? `Открыть фото ${image.index + 1}` : `Open photo ${image.index + 1}`} onClick={() => onOpenLightbox(image.index)}>
+        <img src={image.src} alt={i === 0 ? alt : `${alt} · ${isRu ? 'фото' : 'photo'} ${image.index + 1}`} loading={i === 0 ? 'eager' : 'lazy'} onError={() => setFailed(previous => new Set(previous).add(image.src))} />
+      </button>)}
+      <span className="premium-gallery-count">{available.length} {isRu ? 'фото' : 'photos'}</span>
     </div>
-  );
+    <div className="premium-gallery-thumbs">
+      {available.length > 1 && <><button type="button" aria-label={isRu ? 'Предыдущее фото' : 'Previous photo'} onClick={() => setActive(Math.max(0, current - 1))} disabled={current === 0}><ChevronLeft aria-hidden="true" /></button><span aria-live="polite">{current + 1} / {available.length}</span><button type="button" aria-label={isRu ? 'Следующее фото' : 'Next photo'} onClick={() => setActive(Math.min(available.length - 1, current + 1))} disabled={current === available.length - 1}><ChevronRight aria-hidden="true" /></button></>}
+      <button type="button" onClick={() => onOpenLightbox(available[current].index)}>{isRu ? 'Все фото' : 'All photos'}</button>
+    </div>
+  </section>;
 }

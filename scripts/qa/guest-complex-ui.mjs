@@ -35,7 +35,7 @@ const result = await build({
   }}],
 });
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|usePropertyProjects|useManagementCompanies|useUserCollections)\.ts$/.test(p))) throw Error('Production data module included');
-const css = await Promise.all(['/src/index.css?direct'].map(async file => {
+const css = await Promise.all(['/src/index.css?direct','/src/styles/premium-public.css?direct'].map(async file => {
   const response=await fetch((process.env.FIXTURE_CSS_ORIGIN || 'http://localhost:8080')+file);
   if(!response.ok) throw Error('Preview CSS unavailable: '+file);
   return response.text();

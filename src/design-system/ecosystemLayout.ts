@@ -20,6 +20,7 @@ export const PUBLIC_CONTENT_LAYOUT = {
 /** Opt-in public page types; article, details, form and wizard frames stay unchanged. */
 export function publicContentFrame(pathname: string): 'catalogue' | 'business' | 'default' {
   const path = pathname.replace(/\/$/, '');
+  if (/^\/area\/[^/]+$/.test(path) || /^\/property\/[^/]+$/.test(path)) return 'catalogue';
   if (path === '/discover/services' || path === '/services' || path === '/property/search') return 'catalogue';
   if (path === '/for-business') return 'business';
   return 'default';
