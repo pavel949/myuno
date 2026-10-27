@@ -47,7 +47,7 @@
 .public-commerce-catalog-card h3 { font-size: 1.125rem; line-height: 1.35; }
 .public-commerce-catalog-card img { object-fit: cover; }
 .public-commerce-form-header > div,
-.public-commerce-form { width: 100%; max-width: 52rem; margin-inline: auto; }
+.public-commerce-form { width: 100%; max-width: var(--layout-width-form); margin-inline: auto; }
 .public-commerce-form { padding-block: 1.5rem; }
 .public-commerce-form :is(input:not([type="checkbox"]):not([type="radio"]), [role="combobox"]) { min-height: 2.75rem; }
 /* Radio buttons sit inside padded labels; the mobile button minimum must not stretch their circles. */

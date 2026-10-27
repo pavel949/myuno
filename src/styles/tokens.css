@@ -308,6 +308,7 @@
      ═══════════════════════════════════════════════════════════ */
   /* Named frames: one editable geometry source, distinct purpose preserved. */
   --layout-width-article: 48rem;
+  --layout-width-form: 52rem;
   --card-padding: 1rem;
   --layout-width-content: 64rem;
   --layout-width-wide: 80rem;

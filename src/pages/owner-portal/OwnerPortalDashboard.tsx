@@ -20,10 +20,10 @@ export default function OwnerPortalDashboard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { data: portalProperties, isLoading } = useMyPortalSettings();
+  const { data: portalProperties, isLoading, error: propertiesError, refetch: retryProperties } = useMyPortalSettings();
 
   // Pending statement approvals count (badge for "Statements" card)
-  const { data: pendingStatements = 0 } = useQuery({
+  const statementsQuery = useQuery({
     queryKey: ['owner-portal-pending-statements', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
@@ -32,14 +32,15 @@ export default function OwnerPortalDashboard() {
         .select('id', { count: 'exact', head: true })
         .eq('owner_user_id', user!.id)
         .eq('status', 'pending');
-      if (error) return 0;
-      return count ?? 0;
+      if (error) throw error;
+      if (count === null) throw new Error('Pending count unavailable');
+      return count;
     },
     staleTime: 60_000,
   });
 
   // Pending signature requests count (badge for "Documents" card)
-  const { data: pendingSignatures = 0 } = useQuery({
+  const signaturesQuery = useQuery({
     queryKey: ['owner-portal-pending-signatures', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
@@ -48,11 +49,23 @@ export default function OwnerPortalDashboard() {
         .select('id', { count: 'exact', head: true })
         .eq('signer_user_id', user!.id)
         .eq('status', 'pending');
-      if (error) return 0;
-      return count ?? 0;
+      if (error) throw error;
+      if (count === null) throw new Error('Pending count unavailable');
+      return count;
     },
     staleTime: 60_000,
   });
+
+  const pendingStatements = statementsQuery.isError ? undefined : statementsQuery.data;
+  const pendingSignatures = signaturesQuery.isError ? undefined : signaturesQuery.data;
+  const countText = (query: typeof statementsQuery, count: number | undefined, signature = false) => {
+    if (query.isError) return isRu ? 'Количество недоступно' : 'Count unavailable';
+    if (query.isPending) return isRu ? 'Загрузка…' : 'Loading…';
+    if (count && count > 0) return signature
+      ? (isRu ? `${count} на подпись` : `${count} to sign`)
+      : (isRu ? `${count} на одобрение` : `${count} for approval`);
+    return signature ? (isRu ? 'На подпись' : 'To sign') : (isRu ? 'На одобрение' : 'For approval');
+  };
 
   if (isLoading) {
     return (
@@ -60,6 +73,13 @@ export default function OwnerPortalDashboard() {
         <LoadingSpinner size="lg" />
       </div>
     );
+  }
+
+  if (propertiesError) {
+    return <div role="alert" className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
+      <p>{isRu ? 'Не удалось загрузить ваши объекты.' : 'Unable to load your properties.'}</p>
+      <Button variant="outline" onClick={() => void retryProperties()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div>;
   }
 
   if (!portalProperties || portalProperties.length === 0) {
@@ -120,16 +140,14 @@ export default function OwnerPortalDashboard() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
-                {pendingStatements > 0 && (
+                {(pendingStatements ?? 0) > 0 && (
                   <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
                     {pendingStatements}
                   </Badge>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {pendingStatements > 0
-                  ? (isRu ? `${pendingStatements} на одобрение` : `${pendingStatements} for approval`)
-                  : (isRu ? 'На одобрение' : 'For approval')}
+                {countText(statementsQuery, pendingStatements)}
               </p>
             </div>
           </CardContent>
@@ -149,21 +167,25 @@ export default function OwnerPortalDashboard() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
-                {pendingSignatures > 0 && (
+                {(pendingSignatures ?? 0) > 0 && (
                   <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
                     {pendingSignatures}
                   </Badge>
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground truncate">
-                {pendingSignatures > 0
-                  ? (isRu ? `${pendingSignatures} на подпись` : `${pendingSignatures} to sign`)
-                  : (isRu ? 'На подпись' : 'To sign')}
+                {countText(signaturesQuery, pendingSignatures, true)}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {(statementsQuery.isError || signaturesQuery.isError) && (
+        <Button variant="outline" onClick={() => { void statementsQuery.refetch(); void signaturesQuery.refetch(); }}>
+          {isRu ? 'Повторить загрузку количества' : 'Retry counts'}
+        </Button>
+      )}
 
       {/* Property cards */}
       <div className="space-y-3">

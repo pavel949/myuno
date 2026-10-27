@@ -12,6 +12,7 @@ import {
   ShoppingBag, GraduationCap, Briefcase, Heart, Sparkles, FileText
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { resolveCatalogServiceDestination } from '@/lib/catalog/serviceLookup';
 
 export interface EntityTypeDefinition {
   /** Database entity_type value */
@@ -391,4 +392,22 @@ export function getAllEntityTypes(): string[] {
  */
 export function isPrimaryEntityType(type: string): boolean {
   return getEntityType(type).priority === 'primary';
+}
+
+/** Resolve known seeded service identities; never infer a booking/provider ID. */
+export function resolveEntityDestination(type: string, id: string):
+  | { status: 'resolved'; href: string }
+  | { status: 'unavailable'; reason: string } {
+  if (!id || id.trim() !== id || id === '.' || id === '..') {
+    return { status: 'unavailable', reason: 'invalid-entity-id' };
+  }
+  if (type === 'service') return resolveCatalogServiceDestination(id);
+  const definition = Object.prototype.hasOwnProperty.call(ENTITY_TYPES, type) ? ENTITY_TYPES[type] : undefined;
+  if (!definition) return { status: 'unavailable', reason: 'unknown-entity-type' };
+  if (definition.detailRoute === null) return { status: 'resolved', href: definition.route };
+  try {
+    return { status: 'resolved', href: `${definition.detailRoute ?? definition.route}/${encodeURIComponent(id)}` };
+  } catch {
+    return { status: 'unavailable', reason: 'invalid-entity-id' };
+  }
 }

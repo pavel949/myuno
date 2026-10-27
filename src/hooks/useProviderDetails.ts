@@ -25,6 +25,8 @@ export interface ProviderDetails {
 }
 
 export interface ProviderService {
+  duration_minutes?: number | null;
+  lead_time_hours?: number | null;
   id: string;
   name_en: string;
   name_ru: string;
@@ -119,7 +121,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
       // Fetch services
       const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
       const { data: servicesData, error: servicesError } = await serviceQuery
-        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
+        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at, duration_minutes, lead_time_hours')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
 

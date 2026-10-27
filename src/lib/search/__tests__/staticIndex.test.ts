@@ -49,7 +49,7 @@ describe('staticIndex', () => {
   });
 
   it('finds a life situation under /discover', () => {
-    // Every active life situation routes to /discover/:code.
+    // Ordinary situations use /discover/:code; canonical landing overrides are tested below.
     const results = searchStaticIndex('arrival', ctx, 20);
     expect(results.length).toBeGreaterThan(0);
   });
@@ -71,5 +71,18 @@ describe('staticIndex', () => {
   it('does not emit duplicate destination paths', () => {
     const got = paths('property');
     expect(new Set(got).size).toBe(got.length);
+  });
+});
+
+// The same situation must lead to the same destination from search and menus.
+describe('canonical situation destinations', () => {
+  it.each([
+    ['developer', '/for-developers'],
+    ['management_company', '/for-management-companies'],
+    ['vendor_onboarding', '/vendor/join'],
+  ])('uses the existing landing override for %s', (query, destination) => {
+    const results = searchStaticIndex(query, ctx, 500);
+    expect(results.some(result => result.path === `/discover/${query}`)).toBe(false);
+    expect(results.some(result => result.path === destination)).toBe(true);
   });
 });

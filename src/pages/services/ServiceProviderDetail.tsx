@@ -310,7 +310,7 @@ const ServiceProviderDetail = () => {
                         <div className="flex items-center gap-2">
                           {id && (
                             <Button size="sm" variant="outline" className="h-10 px-3" onClick={() => {
-                              const raw = (services ?? []).find((x) => x.id === service.id) as { duration_minutes?: number | null; lead_time_hours?: number | null } | undefined;
+                              const raw = (services ?? []).find((x) => x.id === service.id);
                               setBooking({ id: service.id, providerId: id, name: service.name, price: service.price, durationMinutes: raw?.duration_minutes ?? null, leadTimeHours: raw?.lead_time_hours ?? null });
                             }}>
                               <Calendar className="w-4 h-4 mr-1" />

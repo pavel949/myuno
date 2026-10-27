@@ -4,9 +4,10 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import { Discover, GoalEntryPage, MeServices, ServicesIndex, SituationNavigator } from '@/components/layout/pageRegistry';
 import { BackButton } from '@/components/uno/BackButton';
+import { CATEGORIES, LIFE_SITUATIONS } from '@/lib/catalog/taxonomy';
 import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 
-vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], isFromDB: true, isLoading: false, error: null }) }));
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: CATEGORIES, lifeSituations: LIFE_SITUATIONS, isFromDB: true, isLoading: false, error: null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en', t: (s: string) => s }) }));
 vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, searchValue, onSearchChange }: { children: ReactNode; searchValue: string; onSearchChange: (value: string) => void }) => <main data-testid="public-catalog-shell"><input aria-label="Search services" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</main> }));
@@ -35,14 +36,14 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.
 afterEach(cleanup);
 
 describe('integrated direct service route ownership', () => {
-  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves combined filters and request/provider return paths at %s', async path => {
+  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);
     await act(async () => { await vi.dynamicImportSettled(); });
     expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^AC Cleaning$/ })).toHaveLength(1);
     expect(screen.queryByRole('button', { name: /^AC Installation$/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Request category' })).toHaveTextContent('Air Conditioning');
+    expect(screen.getByRole('button', { name: 'Air Conditioning', pressed: true })).toBeVisible();
     if (path === '/me/services') {
       expect(screen.getAllByTestId('account-shell')).toHaveLength(1);
       expect(screen.queryByTestId('public-catalog-shell')).not.toBeInTheDocument();
@@ -53,18 +54,31 @@ describe('integrated direct service route ownership', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
     expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent(original);
+
+  });
+  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves provider offer filters and return path at %s', async path => {
+    const original = `${path}?category=ac&q=cleaning&ref=fixture`;
+    mount(original);
+    await act(async () => { await vi.dynamicImportSettled(); });
+    expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
+    // Provider rows have no category metadata: the UI makes this limitation
+    // explicit and preserves text/ref when the user chooses to remove it.
+    expect(screen.queryByRole('link', { name: 'Fixture provider' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse provider offers' }));
+    const providerContext = `${path}?q=cleaning&ref=fixture`;
+    expect(screen.getByTestId('location')).toHaveTextContent(providerContext);
     fireEvent.click(screen.getByRole('link', { name: 'Fixture provider' }));
     expect(await screen.findByText('Selected service')).toBeInTheDocument();
-    expect(screen.getByTestId('location').textContent).toContain(`returnTo=${encodeURIComponent(original)}`);
+    expect(screen.getByTestId('location').textContent).toContain(`returnTo=${encodeURIComponent(providerContext)}`);
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
-    expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
-    expect(screen.getByTestId('location')).toHaveTextContent(original);
+    expect(await screen.findByRole('link', { name: 'Fixture provider' })).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(providerContext);
   });
   it.each(['/discover', '/discover/services', '/me/services'])('keeps unsupported categories empty at %s', async path => {
     mount(`${path}?category=photography&ref=fixture`);
     expect(await screen.findByText('No services found')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^AC Cleaning$/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Clear search and category' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search and filters' }));
     expect(screen.getByTestId('location')).toHaveTextContent(`${path}?ref=fixture`);
   });
   it('keeps situations optional on its dedicated registry destination', async () => {

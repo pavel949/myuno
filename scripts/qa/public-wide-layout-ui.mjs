@@ -9,7 +9,7 @@ const root = process.cwd().replaceAll('\\', '/');
 const output = process.env.PUBLIC_WIDE_OUTPUT || '/tmp/browser/public-wide-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
- '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
+ '@/lib/catalog/useCatalogFromDB': `import{CATEGORIES,LIFE_SITUATIONS}from'${root}/src/lib/catalog/taxonomy.ts';export const useCatalogFromDB=()=>({categories:CATEGORIES,lifeSituations:LIFE_SITUATIONS,isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en',setLanguage:()=>{},t:key=>key});`,
  '@/contexts/AuthContext': `export const useAuth=()=>({user:null,signOut:()=>{}});`,
  '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',resolvedTheme:'light',setTheme:()=>{}});`,
