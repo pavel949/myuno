@@ -1,0 +1,52 @@
+/* Public service presentation over existing tokens and canonical commerce flows. */
+.premium-services h1, .premium-service-provider .service-provider-title {
+  font-family: var(--font-display);
+  font-size: var(--public-title-size);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.015em;
+  overflow-wrap: anywhere;
+}
+.premium-services .public-commerce--services > section { margin-top: var(--public-detail-gap); }
+.premium-services .public-commerce--services :is(h2,h3) { font-weight: 400; }
+.premium-service-offer { box-shadow: none; transition: border-color var(--public-motion); }
+.premium-service-offer:focus-within { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+.premium-service-offer > img { height: auto; }
+.premium-service-offer > div { padding: 1.25rem; }
+.premium-service-provider {
+  width: calc(100% - var(--public-gutter) * 2);
+  max-width: var(--public-width-detail);
+  margin-inline: auto;
+  padding-block: var(--public-detail-gap);
+  padding-bottom: var(--public-detail-gap);
+}
+.premium-service-provider [role="tablist"] { flex-wrap: wrap; gap: .5rem; }
+.premium-service-provider :is(button,[role="tab"]) { min-height: 2.75rem; }
+.service-provider-offer > div { gap: 1rem; align-items: flex-start; }
+.service-provider-offer > div > div:first-child { min-width: 0; }
+.service-provider-actions {
+  width: calc(100% - var(--public-gutter) * 2);
+  max-width: var(--public-width-detail);
+  margin: 0 auto;
+  margin-bottom: calc(var(--bottom-nav-h,0px) + var(--public-detail-gap));
+}
+@media(max-width:767px) {
+  .service-provider-offer > div { flex-direction: column; }
+  .service-provider-offer > div > div:last-child { width: 100%; flex-wrap: wrap; }
+  .service-provider-offer button { flex: 1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  :is(.premium-services,.premium-service-provider,.premium-service-offer) * { transition: none; animation: none; scroll-behavior: auto; }
+}
+.premium-service-request > :is(div,form) { width: 100%; max-width: var(--layout-width-form); margin-inline: auto; }
+.premium-service-request [role="heading"], .premium-service-request h2 { font-family: var(--font-display); font-weight: 400; }
+.premium-service-request :is(button,input,textarea) { min-height: 2.75rem; }
+
+.premium-services .ds-frame-catalogue {
+  width: calc(100% - var(--public-gutter) * 2);
+  max-width: var(--public-width-wide);
+  padding-inline: 0;
+  margin-inline: auto;
+}
+
+.premium-service-request > button { min-width: 2.75rem; min-height: 2.75rem; }

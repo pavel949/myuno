@@ -125,6 +125,8 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
 
+      // A failed public service read is not evidence that the provider has no services.
+      if (servicesError && visibility === 'public') throw servicesError;
       if (!servicesError) {
         setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
       }
