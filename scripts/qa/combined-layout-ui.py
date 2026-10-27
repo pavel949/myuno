@@ -106,7 +106,23 @@ async def check_destinations(page, surface, row, completed):
     if surface == 'local-services':
         expected = ['/vendor/join', '/for-business', '/become-partner', '/list-with-us']
     elif surface == 'developers':
-        expected = ['/developer-portal/apply', '/developer-portal', '/developer-portal/apply', '/developer-portal']
+        # Shared audience composition uses semantic links, not legacy CTA buttons.
+        # Keep every current canonical destination and exercise the real Link handlers.
+        expected = ['/developer-portal/apply', '/developer-portal', '/developer-portal/apply',
+                    '/developer-portal/projects', '/developer-portal/company',
+                    '/developer-portal/projects', '/property/offplan']
+        links = page.locator('.audience-actions a, .audience-choices a, .audience-next a')
+        await expect(links).to_have_count(len(expected))
+        assert not await bounds(page, links), 'audience link overflow'
+        for index, destination in enumerate(expected):
+            link = links.nth(index)
+            await expect(link).to_have_attribute('href', destination)
+            assert (await link.inner_text()).strip(), 'unnamed audience action'
+            box = await link.bounding_box()
+            assert box and box['height'] >= 44, {'audienceTarget': box}
+            await link.click()
+            await expect(output).to_have_text(destination)
+        return expected
     else:
         expected = ['/auth?redirect=/mc/onboarding&trial=true',
                     '/auth?redirect=/mc/onboarding&trial=true&tier=starter',
@@ -185,16 +201,35 @@ async def check_measured_anchor(page, selector):
 
 async def check_owner_business(page, surface, row, completed):
     if surface == 'owners':
-        actions = page.locator('main header a[href="#paths"]')
+        actions = page.locator('.audience-hero .audience-actions a')
         await expect(actions).to_have_count(2)
+        primary = actions.nth(0)
+        await expect(primary).to_have_attribute('href', '#paths')
+        await expect(actions.nth(1)).to_have_attribute('href', '/my-property')
+        assert not await bounds(page, actions), 'owner action overflow'
+        await page.evaluate("window.fixtureAnchorDocument = 'same-document'")
+        before_query = urlparse(page.url).query
         row['anchorProofs'] = []
-        for index in range(2):
-            await actions.nth(index).click()
+        for activation in ['click', 'keyboardEnter']:
+            if activation == 'click':
+                await primary.click()
+            else:
+                await primary.press('Enter')
             assert await page.evaluate('location.hash') == '#paths'
-            row['anchorProofs'].append(await check_measured_anchor(page, '#paths'))
+            assert await page.evaluate('window.fixtureAnchorDocument') == 'same-document', 'anchor reloaded document'
+            assert urlparse(page.url).query == before_query, 'anchor lost query context'
+            if activation == 'keyboardEnter':
+                await expect(page.locator('#paths')).to_be_focused()
+            proof = await check_measured_anchor(page, '#paths')
+            row['anchorProofs'].append({**proof, 'activation': activation})
             (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
-        await expect(page.locator('#paths article a').nth(0)).to_have_attribute('href', '/owner/management-landing')
-        await expect(page.locator('#paths article a').nth(1)).to_have_attribute('href', '/mc/onboarding')
+        await actions.nth(1).click()
+        await expect(page.get_by_test_id('location')).to_have_text('/my-property')
+        for index, destination in enumerate(['/owner/management-landing', '/mc/onboarding']):
+            link = page.locator('#paths article a').nth(index)
+            await expect(link).to_have_attribute('href', destination)
+            await link.click()
+            await expect(page.get_by_test_id('location')).to_have_text(destination)
     else:
         actions = page.locator('main section').first.locator('button')
         await expect(actions).to_have_count(2)
@@ -254,7 +289,7 @@ async def run_language(browser, lang, results):
                 await page.goto(f'http://localhost:8080/fixture?lang={lang}&surface={surface}', wait_until='networkidle')
                 await page.evaluate('document.fonts.ready')
                 await expect(page.locator('h1,main').first).to_be_visible()
-                row['header'] = await check_header(page, surface not in ['property', 'account', 'owners', 'business'])
+                row['header'] = await check_header(page, surface not in ['property', 'account', 'owners', 'business', 'developers'])
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'document overflow'
                 if surface in ['property', 'account']:
                     row['geometry'] = await check_sticky(page, surface)
@@ -276,10 +311,11 @@ async def run_language(browser, lang, results):
                 elif surface in ['owners', 'business']:
                     await check_owner_business(page, surface, row, results)
                 else:
-                    row['ctaBoundsFailures'] = await bounds(page, page.locator('section button'))
+                    cta = page.locator('.audience-actions a') if surface == 'developers' else page.locator('section button')
+                    row['ctaBoundsFailures'] = await bounds(page, cta)
                     assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
                     # Check hero siblings against each other, allowing wrapped rows.
-                    assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
+                    assert await (page.locator('.audience-actions a') if surface == 'developers' else page.locator('section').first.locator('button')).evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
                     row['destinations'] = await check_destinations(page, surface, row, results)
                 row['fontStack'] = await page.locator('body').evaluate('e=>getComputedStyle(e).fontFamily')
                 row['fontLimitation'] = 'Canonical Google Fonts are not bundled; network denied; system fallback geometry only.'

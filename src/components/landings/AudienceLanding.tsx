@@ -33,11 +33,13 @@ export function AudienceLanding(props: AudienceLandingProps) {
         <h1>{label(props.title)}</h1>
         <p className="audience-intro">{label(props.intro)}</p>
         <div className="audience-actions">
-          <Link reloadDocument={props.primary.href.startsWith('#')} className="audience-primary" to={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>
+          {props.primary.href.startsWith('#')
+            ? <a className="audience-primary" href={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></a>
+            : <Link className="audience-primary" to={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>}
           <Link className="audience-secondary" to={props.secondary.href}>{label(props.secondary.title)}</Link>
         </div>
       </header>
-      <section id="paths" aria-labelledby="audience-paths-title" className={`audience-section ${PUBLIC_CONTENT_ANCHOR}`}>
+      <section id="paths" tabIndex={-1} aria-labelledby="audience-paths-title" className={`audience-section ${PUBLIC_CONTENT_ANCHOR}`}>
         <h2 id="audience-paths-title">{label(props.choicesTitle)}</h2>
         <div className="audience-choices">{props.choices.map(item => <article key={item.href}>
           <h3><Link to={item.href}>{label(item.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link></h3>{item.description && <p>{label(item.description)}</p>}
