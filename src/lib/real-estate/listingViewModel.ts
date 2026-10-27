@@ -74,13 +74,6 @@ export function surfaceFromOffplanProject(source: OffplanProject): UnifiedListin
   };
 }
 
-function propertyIntent(p: Property, mode: 'rent' | 'buy'): ListingIntentSurface {
-  if (mode === 'buy') return 'sale';
-  const lt = (p.listing_type || '').toLowerCase();
-  if (lt === 'sale') return 'sale';
-  if (lt === 'rent') return 'rent';
-  return 'rent';
-}
 
 export function surfaceFromProperty(p: Property, mode: 'rent' | 'buy' = 'rent'): UnifiedListingSurface {
   const rental = propertyRentalDisplayPrice(p);
@@ -97,7 +90,7 @@ export function surfaceFromProperty(p: Property, mode: 'rent' | 'buy' = 'rent'):
     titleEn: p.title_en,
     coverImageUrl: p.cover_image ?? null,
     locationLine: p.district ?? null,
-    intent: propertyIntent(p, mode),
+    intent: mode === 'buy' ? 'sale' : 'rent',
     lifecycle: null,
     isFeatured: Boolean(p.is_featured),
     priceHintThb: hint,

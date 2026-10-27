@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { propertyDetailHref, propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { searchStaticIndex } from '@/lib/search/staticIndex';
 import { type NavSearchContext } from '@/lib/search/navigationIndex';
@@ -215,6 +216,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
     const sanitized = sanitizeSearchTerm(searchTerm);
     const searchTermLower = sanitized.toLowerCase();
+    if (sanitized.length < 2) { setResults([]); setIsLoading(false); return; }
 
     // ── Tier 1 — client static index + curated synonyms (synchronous, instant)
     const tier1 = searchStaticIndex(searchTerm, ctxRef.current, DB_RESULT_LIMIT);
@@ -236,18 +238,32 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
     // ── Tier 2 — DB full-text catalog search (resilient)
     try {
-      // search_catalog is a custom RPC not yet in generated types.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)('search_catalog', {
-        q: sanitized,
-        lang: language,
-        max_results: DB_RESULT_LIMIT,
-      });
+      // Housing must use the same public allowlist as the housing catalogue.
+      // The legacy RPC can silently omit its private-table property branch.
+      const [catalogue, housing] = await Promise.allSettled([
+        (supabase.rpc as any)('search_catalog', { q: sanitized, lang: language, max_results: DB_RESULT_LIMIT }),
+        supabase.from('public_property_catalog')
+          .select('id,title_en,title_ru,cover_image,district,listing_type,listing_modes,is_for_sale')
+          .eq('is_active', true).eq('approval_status', 'approved')
+          .or(`title_en.ilike.%${sanitized}%,title_ru.ilike.%${sanitized}%`)
+          .order('id').limit(DB_RESULT_LIMIT).abortSignal(controller.signal),
+      ]);
+      const catalogueResponse = catalogue.status === 'fulfilled' ? catalogue.value : { data: [], error: catalogue.reason };
+      const housingResponse = housing.status === 'fulfilled' ? housing.value : { data: [], error: housing.reason };
+      const data = catalogueResponse.data;
+      const publicHomes: SearchResult[] = !housingResponse.error && Array.isArray(housingResponse.data)
+        ? housingResponse.data.map(row => ({
+          id: `db-property-${row.id}`, type: 'property', titleEn: row.title_en || row.title_ru || '',
+          titleRu: row.title_ru || row.title_en || '', image: row.cover_image,
+          // Generic search has no selected offer or billing context.
+          price: null, rating: null, locationEn: row.district, locationRu: row.district,
+          path: propertyDetailHref(row.id, propertySupportsMode(row, 'rent') ? 'rent' : 'buy'),
+        })) : [];
 
       if (controller.signal.aborted) return;
 
-      if (!error && Array.isArray(data)) {
-        const entities: SearchResult[] = (data as CatalogSearchRow[]).map((row) => ({
+      if (Array.isArray(data) || publicHomes.length) {
+        const entities: SearchResult[] = ((Array.isArray(data) ? data : []) as CatalogSearchRow[]).filter(row => row.entity_type !== 'property').map((row) => ({
           id: `db-${row.entity_type}-${row.entity_id}`,
           type: row.vertical || row.entity_type,
           titleEn: row.title_en || row.title_ru || '',
@@ -261,7 +277,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         }));
 
         const merged = [...tier1];
-        for (const e of entities) {
+        for (const e of [...publicHomes, ...entities]) {
           if (!seenPaths.has(e.path)) {
             seenPaths.add(e.path);
             merged.push(e);
