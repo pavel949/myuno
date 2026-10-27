@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 /**
  * @file LandingSeoHead.tsx
  * @description M6 · Track B.6 + M9 · §9.1 — SEO/OG/schema.org/hreflang head для лендингов.
@@ -139,6 +140,9 @@ function buildLandingBreadcrumb(
 }
 
 const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps) => {
+  useEffect(() => {
+    document.head.querySelectorAll('[data-seo-fallback="true"]').forEach(node => node.remove());
+  }, []);
   if (!landing.seo) return null;
 
   const seo = landing.seo;
@@ -156,15 +160,6 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       : buildClusterOgUrl({ cluster: landing.slug, lang: language });
   const ogAlt = `${landing.h1[language]} — myUNO`;
 
-  // hreflang: используем явные alternates если заданы, иначе генерируем дефолт.
-  const alternates =
-    seo.hreflangAlternates && seo.hreflangAlternates.length > 0
-      ? seo.hreflangAlternates
-      : ([
-          { lang: 'ru', href: `${baseOrigin}${seo.canonicalPath}?lang=ru` },
-          { lang: 'en', href: `${baseOrigin}${seo.canonicalPath}?lang=en` },
-        ] as const);
-
   const serviceSchema = buildServiceSchema(landing, type, language, canonicalUrl);
   const faqSchema = buildLandingFaqSchema(landing, language);
   const breadcrumbSchema = buildLandingBreadcrumb(landing, type, language, baseOrigin);
@@ -175,12 +170,6 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
-
-      {/* hreflang */}
-      {alternates.map((alt) => (
-        <link key={alt.lang} rel="alternate" hrefLang={alt.lang} href={alt.href} />
-      ))}
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
 
       {/* Preload OG image so social crawlers fetch it warm. */}
       <link rel="preload" as="image" href={ogImage} type={OG_IMAGE_TYPE} />

@@ -83,9 +83,6 @@ const PersonaAreaLandingPage = () => {
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={canonical} />
-        <link rel="alternate" hrefLang="ru" href={`${canonical}?lang=ru`} />
-        <link rel="alternate" hrefLang="en" href={`${canonical}?lang=en`} />
-        <link rel="alternate" hrefLang="x-default" href={canonical} />
         {/* Preload OG so social crawlers fetch it warm and the image is ready */}
         <link rel="preload" as="image" href={og} type={OG_IMAGE_TYPE} />
         <meta property="og:type" content="website" />

@@ -52,13 +52,6 @@ export function SEOHead({
   const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const canonicalUrl = url || `${BASE}${basePath}`;
   
-  // Build hreflang alternate URLs
-  const hreflangUrls = {
-    en: `${BASE}${basePath}?lang=en`,
-    ru: `${BASE}${basePath}?lang=ru`,
-    th: `${BASE}${basePath}?lang=th`,
-  };
-
   return (
     <Helmet>
       {/* Primary Meta Tags */}
@@ -94,12 +87,8 @@ export function SEOHead({
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
       
-      {/* Hreflang alternate links — th omitted until Thai content ships (Trust Stack audit A3) */}
-      <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
-      <link rel="alternate" hrefLang="ru" href={hreflangUrls.ru} />
-      <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
-      
-      
+      {/* Language is a UI preference, not a URL contract: do not advertise ignored ?lang variants. */}
+
       {/* JSON-LD Structured Data */}
       {jsonLd && (
         <script type="application/ld+json">

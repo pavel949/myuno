@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Static pages: all public routes with hreflang -->
+  <!-- Public canonical routes (language currently selected by UI preference) -->
   <sitemap>
     <loc>https://www.myuno.app/sitemap-static.xml</loc>
     <lastmod>2026-04-08</lastmod>
@@ -18,10 +18,6 @@
     <lastmod>2026-04-23</lastmod>
   </sitemap>
 
-  <!-- M9 · §4.1 — pillar / cluster guides (placeholder URLs) -->
-  <sitemap>
-    <loc>https://www.myuno.app/sitemap-pillars.xml</loc>
-    <lastmod>2026-04-23</lastmod>
-  </sitemap>
+  <!-- Pillar guides omitted until the /guides/* routes ship. -->
 </sitemapindex>
 

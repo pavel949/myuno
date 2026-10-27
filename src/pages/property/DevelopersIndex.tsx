@@ -1,3 +1,4 @@
+import { SEOHead } from '@/components/seo/SEOHead';
 import '@/styles/public-commerce.css';
 /**
  * DevelopersIndex - Catalog of property developers
@@ -24,6 +25,7 @@ export default function DevelopersIndex() {
 
   return (
     <div className="public-commerce public-commerce--developers px-4 py-6 pb-24 space-y-6">
+      <SEOHead title={isRu ? "Застройщики Пхукета" : "Phuket developers"} description={isRu ? "Компании и проекты в каталоге недвижимости myUNO." : "Companies and projects in the myUNO property catalogue."} />
         {/* Hero */}
         <div className="public-commerce-intro border-b border-border py-4">
           <div className="flex items-center gap-3 mb-3">

@@ -3,7 +3,7 @@
  *
  * Verifies that for every live persona landing:
  *   1. The slug appears in `public/sitemap-landings.xml` exactly once.
- *   2. The sitemap entry declares hreflang alternates for `ru`, `en`, and `x-default`.
+ *   2. The sitemap does not advertise non-functional language query variants.
  *   3. The sitemap canonical `<loc>` matches the landing's `seo.canonicalPath`.
  *   4. The landing has a non-empty `metaDescription` for both `ru` and `en`,
  *      respecting the ≤160 character SEO limit.
@@ -99,20 +99,9 @@ describe('sitemap entry × persona SEO', () => {
         expect(landing!.seo!.canonicalPath).toBe(`/for/${slug}`);
       });
 
-      it('sitemap declares hreflang ru, en, and x-default', () => {
+      it('does not advertise ignored language query variants', () => {
         expect(entry).toBeDefined();
-        expect(entry!.hreflangs.ru, `missing hreflang="ru" for ${slug}`).toBeDefined();
-        expect(entry!.hreflangs.en, `missing hreflang="en" for ${slug}`).toBeDefined();
-        expect(
-          entry!.hreflangs['x-default'],
-          `missing hreflang="x-default" for ${slug}`,
-        ).toBeDefined();
-      });
-
-      it('hreflang URLs are absolute and on the canonical origin', () => {
-        for (const [lang, href] of Object.entries(entry!.hreflangs)) {
-          expect(href.startsWith(`${ORIGIN}/for/${slug}`), `bad ${lang} href: ${href}`).toBe(true);
-        }
+        expect(entry!.hreflangs).toEqual({});
       });
 
       it('landing seo.hreflangAlternates covers both ru and en', () => {

@@ -65,13 +65,10 @@ const areaPersonaMap = extractAreaPersonaMap();
 const areaSlugs = Object.keys(areaPersonaMap);
 
 const today = new Date().toISOString().slice(0, 10);
-const ORIGIN = 'https://myuno.app';
+const ORIGIN = 'https://www.myuno.app';
 
 function urlEntry(path, priority = '0.7', changefreq = 'weekly') {
   return `  <url><loc>${ORIGIN}${path}</loc><lastmod>${today}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority>` +
-    `<xhtml:link rel="alternate" hreflang="ru" href="${ORIGIN}${path}?lang=ru"/>` +
-    `<xhtml:link rel="alternate" hreflang="en" href="${ORIGIN}${path}?lang=en"/>` +
-    `<xhtml:link rel="alternate" hreflang="x-default" href="${ORIGIN}${path}"/>` +
     `</url>`;
 }
 
