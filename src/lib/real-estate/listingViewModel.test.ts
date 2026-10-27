@@ -36,3 +36,12 @@ describe('catalog price semantics', () => {
 it.each(['constructor', '__proto__', 'toString'])('keeps inherited-object period %s unknown', price_period => {
   expect(surfaceFromProperty({ ...home, price_period })).toMatchObject({ priceHintThb: null, priceMode: 'unknown' });
 });
+
+// Dual offers retain the selected area tab rather than the legacy row label.
+it.each(['sale', 'rent', 'both'])('keeps area rental/purchase projections coherent for %s rows', listing_type => {
+  const dual = { ...home, listing_type, listing_modes: ['rent', 'sale'], is_for_sale: true, price_per_night: 2700, sale_price: 9000000, sale_currency: 'THB' } as Property;
+  expect(surfaceFromProperty(dual, 'rent')).toMatchObject({ intent: 'rent', priceHintThb: 2700, priceMode: 'per_night' });
+  expect(surfaceFromProperty(dual, 'rent').href).toContain('mode=rent');
+  expect(surfaceFromProperty(dual, 'buy')).toMatchObject({ intent: 'sale', priceHintThb: 9000000, priceMode: 'total' });
+  expect(surfaceFromProperty(dual, 'buy').href).toContain('mode=buy');
+});

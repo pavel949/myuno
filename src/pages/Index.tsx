@@ -2,6 +2,7 @@ import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/Home
 import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
+import '@/styles/homepage-refinement.css';
 /** Authenticated personal Home, preserving the existing legacy/V2 rollout gate. */
 import React, { useState } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';

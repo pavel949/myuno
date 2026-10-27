@@ -17,9 +17,10 @@ export function HomeSearchEntry() {
   const t = (value: LangValues) => pickLang(language, value);
   return <div className="home-search-entry">
     <Link className="home-search-entry-button" to={R.SEARCH}>
-      <Search size={23} aria-hidden="true" /><span><strong>{t({ ru: 'Найти жильё или услугу', en: 'Find a home or a service', th: 'ค้นหาที่พักหรือบริการ' })}</strong><small>{t({ ru: 'Один поиск по myUNO', en: 'One search across myUNO', th: 'ค้นหาทุกอย่างใน myUNO' })}</small></span><ArrowRight size={22} aria-hidden="true" />
+      <Search className="home-search-symbol" size={23} aria-hidden="true" />
+      <span className="home-search-entry-copy"><strong>{t({ ru: 'Найти жильё или услугу', en: 'Find a home or a service', th: 'ค้นหาที่พักหรือบริการ' })}</strong><small>{t({ ru: 'Даты и район — когда будете готовы', en: 'Dates and area are optional', th: 'วันที่และย่านเป็นตัวเลือก' })}</small></span>
+      <span className="home-search-entry-action" aria-hidden="true"><span>{t({ ru: 'Найти', en: 'Explore', th: 'ค้นหา' })}</span><ArrowRight size={20} /></span>
     </Link>
-    <p>{t({ ru: 'Даты и район — когда будете готовы', en: 'Dates and area are optional', th: 'วันที่และย่านเป็นตัวเลือก' })}</p>
   </div>;
 }
 

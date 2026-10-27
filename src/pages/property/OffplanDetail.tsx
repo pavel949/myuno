@@ -56,7 +56,7 @@ import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
 import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
-import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
+import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { cn } from '@/lib/utils';
 
 const STATUS_CONFIG: Record<ProjectStatus, {
@@ -436,14 +436,16 @@ export default function OffplanDetail() {
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={isRu ? 'Оценка рисков и консультация' : 'Risk Assessment & Consultation'}
+        title={pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
-        <UniversalLeadForm
-          verticalId="property"
-          entryPoint={`offplan_risk_assessment_${project.id}`}
-          leadSource="risk_assessment"
-          onSuccess={() => setShowLeadForm(false)}
+        <LandingLeadForm
+          variant="universal"
+          verticalId="properties"
+          entryPoint={`offplan_project_${project.id}`}
+          leadSource="cta"
+          universalRequestType="property_purchase"
+          contextMetadata={{ project_id: project.id }}
         />
       </ResponsiveModal>
     </div>
