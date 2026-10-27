@@ -6,7 +6,7 @@ import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPres
  */
 
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   MapPin,
@@ -80,10 +80,6 @@ export function OffplanProjectCard({
   const status = project.projectStatus ? STATUS_CONFIG[project.projectStatus] : null;
   const StatusIcon = status?.icon ?? Building2;
 
-  const handleClick = () => {
-    navigate(surface.href);
-  };
-
   const handleFav = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -115,17 +111,17 @@ export function OffplanProjectCard({
     <div
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
-      onClick={handleClick}
       className={cn(
-        "group cursor-pointer rounded-none overflow-hidden",
+        "public-project-card group cursor-pointer rounded-none overflow-hidden",
         "bg-card border border-border/50 shadow-sm",
-        "hover:shadow-lg transition-all duration-300",
+        "transition-shadow duration-200",
         isCarousel ? "flex-shrink-0 w-[280px] sm:w-[300px]" : "w-full",
         className
       )}
     >
-      {/* Image Container */}
-      <div className="relative aspect-[16/10] overflow-hidden">
+      {/* Photo and title link to the same canonical project; actions remain siblings. */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <Link to={surface.href} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
         {project.coverImage ? (
           <img
             src={project.coverImage}
@@ -139,7 +135,8 @@ export function OffplanProjectCard({
         )}
 
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        </Link>
 
         {/* Status badge */}
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 max-w-[70%]">
@@ -183,6 +180,7 @@ export function OffplanProjectCard({
           type="button"
           aria-label={isRu ? 'Добавить в избранное' : 'Add to favourites'}
           onClick={handleFav}
+          aria-pressed={isFav}
           className={cn(
             'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px] rounded-full',
             'bg-background border border-border/50 shadow-sm',
@@ -212,8 +210,8 @@ export function OffplanProjectCard({
       {/* Content */}
       <div className="p-4 space-y-3">
         {/* Title */}
-        <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
-          {name}
+        <h3 className="font-display font-normal text-xl leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+          <Link to={surface.href}>{name}</Link>
         </h3>
 
         {/* Location + Developer */}
@@ -242,22 +240,7 @@ export function OffplanProjectCard({
           {pickLang(language, { ru: 'Условия проекта — по запросу', en: 'Project terms on request', th: 'สอบถามเงื่อนไขโครงการ' })}
         </p>
 
-        <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-          {/* Completion date */}
-          {project.completionDate && project.projectStatus !== 'completed' && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Calendar className="w-3 h-3" />
-              <span>{formatCompletionDate(project.completionDate)}</span>
-            </div>
-          )}
 
-          {/* Units available */}
-          {project.unitsAvailable != null && project.unitsAvailable > 0 && (
-            <div className="text-xs text-muted-foreground ml-auto">
-              {project.unitsAvailable} {isRu ? 'доступно' : 'units'}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

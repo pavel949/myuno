@@ -12,8 +12,8 @@ vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children, usePag
 afterEach(cleanup);
 
 describe('property catalogue frame ownership', () => {
-  it.each(['/property/search', '/property/search/'])('lets only %s own its wide frame and canonical gutters', path => {
-    render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property" element={<PropertyHub />}><Route path="search" element={<p>Actual search route boundary</p>} /></Route></Routes></MemoryRouter>);
+  it.each(['/property/search', '/property/search/', '/property/offplan', '/property/offplan/project', '/property/complex/project'])('lets only %s own its wide frame and canonical gutters', path => {
+    render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Actual search route boundary</p>} /></Route></Routes></MemoryRouter>);
     expect(screen.getByTestId('layout-boundary')).toHaveAttribute('data-automatic-container', 'false');
     expect(screen.getByText('Actual search route boundary')).toBeInTheDocument();
   });

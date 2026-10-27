@@ -6,12 +6,13 @@ import GuestComplexDetail from '../GuestComplexDetail';
 import { complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES } from '@/lib/config/routes';
 const state = vi.hoisted(() => ({
+  language: 'en',
   project: { data: { id: 'complex', name_en: 'Ocean Place', name_ru: '', description_en: 'A peaceful place.', images: [] as string[], video_url: undefined as string | undefined, units_available: 19, amenities: [] as string[] }, isLoading: false, isError: false, refetch: vi.fn() },
   rent: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   sale: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   units: vi.fn(),
 }));
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/usePropertyProjects', () => ({ usePropertyProject: () => state.project }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesByProject: (...args: unknown[]) => { state.units(...args); return (args[2] as { mode: string }).mode === 'buy' ? state.sale : state.rent; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => ({ data: [{ id: 'operator', name_en: 'Actual Operator', slug: 'actual' }] }) }));
@@ -19,11 +20,12 @@ vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCar
 vi.mock('@/components/property/PhotoLightbox', () => ({ PhotoLightbox: () => null }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 afterEach(cleanup);
-beforeEach(() => { state.project.data.images = []; state.project.data.amenities = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
+beforeEach(() => { state.language = 'en'; state.project.data.images = []; state.project.data.amenities = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
 function LocationProbe() { const location = useLocation(); return <output data-testid="location">{location.search}</output>; }
 const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes><LocationProbe /></MemoryRouter>);
 
 describe('informational complex detail', () => {
+  it('shows Thai empty inventory and offer controls without changing mode', () => { state.language = 'th'; mount('?mode=rent'); expect(screen.getByRole('heading', { name: 'ที่พักให้เช่า' })).toBeVisible(); expect(screen.getByRole('button', { name: /ซื้อ/ })).toHaveAttribute('aria-pressed', 'false'); expect(screen.getByText('ยังไม่มีที่พักที่เผยแพร่ตรงกับเงื่อนไขนี้')).toBeVisible(); });
   it('shows only known facilities from the mixed project metadata array without inventing labels', () => {
     state.project.data.amenities = ['set_listed', 'early_delivery', '637_units', 'bang_tao', 'pool', 'beach-access', 'pool', 'rooftop_observatory'];
     mount();
@@ -41,7 +43,7 @@ describe('informational complex detail', () => {
   it('uses a compact no-photo hero and exposes accurate offer anchors early', () => {
     mount('?checkIn=2026-12-01&checkOut=2026-12-04&guests=2&managementCompanyId=operator');
     expect(screen.getByTestId('complex-hero')).toHaveClass('min-h-[280px]');
-    expect(screen.getByTestId('complex-hero')).not.toHaveClass('h-[60svh]');
+    expect(screen.getByTestId('complex-hero')).not.toHaveClass('h-[52svh]');
     expect(screen.getByRole('link', { name: 'Property catalog' })).toHaveAttribute('href', '/property/browse?mode=rent&checkIn=2026-12-01&checkOut=2026-12-04&guests=2&company=operator');
     const buy = screen.getByRole('link', { name: 'Buy: 0' });
     expect(buy).toHaveAttribute('href', '#complex-units');
@@ -54,7 +56,7 @@ describe('informational complex detail', () => {
     state.project.data.images = ['https://example.com/photo.jpg'];
     state.project.data.video_url = 'https://example.com/tour.mp4';
     mount();
-    expect(screen.getByTestId('complex-hero')).toHaveClass('h-[60svh]');
+    expect(screen.getByTestId('complex-hero')).not.toHaveClass('h-[52svh]');
     const homes = screen.getByRole('heading', { name: 'Homes to rent' });
     expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'A closer look' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'Get a feel for the place' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
