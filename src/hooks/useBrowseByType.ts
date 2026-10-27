@@ -47,7 +47,7 @@ interface BrowseTable {
 }
 
 const TYPE_TO_TABLE: Record<string, BrowseTable> = {
-  property: { table: 'properties', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true },
+  property: { table: 'public_property_catalog', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: null, pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true },
   beauty: { table: 'public_salon_catalog', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/beauty/salon/', idField: 'id', hasApprovalStatus: true },
   fitness: { table: 'gyms', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true },
   events: { table: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true },

@@ -46,6 +46,8 @@ export interface LandingLeadFormProps {
   universalRequestType?: string;
   /** Universal pipeline entry point identifier. */
   entryPoint: string;
+  /** Canonical inquiry context; never used as authorization. */
+  contextMetadata?: Record<string, unknown>;
   /** Lead source classification. */
   leadSource?: LeadSource;
   /** Optional select shown above the message field (e.g. topic / asset class). */
@@ -87,6 +89,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
     verticalId,
     universalRequestType,
     entryPoint,
+    contextMetadata,
     leadSource = 'cta',
     topicField,
     showBudgetField,
@@ -142,6 +145,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
           request_type: universalRequestType ?? 'consultation',
           lead_source: leadSource,
           entry_point: entryPoint,
+          vertical_metadata: contextMetadata,
           name,
           phone,
           email: email || undefined,
