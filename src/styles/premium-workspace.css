@@ -1,0 +1,36 @@
+/* Compact MC presentation only; access, scope and operational state stay canonical. */
+.mc-workspace-page {
+  width: 100%;
+  max-width: var(--layout-width-workspace);
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
+  padding-top: var(--layout-page-space-y);
+}
+.mc-workspace-page h1 {
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-leading);
+  font-weight: 400;
+  letter-spacing: -.015em;
+}
+.mc-workspace-page > header { padding-bottom: 1rem; border-bottom: 1px solid hsl(var(--border)); }
+.mc-workspace-page :is(button,[role="combobox"],[role="tab"]) { min-height: 2.75rem; }
+.mc-workspace-page :is(a,button,input,[role="combobox"]):focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+.mc-workspace-page [role="alert"] { line-height: 1.6; }
+.mc-workspace-page [role="group"] { gap: .5rem; }
+.mc-premium-workspace [data-sidebar="menu-button"] { min-height: 2.75rem; }
+.mc-today-page > section { padding-block: .5rem; }
+.mc-today-page > section > h2 { font-weight: 400; }
+.mc-bookings-page > [role="group"] > button { box-shadow: none; text-align: left; padding: 1rem; }
+.mc-calendar-page > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
+@media(max-width:767px) {
+ .mc-calendar-page > header > button { width: 100%; }
+}
+@media(prefers-reduced-motion:reduce) {
+ :is(.mc-workspace-page,.mc-premium-workspace) * { transition: none; animation: none; scroll-behavior: auto; }
+}
+/* Keep the existing 44px checkbox hit area; draw a compact visual box inside it. */
+.mc-workspace-page [role="checkbox"]:not([hidden]) { position: relative; display: inline-flex; align-items: center; justify-content: center; width: var(--touch-target); height: var(--touch-target); min-width: var(--touch-target); min-height: var(--touch-target); border: 0; background: transparent; }
+.mc-workspace-page [role="checkbox"]:not([hidden])::before { content: ''; position: absolute; width: 1rem; height: 1rem; border: 2px solid hsl(var(--border)); pointer-events: none; }
+.mc-workspace-page [role="checkbox"]:not([hidden])[data-state="checked"]::before { background: hsl(var(--primary)); border-color: hsl(var(--primary)); }
+.mc-workspace-page [role="checkbox"]:not([hidden]) > span { position: relative; }

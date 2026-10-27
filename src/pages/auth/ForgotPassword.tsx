@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
@@ -62,8 +63,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+    <div className="premium-auth min-h-screen bg-background flex flex-col">
+      <div className="premium-auth-decoration absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
         <BrandWordmark />
@@ -76,35 +77,33 @@ export default function ForgotPassword() {
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
+        <div className="premium-auth-panel w-full">
           {isSuccess ? (
             <div className="text-center space-y-6">
               <div className="w-16 h-16 mx-auto rounded-full bg-success/10 dark:bg-success/30 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-success dark:text-success" />
               </div>
               <h1 className="text-2xl font-display font-bold">
-                {language === 'ru' ? 'Проверьте почту' : 'Check your email'}
+                {language === 'th' ? 'ตรวจสอบอีเมลของคุณ' : language === 'ru' ? 'Проверьте почту' : 'Check your email'}
               </h1>
               <p className="text-muted-foreground">
                 {language === 'ru'
                   ? `Мы отправили инструкции для сброса пароля на ${email}`
                   : `We've sent password reset instructions to ${email}`}
               </p>
-              <Link to={APP_ROUTES.AUTH}>
-                <PremiumButton variant="outline" className="mt-4">
+              <PremiumButton asChild variant="outline" className="mt-4"><Link to={APP_ROUTES.AUTH}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
-                </PremiumButton>
-              </Link>
+                  {language === 'th' ? 'กลับไปเข้าสู่ระบบ' : language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
+                </Link></PremiumButton>
             </div>
           ) : (
             <div className="space-y-8">
               <div className="text-center space-y-2">
                 <h1 className="text-3xl font-display font-bold text-primary">
-                  {language === 'ru' ? 'Забыли пароль?' : 'Forgot password?'}
+                  {language === 'th' ? 'ลืมรหัสผ่าน?' : language === 'ru' ? 'Забыли пароль?' : 'Forgot password?'}
                 </h1>
                 <p className="text-muted-foreground">
-                  {language === 'ru'
+                  {language === 'th' ? 'กรอกอีเมลเพื่อรับลิงก์รีเซ็ตรหัสผ่าน' : language === 'ru'
                     ? 'Введите email для получения ссылки сброса пароля'
                     : 'Enter your email to receive a password reset link'}
                 </p>
@@ -112,12 +111,15 @@ export default function ForgotPassword() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label htmlFor="recovery-email" className="text-sm font-medium text-foreground">
                     Email
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
+                      id="recovery-email"
+                      aria-invalid={Boolean(error)}
+                      aria-describedby={error ? 'recovery-email-error' : undefined}
                       type="email"
                       name="email"
                       autoComplete="email"
@@ -132,7 +134,7 @@ export default function ForgotPassword() {
                     />
                   </div>
                   {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                    <p id="recovery-email-error" role="alert" className="text-sm text-destructive">{error}</p>
                   )}
                 </div>
 
@@ -142,14 +144,14 @@ export default function ForgotPassword() {
                   size="lg"
                   isLoading={isLoading}
                 >
-                  {language === 'ru' ? 'Отправить ссылку' : 'Send reset link'}
+                  {language === 'th' ? 'ส่งลิงก์รีเซ็ตรหัสผ่าน' : language === 'ru' ? 'Отправить ссылку' : 'Send reset link'}
                 </PremiumButton>
               </form>
 
               <div className="text-center">
                 <Link to={APP_ROUTES.AUTH} className="text-primary font-medium hover:underline inline-flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
-                  {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
+                  {language === 'th' ? 'กลับไปเข้าสู่ระบบ' : language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
                 </Link>
               </div>
             </div>

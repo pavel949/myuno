@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -499,8 +500,8 @@ export default function Auth() {
   const isLongForm = !isLogin && signupStep === 'register';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+    <div className="premium-auth min-h-screen bg-background flex flex-col">
+      <div className="premium-auth-decoration absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
@@ -521,7 +522,7 @@ export default function Auth() {
         </aside>
 
         {/* Auth form column */}
-        <div className="w-full max-w-md mx-auto md:mx-0 self-center">
+        <div className="premium-auth-panel w-full mx-auto md:mx-0 self-center">
           <div className="space-y-6">
             {/* Login Form */}
             {isLogin ? (

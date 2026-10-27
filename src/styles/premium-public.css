@@ -49,7 +49,7 @@
 .premium-search-criteria[open]>summary{border-bottom:1px solid hsl(var(--border))}
 .premium-search .property-discovery-card-grid{gap:var(--public-card-gap)}
 .premium-search .property-discovery-results--map{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
-.premium-search .property-discovery-list [data-catalog-kind] h3{font-size:var(--type-body-lg-size);line-height:1.4}
+.premium-search .property-discovery-list [data-catalog-kind] h3{font-family:var(--font-display);font-size:var(--type-h3-size);font-weight:400;line-height:var(--type-h3-leading)}
 .premium-search .property-discovery-list [data-catalog-kind]>div:last-child{padding-block:.25rem .75rem}
 .premium-gallery{position:relative;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:.5rem;height:clamp(26rem,36vw,40rem);overflow:hidden;background:hsl(var(--muted))}
 .premium-gallery>button{border:0;overflow:hidden;padding:0;position:relative;min-height:2.75rem;background:hsl(var(--muted))}
@@ -112,3 +112,11 @@ body:has(.premium-search,.premium-property,.premium-area) .consumer-header:not(.
 .premium-home .home-search-entry>p{color:hsl(var(--muted-foreground))}
 .premium-property-identity .premium-return{flex-basis:100%;justify-content:flex-start}
 @media(min-width:1024px){.premium-home .home-hero{min-height:30rem}}
+/* Continue the homepage's calm card hierarchy through residential discovery. */
+
+.premium-search .property-discovery-summary { box-shadow: 0 4px 20px hsl(var(--foreground) / .025); }
+.premium-property .premium-offer { border-top: 1px solid hsl(var(--border)); padding-top: 1.25rem; }
+.premium-area-homes h3 { font-family: var(--font-display); font-weight: 400; }
+@media (prefers-reduced-motion: reduce) {
+  :is(.premium-search,.premium-property,.premium-area) *, .public-complex * { scroll-behavior: auto; transition: none; animation: none; }
+}

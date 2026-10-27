@@ -1,3 +1,4 @@
+import '@/styles/premium-workspace.css';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -352,7 +353,7 @@ export function UnifiedTaskHub() {
   const OPS_TYPES = ['cleaning', 'maintenance', 'check_in', 'check_out', 'inspection', 'meter_reading'];
 
   return (
-    <PageContainer>
+    <PageContainer className="mc-workspace-page mc-tasks-page">
       <PageHeader
         title={t('Tasks', 'Задачи', 'งาน')}
         subtitle={t('Business and operational tasks in one place', 'Бизнес и операционные задачи в одном месте', 'รวมงานธุรกิจและงานปฏิบัติการไว้ในที่เดียว')}

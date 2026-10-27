@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * PropertyHub — Unified entry for property vertical
  * Nested routes via Outlet. Catalog + tabs live on /property/browse.
@@ -177,7 +178,7 @@ export function OffplanHubToolsStrip() {
   ];
 
   return (
-    <div className="flex flex-wrap gap-2 px-4 py-2 bg-muted/30 border-b border-border/40 text-xs">
+    <div className="property-hub-tools flex flex-wrap gap-2 px-4 py-2 bg-muted/30 border-b border-border/40 text-xs">
       {links.map((item) => {
         const active =
           item.to === APP_ROUTES.OFFPLAN
@@ -230,7 +231,7 @@ export function PropertyHubTabs() {
   );
 
   return (
-    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2 bg-background border-b border-border/50 snap-x snap-mandatory">
+    <div className="property-hub-tabs flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2 bg-background border-b border-border/50 snap-x snap-mandatory">
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -330,6 +331,8 @@ export default function PropertyHub() {
     }
   }
 
+  const widePublicJourney = p === APP_ROUTES.PROPERTY_SEARCH || p === `${APP_ROUTES.PROPERTY_SEARCH}/` || p === APP_ROUTES.OFFPLAN || p.startsWith(`${APP_ROUTES.OFFPLAN}/`) || p.startsWith('/property/complex/');
+
   const showBottomNav = !(
     p === APP_ROUTES.PROPERTY_DEPOSIT_SUCCESS ||
     p.includes('/inquiry') ||
@@ -341,12 +344,14 @@ export default function PropertyHub() {
       title={title}
       showHeader={!hideGlobalTopBar}
       showBottomNav={showBottomNav}
-      usePageContainer={p !== APP_ROUTES.PROPERTY_SEARCH && p !== `${APP_ROUTES.PROPERTY_SEARCH}/`}
+      usePageContainer={!widePublicJourney}
     >
       <CompareProvider>
+        <div className={widePublicJourney ? "public-property-journey" : undefined}>
         {!hideOuterTabs && p !== APP_ROUTES.PROPERTY_SEARCH && <PropertyHubTabs />}
         <OffplanHubToolsStrip />
         <Outlet />
+        </div>
       </CompareProvider>
     </AppLayout>
   );

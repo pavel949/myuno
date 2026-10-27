@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -101,7 +102,7 @@ export default function ProfileSettings() {
   if (isLoading) {
     return (
       <AppLayout>
-        <PageContainer>
+        <PageContainer className="premium-account-frame">
           <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack />
           <div className="flex justify-center py-12"><LoadingSpinner /></div>
         </PageContainer>
@@ -113,7 +114,7 @@ export default function ProfileSettings() {
 
   return (
     <AppLayout>
-      <PageContainer>
+      <PageContainer className="premium-account-frame">
         <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack fallbackPath="/profile" />
 
         <div className="space-y-6 pb-24 [&_label]:text-foreground/80 [&_input]:text-foreground [&_input]:bg-secondary/50 [&_input:disabled]:bg-muted/80 [&_input:disabled]:text-foreground/60 [&_input:disabled]:opacity-100 [&_textarea]:text-foreground [&_textarea]:bg-secondary/50 [&_.text-sm]:text-foreground/90">

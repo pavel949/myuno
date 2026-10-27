@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -102,7 +103,7 @@ export class ErrorBoundary extends Component<Props, State> {
       const messages = isChunkError ? ERROR_MESSAGES.chunk : ERROR_MESSAGES.generic;
 
       return (
-        <div className="flex flex-col items-center justify-center min-h-[200px] p-6 text-center">
+        <div className="premium-system flex flex-col items-center justify-center min-h-[200px] p-6 text-center">
           <div className="w-16 h-16 rounded-none bg-destructive/8 flex items-center justify-center mb-4">
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>

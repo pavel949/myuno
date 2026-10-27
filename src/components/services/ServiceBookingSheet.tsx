@@ -1,3 +1,5 @@
+import '@/styles/premium-services.css';
+import { servicePriceLabel } from '@/lib/services/servicePresentation';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -84,11 +86,11 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
 
   return (
     <Sheet open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
-      <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto rounded-none">
+      <SheetContent side="bottom" className="premium-service-request max-h-[90vh] overflow-y-auto rounded-none">
         <SheetHeader>
           <SheetTitle>{service?.name}</SheetTitle>
           <SheetDescription>
-            {service?.price != null ? `฿${Number(service.price).toLocaleString()}` : L('Цена по запросу', 'Price on request', 'ราคาตามคำขอ')}
+            {servicePriceLabel(service?.price, service?.currency, language)}
             {service?.durationMinutes ? ` · ${service.durationMinutes} ${L('мин', 'min', 'นาที')}` : ''}
           </SheetDescription>
         </SheetHeader>

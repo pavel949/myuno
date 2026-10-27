@@ -1,3 +1,4 @@
+import '@/styles/premium-services.css';
 import { filterMarketplaceServices } from '@/lib/services/serviceDiscoveryProjection';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -52,8 +53,8 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
             const name = (language === 'ru' ? s.name_ru : s.name_en) || s.name_en;
             const img = s.images?.[0];
             return (
-              <article key={s.id} className="flex min-w-0 flex-col border border-border bg-card">
-                {img && <img src={img} alt="" loading="lazy" className="h-40 w-full border-b border-border object-cover" />}
+              <article key={s.id} className="premium-service-offer flex min-w-0 flex-col border border-border bg-card">
+                {img && <img src={img} alt="" loading="lazy" className="aspect-[4/3] w-full border-b border-border object-cover" />}
                 <div className="flex flex-1 min-w-0 flex-col gap-2 p-4">
                   <ServiceSummary name={name} description={(language === 'ru' ? s.description_ru : s.description_en) || s.description_en} price={s.price} currency={s.currency} durationMinutes={s.duration_minutes} />
                   {s.provider && (
