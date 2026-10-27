@@ -1,17 +1,19 @@
 """Canonical property search + real redirect/editor; synthetic reads and deny-all external network."""
-import asyncio, json, sys
+import asyncio, json, re, sys
 from datetime import datetime, timezone
 from pathlib import Path
 from time import monotonic
 from urllib.parse import urlparse, parse_qs, urlencode
 from playwright.async_api import async_playwright, expect
+from search_browser_selection import select_search_browser
 
 OUTPUT = Path(sys.argv[1])
 
 async def main():
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        selection=select_search_browser(p.chromium.executable_path)
+        browser = await p.chromium.launch(executable_path=selection['executable_path'],headless=True,args=['--no-sandbox'])
         for lang in ['ru', 'en']:
             for width in [375, 390, 430, 1280]:
                 context = await browser.new_context(viewport={'width': width, 'height': 1000},
@@ -68,15 +70,23 @@ async def main():
                     await bounds(menu)
                     await page.get_by_role('option', name=option, exact=True).click()
                     await expect(trigger).to_be_focused()
-                async def visible_search(focused=False):
-                    # Search criteria stay visible before and after submission.
+                async def open_editor():
+                    criteria=page.locator('.premium-search-criteria')
+                    await expect(criteria).to_be_visible()
+                    if await criteria.get_attribute('open') is None:
+                        await criteria.locator(':scope > summary').click()
                     await expect(page.get_by_role('form')).to_have_count(1)
-                    await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()
-                    await expect(page.get_by_role('combobox', name='Спальни' if ru else 'Bedrooms')).to_be_visible()
+                async def visible_search(focused=False):
+                    # Submission closes the editor and focuses results; criteria can be reopened.
                     if focused:
                         await expect(page.get_by_role('heading',level=2)).to_be_focused()
+                        await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
+                    await open_editor()
+                    await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()
+                    await expect(page.get_by_role('combobox', name='Спальни' if ru else 'Bedrooms')).to_be_visible()
                     await bounds()
                 async def hydrated(kind, area, guests=None, mode='rent'):
+                    await open_editor()
                     await expect(page.get_by_role('form')).to_have_count(1)
                     await expect(page.get_by_role('combobox', name=type_label)).to_contain_text(kind)
                     await expect(page.get_by_role('combobox', name=area_label)).to_contain_text(area)
@@ -98,20 +108,23 @@ async def main():
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
                     await visible_search()
-                    summary = page.get_by_label('Текущий поиск' if ru else 'Current search')
+                    summary = page.locator('.premium-search-criteria > summary')
                     await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
                     await expect(summary).to_contain_text('Лаян' if ru else 'Layan')
                     await expect(summary).to_contain_text('10')
                     await expect(summary).to_contain_text('15')
                     await expect(summary).to_contain_text('3')
-                    await expect(summary).to_contain_text('Дополнительных фильтров: 1' if ru else 'Additional filters: 1')
+                    await expect(summary).to_contain_text('1 фильтров' if ru else '1 filters')
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed.png'),full_page=True)
                     await expect(page.get_by_role('button',name='Все компании' if ru else 'All companies',exact=True)).to_have_count(0)
-                    quick = page.get_by_role('group',name='Популярные удобства' if ru else 'Popular features',exact=True)
-                    await expect(quick.get_by_role('button')).to_have_count(3)
-                    for button in await quick.get_by_role('button').all():
-                        box = await button.bounding_box()
-                        assert box['height'] >= 44, box
+                    quick = page.locator('.property-discovery-features')
+                    await expect(quick.locator('button')).to_have_count(3)
+                    if width < 768:
+                        await expect(quick).not_to_be_visible()
+                    else:
+                        for button in await quick.get_by_role('button').all():
+                            box = await button.bounding_box()
+                            assert box['height'] >= 44, box
                     await bounds()
                     if width in [390, 1280]:
                         await page.evaluate("document.documentElement.classList.add('dark')")
@@ -210,8 +223,16 @@ async def main():
                     # Quick chips and the real responsive filter sheet share one URL state.
                     pool_label = 'Свой бассейн' if ru else 'Private pool'
                     filter_label = 'Цена и удобства' if ru else 'Price & amenities'
-                    await page.get_by_role('button',name=pool_label,exact=True).click()
-                    await expect(page.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','true')
+                    if width < 768:
+                        await page.get_by_role('button',name=filter_label,exact=True).click()
+                        mobile_filters=page.get_by_role('dialog')
+                        await mobile_filters.get_by_role('button',name=pool_label,exact=True).click()
+                        await mobile_filters.get_by_role('button',name='Применить (1)' if ru else 'Apply (1)',exact=True).click()
+                        await expect(page.get_by_test_id('location')).to_contain_text(re.compile(r'[?&]cats=private_pool(?:&|$)'))
+                        assert (await query())['cats']==['private_pool']
+                    else:
+                        await page.get_by_role('button',name=pool_label,exact=True).click()
+                        await expect(page.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','true')
                     await page.get_by_role('button',name=filter_label+' (1)',exact=True).click()
                     filters = page.get_by_role('dialog')
                     await expect(filters).to_be_visible()
@@ -226,7 +247,13 @@ async def main():
                     assert features['cats']==['private_pool,wifi'],features
                     assert 'f.guestFeatures' not in features,features
                     assert features['intent']==['assignment'] and features['source']==['purchase-bookmark'],features
-                    await page.get_by_role('button',name=pool_label,exact=True).click()
+                    if width < 768:
+                        await page.get_by_role('button',name=filter_label+' (2)',exact=True).click()
+                        mobile_filters=page.get_by_role('dialog')
+                        await mobile_filters.get_by_role('button',name=pool_label,exact=True).click()
+                        await mobile_filters.get_by_role('button',name='Применить (1)' if ru else 'Apply (1)',exact=True).click()
+                    else:
+                        await page.get_by_role('button',name=pool_label,exact=True).click()
                     await page.get_by_role('button',name=filter_label+' (1)',exact=True).click()
                     filters = page.get_by_role('dialog')
                     await expect(filters.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','false')

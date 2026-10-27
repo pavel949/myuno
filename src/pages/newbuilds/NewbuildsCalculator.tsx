@@ -33,12 +33,11 @@ export default function NewbuildsCalculator() {
   const selectedProject = (projects || []).find(p => p.id === selectedProjectId);
   const { track } = useIPPLeadEvent();
 
-  // Preset wins over project defaults when set
-  const initialPrice = preset?.purchasePrice ?? selectedProject?.price_from ?? null;
-  const initialRoi = preset?.annualAppreciation ?? (selectedProject as { roi_projected?: number } | undefined)?.roi_projected ?? null;
-  const initialCamPerSqm = preset
-    ? Math.round(preset.camFeeMonthly / preset.area)
-    : (selectedProject as { cam_fee_per_sqm?: number } | undefined)?.cam_fee_per_sqm ?? null;
+  // Only the current editable project price may prefill a scenario. Other
+  // financial assumptions are entered by the user, not inherited from presets.
+  const initialPrice = selectedProject?.price_from ?? null;
+  const initialRoi = null;
+  const initialCamPerSqm = null;
 
   // IPP §3 lead event: ROI calculator engaged (+25). Fire once per page mount
   // when an actual price is being modelled.
@@ -69,8 +68,8 @@ export default function NewbuildsCalculator() {
     sourceModule: 'roi_calculator',
     actionId: 'matching-properties',
     isLoading: matches.isLoading,
-    count: matches.count,
-    enabled: !!matchBand,
+    count: matches.count ?? 0,
+    enabled: !!matchBand && matches.count != null,
     context: { project_id: selectedProjectId || null, preset: presetSlug ?? null },
   });
 
@@ -89,7 +88,7 @@ export default function NewbuildsCalculator() {
         transactional: false,
         loading: true,
       });
-    } else if (matches.count > 0) {
+    } else if (matches.count != null && matches.count > 0) {
       list.push({
         id: 'matching-properties',
         to: matches.href,

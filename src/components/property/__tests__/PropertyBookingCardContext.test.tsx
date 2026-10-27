@@ -10,7 +10,7 @@ vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDa
 vi.mock('@/hooks/usePropertyRateSeasons', () => ({ usePropertyRateSeasons: () => ({ data: [] }) }));
 vi.mock('@/hooks/useBreakpoint', () => ({ useBreakpoint: () => ({ isDesktop: true }) }));
 vi.mock('../GuestPriceProposal', () => ({ GuestPriceProposal: () => null }));
-afterEach(cleanup);
+afterEach(() => { cleanup(); availability.isSuccess = false; availability.isError = false; });
 const nextQuery = '?checkIn=2099-12-10&checkOut=2099-12-14&guests=2';
 function RoutedCard() {
   const [params] = useSearchParams(); const navigate = useNavigate();
@@ -50,4 +50,12 @@ describe('booking card initial guest context', () => {
     expect(screen.getByRole('button', { name: /Check-in.*10 Dec 2099.*Check-out.*14 Dec 2099/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reserve' })).toBeDisabled();
   });
+});
+
+it('keeps validated intent on the existing desktop inquiry route', () => {
+  availability.isSuccess = true;
+  function Destination() { const [params] = useSearchParams(); return <output data-testid="inquiry-query">{params.toString()}</output>; }
+  render(<MemoryRouter><PropertyBookingCard propertyId="home" pricePerNight={2000} initialGuestContext={context} guestSearch="mode=rent&tenancy=short&intent=holiday" /><Destination /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Reserve' }));
+  expect(Object.fromEntries(new URLSearchParams(screen.getByTestId('inquiry-query').textContent ?? ''))).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2099-12-01', checkOut: '2099-12-04', guests: '3' });
 });

@@ -1,8 +1,9 @@
 import '@/styles/public-commerce.css';
+import '@/styles/premium-public.css';
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
-  MapPin, Star, BedDouble, Bath, Users, Maximize,
+  ChevronLeft, MapPin, Star, BedDouble, Bath, Users, Maximize,
   Share2, Loader2, Home, Sofa, Building2, Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -12,17 +13,16 @@ import { CompareButton, PropertyCompareTrigger, type CompareProperty } from '@/c
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
-import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyCatalogHref, propertyDetailHref, propertyDetailPricing, propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
+import { publicJourneyState, publicJourneyReturn, propertyAreaHref } from '@/lib/real-estate/publicJourney';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
-import { BackButton } from '@/components/uno/BackButton';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import {
   IncludedServices,
@@ -92,10 +92,15 @@ const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToResults = () => {
+    const plan = publicJourneyReturn(location, propertyCatalogHref(searchParams.get('mode') === 'buy' ? 'buy' : 'rent', searchParams.toString()));
+    if ('delta' in plan) navigate(plan.delta);
+    else navigate(plan.href, { replace: plan.replace, state: plan.state });
+  };
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
   const multiUnitEnabled = useFeatureFlag('multi_unit_properties');
 
@@ -124,7 +129,7 @@ export default function PropertyDetail() {
     [availability],
   );
 
-  const { data: property, isLoading } = usePropertyWithRentalTerms(id);
+  const { data: property, isLoading, isError, refetch } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
@@ -147,18 +152,17 @@ export default function PropertyDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <div className="premium-property premium-load-state" role="status" aria-label={isRu ? 'Загружаем объект' : 'Loading home'}><div className="h-8 w-2/3 bg-muted motion-safe:animate-pulse" /><div className="aspect-[4/3] md:aspect-[2/1] bg-muted motion-safe:animate-pulse" /><span className="sr-only">{isRu ? 'Загружаем объект…' : 'Loading home…'}</span></div>
     );
   }
 
+  if (isError) return <div className="premium-property premium-load-state" role="alert"><h1>{isRu ? 'Не удалось загрузить объект' : 'Could not load this home'}</h1><p>{isRu ? 'Параметры поиска сохранены. Попробуйте ещё раз.' : 'Your search criteria are preserved. Please try again.'}</p><Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button><Button variant="ghost" onClick={returnToResults}>{isRu ? 'К результатам' : 'Back to results'}</Button></div>;
   if (!property) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Home className="w-16 h-16 text-muted-foreground/50" />
         <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
-        <Button variant="outline" onClick={() => navigate('/property')}>
+        <Button variant="outline" onClick={returnToResults}>
           {isRu ? 'К списку' : 'Back to listings'}
         </Button>
       </div>
@@ -195,28 +199,19 @@ export default function PropertyDetail() {
   const amenities = property.amenities || [];
 
 
-  const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
-  // City-aware currency: prefer listing-level currency, else current city default, else USD.
-  const listingCurrency =
-    ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
-  const isSaleListing = propertyDetailMode(property, searchParams.get('mode')) === 'buy';
-  const salePrice = propertySaleAskingPrice(property);
-  const salePriceLabel = salePrice != null ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request');
-
-  // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
-  // explicitly set, respect it; otherwise fall back to legacy nightly-price
-  // signal so existing listings keep showing the booking card.
-  const tenancyModes: string[] = Array.isArray(propertyExt.tenancy_modes)
-    ? propertyExt.tenancy_modes
-    : [];
-  const supportsShortStay = tenancyModes.length > 0
-    ? tenancyModes.includes('short')
-    : !!pricePerNight;
-  const requestedTenancy = searchParams.get('tenancy');
-  // A supported explicit long/monthly search opens the existing request flow,
-  // including dual short+long offers; URL intent never grants listing eligibility.
-  const longStayRequested = (requestedTenancy === 'medium' || requestedTenancy === 'long') && tenancyModes.includes(requestedTenancy);
-  const isLongStayOnly = (tenancyModes.length > 0 && !supportsShortStay) || longStayRequested;
+  const pricing = propertyDetailPricing(property, rentalTerms, searchParams.get('mode'), searchParams.get('tenancy'));
+  const isSaleListing = pricing.mode === 'buy';
+  const requiresRentalRequest = !pricing.canQuoteShortStay;
+  const pricePerNight = pricing.pricePerNight;
+  const listingCurrency = property.currency?.trim().toUpperCase() ?? '';
+  const priceOnRequest = isRu ? 'Цена по запросу' : 'Price on request';
+  const salePrice = isSaleListing ? pricing.amount : null;
+  const salePriceLabel = salePrice !== null ? formatPrice(salePrice) : priceOnRequest;
+  const periodLabel = ({ night: isRu ? 'ночь' : 'night', week: isRu ? 'нед.' : 'week', month: isRu ? 'мес.' : 'month', year: isRu ? 'год' : 'year', total: '' } as Record<string, string>)[pricing.period ?? ''];
+  const rentalPriceLabel = pricing.amount !== null ? `${formatPrice(pricing.amount)}${periodLabel ? ` / ${periodLabel}` : ''}` : priceOnRequest;
+  const tenancyLabel = pricing.requestedTenancy === 'long' ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
+    : pricing.requestedTenancy === 'medium' ? (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')
+    : (isRu ? 'Условия аренды' : 'Rental terms');
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes.map((vt) => viewTypeLabels[vt]).filter(Boolean);
 
@@ -239,20 +234,25 @@ export default function PropertyDetail() {
     setShowAllPhotos(true);
   };
 
+  const offerChoices = <div className="premium-offer-choices" role="group" aria-label={isRu ? 'Предложение' : 'Offer'}>{(['rent', 'buy'] as const).filter(mode => propertySupportsMode(property, mode)).map(mode => <Link key={mode} replace state={location.state} aria-current={pricing.mode === mode ? 'true' : undefined} to={propertyDetailHref(id || '', mode, searchParams.toString())} onClick={event => { if (pricing.mode === mode) event.preventDefault(); }}>{mode === 'rent' ? (isRu ? 'Аренда' : 'Rent') : (isRu ? 'Покупка' : 'Buy')}</Link>)}</div>;
+  const rentalTenancies = !isSaleListing && Array.isArray(property.tenancy_modes) && property.tenancy_modes.length > 1 ? <div className="premium-offer-choices" role="group" aria-label={isRu ? 'Срок аренды' : 'Rental duration'}>{property.tenancy_modes.filter(mode => ['short', 'medium', 'long'].includes(mode)).map(tenancy => { const params = new URLSearchParams(searchParams); params.set('tenancy', tenancy); return <Link key={tenancy} replace state={location.state} aria-current={searchParams.get('tenancy') === tenancy ? 'true' : undefined} to={propertyDetailHref(id || '', 'rent', params.toString())}>{({ short: isRu ? 'Поездка' : 'Short stay', medium: isRu ? 'Несколько месяцев' : 'A few months', long: isRu ? 'Надолго' : 'Long stay' } as Record<string, string>)[tenancy]}</Link>; })}</div> : null;
+  const depositKnown = rentalTerms?.deposit_amount != null && Number.isFinite(rentalTerms.deposit_amount) && rentalTerms.deposit_amount > 0;
+  const depositLabel = depositKnown && rentalTerms?.deposit_currency ? `${new Intl.NumberFormat(language).format(rentalTerms.deposit_amount!)} ${rentalTerms.deposit_currency}` : (isRu ? 'Уточните условия депозита' : 'Confirm deposit terms');
+
   const handleDateSheetConfirm = () => {
-    if (!availabilityQuery.isSuccess || availabilityQuery.isError) return;
+    if (!pricing.canQuoteShortStay || !availabilityQuery.isSuccess || availabilityQuery.isError) return;
     setDateSheetOpen(false);
     if (dateRange?.from && dateRange?.to) {
-      const params = new URLSearchParams({
-        checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-        checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-        guests: guestCount.toString(),
-      });
+      const params = new URLSearchParams(propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]);
+      params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+      params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+      params.set('guests', guestCount.toString());
       navigate(`${APP_ROUTES.PROPERTY_INQUIRY(id)}?${params.toString()}`);
     }
   };
 
   const handleViewPricing = () => {
+    if (!pricing.canQuoteShortStay) return;
     const panel = document.getElementById('property-pricing');
     if (panel && panel.getClientRects().length > 0) {
       panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -272,8 +272,8 @@ export default function PropertyDetail() {
         jsonLd={createRealEstateListingSchema({
           name: propertyTitle || '',
           description: propertyDesc.slice(0, 300),
-          price: pricePerNight || undefined,
-          currency: listingCurrency,
+          price: isSaleListing ? salePrice ?? undefined : undefined,
+          currency: isSaleListing && salePrice !== null ? 'THB' : undefined,
           image: property.cover_image || undefined,
           url: `https://www.myuno.app/property/${id}`,
           bedrooms: property.bedrooms || undefined,
@@ -282,10 +282,10 @@ export default function PropertyDetail() {
           address: property.district || undefined,
         })}
       />
-      <div className="public-commerce public-commerce--property pb-28">
+      <div className="public-commerce public-commerce--property premium-property pb-28">
         {/* Property identity and secondary actions */}
-        <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
-          <BackButton fallbackPath="/property" variant="default" size="md" />
+        <div className="premium-property-identity flex flex-wrap items-start gap-4 py-5 md:py-7">
+          <button type="button" className="premium-return home-text-link" onClick={returnToResults}><ChevronLeft className="h-4 w-4" aria-hidden="true" />{isRu ? 'К результатам' : 'Back to results'}</button>
           {/* Title */}
           <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
             <h1 className="public-commerce-title text-foreground break-words">
@@ -299,7 +299,7 @@ export default function PropertyDetail() {
               maxGuests={property.max_guests || rentalTerms?.max_guests}
             />
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
-              {property.rating != null && property.rating > 0 && (
+              {property.rating != null && property.rating > 0 && property.review_count != null && property.review_count > 0 && (
                 <>
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-primary fill-primary" />
@@ -315,12 +315,6 @@ export default function PropertyDetail() {
                 reviewsCount={property.review_count}
                 variant="inline"
               />
-              {property.is_verified && (
-                <span className="flex items-center gap-1 text-primary">
-                  · <Shield className="w-3.5 h-3.5" />
-                  <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
-                </span>
-              )}
               <span className="text-muted-foreground">
                 · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
               </span>
@@ -386,40 +380,23 @@ export default function PropertyDetail() {
         </div>
 
         {/* Image Gallery */}
-        <PropertyDetailGallery
+        <PropertyDetailGallery key={id}
           images={images}
           alt={galleryFallbackAlt}
           onOpenLightbox={openLightbox}
         />
 
+        {pricing.hasOffer && <section className="premium-offer-mobile" aria-label={isRu ? 'Условия предложения' : 'Offer summary'}>{offerChoices}{rentalTenancies}<p>{isSaleListing ? salePriceLabel : pricing.canQuoteShortStay ? (isRu ? 'Выберите даты для расчёта стоимости' : 'Choose dates to see the total price') : rentalPriceLabel}</p>{!isSaleListing && depositKnown && <p>{isRu ? 'Депозит' : 'Deposit'}: {depositLabel}</p>}{!isSaleListing && propertyExt.min_lease_months && <p>{isRu ? 'Минимальный срок' : 'Minimum lease'}: {propertyExt.min_lease_months} {isRu ? 'мес.' : 'months'}</p>}</section>}
         {/* Main Content with Sidebar Layout for Desktop */}
-        <div className="px-4 md:px-0 py-6 lg:py-10">
-          <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
-            <article className="space-y-6 min-w-0">
-
-              {isSaleListing && (
-                <>
-                  <Separator />
-                  <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
-                    <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
-                    <p className="text-2xl font-bold tracking-tight">{salePriceLabel}</p>
-                    {ownershipLabel && (
-                      <p className="text-sm text-muted-foreground">{ownershipLabel}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {isRu
-                        ? 'Запросите детали сделки, Due Diligence и варианты оплаты у менеджера.'
-                        : 'Ask the manager for transaction details, due diligence, and payment options.'}
-                    </p>
-                  </div>
-                </>
-              )}
+        <div>
+          <div className="premium-detail-grid">
+            <article className="premium-property-content min-w-0">
 
               {/* Trust signals: title deed, escrow, ClearView, owner verified */}
               <TrustStrip
                 titleDeedType={propertyExt.title_deed_type}
                 escrowOffered={propertyExt.escrow_offered}
-                ownerVerified={property.is_verified}
+                ownerVerified={null}
                 isRu={isRu}
               />
 
@@ -473,9 +450,18 @@ export default function PropertyDetail() {
                 ))}
               </div>
 
+              {(property.description_ru || property.description_en) && <div>
+                <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
+                  {isRu ? 'Об этом жилье' : 'About this place'}
+                </h2>
+                <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
+                  {isRu ? property.description_ru || property.description_en : property.description_en || property.description_ru}
+                </p>
+              </div>}
+
               {/* Unit Specs */}
               <Separator />
-              <div>
+              {(property.floor || property.unit_number || viewTypes.length || property.furnishing_level || property.equipment?.length) ? <div>
                 <h2 className="text-xl lg:text-2xl font-semibold mb-4">
                   {isRu ? 'Что есть в жилье' : 'What this place offers'}
                 </h2>
@@ -487,11 +473,11 @@ export default function PropertyDetail() {
                   equipment={
                     (property.equipment && property.equipment.length > 0)
                       ? property.equipment
-                      : amenities.length > 0 ? amenities as string[] : undefined
+                      : undefined
                   }
                   propertyType={property.property_type}
                 />
-              </div>
+              </div> : null}
 
               {/* Structured amenities (catalogue-backed, grouped by category) */}
               <Separator />
@@ -529,20 +515,12 @@ export default function PropertyDetail() {
               {rentalTerms?.manager_name && (
                 <>
                   <Separator />
-                  <HostProfileSection rentalTerms={rentalTerms} isVerified={property.is_verified} />
+                  <HostProfileSection rentalTerms={rentalTerms} />
                 </>
               )}
 
               <Separator />
 
-              <div>
-                <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
-                  {isRu ? 'Об этом жилье' : 'About this place'}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
-                  {isRu ? property.description_ru : property.description_en}
-                </p>
-              </div>
 
               {/* Pricing breakdown intentionally not rendered publicly.
                   Base/seasonal pricing belongs to the host workspace.
@@ -563,7 +541,7 @@ export default function PropertyDetail() {
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <UtilitiesInfo
@@ -599,7 +577,7 @@ export default function PropertyDetail() {
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <CheckInDetails
@@ -628,13 +606,13 @@ export default function PropertyDetail() {
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
-                    onViewPricing={!isSaleListing && !isLongStayOnly ? handleViewPricing : undefined}
+                    onViewPricing={pricing.canQuoteShortStay ? handleViewPricing : undefined}
                   />
                   <GuestAssuranceCard compact className="lg:hidden mt-2" />
                 </>
               )}
 
-              {rentalTerms && (
+              {!isSaleListing && rentalTerms && (
                 <>
                   <Separator />
                   <HouseRules
@@ -678,6 +656,12 @@ export default function PropertyDetail() {
               />
 
               <Separator />
+              {propertyAreaHref(property.district) && (
+                <Link to={propertyAreaHref(property.district)!} state={publicJourneyState(location)} className="inline-flex min-h-11 items-center gap-2 text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring">
+                  <MapPin className="h-4 w-4" aria-hidden />
+                  {isRu ? `О районе ${property.district}` : `Explore ${property.district}`}
+                </Link>
+              )}
               <PropertyLocationMap
                 lat={property.lat}
                 lng={property.lng}
@@ -704,12 +688,16 @@ export default function PropertyDetail() {
               id="property-pricing"
               tabIndex={-1}
               className={cn(
-                'hidden lg:flex lg:flex-col gap-4 w-full',
+                'premium-offer hidden flex-col gap-4 w-full',
                 'lg:sticky lg:top-[4.75rem] xl:top-[5.25rem] lg:self-start lg:z-10',
                 'lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1',
               )}
             >
-              {(isSaleListing || isLongStayOnly) ? (
+              {offerChoices}
+              {rentalTenancies}
+              {!pricing.hasOffer ? (
+                <p role="status">{isRu ? 'Предложение недоступно' : 'Offer unavailable'}</p>
+              ) : (isSaleListing || requiresRentalRequest) ? (
                 <Card>
                   <CardContent className="p-4 space-y-3">
                     {isSaleListing ? (
@@ -720,18 +708,9 @@ export default function PropertyDetail() {
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">
-                          {tenancyModes.includes('long')
-                            ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
-                            : (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')}
+                          {tenancyLabel}
                         </p>
-                        {propertyExt.price_per_month && (
-                          <p className="text-2xl font-bold">
-                            {formatPrice(propertyExt.price_per_month)}
-                            <span className="text-sm font-normal text-muted-foreground ml-1">
-                              /{isRu ? 'мес' : 'mo'}
-                            </span>
-                          </p>
-                        )}
+                        <p className="text-2xl font-bold">{rentalPriceLabel}</p>
                         {propertyExt.min_lease_months && (
                           <p className="text-xs text-muted-foreground">
                             {isRu
@@ -772,8 +751,9 @@ export default function PropertyDetail() {
                   <PropertyBookingCard
                     key={id}
                     initialGuestContext={initialGuestContext}
+                    guestSearch={propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]}
                     propertyId={id || 'prop-1'}
-                    pricePerNight={pricePerNight}
+                    pricePerNight={pricePerNight!}
                     rentalTerms={rentalTerms}
                     currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
@@ -820,11 +800,13 @@ export default function PropertyDetail() {
         </div>
 
         {/* Mobile bottom CTA */}
-        <PropertyDetailMobileBar
+        {pricing.hasOffer && !dateSheetOpen && <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
-          isLongStayOnly={isLongStayOnly}
-          salePrice={salePrice ?? 0}
+          isLongStayOnly={requiresRentalRequest}
+          salePrice={salePrice}
+          rentalPriceLabel={rentalPriceLabel}
+          guestSearch={propertyDetailHref(id || '', pricing.mode, searchParams.toString()).split('?')[1]}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}
           titleEn={property.title_en}
@@ -833,11 +815,11 @@ export default function PropertyDetail() {
           instantBooking={rentalTerms?.instant_booking}
           dateRange={dateRange}
           guestCount={guestCount}
-          onOpenDatePicker={() => setDateSheetOpen(true)}
-        />
+          onOpenDatePicker={() => { if (pricing.canQuoteShortStay) setDateSheetOpen(true); }}
+        />}
 
         {/* Mobile Date Picker Sheet */}
-        <PropertyDetailDateSheet
+        {pricing.canQuoteShortStay && <PropertyDetailDateSheet
           open={dateSheetOpen}
           onOpenChange={setDateSheetOpen}
           dateRange={dateRange}
@@ -852,7 +834,7 @@ export default function PropertyDetail() {
           onRetryAvailability={() => { void availabilityQuery.refetch(); }}
           unavailableDates={unavailableDates}
           onConfirm={handleDateSheetConfirm}
-        />
+        />}
       </div>
 
       {/* Cross-sell */}

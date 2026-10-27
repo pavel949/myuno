@@ -4,6 +4,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
 OUT=Path(sys.argv[1])
+async def open_editor(page):
+ criteria=page.locator('.premium-search-criteria')
+ await expect(criteria).to_be_visible()
+ if await criteria.get_attribute('open') is None:
+  await criteria.locator(':scope > summary').click()
+ await expect(criteria).to_have_attribute('open','')
+
 async def main():
  results=[]
  async with async_playwright() as p:
@@ -44,14 +51,14 @@ async def main():
     await page.screenshot(path=str(OUT/f'catalogue-{lang}-{width}.png'),full_page=False)
     query=page.get_by_role('searchbox',name={'en':'Property name','ru':'Название объекта','th':'ชื่อที่พัก'}[lang])
     submit=page.get_by_role('button',name={'en':'Find a home','ru':'Найти жильё','th':'ค้นหาที่พัก'}[lang],exact=True)
-    await query.fill('Needle');await submit.click();await expect(grid.locator(':scope > *')).to_have_count(1)
+    await open_editor(page);await query.fill('Needle');await submit.click();await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','');await expect(grid.locator(':scope > *')).to_have_count(1)
     await expect(grid).to_contain_text('Needle')
-    await query.fill('Absent');await submit.click()
+    await open_editor(page);await query.fill('Absent');await submit.click()
     reset=page.get_by_role('button',name={'en':'Reset filters','ru':'Сбросить фильтры','th':'ล้างตัวกรอง'}[lang],exact=True)
     await expect(reset).to_be_visible();await page.screenshot(path=str(OUT/f'empty-{lang}-{width}.png'));await reset.click();await expect(grid).to_be_visible()
     await page.get_by_test_id('history-back').click();await expect(reset).to_be_visible()
     await page.get_by_test_id('history-forward').click();await expect(grid).to_be_visible()
-    await query.fill('Slow');await submit.click();await query.fill('Needle');await submit.click()
+    await open_editor(page);await query.fill('Slow');await submit.click();await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','');await open_editor(page);await query.fill('Needle');await submit.click()
     await expect(grid.locator(':scope > *')).to_have_count(1);await expect(grid).to_contain_text('Needle')
     await page.wait_for_timeout(250);await expect(grid).to_contain_text('Needle')
     await page.get_by_role('button',name={'en':'Map','ru':'Карта','th':'แผนที่'}[lang],exact=True).click()

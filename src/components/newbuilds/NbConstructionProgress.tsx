@@ -4,15 +4,16 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { projectCompletionLabel } from '@/lib/offplan/presentation';
 
 interface Props {
-  progress: number; // 0-100
+  progress: number | null; // 0-100
   completionDate?: string | null;
   size?: 'sm' | 'md';
 }
 
 export function NbConstructionProgress({ progress, completionDate, size = 'md' }: Props) {
   const { language } = useLanguage();
+  if (progress == null) return null;
   const h = size === 'sm' ? 'h-1' : 'h-1.5';
-  
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">

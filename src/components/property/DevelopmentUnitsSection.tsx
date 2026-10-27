@@ -1,3 +1,5 @@
+import { publicNewbuildUnit } from '@/lib/real-estate/publicNewbuildPresentation';
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 /**
  * DevelopmentUnitsSection — shows unit types/floor plans for a project
  * Used in OffplanDetail page
@@ -47,13 +49,13 @@ export function DevelopmentUnitsSection({ developmentId }: DevelopmentUnitsSecti
   return (
     <div className="space-y-3">
       <h3 className="font-semibold text-base">
-        {isRu ? 'Планировки и цены' : 'Floor Plans & Pricing'}
+        {isRu ? 'Планировки' : 'Floor plans'}
       </h3>
 
-      {units.map(unit => {
+      {units.map(sourceUnit => {
+        const unit = publicNewbuildUnit(sourceUnit);
         const name = (isRu && unit.name_ru) ? unit.name_ru : unit.name;
-        const statusCfg = STATUS_CONFIG[unit.status] || STATUS_CONFIG.available;
-        const isSoldOut = unit.status === 'sold_out';
+        const isSoldOut = false;
 
         return (
           <div
@@ -90,24 +92,10 @@ export function DevelopmentUnitsSection({ developmentId }: DevelopmentUnitsSecti
                 </div>
               </div>
 
-              <Badge variant="outline" className={cn("text-[10px]", statusCfg.className)}>
-                {isRu ? statusCfg.ru : statusCfg.en}
-                {!isSoldOut && unit.available_units > 0 && (
-                  <span className="ml-1">({unit.available_units})</span>
-                )}
-              </Badge>
+
             </div>
 
-            <div className="flex items-baseline justify-between">
-              <span className={cn("font-bold", isSoldOut ? "text-muted-foreground" : "text-foreground")}>
-                {isRu ? 'от ' : 'from '}{formatPrice(unit.price)}
-              </span>
-              {unit.price_per_sqm && (
-                <span className="text-xs text-muted-foreground">
-                  {formatPrice(unit.price_per_sqm)}/м²
-                </span>
-              )}
-            </div>
+            <ProjectStartingPrice price={null} />
 
             {/* Views */}
             {unit.views && unit.views.length > 0 && (

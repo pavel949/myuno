@@ -1,3 +1,8 @@
+import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
+import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import '@/styles/cinematic-home.css';
+import '@/styles/premium-public.css';
+import '@/styles/homepage-refinement.css';
 /** Authenticated personal Home, preserving the existing legacy/V2 rollout gate. */
 import React, { useState } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -50,7 +55,7 @@ const IndexLegacy: React.FC = () => {
 
   return (
     <AppLayout showHeader={false} showFooter>
-      <div className="mx-auto w-full max-w-3xl pb-24">
+      <div className="premium-personal premium-frame">
         {/* Compact identity; account actions take priority over interests. */}
         <HeroGreeting
           personas={personas}
@@ -74,6 +79,7 @@ const IndexLegacy: React.FC = () => {
         {/* Recommendations follow the stable personal actions. */}
         <PersonalGrid limit={4} />
         <LifecycleSmartTip />
+        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeServiceGallery /></div>
 
         {/* 5. Первый (главный для роли) кластер всегда виден */}
         {visibleClusters.slice(0, 1).map((cid) => (

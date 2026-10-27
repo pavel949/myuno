@@ -31,3 +31,13 @@ it('keeps Russian consent accurate for an owner-specific submit label', () => {
  expect(screen.getByText('Отправляя заявку, вы соглашаетесь с обработкой персональных данных.')).toBeVisible();
  expect(screen.queryByText(/Нажимая «Отправить»/)).toBeNull();
 });
+
+it('preserves canonical project context and purchase intent in an isolated inquiry', async () => {
+ fixture.submit.mockResolvedValue({ id: 'synthetic-receipt' });
+ render(<LandingLeadForm variant="universal" verticalId="properties" universalRequestType="property_purchase" entryPoint="offplan_project_synthetic" contextMetadata={{ project_id: 'synthetic-project' }} />);
+ fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Synthetic buyer' } });
+ fireEvent.change(screen.getByLabelText(/Phone/), { target: { value: '+66000000000' } });
+ fireEvent.click(screen.getByRole('button', { name: 'Submit request' }));
+ expect(await screen.findByText('Request saved')).toBeVisible();
+ expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({ vertical_id: 'properties', request_type: 'property_purchase', vertical_metadata: { project_id: 'synthetic-project' } }));
+});

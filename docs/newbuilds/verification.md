@@ -1,5 +1,7 @@
 # Newbuild request-only tranche — bounded verification and NO-GO
 
+> **Integration scope note (2026-10-27, PR #184).** The evidence below was recorded before `main` received the #196/#197 newbuild presentation (provisional starting price, Plans tab, `NbLeadForm`). The integration keeps `main`'s presentation and drops this tranche's buyer UI: `BuyerRequestForm`, `BuyerProjectUnits`, `BuyerProjectTerms`, `useBuyerProjectUnits`, `buyerContract`, the `audience: 'buyer'` projection, the `e2e/newbuilds` harness and their tests. The evidence lines below that cite those files (Focused Vitest command, Playwright command, screenshots) describe the earlier source and no longer apply to the merged tree. Retained: request-only containment of hold/checkout writers, canonical physical-property identity, offline source staging with its privacy guard, and the idempotent consultation intake hardening (candidate SQL, not applied).
+
 Baseline 775bd61cef82011eb1f530bcce8dfe666f661a03; current review date 2026-10-25. No header/calendar/workflow/area/gallery changes. No merge, deployment, migration, grants/policy mutation, catalogue import, real request, notification, reservation or payment was performed.
 
 ## Local evidence

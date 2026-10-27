@@ -2,7 +2,7 @@
  * NbROICalculator — Full investment ROI calculator for Phuket newbuilds
  * Pre-fills from project data, computes yields, payback, projections
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 import { Calculator, TrendingUp, DollarSign, Clock, Copy, Check } from 'lucide-react';
 import { DisclaimerNote } from '@/components/legal/DisclaimerNote';
 
@@ -29,14 +29,9 @@ interface CalcInputs {
 }
 
 const DEFAULT_INPUTS: CalcInputs = {
-  purchasePrice: 5_000_000,
-  rentalPerNight: 3_000,
-  occupancyRate: 70,
-  annualAppreciation: 5,
-  camFeeMonthly: 3_000,
-  managementFee: 20,
-  taxRate: 5,
-  furnishingCost: 500_000,
+  purchasePrice: 0, rentalPerNight: 0, occupancyRate: 0,
+  annualAppreciation: 0, camFeeMonthly: 0, managementFee: 0,
+  taxRate: 0, furnishingCost: 0,
 };
 
 function formatThb(value: number): string {
@@ -49,11 +44,19 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
   const [inputs, setInputs] = useState<CalcInputs>({
     ...DEFAULT_INPUTS,
     purchasePrice: defaultPrice || DEFAULT_INPUTS.purchasePrice,
-    camFeeMonthly: defaultCamFee ? defaultCamFee * 40 : DEFAULT_INPUTS.camFeeMonthly, // rough estimate: 40sqm avg unit
+    camFeeMonthly: 0, // Enter the actual fee; do not infer it from an assumed unit size.
   });
+  const fieldPrefix = useId();
+  const [entered, setEntered] = useState<Set<keyof CalcInputs>>(() => new Set(defaultPrice != null && defaultPrice > 0 ? ['purchasePrice'] : []));
+  const hasScenario = Object.keys(DEFAULT_INPUTS).every(key => entered.has(key as keyof CalcInputs))
+    && Object.values(inputs).every(Number.isFinite) && inputs.purchasePrice > 0
+    && inputs.rentalPerNight >= 0 && inputs.occupancyRate >= 0 && inputs.occupancyRate <= 100
+    && inputs.camFeeMonthly >= 0 && inputs.furnishingCost >= 0
+    && inputs.managementFee >= 0 && inputs.managementFee <= 100 && inputs.taxRate >= 0 && inputs.taxRate <= 100;
   const [copied, setCopied] = useState(false);
 
   const update = (field: keyof CalcInputs, value: string) => {
+    setEntered(previous => { const next = new Set(previous); if (value.trim()) next.add(field); else next.delete(field); return next; });
     const num = parseFloat(value) || 0;
     setInputs(prev => ({ ...prev, [field]: num }));
   };
@@ -131,20 +134,21 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
       {/* Inputs */}
       <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-3`}>
         {([
-          { key: 'purchasePrice', label: 'Цена покупки (฿)', placeholder: '5000000' },
-          { key: 'furnishingCost', label: 'Мебель и отделка (฿)', placeholder: '500000' },
-          { key: 'rentalPerNight', label: 'Аренда за ночь (฿)', placeholder: '3000' },
-          { key: 'occupancyRate', label: 'Заполняемость (%)', placeholder: '70' },
-          { key: 'annualAppreciation', label: 'Рост цены в год (%)', placeholder: '5' },
-          { key: 'camFeeMonthly', label: 'CAM fee/мес (฿)', placeholder: '3000' },
-          { key: 'managementFee', label: 'УК аренды (%)', placeholder: '20' },
-          { key: 'taxRate', label: 'Налог (%)', placeholder: '5' },
+          { key: 'purchasePrice', label: 'Цена покупки (฿)', placeholder: 'Введите значение' },
+          { key: 'furnishingCost', label: 'Мебель и отделка (฿)', placeholder: 'Введите значение' },
+          { key: 'rentalPerNight', label: 'Аренда за ночь (฿)', placeholder: 'Введите значение' },
+          { key: 'occupancyRate', label: 'Заполняемость (%)', placeholder: 'Введите значение' },
+          { key: 'annualAppreciation', label: 'Рост цены в год (%)', placeholder: 'Введите значение' },
+          { key: 'camFeeMonthly', label: 'CAM fee/мес (฿)', placeholder: 'Введите значение' },
+          { key: 'managementFee', label: 'УК аренды (%)', placeholder: 'Введите значение' },
+          { key: 'taxRate', label: 'Налог (%)', placeholder: 'Введите значение' },
         ] as { key: keyof CalcInputs; label: string; placeholder: string }[]).map(({ key, label, placeholder }) => (
           <div key={key}>
-            <label className="text-[11px] mb-1 block" style={{ color: 'hsl(var(--nb-muted))' }}>{label}</label>
+            <label htmlFor={`${fieldPrefix}-${key}`} className="text-[11px] mb-1 block" style={{ color: 'hsl(var(--nb-muted))' }}>{label}</label>
             <input
+              id={`${fieldPrefix}-${key}`}
               type="number"
-              value={inputs[key] || ''}
+              value={entered.has(key) ? inputs[key] : ''}
               onChange={e => update(key, e.target.value)}
               placeholder={placeholder}
               className="w-full px-3 py-2 rounded-none text-sm"
@@ -154,8 +158,8 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
         ))}
       </div>
 
-      {/* Results */}
-      <div className="nb-separator" />
+      {/* Results describe only the scenario explicitly entered by the user. */}
+      {hasScenario && <><div className="nb-separator" />
       <div className="space-y-4">
         <p className="nb-label">РЕЗУЛЬТАТЫ</p>
 
@@ -250,7 +254,8 @@ export function NbROICalculator({ defaultPrice, defaultRoi, defaultCamFee, compa
         </button>
 
         <DisclaimerNote variant="card" className="mt-3" />
-      </div>
+      </div></>}
+      {!hasScenario && <p className="text-sm text-muted-foreground">Введите все параметры своего сценария, включая нулевые расходы. Это не прогноз доходности проекта.</p>}
     </div>
   );
 }

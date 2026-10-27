@@ -1,3 +1,6 @@
+import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 import '@/styles/public-commerce.css';
 import { projectFeatureLabel } from '@/lib/offplan/presentation';
 /**
@@ -7,10 +10,10 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
 
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  Building2, 
-  MapPin, 
-  Calendar, 
+import {
+  Building2,
+  MapPin,
+  Calendar,
   TrendingUp,
   Users,
   CheckCircle2,
@@ -51,14 +54,13 @@ import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectD
 import { pickLang } from '@/lib/i18n/pickLang';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
+import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
 import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
-import { BuyerRequestForm } from '@/components/newbuilds/BuyerRequestForm';
-import { BuyerProjectUnits } from '@/components/newbuilds/BuyerProjectUnits';
-import type { BuyerIntent } from '@/lib/offplan/buyerContract';
+import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { cn } from '@/lib/utils';
 
-const STATUS_CONFIG: Record<ProjectStatus, { 
-  label: { en: string; ru: string }; 
+const STATUS_CONFIG: Record<ProjectStatus, {
+  label: { en: string; ru: string };
   icon: React.ElementType;
   color: string;
 }> = {
@@ -89,10 +91,10 @@ export default function OffplanDetail() {
   const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
-  const [requestIntent, setRequestIntent] = useState<BuyerIntent>('consultation');
-  const { data: project, isLoading } = useOffplanProject(id);
+  const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
+  const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const { data: developer } = useDeveloper(project?.developerId || '');
-  const { data: nbProject } = useNewbuildProject(id, 'buyer');
+  const { data: nbProject } = useNewbuildProject(id);
   const { data: allDocs = [] } = useProjectDocuments(id);
   const publicDocs = allDocs.filter((d) => d.visibility === 'public');
 
@@ -106,6 +108,8 @@ export default function OffplanDetail() {
       </div>
     );
   }
+
+  if (isError) return <div role="alert" className="p-6 space-y-4"><p>{pickLang(language, { ru: 'Не удалось загрузить проект.', en: 'Unable to load project.', th: 'โหลดโครงการไม่สำเร็จ' })}</p><Button onClick={() => void refetch()}>{pickLang(language, { ru: 'Попробовать ещё раз', en: 'Try again', th: 'ลองอีกครั้ง' })}</Button></div>;
 
   if (!project) {
     return (
@@ -122,19 +126,19 @@ export default function OffplanDetail() {
   }
 
   const name = isRu ? project.nameRu : project.nameEn;
-  const status = STATUS_CONFIG[project.projectStatus];
-  const StatusIcon = status.icon;
+  const status = project.projectStatus ? STATUS_CONFIG[project.projectStatus] : null;
+  const StatusIcon = status?.icon ?? Building2;
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}.  Сведения о проекте и опубликованные отчёты.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}.  Project information and published reports.`.trim();
+    ? `${name} — ${project.district || 'Пхукет'}. ${status ? status.label.ru + '.' : ''} Начальная цена требует уточнения.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status ? status.label.en + '.' : ''} Starting price requires confirmation.`.trim();
   const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
     description: seoDescription,
-    price: undefined,
+    // Unconfirmed project starting prices are visible with a warning, not structured offers.
     currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'THB').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
@@ -195,10 +199,10 @@ export default function OffplanDetail() {
 
         {/* Bottom info */}
         <div className="absolute bottom-4 left-4 right-4">
-          <Badge className={cn("mb-2 gap-1", status.color)}>
+          {status && <Badge className={cn("mb-2 gap-1", status.color)}>
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
-          </Badge>
+          </Badge>}
           <h1 className="public-commerce-title text-white mb-1">{name}</h1>
           {project.district && (
             <div className="flex items-center gap-1 text-white/80 text-sm">
@@ -209,22 +213,26 @@ export default function OffplanDetail() {
         </div>
       </div>
 
-      <div className="px-4 py-6 pb-32 space-y-8 sm:px-6">
+      <div className={`px-4 py-6 space-y-8 sm:px-6 ${FLOATING_OFFSET.contentClearance}`}>
         {/* Published report is the sole public assessment source. */}
         <div id="clearview-report" className="scroll-mt-24">
-          <ClearViewReport projectId={project.id} publicView />
+          <p className="text-sm text-muted-foreground">{isRu ? 'Условия проекта — по запросу.' : 'Project terms are available on request.'}</p>
         </div>
 
         {/* Price & Units */}
         <div className="rounded-none border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">
-              {isRu ? 'Цена от' : 'Price from'}
+              {isRu ? 'Цена' : 'Price'}
             </span>
             <span className="text-xl font-bold text-primary">
-              {pickLang(language, { ru: 'Цена требует подтверждения', en: 'Price requires confirmation', th: 'ราคาต้องยืนยัน' })}
+              <ProjectStartingPrice price={project.priceFrom} />
             </span>
           </div>
+          <Button size="lg" className="w-full min-h-12 gap-2" onClick={() => setShowLeadForm(true)}>
+            <MessageCircle className="w-5 h-5" />
+            {pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามโครงการนี้' })}
+          </Button>
           {project.minInvestment && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">
@@ -235,11 +243,20 @@ export default function OffplanDetail() {
               </span>
             </div>
           )}
-
+          {project.unitsAvailable != null && project.unitsAvailable > 0 && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="text-muted-foreground">
+                {isRu ? 'Доступно юнитов' : 'Units available'}
+              </span>
+              <Badge variant="secondary">
+                {project.unitsAvailable}{project.unitsSold != null ? ` / ${project.unitsAvailable + project.unitsSold}` : ''}
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Construction Progress */}
-        {project.projectStatus !== 'completed' && (
+        {project.projectStatus !== 'completed' && project.constructionProgress != null && (
           <div className="rounded-none border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">
@@ -261,7 +278,7 @@ export default function OffplanDetail() {
         )}
 
         {/* Investment Funding Progress */}
-        {project.investmentEnabled && project.fundingGoal && (
+        {project.investmentEnabled && project.fundingGoal && project.amountRaised != null && (
           <div className="rounded-none border bg-card p-4">
             <FundingProgress
               amountRaised={project.amountRaised}
@@ -273,9 +290,8 @@ export default function OffplanDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
-            <TabsTrigger value="scoring">{isRu ? 'Скоринг' : 'Scoring'}</TabsTrigger>
             <TabsTrigger value="documents">
               {isRu ? 'Документы' : 'Docs'}
               {publicDocs.length > 0 && (
@@ -287,7 +303,7 @@ export default function OffplanDetail() {
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             {/* Development Units / Floor Plans */}
-            {id && <BuyerProjectUnits projectId={id} />}
+            {id && <DevelopmentUnitsSection developmentId={id} />}
 
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
@@ -301,18 +317,10 @@ export default function OffplanDetail() {
               </div>
             )}
 
-            <a href="#clearview-report" className="inline-flex min-h-11 items-center gap-2 text-sm text-primary underline">
-              <FileSearch className="h-4 w-4" aria-hidden="true" />
-              {assessmentLabel}
-            </a>
+
           </TabsContent>
 
-          <TabsContent value="scoring" className="pt-4">
-            <a href="#clearview-report" className="inline-flex min-h-11 items-center gap-2 text-primary underline">
-              <FileSearch className="h-4 w-4" aria-hidden="true" />
-              {assessmentLabel}
-            </a>
-          </TabsContent>
+
 
           <TabsContent value="documents" className="pt-4 space-y-4">
             {publicDocs.length > 0 ? (
@@ -357,7 +365,7 @@ export default function OffplanDetail() {
                     ? 'Публичные документы пока не опубликованы.'
                     : 'No public documents have been published yet.'}
                 </p>
-                <Button variant="outline" size="sm" onClick={() => { setRequestIntent('documents'); setShowLeadForm(true); }} className="gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
                   <FileSearch className="w-4 h-4" />
                   {isRu ? 'Запросить пакет документов' : 'Request document package'}
                 </Button>
@@ -394,14 +402,11 @@ export default function OffplanDetail() {
                     <div className="text-2xl font-bold">{developer.projectsCompleted}</div>
                     <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : 'Projects'}</div>
                   </div>
-                  <div className="rounded-none bg-muted/50 p-3 text-center">
-                    <div className="text-2xl font-bold">{developer.muunoScore || '—'}</div>
-                    <div className="text-xs text-muted-foreground">myUNO Score</div>
-                  </div>
+
                 </div>
 
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full gap-2"
                   onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(developer.id))}
                 >
@@ -427,28 +432,21 @@ export default function OffplanDetail() {
         )}
       </div>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t safe-area-bottom">
-        <div className="flex gap-3">
-          <Button variant="outline" size="lg" className="flex-1 gap-2" onClick={() => { setRequestIntent('documents'); setShowLeadForm(true); }}>
-            <FileSearch className="w-5 h-5" />
-            {isRu ? 'Оценка рисков' : 'Risk Report'}
-          </Button>
-          <Button size="lg" className="flex-1 gap-2" onClick={() => { setRequestIntent('consultation'); setShowLeadForm(true); }}>
-            <MessageCircle className="w-5 h-5" />
-            {isRu ? 'Консультация' : 'Consultation'}
-          </Button>
-        </div>
-      </div>
-
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={pickLang(language, { ru: 'Запрос по проекту', en: 'Project enquiry', th: 'สอบถามโครงการ' })}
+        title={pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
-        <BuyerRequestForm key={`${project.id}:${requestIntent}`} projectId={project.id} intent={requestIntent} />
+        <LandingLeadForm
+          variant="universal"
+          verticalId="properties"
+          entryPoint={`offplan_project_${project.id}`}
+          leadSource="cta"
+          universalRequestType="property_purchase"
+          contextMetadata={{ project_id: project.id }}
+        />
       </ResponsiveModal>
     </div>
   );

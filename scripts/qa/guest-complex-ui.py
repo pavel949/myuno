@@ -3,6 +3,7 @@ import asyncio, json, sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 from playwright.async_api import async_playwright, expect
+from search_browser_selection import select_search_browser
 
 OUTPUT = Path(sys.argv[1])
 PHOTO = '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000"><defs><linearGradient id="g" x2="0" y2="1"><stop stop-color="#284b42"/><stop offset="1" stop-color="#839d8a"/></linearGradient></defs><path fill="url(#g)" d="M0 0h1600v1000H0z"/><path fill="#e5d9bf" d="M150 220h1300v460H150z"/><path fill="#34554b" d="M230 290h1140v250H230z"/><path fill="#99c4b8" d="M120 720h1360v240H120z"/><path fill="#d8d0bb" d="M0 650h1600v70H0z"/></svg>'
@@ -10,7 +11,8 @@ PHOTO = '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000"><def
 async def main():
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        selection=select_search_browser(p.chromium.executable_path)
+        browser = await p.chromium.launch(executable_path=selection['executable_path'],headless=True,args=['--no-sandbox'])
         for lang in ['ru', 'en']:
             for width in [375, 430, 1280]:
                 for empty in [False, True]:
@@ -44,6 +46,16 @@ async def main():
                         assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), f'Overflow: {lang}/{width}/{empty}'
                     hero = page.get_by_test_id('complex-hero')
                     hero_box = await hero.bounding_box()
+                    if not empty:
+                        gallery=page.locator('.premium-gallery')
+                        await expect(gallery).to_be_visible()
+                        geometry=await gallery.evaluate('(el)=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height,columns:getComputedStyle(el).gridTemplateColumns}}')
+                        if width < 768:
+                            await expect(gallery.locator(':scope > button:visible')).to_have_count(1)
+                            assert abs(geometry['width']/geometry['height']-4/3)<.02,geometry
+                        else:
+                            await expect(gallery.locator(':scope > button:visible')).to_have_count(3)
+                            assert len(geometry['columns'].split())==2,geometry
                     if empty:
                         assert hero_box['height'] < 520, f'Empty hero too tall: {hero_box}'
                     else:
@@ -68,7 +80,11 @@ async def main():
                         unit = page.get_by_role('link',name='Апартаменты с видом на сад' if ru else 'Garden apartment',exact=True)
                         await expect(unit).to_have_count(1)
                         await expect(unit).to_have_attribute('href', '/property/dual-unit?mode=buy')
-                        await expect(page.get_by_text('Управляет Управляющая компания' if ru else 'Managed by Verified fixture operator', exact=True)).to_be_visible()
+                        company=page.locator('a[href="/company/fixture-operator"]')
+                        await expect(company).to_have_count(1)
+                        await expect(company).to_contain_text('Компания' if ru else 'Company')
+                        await expect(company).to_contain_text('Управляющая компания' if ru else 'Verified fixture operator')
+                        assert 'Managed by' not in await page.locator('body').inner_text()
                         await page.get_by_role('button',name='Воспроизвести видео' if ru else 'Play video', exact=True).click()
                         await expect(page.locator('video')).to_have_attribute('controls','')
                         assert await page.locator('video').get_attribute('autoplay') is None

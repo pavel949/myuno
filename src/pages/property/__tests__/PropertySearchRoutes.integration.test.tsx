@@ -43,8 +43,10 @@ function mount(entry: string, navigationState?: unknown) {
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
-  const summary = result.container.querySelector('summary');
-  if (summary) fireEvent.click(summary);
+  const criteria = result.container.querySelector('.premium-search-criteria>summary');
+  if (criteria) fireEvent.click(criteria);
+  const secondary = result.container.querySelector('.home-search-secondary>summary');
+  if (secondary) fireEvent.click(secondary);
   return result;
 }
 beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = false; state.nextPageError = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
@@ -217,10 +219,10 @@ describe('one residential results surface', () => {
     if (status === 'failed') expect(screen.getByRole('alert')).toHaveTextContent('could not be checked');
     if (status === 'hasNextPage') expect(screen.getByRole('button', { name: 'Load more' })).toBeVisible();
   });
-  it.each([false, true])('shows one editable form immediately (mobile=%s)', mobile => {
+  it.each([false, true])('offers one editable form after expanding criteria (mobile=%s)', mobile => {
     state.mobile = mobile;
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium');
-    expect(screen.getAllByRole('form')).toHaveLength(1);
+    expect(screen.getAllByRole('form', { hidden: true })).toHaveLength(1);
     expect(screen.getByRole('searchbox', { name: 'Property name' })).toBeVisible();
     expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(3);
     expect(screen.getByText('Villa · Layan')).toBeVisible();
@@ -256,7 +258,7 @@ describe('one residential results surface', () => {
     view.rerender(<MemoryRouter initialEntries={['/property/search?guests=3']}><Location /><Routes><Route path="/property/search" element={<PropertySearchPage />} /></Routes></MemoryRouter>);
     expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(5);
     expect(screen.getByRole('spinbutton', { hidden: true })).toHaveFocus();
-    expect(screen.getAllByRole('form')).toHaveLength(1);
+    expect(screen.getAllByRole('form', { hidden: true })).toHaveLength(1);
   });
   it('does not invent dates and hides retained rental context in the purchase summary', () => {
     state.mobile = true;
@@ -273,7 +275,7 @@ describe('one residential results surface', () => {
     mount('/property/search?guests=3');
     fireEvent.change(screen.getByRole('spinbutton', { hidden: true }), { target: { value: '5' } });
     fireEvent.submit(screen.getByRole('form'));
-    expect(screen.getByRole('form')).toBeVisible();
+    expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
     expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
     expect(screen.getByText(/Guests: 5/)).toBeVisible();
     const back = screen.getByRole('button', { name: 'History back' });
@@ -281,13 +283,13 @@ describe('one residential results surface', () => {
     fireEvent.click(back);
     expect(screen.getByText(/Guests: 3/)).toBeVisible();
     expect(back).toHaveFocus();
-    expect(screen.getByRole('form')).toBeVisible();
+    expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
   });
   it('keeps desktop controls visible and focuses submitted results', () => {
     mount('/property/search?guests=3');
     expect(screen.getByRole('form')).toBeVisible();
     fireEvent.submit(screen.getByRole('form'));
-    expect(screen.getByRole('form')).toBeVisible();
+    expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
     expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
@@ -297,7 +299,7 @@ describe('one residential results surface', () => {
     const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.hash).toBe('#results');
-    expect(screen.getAllByRole('form')).toHaveLength(1);
+    expect(screen.getAllByRole('form', { hidden: true })).toHaveLength(1);
     expect(screen.getByRole('combobox', { name: 'Home type' })).toHaveTextContent('Villa');
     expect(screen.getByRole('combobox', { name: 'Choose an area' })).toHaveTextContent('Layan');
     expect(state.filters).toMatchObject({ district: 'layan', propertyType: 'villa', minGuests: 4, rentTenancy: 'medium', managementCompanyId: 'operator' });

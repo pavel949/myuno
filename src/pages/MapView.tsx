@@ -1,3 +1,5 @@
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
+import { projectStartingPriceText } from '@/lib/real-estate/publicNewbuildPresentation';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, X, SlidersHorizontal } from 'lucide-react';
@@ -72,7 +74,7 @@ interface UniversalMarker {
   lat: number;
   lng: number;
   rating: number;
-  priceFrom: number;
+  priceFrom: number | null;
   image?: string;
   vertical: VerticalFilter;
   workingHours?: Record<string, string> | null;
@@ -370,7 +372,7 @@ export default function MapView() {
       if (selectedVertical !== 'all' && m.vertical !== selectedVertical) return false;
       if (selectedPrice !== 'all' && (m.vertical === 'stay' || m.vertical === 'all')) {
         const [min, max] = PRICE_RANGES[selectedPrice];
-        if (m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
+        if (m.priceFrom != null && m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
       }
       if (selectedAvailability === 'open_now') {
         if (m.workingHours && !isOpenNow(m.workingHours)) return false;
@@ -666,7 +668,7 @@ export default function MapView() {
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs">
                       {m.rating > 0 && <span>⭐ {m.rating.toFixed(1)}</span>}
-                      {m.priceFrom > 0 && <span className="text-primary font-medium">{formatPrice(m.priceFrom)}+</span>}
+                      {m.vertical === 'newbuild' ? <ProjectStartingPrice price={m.priceFrom} /> : m.priceFrom != null && m.priceFrom > 0 && <span className="text-primary font-medium">{formatPrice(m.priceFrom)}+</span>}
                     </div>
                   </button>
                 );
@@ -754,7 +756,7 @@ export default function MapView() {
                   title={title}
                   subtitle={subtitle}
                   rating={vendor?.rating}
-                  priceLabel={vendor && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}${vendor.vertical === 'rent' ? (language === 'ru' ? '/мес' : '/mo') : vendor.vertical === 'stay' ? (language === 'ru' ? '/ночь' : '/night') : '+'}` : undefined}
+                  priceLabel={vendor?.vertical === 'newbuild' ? projectStartingPriceText(vendor.priceFrom, language) : vendor && vendor.priceFrom != null && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}${vendor.vertical === 'rent' ? (language === 'ru' ? '/мес' : '/mo') : vendor.vertical === 'stay' ? (language === 'ru' ? '/ночь' : '/night') : '+'}` : undefined}
                   isSelected={activeMarkerId === m.id}
                   onSelect={(id) => {
                     selectMarker(id);

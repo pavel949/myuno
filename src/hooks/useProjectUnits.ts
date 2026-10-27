@@ -1,3 +1,4 @@
+import { publicNewbuildUnit } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * useProjectUnits — reads units for a public project page.
  * Source: `project_units` (canonical operational table). Falls back to
@@ -15,7 +16,7 @@ export interface ProjectUnit {
   area_sqm: number;
   bedrooms: number | null;
   bathrooms: number | null;
-  price: number;
+  price: number | null;
   price_per_sqm: number | null;
   floor_from: number | null;
   floor_to: number | null;
@@ -82,11 +83,11 @@ export function useProjectUnits(projectId?: string) {
           'id, unit_code, unit_type, area_sqm, bedrooms, bathrooms, price, price_per_sqm, floor, floor_number, floor_plan_url, view_type, status, unit_status',
         )
         .eq('project_id', projectId)
-        .order('price', { ascending: true });
+        .order('id');
 
       if (error) throw error;
       if (data && data.length > 0) {
-        return (data as ProjectUnitRow[]).map(mapRow);
+        return (data as ProjectUnitRow[]).map(u => publicNewbuildUnit(mapRow(u)));
       }
 
       // Fallback — legacy `development_units`. Only when the kill-switch flag
@@ -97,11 +98,11 @@ export function useProjectUnits(projectId?: string) {
         .from('development_units')
         .select('*')
         .eq('development_id', projectId)
-        .order('price', { ascending: true });
+        .order('id');
 
       if (legacyErr) return [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (legacy || []).map((u: any) => ({
+      return (legacy || []).map((u: any) => publicNewbuildUnit({
         id: u.id,
         name: u.name,
         name_ru: u.name_ru,

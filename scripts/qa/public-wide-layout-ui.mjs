@@ -64,7 +64,7 @@ for(const actual of ['nav/ConsumerHeader.tsx','pages/services/ServicesIndex.tsx'
 if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|usePropertyFilterOptions|usePropertyQuickFilters|useServiceMarketplace|useSearchPropertyAvailability)\.ts$/.test(p)))throw Error('Production read module bundled');
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 if(process.argv.includes('--bundle-only'))process.exit(0);
-const css=await Promise.all(['/src/index.css?direct','/src/styles/consumer-system.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct'].map(async file=>{const response=await fetch('http://localhost:8080'+file);if(!response.ok)throw Error('CSS unavailable: '+file);return response.text();}));
+const css=await Promise.all(['/src/index.css?direct','/src/styles/consumer-system.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct','/src/styles/premium-public.css?direct'].map(async file=>{const response=await fetch('http://localhost:8080'+file);if(!response.ok)throw Error('CSS unavailable: '+file);return response.text();}));
 await writeFile(path.join(output,'fixture.css'),css.join('\n'));
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only'))process.exit(0);

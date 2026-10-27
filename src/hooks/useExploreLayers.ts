@@ -16,7 +16,7 @@ export interface ExploreItem {
   lat: number;
   lng: number;
   rating: number;
-  priceFrom: number;
+  priceFrom: number | null;
   image?: string;
   layer: ExploreLayer;
   approximate: boolean;
@@ -39,8 +39,10 @@ export function useExploreLayers() {
           .limit(1000),
         supabase
           .from('property_projects')
-          .select('id, slug, name_en, name_ru, lat, lng, location_lat, location_lng, district, price_from_thb, price_from, cover_image_url, cover_image')
+          .select('id, slug, name_en, name_ru, lat, lng, location_lat, location_lng, district, price_from, cover_image_url, cover_image')
           .eq('is_approved', true)
+          .eq('is_active', true)
+          .eq('public_listing_enabled', true)
           .limit(1000),
         supabase
           .from('public_provider_catalog')
@@ -85,7 +87,7 @@ export function useExploreLayers() {
             id: `newbuild-${pr.id}`, layer: 'newbuild', routeId: pr.id,
             name: pr.name_en || 'Project', nameRu: pr.name_ru || pr.name_en || 'Проект',
             lat, lng, rating: 0, approximate,
-            priceFrom: Number(pr.price_from_thb ?? pr.price_from) || 0,
+            priceFrom: typeof pr.price_from === 'number' && Number.isFinite(pr.price_from) && pr.price_from > 0 ? pr.price_from : null,
             image: pr.cover_image_url || pr.cover_image || undefined,
           });
         }

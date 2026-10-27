@@ -1,6 +1,7 @@
 /**
  * Hooks for newbuilds section — reuses property_projects + developers tables
  */
+import { PUBLIC_NEWBUILD_COLUMNS, publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
@@ -8,6 +9,8 @@ import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 export interface NewbuildProject {
   id: string;
   slug: string | null;
+  landing_enabled?: boolean | null;
+  og_image_url?: string | null;
   name_en: string;
   name_ru: string | null;
   tagline: string | null;
@@ -29,8 +32,8 @@ export interface NewbuildProject {
   units_available: number | null;
   units_sold: number | null;
   completion_date: string | null;
-  construction_progress: number;
-  project_status: string;
+  construction_progress: number | null;
+  project_status: string | null;
   is_featured: boolean;
   is_approved: boolean;
   developer_id: string | null;
@@ -66,15 +69,16 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
     queryFn: async (): Promise<NewbuildProject[]> => {
       let query = supabase
         .from('property_projects')
-        .select('*')
+        .select(PUBLIC_NEWBUILD_COLUMNS)
         .eq('is_active', true)
-        .eq('is_approved', true);
+        .eq('is_approved', true)
+        .eq('public_listing_enabled', true);
 
       if (filters?.location_area) query = query.eq('location_area', filters.location_area);
-      if (filters?.status) query = query.eq('project_status', filters.status);
+
       if (filters?.developer_id) query = query.eq('developer_id', filters.developer_id);
-      if (filters?.price_min) query = query.gte('price_from', filters.price_min);
-      if (filters?.price_max) query = query.lte('price_from', filters.price_max);
+
+
       if (filters?.search_text) {
         const term = `%${filters.search_text}%`;
         query = query.or(`name_en.ilike.${term},name_ru.ilike.${term},location_area.ilike.${term},developer_name.ilike.${term}`);
@@ -82,20 +86,24 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
 
       // Sort
       switch (filters?.sort) {
-        case 'price_asc': query = query.order('price_from', { ascending: true }); break;
-        case 'price_desc': query = query.order('price_from', { ascending: false }); break;
-        case 'progress': query = query.order('construction_progress', { ascending: false }); break;
+        case 'price_asc':
+        case 'price_desc':
+        case 'progress': query = query.order('name_en'); break;
+
+
         case 'newest': query = query.order('created_at', { ascending: false }); break;
         default:
-          query = query.order('is_featured', { ascending: false }).order('muuno_score', { ascending: false, nullsFirst: false });
+          query = query.order('is_featured', { ascending: false }).order('name_en');
       }
 
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((p: any) => ({
+      return (data || []).map((p: any) => publicNewbuildPresentation({
         id: p.id,
         slug: p.slug,
+        landing_enabled: p.landing_enabled,
+        og_image_url: p.og_image_url,
         name_en: p.name_en,
         name_ru: p.name_ru,
         tagline: p.tagline,
@@ -140,25 +148,26 @@ export function useNewbuildProjects(filters?: NewbuildFilters) {
   });
 }
 
-export const NEWBUILD_BUYER_PROJECT_FIELDS = 'id,slug,name_en,name_ru,tagline,description_en,description_ru,cover_image,gallery_urls,images,video_url,location_area,district,address,lat,lng,unit_types,total_units,completion_date,construction_progress,project_status,is_featured,is_active,is_approved,developer_id,developer_name,amenities,muuno_score,created_at';
-export function useNewbuildProject(slugOrId?: string, audience: 'operator' | 'buyer' = 'operator') {
+export function useNewbuildProject(slugOrId?: string, publicPresentation = true) {
   return useQuery({
-    queryKey: ['newbuild-project', slugOrId, audience],
+    queryKey: ['newbuild-project', slugOrId, publicPresentation],
     queryFn: async (): Promise<NewbuildProject | null> => {
       if (!slugOrId) return null;
 
-      const query = () => {
-        const base = supabase.from('property_projects').select(audience === 'buyer' ? NEWBUILD_BUYER_PROJECT_FIELDS : '*');
-        return audience === 'buyer' ? base.eq('is_active', true).eq('is_approved', true) : base;
-      };
       // Try slug first, fall back to id
-      let { data, error } = await query()
+      let { data, error } = await supabase
+        .from('property_projects')
+        .select(publicPresentation ? PUBLIC_NEWBUILD_COLUMNS : '*')
         .eq('slug', slugOrId)
+        .match(publicPresentation ? { is_active: true, is_approved: true, public_listing_enabled: true } : {})
         .maybeSingle();
 
       if (!data && !error) {
-        ({ data, error } = await query()
+        ({ data, error } = await supabase
+          .from('property_projects')
+          .select(publicPresentation ? PUBLIC_NEWBUILD_COLUMNS : '*')
           .eq('id', slugOrId)
+          .match(publicPresentation ? { is_active: true, is_approved: true, public_listing_enabled: true } : {})
           .maybeSingle());
       }
 
@@ -166,9 +175,11 @@ export function useNewbuildProject(slugOrId?: string, audience: 'operator' | 'bu
       if (!data) return null;
 
       const p = data as any;
-      return {
+      const project = {
         id: p.id,
         slug: p.slug,
+        landing_enabled: p.landing_enabled,
+        og_image_url: p.og_image_url,
         name_en: p.name_en,
         name_ru: p.name_ru,
         tagline: p.tagline,
@@ -208,6 +219,7 @@ export function useNewbuildProject(slugOrId?: string, audience: 'operator' | 'bu
         min_price_per_sqm: p.min_price_per_sqm ?? null,
         ownership_types: p.ownership_types ?? [],
       };
+      return publicPresentation ? publicNewbuildPresentation(project) : project;
     },
     enabled: !!slugOrId,
   });
@@ -218,19 +230,14 @@ export function useNewbuildStats() {
     queryKey: ['newbuild-stats'],
     queryFn: async () => {
       const [projectsRes, developersRes] = await Promise.all([
-        supabase.from('property_projects').select('id, price_from', { count: 'exact' }).eq('is_active', true).eq('is_approved', true),
+        supabase.from('property_projects').select('id', { count: 'exact' }).eq('is_active', true).eq('is_approved', true).eq('public_listing_enabled', true),
         supabase.from('developers').select('id', { count: 'exact' }).eq('is_active', true),
       ]);
-
-      const projects = projectsRes.data || [];
-      const avgPrice = projects.length 
-        ? projects.reduce((s, p) => s + (p.price_from || 0), 0) / projects.filter(p => p.price_from).length 
-        : 0;
 
       return {
         projectCount: projectsRes.count || 0,
         developerCount: developersRes.count || 0,
-        avgPrice: Math.round(avgPrice),
+        avgPrice: null,
       };
     },
     staleTime: 10 * 60 * 1000,
@@ -245,8 +252,9 @@ export function useNewbuildLocations() {
         .from('property_projects')
         .select('location_area, district')
         .eq('is_active', true)
-        .eq('is_approved', true);
-      
+        .eq('is_approved', true)
+        .eq('public_listing_enabled', true);
+
       const areas = new Set<string>();
       (data || []).forEach((p: any) => {
         if (p.location_area) areas.add(p.location_area);

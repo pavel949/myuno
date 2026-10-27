@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Property } from '@/hooks/useProperties';
 import { comparePropertiesForSort, getEffectivePropertySortPrice } from '../propertySortPrice';
-const property = (fields: Partial<Property>) => fields as Property;
+const property = (fields: Partial<Property>) => ({ currency: 'THB', sale_currency: fields.currency ?? 'THB', ...fields }) as Property;
 describe('catalogue sorting matches displayed offer', () => {
   it('uses the rental amount on Rent even for a dual-listed sale-type row', () => {
     expect(getEffectivePropertySortPrice(property({ listing_type: 'sale', listing_modes: ['rent', 'sale'], price_per_night: 3000, sale_price: 5000000 }), 'rent')).toBe(3000);
@@ -53,4 +53,23 @@ describe('mixed catalogue comparable price groups', () => {
     expect(comparePropertiesForSort(thb, usd, 'price_asc', 'all')).toBeLessThan(0);
     expect(comparePropertiesForSort(thb, usd, 'price_desc', 'all')).toBeLessThan(0);
   });
+});
+
+it('sorts a long stay by its explicit monthly tariff, not the unrelated nightly field', () => {
+  expect(getEffectivePropertySortPrice(property({ tenancy_modes: ['long'], price_period: 'month', price_per_night: 2000, price_per_month: 45000 }), 'rent')).toBe(45000);
+});
+it('does not guess a legacy amount without a billing period', () => {
+  expect(getEffectivePropertySortPrice(property({ price: 2500 }), 'rent')).toBeNull();
+});
+
+it.each(['rent', 'buy'] as const)('keeps hidden non-THB %s amounts out of numeric sorting', mode => {
+  expect(getEffectivePropertySortPrice(property({ currency: 'USD', sale_currency: 'USD', price_per_night: 100, sale_price: 100000 }), mode)).toBeNull();
+});
+it('does not use rental currency for an explicit sale amount', () => {
+  expect(getEffectivePropertySortPrice(property({ currency: 'THB', sale_currency: null, sale_price: 5000000 }), 'buy')).toBeNull();
+});
+it.each(['price_asc', 'price_desc'] as const)('keeps rental billing groups stable for %s', sort => {
+  const night = property({ listing_type: 'rent', price_per_night: 3000 });
+  const month = property({ listing_type: 'rent', price_period: 'month', price_per_month: 1000 });
+  expect(comparePropertiesForSort(night, month, sort, 'rent')).toBeLessThan(0);
 });

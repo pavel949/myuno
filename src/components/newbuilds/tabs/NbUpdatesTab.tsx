@@ -6,7 +6,7 @@ import { Clock, Camera, TrendingUp, Bell } from 'lucide-react';
 import { useProjectUpdates } from '@/hooks/useProjectUpdates';
 import { NbConstructionProgress } from '../NbConstructionProgress';
 import { NbLightbox } from '../NbLightbox';
-import { BuyerRequestForm } from '../BuyerRequestForm';
+import { NbLeadForm } from '../NbLeadForm';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Props {
@@ -154,7 +154,7 @@ export function NbUpdatesTab({ projectId, currentProgress = 0, completionDate }:
                 Получайте фото и отчёты со стройплощадки в WhatsApp или Telegram
               </p>
             </div>
-            <BuyerRequestForm projectId={projectId} />
+            <NbLeadForm projectId={projectId} source="updates_subscription" compact />
           </div>
         </div>
       )}

@@ -1,16 +1,14 @@
 import React from 'react';
-import { Shield, Globe, Calendar } from 'lucide-react';
+import { Globe, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { PropertyRentalTerms } from '@/hooks/useProperties';
 
 interface HostProfileSectionProps {
   rentalTerms?: PropertyRentalTerms | null;
-  isVerified?: boolean;
 }
 
-export function HostProfileSection({ rentalTerms, isVerified }: HostProfileSectionProps) {
+export function HostProfileSection({ rentalTerms }: HostProfileSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -37,14 +35,9 @@ export function HostProfileSection({ rentalTerms, isVerified }: HostProfileSecti
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-semibold text-lg">
-            {isRu ? `Хозяин: ${hostName}` : `Hosted by ${hostName}`}
+            {isRu ? `Менеджер: ${hostName}` : `Manager: ${hostName}`}
           </h3>
-          {isVerified && (
-            <Badge variant="secondary" className="gap-1 text-xs">
-              <Shield className="w-3 h-3" />
-              {isRu ? 'Суперхост' : 'Superhost'}
-            </Badge>
-          )}
+
         </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">

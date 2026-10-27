@@ -13,6 +13,7 @@ describe('offplan public developer embed projection', () => {
     const query = useOffplanProjects() as unknown as { queryFn: () => Promise<OffplanProject[]> };
     const [project] = await query.queryFn();
     expect(state.select).toMatch(/developers\s*\(\s*id,\s*is_active,/);
+    expect(project).toMatchObject({ projectStatus: null, constructionProgress: null, unitsAvailable: null, unitsSold: null, isClearviewRated: false });
     expect(project.developerId).toBe('developer');
     expect(project.developerName).toBe('Known label');
     expect(project.developerProfileAvailable).toBe(embed?.is_active === true);

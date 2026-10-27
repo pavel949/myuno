@@ -39,6 +39,7 @@ export function SEOHead({
     document.head.querySelectorAll('[data-seo-fallback="true"]').forEach(node => node.remove());
   }, []);
   const lang = language === 'ru' ? 'ru' : 'en';
+  const ogLocale = language === 'th' ? 'th_TH' : lang === 'ru' ? 'ru_RU' : 'en_US';
   
   const finalTitle = title 
     ? `${title} | myUNO`
@@ -64,7 +65,7 @@ export function SEOHead({
       <title>{finalTitle}</title>
       <meta name="title" content={finalTitle} />
       <meta name="description" content={finalDescription} />
-      <html lang={lang} />
+      <html lang={language} />
       
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       
@@ -77,9 +78,10 @@ export function SEOHead({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="myUNO" />
-      <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
-      <meta property="og:locale:alternate" content={lang === 'ru' ? 'en_US' : 'ru_RU'} />
-      <meta property="og:locale:alternate" content="th_TH" />
+      <meta property="og:locale" content={ogLocale} />
+      {['en_US', 'ru_RU', 'th_TH'].filter(locale => locale !== ogLocale).map(locale => (
+        <meta key={locale} property="og:locale:alternate" content={locale} />
+      ))}
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Star, Zap, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeL
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { propertyDetailHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { TrustStrip } from './TrustStrip';
@@ -94,11 +95,9 @@ function PropertyListingCardBase({
     : 'Phuket';
 
   // Keep each displayed amount paired with its own billing period.
-  const nightlyPrice = typeof property.price_per_night === 'number' && Number.isFinite(property.price_per_night) && property.price_per_night > 0 ? property.price_per_night : null;
-  const legacyPrice = typeof property.price === 'number' && Number.isFinite(property.price) && property.price > 0 ? property.price : null;
-  const unitPrice = nightlyPrice ?? legacyPrice;
-  const pricePeriod = nightlyPrice !== null ? 'night' : property.price_period || 'night';
-  const salePrice = propertySaleAskingPrice(property);
+  const unitPrice = mode === 'rent' ? surface.priceHintThb : null;
+  const pricePeriod = surface.priceMode.replace('per_', '');
+  const salePrice = mode === 'buy' ? surface.priceHintThb : null;
   const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
   const totalPrice = nights && nights > 0 && pricePeriod === 'night' && unitPrice !== null
     ? unitPrice * nights
@@ -116,7 +115,7 @@ function PropertyListingCardBase({
       // In split/map mode, primary action is to select on the map, not navigate.
       onSelect(property.id);
     } else {
-      navigate(detailHref);
+      navigate(detailHref, { state: publicJourneyState(location) });
     }
   };
 
@@ -142,7 +141,7 @@ function PropertyListingCardBase({
           images={images}
           alt={title}
           isHovered={isHovered}
-          aspectClass="aspect-[4/3] sm:aspect-square"
+          aspectClass="aspect-[4/3]"
         />
 
 
@@ -168,27 +167,7 @@ function PropertyListingCardBase({
             "Guest favorite" supersedes the legacy `is_featured` badge when
             the property meets the rating + review threshold (Airbnb pattern). */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {isGuestFavorite(property.rating, property.review_count) ? (
-            <GuestFavoriteBadge
-              rating={property.rating}
-              reviewsCount={property.review_count}
-            />
-          ) : property.is_featured ? (
-            <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
-              {isRu ? 'Популярное' : 'Popular'}
-            </Badge>
-          ) : null}
-          {primaryViewLabel && (
-            <Badge className="bg-background/90 text-foreground border-0 shadow-sm text-[10px] font-medium px-2 py-0.5 rounded-full max-w-[140px] truncate">
-              {primaryViewLabel}
-            </Badge>
-          )}
-          {property.instant_booking && (
-            <Badge className="bg-accent-amber text-white border-0 text-[11px] gap-1 rounded-full px-2 py-0.5">
-              <Zap className="w-3 h-3" />
-              {isRu ? 'Мгновенное' : 'Instant'}
-            </Badge>
-          )}
+          {primaryViewLabel && <Badge className="bg-background text-foreground border-0 rounded-none">{primaryViewLabel}</Badge>}
         </div>
 
         {/* ClearView grade overlay — bottom-left of image */}
@@ -208,7 +187,7 @@ function PropertyListingCardBase({
         {/* Listing name is the primary destination; district and rating are secondary. */}
         <div className="flex items-start justify-between gap-1">
           <h3 className="min-w-0 font-sans text-base font-semibold leading-snug text-foreground">
-            <Link to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Link state={publicJourneyState(location)} to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               {title || districtDisplay}
             </Link>
           </h3>
@@ -301,7 +280,7 @@ function PropertyListingCardBase({
           escrowOffered={(property as unknown as { escrow_offered?: boolean | null }).escrow_offered ?? null}
           clearviewBadge={(property as unknown as { clearview_badge?: string | null }).clearview_badge ?? null}
           floodRisk={(property as unknown as { flood_risk?: string | null }).flood_risk ?? null}
-          ownerVerified={property.is_verified ?? null}
+          ownerVerified={null}
           isRu={isRu}
           className="mt-1.5 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
         />
@@ -315,7 +294,7 @@ function PropertyListingCardBase({
           >
             <Building2 className="w-3 h-3 shrink-0" />
             <span className="line-clamp-1">
-              {isRu ? 'Управляет' : 'Managed by'} {companyName}
+              {isRu ? 'Компания' : 'Company'}: {companyName}
             </span>
           </Link>
         )}
