@@ -116,10 +116,10 @@ export default function OffplanDetail() {
       <div className="flex flex-col items-center justify-center py-20">
         <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
         <p className="text-muted-foreground">
-          {isRu ? 'Проект не найден' : 'Project not found'}
+          {pickLang(language, {"ru": "Проект не найден", "en": "Project not found", "th": "ไม่พบโครงการ"})}
         </p>
         <Button variant="link" onClick={() => navigate('/property/offplan')}>
-          {isRu ? 'Вернуться к списку' : 'Back to list'}
+          {pickLang(language, {"ru": "Вернуться к списку", "en": "Back to list", "th": "กลับไปยังรายการ"})}
         </Button>
       </div>
     );
@@ -146,7 +146,7 @@ export default function OffplanDetail() {
   });
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: 'Property', url: 'https://www.myuno.app/property' },
-    { name: isRu ? 'Новостройки' : 'Off-Plan', url: 'https://www.myuno.app/property/offplan' },
+    { name: pickLang(language, {"ru": "Новостройки", "en": "Off-Plan", "th": "โครงการใหม่"}), url: 'https://www.myuno.app/property/offplan' },
     { name, url: canonicalUrl },
   ]);
 
@@ -168,7 +168,7 @@ export default function OffplanDetail() {
         jsonLd={{ '@context': 'https://schema.org', '@graph': [listingSchema, breadcrumbSchema] }}
       />
       {/* Hero Image */}
-      <div className="relative aspect-[16/10] bg-muted">
+      <div className="public-project-hero relative bg-muted">
         {project.coverImage ? (
           <img
             src={project.coverImage}
@@ -187,14 +187,7 @@ export default function OffplanDetail() {
         {/* Top actions */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
           <BackButton fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
-          <div className="flex gap-2">
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white" aria-label={isRu ? 'Поделиться' : 'Share'}>
-              <Share2 className="w-5 h-5" />
-            </Button>
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white" aria-label={isRu ? 'В избранное' : 'Save'}>
-              <Heart className="w-5 h-5" />
-            </Button>
-          </div>
+
         </div>
 
         {/* Bottom info */}
@@ -213,17 +206,17 @@ export default function OffplanDetail() {
         </div>
       </div>
 
-      <div className={`px-4 py-6 space-y-8 sm:px-6 ${FLOATING_OFFSET.contentClearance}`}>
+      <div className={`public-project-content space-y-8 ${FLOATING_OFFSET.contentClearance}`}>
         {/* Published report is the sole public assessment source. */}
         <div id="clearview-report" className="scroll-mt-24">
-          <p className="text-sm text-muted-foreground">{isRu ? 'Условия проекта — по запросу.' : 'Project terms are available on request.'}</p>
+          <p className="text-sm text-muted-foreground">{pickLang(language, {"ru": "Условия проекта — по запросу.", "en": "Project terms are available on request.", "th": "สอบถามเงื่อนไขโครงการได้"})}</p>
         </div>
 
         {/* Price & Units */}
         <div className="rounded-none border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">
-              {isRu ? 'Цена' : 'Price'}
+              {pickLang(language, {"ru": "Цена", "en": "Price", "th": "ราคา"})}
             </span>
             <span className="text-xl font-bold text-primary">
               <ProjectStartingPrice price={project.priceFrom} />
@@ -236,7 +229,7 @@ export default function OffplanDetail() {
           {project.minInvestment && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">
-                {isRu ? 'Мин. инвестиция' : 'Min. investment'}
+                {pickLang(language, {"ru": "Мин. инвестиция", "en": "Min. investment", "th": "เงินลงทุนขั้นต่ำ"})}
               </span>
               <span className="font-semibold">
                 {formatPrice(project.minInvestment)}
@@ -246,7 +239,7 @@ export default function OffplanDetail() {
           {project.unitsAvailable != null && project.unitsAvailable > 0 && (
             <div className="flex items-center justify-between pt-2 border-t">
               <span className="text-muted-foreground">
-                {isRu ? 'Доступно юнитов' : 'Units available'}
+                {pickLang(language, {"ru": "Доступно юнитов", "en": "Units available", "th": "ยูนิตที่มี"})}
               </span>
               <Badge variant="secondary">
                 {project.unitsAvailable}{project.unitsSold != null ? ` / ${project.unitsAvailable + project.unitsSold}` : ''}
@@ -260,7 +253,7 @@ export default function OffplanDetail() {
           <div className="rounded-none border bg-card p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">
-                {isRu ? 'Прогресс строительства' : 'Construction Progress'}
+                {pickLang(language, {"ru": "Прогресс строительства", "en": "Construction Progress", "th": "ความคืบหน้าการก่อสร้าง"})}
               </span>
               <span className="text-lg font-bold">{project.constructionProgress}%</span>
             </div>
@@ -269,7 +262,7 @@ export default function OffplanDetail() {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {isRu ? 'Ожидаемая сдача:' : 'Expected completion:'}{' '}
+                  {pickLang(language, {"ru": "Ожидаемая сдача:", "en": "Expected completion:", "th": "กำหนดแล้วเสร็จ:"})}{' '}
                   {formatCompletionDate(project.completionDate)}
                 </span>
               </div>
@@ -291,14 +284,14 @@ export default function OffplanDetail() {
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
+            <TabsTrigger value="overview">{pickLang(language, {"ru": "Обзор", "en": "Overview", "th": "ภาพรวม"})}</TabsTrigger>
             <TabsTrigger value="documents">
-              {isRu ? 'Документы' : 'Docs'}
+              {pickLang(language, {"ru": "Документы", "en": "Docs", "th": "เอกสาร"})}
               {publicDocs.length > 0 && (
                 <span className="ml-1 text-[10px] opacity-70">({publicDocs.length})</span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="developer">{isRu ? 'Застройщик' : 'Developer'}</TabsTrigger>
+            <TabsTrigger value="developer">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 pt-4">
@@ -308,7 +301,7 @@ export default function OffplanDetail() {
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
               <div>
-                <h3 className="font-medium mb-2">{isRu ? 'Удобства' : 'Amenities'}</h3>
+                <h3 className="font-medium mb-2">{pickLang(language, {"ru": "Удобства", "en": "Amenities", "th": "สิ่งอำนวยความสะดวก"})}</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.amenities.map((a, i) => (
                     <Badge key={i} variant="outline">{projectFeatureLabel(a, language)}</Badge>
@@ -367,7 +360,7 @@ export default function OffplanDetail() {
                 </p>
                 <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
                   <FileSearch className="w-4 h-4" />
-                  {isRu ? 'Запросить пакет документов' : 'Request document package'}
+                  {pickLang(language, {"ru": "Запросить пакет документов", "en": "Request document package", "th": "ขอเอกสารโครงการ"})}
                 </Button>
               </div>
             )}
@@ -391,7 +384,7 @@ export default function OffplanDetail() {
                     </h3>
                     {developer.foundedYear && (
                       <p className="text-sm text-muted-foreground">
-                        {isRu ? 'Основано в' : 'Founded in'} {developer.foundedYear}
+                        {pickLang(language, {"ru": "Основано в", "en": "Founded in", "th": "ก่อตั้งเมื่อ"})} {developer.foundedYear}
                       </p>
                     )}
                   </div>
@@ -400,7 +393,7 @@ export default function OffplanDetail() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-none bg-muted/50 p-3 text-center">
                     <div className="text-2xl font-bold">{developer.projectsCompleted}</div>
-                    <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : 'Projects'}</div>
+                    <div className="text-xs text-muted-foreground">{pickLang(language, {"ru": "Проектов", "en": "Projects", "th": "โครงการ"})}</div>
                   </div>
 
                 </div>
@@ -410,13 +403,13 @@ export default function OffplanDetail() {
                   className="w-full gap-2"
                   onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(developer.id))}
                 >
-                  {isRu ? 'Все проекты застройщика' : 'All Developer Projects'}
+                  {pickLang(language, {"ru": "Все проекты застройщика", "en": "All Developer Projects", "th": "ดูโครงการทั้งหมดของผู้พัฒนา"})}
                   <ExternalLink className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                {isRu ? 'Информация о застройщике недоступна' : 'Developer information not available'}
+                {pickLang(language, {"ru": "Информация о застройщике недоступна", "en": "Developer information not available", "th": "ยังไม่มีข้อมูลผู้พัฒนา"})}
               </div>
             )}
           </TabsContent>
@@ -425,7 +418,7 @@ export default function OffplanDetail() {
         {nbProject && (
           <section
             className="rounded-none border overflow-hidden bg-card"
-            aria-label={isRu ? 'Расширенные данные проекта' : 'Extended project data'}
+            aria-label={pickLang(language, {"ru": "Расширенные данные проекта", "en": "Extended project data", "th": "ข้อมูลโครงการเพิ่มเติม"})}
           >
             <NewbuildProjectDeepTabs project={nbProject} variant="embedded" />
           </section>

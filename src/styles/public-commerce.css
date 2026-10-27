@@ -71,3 +71,53 @@
 @media (prefers-reduced-motion: reduce) {
   .public-commerce-catalog-card { transition: none; }
 }
+
+/* Property journey: shared canonical widths, quiet surfaces and readable cards. */
+.public-commerce--projects {
+  width: calc(100% - var(--public-gutter) * 2);
+  max-width: var(--public-width-wide);
+  margin-inline: auto;
+  padding-inline: 0;
+  padding-block: var(--public-detail-gap);
+}
+.public-commerce--projects > .grid { gap: var(--public-card-gap); }
+.public-commerce--projects .public-commerce-intro { padding-top: 0; }
+.public-project-card { box-shadow: none; }
+.public-project-card:hover { box-shadow: 0 8px 24px hsl(var(--foreground) / .05); }
+.public-project-card h3 { min-height: 2.75em; overflow-wrap: anywhere; }
+.public-project-card:focus-within { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+.public-complex { color: hsl(var(--foreground)); }
+.public-complex-shell, .public-complex-state {
+  width: calc(100% - var(--public-gutter) * 2);
+  max-width: var(--public-width-detail);
+  margin-inline: auto;
+}
+.public-complex-content { padding-top: var(--public-detail-gap); }
+.public-complex-content > * + * { margin-top: var(--public-section-gap); }
+.public-complex :is(h1,h2,h3) { font-family: var(--font-display); font-weight: 400; letter-spacing: -.015em; }
+.public-complex h1 { font-size: var(--public-display-size); line-height: 1.12; }
+.public-complex h2 { font-size: var(--public-section-size); line-height: 1.2; }
+.public-complex [id] { scroll-margin-top: 6rem; }
+.public-complex :is(button,a) { touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  .public-project-card, .public-project-card * { transition: none; animation: none; }
+}
+.public-project-card h3 > a { display: block; min-height: 2.75rem; }
+.public-commerce--project { width: min(100%, var(--public-width-detail)); margin-inline: auto; }
+.public-commerce--project .public-project-hero { height: clamp(20rem, 38vw, 34rem); max-height: none; }
+.public-project-content { padding: var(--public-detail-gap) var(--public-gutter); }
+.public-project-content > :is(div,section) { min-width: 0; }
+@media (max-width: 767px) {
+  .public-commerce--project .public-project-hero { height: 22rem; }
+}
+.public-property-journey > :is(.property-hub-tabs,.property-hub-tools) {
+  width: min(100%, var(--public-width-wide));
+  margin-inline: auto;
+  padding-inline: var(--public-gutter);
+}
+.public-property-journey > :is(.property-hub-tabs,.property-hub-tools) :is(button,a) { min-height: 2.75rem; }
+
+.public-complex [data-testid="complex-hero"]:has(> img) { min-height: clamp(20rem, 52svh, 35rem); }
+.public-complex-hero-content { min-height: inherit; }
+.public-commerce--projects :is(button,[role="combobox"]), .public-project-card a { min-height: 2.75rem; }
+.public-commerce--projects button { min-width: 2.75rem; }
