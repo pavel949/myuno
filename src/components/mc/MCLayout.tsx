@@ -1,3 +1,4 @@
+import '@/styles/premium-workspace.css';
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,7 +14,7 @@ interface MCLayoutProps {
  */
 export function MCLayout({ children }: MCLayoutProps) {
   return (
-    <AppLayout variant="workspace" navRole="owner" usePageContainer={false} showFooter={false}>
+    <AppLayout variant="workspace" navRole="owner" className="mc-premium-workspace" usePageContainer={false} showFooter={false}>
       {children || <Outlet />}
     </AppLayout>
   );

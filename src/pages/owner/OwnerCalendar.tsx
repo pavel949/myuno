@@ -1,3 +1,5 @@
+import { pickLang } from '@/lib/i18n/pickLang';
+import '@/styles/premium-workspace.css';
 import { bangkokTodayDate } from '@/lib/hotelDates';
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -39,7 +41,7 @@ export default function OwnerCalendar() {
     requestedProperty !== null ? 'single' : typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
   );
   
-  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const { allProperties, isLoading: propertiesLoading, error: propertiesError, refetch: retryProperties } = useMyProperties();
   const selectedPropertyId = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, 'first');
   const setSelectedPropertyId = (id: string) => {
     if (!allProperties.some(p => p.property_id === id)) return;
@@ -91,24 +93,26 @@ export default function OwnerCalendar() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
         <CalendarDays className="h-16 w-16 text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-2">
-          {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
+          {pickLang(language, {"ru": "Календарь бронирований", "en": "Booking Calendar", "th": "ปฏิทินการจอง"})}
         </h1>
         <p className="text-muted-foreground mb-6">
-          {isRu ? 'Войдите, чтобы просмотреть календарь' : 'Sign in to view the calendar'}
+          {pickLang(language, {"ru": "Войдите, чтобы просмотреть календарь", "en": "Sign in to view the calendar", "th": "เข้าสู่ระบบเพื่อดูปฏิทิน"})}
         </p>
         <Button onClick={() => redirectToAuth(navigate)}>
-          {isRu ? 'Войти' : 'Sign In'}
+          {pickLang(language, {"ru": "Войти", "en": "Sign In", "th": "เข้าสู่ระบบ"})}
         </Button>
       </div>
     );
   }
 
+  if (propertiesError) return <div className="mc-workspace-page mc-calendar-page space-y-4" role="alert"><h1>{pickLang(language, { ru: 'Календарь бронирований', en: 'Booking Calendar', th: 'ปฏิทินการจอง' })}</h1><p>{pickLang(language, { ru: 'Не удалось загрузить объекты. Выбор календаря сохранён.', en: 'Could not load properties. Your calendar choice is kept.', th: 'ไม่สามารถโหลดที่พักได้ ระบบเก็บตัวเลือกปฏิทินไว้แล้ว' })}</p><Button variant="outline" onClick={() => retryProperties()}>{pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}</Button></div>;
+
   if (requestedProperty !== null && !selectedPropertyId) {
-    return <div className="p-4 space-y-3">
-      <h1 className="font-display text-h3">{isRu ? 'Календарь бронирований' : 'Booking Calendar'}</h1>
-      <p role="status">{propertiesLoading ? (isRu ? 'Загрузка объектов…' : 'Loading properties…')
-        : (isRu ? 'Объект недоступен. Выберите объект из своего списка.' : 'This property is unavailable. Choose a property from your list.')}</p>
-      {!propertiesLoading && <Button variant="outline" onClick={() => navigate('/mc/properties')}>{isRu ? 'К объектам' : 'Browse properties'}</Button>}
+    return <div className="mc-workspace-page mc-calendar-page p-4 space-y-3">
+      <h1 className="font-display text-h3">{pickLang(language, {"ru": "Календарь бронирований", "en": "Booking Calendar", "th": "ปฏิทินการจอง"})}</h1>
+      <p role="status">{propertiesLoading ? (pickLang(language, {"ru": "Загрузка объектов…", "en": "Loading properties…", "th": "กำลังโหลดที่พัก…"}))
+        : (pickLang(language, {"ru": "Объект недоступен. Выберите объект из своего списка.", "en": "This property is unavailable. Choose a property from your list.", "th": "ไม่สามารถเข้าถึงที่พักนี้ได้ โปรดเลือกที่พักจากรายการของคุณ"}))}</p>
+      {!propertiesLoading && <Button variant="outline" onClick={() => navigate('/mc/properties')}>{pickLang(language, {"ru": "К объектам", "en": "Browse properties", "th": "ดูที่พัก"})}</Button>}
     </div>;
   }
 
@@ -116,31 +120,31 @@ export default function OwnerCalendar() {
   const isMulti = requestedProperty === null && viewMode === 'multi';
 
   return (
-    <div className="p-4 pb-24 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
+    <div className="mc-workspace-page mc-calendar-page p-4 pb-24 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
       <header className="space-y-3">
         <h1 className="font-display text-h3 break-words">
-          {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
+          {pickLang(language, {"ru": "Календарь бронирований", "en": "Booking Calendar", "th": "ปฏิทินการจอง"})}
         </h1>
         {!isMulti && (
           <Button className="w-full sm:w-auto min-h-11" disabled={!selectedPropertyId}
             onClick={() => setShowAddBookingDialog(true)}>
             <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-            {isRu ? 'Добавить бронирование' : 'Add Booking'}
+            {pickLang(language, {"ru": "Добавить бронирование", "en": "Add Booking", "th": "เพิ่มการจอง"})}
           </Button>
         )}
       </header>
       {allProperties.length > 1 && (
         <div className="grid grid-cols-2 gap-1 border-b border-border pb-3" role="group"
-          aria-label={isRu ? 'Режим календаря' : 'Calendar view'}>
+          aria-label={pickLang(language, {"ru": "Режим календаря", "en": "Calendar view", "th": "มุมมองปฏิทิน"})}>
           <Button variant="ghost" aria-pressed={isMulti} onClick={() => { const next = new URLSearchParams(params); next.delete('property'); setParams(next); setViewMode('multi'); }}
             className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
             <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {isRu ? 'Все объекты' : 'Portfolio'}
+            {pickLang(language, {"ru": "Все объекты", "en": "Portfolio", "th": "ภาพรวมที่พัก"})}
           </Button>
           <Button variant="ghost" aria-pressed={!isMulti} onClick={() => { if (selectedPropertyId) setSelectedPropertyId(selectedPropertyId); else setViewMode('single'); }}
             className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', !isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
             <List className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {isRu ? 'Один объект' : 'Single property'}
+            {pickLang(language, {"ru": "Один объект", "en": "Single property", "th": "ที่พักเดียว"})}
           </Button>
         </div>
       )}
@@ -156,26 +160,26 @@ export default function OwnerCalendar() {
             <div className="flex items-center gap-2 min-w-0">
               <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger className="min-h-11 text-sm w-full min-w-0" aria-label={isRu ? 'Проект или комплекс' : 'Project or complex'}>
-                  <SelectValue placeholder={isRu ? 'Все проекты' : 'All projects'} />
+                <SelectTrigger className="min-h-11 text-sm w-full min-w-0" aria-label={pickLang(language, {"ru": "Проект или комплекс", "en": "Project or complex", "th": "โครงการหรืออาคาร"})}>
+                  <SelectValue placeholder={pickLang(language, {"ru": "Все проекты", "en": "All projects", "th": "ทุกโครงการ"})} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{isRu ? 'Все объекты' : 'All properties'}</SelectItem>
+                  <SelectItem value="all">{pickLang(language, {"ru": "Все объекты", "en": "All properties", "th": "ที่พักทั้งหมด"})}</SelectItem>
                   {groupOptions.map(g => (
                     <SelectItem key={g.id} value={g.id}>
                       {g.label}
                     </SelectItem>
                   ))}
-                  <SelectItem value="no-group">{isRu ? 'Без проекта' : 'No project'}</SelectItem>
+                  <SelectItem value="no-group">{pickLang(language, {"ru": "Без проекта", "en": "No project", "th": "ไม่มีโครงการ"})}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
           {selectedGroupId !== 'all' && (
             <p className="text-sm text-muted-foreground break-words" aria-live="polite">
-              {isRu ? 'Фильтр: ' : 'Filter: '}
+              {pickLang(language, {"ru": "Фильтр: ", "en": "Filter: ", "th": "ตัวกรอง: "})}
               {selectedGroupId === 'no-group'
-                ? (isRu ? 'Без проекта' : 'No project')
+                ? (pickLang(language, {"ru": "Без проекта", "en": "No project", "th": "ไม่มีโครงการ"}))
                 : groupOptions.find(g => g.id === selectedGroupId)?.label}
             </p>
           )}
@@ -188,9 +192,9 @@ export default function OwnerCalendar() {
       ) : (
         /* Single property view */
         <>
-          <section className="space-y-2 border-y border-border py-3" aria-label={isRu ? 'Объект календаря' : 'Calendar property'}>
+          <section className="space-y-2 border-y border-border py-3" aria-label={pickLang(language, {"ru": "Объект календаря", "en": "Calendar property", "th": "ที่พักในปฏิทิน"})}>
             <label className="text-sm font-medium" htmlFor="calendar-property">
-              {isRu ? 'Объект' : 'Property'}
+              {pickLang(language, {"ru": "Объект", "en": "Property", "th": "ที่พัก"})}
             </label>
             {propertiesLoading ? (
               <div className="h-11 bg-muted animate-pulse" />
@@ -208,7 +212,7 @@ export default function OwnerCalendar() {
                 </SelectContent>
               </Select>
             ) : (
-              <p className="text-sm text-muted-foreground">{isRu ? 'Нет объектов' : 'No properties'}</p>
+              <p className="text-sm text-muted-foreground">{pickLang(language, {"ru": "Нет объектов", "en": "No properties", "th": "ไม่มีที่พัก"})}</p>
             )}
             <p className="text-sm break-words text-muted-foreground" aria-live="polite">
               {propertyRefs.find(p => p.id === selectedPropertyId) && (
@@ -219,7 +223,7 @@ export default function OwnerCalendar() {
             <Button variant="outline" className="min-h-11" disabled={!selectedPropertyId}
               onClick={() => setShowCreateTaskDialog(true)}>
               <Plus className="h-4 w-4" aria-hidden="true" />
-              {isRu ? 'Добавить задачу' : 'Add Task'}
+              {pickLang(language, {"ru": "Добавить задачу", "en": "Add Task", "th": "เพิ่มงาน"})}
             </Button>
           </section>
 
@@ -228,7 +232,7 @@ export default function OwnerCalendar() {
             returnTo.set('property', selectedPropertyId);
             const next = new URLSearchParams({ property: selectedPropertyId, returnTo: location.pathname + '?' + returnTo.toString() });
             navigate('/mc/rates?' + next.toString());
-          }}>{isRu ? 'Тарифы объекта' : 'Property rates'}</Button>}
+          }}>{pickLang(language, {"ru": "Тарифы объекта", "en": "Property rates", "th": "ราคาที่พัก"})}</Button>}
 
           {/* Calendar + today’s tasks: full-width grid on large screens */}
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">
@@ -250,7 +254,7 @@ export default function OwnerCalendar() {
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <span className="flex items-center gap-2 text-sm font-medium">
                     <RefreshCw className="h-4 w-4" />
-                    {isRu ? 'Синхронизация iCal' : 'iCal Sync'}
+                    {pickLang(language, {"ru": "Синхронизация iCal", "en": "iCal Sync", "th": "ซิงค์ iCal"})}
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-4">

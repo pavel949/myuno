@@ -4,16 +4,16 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { todayFixtures, type TodayScenario } from './today.fixtures';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-const mocks = vi.hoisted(() => ({ language: 'ru' as 'ru' | 'en' | 'th', scenario: 'populated' as TodayScenario, refetch: vi.fn(), database: vi.fn(() => { throw new Error('Real database forbidden'); }) }));
+const mocks = vi.hoisted(() => ({ language: 'ru' as 'ru' | 'en' | 'th', scenario: 'populated' as TodayScenario, unknownGuests: false, refetch: vi.fn(), database: vi.fn(() => { throw new Error('Real database forbidden'); }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
-vi.mock('@/hooks/usePmsToday', () => ({ usePmsToday: () => ({ ...todayFixtures(mocks.language, mocks.scenario), refetch: mocks.refetch }) }));
+vi.mock('@/hooks/usePmsToday', () => ({ usePmsToday: () => { const data = todayFixtures(mocks.language, mocks.scenario); if (mocks.unknownGuests) data.arrivals = data.arrivals.map(booking => ({...booking,guests_count:null})); return { ...data, refetch: mocks.refetch }; } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: new Proxy({}, { get: () => mocks.database() }) }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
 function Boundary() { return <output data-testid="route-boundary">{useLocation().pathname}</output>; }
 function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
-beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; });
+beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
 afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
@@ -87,4 +87,12 @@ describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => 
     expect(screen.queryByRole('region', { name: /Tasks to act on|Задачи к выполнению|งานที่ต้องดำเนินการ/ })).not.toBeInTheDocument();
     if (scenario === 'truncated' || scenario === 'unknown-count') expect(screen.getByRole('alert')).toHaveTextContent(language === 'ru' ? 'неполная' : language === 'th' ? 'ไม่ครบถ้วน' : 'incomplete');
   });
+});
+
+it('does not invent one guest when the arrival count is unknown', () => {
+ mocks.language='en';mocks.unknownGuests=true;
+ render(<MemoryRouter><PmsTodayPage /></MemoryRouter>);
+ const arrivals=screen.getByRole('heading',{name:/Arrivals/}).closest('section')!;
+ expect(arrivals.textContent).not.toContain('1 guests');
+ expect(mocks.database).not.toHaveBeenCalled();
 });

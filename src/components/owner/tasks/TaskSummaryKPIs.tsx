@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, CalendarDays, CalendarCheck, CheckCircle2 } from 'lucide-react';
@@ -14,7 +15,6 @@ interface TaskSummaryKPIsProps {
 
 export function TaskSummaryKPIs({ crmTasks, opsTasks }: TaskSummaryKPIsProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   // Combine for counting
   const allItems = [
@@ -28,10 +28,10 @@ export function TaskSummaryKPIs({ crmTasks, opsTasks }: TaskSummaryKPIsProps) {
   const completed = allItems.filter(t => isTaskCompletedStatus(t.status)).length;
 
   const kpis = [
-    { label: isRu ? 'Просрочено' : 'Overdue', value: overdue, icon: AlertTriangle, color: 'text-destructive' },
-    { label: isRu ? 'Сегодня' : 'Today', value: today, icon: CalendarDays, color: 'text-warning' },
-    { label: isRu ? 'Эта неделя' : 'This Week', value: thisWeek, icon: CalendarCheck, color: 'text-info' },
-    { label: isRu ? 'Выполнено' : 'Completed', value: completed, icon: CheckCircle2, color: 'text-success' },
+    { label: pickLang(language, { ru: 'Просрочено', en: 'Overdue', th: 'เกินกำหนด' }), value: overdue, icon: AlertTriangle, color: 'text-destructive' },
+    { label: pickLang(language, { ru: 'Сегодня', en: 'Today', th: 'วันนี้' }), value: today, icon: CalendarDays, color: 'text-warning' },
+    { label: pickLang(language, { ru: 'Эта неделя', en: 'This Week', th: 'สัปดาห์นี้' }), value: thisWeek, icon: CalendarCheck, color: 'text-info' },
+    { label: pickLang(language, { ru: 'Выполнено', en: 'Completed', th: 'เสร็จสิ้น' }), value: completed, icon: CheckCircle2, color: 'text-success' },
   ];
 
   return (
