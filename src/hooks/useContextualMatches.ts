@@ -4,8 +4,6 @@
  * Used by ContextualCTA to render "N matching properties" links — IPP §25
  * (M10f). Empty matches must NOT render a CTA, per acceptance criteria.
  */
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
 interface PriceBand {
   /** Inclusive lower bound, THB */
@@ -17,7 +15,7 @@ interface PriceBand {
 }
 
 export interface ContextualMatchResult {
-  count: number;
+  count: number | null;
   /** Pre-built href to /property/offplan with query string applied */
   href: string;
   isLoading: boolean;
@@ -32,32 +30,8 @@ function buildOffplanHref(band: PriceBand): string {
   return q ? `/property/offplan?${q}` : '/property/offplan';
 }
 
+/** Project starting prices are provisional, and the catalogue does not apply
+ * the calculator's unit-price band. Do not advertise a verified match count. */
 export function useContextualOffplanMatches(band: PriceBand | null): ContextualMatchResult {
-  const enabled = !!band && (band.min != null || band.max != null || !!band.district);
-
-  const { data: count = 0, isLoading } = useQuery({
-    queryKey: ['contextual-offplan-matches', band],
-    enabled,
-    staleTime: 60_000,
-    queryFn: async (): Promise<number> => {
-      if (!band) return 0;
-      let q = supabase
-        .from('property_projects')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_active', true)
-        .eq('is_approved', true);
-      if (band.min != null) q = q.gte('price_from', band.min);
-      if (band.max != null) q = q.lte('price_from', band.max);
-      if (band.district) q = q.eq('location_area', band.district);
-      const { count: c, error } = await q;
-      if (error) return 0;
-      return c ?? 0;
-    },
-  });
-
-  return {
-    count,
-    href: buildOffplanHref(band ?? {}),
-    isLoading,
-  };
+  return { count: null, href: buildOffplanHref({ district: band?.district }), isLoading: false };
 }

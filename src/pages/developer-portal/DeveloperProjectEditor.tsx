@@ -1,3 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateProjectPriceReaders } from '@/lib/real-estate/invalidateProjectPriceReaders';
+import { projectStartingPrice } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * Developer Portal — Project Workspace (tabbed editor)
  * Replaces the old 5-step wizard with a persistent tabbed workspace.
@@ -219,10 +222,11 @@ function DocRow({ doc, onDelete }: { doc: { id: string; title: string; document_
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function DeveloperProjectEditor() {
+  const projectQueryClient = useQueryClient();
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: developer } = useEffectiveDeveloperProfile();
-  const { data: existing } = useNewbuildProject(id);
+  const { data: existing } = useNewbuildProject(id, false);
 
   // project_units for inventory tab
   const { data: units = [] } = useProjectUnitsForEditor(id);
@@ -295,6 +299,7 @@ export default function DeveloperProjectEditor() {
     setSaving(true);
     try {
       const slug = form.name_en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (form.price_from !== '' && projectStartingPrice(Number(form.price_from)) == null) throw new Error('Укажите положительную цену в THB или очистите поле.');
       const payload = {
         name_en: form.name_en,
         name_ru: form.name_ru || form.name_en,
@@ -323,6 +328,7 @@ export default function DeveloperProjectEditor() {
       if (id && existing) {
         const { error } = await supabase.from('property_projects').update(payload).eq('id', id);
         if (error) throw error;
+        await invalidateProjectPriceReaders(projectQueryClient);
         toast.success('Проект обновлён');
       } else {
         const { data: created, error } = await supabase.from('property_projects').insert(payload).select('id').single();

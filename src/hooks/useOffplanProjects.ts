@@ -2,6 +2,7 @@
  * Hook for fetching off-plan property projects with filters
  */
 
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import { knownProjectLifecycle, knownProjectProgress, knownProjectCount } from '@/lib/real-estate/projectPublicFacts';
 import { hasPublicDeveloperProfile } from '@/lib/adapters/developerAdapter';
 import { useQuery } from '@tanstack/react-query';
@@ -133,13 +134,13 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         isActive: true,
         isApproved: true,
         publicListingEnabled: true,
-        statuses: filters?.status,
+        statuses: undefined,
         district: filters?.district,
-        minPrice: filters?.minPrice,
-        maxPrice: filters?.maxPrice,
-        minScore: filters?.minScore,
+        minPrice: undefined,
+        maxPrice: undefined,
+        minScore: undefined,
         developerId: filters?.developerId,
-        investmentOnly: filters?.investmentOnly,
+        investmentOnly: undefined,
       };
 
       const mapMinimal = (p: ProjectRow): OffplanProject => ({
@@ -246,7 +247,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
       const runRich = async (selectStr: string) => {
         let q = createProjectCatalogQuery(selectStr);
         q = applyProjectCatalogFilters(q, commonFilters);
-        q = applyProjectCatalogSort(q, 'featured_score');
+        q = applyProjectCatalogSort(q, 'name');
         return q;
       };
 
@@ -261,7 +262,7 @@ export function useOffplanProjects(filters?: OffplanFilters) {
       }
 
       if (!rich.error && rich.data && rich.data.length > 0) {
-        return (rich.data as unknown as ProjectRow[]).map((p) => mapRich(p));
+        return (rich.data as unknown as ProjectRow[]).map((p) => publicNewbuildPresentation(mapRich(p)));
       }
 
       if (!rich.error && rich.data) {
@@ -289,11 +290,11 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         `);
 
       fallbackQuery = applyProjectCatalogFilters(fallbackQuery, commonFilters);
-      fallbackQuery = applyProjectCatalogSort(fallbackQuery, 'featured_score');
+      fallbackQuery = applyProjectCatalogSort(fallbackQuery, 'name');
       const fallback = await fallbackQuery;
       if (fallback.error) throw fallback.error;
       if (!fallback.data) return [];
-      return fallback.data.map(mapMinimal);
+      return fallback.data.map(p => publicNewbuildPresentation(mapMinimal(p)));
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -313,7 +314,7 @@ export function useProjectDistricts() {
         .not('district', 'is', null);
 
       if (error) throw error;
-      
+
       const districts = new Set(data?.map(p => p.district).filter(Boolean) as string[]);
       return Array.from(districts).sort();
     },
@@ -387,7 +388,7 @@ export function useOffplanProject(id?: string) {
 
       const p = data as unknown as ProjectRow;
       const developer = p.developers ?? null;
-      return {
+      return publicNewbuildPresentation({
         id: p.id,
         nameEn: p.name_en,
         nameRu: p.name_ru,
@@ -423,7 +424,7 @@ export function useOffplanProject(id?: string) {
         yieldEstimate: p.yield_estimate ?? null,
         sourceUrl: p.source_url ?? null,
         isClearviewRated: p.is_clearview_rated === true,
-      };
+      });
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,

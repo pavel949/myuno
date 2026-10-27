@@ -1,3 +1,4 @@
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 /**
  * /newbuilds/map — Interactive map view with layer filters.
  *
@@ -75,7 +76,7 @@ const TYPE_LAYERS = [
   { key: 'townhouse', label: 'Таунхаусы' },
 ] as const;
 
-function getStatusColor(status: string) {
+function getStatusColor(status: string | null) {
   switch (status) {
     case 'offplan': return 'hsl(var(--accent-amber))';
     case 'under_construction': return 'hsl(var(--cluster-live))';
@@ -96,7 +97,7 @@ export default function NewbuildsMap() {
   const filtered = useMemo(() => {
     if (!projects) return [];
     return projects.filter(p => {
-      if (statusFilter !== 'all' && p.project_status !== statusFilter) return false;
+
       if (typeFilter !== 'all') {
         // Check offplan_catalog type or fallback to unit_types
         const raw = (p as any).offplan_catalog;
@@ -228,24 +229,6 @@ export default function NewbuildsMap() {
           {/* Filter panel overlay */}
           {showFilters && (
             <div className="absolute top-3 left-3 z-20 space-y-2">
-              {/* Status filters */}
-              <div className="nb-glass p-2 rounded-none flex flex-wrap gap-1.5">
-                {STATUS_LAYERS.map(s => (
-                  <button
-                    key={s.key}
-                    onClick={() => setStatusFilter(s.key)}
-                    className="px-2.5 py-1 rounded-none text-[11px] font-medium transition-all"
-                    style={{
-                      background: statusFilter === s.key ? s.color + '33' : 'transparent',
-                      color: statusFilter === s.key ? s.color : 'hsl(var(--nb-muted))',
-                      border: `1px solid ${statusFilter === s.key ? s.color : 'transparent'}`,
-                    }}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-
               {/* Type filters */}
               <div className="nb-glass p-2 rounded-none flex flex-wrap gap-1.5">
                 {TYPE_LAYERS.map(t => (
@@ -275,19 +258,6 @@ export default function NewbuildsMap() {
                 style={{ color: 'hsl(var(--nb-gold))', borderColor: 'hsl(var(--nb-gold) / 0.2)' }}
               >
                 Легенда
-              </div>
-
-              {/* Status colors */}
-              <div className="space-y-1.5">
-                {STATUS_LAYERS.filter(s => s.key !== 'all').map(s => (
-                  <div key={s.key} className="flex items-center gap-2 text-[11px]" style={{ color: 'hsl(var(--nb-text))' }}>
-                    <span
-                      className="inline-block w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ background: s.color, boxShadow: `0 0 0 2px ${s.color}33` }}
-                    />
-                    <span>{s.label}</span>
-                  </div>
-                ))}
               </div>
 
               {/* Marker / cluster meaning */}
@@ -390,9 +360,7 @@ export default function NewbuildsMap() {
                               : '0 2px 6px rgba(0,0,0,0.4)',
                           }}
                         >
-                          {project.price_from
-                            ? `฿${(project.price_from / 1_000_000).toFixed(1)}M`
-                            : (project.name_ru || project.name_en || '').slice(0, 12)}
+                          <ProjectStartingPrice price={project.price_from} />
                         </div>
                         <div
                           className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] mx-auto"

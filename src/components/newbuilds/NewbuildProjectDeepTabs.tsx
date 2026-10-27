@@ -1,3 +1,4 @@
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * Rich off-plan project tabs (inventory, plans, marketing, etc.) — shared by
  * embedded Property Hub detail and legacy newbuilds-themed views.
@@ -10,32 +11,15 @@ import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadg
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
-import { NbROICalculator } from '@/components/newbuilds/NbROICalculator';
 import { NbServicesSection } from '@/components/newbuilds/NbServicesSection';
-import { NbInventoryTab } from '@/components/newbuilds/tabs/NbInventoryTab';
 import { NbPlansTab } from '@/components/newbuilds/tabs/NbPlansTab';
-import { PublicFloorPlan } from '@/components/newbuilds/PublicFloorPlan';
-import { NbTermsTab } from '@/components/newbuilds/tabs/NbTermsTab';
-import { NbUpdatesTab } from '@/components/newbuilds/tabs/NbUpdatesTab';
-import { NbReportsTab } from '@/components/newbuilds/tabs/NbReportsTab';
 import { NbDeveloperTab } from '@/components/newbuilds/tabs/NbDeveloperTab';
-import { ProjectUnitsGrid } from '@/components/newbuilds/ProjectUnitsGrid';
-import { ProjectDealsTab } from '@/components/newbuilds/ProjectDealsTab';
-import { ProjectMarketingTab } from '@/components/newbuilds/ProjectMarketingTab';
 import type { NewbuildProject } from '@/hooks/useNewbuildProjects';
 import '@/styles/newbuilds-theme.css';
 
 const TABS = [
   { key: 'overview', label: { ru: 'Обзор', en: 'Overview', th: 'ภาพรวม' } },
-  { key: 'availability', label: { ru: 'Доступность', en: 'Availability', th: 'ห้องที่ว่าง' } },
-  { key: 'units', label: { ru: 'Юниты', en: 'Units', th: 'ยูนิต' } },
-  { key: 'inventory', label: { ru: 'Инвентарь', en: 'Inventory', th: 'รายการยูนิต' } },
   { key: 'plans', label: { ru: 'Планировки', en: 'Floor plans', th: 'แปลนห้อง' } },
-  { key: 'terms', label: { ru: 'Условия', en: 'Terms', th: 'เงื่อนไข' } },
-  { key: 'marketing', label: { ru: 'Маркетинг', en: 'Marketing', th: 'การตลาด' } },
-  { key: 'deals', label: { ru: 'Сделки', en: 'Deals', th: 'ข้อเสนอ' } },
-  { key: 'updates', label: { ru: 'Обновления', en: 'Updates', th: 'อัปเดต' } },
-  { key: 'reports', label: { ru: 'Отчёты', en: 'Reports', th: 'รายงาน' } },
   { key: 'developer', label: { ru: 'О девелопере', en: 'Developer', th: 'ผู้พัฒนา' } },
 ] as const;
 
@@ -45,7 +29,8 @@ export interface NewbuildProjectDeepTabsProps {
   variant: 'full' | 'embedded';
 }
 
-export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDeepTabsProps) {
+export function NewbuildProjectDeepTabs({ project: sourceProject, variant }: NewbuildProjectDeepTabsProps) {
+  const project = publicNewbuildPresentation(sourceProject);
   const { language } = useLanguage();
   const t = (copy: LangValues) => pickLang(language, copy);
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -53,7 +38,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
   const showSidebar = variant === 'full';
 
   const gallery = project.gallery_urls || project.images || [];
-  const heroImage = gallery[selectedImage] || project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80';
+  const heroImage = gallery[selectedImage] || project.cover_image;
 
   return (
     <div className="nb-theme">
@@ -112,7 +97,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
             {t({ ru: 'Полная карточка проекта', en: 'Project details', th: 'รายละเอียดโครงการ' })}
           </p>
           <p className="text-xs mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>
-            {t({ ru: 'Планировки, инвентарь, условия и сделки — в одном месте', en: 'Floor plans, inventory, terms and deals in one place', th: 'แปลนห้อง รายการยูนิต เงื่อนไข และข้อเสนอในที่เดียว' })}
+            {t({ ru: 'Планировки, инвентарь, условия и сделки — в одном месте', en: 'Description, floor plans and developer information', th: 'แปลนห้อง รายการยูนิต เงื่อนไข และข้อเสนอในที่เดียว' })}
           </p>
         </div>
       )}
@@ -137,10 +122,6 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
 
       <div className={`flex gap-8 ${variant === 'embedded' ? 'flex-col' : ''}`}>
         <div className="flex-1 min-w-0">
-          {activeTab === 'availability' && (
-            <PublicFloorPlan projectId={project.id} developerId={project.developer_id} />
-          )}
-
           {activeTab === 'overview' && (
             <div className="space-y-8">
               <div className="prose prose-invert max-w-none">
@@ -167,14 +148,14 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
                   ))}
               </div>
 
-              <div className="nb-glass p-5">
+              {project.construction_progress != null && <div className="nb-glass p-5">
                 <p className="nb-label mb-4">{t({ ru: 'Прогресс строительства', en: 'Construction progress', th: 'ความคืบหน้าการก่อสร้าง' })}</p>
                 <NbConstructionProgress
-                  progress={project.construction_progress}
+                  progress={project.construction_progress ?? 0}
                   completionDate={project.completion_date}
                   size="md"
                 />
-              </div>
+              </div>}
 
               {project.amenities && project.amenities.length > 0 && (
                 <div>
@@ -199,37 +180,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
             </div>
           )}
 
-          {activeTab === 'units' && <ProjectUnitsGrid projectId={project.id} />}
-
-          {activeTab === 'inventory' && (
-            <NbInventoryTab projectId={project.id} developerId={project.developer_id || undefined} />
-          )}
-
-          {activeTab === 'marketing' && (
-            <ProjectMarketingTab
-              commissionPct={project.commission_pct}
-              paymentPlan={project.payment_plan}
-              marketingMaterials={project.marketing_materials}
-              ownershipTypes={project.ownership_types}
-              exclusive={project.exclusive}
-            />
-          )}
-
-          {activeTab === 'deals' && <ProjectDealsTab projectId={project.id} />}
-
           {activeTab === 'plans' && <NbPlansTab projectId={project.id} />}
-
-          {activeTab === 'terms' && <NbTermsTab projectId={project.id} />}
-
-          {activeTab === 'updates' && (
-            <NbUpdatesTab
-              projectId={project.id}
-              currentProgress={project.construction_progress}
-              completionDate={project.completion_date}
-            />
-          )}
-
-          {activeTab === 'reports' && <NbReportsTab projectId={project.id} />}
 
           {activeTab === 'developer' && project.developer_id && (
             <NbDeveloperTab developerId={project.developer_id} currentProjectId={project.id} />
@@ -248,14 +199,6 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
           <div className="hidden lg:block w-[340px] flex-shrink-0 space-y-6">
             <div id="lead-form">
               <NbLeadForm projectId={project.id} developerId={project.developer_id || undefined} source="project_page" />
-            </div>
-            <div className="nb-glass p-5">
-              <NbROICalculator
-                defaultPrice={project.price_from}
-                defaultRoi={(project as { roi_projected?: number }).roi_projected}
-                defaultCamFee={(project as { cam_fee_per_sqm?: number }).cam_fee_per_sqm}
-                compact
-              />
             </div>
             <NbServicesSection />
           </div>

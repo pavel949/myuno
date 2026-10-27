@@ -1,3 +1,4 @@
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import '@/styles/premium-public.css';
 import { homeAreaCover } from '@/components/home/homeAreaCovers';
@@ -96,7 +97,7 @@ const SeedCard = ({ surface, isRu }: SeedCardProps) => {
         {surface.locationLine ? (
           <p className="mt-1 text-xs text-muted-foreground">{surface.locationLine}</p>
         ) : null}
-        {priceLine ? (
+        {surface.kind === 'offplan_project' ? <ProjectStartingPrice price={surface.priceHintThb} className="mt-2 text-sm font-semibold" /> : priceLine ? (
           <p className="mt-2 text-sm font-semibold text-foreground">{priceLine}</p>
         ) : null}
       </div>

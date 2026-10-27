@@ -1,3 +1,5 @@
+import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
+import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * OffplanProjectCard - Premium card for off-plan property projects
  * Shows construction status, developer, pricing and a route to project reports
@@ -5,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Building2, 
-  MapPin, 
-  TrendingUp, 
-  Calendar, 
+import {
+  Building2,
+  MapPin,
+  TrendingUp,
+  Calendar,
   Sparkles,
   HardHat,
   CheckCircle2,
@@ -37,8 +39,8 @@ interface OffplanProjectCardProps {
   variant?: 'carousel' | 'grid';
 }
 
-const STATUS_CONFIG: Record<ProjectStatus, { 
-  label: { en: string; ru: string }; 
+const STATUS_CONFIG: Record<ProjectStatus, {
+  label: { en: string; ru: string };
   icon: React.ElementType;
   color: string;
 }> = {
@@ -59,11 +61,12 @@ const STATUS_CONFIG: Record<ProjectStatus, {
   },
 };
 
-export function OffplanProjectCard({ 
-  project, 
+export function OffplanProjectCard({
+  project: sourceProject,
   className,
   variant = 'carousel'
 }: OffplanProjectCardProps) {
+  const project = publicNewbuildPresentation(sourceProject);
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -94,7 +97,6 @@ export function OffplanProjectCard({
       name_ru: surface.titleRu,
       cover_image: project.coverImage ?? undefined,
       district: project.district ?? undefined,
-      price: project.priceFrom ?? undefined,
       currency: 'THB',
     });
   };
@@ -199,8 +201,8 @@ export function OffplanProjectCard({
               <span>{isRu ? 'Прогресс' : 'Progress'}</span>
               <span className="font-semibold">{project.constructionProgress}%</span>
             </div>
-            <Progress 
-              value={project.constructionProgress} 
+            <Progress
+              value={project.constructionProgress}
               className="h-1.5 bg-white/20"
             />
           </div>
@@ -222,7 +224,7 @@ export function OffplanProjectCard({
               <span>{project.district}</span>
             </div>
           )}
-          
+
           <DeveloperBadge
             developerId={project.developerId}
             showLink={project.developerProfileAvailable === true}
@@ -234,17 +236,10 @@ export function OffplanProjectCard({
         </div>
 
         {/* Price */}
-        {project.priceFrom && (
-          <p className="text-base">
-            <span className="text-muted-foreground text-sm">{isRu ? 'от' : 'from'} </span>
-            <span className="font-bold text-primary">
-              {formatPrice(project.priceFrom)}
-            </span>
-          </p>
-        )}
+        <ProjectStartingPrice price={project.priceFrom} className="text-base font-semibold" />
 
         <p className="text-xs text-muted-foreground">
-          {pickLang(language, { ru: 'Отчёты: смотрите карточку проекта', en: 'Reports: see project details', th: 'รายงาน: ดูรายละเอียดโครงการ' })}
+          {pickLang(language, { ru: 'Условия проекта — по запросу', en: 'Project terms on request', th: 'สอบถามเงื่อนไขโครงการ' })}
         </p>
 
         <div className="flex items-center gap-2 pt-2 border-t border-border/50">

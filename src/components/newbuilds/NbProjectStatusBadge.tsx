@@ -9,7 +9,9 @@ const statusMap: Record<string, { label: string; className: string }> = {
   upcoming: { label: 'Скоро', className: 'nb-badge nb-badge-upcoming' },
 };
 
-export function NbProjectStatusBadge({ status }: { status: Status }) {
-  const s = statusMap[status] || statusMap.under_construction;
+export function NbProjectStatusBadge({ status }: { status: Status | null }) {
+  if (!status) return null;
+  const s = Object.prototype.hasOwnProperty.call(statusMap, status) ? statusMap[status] : null;
+  if (!s) return null;
   return <span className={s.className}>{s.label}</span>;
 }

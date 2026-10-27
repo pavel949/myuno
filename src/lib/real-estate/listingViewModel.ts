@@ -1,3 +1,4 @@
+import { publicNewbuildPresentation } from './publicNewbuildPresentation';
 /**
  * Unified presentation layer for real-estate catalog cards (offplan / property / resale).
  * Inventory chain: developer → project → unit → listing; operations & transaction roles stay in canonicalModel.
@@ -52,7 +53,8 @@ export function hrefResaleListing(id: string): string {
   return APP_ROUTES.RESALE_DETAIL(id);
 }
 
-export function surfaceFromOffplanProject(p: OffplanProject): UnifiedListingSurface {
+export function surfaceFromOffplanProject(source: OffplanProject): UnifiedListingSurface {
+  const p = publicNewbuildPresentation(source);
   return {
     kind: 'offplan_project',
     id: p.id,
@@ -65,7 +67,7 @@ export function surfaceFromOffplanProject(p: OffplanProject): UnifiedListingSurf
     lifecycle: p.projectStatus,
     isFeatured: p.isFeatured,
     priceHintThb: p.priceFrom,
-    priceMode: 'from_project',
+    priceMode: p.priceFrom == null ? 'unknown' : 'from_project',
     developerVerified: p.developerVerified,
     muunoScore: p.muunoScore,
     isAssignment: null,
