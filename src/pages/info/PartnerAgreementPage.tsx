@@ -1,3 +1,4 @@
+import { SEOHead } from '@/components/seo/SEOHead';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -19,6 +20,10 @@ export default function PartnerAgreementPage() {
 
   return (
     <AppLayout>
+      <SEOHead
+        title={isRu ? 'Условия партнёрства' : 'Partnership terms'}
+        description={isRu ? 'Условия сотрудничества партнёров с платформой myUNO.' : 'Terms for partners working with the myUNO platform.'}
+      />
       <PageContainer>
         <PageHeader 
           title={isRu ? 'Условия партнёрства' : 'Partnership Terms'} 

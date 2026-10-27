@@ -74,8 +74,8 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.myuno.app" }],
-      "destination": "https://myuno.app/:path*",
+      "has": [{ "type": "host", "value": "myuno.app" }],
+      "destination": "https://www.myuno.app/:path*",
       "permanent": true
     },
     {
@@ -86,9 +86,7 @@
     },
     { "source": "/properties", "destination": "/property", "permanent": true },
     { "source": "/properties/:path*", "destination": "/property/:path*", "permanent": true },
-    { "source": "/offplan", "destination": "/newbuilds", "permanent": true },
-    { "source": "/offplan/:path*", "destination": "/newbuilds/:path*", "permanent": true },
-    { "source": "/property/offplan", "destination": "/newbuilds", "permanent": true },
-    { "source": "/property/offplan/:path*", "destination": "/newbuilds/:path*", "permanent": true }
+    { "source": "/offplan", "destination": "/property/offplan", "permanent": true },
+    { "source": "/offplan/:path*", "destination": "/property/offplan/:path*", "permanent": true }
   ]
 }

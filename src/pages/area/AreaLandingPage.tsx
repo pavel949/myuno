@@ -208,10 +208,6 @@ const AreaLandingPage = () => {
         <title>{seo.metaTitle[language as 'ru' | 'en']}</title>
         <meta name="description" content={seo.metaDescription[language as 'ru' | 'en']} />
         <link rel="canonical" href={canonicalUrl} />
-        {seo.hreflangAlternates.map((alt) => (
-          <link key={alt.lang} rel="alternate" hrefLang={alt.lang} href={alt.href} />
-        ))}
-        <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
         {(() => {
           const og = buildAreaOgUrl({
             area: area.slug,

@@ -1,3 +1,4 @@
+import { SEOHead } from "@/components/seo/SEOHead";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, Search, HelpCircle } from "lucide-react";
@@ -25,6 +26,7 @@ const NotFound = () => {
 
   return (
     <AppLayout showFooter={false}>
+      <SEOHead title={isRu ? "Страница не найдена" : "Page not found"} noindex />
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
         {/* 404 — calm, not aggressive */}
         <div className="mb-8">

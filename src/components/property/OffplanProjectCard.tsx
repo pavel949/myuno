@@ -6,7 +6,7 @@ import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPres
  */
 
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   MapPin,
@@ -213,7 +213,7 @@ export function OffplanProjectCard({
       <div className="p-4 space-y-3">
         {/* Title */}
         <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
-          {name}
+          <Link to={surface.href} onClick={event => event.stopPropagation()}>{name}</Link>
         </h3>
 
         {/* Location + Developer */}
