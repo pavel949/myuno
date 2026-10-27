@@ -3,8 +3,9 @@ import { render, waitFor, cleanup } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SEOHead } from './SEOHead';
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-afterEach(() => { cleanup(); document.head.innerHTML = ''; window.history.replaceState({}, '', '/'); });
+const locale = vi.hoisted(() => ({ language: 'en' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
+afterEach(() => { locale.language = 'en'; cleanup(); document.head.innerHTML = ''; window.history.replaceState({}, '', '/'); });
 describe('route metadata replaces the static homepage fallback', () => {
   it.each(['/discover', '/property', '/newbuilds', '/legal'])('has one route canonical and description at %s', async path => {
     const shell = new DOMParser().parseFromString(readFileSync('index.html', 'utf8'), 'text/html');
@@ -17,4 +18,12 @@ describe('route metadata replaces the static homepage fallback', () => {
     expect(document.querySelector('meta[name="description"]')).toHaveAttribute('content', 'Explore published offerings.');
     expect(document.querySelector('meta[name="robots"]')).toBeNull();
   });
+});
+
+it.each([['en', 'en_US'], ['ru', 'ru_RU'], ['th', 'th_TH']])('keeps actual %s page language for assistive technology', async (language, ogLocale) => {
+ locale.language = language;
+ render(<HelmetProvider><SEOHead title="Localized page" description="Localized description" /></HelmetProvider>);
+ await waitFor(() => expect(document.documentElement.lang).toBe(language));
+ expect(document.head.querySelector('meta[property="og:locale"]')).toHaveAttribute('content', ogLocale);
+ expect([...document.head.querySelectorAll('meta[property="og:locale:alternate"]')].map(node => node.getAttribute('content'))).toEqual(['en_US', 'ru_RU', 'th_TH'].filter(value => value !== ogLocale));
 });

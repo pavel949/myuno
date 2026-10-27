@@ -642,14 +642,18 @@ html:not([lang]) {
   --public-label-size: .875rem;
   --public-caption-size: .8125rem;
   --public-width-summary: 38rem;
+  --public-width-hero: 41rem;
+  --public-editorial-display-size: clamp(2.25rem, 9.3vw, 2.5rem);
 }
 @media(min-width:360px) { :root { --public-gutter-base: 1.25rem; } }
+@media(min-width:768px) { :root { --public-editorial-display-size: 3rem; } }
 @media(min-width:1024px) { :root {
   --public-gutter-base: clamp(2rem,calc(6.667vw - 3rem),5rem);
   --public-section-gap: 5rem;
   --public-detail-gap: 3rem;
   --public-card-gap: 2rem;
   --public-display-size: 4rem;
+  --public-editorial-display-size: clamp(3.5rem, 4.2vw, 3.75rem);
   --public-title-size: 2.75rem;
   --public-section-size: 2.5rem;
 } }

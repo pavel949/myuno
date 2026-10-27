@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { Children, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -55,7 +55,7 @@ export function HorizontalRail({
   });
   const next = pickLang(language, { ru: 'Далее', en: 'Next', th: 'ถัดไป' });
   return (
-    <div className={`home-rail${compact ? ' home-rail--compact' : ''}`}>
+    <div className={`home-rail${compact ? ' home-rail--compact' : ''}${Children.count(children) <= 3 ? ' home-rail--short' : ''}`}>
       <div className="home-rail-controls" hidden={edges.start && edges.end}>
         <button
           type="button"

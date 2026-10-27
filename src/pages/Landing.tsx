@@ -17,6 +17,7 @@ import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-desktop.webp';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
+import '@/styles/homepage-refinement.css';
 
 const publicNavigationRole = 'guest' as const;
 
@@ -29,7 +30,7 @@ export default function Landing() {
   const [requestSubject, setRequestSubject] = useState<string | undefined>();
 
   return (
-    <div className="cinematic-home premium-home" data-testid="cinematic-home">
+    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home">
       <SEOHead title={t({ ru: 'Ваш дом и жизнь на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <section className="home-hero" aria-labelledby="home-title">
         <img
