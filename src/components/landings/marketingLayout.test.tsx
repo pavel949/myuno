@@ -34,7 +34,7 @@ it('keeps default landing bounds and opts marketing content and chrome into the 
   expect(screen.getAllByRole('link', { name: 'Get started' })).toHaveLength(2);
 });
 
-it.each(['ForManagementCompanies', 'ForDevelopers', 'ForLocalServices'])('%s owns one explicit frame and canonical hero type', page => {
+it.each(['ForManagementCompanies', 'ForLocalServices'])('%s owns one explicit frame and canonical hero type', page => {
   const text = source(page);
   expect(text).toContain('<AppLayout usePageContainer={false} showHeader={false}>');
   expect(text).toContain('<LandingChrome isRu={isRu} variant="marketing" />');
@@ -62,12 +62,11 @@ it('retains MC pricing, trial queries and section destinations', () => {
 
 it('retains developer and provider destinations and existing commercial copy', () => {
   const developers = source('ForDevelopers');
-  expect(developers).toContain('grid grid-cols-1 sm:grid-cols-2');
-  expect(developers).toContain('flex flex-col sm:flex-row');
-  expect(developers).toContain('navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)');
-  expect(developers).toContain('navigate(APP_ROUTES.DEVELOPER_PORTAL)');
-  expect(developers).toContain('Registration is free. Moderation takes up to 48 hours.');
-  expect(developers).toContain('No hidden fees');
+  expect(developers).toContain('<AudienceLanding');
+  expect(developers).toContain('APP_ROUTES.DEVELOPER_PORTAL_APPLY');
+  expect(developers).toContain('APP_ROUTES.DEVELOPER_PORTAL_PROJECTS');
+  expect(developers).not.toContain('48 hours');
+  expect(developers).not.toContain('No hidden fees');
   const providers = source('ForLocalServices');
   expect(providers).toContain('grid grid-cols-1 sm:grid-cols-2');
   expect(providers).toContain('flex flex-col sm:flex-row');

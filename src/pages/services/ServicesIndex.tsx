@@ -22,6 +22,7 @@ import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDis
 import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
+import '@/styles/premium-services.css';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
 function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
@@ -102,7 +103,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
   const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
 
-  return <Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+  return <div className="premium-services"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
     title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')}
     subtitle={t('Найдите нужное — по ситуации или категории.', 'Find what you need by situation or category.', 'ค้นหาบริการตามสถานการณ์หรือหมวดหมู่')}
     fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
@@ -204,5 +205,5 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {filters.situation === 'arrival' && <Button asChild variant="outline"><Link to="/trip-planner">{t('Спланировать поездку', 'Plan a trip', 'วางแผนการเดินทาง')}</Link></Button>}
     <section className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4" aria-labelledby="service-help-title"><div><h2 id="service-help-title" className="font-display text-h3">{t('Не нашли нужную услугу?', 'Can’t find the right service?', 'ไม่พบบริการที่ต้องการ?')}</h2><p className="mt-2 text-sm text-muted-foreground">{t('Опишите задачу — поможем уточнить варианты.', 'Describe your task and we can help you explore options.', 'อธิบายสิ่งที่ต้องการ เราจะช่วยค้นหาตัวเลือกให้คุณ')}</p></div><Button onClick={() => setHelpOpen(true)}><Wrench className="mr-2 size-4" aria-hidden="true" />{t('Описать задачу', 'Describe your task', 'อธิบายสิ่งที่ต้องการ')}</Button></section>
     {helpOpen && <Suspense fallback={<p role="status">{t('Открываем форму…', 'Opening request form…', 'กำลังเปิดแบบฟอร์มคำขอ…')}</p>}><ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic="general" initialSubject={filters.query} subjectPlaceholder={t('Например: помощь с сантехникой', 'For example: help with plumbing', 'เช่น ต้องการช่างประปา')} messagePlaceholder={t('Какая услуга нужна, где и когда?', 'What service do you need, where and when?', 'ต้องการบริการอะไร ที่ไหน และเมื่อไหร่?')} sourceData={{ source: 'services_catalogue', returnTo }} /></Suspense>}
-  </Layout>;
+  </Layout></div>;
 }

@@ -1,6 +1,8 @@
+import { pickLang } from '@/lib/i18n/pickLang';
+import '@/styles/premium-workspace.css';
 import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
 import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
@@ -35,20 +37,20 @@ type StatusFilter = 'all' | 'upcoming' | 'active' | 'pending' | 'completed' | 'c
 type SortKey = 'check_in' | 'created_at' | 'total_amount' | 'guest_name';
 type BulkAction = 'confirm' | 'cancel';
 
-const STATUS_FILTERS: { value: StatusFilter; label: string; labelRu: string }[] = [
-  { value: 'all', label: 'All', labelRu: 'Все' },
-  { value: 'active', label: 'Active', labelRu: 'Активные' },
-  { value: 'upcoming', label: 'Upcoming', labelRu: 'Предстоящие' },
-  { value: 'pending', label: 'Pending', labelRu: 'Ожидающие' },
-  { value: 'completed', label: 'Completed', labelRu: 'Завершённые' },
-  { value: 'cancelled', label: 'Cancelled', labelRu: 'Отменённые' },
+const STATUS_FILTERS: { value: StatusFilter; label: string; labelRu: string; labelTh: string }[] = [
+  { value: 'all', label: 'All', labelRu: 'Все', labelTh: "ทั้งหมด" },
+  { value: 'active', label: 'Active', labelRu: 'Активные', labelTh: "กำลังเข้าพัก" },
+  { value: 'upcoming', label: 'Upcoming', labelRu: 'Предстоящие', labelTh: "กำลังจะมาถึง" },
+  { value: 'pending', label: 'Pending', labelRu: 'Ожидающие', labelTh: "รอดำเนินการ" },
+  { value: 'completed', label: 'Completed', labelRu: 'Завершённые', labelTh: "เสร็จสิ้น" },
+  { value: 'cancelled', label: 'Cancelled', labelRu: 'Отменённые', labelTh: "ยกเลิกแล้ว" },
 ];
 
-const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string }[] = [
-  { key: 'check_in', label: 'By check-in date', labelRu: 'По дате заезда' },
-  { key: 'created_at', label: 'By created date', labelRu: 'По дате создания' },
-  { key: 'total_amount', label: 'By amount', labelRu: 'По сумме' },
-  { key: 'guest_name', label: 'By guest name', labelRu: 'По имени гостя' },
+const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string; labelTh: string }[] = [
+  { key: 'check_in', label: 'By check-in date', labelRu: 'По дате заезда', labelTh: "ตามวันเช็คอิน" },
+  { key: 'created_at', label: 'By created date', labelRu: 'По дате создания', labelTh: "ตามวันที่สร้าง" },
+  { key: 'total_amount', label: 'By amount', labelRu: 'По сумме', labelTh: "ตามยอดเงิน" },
+  { key: 'guest_name', label: 'By guest name', labelRu: 'По имени гостя', labelTh: "ตามชื่อผู้เข้าพัก" },
 ];
 
 // These rows are order projections. Financial releases use order semantics;
@@ -73,10 +75,16 @@ export default function MCBookingsPage() {
 
   const { bookings, isLoading, error, refetch } = useAllPropertyBookings();
 
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const statusFilter: StatusFilter = STATUS_FILTERS.some(option => option.value === params.get('status')) ? params.get('status') as StatusFilter : 'all';
+  const sortKey: SortKey = SORT_OPTIONS.some(option => option.key === params.get('sort')) ? params.get('sort') as SortKey : 'check_in';
+  const sortAsc = params.get('direction') === 'asc';
+  const setStatusFilter = (value: StatusFilter) => setParams(previous => {
+    const next = new URLSearchParams(previous); if (value === 'all') next.delete('status'); else next.set('status', value); return next;
+  }, { replace: true, state: location.state });
+  // Free-text search can contain guest details; keep it out of shareable URLs.
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('check_in');
-  const [sortAsc, setSortAsc] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null);
@@ -151,14 +159,11 @@ export default function MCBookingsPage() {
     };
   }, [bookings]);
 
-  const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-    } else {
-      setSortKey(key);
-      setSortAsc(false);
-    }
-  };
+  const toggleSort = (key: SortKey) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('sort', key); next.set('direction', key === sortKey && !sortAsc ? 'asc' : 'desc');
+    return next;
+  }, { replace: true, state: location.state });
 
   const toggleSelectBooking = (id: string) => {
     setSelectedIds(prev => {
@@ -189,8 +194,8 @@ export default function MCBookingsPage() {
       setBulkBusy(false);
       if (error) {
         toast.error(action === 'confirm'
-          ? (isRu ? 'Не удалось подтвердить брони' : 'Failed to confirm bookings')
-          : (isRu ? 'Не удалось отменить брони' : 'Failed to cancel bookings'));
+          ? (pickLang(language, {"ru": "Не удалось подтвердить брони", "en": "Failed to confirm bookings", "th": "ยืนยันการจองไม่สำเร็จ"}))
+          : (pickLang(language, {"ru": "Не удалось отменить брони", "en": "Failed to cancel bookings", "th": "ยกเลิกการจองไม่สำเร็จ"})));
         return;
       }
       clearSelection();
@@ -225,19 +230,19 @@ export default function MCBookingsPage() {
   };
 
   if (error) {
-    return <PageContainer>
-      <PageHeader title={isRu ? 'Бронирования' : 'Bookings'} />
+    return <PageContainer className="mc-workspace-page mc-bookings-page">
+      <PageHeader title={pickLang(language, {"ru": "Бронирования", "en": "Bookings", "th": "การจอง"})} />
       <div role="alert" className="space-y-3 text-sm text-destructive">
-        <p>{isRu ? 'Не удалось загрузить бронирования' : 'Could not load bookings'}</p>
-        <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+        <p>{pickLang(language, {"ru": "Не удалось загрузить бронирования", "en": "Could not load bookings", "th": "ไม่สามารถโหลดการจองได้"})}</p>
+        <Button variant="outline" onClick={() => refetch()}>{pickLang(language, {"ru": "Повторить", "en": "Retry", "th": "ลองอีกครั้ง"})}</Button>
       </div>
     </PageContainer>;
   }
 
   if (isLoading) {
     return (
-      <PageContainer>
-        <PageHeader title={isRu ? 'Бронирования' : 'Bookings'} />
+      <PageContainer className="mc-workspace-page mc-bookings-page">
+        <PageHeader title={pickLang(language, {"ru": "Бронирования", "en": "Bookings", "th": "การจอง"})} />
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-none" />)}
         </div>
@@ -246,24 +251,24 @@ export default function MCBookingsPage() {
   }
 
   return (
-    <PageContainer>
+    <PageContainer className="mc-workspace-page mc-bookings-page">
       <header className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-display text-h3 text-foreground break-words min-w-0">
-          {isRu ? 'Бронирования' : 'Bookings'}
+          {pickLang(language, {"ru": "Бронирования", "en": "Bookings", "th": "การจอง"})}
         </h1>
         <Button className="w-full sm:w-auto min-h-11" onClick={() => navigate('/mc/calendar')}>
           <Plus className="w-4 h-4" aria-hidden="true" />
-          {isRu ? 'Новое бронирование' : 'New Booking'}
+          {pickLang(language, {"ru": "Новое бронирование", "en": "New Booking", "th": "เพิ่มการจอง"})}
         </Button>
       </header>
 
       {/* Compact KPI summary — each tile also selects the matching filter */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4" role="group" aria-label={isRu ? 'Сводка бронирований' : 'Bookings summary'}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4" role="group" aria-label={pickLang(language, {"ru": "Сводка бронирований", "en": "Bookings summary", "th": "สรุปการจอง"})}>
         {([
-          { filter: 'all' as StatusFilter, value: stats.total, label: isRu ? 'Всего' : 'Total' },
-          { filter: 'active' as StatusFilter, value: stats.active, label: isRu ? 'Сейчас' : 'Active' },
-          { filter: 'upcoming' as StatusFilter, value: stats.upcoming, label: isRu ? 'Скоро' : 'Upcoming' },
-          { filter: 'pending' as StatusFilter, value: stats.pending, label: isRu ? 'Ожидает' : 'Pending' },
+          { filter: 'all' as StatusFilter, value: stats.total, label: pickLang(language, {"ru": "Всего", "en": "Total", "th": "ทั้งหมด"}) },
+          { filter: 'active' as StatusFilter, value: stats.active, label: pickLang(language, {"ru": "Сейчас", "en": "Active", "th": "กำลังเข้าพัก"}) },
+          { filter: 'upcoming' as StatusFilter, value: stats.upcoming, label: pickLang(language, {"ru": "Скоро", "en": "Upcoming", "th": "กำลังจะมาถึง"}) },
+          { filter: 'pending' as StatusFilter, value: stats.pending, label: pickLang(language, {"ru": "Ожидает", "en": "Pending", "th": "รอดำเนินการ"}) },
         ]).map(tile => (
           <Button
             key={tile.filter}
@@ -282,35 +287,35 @@ export default function MCBookingsPage() {
       </div>
 
       {/* Search, utilities and status share one bounded control area. */}
-      <section className="min-w-0 space-y-2 border-y border-border py-3 mb-4" aria-label={isRu ? 'Поиск и фильтры бронирований' : 'Booking search and filters'}>
+      <section className="min-w-0 space-y-2 border-y border-border py-3 mb-4" aria-label={pickLang(language, {"ru": "Поиск и фильтры бронирований", "en": "Booking search and filters", "th": "ค้นหาและกรองการจอง"})}>
       <div className="flex gap-2">
         <div className="flex-1 min-w-0 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder={isRu ? 'Поиск по имени, email, телефону...' : 'Search by name, email, phone...'}
-            aria-label={isRu ? 'Поиск бронирований' : 'Search bookings'}
+            placeholder={pickLang(language, {"ru": "Поиск по имени, email, телефону...", "en": "Search by name, email, phone...", "th": "ค้นหาชื่อ อีเมล หรือโทรศัพท์..."})}
+            aria-label={pickLang(language, {"ru": "Поиск бронирований", "en": "Search bookings", "th": "ค้นหาการจอง"})}
             className="pl-9 min-h-11"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" title={isRu ? 'Сортировка' : 'Sort'} aria-label={isRu ? 'Сортировка' : 'Sort'}>
+            <Button variant="ghost" size="icon" title={pickLang(language, {"ru": "Сортировка", "en": "Sort", "th": "เรียงลำดับ"})} aria-label={pickLang(language, {"ru": "Сортировка", "en": "Sort", "th": "เรียงลำดับ"})}>
               <ArrowUpDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {SORT_OPTIONS.map(opt => (
               <DropdownMenuItem key={opt.key} onClick={() => toggleSort(opt.key)}>
-                {isRu ? opt.labelRu : opt.label} {sortKey === opt.key && (sortAsc ? '↑' : '↓')}
+                {pickLang(language, { ru: opt.labelRu, en: opt.label, th: opt.labelTh })} {sortKey === opt.key && (sortAsc ? '↑' : '↓')}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
         <Button variant="ghost" size="icon" onClick={exportCSV}
-          title={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}
-          aria-label={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}>
+          title={pickLang(language, {"ru": "Экспортировать список в CSV", "en": "Export list to CSV", "th": "ส่งออกรายการเป็น CSV"})}
+          aria-label={pickLang(language, {"ru": "Экспортировать список в CSV", "en": "Export list to CSV", "th": "ส่งออกรายการเป็น CSV"})}>
           <Download className="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>
@@ -319,7 +324,7 @@ export default function MCBookingsPage() {
       <div
         className="grid grid-cols-2 min-[390px]:grid-cols-3 lg:grid-cols-6 gap-1"
         role="group"
-        aria-label={isRu ? 'Фильтр по статусу' : 'Filter by status'}
+        aria-label={pickLang(language, {"ru": "Фильтр по статусу", "en": "Filter by status", "th": "กรองตามสถานะ"})}
       >
         {STATUS_FILTERS.map(f => (
           <Button
@@ -334,7 +339,7 @@ export default function MCBookingsPage() {
                 : 'bg-background text-muted-foreground border-border hover:text-foreground',
             )}
           >
-            {isRu ? f.labelRu : f.label}
+            {pickLang(language, { ru: f.labelRu, en: f.label, th: f.labelTh })}
           </Button>
         ))}
       </div>
@@ -343,29 +348,29 @@ export default function MCBookingsPage() {
 
       {/* Bulk actions toolbar */}
       {selectedIds.size > 0 && (
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3 p-2 bg-muted border border-border rounded-none" role="group" aria-label={isRu ? 'Действия с выбранными бронированиями' : 'Selected booking actions'}>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3 p-2 bg-muted border border-border rounded-none" role="group" aria-label={pickLang(language, {"ru": "Действия с выбранными бронированиями", "en": "Selected booking actions", "th": "การดำเนินการกับการจองที่เลือก"})}>
           <Checkbox
             className="h-11 w-11 shrink-0"
             checked={selectedIds.size === filteredBookings.length}
             onCheckedChange={toggleSelectAll}
-            aria-label={isRu ? 'Выбрать все видимые бронирования' : 'Select all visible bookings'}
+            aria-label={pickLang(language, {"ru": "Выбрать все видимые бронирования", "en": "Select all visible bookings", "th": "เลือกการจองที่แสดงทั้งหมด"})}
           />
           <span className="text-sm font-medium">
-            {selectedIds.size} {isRu ? 'выбрано' : 'selected'}
+            {selectedIds.size} {pickLang(language, {"ru": "выбрано", "en": "selected", "th": "รายการที่เลือก"})}
           </span>
           <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto sm:ml-auto">
             {pendingBulkAction === null ? (
               <>
                 <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('confirm')}>
                   <Check className="w-3.5 h-3.5 mr-1" />
-                  {isRu ? 'Подтвердить' : 'Confirm'}
+                  {pickLang(language, {"ru": "Подтвердить", "en": "Confirm", "th": "ยืนยัน"})}
                 </Button>
                 <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('cancel')}>
                   <X className="w-3.5 h-3.5 mr-1" />
-                  {isRu ? 'Отменить' : 'Cancel'}
+                  {pickLang(language, {"ru": "Отменить", "en": "Cancel", "th": "ยกเลิก"})}
                 </Button>
                 <Button className="min-h-11 px-2" size="sm" variant="ghost" onClick={clearSelection}>
-                  {isRu ? 'Снять выбор' : 'Clear'}
+                  {pickLang(language, {"ru": "Снять выбор", "en": "Clear", "th": "ล้าง"})}
                 </Button>
               </>
             ) : (
@@ -382,10 +387,10 @@ export default function MCBookingsPage() {
                   disabled={bulkBusy}
                   onClick={() => executeBulkAction(pendingBulkAction)}
                 >
-                  {isRu ? 'Да' : 'Yes'}
+                  {pickLang(language, {"ru": "Да", "en": "Yes", "th": "ใช่"})}
                 </Button>
                 <Button className="min-h-11 min-w-11" size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setPendingBulkAction(null)}>
-                  {isRu ? 'Нет' : 'No'}
+                  {pickLang(language, {"ru": "Нет", "en": "No", "th": "ไม่"})}
                 </Button>
               </>
             )}
@@ -399,12 +404,12 @@ export default function MCBookingsPage() {
           <CardContent className="py-12 text-center">
             <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="font-semibold mb-2">
-              {isRu ? 'Нет бронирований' : 'No Bookings'}
+              {pickLang(language, {"ru": "Нет бронирований", "en": "No Bookings", "th": "ยังไม่มีการจอง"})}
             </h3>
             <p className="text-sm text-muted-foreground">
               {searchQuery
-                ? (isRu ? 'Ничего не найдено по запросу' : 'No results for this search')
-                : (isRu ? 'Бронирования появятся здесь' : 'Bookings will appear here')
+                ? (pickLang(language, {"ru": "Ничего не найдено по запросу", "en": "No results for this search", "th": "ไม่พบผลลัพธ์สำหรับการค้นหานี้"}))
+                : (pickLang(language, {"ru": "Бронирования появятся здесь", "en": "Bookings will appear here", "th": "การจองจะแสดงที่นี่"}))
               }
             </p>
           </CardContent>
@@ -416,7 +421,7 @@ export default function MCBookingsPage() {
             const checkOut = parseCivilDate(booking.check_out);
             const nights = differenceInCalendarDays(checkOut, checkIn);
             const statusCfg = propertyBookingStatus(booking.status);
-            const guestName = booking.guest_name || (isRu ? 'Гость' : 'Guest');
+            const guestName = booking.guest_name || (pickLang(language, {"ru": "Гость", "en": "Guest", "th": "ผู้เข้าพัก"}));
 
             return (
               <Card
@@ -472,7 +477,7 @@ export default function MCBookingsPage() {
                       </div>
                     </div>
                     <Badge variant={statusCfg.variant} className={cn('max-w-full whitespace-normal break-words')}>
-                      {isRu ? statusCfg.labelRu : statusCfg.label}
+                      {pickLang(language, { ru: statusCfg.labelRu, en: statusCfg.label, th: statusCfg.labelTh })}
                     </Badge>
                   </div>
 
@@ -485,7 +490,7 @@ export default function MCBookingsPage() {
                       <span className="whitespace-nowrap">{format(checkOut, 'dd MMM', { locale: isRu ? ru : undefined })}</span>
                     </div>
                     <span className="text-muted-foreground hidden sm:inline">·</span>
-                    <span className="whitespace-nowrap">{nights} {isRu ? 'н.' : 'n.'}</span>
+                    <span className="whitespace-nowrap">{nights} {pickLang(language, {"ru": "н.", "en": "n.", "th": "คืน"})}</span>
                     {booking.guests_count && (
                       <>
                         <span className="text-muted-foreground hidden sm:inline">·</span>
@@ -514,8 +519,8 @@ export default function MCBookingsPage() {
                     )}
                     <span className="font-mono font-bold text-sm break-all max-w-full ml-auto">
                       {typeof booking.total_amount === 'number' && Number.isFinite(booking.total_amount)
-                        ? `${booking.total_amount.toLocaleString(isRu ? 'ru-RU' : 'en-US')} ${booking.currency || (isRu ? '(валюта неизвестна)' : '(currency unavailable)')}`
-                        : (isRu ? 'Стоимость неизвестна' : 'Total unavailable')}
+                        ? `${booking.total_amount.toLocaleString(isRu ? 'ru-RU' : 'en-US')} ${booking.currency || (pickLang(language, {"ru": "(валюта неизвестна)", "en": "(currency unavailable)", "th": "(ไม่มีข้อมูลสกุลเงิน)"}))}`
+                        : (pickLang(language, {"ru": "Стоимость неизвестна", "en": "Total unavailable", "th": "ไม่มีข้อมูลยอดรวม"}))}
                     </span>
                   </div>
                 </CardContent>

@@ -3,11 +3,14 @@ import { afterEach, expect, it, vi } from 'vitest';
 import ForLocalServices from '../ForLocalServices';
 import ForDevelopers from '../ForDevelopers';
 import ForManagementCompanies from '../ForManagementCompanies';
+import { MemoryRouter } from 'react-router-dom';
+import { readFileSync } from 'node:fs';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const fixture = vi.hoisted(() => ({ language: 'en', navigate: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => fixture }));
-vi.mock('react-router-dom', () => ({ useNavigate: () => fixture.navigate }));
+vi.mock('react-router-dom', async () => ({ ...await vi.importActual<typeof import('react-router-dom')>('react-router-dom'), useNavigate: () => fixture.navigate }));
+vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 vi.mock('react-helmet-async', () => ({ Helmet: () => null }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
 vi.mock('@/components/landings', () => ({
@@ -36,22 +39,33 @@ it.each(['ru', 'en'])('lets the %s provider CTA row wrap without losing any dest
  }
 });
 
-it.each(['ru', 'en'])('allows the full %s lower developer CTA label to wrap and preserves its action', language => {
+it.each(['ru', 'en'])('allows the full %s developer CTA label to wrap and preserves its action', language => {
  fixture.language = language;
- render(<ForDevelopers />);
- const label = language === 'ru' ? 'Зарегистрировать компанию' : 'Register your company';
- const action = screen.getByRole('button', { name: label });
- expect(action).toHaveClass('h-auto', 'min-h-12', 'max-w-full', 'whitespace-normal', 'px-4', 'py-3', 'leading-snug');
- expect(action).not.toHaveClass('h-12', 'whitespace-nowrap', 'px-8');
- expect(action.parentElement).toHaveClass('sm:flex-wrap');
- fireEvent.click(action);
- expect(fixture.navigate).toHaveBeenLastCalledWith(APP_ROUTES.DEVELOPER_PORTAL_APPLY);
+ render(<MemoryRouter><ForDevelopers /></MemoryRouter>);
+ const label = language === 'ru' ? 'Представить компанию' : 'Introduce your company';
+ const action = screen.getByRole('link', { name: label });
+ expect(action).toHaveAttribute('href', APP_ROUTES.DEVELOPER_PORTAL_APPLY);
+ expect(action).toHaveTextContent(label);
+ expect(action.querySelector('button')).toBeNull();
+ // Layout ownership moved into AudienceLanding; preserve wrapping and minimum
+ // target geometry through its shared stylesheet rather than old button classes.
+ const css = readFileSync('src/styles/premium-audience.css', 'utf8');
+ expect(css).toContain('.audience-actions { display: flex; flex-wrap: wrap;');
+ expect(css).toMatch(/\.audience-actions a[^}]+min-height: 2\.75rem/);
+ expect(action).not.toHaveClass('whitespace-nowrap', 'h-12');
+
 });
 
 it.each([ForLocalServices, ForDevelopers, ForManagementCompanies])('keeps every marketing action inside its available width with flexible height', Page => {
  fixture.language = 'en';
- render(<Page />);
- for (const action of screen.getAllByRole('button')) {
+ render(<MemoryRouter><Page /></MemoryRouter>);
+ const actions = screen.getAllByRole(Page === ForDevelopers ? 'link' : 'button');
+ for (const action of actions) {
+  if (Page === ForDevelopers) {
+   expect(action).toHaveAccessibleName();
+   expect(action).not.toHaveClass('whitespace-nowrap', 'h-12');
+   continue;
+  }
   expect(action).toHaveClass('max-w-full', 'whitespace-normal', 'h-auto');
   expect(action).not.toHaveClass('whitespace-nowrap', 'h-12');
  }

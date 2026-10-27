@@ -7,12 +7,12 @@ import RateManagementPage from './RateManagementPage';
 
 const state = vi.hoisted(() => ({
   properties: [{ property_id: 'p1', title: 'First villa', price_per_night: 1000 }, { property_id: 'p2', title: 'Second villa', price_per_night: 2000 }],
-  loading: false,
+  loading: false, propertiesError: null as Error | null, retryProperties: vi.fn(),
   rates: vi.fn(), ai: vi.fn(), write: vi.fn(), query: vi.fn(),
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'owner' } }) }));
-vi.mock('@/hooks/useMyProperties', () => ({ useMyProperties: () => ({ allProperties: state.properties, isLoading: state.loading }) }));
+vi.mock('@/hooks/useMyProperties', () => ({ useMyProperties: () => ({ allProperties: state.properties, isLoading: state.loading, error: state.propertiesError, refetch: state.retryProperties }) }));
 vi.mock('@/hooks/usePropertyComplexes', () => ({ usePropertyComplexes: () => ({ data: [] }) }));
 vi.mock('@/hooks/usePropertyProjects', () => ({ usePropertyProjects: () => ({ data: [] }) }));
 vi.mock('@/components/owner/AirbnbCalendarGrid', () => ({ AirbnbCalendarGrid: ({ propertyId }: { propertyId?: string }) => <div data-testid="calendar-property-id">{propertyId}</div> }));
@@ -45,6 +45,7 @@ function Harness({ path }: { path: string }) {
 }
 beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
 beforeEach(() => {
+ state.propertiesError = null; state.retryProperties.mockClear();
   state.properties = [{ property_id: 'p1', title: 'First villa', price_per_night: 1000 }, { property_id: 'p2', title: 'Second villa', price_per_night: 2000 }];
   state.loading = false;
   vi.clearAllMocks();
@@ -152,4 +153,12 @@ describe('owner property navigation', () => {
     expect(screen.getByTestId('url')).toHaveTextContent('/mc/rates?ref=owner');
     expect(state.rates).toHaveBeenLastCalledWith('owner', 'all');
   });
+});
+
+it('keeps a property-read error distinct from an empty or denied calendar selection', () => {
+ state.propertiesError = new Error('Synthetic read failure');
+ render(<MemoryRouter initialEntries={['/mc/calendar?property=p1']}><OwnerCalendar /></MemoryRouter>);
+ expect(screen.getByRole('alert')).toHaveTextContent('Could not load properties');
+ expect(screen.queryByRole('button',{name:'Add Booking'})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Retry'}));expect(state.retryProperties).toHaveBeenCalledOnce();expect(state.write).not.toHaveBeenCalled();
 });

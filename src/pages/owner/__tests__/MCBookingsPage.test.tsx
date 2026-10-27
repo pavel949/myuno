@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { bookingsListFixtures, type FixtureLanguage } from './bookingsList.fixtures';
 
 const mocks = vi.hoisted(() => ({
@@ -176,4 +176,17 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(mocks.from).not.toHaveBeenCalled();
   });
+});
+
+function QueryProbe() { const location = useLocation(); return <output data-testid="bookings-query">{location.search} · {JSON.stringify(location.state)}</output>; }
+it('restores discrete filters from the URL without putting guest search in it', () => {
+ mocks.language='en';
+ render(<MemoryRouter initialEntries={[{pathname:'/mc/bookings-list',search:'?status=cancelled&sort=guest_name&direction=asc&space=keep',state:{origin:'fixture'}}]}><MCBookingsPage/><QueryProbe/></MemoryRouter>);
+ expect(screen.getByRole('button',{name:'Cancelled'})).toHaveAttribute('aria-pressed','true');
+ fireEvent.click(screen.getByRole('button',{name:'All'}));fireEvent.click(screen.getByRole('button',{name:'All'}));
+ expect(screen.getByTestId('bookings-query')).toHaveTextContent('space=keep');
+ expect(screen.getByTestId('bookings-query')).toHaveTextContent('origin');
+ expect(screen.getByTestId('bookings-query')).not.toHaveTextContent('status=cancelled');
+ fireEvent.change(screen.getByRole('textbox',{name:'Search bookings'}),{target:{value:'private@example.invalid'}});
+ expect(screen.getByTestId('bookings-query')).not.toHaveTextContent('private');expect(mocks.update).not.toHaveBeenCalled();
 });

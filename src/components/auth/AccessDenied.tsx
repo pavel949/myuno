@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -8,11 +9,11 @@ import { type AppRole, ROLE_METADATA, SELF_ACTIVATABLE_ROLES } from '@/types/aut
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Shield, 
-  ArrowLeft, 
-  Home, 
-  LogIn, 
+import {
+  Shield,
+  ArrowLeft,
+  Home,
+  LogIn,
   UserPlus,
   AlertCircle,
   ArrowRight,
@@ -39,7 +40,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
   const { language } = useLanguage();
   const { user } = useAuth();
   const { activeRole, hasRole } = useUserContext();
-  
+
   const isRussian = language === 'ru';
 
   // Get the primary required role for messaging
@@ -49,7 +50,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
 
   // Check if any required role can be self-activated
   const canSelfActivate = requiredRoles.some(role => SELF_ACTIVATABLE_ROLES.includes(role));
-  
+
   // Determine the onboarding path based on required role
   const getOnboardingPath = () => {
     if (requiredRoles.includes('vendor') || requiredRoles.includes('partner')) {
@@ -84,7 +85,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
 
   return (
     <div className={cn(
-      "min-h-[60vh] flex items-center justify-center p-4",
+      "premium-system min-h-[60vh] flex items-center justify-center p-4",
       className
     )}>
       <Card className="max-w-md w-full border-destructive/20">
@@ -93,13 +94,13 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
           <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-destructive" />
           </div>
-          
-          <CardTitle className="text-xl">
-            {isRussian ? 'Доступ ограничен' : 'Access Restricted'}
+
+          <CardTitle className="premium-system-title text-xl">
+            {language === 'th' ? 'จำกัดการเข้าถึง' : isRussian ? 'Доступ ограничен' : 'Access Restricted'}
           </CardTitle>
-          
+
           <CardDescription className="text-base">
-            {isRussian 
+            {language === 'th' ? 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้' : isRussian
               ? 'У вас нет прав для просмотра этой страницы'
               : 'You don\'t have permission to view this page'
             }
@@ -140,7 +141,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
               /* Not logged in - show login/signup options */
               <>
                 <p className="text-sm text-muted-foreground text-center">
-                  {isRussian 
+                  {isRussian
                     ? 'Войдите в аккаунт, чтобы получить доступ'
                     : 'Sign in to your account to access this page'
                   }
@@ -164,7 +165,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
               /* Can self-activate - show onboarding path */
               <>
                 <p className="text-sm text-muted-foreground text-center">
-                  {isRussian 
+                  {isRussian
                     ? 'Вы можете получить эту роль, завершив регистрацию'
                     : 'You can get this role by completing registration'
                   }
@@ -180,7 +181,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
               /* Admin-only role - show contact info */
               <>
                 <p className="text-sm text-muted-foreground text-center">
-                  {isRussian 
+                  {isRussian
                     ? 'Эта роль требует подтверждения администратора'
                     : 'This role requires administrator approval'
                   }
@@ -234,7 +235,7 @@ interface RoleRequiredGateProps {
 export function RoleRequiredGate({ requiredRoles, children, fallback }: RoleRequiredGateProps) {
   const { hasRole, isLoading } = useUserContext();
   const { language } = useLanguage();
-  
+
   const isRussian = language === 'ru';
 
   if (isLoading) {

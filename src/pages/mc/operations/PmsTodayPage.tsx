@@ -1,3 +1,4 @@
+import '@/styles/premium-workspace.css';
 /**
  * /mc/today — presentation of existing usePmsToday projections only.
  * Unit states are inferred signals, not verified readiness or inventory status.
@@ -65,7 +66,7 @@ export default function PmsTodayPage() {
     return <li className="flex min-w-0 items-start gap-2 border-b border-border last:border-0">
       <Link to={APP_ROUTES.MC_PROPERTY_DETAIL(b.property_id)} aria-label={`${openProperty}: ${property} · ${guest}`} className={cn('min-h-11 min-w-0 flex-1 py-3 hover:bg-muted/50', focusLink)}>
         <p title={guest} className="break-words font-medium text-foreground [overflow-wrap:anywhere]">{guest}</p>
-        <p title={property} className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{property} · {b.guests_count ?? 1} {t({ en: 'guests', ru: 'чел.', th: 'คน' })}</p>
+        <p title={property} className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{property}{typeof b.guests_count === 'number' && Number.isFinite(b.guests_count) && b.guests_count > 0 ? <> · {b.guests_count} {t({ en: 'guests', ru: 'чел.', th: 'คน' })}</> : null}</p>
         <p className="mt-1 break-words font-mono text-xs text-muted-foreground">
           {t(kind === 'in' ? { en: 'Arrival', ru: 'Заезд', th: 'เช็คอิน' } : kind === 'out' ? { en: 'Departure', ru: 'Выезд', th: 'เช็คเอาท์' } : { en: 'Until', ru: 'До', th: 'ถึง' })}: {toBangkokDateKey(kind === 'in' ? b.check_in : b.check_out) ?? '—'}
         </p>
@@ -147,7 +148,7 @@ export default function PmsTodayPage() {
   const attentionTitle = t({ en: 'Needs attention', ru: 'Требует внимания', th: 'ต้องดำเนินการ' });
   const todayTitle = t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' });
 
-  return <PageShell width="wide" className="space-y-6 text-foreground">
+  return <PageShell width="wide" className="mc-workspace-page mc-today-page space-y-6 text-foreground">
     <header className="space-y-3 border-b border-border pb-4">
       <div className="min-w-0">
         <h1 className="break-words font-display text-h2 sm:text-h1">{todayTitle}</h1>

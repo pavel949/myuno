@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
@@ -130,8 +131,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+    <div className="premium-auth min-h-screen bg-background flex flex-col">
+      <div className="premium-auth-decoration absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
         <BrandWordmark />
@@ -144,12 +145,12 @@ export default function ResetPassword() {
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
+        <div className="premium-auth-panel w-full">
           {linkStatus === 'checking' ? (
             <div className="text-center space-y-6 py-8">
               <div className="w-12 h-12 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-muted-foreground">
-                {language === 'ru' ? 'Проверка ссылки...' : 'Checking link...'}
+                {language === 'th' ? 'กำลังตรวจสอบลิงก์...' : language === 'ru' ? 'Проверка ссылки...' : 'Checking link...'}
               </p>
             </div>
           ) : (linkStatus === 'invalid' || linkStatus === 'unavailable') ? (
@@ -159,7 +160,7 @@ export default function ResetPassword() {
               </div>
               <h1 className="text-2xl font-display font-bold">
                 {linkStatus === 'unavailable'
-                  ? (language === 'ru' ? 'Не удалось проверить ссылку' : 'Could not verify link')
+                  ? (language === 'th' ? 'ไม่สามารถตรวจสอบลิงก์' : language === 'ru' ? 'Не удалось проверить ссылку' : 'Could not verify link')
                   : (language === 'ru' ? 'Недействительная или устаревшая ссылка' : 'Invalid or expired link')}
               </h1>
               <p className="text-muted-foreground">
@@ -175,17 +176,13 @@ export default function ResetPassword() {
                 </p>
               )}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD}>
-                  <PremiumButton variant="default" className="w-full sm:w-auto">
-                    {language === 'ru' ? 'Запросить новую ссылку' : 'Request new link'}
-                  </PremiumButton>
-                </Link>
-                <Link to={APP_ROUTES.AUTH}>
-                  <PremiumButton variant="outline" className="w-full sm:w-auto gap-2">
+                <PremiumButton asChild variant="default" className="w-full sm:w-auto"><Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD}>
+                    {language === 'th' ? 'ขอลิงก์ใหม่' : language === 'ru' ? 'Запросить новую ссылку' : 'Request new link'}
+                  </Link></PremiumButton>
+                <PremiumButton asChild variant="outline" className="w-full sm:w-auto gap-2"><Link to={APP_ROUTES.AUTH}>
                     <ArrowLeft className="w-4 h-4" />
                     {language === 'ru' ? 'К входу' : 'Back to login'}
-                  </PremiumButton>
-                </Link>
+                  </Link></PremiumButton>
               </div>
             </div>
           ) : isSuccess ? (
@@ -209,18 +206,16 @@ export default function ResetPassword() {
                   if (await signOut()) navigate(APP_ROUTES.AUTH, { replace: true });
                 } finally { setIsLoading(false); }
               }}>{language === 'ru' ? 'Повторить выход' : 'Retry sign-out'}</PremiumButton>}
-              <Link to={APP_ROUTES.AUTH}>
-                <PremiumButton variant="outline" className="mt-2 gap-2">
+              <PremiumButton asChild variant="outline" className="mt-2 gap-2"><Link to={APP_ROUTES.AUTH}>
                   <ArrowLeft className="w-4 h-4" />
-                  {language === 'ru' ? 'Перейти к входу' : 'Go to login'}
-                </PremiumButton>
-              </Link>
+                  {language === 'th' ? 'ไปที่หน้าเข้าสู่ระบบ' : language === 'ru' ? 'Перейти к входу' : 'Go to login'}
+                </Link></PremiumButton>
             </div>
           ) : (
             <div className="space-y-8">
               <div className="text-center space-y-2">
                 <h1 className="text-3xl font-display font-bold text-primary">
-                  {language === 'ru' ? 'Новый пароль' : 'New password'}
+                  {language === 'th' ? 'รหัสผ่านใหม่' : language === 'ru' ? 'Новый пароль' : 'New password'}
                 </h1>
                 <p className="text-muted-foreground">
                   {language === 'ru'
@@ -232,7 +227,7 @@ export default function ResetPassword() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="new-password" className="text-sm font-medium text-foreground">
-                    {language === 'ru' ? 'Новый пароль' : 'New password'}
+                    {language === 'th' ? 'รหัสผ่านใหม่' : language === 'ru' ? 'Новый пароль' : 'New password'}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -264,13 +259,13 @@ export default function ResetPassword() {
                     <p className="text-sm text-destructive">{errors.password}</p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {language === 'ru' ? 'Минимум 6 символов' : 'At least 6 characters'}
+                    {language === 'th' ? 'อย่างน้อย 6 ตัวอักษร' : language === 'ru' ? 'Минимум 6 символов' : 'At least 6 characters'}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <label htmlFor="confirm-password" className="text-sm font-medium text-foreground">
-                    {language === 'ru' ? 'Подтвердите пароль' : 'Confirm password'}
+                    {language === 'th' ? 'ยืนยันรหัสผ่าน' : language === 'ru' ? 'Подтвердите пароль' : 'Confirm password'}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -300,14 +295,14 @@ export default function ResetPassword() {
                   size="lg"
                   isLoading={isLoading}
                 >
-                  {language === 'ru' ? 'Сохранить пароль' : 'Save password'}
+                  {language === 'th' ? 'บันทึกรหัสผ่าน' : language === 'ru' ? 'Сохранить пароль' : 'Save password'}
                 </PremiumButton>
               </form>
 
               <div className="text-center">
                 <Link to={APP_ROUTES.AUTH} className="text-primary font-medium hover:underline inline-flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
-                  {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
+                  {language === 'th' ? 'กลับไปเข้าสู่ระบบ' : language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
                 </Link>
               </div>
             </div>

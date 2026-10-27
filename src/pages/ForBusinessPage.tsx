@@ -1,3 +1,4 @@
+import '@/styles/premium-audience.css';
 /**
  * Public landing — myUNO for Local Business.
  * B2B services menu for local Phuket businesses (F&B, salons, clinics, schools, venues)
@@ -6,8 +7,8 @@
  *
  * Trilingual: RU / EN / TH — all user-facing strings are picked by `useLanguage()`.
  */
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -302,6 +303,8 @@ const UI = {
 } as const;
 
 export default function ForBusinessPage() {
+  const reducedMotion = useReducedMotion();
+  const submissionInFlight = useRef(false);
   const { language } = useLanguage();
   const t = (v: Tri) => pick(v, language);
 
@@ -328,16 +331,18 @@ export default function ForBusinessPage() {
   };
 
   const scrollToForm = () => {
-    document.getElementById('b2b-inquiry-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('b2b-inquiry-form')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submissionInFlight.current) return;
     if (!form.business_name || !form.contact_name || (!form.contact_email && !form.contact_phone)) {
       toast.error(t(UI.errFields));
       return;
     }
 
+    submissionInFlight.current = true;
     setSubmitting(true);
     try {
       const payload = {
@@ -369,6 +374,7 @@ export default function ForBusinessPage() {
       console.error('[ForBusiness] submit failed', err);
       toast.error(t(UI.errSend));
     } finally {
+      submissionInFlight.current = false;
       setSubmitting(false);
     }
   };
@@ -376,7 +382,7 @@ export default function ForBusinessPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout usePageContainer={false}>
+    <AppLayout usePageContainer={false} className="premium-audience-business">
       <Helmet>
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
@@ -398,9 +404,9 @@ export default function ForBusinessPage() {
           <div className={PUBLIC_CONTENT_LAYOUT.business}>
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
+              transition={{ duration: reducedMotion ? 0 : 0.2 }}
             >
               <Badge variant="secondary" className="mb-4 gap-1">
                 <Building2 className="w-3.5 h-3.5" />
@@ -457,9 +463,9 @@ export default function ForBusinessPage() {
               return (
                 <motion.div
                   key={s.key}
-                  initial={{ opacity: 0, y: 12 }}
+                  initial={reducedMotion ? false : { opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.03 * i, duration: 0.3 }}
+                  transition={{ delay: reducedMotion ? 0 : 0.03 * i, duration: reducedMotion ? 0 : 0.2 }}
                 >
                   <Card
                     onClick={() => toggle(s.key)}

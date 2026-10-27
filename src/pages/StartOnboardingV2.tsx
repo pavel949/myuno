@@ -1,3 +1,4 @@
+import '@/styles/premium-account.css';
 /**
  * StartOnboardingV2 — M5 canonical 3-question onboarding.
  *
@@ -133,7 +134,7 @@ export default function StartOnboardingV2() {
     (o.step === 2);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
+    <main className="premium-onboarding min-h-screen bg-background">
       <Helmet>
         <title>{T(COPY.title, lang)} · myUNO</title>
         <meta name="description" content={T(COPY.subtitle, lang)} />
