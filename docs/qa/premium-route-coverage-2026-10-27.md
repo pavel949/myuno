@@ -2,7 +2,7 @@
 
 Source registry: 712 declarations and 433 canonical route constants. Declarations include aliases, layout nodes and repeated path families; they are not 712 unique accepted screens. This report records source coverage, not a new routing taxonomy.
 
-The four completed local groups and account tranche are separate branches from main `046663d`. They have not been integrated or jointly validated. Only #196/#197 are published. Untouched below means no route-specific redesign acceptance in these tranches, even when global tokens or a shared shell affect its pixels.
+The five source branches remain preserved. Their patches are now integrated locally on `codex/premium-local-integration-20261027` from unchanged main `046663d`; see `premium-integration-2026-10-27.md` for joint verification rather than inheriting individual PASS results. Only #196/#197 are published. Untouched below means no route-specific redesign acceptance in these tranches, even when global tokens or a shared shell affect its pixels.
 
 Untouched account routes explicitly include `/auth/account-type`, `/auth/setup-password`, `/.lovable/oauth/consent`, `/profile/edit`, `/profile/personal-details`, `/profile/notifications` and `/profile/referral`.
 
@@ -35,7 +35,7 @@ Shared system components: NotFound wildcard, AccessDenied and ErrorBoundary have
 | `/auth/setup-password` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:230 |
 | `/.lovable/oauth/consent` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:231 |
 | `/discover` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:236 |
-| `/discover/:goal` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:237 |
+| `/discover/:goal` | Partial: concrete services goal uses migrated ServicesIndex; stay/live/buy goals not accepted by that change | src/components/layout/AnimatedRoutes.tsx:237 |
 | `/discover/situations` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:240 |
 | `/discover/:code` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:241 |
 | `/navigator` | Untouched / shared-token effects only; route-specific review pending | src/components/layout/AnimatedRoutes.tsx:242 |

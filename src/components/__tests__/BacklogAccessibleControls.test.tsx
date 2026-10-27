@@ -67,8 +67,8 @@ describe.each(labels)('$language accessible controls', labels => {
   it('names the reset-password visibility toggle without submitting a password', async () => {
     render(<MemoryRouter><ResetPassword /></MemoryRouter>);
     const show = await screen.findByRole('button', { name: labels.show, pressed: false });
-    expect(screen.getByLabelText(labels.language === 'ru' ? 'Новый пароль' : 'New password')).toHaveAttribute('name', 'new-password');
-    expect(screen.getByLabelText(labels.language === 'ru' ? 'Подтвердите пароль' : 'Confirm password')).toHaveAttribute('name', 'confirm-password');
+    expect(screen.getByLabelText(labels.language === 'th' ? 'รหัสผ่านใหม่' : labels.language === 'ru' ? 'Новый пароль' : 'New password')).toHaveAttribute('name', 'new-password');
+    expect(screen.getByLabelText(labels.language === 'th' ? 'ยืนยันรหัสผ่าน' : labels.language === 'ru' ? 'Подтвердите пароль' : 'Confirm password')).toHaveAttribute('name', 'confirm-password');
     fireEvent.click(show);
     expect(screen.getByRole('button', { name: labels.hide, pressed: true })).toBeInTheDocument();
     expect(document.querySelector('input[name="new-password"]')).toHaveAttribute('type', 'text');
