@@ -38,7 +38,9 @@ async def main():
                 # Direct entry: no prior newbuild route may preload the theme CSS.
                 await load('microsite')
                 await expect(page.get_by_role('heading', level=1, name='Тестовый проект у моря')).to_be_visible()
-                await expect(page.get_by_text('37%', exact=True)).to_be_visible()
+                await expect(page.get_by_text('37%', exact=True)).to_have_count(0)
+                await expect(page.get_by_text('Цена требует уточнения' if lang == 'ru' else 'Price requires confirmation', exact=True)).to_be_visible()
+                await expect(page.get_by_text(re.compile(r'(?:от|From) 7[\s,]234[\s,]567 THB'))).to_be_visible()
                 await expect(page.get_by_text('Synthetic unit / Тестовый юнит', exact=True)).to_be_visible()
                 theme = await page.locator('.nb-theme').first.evaluate(r'''root => {
                     const style=getComputedStyle(root), form=root.querySelector('form');
