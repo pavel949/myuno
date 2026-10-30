@@ -90,3 +90,9 @@ it('keeps the monthly card and independent nightly inquiry consistent after an e
   expect(screen.getByText(/Rental rates need confirmation/)).toBeVisible();
   expect(screen.queryByText(/Estimated/)).toBeNull();
  });
+
+ it('keeps the request-only fallback when multiple recorded rates have unsupported currency', () => {
+  mount({ currency: 'USD', price: 3000, price_period: 'month', price_per_night: 3000 });
+  expect(screen.getByText('Price on request')).toBeVisible();
+  expect(screen.queryByLabelText('Rental rates')).toBeNull();
+ });

@@ -97,7 +97,7 @@ function PropertyListingCardBase({
     : 'Phuket';
 
   // Keep each displayed amount paired with its own billing period.
-  const multipleRates = mode === 'rent' && propertyRentalRateOptions(property).rates.length > 1;
+  const multipleRates = mode === 'rent' && property.currency?.trim().toUpperCase() === 'THB' && propertyRentalRateOptions(property).rates.length > 1;
   const unitPrice = mode === 'rent' ? surface.priceHintThb : null;
   const pricePeriod = surface.priceMode.replace('per_', '');
   const salePrice = mode === 'buy' ? surface.priceHintThb : null;

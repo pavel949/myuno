@@ -19,7 +19,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
   const images = showcaseImages(property);
   const image = images.find(url => !failedImages.has(url));
   const title = (language === 'ru' ? property.title_ru : property.title_en) || property.title_en || property.title_ru;
-  const multipleRates = propertyRentalRateOptions(property).rates.length > 1;
+  const multipleRates = property.currency?.trim().toUpperCase() === 'THB' && propertyRentalRateOptions(property).rates.length > 1;
   const quote = homeShowcasePrice(property);
   const periods: Record<string, LangValues> = {
     total: { ru: '', en: '', th: '' },

@@ -16,7 +16,7 @@ describe('commercial field roundtrip without conversion', () => {
     expect(propertyCommercialPayload(propertyCommercialValues(initial), source)).toEqual(source);
   });
   it('changes a dedicated nightly amount without changing monthly, sale or currency fields', () => {
-    const source = fixtures[4].source;
+    const source = { ...fixtures[4].source, price: 85000 };
     const next = propertyCommercialPayload({ ...propertyCommercialValues(source), price_per_night: '3300.25' }, source);
     expect(next).toEqual({ ...source, price_per_night: 3300.25 });
     expect(propertyRentalDisplayPrice(next)).toEqual({ amount: 85000, period: 'month' });
