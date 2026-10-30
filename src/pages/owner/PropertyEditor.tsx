@@ -1,3 +1,4 @@
+import { propertyCommercialInitial } from '@/lib/propertyCommercialFields';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
 import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
@@ -111,6 +112,7 @@ function mapPropertyToInitialData(property: any) {
     transfer_airport_price: property.transfer_airport_price,
     extra_guest_price: property.extra_guest_price,
     extra_guest_threshold: property.extra_guest_threshold,
+    ...propertyCommercialInitial(property),
   };
 }
 

@@ -1,3 +1,5 @@
+import { propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
+import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import React from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -88,6 +90,59 @@ describe('contained admin property editor', () => {
     mocks.properties = [{ id: 'synthetic-property', updated_at: '2026-10-19T00:00:00Z', approval_status: 'pending', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: Array.from({ length: 15 }, (_, i) => `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>#${i}`) }];
   });
   afterEach(() => { cleanup(); expect(mocks.network).not.toHaveBeenCalled(); });
+
+  it.each([
+    { name: 'monthly', price: 90000, price_period: 'month', price_per_night: null, price_per_month: null, price_per_year: null, sale_price: null, currency: 'USD', sale_currency: null, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false },
+    { name: 'nightly', price: null, price_period: null, price_per_night: 3000, price_per_month: null, price_per_year: null, sale_price: null, currency: 'THB', sale_currency: null, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false },
+    { name: 'sale', price: 5000000, price_period: null, price_per_night: null, price_per_month: null, price_per_year: null, sale_price: null, currency: 'USD', sale_currency: null, listing_modes: null, listing_type: 'sale', is_for_sale: null },
+    { name: 'dual', price: 90000, price_period: 'month', price_per_night: 3000, price_per_month: 85000, price_per_year: 900000, sale_price: 200000, currency: 'THB', sale_currency: 'EUR', listing_modes: ['rent', 'sale', 'platform'], listing_type: 'rent', is_for_sale: true },
+    { name: 'null and zero', price: 0, price_period: null, price_per_night: null, price_per_month: null, price_per_year: 0, sale_price: null, currency: null, sale_currency: null, listing_modes: null, listing_type: null, is_for_sale: null },
+  ])('preserves the complete $name commercial record on an unrelated edit', async ({ name: _name, ...commercial }) => {
+    mocks.properties = [{ ...mocks.properties[0], ...commercial }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.change(within(editor).getByLabelText('Fixture title'), { target: { value: 'Metadata only' } });
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    expect(await within(editor).findByLabelText('Price per night')).toHaveValue(commercial.price_per_night == null ? '' : String(commercial.price_per_night));
+    expect(within(editor).getByLabelText('Rental / offer currency')).toHaveValue(commercial.currency ?? '');
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    const payload = mocks.update.mock.calls[0][1];
+    expect(payload).toMatchObject(commercial);
+    if (commercial.listing_type === 'rent') {
+      const view = surfaceFromProperty({ ...mocks.properties[0], ...payload } as any, 'rent');
+      expect(view.priceHintThb).toBe(commercial.currency === 'THB' ? commercial.price_per_month ?? commercial.price ?? commercial.price_per_night : null);
+      expect(propertyDetailPricing(payload, { price_per_night: payload.price_per_night }, 'rent').canQuoteShortStay).toBe(commercial.currency === 'THB' && commercial.price_per_night !== null);
+    }
+  });
+
+  it('changes nightly rent and clears sale price without retyping the monthly amount, currencies or dual modes', async () => {
+    mocks.properties = [{ ...mocks.properties[0], price: 90000, price_period: 'month', currency: 'THB', price_per_night: 3000, price_per_month: null, price_per_year: null, sale_price: 200000, sale_currency: 'EUR', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true }];
+    mocks.update.mockResolvedValue({ error: null }); renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    fireEvent.change(await within(editor).findByLabelText('Price per night'), { target: { value: '3200.5' } });
+    fireEvent.change(within(editor).getByLabelText('Sale price'), { target: { value: '' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][1]).toMatchObject({ price: 90000, price_per_night: 3200.5, price_period: 'month', currency: 'THB', sale_price: null, sale_currency: 'EUR', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true });
+  });
+
+  it('creates with explicit separate monthly, nightly and sale values and currencies', async () => {
+    mocks.properties = []; mocks.create.mockResolvedValue({ error: null });
+    render(<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider']}><AdminProperties /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Add property' }));
+    const editor = await screen.findByRole('dialog');
+    fireEvent.change(within(editor).getByLabelText('Fixture title'), { target: { value: 'Synthetic create' } });
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    await within(editor).findByLabelText('Offer amount');
+    for (const [label, value] of [['Offer amount', '90000'], ['Billing period', 'month'], ['Price per night', '3000'], ['Sale price', '200000'], ['Sale currency', 'USD']]) fireEvent.change(within(editor).getByLabelText(label), { target: { value } });
+    fireEvent.click(within(editor).getByRole('switch', { name: 'Offer for sale' }));
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalled());
+    expect(mocks.create.mock.calls[0][0]).toMatchObject({ price: 90000, price_period: 'month', price_per_night: 3000, price_per_month: null, price_per_year: null, currency: 'THB', sale_price: 200000, sale_currency: 'USD', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true });
+  });
 
   it('reopens and saves canonical project/unit/floor fields without replacing the physical ID or zero bedrooms', async () => {
     mocks.properties = [{ ...mocks.properties[0], project_id: 'project', unit_number: 'G-01', floor: 0, total_floors: 4, bedrooms: 0 }];

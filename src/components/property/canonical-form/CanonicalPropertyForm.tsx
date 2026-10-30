@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { MediaModalLayer } from '@/components/upload/shared/mediaModalLayer';
 import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound, Check } from 'lucide-react';
+import { PropertyCommercialFields } from './PropertyCommercialFields';
+import { propertyCommercialValues, propertyCommercialPayload, commercialText, changeCommercialOffer, type PropertyCommercialValues } from '@/lib/propertyCommercialFields';
 import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // Import canonical step components from Owner Wizard
@@ -33,10 +35,12 @@ export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
   // Admin/Vendor specific fields
   provider_id?: string;
   highlights?: string[];
-  listing_modes?: string[];
-  listing_type?: string;
-  price?: number;
-  price_period?: string;
+  listing_modes?: string[] | null;
+  listing_type?: string | null;
+  price?: number | null;
+  price_period?: string | null;
+  currency?: string | null;
+  sale_currency?: string | null;
   amenities?: string[];
   is_active?: boolean;
   is_featured?: boolean;
@@ -52,13 +56,13 @@ export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
   description_ru?: string;
   // Utilities
   electricity_included?: boolean;
-  electricity_unit_price?: number;
+  electricity_unit_price?: number | null;
   electricity_provider?: string;
   electricity_metering?: string;
   electricity_notes?: string;
   electricity_notes_ru?: string;
   water_included?: boolean;
-  water_unit_price?: number;
+  water_unit_price?: number | null;
   water_notes?: string;
   water_notes_ru?: string;
   internet_speed?: string;
@@ -66,19 +70,19 @@ export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
   // Services
   cleaning_included?: boolean;
   cleaning_frequency?: string;
-  extra_cleaning_price?: number;
-  linen_change_price?: number;
+  extra_cleaning_price?: number | null;
+  linen_change_price?: number | null;
   linen_change_frequency?: string;
-  early_checkin_price?: number;
-  late_checkout_price?: number;
+  early_checkin_price?: number | null;
+  late_checkout_price?: number | null;
   transfer_available?: boolean;
-  transfer_airport_price?: number;
+  transfer_airport_price?: number | null;
   transfer_notes?: string;
   transfer_notes_ru?: string;
-  extra_guest_price?: number;
+  extra_guest_price?: number | null;
   extra_guest_threshold?: number;
   // Investment
-  purchase_price?: number;
+  purchase_price?: number | null;
   purchase_date?: string;
   purchase_currency?: string;
   acquisition_costs?: number;
@@ -165,7 +169,9 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     view_type: normalizeViewTypes(data.view_type),
     furnishing_level: normalizeFurnishingLevel(data.furnishing_level),
     equipment: data.equipment || [],
-    price_per_night: (data.price_per_night && data.price_per_night !== '0') ? data.price_per_night : (data.price ? String(data.price) : ''),
+    price_per_night: commercialText(data.price_per_night),
+    price_per_month: commercialText(data.price_per_month),
+    price_per_year: commercialText(data.price_per_year),
     min_stay_nights: data.min_stay_nights || 1,
     max_guests: data.max_guests || 2,
     deposit_amount: data.deposit_amount || '',
@@ -173,7 +179,7 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     check_out_time: data.check_out_time || '12:00',
     instant_booking: data.instant_booking || false,
     ownership_form: data.ownership_form,
-    is_for_sale: data.is_for_sale || (data.listing_modes?.includes('sale') ?? false),
+    is_for_sale: data.is_for_sale ?? (data.listing_type === 'sale' || (data.listing_modes?.includes('sale') ?? false)),
     sale_price: data.sale_price || '',
     pets_allowed: data.pets_allowed,
     pet_deposit: data.pet_deposit,
@@ -202,8 +208,15 @@ function mapFromOwnerFormat(
   originalData: CanonicalPropertyFormData,
   extraData: ExtraFormData,
 ): CanonicalPropertyFormData {
+  const commercial = propertyCommercialPayload({ ...extraData.commercial,
+    price_per_night: ownerData.price_per_night,
+    price_per_month: ownerData.price_per_month ?? extraData.commercial.price_per_month,
+    price_per_year: ownerData.price_per_year ?? extraData.commercial.price_per_year,
+    sale_price: ownerData.sale_price,
+  }, originalData, extraData.validateCommercial);
   return {
     ...originalData,
+    ...commercial,
     title: ownerData.title,
     title_en: ownerData.title,
     title_ru: ownerData.title_ru,
@@ -227,16 +240,17 @@ function mapFromOwnerFormat(
     floor: ownerData.floor,
     total_floors: ownerData.total_floors,
     unit_number: ownerData.unit_number,
-    price_per_night: ownerData.price_per_night,
-    price: ownerData.price_per_night ? Number(ownerData.price_per_night) : undefined,
+    price_per_night: commercialText(commercial.price_per_night),
+    price_per_month: commercialText(commercial.price_per_month),
+    price_per_year: commercialText(commercial.price_per_year),
     min_stay_nights: ownerData.min_stay_nights,
     max_guests: ownerData.max_guests,
     deposit_amount: ownerData.deposit_amount,
     check_in_time: ownerData.check_in_time,
     check_out_time: ownerData.check_out_time,
     instant_booking: ownerData.instant_booking,
-    is_for_sale: ownerData.is_for_sale,
-    sale_price: ownerData.sale_price,
+    is_for_sale: commercial.is_for_sale ?? undefined,
+    sale_price: commercialText(commercial.sale_price),
     view_type: ownerData.view_type,
     furnishing_level: normalizeFurnishingLevel(ownerData.furnishing_level),
     equipment: ownerData.equipment,
@@ -250,14 +264,6 @@ function mapFromOwnerFormat(
     seasonal_pricing: ownerData.seasonal_pricing,
     house_rules: ownerData.house_rules,
     house_rules_ru: ownerData.house_rules_ru,
-    listing_modes: [
-      ...(ownerData.is_for_sale ? ['sale'] : []),
-      ...(ownerData.price_per_night ? ['rent'] : []),
-    ].length > 0 ? [
-      ...(ownerData.is_for_sale ? ['sale'] : []),
-      ...(ownerData.price_per_night ? ['rent'] : []),
-    ] : ['rent'],
-    listing_type: ownerData.is_for_sale && !ownerData.price_per_night ? 'sale' : 'rent',
     // Extra data from new tabs
     ...extraData.utilities,
     ...extraData.services,
@@ -266,6 +272,8 @@ function mapFromOwnerFormat(
 }
 
 interface ExtraFormData {
+  commercial: PropertyCommercialValues;
+  validateCommercial: boolean;
   utilities: Record<string, any>;
   services: Record<string, any>;
   admin: Record<string, any>;
@@ -404,9 +412,12 @@ export function CanonicalPropertyForm({
   
   // Keep original data for merging on submit
   const [originalData] = useState(initialData);
+  const [commercialData, setCommercialData] = useState(() => propertyCommercialValues(initialData));
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+    if (updates.is_for_sale !== undefined) setCommercialData(prev => changeCommercialOffer(prev, 'sale', updates.is_for_sale));
   }, [setFormData]);
 
   const updateOwnershipData = useCallback((updates: Partial<OwnershipData>) => {
@@ -426,12 +437,24 @@ export function CanonicalPropertyForm({
   }, []);
 
   const handleSubmit = async () => {
-    const submissionData = mapFromOwnerFormat(formData, originalData, {
-      utilities: utilitiesData,
-      services: servicesData,
-      admin: adminData,
-    });
-    await onSubmit(submissionData);
+    setSubmissionError(null);
+    try {
+      const submissionData = mapFromOwnerFormat(formData, originalData, {
+        utilities: utilitiesData, services: servicesData, admin: adminData,
+        commercial: commercialData, validateCommercial: !isOwner,
+      });
+      await onSubmit(submissionData);
+    } catch (error) {
+      setSubmissionError(isRu ? 'Проверьте суммы, период и валюты. Сохранение не подтверждено.' : error instanceof Error ? error.message : 'Save was not confirmed');
+    }
+  };
+  const commercialValues = { ...commercialData, price_per_night: formData.price_per_night,
+    price_per_month: formData.price_per_month ?? commercialData.price_per_month,
+    price_per_year: formData.price_per_year ?? commercialData.price_per_year, sale_price: formData.sale_price };
+  const updateCommercial = (values: PropertyCommercialValues) => {
+    setCommercialData(values);
+    setFormData(prev => ({ ...prev, price_per_night: values.price_per_night, price_per_month: values.price_per_month,
+      price_per_year: values.price_per_year, sale_price: values.sale_price, is_for_sale: values.is_for_sale ?? prev.is_for_sale }));
   };
 
   const baseTabs = [
@@ -577,7 +600,11 @@ export function CanonicalPropertyForm({
           </TabsContent>
 
           <TabsContent value="pricing" className="mt-0">
+            {!isOwner && <PropertyCommercialFields values={commercialValues} onChange={updateCommercial} disabled={!canEditPricing} />}
             <PricingStep
+              hideCommercialFields={!isOwner}
+              rentalCurrency={commercialData.currency}
+              saleCurrency={commercialData.sale_currency}
               authoringOnly={authoringOnly}
               canEditPricing={canEditPricing}
               canEditBookingTerms={canEditBookingTerms}
@@ -625,6 +652,7 @@ export function CanonicalPropertyForm({
       </div>
 
       {/* Actions stay outside the clipped body, even with a long gallery. */}
+      {submissionError && <p role="alert" className="p-3 text-destructive">{submissionError}</p>}
       {!hideActions && (
         <div data-property-form-actions="" className="relative z-30 flex shrink-0 gap-3 border-t bg-background pt-4 mt-4 pb-[env(safe-area-inset-bottom)]">
           {onCancel && (
