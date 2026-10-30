@@ -799,7 +799,7 @@ export default function PropertyEditor() {
                 bathrooms: formData.bathrooms || 1,
                 max_guests: formData.max_guests || 2,
                 price_per_night: formData.price_per_night === '' ? null : Number(formData.price_per_night),
-                price_per_month: formData.price_per_month === '' ? null : formData.price_per_month == null ? property.price_per_month : Number(formData.price_per_month),
+                price_per_month: formData.price_per_month === '' ? null : formData.price_per_month == null ? undefined : Number(formData.price_per_month),
                 sale_price: formData.sale_price === '' ? null : Number(formData.sale_price),
                 instant_booking: formData.instant_booking || false,
                 is_featured: false,
