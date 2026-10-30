@@ -45,16 +45,19 @@ vi.mock('@/hooks/usePropertyAvailabilityManagement', () => ({
 }));
 vi.mock('@/components/uno/PageContainer', () => ({ PageContainer: ({ children }: React.PropsWithChildren) => <div>{children}</div> }));
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div> }));
-vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
+vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: unknown }) => <output data-testid="preview-property">{JSON.stringify(property)}</output> }));
 vi.mock('@/components/property/PropertyRooms', () => ({ PropertyRooms: () => null }));
-vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: () => null }));
+vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: ({ currency }: { currency?: string }) => <output data-testid="calendar-currency">{currency || "unknown"}</output> }));
 vi.mock('@/components/owner/PropertyTeamTab', () => ({ PropertyTeamTab: () => null }));
 vi.mock('@/components/owner/property-wizard/AIIntakePanel', () => ({ AIIntakePanel: () => null }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }));
 vi.mock('@/components/property/canonical-form/CanonicalPropertyForm', () => ({
-  CanonicalPropertyForm: ({ initialData, controlledFormData, onFormDataChange, onSubmit, controlledUtilities, onUtilitiesChange }: ComponentProps<typeof CanonicalPropertyForm>) => {
+  CanonicalPropertyForm: ({ initialData, controlledFormData, onFormDataChange, onSubmit, controlledUtilities, onUtilitiesChange, extraTabs }: ComponentProps<typeof CanonicalPropertyForm>) => {
     const form = controlledFormData!;
     return <div>
+      {extraTabs?.map(tab => <div key={tab.id}>{tab.content}</div>)}
+      <label>Nightly amount<input aria-label="Nightly amount" value={form.price_per_night} onChange={event => onFormDataChange!({ ...form, price_per_night: event.target.value })} /></label>
+      <label>Sale amount<input aria-label="Sale amount" value={form.sale_price} onChange={event => onFormDataChange!({ ...form, sale_price: event.target.value })} /></label>
       <output data-testid="initial-data">{JSON.stringify(initialData)}</output>
       <output data-testid="controlled-data">{JSON.stringify(form)}</output>
       <label htmlFor="property-title">Title<input id="property-title" aria-label="Title" value={form.title} onChange={event => onFormDataChange!({ ...form, title: event.target.value })} /></label>
@@ -103,6 +106,32 @@ describe('PropertyEditor payment-field round trip', () => {
     expect(renderedData('controlled-data')).toMatchObject(expected);
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated title only' } });
     expect(await save()).toMatchObject({ ...expected, title: 'Updated title only', deposit_amount: 300 });
+  });
+
+  it.each([
+    { price: 4200, price_period: 'month', currency: 'EUR', price_per_night: null, listing_modes: ['rent', 'sale', 'platform'], listing_type: 'rent', is_for_sale: true, sale_price: 95000, sale_currency: 'USD' },
+    { price: null, price_period: null, currency: null, price_per_night: 150, listing_modes: ['sale'], listing_type: 'sale', is_for_sale: false, sale_price: 95000, sale_currency: 'EUR' },
+  ])('preserves commercial source fields and offer modes through unrelated owner edits: %j', async commercial => {
+    Object.assign(mocks.property, commercial);
+    renderEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(renderedData('preview-property')).toMatchObject(commercial);
+    expect(screen.getByTestId('calendar-currency')).toHaveTextContent(commercial.currency || 'unknown');
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Owner title only' } });
+    const payload = await save();
+    expect(payload.listing_modes).toEqual(commercial.listing_modes);
+    for (const field of ['price', 'price_period', 'currency', 'sale_price', 'sale_currency']) {
+      if (field in payload) expect(payload[field]).toEqual(commercial[field as keyof typeof commercial]);
+    }
+    expect(renderedData('preview-property')).toMatchObject({ ...commercial, title_en: 'Owner title only' });
+  });
+
+  it.each(['0', '180', ''])('saves an explicit owner nightly edit %j in its recorded EUR without changing generic monthly or sale USD', async nightly => {
+    Object.assign(mocks.property, { currency: 'EUR', price: 4200, price_period: 'month', price_per_night: 120, sale_price: 95000, sale_currency: 'USD', listing_modes: ['rent', 'sale'], is_for_sale: true });
+    renderEditor();
+    fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: nightly } });
+    fireEvent.change(screen.getByLabelText('Sale amount'), { target: { value: '96000' } });
+    expect(await save()).toMatchObject({ price: 4200, price_period: 'month', currency: 'EUR', price_per_night: nightly === '' ? null : Number(nightly), sale_price: 96000, sale_currency: 'USD', listing_modes: ['rent', 'sale'] });
   });
 
   it('persists an explicit currency edit to THB without converting the deposit amount', async () => {
