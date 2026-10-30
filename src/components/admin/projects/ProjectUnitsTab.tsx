@@ -145,7 +145,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
                   <td className="p-2 font-medium">{unit.internal_name || unit.title_en}</td>
                   <td className="p-2 text-muted-foreground">{unit.bedrooms}BR</td>
                   <td className="p-2 text-right">{unit.area_sqm || '—'}</td>
-                  <td className="p-2 text-right">{unit.floor || '—'}</td>
+                  <td className="p-2 text-right">{unit.floor ?? '—'}</td>
                   <td className="p-2 text-right font-mono">
                     {unit.sale_price ? `฿${(unit.sale_price / 1e6).toFixed(1)}M` : unit.price ? `฿${unit.price}` : '—'}
                   </td>

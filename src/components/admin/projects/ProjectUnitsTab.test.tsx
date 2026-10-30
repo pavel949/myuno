@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectUnitsTab } from './ProjectUnitsTab';
@@ -9,7 +9,7 @@ vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: ({ open, c
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => {
   const query = {
     select: () => query, eq: () => query,
-    order: async () => ({ data: [{ id: 'existing', internal_name: 'Existing unit', bedrooms: 0, is_active: false }], error: state.error }),
+    order: async () => ({ data: [{ id: 'existing', internal_name: 'Existing unit', bedrooms: 0, floor: 0, is_active: false }], error: state.error }),
     insert: (payload: Record<string, unknown>) => { state.inserted = payload; state.writes++; return query; },
     single: async () => ({ data: state.confirmError ? null : { id: 'created' }, error: state.confirmError }),
   };
@@ -24,6 +24,11 @@ describe('physical properties in admin project authoring', () => {
     expect(screen.queryByText('Sold')).not.toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeVisible();
     expect(state.writes).toBe(0);
+  });
+  it('renders a stored ground floor as zero', async () => {
+    mount();
+    const row = (await screen.findByText('Existing unit')).closest('tr')!;
+    expect(within(row).getAllByRole('cell')[3]).toHaveTextContent(/^0$/);
   });
   it('exposes load failure with retry instead of an empty inventory', async () => {
     state.error = new Error('synthetic load failure');

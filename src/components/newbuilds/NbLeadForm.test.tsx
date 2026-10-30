@@ -4,7 +4,7 @@ import { NbLeadForm } from './NbLeadForm';
 const state = vi.hoisted(() => ({ insert: vi.fn(), attribution: vi.fn(), success: vi.fn(), error: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ insert: state.insert }) } }));
 vi.mock('@/lib/newbuilds/attribution', () => ({ recordAttribution: state.attribution }));
-vi.mock('@/lib/newbuilds/leadAttempt', () => ({ leadAttempt: async () => '11111111-1111-4111-8111-111111111111' }));
+vi.mock('@/lib/newbuilds/leadAttempt', () => ({ leadAttempt: async () => ({ id: '11111111-1111-4111-8111-111111111111', state: 'pending' }), completeLeadAttempt: async () => {}, startNewLeadAttempt: async () => {} }));
 vi.mock('sonner', () => ({ toast: { success: state.success, error: state.error } }));
 beforeEach(() => { vi.clearAllMocks(); state.attribution.mockResolvedValue({ attributionId: null }); state.insert.mockResolvedValue({ error: null }); });
 function form() {

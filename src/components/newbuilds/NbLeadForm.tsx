@@ -8,7 +8,7 @@
 import React, { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { leadAttempt } from '@/lib/newbuilds/leadAttempt';
+import { leadAttempt, completeLeadAttempt, startNewLeadAttempt } from '@/lib/newbuilds/leadAttempt';
 import { recordAttribution } from '@/lib/newbuilds/attribution';
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
 export function NbLeadForm({ projectId, developerId, source = 'project_page', compact = false }: Props) {
   const submitting = useRef(false);
   const [loading, setLoading] = useState(false);
+  const completed = useRef<{ payload: Record<string, unknown>; id: string } | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ full_name: '', phone: '', email: '', message: '', unit_preference: '' });
 
@@ -40,7 +41,13 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
         unit_preference: form.unit_preference.trim() || null,
         project_id: projectId ?? null, developer_id: developerId ?? null, source,
       };
-      const attemptId = await leadAttempt(payload);
+      const attempt = await leadAttempt(payload);
+      if (attempt.state === 'completed') {
+        completed.current = { payload, id: attempt.id };
+        setSubmitted(true);
+        return;
+      }
+      const attemptId = attempt.id;
       // 1. Record attribution (cookie + fingerprint + RLN)
       let attributionId: string | null = null;
       try {
@@ -63,6 +70,10 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
       });
       if (error) throw error;
 
+      completed.current = { payload, id: attemptId };
+      // The insert was acknowledged even if local completion persistence fails.
+      // Retain the pending ID on failure; never rotate an uncertain attempt.
+      try { await completeLeadAttempt(payload, attemptId); } catch { /* Keep acknowledged UI state. */ }
       setSubmitted(true);
       toast.success('Запрос отправлен! Мы свяжемся с вами в течение 2 часов.');
     } catch (error) {
@@ -78,12 +89,31 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
     }
   };
 
+  const handleNewEnquiry = async () => {
+    if (submitting.current || !completed.current) return;
+    submitting.current = true;
+    setLoading(true);
+    try {
+      const { payload, id } = completed.current;
+      await completeLeadAttempt(payload, id);
+      await startNewLeadAttempt(payload, id);
+      completed.current = null;
+      setSubmitted(false);
+    } catch {
+      toast.error('Не удалось подготовить новый запрос. Попробуйте позже.');
+    } finally {
+      submitting.current = false;
+      setLoading(false);
+    }
+  };
+
   if (submitted) {
     return (
       <div className="nb-glass p-6 text-center">
         <div className="text-2xl mb-2">✓</div>
         <p className="nb-display text-lg" style={{ color: 'hsl(var(--nb-gold))' }}>Запрос отправлен</p>
         <p className="text-sm mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>Мы свяжемся с вами в течение 2 часов</p>
+        <button type="button" onClick={handleNewEnquiry} disabled={loading} className="nb-btn-gold mt-4 disabled:opacity-50">Отправить новый запрос</button>
       </div>
     );
   }
