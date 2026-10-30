@@ -19,6 +19,11 @@ describe('one recorded rental tariff schedule', () => {
     expect(propertyRentalDisplayPrice(property, terms)).toBeNull();
     expect(propertyDetailPricing(property, terms, 'rent')).toMatchObject({ amount: null, pricePerNight: null, canQuoteShortStay: false });
   });
+  it('handles the same public monthly/nightly presentation when monthly money is in its dedicated column', () => {
+    const property = { ...canvas, price: null, price_per_month: 3000 };
+    expect(propertyRentalRateOptions(property).rates).toEqual([{ period: 'night', amount: 3000 }, { period: 'month', amount: 3000 }]);
+    expect(propertyDetailPricing(property, null, 'rent')).toMatchObject({ pricePerNight: 3000, canQuoteShortStay: true });
+  });
   it('does not let an empty generic amount hide a known independent nightly tariff', () => {
     const property = { ...canvas, price: null };
     expect(propertyRentalDisplayPrice(property)).toEqual({ period: 'night', amount: 3000 });
