@@ -1,3 +1,5 @@
+import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalRateSummary';
+import { propertyRentalRateOptions } from '@/lib/real-estate/propertyDetailIntent';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Property } from '@/hooks/useProperties';
@@ -17,6 +19,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
   const images = showcaseImages(property);
   const image = images.find(url => !failedImages.has(url));
   const title = (language === 'ru' ? property.title_ru : property.title_en) || property.title_en || property.title_ru;
+  const multipleRates = propertyRentalRateOptions(property).rates.length > 1;
   const quote = homeShowcasePrice(property);
   const periods: Record<string, LangValues> = {
     total: { ru: '', en: '', th: '' },
@@ -34,6 +37,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
     }} /></div>}
     <div className="home-listing-copy"><p className="home-listing-location">{property.district ? getDistrictLabel(property.district, language === 'ru' ? 'ru' : 'en') : t({ ru: 'Пхукет', en: 'Phuket', th: 'ภูเก็ต' })}</p>
       <h3>{title}</h3><p className="home-listing-facts">{property.bedrooms != null && property.bedrooms > 0 ? `${property.bedrooms} ${t({ ru: 'сп.', en: 'bedrooms', th: 'ห้องนอน' })}` : t({ ru: 'Описание и условия', en: 'Details and terms', th: 'รายละเอียดและเงื่อนไข' })}{property.area_sqm != null && property.area_sqm > 0 ? ` · ${property.area_sqm} ${t({ ru: 'м²', en: 'm²', th: 'ตร.ม.' })}` : ''}</p>
-      <p className="home-listing-price">{quote ? <><strong>{quote.currency === 'THB' ? formatPrice(quote.amount) : `${new Intl.NumberFormat(language).format(quote.amount)} ${quote.currency}`}</strong> <span>{t(periods[quote.period])}</span></> : t({ ru: 'Стоимость и условия в карточке', en: 'Pricing and terms on the listing', th: 'ราคาและเงื่อนไขในประกาศ' })}</p>
+      {!multipleRates && <p className="home-listing-price">{quote ? <><strong>{quote.currency === 'THB' ? formatPrice(quote.amount) : `${new Intl.NumberFormat(language).format(quote.amount)} ${quote.currency}`}</strong> <span>{t(periods[quote.period])}</span></> : t({ ru: 'Стоимость и условия в карточке', en: 'Pricing and terms on the listing', th: 'ราคาและเงื่อนไขในประกาศ' })}</p>}
+      <PropertyRentalRateSummary property={property} />
     </div></Link></article>;
 }

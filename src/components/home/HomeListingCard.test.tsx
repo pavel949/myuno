@@ -23,3 +23,9 @@ it('excludes the home only after all unique stored candidates fail', () => {
  expect(container.querySelector('article')).toBeNull();
  expect(unavailable).toHaveBeenCalledExactlyOnceWith('home');
 });
+
+ it('shows both recorded periods on the actual homepage card', () => {
+  render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
+  expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per night');
+  expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per month');
+ });

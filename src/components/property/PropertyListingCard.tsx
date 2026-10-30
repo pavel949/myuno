@@ -4,6 +4,8 @@
  * NOT for admin/owner dashboards (use PropertyCard instead)
  */
 
+import { PropertyRentalRateSummary } from './PropertyRentalRateSummary';
+import { propertyRentalRateOptions } from '@/lib/real-estate/propertyDetailIntent';
 import React, { useMemo } from 'react';
 import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -95,6 +97,7 @@ function PropertyListingCardBase({
     : 'Phuket';
 
   // Keep each displayed amount paired with its own billing period.
+  const multipleRates = mode === 'rent' && propertyRentalRateOptions(property).rates.length > 1;
   const unitPrice = mode === 'rent' ? surface.priceHintThb : null;
   const pricePeriod = surface.priceMode.replace('per_', '');
   const salePrice = mode === 'buy' ? surface.priceHintThb : null;
@@ -253,7 +256,7 @@ function PropertyListingCardBase({
 
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">
-          <p className="text-base leading-snug text-foreground">
+          {!multipleRates && <p className="text-base leading-snug text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
                 {salePrice !== null ? formatPrice(salePrice) : priceOnRequest}
@@ -266,7 +269,8 @@ function PropertyListingCardBase({
                 </span>
               </>
             )}
-          </p>
+          </p>}
+          {mode === 'rent' && <PropertyRentalRateSummary property={property} />}
           {totalPrice && nights && mode !== 'buy' && (
             <p className="text-sm text-muted-foreground mt-1 underline decoration-muted-foreground/50">
               {isRu ? 'Ориентировочно' : language === 'th' ? 'ประมาณ' : 'Estimated'}: {formatPrice(totalPrice)}
