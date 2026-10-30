@@ -1,4 +1,6 @@
-# Verification record — 2026-10-30
+# Original tranche verification record — 2026-10-30
+
+This historical matrix covers the original tranche `1b367c2605139eafe759acf8921bc9f0dfcea46c`. Follow-up review, lead lifecycle, unit metadata and test-efficiency repairs are subsequent separable commits. Their final frozen-SHA aggregate evidence is recorded in the draft PR; this original matrix must not be read as a fresh all-green aggregate claim for those follow-ups.
 
 Scope and remaining operational gates: [repair contract](2026-10-30.md).
 Base: `5b71c3fa74f5d94739bddaf73ac155ab0b58cead`; dedicated branch `codex/operational-repairs-20261030`.
