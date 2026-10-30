@@ -1,3 +1,4 @@
+import { assertAdminRows } from '@/lib/assertAdminRows';
 /**
  * Bulk-link properties to a canonical `property_projects` row.
  *
@@ -98,11 +99,13 @@ export function PropertyProjectBulkLinkPanel() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('properties')
         .update({ project_id: projectId })
-        .in('id', selected);
+        .in('id', selected)
+        .select('id,project_id');
       if (error) throw error;
+      assertAdminRows(data, selected, row => row.project_id === projectId);
     },
     onSuccess: () => {
       toast.success(

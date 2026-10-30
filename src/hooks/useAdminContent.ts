@@ -261,7 +261,9 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
     const { error } = await supabase
       .from('properties')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .single();
 
     if (!error) await fetchProperties();
     return { error };

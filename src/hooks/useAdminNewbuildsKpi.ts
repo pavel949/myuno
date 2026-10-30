@@ -24,16 +24,22 @@ export function useAdminNewbuildsKpi() {
         supabase.from('developers').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
+      const results = [pendingProjects, pendingDevs, orphan, needsReview, stale, leadsToday, leadsWeek, totalProjects, totalDevs];
+      for (const result of results) {
+        if (result.error) throw result.error;
+        if (result.count === null) throw new Error('Newbuild dashboard count was not returned');
+      }
+
       return {
-        pendingProjects: pendingProjects.count || 0,
-        pendingDevs: pendingDevs.count || 0,
-        orphan: orphan.count || 0,
-        needsReview: needsReview.count || 0,
-        stale: stale.count || 0,
-        leadsToday: leadsToday.count || 0,
-        leadsWeek: leadsWeek.count || 0,
-        totalProjects: totalProjects.count || 0,
-        totalDevs: totalDevs.count || 0,
+        pendingProjects: pendingProjects.count,
+        pendingDevs: pendingDevs.count,
+        orphan: orphan.count,
+        needsReview: needsReview.count,
+        stale: stale.count,
+        leadsToday: leadsToday.count,
+        leadsWeek: leadsWeek.count,
+        totalProjects: totalProjects.count,
+        totalDevs: totalDevs.count,
       };
     },
     staleTime: 60_000,

@@ -85,3 +85,14 @@ it('records BrowserRouter initial idx0/default so a direct search return uses Ba
   window.history.replaceState({ idx: 1, key: 'property-entry' }, '', '/property/unit');
   expect(publicJourneyReturn({ pathname: '/property/unit', search: '', hash: '', key: 'property-entry', state }, '/property/browse')).toEqual({ delta: -1 });
 });
+
+it('returns to the complete global search query and category after a reload', () => {
+  const search = { pathname: '/search', search: '?q=Canvas&type=property', hash: '#results', key: 'global-search' };
+  const detail = { pathname: '/property/synthetic', search: '', hash: '', key: 'detail' };
+  const state = publicJourneyState(search);
+  expect(publicJourneyReturn({ ...detail, state }, '/property/search?mode=rent')).toEqual({ href: '/search?q=Canvas&type=property#results', state: undefined, replace: true });
+});
+
+it.each(['/search/../../admin', '/search/private', '/search%0a'])('rejects non-canonical global search origin %s', href => {
+  expect(readPublicJourneyOrigin({ publicJourneyOrigin: { href, key: 'x' } })).toBeUndefined();
+});

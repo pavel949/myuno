@@ -161,7 +161,7 @@ Small reviewable tranches. Never combine auth cutover, schema redesign, money ch
 
 `Audit → Design → Isolated Tests → Implement → Verify → GO/NO-GO → Next`.
 
-Never edit applied migrations; use forward migrations + security-preserving rollback. Test RLS as authenticated non-owner. UI filtering is not isolation. No production business writes for QA. TypeScript strict. Restricted query keys include actor/company/scope/revision or are evicted. Test changed operational UI at 375/390/430 + desktop. Never fabricate successful transitions.
+Never edit applied migrations; use forward migrations + security-preserving rollback. Test RLS as authenticated non-owner. UI filtering is not isolation. No production business writes for QA. Admin bulk mutations confirm every selected row before full success; listing activity never establishes sale status. Public inquiry and detail use the same stored tariff eligibility and cancellation description. TypeScript strict. Restricted query keys include actor/company/scope/revision or are evicted. Test changed operational UI at 375/390/430 + desktop. Never fabricate successful transitions.
 
 ## 15. Definition of Done
 Build/UI success is insufficient. Done requires canonical-domain correctness, server auth, explicit states, mobile/RU/EN, tests, auditability, no duplicate truth, rollback evidence and safe operational acceptance where relevant.

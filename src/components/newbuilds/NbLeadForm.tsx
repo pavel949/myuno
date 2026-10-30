@@ -5,9 +5,10 @@
  * - Creates/updates lead_attributions record
  * - Triggers RLN on first qualified project touchpoint
  */
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { leadAttempt } from '@/lib/newbuilds/leadAttempt';
 import { recordAttribution } from '@/lib/newbuilds/attribution';
 
 interface Props {
@@ -18,18 +19,28 @@ interface Props {
 }
 
 export function NbLeadForm({ projectId, developerId, source = 'project_page', compact = false }: Props) {
+  const submitting = useRef(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ full_name: '', phone: '', email: '', message: '', unit_preference: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.full_name || !form.phone) {
+    if (submitting.current || submitted) return;
+    if (!form.full_name.trim() || !form.phone.trim()) {
       toast.error('Укажите имя и телефон');
       return;
     }
+    submitting.current = true;
     setLoading(true);
     try {
+      const payload = {
+        full_name: form.full_name.trim(), phone: form.phone.trim(),
+        email: form.email.trim() || null, message: form.message.trim() || null,
+        unit_preference: form.unit_preference.trim() || null,
+        project_id: projectId ?? null, developer_id: developerId ?? null, source,
+      };
+      const attemptId = await leadAttempt(payload);
       // 1. Record attribution (cookie + fingerprint + RLN)
       let attributionId: string | null = null;
       try {
@@ -46,23 +57,23 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
 
       // 2. Insert nb_lead
       const { error } = await (supabase.from('nb_leads' as any) as any).insert({
-        full_name: form.full_name,
-        phone: form.phone,
-        email: form.email || null,
-        message: form.message || null,
-        unit_preference: form.unit_preference || null,
-        project_id: projectId ?? null,
-        developer_id: developerId ?? null,
-        source,
+        ...payload,
+        id: attemptId,
         attribution_id: attributionId,
       });
       if (error) throw error;
 
       setSubmitted(true);
       toast.success('Запрос отправлен! Мы свяжемся с вами в течение 2 часов.');
-    } catch {
+    } catch (error) {
+      const duplicate = typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
+      if (duplicate) {
+        toast.error('Этот запрос уже получен или ожидает подтверждения. Не отправляйте его повторно; уточните статус у менеджера.');
+        return;
+      }
       toast.error('Ошибка отправки. Попробуйте позже.');
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };

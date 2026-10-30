@@ -1,7 +1,7 @@
 import '@/styles/public-commerce.css';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2, Info, Sparkles } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,12 +34,15 @@ import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
+import { propertyDetailPricing, propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyCancellationDescription } from '@/lib/propertyCancellationDescription';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 
 
 export default function PropertyInquiry() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -60,7 +63,7 @@ export default function PropertyInquiry() {
   const draftKey = id ? `uno_inquiry_draft_${id}` : null;
 
   // Determine booking mode from property data
-  const { data: property } = usePropertyWithRentalTerms(id);
+  const { data: property, isLoading: propertyLoading, isError: propertyError, refetch: refetchProperty } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
 
   // Loose extension typings — fields exist in DB but aren't in generated types yet.
@@ -93,23 +96,19 @@ export default function PropertyInquiry() {
   // 6-tracks guard: STR booking flow only supports short-stay listings.
   // If owner has switched the listing to medium/long-only or sale-only, redirect
   // back to the detail page (which renders the correct lead-form CTA).
-  const tenancyModes: string[] = Array.isArray(propertyExt?.tenancy_modes)
-    ? (propertyExt!.tenancy_modes as string[])
-    : [];
-  const supportsShortStay = tenancyModes.length > 0
-    ? tenancyModes.includes('short')
-    : !!(property?.price_per_night || rentalExt?.price_per_night);
+  const offerPricing = property ? propertyDetailPricing(property, rentalTerms, 'rent', searchParams.get('tenancy')) : null;
+  const supportsShortStay = offerPricing?.canQuoteShortStay === true;
   useEffect(() => {
     if (!property) return;
     if (!supportsShortStay) {
       toast.info(
         isRu
-          ? 'Этот объект сдаётся на длительный срок — оставьте запрос менеджеру.'
-          : 'This listing is for long-term rental — please send a request to the manager.',
+          ? 'Расчёт краткосрочной аренды недоступен — уточните условия у менеджера.'
+          : 'A short-stay quote is unavailable — please confirm terms with the manager.',
       );
-      navigate(`/property/${id}`, { replace: true });
+      navigate(propertyDetailHref(id!, 'rent', searchParams.toString()), { replace: true, state: location.state });
     }
-  }, [property, supportsShortStay, isRu, navigate, id]);
+  }, [property, supportsShortStay, isRu, navigate, id, searchParams, location.state]);
   // Get dates and guests from URL params (set on the property detail page)
   const checkInParam = searchParams.get('checkIn');
   const checkOutParam = searchParams.get('checkOut');
@@ -258,7 +257,7 @@ export default function PropertyInquiry() {
     return differenceInDays(checkOut, checkIn);
   }, [checkIn, checkOut]);
 
-  const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
+  const pricePerNight = offerPricing?.pricePerNight ?? 0;
 
   // Pull rate seasons (per-property pricing overrides) for the central engine.
   const { data: rateSeasons } = usePropertyRateSeasons(id);
@@ -339,25 +338,23 @@ export default function PropertyInquiry() {
   }, [checkIn, checkOut, rentalTerms, guests, language, isRu]);
 
 
-  const isFormValid = formData.name && formData.phone && hasDates && validationErrors.length === 0;
+  const isFormValid = supportsShortStay && formData.name && formData.phone && hasDates && validationErrors.length === 0;
   const propertyTitle = isRu ? property?.title_ru : property?.title_en;
   const propertyImage = property?.cover_image || property?.images?.[0];
 
-  const editUrl = `/property/${id}`;
-
-  const cancellationLabels: Record<string, { en: string; ru: string }> = {
-    flexible: { en: 'Free cancellation up to 24h before check-in', ru: 'Бесплатная отмена за 24ч до заезда' },
-    moderate: { en: 'Free cancellation up to 5 days before check-in', ru: 'Бесплатная отмена за 5 дней до заезда' },
-    strict: { en: 'Non-refundable after booking', ru: 'Невозвратная после бронирования' },
-  };
+  const editUrl = propertyDetailHref(id || '', 'rent', searchParams.toString());
 
   // Show confirmation screen after a successful viewing request submission.
   if (submittedOrderId) {
     return <InquiryConfirmation orderId={submittedOrderId} />;
   }
 
+  if (propertyLoading) return <div role="status" className="p-6">{isRu ? 'Загрузка объекта…' : 'Loading property…'}</div>;
+  if (propertyError) return <div role="alert" className="p-6 space-y-4"><p>{isRu ? 'Не удалось загрузить объект' : 'Could not load this home'}</p><Button onClick={() => refetchProperty()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>;
+  if (!property) return <div role="alert" className="p-6">{isRu ? 'Объект недоступен' : 'This home is unavailable'}</div>;
+
   // If no dates, prompt the user to go back
-  if (!hasDates) {
+  if (!property || !supportsShortStay || !hasDates) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center gap-4">
         <CalendarIcon className="w-12 h-12 text-muted-foreground" />
@@ -680,7 +677,7 @@ export default function PropertyInquiry() {
             </div>
             <p className="text-sm text-muted-foreground">
               {rentalTerms?.cancellation_policy
-                ? (cancellationLabels[rentalTerms.cancellation_policy]?.[isRu ? 'ru' : 'en'] || rentalTerms.cancellation_policy)
+                ? propertyCancellationDescription(rentalTerms.cancellation_policy, isRu ? 'ru' : 'en')
                 : (isRu ? 'Уточняйте у хозяина' : 'Check with the host')}
             </p>
           </section>

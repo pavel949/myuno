@@ -1,3 +1,4 @@
+import { assertAdminRows } from '@/lib/assertAdminRows';
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -179,11 +180,13 @@ export default function AdminProjects() {
     if (!bulkDeveloperId || selectedIds.size === 0) return;
     setIsBulkProcessing(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('property_projects')
         .update({ developer_id: bulkDeveloperId, needs_review: false })
-        .in('id', Array.from(selectedIds));
+        .in('id', Array.from(selectedIds))
+        .select('id,developer_id,needs_review');
       if (error) throw error;
+      assertAdminRows(data, selectedIds, row => row.developer_id === bulkDeveloperId && row.needs_review === false);
       toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
@@ -199,11 +202,13 @@ export default function AdminProjects() {
     if (selectedIds.size === 0) return;
     setIsBulkProcessing(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('property_projects')
         .update({ is_approved: true, needs_review: false })
-        .in('id', Array.from(selectedIds));
+        .in('id', Array.from(selectedIds))
+        .select('id,is_approved,needs_review');
       if (error) throw error;
+      assertAdminRows(data, selectedIds, row => row.is_approved === true && row.needs_review === false);
       toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
@@ -332,6 +337,7 @@ export default function AdminProjects() {
   };
 
   const handleSave = async () => {
+    if (createProject.isPending || updateProject.isPending) return;
     if (!formData.name_en?.trim()) {
       toast.error(isRu ? 'Введите название проекта' : 'Enter project name');
       return;

@@ -38,7 +38,7 @@ export function ProjectUnitsGrid({ projectId }: Props) {
   const isRu = language === 'ru';
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
-  const { data: units = [], isLoading } = useProjectUnitsGrid(projectId);
+  const { data: units = [], isLoading, error, refetch } = useProjectUnitsGrid(projectId);
   const createUnit = useCreateProjectUnit();
   const updateUnit = useUpdateProjectUnit();
   const deleteUnit = useDeleteProjectUnit();
@@ -81,6 +81,7 @@ export function ProjectUnitsGrid({ projectId }: Props) {
     sold: units.filter(u => u.status === 'sold').length,
   };
 
+  if (error) return <div role="alert" className="space-y-3"><p>{isRu ? 'Не удалось загрузить юниты' : 'Could not load units'}</p><Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>;
   if (isLoading) return <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>;
 
   return (
