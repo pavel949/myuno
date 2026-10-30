@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,7 +39,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, property_type, bedrooms, bathrooms, area_sqm, sale_price, price, listing_type, is_active, floor, internal_name')
+        .select('id, title_en, title_ru, property_type, bedrooms, bathrooms, area_sqm, sale_price, price, listing_type, is_active, floor, internal_name, unit_number')
         .eq('project_id', projectId)
         .order('internal_name');
       if (error) throw error;
@@ -48,11 +49,13 @@ export function ProjectUnitsTab({ projectId }: Props) {
 
   const addUnit = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('properties').insert({
+      if (!form.unit_id.trim()) throw new Error('Unit code is required');
+      const { data: saved, error } = await supabase.from('properties').insert({
         project_id: projectId,
         title_en: `Unit ${form.unit_id} — ${form.unit_type}`,
         title_ru: `Юнит ${form.unit_id} — ${form.unit_type}`,
-        internal_name: form.unit_id,
+        internal_name: form.unit_id.trim(),
+        unit_number: form.unit_id.trim(),
         property_type: 'condo',
         listing_type: 'sale',
         bedrooms: form.bedrooms === '' ? null : Number(form.bedrooms),
@@ -64,6 +67,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
         approval_status: 'pending',
       } as any).select('id').single();
       if (error) throw error;
+      if (!saved?.id) throw new Error('Created property was not confirmed');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-project-properties', projectId] });
@@ -142,7 +146,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
             <tbody>
               {filtered.map((unit: any) => (
                 <tr key={unit.id} className="border-t hover:bg-muted/30">
-                  <td className="p-2 font-medium">{unit.internal_name || unit.title_en}</td>
+                  <td className="p-2 font-medium"><Link className="underline" to={`/admin/properties?edit=${encodeURIComponent(unit.id)}`}>{unit.unit_number || unit.internal_name || unit.title_en}</Link></td>
                   <td className="p-2 text-muted-foreground">{unit.bedrooms}BR</td>
                   <td className="p-2 text-right">{unit.area_sqm || '—'}</td>
                   <td className="p-2 text-right">{unit.floor ?? '—'}</td>
@@ -164,7 +168,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
       {/* Add Unit Modal */}
       <ResponsiveModal open={showAdd} onOpenChange={setShowAdd} title={isRu ? 'Добавить юнит' : 'Add Unit'} size="md"
         footer={
-          <Button onClick={() => addUnit.mutate()} disabled={addUnit.isPending || !form.unit_id}>
+          <Button onClick={() => addUnit.mutate()} disabled={addUnit.isPending || !form.unit_id.trim()}>
             {addUnit.isPending ? '...' : (isRu ? 'Добавить' : 'Add Unit')}
           </Button>
         }

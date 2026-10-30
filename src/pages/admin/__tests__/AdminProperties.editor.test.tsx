@@ -42,7 +42,14 @@ vi.mock('@/components/owner/property-wizard/steps', async () => {
   const { PhotosStep } = await import('@/components/owner/property-wizard/steps/PhotosStep');
   return {
     PhotosStep,
-    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string }; updateFormData: (data: { title: string }) => void }) => <label htmlFor="fixture-title">Fixture title<input id="fixture-title" value={formData.title} onChange={event => updateFormData({ title: event.target.value })} /></label>,
+    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string; project_id?: string; unit_number?: string; floor?: number; total_floors?: number; bedrooms?: number }; updateFormData: (data: Record<string, unknown>) => void }) => <>
+      <label htmlFor="fixture-title">Fixture title<input id="fixture-title" value={formData.title} onChange={event => updateFormData({ title: event.target.value })} /></label>
+      <label htmlFor="fixture-project">Fixture project<input id="fixture-project" value={formData.project_id || ''} onChange={event => updateFormData({ project_id: event.target.value || undefined })} /></label>
+      <label htmlFor="fixture-unit">Fixture unit<input id="fixture-unit" value={formData.unit_number || ''} onChange={event => updateFormData({ unit_number: event.target.value })} /></label>
+      <label htmlFor="fixture-floor">Fixture floor<input id="fixture-floor" type="number" value={formData.floor ?? ''} onChange={event => updateFormData({ floor: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>
+      <label htmlFor="fixture-total-floors">Fixture total floors<input id="fixture-total-floors" type="number" value={formData.total_floors ?? ''} onChange={event => updateFormData({ total_floors: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>
+      <label htmlFor="fixture-bedrooms">Fixture bedrooms<input id="fixture-bedrooms" type="number" value={formData.bedrooms ?? ''} onChange={event => updateFormData({ bedrooms: Number(event.target.value) })} /></label>
+    </>,
     LocationStep: () => null,
     PricingStep: () => null,
     UtilitiesStep: () => null,
@@ -81,6 +88,31 @@ describe('contained admin property editor', () => {
     mocks.properties = [{ id: 'synthetic-property', updated_at: '2026-10-19T00:00:00Z', approval_status: 'pending', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: Array.from({ length: 15 }, (_, i) => `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>#${i}`) }];
   });
   afterEach(() => { cleanup(); expect(mocks.network).not.toHaveBeenCalled(); });
+
+  it('reopens and saves canonical project/unit/floor fields without replacing the physical ID or zero bedrooms', async () => {
+    mocks.properties = [{ ...mocks.properties[0], project_id: 'project', unit_number: 'G-01', floor: 0, total_floors: 4, bedrooms: 0 }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog', { name: 'Edit Property' });
+    expect(within(editor).getByLabelText('Fixture project')).toHaveValue('project');
+    expect(within(editor).getByLabelText('Fixture floor')).toHaveValue(0);
+    expect(within(editor).getByLabelText('Fixture bedrooms')).toHaveValue(0);
+    fireEvent.change(within(editor).getByLabelText('Fixture project'), { target: { value: 'reviewed-project' } });
+    fireEvent.change(within(editor).getByLabelText('Fixture total floors'), { target: { value: '5' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledWith('synthetic-property', expect.objectContaining({ project_id: 'reviewed-project', unit_number: 'G-01', floor: 0, total_floors: 5, bedrooms: 0 }), '2026-10-19T00:00:00Z'));
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it('can explicitly clear an optional project link and unit identifiers', async () => {
+    mocks.properties = [{ ...mocks.properties[0], project_id: 'project', unit_number: 'G-01', floor: 0 }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog', { name: 'Edit Property' });
+    for (const name of ['Fixture project', 'Fixture unit', 'Fixture floor']) fireEvent.change(within(editor).getByLabelText(name), { target: { value: '' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledWith('synthetic-property', expect.objectContaining({ project_id: null, unit_number: null, floor: null }), '2026-10-19T00:00:00Z'));
+  });
 
   it('owns one scrolling body with a protected footer and accessible tab labels', async () => {
     renderEditor();

@@ -52,12 +52,13 @@ export function useCreateProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<ProjectUnitInsert> & { project_id: string; unit_type: string }) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
         .insert(data as any)
         .select('id')
         .single();
       if (error) throw error;
+      if (!saved?.id) throw new Error('Created unit was not confirmed');
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['project-units-grid', vars.project_id] });
@@ -72,7 +73,7 @@ export function useUpdateProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, projectId, ...updates }: { id: string; projectId: string } & Partial<ProjectUnit>) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
         .update(updates as any)
         .eq('id', id)
@@ -80,6 +81,7 @@ export function useUpdateProjectUnit() {
         .select('id')
         .single();
       if (error) throw error;
+      if (saved?.id !== id) throw new Error('Unit change was not confirmed. Reload before retrying.');
       return projectId;
     },
     onSuccess: (projectId) => {
@@ -95,7 +97,7 @@ export function useDeleteProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
         .delete()
         .eq('id', id)
@@ -103,6 +105,7 @@ export function useDeleteProjectUnit() {
         .select('id')
         .single();
       if (error) throw error;
+      if (saved?.id !== id) throw new Error('Unit change was not confirmed. Reload before retrying.');
       return projectId;
     },
     onSuccess: (projectId) => {

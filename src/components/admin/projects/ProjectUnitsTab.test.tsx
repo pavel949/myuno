@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { ProjectUnitsTab } from './ProjectUnitsTab';
 const state = vi.hoisted(() => ({ error: null as null | Error, inserted: null as null | Record<string, unknown>, writes: 0, confirmError: null as null | Error }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
@@ -16,7 +17,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => {
   return query;
 } } }));
 beforeEach(() => { state.error = null; state.inserted = null; state.writes = 0; state.confirmError = null; });
-function mount() { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}><ProjectUnitsTab projectId="project" /></QueryClientProvider>); }
+function mount() { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}><MemoryRouter><ProjectUnitsTab projectId="project" /></MemoryRouter></QueryClientProvider>); }
 describe('physical properties in admin project authoring', () => {
   it('does not infer sold inventory from an inactive listing', async () => {
     mount();
@@ -24,6 +25,7 @@ describe('physical properties in admin project authoring', () => {
     expect(screen.queryByText('Sold')).not.toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeVisible();
     expect(state.writes).toBe(0);
+    expect(screen.getByRole('link', { name: 'Existing unit' })).toHaveAttribute('href', '/admin/properties?edit=existing');
   });
   it('renders a stored ground floor as zero', async () => {
     mount();
@@ -50,7 +52,7 @@ describe('physical properties in admin project authoring', () => {
     fireEvent.change(numbers[3], { target: { value: '0' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add Unit' }));
     await waitFor(() => expect(state.writes).toBe(1));
-    expect(state.inserted).toMatchObject({ project_id: 'project', bedrooms: 0, floor: 0, is_active: false, approval_status: 'pending' });
+    expect(state.inserted).toMatchObject({ project_id: 'project', unit_number: 'Synthetic-0', bedrooms: 0, floor: 0, is_active: false, approval_status: 'pending' });
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByPlaceholderText('A-101')).toHaveValue('Synthetic-0');
   });

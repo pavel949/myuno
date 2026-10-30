@@ -52,7 +52,7 @@ export function PropertyProjectBulkLinkPanel() {
   const [showLinked, setShowLinked] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
 
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projects, isLoading: projectsLoading, error: projectsError, refetch: refetchProjects } = useQuery({
     queryKey: ['admin-bulk-link-projects'],
     queryFn: async (): Promise<ProjectRow[]> => {
       const { data, error } = await supabase
@@ -66,7 +66,7 @@ export function PropertyProjectBulkLinkPanel() {
     staleTime: 5 * 60_000,
   });
 
-  const { data: properties, isLoading: propsLoading } = useQuery({
+  const { data: properties, isLoading: propsLoading, error: propertiesError, refetch: refetchProperties } = useQuery({
     queryKey: ['admin-bulk-link-properties', showLinked],
     queryFn: async (): Promise<PropertyRow[]> => {
       let query = supabase
@@ -124,6 +124,8 @@ export function PropertyProjectBulkLinkPanel() {
       );
     },
   });
+
+  if (projectsError || propertiesError) return <Card role="alert"><CardContent className="p-6 space-y-3"><p>{t('Не удалось загрузить проекты или объекты для привязки', 'Could not load projects or properties for linkage')}</p><Button onClick={() => { void refetchProjects(); void refetchProperties(); }}>{t('Повторить', 'Retry')}</Button></CardContent></Card>;
 
   const canSave = !!projectId && selected.length > 0 && !save.isPending;
 
