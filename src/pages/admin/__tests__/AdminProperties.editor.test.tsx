@@ -112,8 +112,13 @@ describe('contained admin property editor', () => {
     expect(payload).toMatchObject(commercial);
     if (commercial.listing_type === 'rent') {
       const view = surfaceFromProperty({ ...mocks.properties[0], ...payload } as any, 'rent');
-      expect(view.priceHintThb).toBe(commercial.currency === 'THB' ? commercial.price_per_month ?? commercial.price ?? commercial.price_per_night : null);
-      expect(propertyDetailPricing(payload, { price_per_night: payload.price_per_night }, 'rent').canQuoteShortStay).toBe(commercial.currency === 'THB' && commercial.price_per_night !== null);
+      // The dual fixture intentionally preserves two different recorded monthly amounts.
+      // Authoring must retain both; public quoting must not choose one silently.
+      const conflictingMonthly = _name === 'dual';
+      expect(view.priceHintThb).toBe(!conflictingMonthly && commercial.currency === 'THB' ? commercial.price_per_month ?? commercial.price ?? commercial.price_per_night : null);
+      const offer = propertyDetailPricing(payload, { price_per_night: payload.price_per_night }, 'rent');
+      expect(offer.canQuoteShortStay).toBe(!conflictingMonthly && commercial.currency === 'THB' && commercial.price_per_night !== null);
+      if (conflictingMonthly) expect(offer.rentalRatesAmbiguous).toBe(true);
     }
   });
 
