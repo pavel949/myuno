@@ -167,6 +167,16 @@ describe('PropertyEditor payment-field round trip', () => {
     } finally { vi.useRealTimers(); }
   });
 
+  it('preserves studio zero bedrooms and bathrooms through an unrelated owner edit and public preview', async () => {
+    Object.assign(mocks.property, { bedrooms: 0, bathrooms: 0 });
+    renderEditor();
+    expect(renderedData('controlled-data')).toMatchObject({ bedrooms: 0, bathrooms: 0 });
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Studio title only' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(renderedData('preview-property')).toMatchObject({ bedrooms: 0, bathrooms: 0 });
+    expect(await save()).toMatchObject({ bedrooms: 0, bathrooms: 0 });
+  });
+
   it('persists an explicit currency edit to THB without converting the deposit amount', async () => {
     renderEditor();
     fireEvent.change(screen.getByLabelText('Deposit currency'), { target: { value: 'THB' } });
