@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import type { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
@@ -132,6 +132,18 @@ describe('PropertyEditor payment-field round trip', () => {
     fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: nightly } });
     fireEvent.change(screen.getByLabelText('Sale amount'), { target: { value: '96000' } });
     expect(await save()).toMatchObject({ price: 4200, price_period: 'month', currency: 'EUR', price_per_night: nightly === '' ? null : Number(nightly), sale_price: 96000, sale_currency: 'USD', listing_modes: ['rent', 'sale'] });
+  });
+
+  it('contains invalid commercial input in the autosave error path without an unhandled rejection or write', async () => {
+    Object.assign(mocks.property, { currency: 'EUR', price_per_night: 120 });
+    renderEditor();
+    vi.useFakeTimers();
+    try {
+      fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: '-1' } });
+      await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
+      expect(mocks.mutateAsync).not.toHaveBeenCalled();
+      expect(mocks.navigate).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
   });
 
   it('persists an explicit currency edit to THB without converting the deposit amount', async () => {

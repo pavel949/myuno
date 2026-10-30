@@ -482,12 +482,11 @@ export default function PropertyEditor() {
     if (!id || !formData || !hasUnsavedChanges || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
 
-    const payload = buildEditorPayload();
-    if (!payload) return;
-
-    setSaveState('saving');
     savingRef.current = true;
     try {
+      const payload = buildEditorPayload();
+      if (!payload) return;
+      setSaveState('saving');
       const saved = publishedRevision ? await persistRevision(payload) : await autosaveProperty.mutateAsync({
         id,
         ...payload,
