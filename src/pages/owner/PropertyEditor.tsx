@@ -1,3 +1,4 @@
+import { propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 import { propertyCommercialInitial, propertyCommercialValues, propertyCommercialPayload, changeCommercialOffer, type PropertyCommercialSource } from '@/lib/propertyCommercialFields';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
@@ -117,7 +118,7 @@ function mapPropertyToInitialData(property: any) {
 
 function ownerOfferIntent(formData: PropertyFormData, original: PropertyCommercialSource) {
   let values = propertyCommercialValues(original);
-  if (formData.is_for_sale !== (original.is_for_sale ?? false)) {
+  if (formData.is_for_sale !== propertySupportsMode(original, 'buy')) {
     values = changeCommercialOffer(values, 'sale', formData.is_for_sale);
   }
   const modes = new Set(values.listing_modes ?? []);
@@ -309,7 +310,7 @@ export default function PropertyEditor() {
       check_in_time: mapped.check_in_time,
       check_out_time: mapped.check_out_time,
       instant_booking: mapped.instant_booking,
-      is_for_sale: property.is_for_sale ?? false,
+      is_for_sale: propertySupportsMode(property, 'buy'),
       sale_price: property.sale_price != null ? String(property.sale_price) : '',
       pets_allowed: mapped.pets_allowed,
       pet_deposit: mapped.pet_deposit,

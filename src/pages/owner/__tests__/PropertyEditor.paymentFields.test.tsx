@@ -138,6 +138,8 @@ describe('PropertyEditor payment-field round trip', () => {
 
   it.each([
     { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: true, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: null, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: false, expectedType: null, expectedModes: [] },
     { listing_type: 'sale', listing_modes: ['sale', 'rent', 'platform'], is_for_sale: true, expectedType: 'rent', expectedModes: ['rent', 'platform'] },
   ])('explicitly disables public sale eligibility in the controlled owner writer and preview: %j', async offer => {
     Object.assign(mocks.property, { currency: 'EUR', sale_currency: 'USD', sale_price: 95000, ...offer });
