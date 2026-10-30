@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import type { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import PropertyEditor from '../PropertyEditor';
+import { propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 
 const mocks = vi.hoisted(() => ({
   property: {} as Record<string, unknown>,
@@ -57,6 +58,7 @@ vi.mock('@/components/property/canonical-form/CanonicalPropertyForm', () => ({
     return <div>
       {extraTabs?.map(tab => <div key={tab.id}>{tab.content}</div>)}
       <label>Nightly amount<input aria-label="Nightly amount" value={form.price_per_night} onChange={event => onFormDataChange!({ ...form, price_per_night: event.target.value })} /></label>
+      <label>Sale offer<input type="checkbox" aria-label="Sale offer" checked={form.is_for_sale} onChange={event => onFormDataChange!({ ...form, is_for_sale: event.target.checked })} /></label>
       <label>Sale amount<input aria-label="Sale amount" value={form.sale_price} onChange={event => onFormDataChange!({ ...form, sale_price: event.target.value })} /></label>
       <output data-testid="initial-data">{JSON.stringify(initialData)}</output>
       <output data-testid="controlled-data">{JSON.stringify(form)}</output>
@@ -132,6 +134,23 @@ describe('PropertyEditor payment-field round trip', () => {
     fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: nightly } });
     fireEvent.change(screen.getByLabelText('Sale amount'), { target: { value: '96000' } });
     expect(await save()).toMatchObject({ price: 4200, price_period: 'month', currency: 'EUR', price_per_night: nightly === '' ? null : Number(nightly), sale_price: 96000, sale_currency: 'USD', listing_modes: ['rent', 'sale'] });
+  });
+
+  it.each([
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: true, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale', 'rent', 'platform'], is_for_sale: true, expectedType: 'rent', expectedModes: ['rent', 'platform'] },
+  ])('explicitly disables public sale eligibility in the controlled owner writer and preview: %j', async offer => {
+    Object.assign(mocks.property, { currency: 'EUR', sale_currency: 'USD', sale_price: 95000, ...offer });
+    renderEditor();
+    fireEvent.click(screen.getByLabelText('Sale offer'));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    const expected = { listing_type: offer.expectedType, listing_modes: offer.expectedModes, is_for_sale: false };
+    expect(renderedData('preview-property')).toMatchObject(expected);
+    expect(propertySupportsMode(renderedData('preview-property'), 'buy')).toBe(false);
+    const payload = await save();
+    expect(payload).toMatchObject(expected);
+    expect(propertySupportsMode(payload, 'buy')).toBe(false);
+    expect(payload).toMatchObject({ _authoring: true, _expectedUpdatedAt: '2026-10-01T00:00:00Z' });
   });
 
   it('contains invalid commercial input in the autosave error path without an unhandled rejection or write', async () => {

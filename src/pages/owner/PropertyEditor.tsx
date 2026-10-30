@@ -1,4 +1,4 @@
-import { propertyCommercialInitial, propertyCommercialValues, propertyCommercialPayload, type PropertyCommercialSource } from '@/lib/propertyCommercialFields';
+import { propertyCommercialInitial, propertyCommercialValues, propertyCommercialPayload, changeCommercialOffer, type PropertyCommercialSource } from '@/lib/propertyCommercialFields';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
 import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
@@ -115,14 +115,23 @@ function mapPropertyToInitialData(property: any) {
   };
 }
 
+function ownerOfferIntent(formData: PropertyFormData, original: PropertyCommercialSource) {
+  let values = propertyCommercialValues(original);
+  if (formData.is_for_sale !== (original.is_for_sale ?? false)) {
+    values = changeCommercialOffer(values, 'sale', formData.is_for_sale);
+  }
+  const modes = new Set(values.listing_modes ?? []);
+  if (Boolean(formData.platform_listed) !== Boolean(original.listing_modes?.includes('platform'))) {
+    if (formData.platform_listed) modes.add('platform'); else modes.delete('platform');
+  }
+  return {
+    listing_modes: modes.size || values.listing_modes != null ? [...modes] : values.listing_modes,
+    listing_type: values.listing_type,
+    is_for_sale: values.is_for_sale,
+  };
+}
+
 function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formData: PropertyFormData; rooms: Room[]; servicesData: Record<string, any>; utilitiesData: Record<string, any> }, managedEmployee: boolean, original: PropertyCommercialSource = {}) {
-    const modes = new Set(original.listing_modes ?? []);
-    if (Boolean(formData.platform_listed) !== Boolean(original.listing_modes?.includes('platform'))) {
-      if (formData.platform_listed) modes.add('platform'); else modes.delete('platform');
-    }
-    if (formData.is_for_sale !== (original.is_for_sale ?? false)) {
-      if (formData.is_for_sale) modes.add('sale'); else modes.delete('sale');
-    }
     return {
       ...(managedEmployee ? { ...buildPropertyPayload({ formData, ownershipData: initialOwnershipData, activeOrgId: null, approvalStatus: 'draft' }), ...utilitiesData, ...servicesData } : {}),
       ...pickPropertyPaymentFields(formData),
@@ -130,8 +139,7 @@ function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formD
         price_per_night: formData.price_per_night,
         price_per_month: formData.price_per_month ?? propertyCommercialValues(original).price_per_month,
         sale_price: formData.sale_price,
-        is_for_sale: formData.is_for_sale === (original.is_for_sale ?? false) ? original.is_for_sale : formData.is_for_sale,
-        listing_modes: modes.size || original.listing_modes != null ? [...modes] : original.listing_modes,
+        ...ownerOfferIntent(formData, original),
       }, original),
       title: formData.title,
       title_en: formData.title,
@@ -185,7 +193,6 @@ function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formD
       house_rules: formData.house_rules || null,
       house_rules_ru: formData.house_rules_ru || null,
       smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
-      listing_modes: modes.size || original.listing_modes != null ? [...modes] : original.listing_modes,
     };
 }
 
@@ -787,6 +794,7 @@ export default function PropertyEditor() {
             <PropertyListingCard
               property={{
                 ...property,
+                ...ownerOfferIntent(formData, property),
                 id: id || 'preview',
                 title_en: formData.title || '',
                 title_ru: formData.title_ru || '',
