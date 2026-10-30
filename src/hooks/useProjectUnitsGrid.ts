@@ -52,13 +52,17 @@ export function useCreateProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<ProjectUnitInsert> & { project_id: string; unit_type: string }) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
-        .insert(data as any);
+        .insert(data as any)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (!saved?.id) throw new Error('Created unit was not confirmed');
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['project-units-grid', vars.project_id] });
+      qc.invalidateQueries({ queryKey: ['project-units', vars.project_id] });
       toast.success('Unit added');
     },
     onError: () => toast.error('Failed to add unit'),
@@ -69,15 +73,20 @@ export function useUpdateProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, projectId, ...updates }: { id: string; projectId: string } & Partial<ProjectUnit>) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
         .update(updates as any)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('project_id', projectId)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (saved?.id !== id) throw new Error('Unit change was not confirmed. Reload before retrying.');
       return projectId;
     },
     onSuccess: (projectId) => {
       qc.invalidateQueries({ queryKey: ['project-units-grid', projectId] });
+      qc.invalidateQueries({ queryKey: ['project-units', projectId] });
       toast.success('Unit updated');
     },
     onError: () => toast.error('Failed to update unit'),
@@ -88,15 +97,20 @@ export function useDeleteProjectUnit() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
-      const { error } = await supabase
+      const { data: saved, error } = await supabase
         .from('project_units')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('project_id', projectId)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (saved?.id !== id) throw new Error('Unit change was not confirmed. Reload before retrying.');
       return projectId;
     },
     onSuccess: (projectId) => {
       qc.invalidateQueries({ queryKey: ['project-units-grid', projectId] });
+      qc.invalidateQueries({ queryKey: ['project-units', projectId] });
       toast.success('Unit removed');
     },
     onError: () => toast.error('Failed to remove unit'),

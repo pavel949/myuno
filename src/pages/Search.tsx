@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { Search as SearchIcon, X, Star, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,14 +12,26 @@ import { cn } from '@/lib/utils';
 import { AnimatedList, AnimatedItem, AnimatedGrid, AnimatedCard } from '@/components/layout/AnimatedList';
 import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
 import { useBrowseByType } from '@/hooks/useBrowseByType';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { searchTypeConfig, trendingSearches } from '@/lib/searchData';
 
 export default function Search() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const { language } = useLanguage();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const query = searchParams.get('q') || '';
+  const selectedType = searchParams.get('type');
+  const setQuery = (value: string) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (value) next.set('q', value); else next.delete('q');
+    return next;
+  }, { replace: true });
+  const setSelectedType = (value: string | null) => setSearchParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (value) next.set('type', value); else next.delete('type');
+    return next;
+  }, { replace: true });
   const isRu = language === 'ru';
 
   const hasQuery = query.trim().length >= 2;
@@ -214,6 +226,7 @@ export default function Search() {
                       <AnimatedItem key={item.id}>
                         <Link
                           to={item.path}
+                          state={publicJourneyState(location)}
                           className="flex gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           {item.image ? (

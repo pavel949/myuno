@@ -115,7 +115,9 @@ export function useAdminProviders(options?: ProviderQueryOptions) {
     const { error } = await supabase
       .from('providers')
       .delete()
-      .eq('id', providerId);
+      .eq('id', providerId)
+      .select('id')
+      .single();
 
     if (!error) invalidate();
     return { error };
@@ -128,7 +130,7 @@ export function useAdminProviders(options?: ProviderQueryOptions) {
 export function useAdminServices(providerId?: string) {
   const queryClient = useQueryClient();
 
-  const { data: services = [], isLoading } = useQuery({
+  const { data: services = [], isLoading, error } = useQuery({
     queryKey: QUERY_KEYS.services(providerId),
     queryFn: async () => {
       let query = supabase
@@ -193,13 +195,15 @@ export function useAdminServices(providerId?: string) {
     const { error } = await supabase
       .from('services')
       .delete()
-      .eq('id', serviceId);
+      .eq('id', serviceId)
+      .select('id')
+      .single();
 
     if (!error) invalidate();
     return { error };
   }, [invalidate]);
 
-  return { services, isLoading, createService, updateService, deleteService, refetch: invalidate };
+  return { services, isLoading, error, createService, updateService, deleteService, refetch: invalidate };
 }
 
 // ============= useAdminCategories =============

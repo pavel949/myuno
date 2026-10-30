@@ -176,6 +176,9 @@ export function useCreatePropertyProject() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['public-property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['my-property-projects'] });
       toast.success('Project created successfully');
     },
     onError: () => {
@@ -201,6 +204,9 @@ export function useUpdatePropertyProject() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['public-property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['my-property-projects'] });
       queryClient.invalidateQueries({ queryKey: ['property-project', data.id] });
       toast.success('Project updated successfully');
     },

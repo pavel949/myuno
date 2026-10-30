@@ -162,7 +162,9 @@ export function useDeleteDeveloper() {
       const { error } = await supabase
         .from('developers')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+      .select('id')
+      .single();
 
       if (error) throw error;
     },

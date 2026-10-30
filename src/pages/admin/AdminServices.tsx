@@ -77,7 +77,7 @@ export default function AdminServices() {
   const { isOnBehalf } = useOnBehalfContext();
   
   const providerId = searchParams.get('provider') || undefined;
-  const { services, isLoading: servicesLoading, createService, updateService, deleteService } = useAdminServices(providerId);
+  const { services, isLoading: servicesLoading, error: servicesError, refetch: refetchServices, createService, updateService, deleteService } = useAdminServices(providerId);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -399,6 +399,13 @@ export default function AdminServices() {
               <Skeleton key={i} className="h-24" />
             ))}
           </div>
+        ) : servicesError ? (
+          <Card role="alert">
+            <CardContent className="p-8 text-center space-y-4">
+              <p>{isRussian ? 'Не удалось загрузить услуги' : 'Could not load services'}</p>
+              <Button onClick={() => refetchServices()}>{isRussian ? 'Повторить' : 'Retry'}</Button>
+            </CardContent>
+          </Card>
         ) : filteredServices.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">

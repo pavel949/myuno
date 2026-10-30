@@ -8,11 +8,12 @@ import { Percent, Calendar, TrendingDown, Sparkles } from 'lucide-react';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 
 interface DiscountsSectionProps {
+  currencyLabel?: string;
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
 }
 
-function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionProps) {
+function DiscountsSectionInner({ formData, updateFormData, currencyLabel = '฿' }: DiscountsSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -78,10 +79,10 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
               
               {weeklyDiscount > 0 && pricePerNight > 0 && (
                 <div className="text-sm text-muted-foreground">
-                  <span className="line-through">฿{(pricePerNight * 7).toLocaleString()}</span>
+                  <span className="line-through">{currencyLabel}{(pricePerNight * 7).toLocaleString()}</span>
                   {' → '}
                   <span className="text-foreground font-medium">
-                    ฿{Math.round(weeklyPrice).toLocaleString()}
+                    {currencyLabel}{Math.round(weeklyPrice).toLocaleString()}
                   </span>
                   <span className="text-xs ml-1">{isRu ? '/неделя' : '/week'}</span>
                 </div>
@@ -127,10 +128,10 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
               
               {monthlyDiscount > 0 && pricePerNight > 0 && (
                 <div className="text-sm text-muted-foreground">
-                  <span className="line-through">฿{(pricePerNight * 30).toLocaleString()}</span>
+                  <span className="line-through">{currencyLabel}{(pricePerNight * 30).toLocaleString()}</span>
                   {' → '}
                   <span className="text-foreground font-medium">
-                    ฿{Math.round(monthlyPrice).toLocaleString()}
+                    {currencyLabel}{Math.round(monthlyPrice).toLocaleString()}
                   </span>
                   <span className="text-xs ml-1">{isRu ? '/месяц' : '/month'}</span>
                 </div>

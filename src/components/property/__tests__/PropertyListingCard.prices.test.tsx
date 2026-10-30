@@ -1,3 +1,5 @@
+import { propertyCommercialInitial, propertyCommercialPayload, propertyCommercialValues } from '@/lib/propertyCommercialFields';
+import { propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -70,4 +72,14 @@ describe('public listing amount and billing period', () => {
     expect(screen.getByText('Price on request')).toBeVisible();
     expect(screen.queryByText(/Estimated/)).toBeNull();
   });
+});
+
+
+it('keeps the monthly card and independent nightly inquiry consistent after an editor roundtrip', () => {
+  const source = { price: 90000, price_period: 'month', currency: 'THB', price_per_night: 3000, listing_type: 'rent', listing_modes: ['rent', 'sale'], sale_price: 200000, sale_currency: 'USD' };
+  const roundtrip = propertyCommercialPayload(propertyCommercialValues(propertyCommercialInitial(source)), source);
+  mount(roundtrip);
+  expect(screen.getByText('฿90000').parentElement).toHaveTextContent('month');
+  expect(screen.queryByText(/Estimated/)).not.toBeInTheDocument();
+  expect(propertyDetailPricing(roundtrip, { price_per_night: roundtrip.price_per_night }, 'rent')).toMatchObject({ canQuoteShortStay: true, pricePerNight: 3000 });
 });

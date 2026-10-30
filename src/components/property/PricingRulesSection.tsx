@@ -28,11 +28,12 @@ interface PricingRulesData {
 }
 
 interface PricingRulesSectionProps {
+  currencyLabel?: string;
   formData: PricingRulesData;
   updateFormData: (updates: Partial<PricingRulesData>) => void;
 }
 
-function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSectionProps) {
+function PricingRulesSectionInner({ formData, updateFormData, currencyLabel = '฿' }: PricingRulesSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const pricePerNight = Number(formData.price_per_night) || 0;
@@ -141,8 +142,8 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
                 <p className="col-span-2 text-xs text-muted-foreground">
                   {isRu ? 'Пример: ' : 'Example: '}
                   {isRu
-                    ? `Бронирование за ${formData.early_booking_days}+ дней = ฿${Math.round(pricePerNight * (1 - (formData.early_booking_discount || 0) / 100)).toLocaleString()}/ночь`
-                    : `Book ${formData.early_booking_days}+ days ahead = ฿${Math.round(pricePerNight * (1 - (formData.early_booking_discount || 0) / 100)).toLocaleString()}/night`
+                    ? `Бронирование за ${formData.early_booking_days}+ дней = ${currencyLabel}${Math.round(pricePerNight * (1 - (formData.early_booking_discount || 0) / 100)).toLocaleString()}/ночь`
+                    : `Book ${formData.early_booking_days}+ days ahead = ${currencyLabel}${Math.round(pricePerNight * (1 - (formData.early_booking_discount || 0) / 100)).toLocaleString()}/night`
                   }
                 </p>
               )}

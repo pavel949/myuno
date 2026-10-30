@@ -1,3 +1,5 @@
+import { propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyCommercialInitial, propertyCommercialValues, propertyCommercialPayload, changeCommercialOffer, type PropertyCommercialSource } from '@/lib/propertyCommercialFields';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
 import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
@@ -10,7 +12,6 @@ import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useTeamPermissions } from '@/hooks/useTeamPermissions';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
@@ -111,13 +112,36 @@ function mapPropertyToInitialData(property: any) {
     transfer_airport_price: property.transfer_airport_price,
     extra_guest_price: property.extra_guest_price,
     extra_guest_threshold: property.extra_guest_threshold,
+    ...propertyCommercialInitial(property),
   };
 }
 
-function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formData: PropertyFormData; rooms: Room[]; servicesData: Record<string, any>; utilitiesData: Record<string, any> }, managedEmployee: boolean) {
+function ownerOfferIntent(formData: PropertyFormData, original: PropertyCommercialSource) {
+  let values = propertyCommercialValues(original);
+  if (formData.is_for_sale !== propertySupportsMode(original, 'buy')) {
+    values = changeCommercialOffer(values, 'sale', formData.is_for_sale);
+  }
+  const modes = new Set(values.listing_modes ?? []);
+  if (Boolean(formData.platform_listed) !== Boolean(original.listing_modes?.includes('platform'))) {
+    if (formData.platform_listed) modes.add('platform'); else modes.delete('platform');
+  }
+  return {
+    listing_modes: modes.size || values.listing_modes != null ? [...modes] : values.listing_modes,
+    listing_type: values.listing_type,
+    is_for_sale: values.is_for_sale,
+  };
+}
+
+function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formData: PropertyFormData; rooms: Room[]; servicesData: Record<string, any>; utilitiesData: Record<string, any> }, managedEmployee: boolean, original: PropertyCommercialSource = {}) {
     return {
       ...(managedEmployee ? { ...buildPropertyPayload({ formData, ownershipData: initialOwnershipData, activeOrgId: null, approvalStatus: 'draft' }), ...utilitiesData, ...servicesData } : {}),
       ...pickPropertyPaymentFields(formData),
+      ...propertyCommercialPayload({ ...propertyCommercialValues(original),
+        price_per_night: formData.price_per_night,
+        price_per_month: formData.price_per_month ?? propertyCommercialValues(original).price_per_month,
+        sale_price: formData.sale_price,
+        ...ownerOfferIntent(formData, original),
+      }, original),
       title: formData.title,
       title_en: formData.title,
       title_ru: formData.title_ru,
@@ -137,7 +161,6 @@ function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formD
       lng: formData.lng,
       cover_image: formData.cover_image,
       images: formData.images,
-      price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
       deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
       weekly_discount: Number(formData.weekly_discount) || 0,
       monthly_discount: Number(formData.monthly_discount) || 0,
@@ -171,11 +194,6 @@ function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formD
       house_rules: formData.house_rules || null,
       house_rules_ru: formData.house_rules_ru || null,
       smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
-      listing_modes: [
-        ...(formData.platform_listed ? ['platform'] : []),
-        ...(formData.is_for_sale ? ['sale'] : []),
-        ...(formData.price_per_night ? ['rent'] : []),
-      ],
     };
 }
 
@@ -185,7 +203,6 @@ export default function PropertyEditor() {
   const { user } = useAuth();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { canAccess, isLoading: permissionsLoading } = useTeamPermissions();
-  const { code: cityCurrencyCode } = useCityCurrency();
 
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -293,7 +310,7 @@ export default function PropertyEditor() {
       check_in_time: mapped.check_in_time,
       check_out_time: mapped.check_out_time,
       instant_booking: mapped.instant_booking,
-      is_for_sale: property.is_for_sale ?? false,
+      is_for_sale: propertySupportsMode(property, 'buy'),
       sale_price: property.sale_price != null ? String(property.sale_price) : '',
       pets_allowed: mapped.pets_allowed,
       pet_deposit: mapped.pet_deposit,
@@ -426,11 +443,11 @@ export default function PropertyEditor() {
 
   const buildEditorPayload = useCallback(() => {
     if (!formData) return null;
-    const payload = editorPayload({ formData, rooms, servicesData, utilitiesData }, managedEmployee);
+    const payload = editorPayload({ formData, rooms, servicesData, utilitiesData }, managedEmployee, property);
     if (!managedEmployee) return payload;
-    const baseline = lastSavedSnapshotRef.current ? editorPayload(JSON.parse(lastSavedSnapshotRef.current), true) : {};
+    const baseline = lastSavedSnapshotRef.current ? editorPayload(JSON.parse(lastSavedSnapshotRef.current), true, property) : {};
     return editablePropertyAuthoringPatch(propertyAuthoringDelta(payload, baseline), { pricing: canAccess('pricing', 'edit'), bookings: canAccess('bookings', 'edit') });
-  }, [formData, rooms, servicesData, utilitiesData, managedEmployee, canAccess]);
+  }, [formData, rooms, servicesData, utilitiesData, managedEmployee, canAccess, property]);
 
   const persistRevision = useCallback(async (payload: Record<string, unknown>, submit = false) => {
     if (!id || !liveProperty?.management_company_id || !savedVersionRef.current) throw new Error('Reload the property revision before saving');
@@ -473,12 +490,11 @@ export default function PropertyEditor() {
     if (!id || !formData || !hasUnsavedChanges || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
 
-    const payload = buildEditorPayload();
-    if (!payload) return;
-
-    setSaveState('saving');
     savingRef.current = true;
     try {
+      const payload = buildEditorPayload();
+      if (!payload) return;
+      setSaveState('saving');
       const saved = publishedRevision ? await persistRevision(payload) : await autosaveProperty.mutateAsync({
         id,
         ...payload,
@@ -585,7 +601,7 @@ export default function PropertyEditor() {
           availability={localAvailability}
           onChange={setLocalAvailability}
           basePrice={Number(formData?.price_per_night) || 0}
-          currency={cityCurrencyCode}
+          currency={property?.currency?.trim() || ''}
         />
       ),
     },
@@ -596,7 +612,7 @@ export default function PropertyEditor() {
       labelRu: 'Команда',
       content: <PropertyTeamTab propertyId={id || ''} />,
     },
-  ], [rooms, localAvailability, formData?.price_per_night, id, cityCurrencyCode]);
+  ], [rooms, localAvailability, formData?.price_per_night, id, property?.currency]);
 
   // Loading state
   if (isLoading || adminLoading || providerAuthority.isLoading || (managedEmployee && permissionsLoading) || (publishedRevision && revisionQuery.isLoading)) {
@@ -778,6 +794,8 @@ export default function PropertyEditor() {
             </div>
             <PropertyListingCard
               property={{
+                ...property,
+                ...ownerOfferIntent(formData, property),
                 id: id || 'preview',
                 title_en: formData.title || '',
                 title_ru: formData.title_ru || '',
@@ -788,8 +806,9 @@ export default function PropertyEditor() {
                 bedrooms: formData.bedrooms || 1,
                 bathrooms: formData.bathrooms || 1,
                 max_guests: formData.max_guests || 2,
-                price: Number(formData.price_per_night) || 0,
-                price_period: 'night',
+                price_per_night: formData.price_per_night === '' ? null : Number(formData.price_per_night),
+                price_per_month: formData.price_per_month === '' ? null : formData.price_per_month == null ? undefined : Number(formData.price_per_month),
+                sale_price: formData.sale_price === '' ? null : Number(formData.sale_price),
                 instant_booking: formData.instant_booking || false,
                 is_featured: false,
                 view_type: primaryViewType(formData.view_type),
