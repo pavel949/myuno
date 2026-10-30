@@ -1,3 +1,4 @@
+import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalRateSummary';
 import '@/styles/public-commerce.css';
 import '@/styles/premium-public.css';
 import React, { useState, useMemo } from 'react';
@@ -391,6 +392,8 @@ export default function PropertyDetail() {
         <div>
           <div className="premium-detail-grid">
             <article className="premium-property-content min-w-0">
+
+              {!isSaleListing && pricing.hasOffer && <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />}
 
               {/* Trust signals: title deed, escrow, ClearView, owner verified */}
               <TrustStrip

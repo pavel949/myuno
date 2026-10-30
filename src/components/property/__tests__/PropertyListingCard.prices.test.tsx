@@ -21,15 +21,15 @@ function mount(values: Partial<Property>, mode: 'rent' | 'buy' = 'rent') {
   return render(<MemoryRouter><PropertyListingCard property={property} mode={mode} nights={3} /></MemoryRouter>);
 }
 describe('public listing amount and billing period', () => {
-  it('preserves the declared monthly tariff when a nightly amount also exists', () => {
+  it('shows independent nightly and monthly tariffs together without converting either', () => {
     mount({ price_per_night: 3000, price: 90000, price_period: 'month' });
-    expect(screen.getByText('฿90000').parentElement).toHaveTextContent('฿90000 month');
+    expect(screen.getByText('฿90000').parentElement).toHaveTextContent('฿90000 per month');
     expect(screen.queryByText(/Estimated/)).toBeNull();
-    expect(screen.queryByText('฿3000')).toBeNull();
+    expect(screen.getByLabelText('Rental rates')).toHaveTextContent('฿3000 per night');
   });
   it.each(['$', '€', '₽'])('retains the currency formatter for %s without changing the billing period', currency => {
     state.currency = currency;
-    mount({ price_per_night: 3000, price: 90000, price_period: 'night' });
+    mount({ price_per_night: 3000, price: 3000, price_period: 'night' });
     expect(screen.getByText(`${currency}3000`).parentElement).toHaveTextContent(`${currency}3000 night`);
     expect(screen.getByText(`Estimated: ${currency}9000`)).toBeVisible();
   });
@@ -83,3 +83,16 @@ it('keeps the monthly card and independent nightly inquiry consistent after an e
   expect(screen.queryByText(/Estimated/)).not.toBeInTheDocument();
   expect(propertyDetailPricing(roundtrip, { price_per_night: roundtrip.price_per_night }, 'rent')).toMatchObject({ canQuoteShortStay: true, pricePerNight: 3000 });
 });
+
+ it('does not choose between conflicting prices for the same nightly period', () => {
+  mount({ price: 90000, price_period: 'night', price_per_night: 3000 });
+  expect(screen.getByText('Price on request')).toBeVisible();
+  expect(screen.getByText(/Rental rates need confirmation/)).toBeVisible();
+  expect(screen.queryByText(/Estimated/)).toBeNull();
+ });
+
+ it('keeps the request-only fallback when multiple recorded rates have unsupported currency', () => {
+  mount({ currency: 'USD', price: 3000, price_period: 'month', price_per_night: 3000 });
+  expect(screen.getByText('Price on request')).toBeVisible();
+  expect(screen.queryByLabelText('Rental rates')).toBeNull();
+ });

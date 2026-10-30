@@ -1,3 +1,4 @@
+import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalRateSummary';
 import '@/styles/public-commerce.css';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -475,6 +476,7 @@ export default function PropertyInquiry() {
           {/* ===== PRICE BREAKDOWN ===== */}
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">{isRu ? 'Стоимость' : 'Price details'}</h2>
+            <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
