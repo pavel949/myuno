@@ -24,11 +24,11 @@ test(`homepage, housing search, detail and inquiry show the same independent Can
   let expectedRates: string | undefined;
   for (const path of ['/', '/property/browse?mode=rent', `/property/${property.id}?mode=rent`, `/property/${property.id}/inquiry?mode=rent&checkIn=2028-11-10&checkOut=2028-11-12&guests=2`]) {
     await page.goto(path);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const rates = page.locator('[aria-label="Rental rates"]').first();
     await expect(rates).toBeVisible({ timeout: 60_000 });
     await expect(rates.getByText('per night', { exact: true })).toBeVisible();
     await expect(rates.getByText('per month', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const text = (await rates.innerText()).replace(/\s+/g, ' ').trim();
     if (expectedRates === undefined) expectedRates = text;
     else expect(text).toBe(expectedRates);
