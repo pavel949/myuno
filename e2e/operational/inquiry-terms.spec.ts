@@ -17,11 +17,14 @@ test('a valid nightly inquiry uses the same stored strict policy as detail', asy
   expect(unexpected).toEqual([]);
 });
 
-test('homepage, housing search, detail and inquiry show the same independent Canvas tariffs', async ({ page }) => {
+for (const width of [375, 390, 430, 1280]) {
+test(`homepage, housing search, detail and inquiry show the same independent Canvas tariffs at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
   const unexpected = await isolate(page, { ...property, price_per_night: 3000, tenancy_modes: ['short', 'long'], cover_image: 'http://127.0.0.1:8098/favicon.svg' });
   let expectedRates: string | undefined;
   for (const path of ['/', '/property/browse?mode=rent', `/property/${property.id}?mode=rent`, `/property/${property.id}/inquiry?mode=rent&checkIn=2028-11-10&checkOut=2028-11-12&guests=2`]) {
     await page.goto(path);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     const rates = page.locator('[aria-label="Rental rates"]').first();
     await expect(rates).toBeVisible({ timeout: 60_000 });
     await expect(rates.getByText('per night', { exact: true })).toBeVisible();
@@ -33,6 +36,8 @@ test('homepage, housing search, detail and inquiry show the same independent Can
   await expect(page.getByText(/× 2 nights/)).toBeVisible();
   expect(unexpected).toEqual([]);
 });
+
+}
 
 test('conflicting nightly sources redirect an inquiry to request-only detail', async ({ page }) => {
   const unexpected = await isolate(page, { ...property, price_period: 'night', price_per_night: 4500, tenancy_modes: ['short'] });
