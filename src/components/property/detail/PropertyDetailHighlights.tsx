@@ -36,9 +36,13 @@ export function PropertyDetailHighlights({
   const propertyTypeLabel =
     propertyType === 'villa'
       ? (isRu ? 'Вилла целиком' : 'Entire villa')
-      : propertyType === 'condo'
+      : propertyType === 'condo' || propertyType === 'apartment'
         ? (isRu ? 'Апартаменты целиком' : 'Entire apartment')
-        : (isRu ? 'Жильё целиком' : 'Entire place');
+        : propertyType === 'studio'
+          ? (isRu ? 'Студия целиком' : 'Entire studio')
+          : propertyType === 'hotel'
+            ? (isRu ? 'Отель' : 'Hotel')
+            : (isRu ? 'Жильё целиком' : 'Entire place');
 
   return (
     <div className="space-y-4">

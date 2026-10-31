@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,9 +19,8 @@ interface Props {
 
 const UNIT_TYPES = ['Studio', '1BR', '2BR', '3BR', 'Penthouse', 'Duplex'] as const;
 const UNIT_STATUSES = [
-  { value: 'available', labelEn: 'Available', labelRu: 'Доступен', color: 'bg-success' },
-  { value: 'reserved', labelEn: 'Reserved', labelRu: 'Забронирован', color: 'bg-warning' },
-  { value: 'sold', labelEn: 'Sold', labelRu: 'Продан', color: 'bg-destructive' },
+  { value: 'active', labelEn: 'Active', labelRu: 'Активен', color: 'bg-success' },
+  { value: 'inactive', labelEn: 'Inactive', labelRu: 'Неактивен', color: 'bg-muted' },
 ] as const;
 
 export function ProjectUnitsTab({ projectId }: Props) {
@@ -30,16 +30,16 @@ export function ProjectUnitsTab({ projectId }: Props) {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({
-    unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'available',
+    unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'inactive',
     view: '', bedrooms: '1', bathrooms: '1',
   });
 
-  const { data: units = [], isLoading } = useQuery({
-    queryKey: ['project-units', projectId],
+  const { data: units = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['admin-project-properties', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, property_type, bedrooms, bathrooms, area_sqm, sale_price, price, listing_type, is_active, floor, internal_name')
+        .select('id, title_en, title_ru, property_type, bedrooms, bathrooms, area_sqm, sale_price, price, listing_type, is_active, floor, internal_name, unit_number')
         .eq('project_id', projectId)
         .order('internal_name');
       if (error) throw error;
@@ -49,27 +49,30 @@ export function ProjectUnitsTab({ projectId }: Props) {
 
   const addUnit = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('properties').insert({
+      if (!form.unit_id.trim()) throw new Error('Unit code is required');
+      const { data: saved, error } = await supabase.from('properties').insert({
         project_id: projectId,
         title_en: `Unit ${form.unit_id} — ${form.unit_type}`,
         title_ru: `Юнит ${form.unit_id} — ${form.unit_type}`,
-        internal_name: form.unit_id,
+        internal_name: form.unit_id.trim(),
+        unit_number: form.unit_id.trim(),
         property_type: 'condo',
         listing_type: 'sale',
-        bedrooms: Number(form.bedrooms) || 1,
-        bathrooms: Number(form.bathrooms) || 1,
+        bedrooms: form.bedrooms === '' ? null : Number(form.bedrooms),
+        bathrooms: form.bathrooms === '' ? null : Number(form.bathrooms),
         area_sqm: Number(form.area_sqm) || null,
         sale_price: Number(form.price) || null,
-        floor: Number(form.floor) || null,
-        is_active: form.status === 'available',
-        approval_status: form.status === 'sold' ? 'approved' : 'pending',
-      } as any);
+        floor: form.floor === '' ? null : Number(form.floor),
+        is_active: form.status === 'active',
+        approval_status: 'pending',
+      } as any).select('id').single();
       if (error) throw error;
+      if (!saved?.id) throw new Error('Created property was not confirmed');
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['project-units', projectId] });
+      qc.invalidateQueries({ queryKey: ['admin-project-properties', projectId] });
       setShowAdd(false);
-      setForm({ unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'available', view: '', bedrooms: '1', bathrooms: '1' });
+      setForm({ unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'inactive', view: '', bedrooms: '1', bathrooms: '1' });
       toast.success(isRu ? 'Юнит добавлен' : 'Unit added');
     },
     onError: (err: Error) => { toast.error(err.message || 'Failed to add unit'); },
@@ -83,17 +86,19 @@ export function ProjectUnitsTab({ projectId }: Props) {
 
   const stats = {
     total: units.length,
-    available: units.filter((u: any) => u.is_active).length,
-    sold: units.filter((u: any) => !u.is_active).length,
+    active: units.filter((u: any) => u.is_active).length,
+    inactive: units.filter((u: any) => !u.is_active).length,
   };
+
+  if (error) return <div role="alert" className="space-y-3"><p>{isRu ? 'Не удалось загрузить объекты проекта' : 'Could not load project properties'}</p><Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>;
 
   return (
     <div className="space-y-4">
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
         <Badge variant="outline">{isRu ? 'Всего' : 'Total'}: {stats.total}</Badge>
-        <Badge className="bg-success/10 text-success border-success/30">{isRu ? 'Доступно' : 'Available'}: {stats.available}</Badge>
-        <Badge className="bg-destructive/10 text-destructive border-destructive/30">{isRu ? 'Продано' : 'Sold'}: {stats.sold}</Badge>
+        <Badge className="bg-success/10 text-success border-success/30">{isRu ? 'Активно' : 'Active'}: {stats.active}</Badge>
+        <Badge className="bg-destructive/10 text-destructive border-destructive/30">{isRu ? 'Неактивно' : 'Inactive'}: {stats.inactive}</Badge>
       </div>
 
       {/* Search + Add */}
@@ -135,22 +140,22 @@ export function ProjectUnitsTab({ projectId }: Props) {
                 <th className="text-right p-2 font-medium">m²</th>
                 <th className="text-right p-2 font-medium">{isRu ? 'Этаж' : 'Floor'}</th>
                 <th className="text-right p-2 font-medium">{isRu ? 'Цена' : 'Price'}</th>
-                <th className="text-center p-2 font-medium">{isRu ? 'Статус' : 'Status'}</th>
+                <th className="text-center p-2 font-medium">{isRu ? 'Активность объявления' : 'Listing activity'}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((unit: any) => (
                 <tr key={unit.id} className="border-t hover:bg-muted/30">
-                  <td className="p-2 font-medium">{unit.internal_name || unit.title_en}</td>
+                  <td className="p-2 font-medium"><Link className="underline" to={`/admin/properties?edit=${encodeURIComponent(unit.id)}`}>{unit.unit_number || unit.internal_name || unit.title_en}</Link></td>
                   <td className="p-2 text-muted-foreground">{unit.bedrooms}BR</td>
                   <td className="p-2 text-right">{unit.area_sqm || '—'}</td>
-                  <td className="p-2 text-right">{unit.floor || '—'}</td>
+                  <td className="p-2 text-right">{unit.floor ?? '—'}</td>
                   <td className="p-2 text-right font-mono">
                     {unit.sale_price ? `฿${(unit.sale_price / 1e6).toFixed(1)}M` : unit.price ? `฿${unit.price}` : '—'}
                   </td>
                   <td className="p-2 text-center">
                     <Badge variant="outline" className={unit.is_active ? 'text-success border-success/30' : 'text-destructive border-destructive/30'}>
-                      {unit.is_active ? (isRu ? 'Доступен' : 'Available') : (isRu ? 'Продан' : 'Sold')}
+                      {unit.is_active ? (isRu ? 'Активен' : 'Active') : (isRu ? 'Неактивен' : 'Inactive')}
                     </Badge>
                   </td>
                 </tr>
@@ -163,7 +168,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
       {/* Add Unit Modal */}
       <ResponsiveModal open={showAdd} onOpenChange={setShowAdd} title={isRu ? 'Добавить юнит' : 'Add Unit'} size="md"
         footer={
-          <Button onClick={() => addUnit.mutate()} disabled={addUnit.isPending || !form.unit_id}>
+          <Button onClick={() => addUnit.mutate()} disabled={addUnit.isPending || !form.unit_id.trim()}>
             {addUnit.isPending ? '...' : (isRu ? 'Добавить' : 'Add Unit')}
           </Button>
         }
@@ -181,7 +186,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
           <div><Label>{isRu ? 'Площадь (м²)' : 'Area (sqm)'}</Label><Input type="number" value={form.area_sqm} onChange={e => setForm(f => ({ ...f, area_sqm: e.target.value }))} /></div>
           <div><Label>{isRu ? 'Цена (THB)' : 'Price (THB)'}</Label><Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} /></div>
           <div>
-            <Label>{isRu ? 'Статус' : 'Status'}</Label>
+            <Label>{isRu ? 'Активность объявления' : 'Listing activity'}</Label>
             <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>

@@ -38,7 +38,7 @@ vi.mock('@/components/property/PropertyReviewRatings', () => ({PropertyReviewRat
 vi.mock('@/components/property/StayRulesSection', () => ({StayRulesSection: () => null}));
 vi.mock('@/components/property/RoomCategoryOffers', () => ({RoomCategoryOffers: () => null}));
 vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => null}));
-afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; state.property.tenancy_modes = []; state.property.currency = 'THB'; state.property.sale_currency = undefined; state.property.price_period = undefined; state.property.price_per_month = null; state.property.price_per_year = null; state.property.rentalTerms.price_per_night = 2000; state.property.is_verified = false; state.property.price_per_night = 2000; state.property.rentalTerms.manager_name = undefined; });
+afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; state.property.tenancy_modes = []; state.property.currency = 'THB'; state.property.sale_currency = undefined; state.property.price_period = undefined; state.property.price = 2000; state.property.price_per_month = null; state.property.price_per_year = null; state.property.rentalTerms.price_per_night = 2000; state.property.is_verified = false; state.property.price_per_night = 2000; state.property.rentalTerms.manager_name = undefined; });
 function NavigateContext() { const navigate = useNavigate(); return <button onClick={() => navigate('/property/unit?mode=rent&checkIn=2099-12-10&checkOut=2099-12-14&guests=2')}>New URL</button>; }
 function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><NavigateContext /><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
@@ -185,7 +185,7 @@ it('keeps guest criteria when a direct property link returns to the catalogue', 
 });
 
 it.each(['medium', 'long'])('shows the explicit monthly tariff for a %s request without a nightly booking card', tenancy => {
-  state.property.tenancy_modes = [tenancy]; state.property.price_period = 'month'; state.property.price_per_month = 45000;
+  state.property.tenancy_modes = [tenancy]; state.property.price_period = 'month'; state.property.price = 45000; state.property.price_per_month = 45000;
   mount(`rent&tenancy=${tenancy}`);
   expect(screen.getAllByText('45000 / month').length).toBeGreaterThan(0);
   expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
@@ -238,3 +238,19 @@ it('does not publish an unpriced or foreign-currency sale as a THB offer', () =>
   state.property.sale_currency = 'USD'; mount('buy');
   expect(createRealEstateListingSchema).toHaveBeenLastCalledWith(expect.objectContaining({ price: undefined, currency: undefined }));
 });
+
+ it('shows independent nightly and monthly tariffs together on real property detail', () => {
+  state.property.price = 3000; state.property.price_period = 'month'; state.property.price_per_night = 3000; state.property.rentalTerms.price_per_night = 3000;
+  mount('rent');
+  const rates = screen.getByLabelText('Rental rates');
+  expect(rates).toHaveTextContent('3000 per night');
+  expect(rates).toHaveTextContent('3000 per month');
+  expect(screen.getByRole('button', { name: 'Book rental' })).toBeVisible();
+ });
+ it('blocks the real detail booking action when same-period prices conflict', () => {
+  state.property.price_period = 'night'; state.property.price = 4000;
+  mount('rent');
+  expect(screen.getByText(/Rental rates need confirmation/)).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+ });

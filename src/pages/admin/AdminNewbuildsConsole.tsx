@@ -9,7 +9,7 @@ import { useAdminNewbuildsKpi } from '@/hooks/useAdminNewbuildsKpi';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminNewbuildsConsole() {
-  const { data, isLoading } = useAdminNewbuildsKpi();
+  const { data, isLoading, error, refetch } = useAdminNewbuildsKpi();
 
   const kpis = [
     { label: 'Проекты в модерации', value: data?.pendingProjects, color: 'text-accent', icon: Clock, href: '/admin/projects?filter=pending' },
@@ -22,6 +22,8 @@ export default function AdminNewbuildsConsole() {
     { label: 'Всего проектов', value: data?.totalProjects, color: 'text-muted-foreground', icon: Building2, href: '/admin/projects' },
     { label: 'Активных застройщиков', value: data?.totalDevs, color: 'text-muted-foreground', icon: Users, href: '/admin/developers' },
   ];
+
+  if (error) return <div role="alert" className="container mx-auto p-6 space-y-4"><p>Не удалось загрузить показатели / Could not load dashboard counts</p><Button onClick={() => refetch()}>Повторить / Retry</Button></div>;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -48,7 +50,7 @@ export default function AdminNewbuildsConsole() {
                 {isLoading ? (
                   <Skeleton className="h-8 w-16" />
                 ) : (
-                  <div className={`text-3xl font-bold ${kpi.color}`}>{kpi.value ?? 0}</div>
+                  <div className={`text-3xl font-bold ${kpi.color}`}>{kpi.value ?? '—'}</div>
                 )}
                 <div className="text-xs text-muted-foreground mt-1">{kpi.label}</div>
               </Card>

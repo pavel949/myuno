@@ -18,7 +18,7 @@ function mount(currency: string | null = 'THB') {
 beforeEach(() => { vi.clearAllMocks(); state.rows=[{date:'2026-10-21',price_override:100,status:'blocked',booking_id:'booking',min_nights_override:2}]; state.rpc.mockImplementation(async (name,args) => name === 'get_property_calendar_prices' ? {data:state.rows,error:null} : ({data:{property_id:args.p_property_id,category_id:args.p_category_id,nights:1,nightly_rate:args.p_price,currency:args.p_currency},error:null})); });
 describe('CalendarPriceEditor', () => {
  it('saves native unit price through the price-only RPC with inventory snapshot', async () => {
-  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
+  mount(); await screen.findByLabelText('2026-10-21 100');
   fireEvent.change(screen.getByLabelText('Per night · THB'),{target:{value:'2500.50'}});
   await waitFor(() => expect(screen.getByRole('button',{name:'Apply nightly price'})).not.toBeDisabled());
   fireEvent.click(screen.getByRole('button',{name:'Apply nightly price'}));
@@ -43,13 +43,13 @@ describe('CalendarPriceEditor', () => {
   await waitFor(() => expect(state.error).toHaveBeenCalled()); expect(state.success).not.toHaveBeenCalled();
  });
  it('supports shift selection and reciprocal booking-calendar links', async () => {
-  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
+  mount(); await screen.findByLabelText('2026-10-21 100');
   fireEvent.click(screen.getByRole('button',{name:'2026-10-23 Inherited rate'}),{shiftKey:true});
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2026-10-23');
   expect(screen.getByRole('link',{name:'Open booking calendar'})).toHaveAttribute('href','/mc/calendar?property=property&date=2026-10-21');
  });
  it('moves the displayed month when a distant date is typed, keeping reads bounded', async () => {
-  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
+  mount(); await screen.findByLabelText('2026-10-21 100');
   fireEvent.change(screen.getByLabelText('From'),{target:{value:'2028-02-20'}});
   expect(screen.getByText('February 2028')).toBeInTheDocument();
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2028-02-20');
@@ -58,8 +58,11 @@ describe('CalendarPriceEditor', () => {
  });
 
  it('browses far-future months independently of the selected edit dates', async () => {
-  mount(); await screen.findByRole('button',{name:'2026-10-21 100'});
-  for(let month=0;month<16;month++) fireEvent.click(screen.getByRole('button',{name:'Next month'}));
+  mount(); await screen.findByLabelText('2026-10-21 100');
+  // Reuse the stable navigation control; repeated accessibility-tree scans of
+  // all 42 day buttons made this bounded browse test consume its own deadline.
+  const nextMonth = screen.getByRole('button',{name:'Next month'});
+  for(let month=0;month<16;month++) fireEvent.click(nextMonth);
   expect(screen.getByText('February 2028')).toBeInTheDocument();
   expect(screen.getByLabelText('From')).toHaveValue('2026-10-21');
   await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('get_property_calendar_prices',expect.objectContaining({p_from:'2028-01-31',p_to:'2028-03-13'})));

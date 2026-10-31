@@ -12,14 +12,14 @@ describe('catalog price semantics', () => {
     expect(surfaceFromProperty({ ...home, sale_price: 1000000, sale_currency: 'THB' }, 'buy').priceHintThb).toBe(1000000);
   });
   it.each([['month', 50000, 'per_month'], ['monthly', 50000, 'per_month'], ['year', 500000, 'per_year'], ['weekly', 2000, 'per_week'], ['day', 2000, 'per_night']] as const)('preserves %s rental billing', (period, amount, mode) => {
-    expect(surfaceFromProperty({ ...home, price_period: period, price_per_month: 50000, price_per_year: 500000 })).toMatchObject({ priceHintThb: amount, priceMode: mode });
+    expect(surfaceFromProperty({ ...home, price: amount, price_period: period, price_per_month: 50000, price_per_year: 500000 })).toMatchObject({ priceHintThb: amount, priceMode: mode });
   });
   it('does not guess an unspecified or unknown legacy period', () => {
     expect(surfaceFromProperty(home).priceMode).toBe('unknown');
     expect(surfaceFromProperty({ ...home, price_period: 'custom' }).priceMode).toBe('unknown');
   });
   it('keeps long tenancy and monthly billing separate', () => {
-    expect(surfaceFromProperty({ ...home, tenancy_modes: ['long'], price_period: 'month', price_per_month: 50000, price_per_year: 500000 })).toMatchObject({ priceHintThb: 50000, priceMode: 'per_month' });
+    expect(surfaceFromProperty({ ...home, price: 50000, tenancy_modes: ['long'], price_period: 'month', price_per_month: 50000, price_per_year: 500000 })).toMatchObject({ priceHintThb: 50000, priceMode: 'per_month' });
   });
   it('uses a dedicated monthly tariff without relabelling nightly data', () => {
     expect(surfaceFromProperty({ ...home, price_per_month: 50000 })).toMatchObject({ priceHintThb: 50000, priceMode: 'per_month' });

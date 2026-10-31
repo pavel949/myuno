@@ -14,6 +14,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => {
     is: (...args: unknown[]) => { if (writing) state.filters.push(['is', ...args]); return query; },
     insert: (value: unknown) => { writing = true; state.writes.push(value); return query; },
     update: (value: unknown) => { writing = true; state.writes.push(value); return query; },
+    delete: () => { writing = true; return query; },
     single: async () => state.response,
   };
   return query;
@@ -60,4 +61,15 @@ describe('admin property writes', () => {
       expect(saved.error).toBeTruthy();
     });
   });
+});
+
+
+it.each([{ data: null, error: { message: 'No row deleted' } }, { data: { id: 'property' }, error: null }])('requires a returned deleted property: %o', async response => {
+  state.response = response;
+  const { result } = await mount();
+  await act(async () => {
+    const deleted = await result.current.deleteProperty('property');
+    expect(deleted.error).toEqual(response.error);
+  });
+  expect(state.filters).toContainEqual(['id', 'property']);
 });

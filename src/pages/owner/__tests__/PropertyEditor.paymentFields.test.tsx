@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import type { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import PropertyEditor from '../PropertyEditor';
+import { propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 
 const mocks = vi.hoisted(() => ({
   property: {} as Record<string, unknown>,
@@ -45,16 +46,20 @@ vi.mock('@/hooks/usePropertyAvailabilityManagement', () => ({
 }));
 vi.mock('@/components/uno/PageContainer', () => ({ PageContainer: ({ children }: React.PropsWithChildren) => <div>{children}</div> }));
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div> }));
-vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
+vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: unknown }) => <output data-testid="preview-property">{JSON.stringify(property)}</output> }));
 vi.mock('@/components/property/PropertyRooms', () => ({ PropertyRooms: () => null }));
-vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: () => null }));
+vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: ({ currency }: { currency?: string }) => <output data-testid="calendar-currency">{currency || "unknown"}</output> }));
 vi.mock('@/components/owner/PropertyTeamTab', () => ({ PropertyTeamTab: () => null }));
 vi.mock('@/components/owner/property-wizard/AIIntakePanel', () => ({ AIIntakePanel: () => null }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }));
 vi.mock('@/components/property/canonical-form/CanonicalPropertyForm', () => ({
-  CanonicalPropertyForm: ({ initialData, controlledFormData, onFormDataChange, onSubmit, controlledUtilities, onUtilitiesChange }: ComponentProps<typeof CanonicalPropertyForm>) => {
+  CanonicalPropertyForm: ({ initialData, controlledFormData, onFormDataChange, onSubmit, controlledUtilities, onUtilitiesChange, extraTabs }: ComponentProps<typeof CanonicalPropertyForm>) => {
     const form = controlledFormData!;
     return <div>
+      {extraTabs?.map(tab => <div key={tab.id}>{tab.content}</div>)}
+      <label>Nightly amount<input aria-label="Nightly amount" value={form.price_per_night} onChange={event => onFormDataChange!({ ...form, price_per_night: event.target.value })} /></label>
+      <label>Sale offer<input type="checkbox" aria-label="Sale offer" checked={form.is_for_sale} onChange={event => onFormDataChange!({ ...form, is_for_sale: event.target.checked })} /></label>
+      <label>Sale amount<input aria-label="Sale amount" value={form.sale_price} onChange={event => onFormDataChange!({ ...form, sale_price: event.target.value })} /></label>
       <output data-testid="initial-data">{JSON.stringify(initialData)}</output>
       <output data-testid="controlled-data">{JSON.stringify(form)}</output>
       <label htmlFor="property-title">Title<input id="property-title" aria-label="Title" value={form.title} onChange={event => onFormDataChange!({ ...form, title: event.target.value })} /></label>
@@ -103,6 +108,73 @@ describe('PropertyEditor payment-field round trip', () => {
     expect(renderedData('controlled-data')).toMatchObject(expected);
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated title only' } });
     expect(await save()).toMatchObject({ ...expected, title: 'Updated title only', deposit_amount: 300 });
+  });
+
+  it.each([
+    { price: 4200, price_period: 'month', currency: 'EUR', price_per_night: null, listing_modes: ['rent', 'sale', 'platform'], listing_type: 'rent', is_for_sale: true, sale_price: 95000, sale_currency: 'USD' },
+    { price: null, price_period: null, currency: null, price_per_night: 150, listing_modes: ['sale'], listing_type: 'sale', is_for_sale: false, sale_price: 95000, sale_currency: 'EUR' },
+  ])('preserves commercial source fields and offer modes through unrelated owner edits: %j', async commercial => {
+    Object.assign(mocks.property, commercial);
+    renderEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(renderedData('preview-property')).toMatchObject(commercial);
+    expect(screen.getByTestId('calendar-currency')).toHaveTextContent(commercial.currency || 'unknown');
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Owner title only' } });
+    const payload = await save();
+    expect(payload.listing_modes).toEqual(commercial.listing_modes);
+    for (const field of ['price', 'price_period', 'currency', 'sale_price', 'sale_currency']) {
+      if (field in payload) expect(payload[field]).toEqual(commercial[field as keyof typeof commercial]);
+    }
+    expect(renderedData('preview-property')).toMatchObject({ ...commercial, title_en: 'Owner title only' });
+  });
+
+  it.each(['0', '180', ''])('saves an explicit owner nightly edit %j in its recorded EUR without changing generic monthly or sale USD', async nightly => {
+    Object.assign(mocks.property, { currency: 'EUR', price: 4200, price_period: 'month', price_per_night: 120, sale_price: 95000, sale_currency: 'USD', listing_modes: ['rent', 'sale'], is_for_sale: true });
+    renderEditor();
+    fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: nightly } });
+    fireEvent.change(screen.getByLabelText('Sale amount'), { target: { value: '96000' } });
+    expect(await save()).toMatchObject({ price: 4200, price_period: 'month', currency: 'EUR', price_per_night: nightly === '' ? null : Number(nightly), sale_price: 96000, sale_currency: 'USD', listing_modes: ['rent', 'sale'] });
+  });
+
+  it.each([
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: true, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: null, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale'], is_for_sale: false, expectedType: null, expectedModes: [] },
+    { listing_type: 'sale', listing_modes: ['sale', 'rent', 'platform'], is_for_sale: true, expectedType: 'rent', expectedModes: ['rent', 'platform'] },
+  ])('explicitly disables public sale eligibility in the controlled owner writer and preview: %j', async offer => {
+    Object.assign(mocks.property, { currency: 'EUR', sale_currency: 'USD', sale_price: 95000, ...offer });
+    renderEditor();
+    fireEvent.click(screen.getByLabelText('Sale offer'));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    const expected = { listing_type: offer.expectedType, listing_modes: offer.expectedModes, is_for_sale: false };
+    expect(renderedData('preview-property')).toMatchObject(expected);
+    expect(propertySupportsMode(renderedData('preview-property'), 'buy')).toBe(false);
+    const payload = await save();
+    expect(payload).toMatchObject(expected);
+    expect(propertySupportsMode(payload, 'buy')).toBe(false);
+    expect(payload).toMatchObject({ _authoring: true, _expectedUpdatedAt: '2026-10-01T00:00:00Z' });
+  });
+
+  it('contains invalid commercial input in the autosave error path without an unhandled rejection or write', async () => {
+    Object.assign(mocks.property, { currency: 'EUR', price_per_night: 120 });
+    renderEditor();
+    vi.useFakeTimers();
+    try {
+      fireEvent.change(screen.getByLabelText('Nightly amount'), { target: { value: '-1' } });
+      await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
+      expect(mocks.mutateAsync).not.toHaveBeenCalled();
+      expect(mocks.navigate).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('preserves studio zero bedrooms and bathrooms through an unrelated owner edit and public preview', async () => {
+    Object.assign(mocks.property, { bedrooms: 0, bathrooms: 0 });
+    renderEditor();
+    expect(renderedData('controlled-data')).toMatchObject({ bedrooms: 0, bathrooms: 0 });
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Studio title only' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(renderedData('preview-property')).toMatchObject({ bedrooms: 0, bathrooms: 0 });
+    expect(await save()).toMatchObject({ bedrooms: 0, bathrooms: 0 });
   });
 
   it('persists an explicit currency edit to THB without converting the deposit amount', async () => {

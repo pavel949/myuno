@@ -1,3 +1,4 @@
+import { propertyCommercialInitial, propertyCommercialPayload, propertyCommercialValues } from '@/lib/propertyCommercialFields';
 import { PublishedPropertyRevisionQueue } from '@/components/admin/PublishedPropertyRevisionQueue';
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useCallback } from 'react';
@@ -162,31 +163,25 @@ export default function AdminProperties() {
   // Convert VendorProperty to CanonicalPropertyFormData for editing
   const getInitialFormData = useCallback((): CanonicalPropertyFormData => {
     if (!editingProperty) {
-      return { provider_id: selectedProviderId };
+      return { provider_id: selectedProviderId, ...propertyCommercialInitial({ currency: cityCurrencyCode, sale_currency: cityCurrencyCode, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false }) };
     }
 
     const p = editingProperty as any;
-    const modes = p.listing_modes?.length > 0 
-      ? p.listing_modes 
-      : [p.listing_type || 'rent'];
-
     return {
       provider_id: p.management_company_id || p.provider_id || '',
       internal_name: p.internal_name || '',
+      project_id: p.project_id ?? undefined,
+      unit_number: p.unit_number ?? '',
+      floor: p.floor ?? undefined,
+      total_floors: p.total_floors ?? undefined,
       title_en: p.title_en,
       title_ru: p.title_ru || '',
       description_en: p.description_en || '',
       description_ru: p.description_ru || '',
       property_type: p.property_type,
-      listing_modes: modes,
-      listing_type: p.listing_type,
-      price: p.price ?? undefined,
-      price_per_night: p.price?.toString() || p.price_per_night?.toString() || '',
-      price_period: p.price_period || 'month',
-      sale_price: p.sale_price?.toString() || '',
-      is_for_sale: modes.includes('sale'),
-      bedrooms: p.bedrooms || 1,
-      bathrooms: p.bathrooms || 1,
+      ...propertyCommercialInitial(p),
+      bedrooms: p.bedrooms ?? 1,
+      bathrooms: p.bathrooms ?? 1,
       area_sqm: p.area_sqm?.toString() || '',
       max_guests: p.max_guests || 2,
       min_stay_nights: p.min_stay_nights || 1,
@@ -262,7 +257,7 @@ export default function AdminProperties() {
       furnishing_level: p.furnishing_level,
       equipment: p.equipment,
     };
-  }, [editingProperty, selectedProviderId]);
+  }, [editingProperty, selectedProviderId, cityCurrencyCode]);
 
   const handleSubmit = async (data: CanonicalPropertyFormData) => {
     if (!data.title_en && !data.title) {
@@ -279,16 +274,7 @@ export default function AdminProperties() {
     setIsSubmitting(true);
     setSaveUnconfirmed(false);
     try {
-      const listingModes = data.listing_modes || [];
-      if (listingModes.length === 0) {
-        if (data.is_for_sale) listingModes.push('sale');
-        if (data.price_per_night || data.price) listingModes.push('rent');
-        if (listingModes.length === 0) listingModes.push('rent');
-      }
-
-      const primaryListingType = listingModes.includes('sale') && !listingModes.includes('rent') 
-        ? 'sale' 
-        : 'rent';
+      const commercial = propertyCommercialPayload(propertyCommercialValues(data), editingProperty ?? {}, true, !editingProperty);
 
       // Determine if selected entity is MC or provider
       const isMC = isSelectedMC;
@@ -299,19 +285,18 @@ export default function AdminProperties() {
           : { provider_id: entityId }
         ),
         internal_name: data.internal_name || undefined,
+        project_id: data.project_id || null,
+        unit_number: data.unit_number?.trim() || null,
+        floor: data.floor ?? null,
+        total_floors: data.total_floors ?? null,
         title_en: data.title_en || data.title || '',
         title_ru: data.title_ru || data.title_en || data.title || '',
         description_en: data.description_en || data.description || undefined,
         description_ru: data.description_ru || undefined,
         property_type: data.property_type || 'apartment',
-        listing_type: primaryListingType,
-        listing_modes: listingModes,
-        price: data.price || (data.price_per_night ? parseFloat(data.price_per_night) : undefined),
-        price_period: data.price_period || 'month',
-        sale_price: data.sale_price ? parseFloat(data.sale_price) : undefined,
-        currency: cityCurrencyCode,
-        bedrooms: data.bedrooms || 1,
-        bathrooms: data.bathrooms || 1,
+        ...commercial,
+        bedrooms: data.bedrooms ?? 1,
+        bathrooms: data.bathrooms ?? 1,
         area_sqm: data.area_sqm ? parseInt(String(data.area_sqm)) : undefined,
         max_guests: data.max_guests || 2,
         min_stay_nights: data.min_stay_nights || 1,

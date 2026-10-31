@@ -28,6 +28,9 @@ interface PricingStepProps {
   authoringOnly?: boolean;
   canEditPricing?: boolean;
   canEditBookingTerms?: boolean;
+  hideCommercialFields?: boolean;
+  rentalCurrency?: string;
+  saleCurrency?: string;
 }
 
 // Amenity labels for display
@@ -123,9 +126,10 @@ const PRICING_TEMPLATES = [
   },
 ] as const;
 
-function PricingStepInner({ formData, updateFormData, selectedProject, authoringOnly = false, canEditPricing = true, canEditBookingTerms = true }: PricingStepProps) {
+function PricingStepInner({ formData, updateFormData, selectedProject, authoringOnly = false, canEditPricing = true, canEditBookingTerms = true, hideCommercialFields = false, rentalCurrency = 'THB', saleCurrency = '' }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const currencyLabel = rentalCurrency || (isRu ? 'валюта не задана' : 'currency not set');
   const [pricingMode, setPricingMode] = useState<'short_term' | 'long_term' | 'sale' | null>(null);
 
   const handleUseProjectDescription = () => {
@@ -240,10 +244,11 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
         icon={<DollarSign className="h-4 w-4" />}
         title={isRu ? 'Условия аренды' : 'Rental Terms'}
         defaultOpen
-        badge={basePrice > 0 ? `${basePrice.toLocaleString()} THB` : undefined}
+        badge={basePrice > 0 ? `${basePrice.toLocaleString()} ${currencyLabel}` : undefined}
       >
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {!hideCommercialFields && <>
             <div className="space-y-2">
               <Label>{isRu ? 'Цена за ночь' : 'Price per night'}</Label>
               <div className="relative">
@@ -258,18 +263,19 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
                   className="pr-14"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none font-medium">
-                  THB
+                  {currencyLabel}
                 </span>
               </div>
               {estimatedMonthly > 0 && (
                 <p className="text-xs text-success flex items-center gap-1">
                   <BadgeDollarSign className="h-3 w-3" />
                   {isRu
-                    ? `≈ ${estimatedMonthly.toLocaleString('ru')} THB/мес при загрузке 70%`
-                    : `≈ ${estimatedMonthly.toLocaleString()} THB/mo at 70% occupancy`}
+                    ? `≈ ${estimatedMonthly.toLocaleString('ru')} ${currencyLabel}/мес при загрузке 70%`
+                    : `≈ ${estimatedMonthly.toLocaleString()} ${currencyLabel}/mo at 70% occupancy`}
                 </p>
               )}
             </div>
+            </>}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">
                 <Label className="flex items-center gap-1">
@@ -351,7 +357,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
       >
         <SeasonalPricing
           basePrice={basePrice > 0 ? basePrice : 0}
-          currency="THB"
+          currency={rentalCurrency}
           seasons={formData.seasonal_pricing || []}
           onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
         />
@@ -370,7 +376,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
             : undefined
         }
       >
-        <DiscountsSection formData={formData} updateFormData={updateFormData} />
+        <DiscountsSection currencyLabel={currencyLabel + ' '} formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
       </fieldset>
@@ -381,7 +387,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
         icon={<DollarSign className="h-4 w-4" />}
         title={isRu ? 'Продвинутые правила' : 'Advanced Pricing Rules'}
       >
-        <PricingRulesSection formData={formData} updateFormData={updateFormData} />
+        <PricingRulesSection currencyLabel={currencyLabel + ' '} formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
       </fieldset>
@@ -460,16 +466,17 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
               onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
             />
           </div>
-          {!authoringOnly && formData.platform_listed && basePrice > 0 && (
+          {!hideCommercialFields && !authoringOnly && formData.platform_listed && basePrice > 0 && (
             <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
               {isRu ? 'Пример: ' : 'Example: '}
-              {basePrice.toLocaleString()} THB/{isRu ? 'ночь' : 'night'} → 
-              {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(basePrice * 0.1).toLocaleString()} THB
+              {basePrice.toLocaleString()} {currencyLabel}/{isRu ? 'ночь' : 'night'} →
+              {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(basePrice * 0.1).toLocaleString()} {currencyLabel}
             </div>
           )}
         </div>
       </CollapsibleSection>
 
+      {!hideCommercialFields && <>
       <fieldset disabled={!canEditPricing || !canEditBookingTerms} className="min-w-0">
       {/* ─── Sale Option — collapsed ─── */}
       <CollapsibleSection
@@ -493,7 +500,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
 
           {formData.is_for_sale && (
             <div className="space-y-2">
-              <Label>{isRu ? 'Цена продажи (THB)' : 'Sale Price (THB)'}</Label>
+              <Label>{isRu ? 'Цена продажи' : 'Sale Price'} ({saleCurrency || (isRu ? 'валюта не задана' : 'currency not set')})</Label>
               <Input
                 type="number"
                 min={0}
@@ -502,17 +509,14 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
                 placeholder="5000000"
                 className="text-lg"
               />
-              {formData.sale_price && Number(formData.sale_price) > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  ≈ ${(Number(formData.sale_price) / 35).toLocaleString('en-US', { maximumFractionDigits: 0 })} USD
-                </p>
-              )}
+
             </div>
           )}
         </div>
       </CollapsibleSection>
 
       </fieldset>
+      </>}
 
       {/* ─── Description — edited on step 1 (Основное); here only summary + optional "Use project description" ─── */}
       <CollapsibleSection

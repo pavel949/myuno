@@ -12,7 +12,7 @@ function safePublicHref(value: unknown): string | undefined {
     const url = new URL(value, 'https://journey.invalid');
     const decoded = decodeURIComponent(url.pathname);
     if (url.origin !== 'https://journey.invalid' || /[\\\r\n]/.test(decoded)) return;
-    if (!/^\/(?:property(?:\/[^?#]*)?|area\/[a-z-]+)$/.test(url.pathname)) return;
+    if (!/^\/(?:search|property(?:\/[^?#]*)?|area\/[a-z-]+)$/.test(url.pathname)) return;
     return url.pathname + url.search + url.hash;
   } catch { return; }
 }

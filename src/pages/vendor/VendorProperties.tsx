@@ -1,3 +1,6 @@
+import { propertyRentalDisplayPrice, propertySaleAskingPrice, propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
+import { formatPriceStatic } from '@/lib/format/price';
+import { propertyCommercialInitial, propertyCommercialPayload, propertyCommercialValues } from '@/lib/propertyCommercialFields';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,12 +42,14 @@ import {
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import { DraftRestorationBanner } from '@/components/vendor';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorProperties = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const { profile, isLoading: profileLoading } = useVendorProfile();
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useVendorProperties(profile?.id);
   
@@ -102,7 +107,7 @@ const VendorProperties = () => {
   // Convert VendorProperty to CanonicalPropertyFormData for editing
   const getInitialFormData = useCallback((): CanonicalPropertyFormData => {
     if (!editingProperty) {
-      return {};
+      return propertyCommercialInitial({ currency: cityCurrencyCode, sale_currency: cityCurrencyCode, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false });
     }
 
     // Build deduped, cover-first images list — prevents the cover from
@@ -128,12 +133,9 @@ const VendorProperties = () => {
       description_en: editingProperty.description_en || '',
       description_ru: editingProperty.description_ru || '',
       property_type: editingProperty.property_type,
-      listing_type: editingProperty.listing_type,
-      price: editingProperty.price ?? undefined,
-      price_per_night: editingProperty.price?.toString() || '',
-      price_period: editingProperty.price_period || 'month',
-      bedrooms: editingProperty.bedrooms || 1,
-      bathrooms: editingProperty.bathrooms || 1,
+      ...propertyCommercialInitial(editingProperty),
+      bedrooms: editingProperty.bedrooms ?? 1,
+      bathrooms: editingProperty.bathrooms ?? 1,
       area_sqm: editingProperty.area_sqm?.toString() || '',
       max_guests: editingProperty.max_guests || 2,
       min_stay_nights: editingProperty.min_stay_nights || 1,
@@ -147,7 +149,7 @@ const VendorProperties = () => {
       instant_booking: (editingProperty as any).instant_booking ?? false,
       is_active: editingProperty.is_active ?? true,
     };
-  }, [editingProperty]);
+  }, [editingProperty, cityCurrencyCode]);
 
   const handleSubmit = async (data: CanonicalPropertyFormData) => {
     if (!data.title_en && !data.title) {
@@ -155,25 +157,18 @@ const VendorProperties = () => {
       return;
     }
 
-    if (!data.price_per_night && !data.price) {
-      toast.error(isRussian ? 'Укажите цену' : 'Set price');
-      return;
-    }
-
     setIsSubmitting(true);
     try {
+      const commercial = propertyCommercialPayload(propertyCommercialValues(data), editingProperty ?? {}, true, !editingProperty);
       const propertyData: Partial<VendorProperty> = {
         title_en: data.title_en || data.title || '',
         title_ru: data.title_ru || data.title_en || data.title || '',
         description_en: data.description_en || data.description || undefined,
         description_ru: data.description_ru || undefined,
         property_type: data.property_type || 'apartment',
-        listing_type: data.listing_type || (data.is_for_sale ? 'sale' : 'rent'),
-        price: data.price || (data.price_per_night ? parseFloat(data.price_per_night) : undefined),
-        price_period: data.price_period || 'month',
-        currency: 'THB',
-        bedrooms: data.bedrooms || 1,
-        bathrooms: data.bathrooms || 1,
+        ...commercial,
+        bedrooms: data.bedrooms ?? 1,
+        bathrooms: data.bathrooms ?? 1,
         area_sqm: data.area_sqm ? parseInt(String(data.area_sqm)) : undefined,
         max_guests: data.max_guests || 2,
         min_stay_nights: data.min_stay_nights || 1,
@@ -243,15 +238,13 @@ const VendorProperties = () => {
     }
   };
 
-  const formatPrice = (price: number, period?: string) => {
-    const periodLabel = period === 'day' 
-      ? (isRussian ? '/день' : '/day')
-      : period === 'month'
-        ? (isRussian ? '/мес' : '/mo')
-        : period === 'year'
-          ? (isRussian ? '/год' : '/yr')
-          : '';
-    return `฿${price.toLocaleString()}${periodLabel}`;
+  const formatPropertyPrice = (property: VendorProperty) => {
+    const mode = propertyDetailMode(property, property.listing_type === 'sale' ? 'buy' : 'rent');
+    const rental = propertyRentalDisplayPrice(property);
+    const price = mode === 'buy' ? propertySaleAskingPrice(property) : rental?.amount;
+    const currency = mode === 'buy' && property.sale_price != null ? property.sale_currency : property.currency;
+    if (price == null || !currency?.trim()) return isRussian ? 'Цена по запросу' : 'Price on request';
+    return `${formatPriceStatic(price, currency)}${mode === 'rent' && rental ? ' / ' + rental.period : ''}`;
   };
 
   if (authLoading || profileLoading) {
@@ -371,7 +364,7 @@ const VendorProperties = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-primary">
-                            {property.price && formatPrice(property.price, property.price_period)}
+                            {formatPropertyPrice(property)}
                           </span>
                           {property.district && (
                             <span className="text-xs text-muted-foreground flex items-center gap-1">

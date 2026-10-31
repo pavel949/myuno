@@ -44,30 +44,46 @@ export function propertySaleAskingPrice(property: PropertyIntentFields & { sale_
   return typeof amount === 'number' && Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 
-/** A billing period belongs to the tariff, never to the duration of a tenancy. */
-export function propertyRentalDisplayPrice(property: {
-  price?: number | null; price_period?: string | null;
+export interface PropertyRentalRateSource {
+  price?: number | null; price_period?: string | null; currency?: string | null;
   price_per_night?: number | null; price_per_month?: number | null; price_per_year?: number | null;
-}): { amount: number; period: 'night' | 'week' | 'month' | 'year' | 'total' } | null {
-  const positive = (value: number | null | undefined) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
-  const aliases: Record<string, 'night' | 'week' | 'month' | 'year' | 'total'> = {
-    day: 'night', daily: 'night', night: 'night', nightly: 'night', week: 'week', weekly: 'week',
-    month: 'month', monthly: 'month', year: 'year', yearly: 'year', annual: 'year', total: 'total',
+}
+export type RentalRatePeriod = 'night' | 'week' | 'month' | 'year' | 'total';
+export interface PropertyRentalRate { amount: number; period: RentalRatePeriod }
+const rentalPeriods: RentalRatePeriod[] = ['night', 'week', 'month', 'year', 'total'];
+const rentalPeriodAliases: Record<string, RentalRatePeriod> = {
+  day: 'night', daily: 'night', night: 'night', nightly: 'night', week: 'week', weekly: 'week',
+  month: 'month', monthly: 'month', year: 'year', yearly: 'year', annual: 'year', total: 'total',
+};
+const positiveRentalAmount = (value?: number | null) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+/** Recorded tariffs only: periods never imply a conversion or an offer. Conflicting same-period sources fail closed. */
+export function propertyRentalRateOptions(property: PropertyRentalRateSource, terms?: { price_per_night?: number | null; currency?: string | null } | null) {
+  const amounts = new Map<RentalRatePeriod, number>();
+  const conflicts = new Set<RentalRatePeriod>();
+  const add = (period: RentalRatePeriod, value?: number | null) => {
+    const amount = positiveRentalAmount(value);
+    if (amount === null) return;
+    if (amounts.has(period) && amounts.get(period) !== amount) conflicts.add(period);
+    else amounts.set(period, amount);
   };
   const rawPeriod = property.price_period?.trim().toLowerCase();
-  const period = rawPeriod && Object.prototype.hasOwnProperty.call(aliases, rawPeriod) ? aliases[rawPeriod] : undefined;
-  const explicit = { night: property.price_per_night, month: property.price_per_month, year: property.price_per_year };
-  if (period) {
-    const amount = positive(period in explicit ? explicit[period as keyof typeof explicit] : null) ?? positive(property.price);
-    return amount === null ? null : { amount, period };
-  }
-  // Unknown legacy period cannot be guessed. Dedicated fields carry their own period.
-  if (rawPeriod) return null;
-  for (const period of ['night', 'month', 'year'] as const) {
-    const amount = positive(explicit[period]);
-    if (amount !== null) return { amount, period };
-  }
-  return null;
+  const declaredPeriod = rawPeriod && Object.prototype.hasOwnProperty.call(rentalPeriodAliases, rawPeriod) ? rentalPeriodAliases[rawPeriod] : undefined;
+  if (declaredPeriod) add(declaredPeriod, property.price);
+  add('night', property.price_per_night);
+  add('month', property.price_per_month);
+  add('year', property.price_per_year);
+  add('night', terms?.price_per_night);
+  if (positiveRentalAmount(terms?.price_per_night) !== null && terms?.currency?.trim() && terms.currency.trim().toUpperCase() !== property.currency?.trim().toUpperCase()) conflicts.add('night');
+  const unknownPeriod = !!rawPeriod && !declaredPeriod && positiveRentalAmount(property.price) !== null;
+  const ambiguous = unknownPeriod || conflicts.size > 0;
+  return { declaredPeriod, ambiguous, conflicts: [...conflicts], rates: ambiguous ? [] : rentalPeriods.filter(period => amounts.has(period)).map(period => ({ period, amount: amounts.get(period)! })) };
+}
+
+/** One display selector over the same recorded tariffs used by the quote gate. */
+export function propertyRentalDisplayPrice(property: PropertyRentalRateSource, terms?: { price_per_night?: number | null; currency?: string | null } | null): PropertyRentalRate | null {
+  const options = propertyRentalRateOptions(property, terms);
+  if (options.ambiguous) return null;
+  return (options.declaredPeriod ? options.rates.find(rate => rate.period === options.declaredPeriod) : undefined) ?? options.rates[0] ?? null;
 }
 
 /** Public detail presentation; this never establishes availability or a server quote. */
@@ -75,24 +91,23 @@ export function propertyDetailPricing(property: PropertyIntentFields & {
   currency?: string | null; sale_currency?: string | null; sale_price?: number | null;
   price?: number | null; price_period?: string | null; price_per_night?: number | null;
   price_per_month?: number | null; price_per_year?: number | null; tenancy_modes?: string[] | null;
-}, rentalTerms: { price_per_night?: number | null } | null | undefined, requestedMode?: string | null, requestedTenancy?: string | null) {
+}, rentalTerms: { price_per_night?: number | null; currency?: string | null } | null | undefined, requestedMode?: string | null, requestedTenancy?: string | null) {
   const mode = propertyDetailMode(property, requestedMode);
   const hasOffer = propertySupportsMode(property, mode);
-  const positive = (value?: number | null) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
-  const dedicatedNightly = positive(rentalTerms?.price_per_night) ?? positive(property.price_per_night);
-  const rental = propertyRentalDisplayPrice({ ...property, price_per_night: dedicatedNightly });
-  const nightly = dedicatedNightly ?? (rental?.period === 'night' ? rental.amount : null);
+  const rateOptions = propertyRentalRateOptions(property, rentalTerms);
+  const rental = propertyRentalDisplayPrice(property, rentalTerms);
+  const nightly = rateOptions.rates.find(rate => rate.period === 'night')?.amount ?? null;
   const modes = property.tenancy_modes ?? [];
   const shortEligible = modes.length > 0 ? modes.includes('short') : nightly !== null;
   const longerStayRequested = (requestedTenancy === 'medium' || requestedTenancy === 'long') && modes.includes(requestedTenancy);
   const rentalCurrencyKnown = property.currency?.trim().toUpperCase() === 'THB';
   const saleCurrencyKnown = (property.sale_price != null ? property.sale_currency : property.currency)?.trim().toUpperCase() === 'THB';
-  const canQuoteShortStay = hasOffer && mode === 'rent' && shortEligible && !longerStayRequested && rentalCurrencyKnown && nightly !== null;
+  const canQuoteShortStay = hasOffer && mode === 'rent' && shortEligible && !longerStayRequested && rentalCurrencyKnown && !rateOptions.ambiguous && nightly !== null;
   const amount = !hasOffer ? null : mode === 'buy'
     ? saleCurrencyKnown ? propertySaleAskingPrice(property) : null
     : rentalCurrencyKnown ? canQuoteShortStay ? nightly : rental?.amount ?? null : null;
   return {
-    mode, hasOffer, canQuoteShortStay,
+    mode, hasOffer, canQuoteShortStay, rentalRates: rateOptions.rates, rentalRatesAmbiguous: rateOptions.ambiguous,
     amount, period: mode === 'buy' ? 'total' as const : canQuoteShortStay ? 'night' as const : rental?.period ?? null,
     pricePerNight: canQuoteShortStay ? nightly : null,
     requestedTenancy: longerStayRequested ? requestedTenancy : null,

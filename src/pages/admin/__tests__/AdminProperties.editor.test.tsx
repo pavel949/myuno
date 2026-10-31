@@ -1,3 +1,5 @@
+import { propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
+import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import React from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -42,7 +44,14 @@ vi.mock('@/components/owner/property-wizard/steps', async () => {
   const { PhotosStep } = await import('@/components/owner/property-wizard/steps/PhotosStep');
   return {
     PhotosStep,
-    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string }; updateFormData: (data: { title: string }) => void }) => <label htmlFor="fixture-title">Fixture title<input id="fixture-title" value={formData.title} onChange={event => updateFormData({ title: event.target.value })} /></label>,
+    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string; project_id?: string; unit_number?: string; floor?: number; total_floors?: number; bedrooms?: number }; updateFormData: (data: Record<string, unknown>) => void }) => <>
+      <label htmlFor="fixture-title">Fixture title<input id="fixture-title" value={formData.title} onChange={event => updateFormData({ title: event.target.value })} /></label>
+      <label htmlFor="fixture-project">Fixture project<input id="fixture-project" value={formData.project_id || ''} onChange={event => updateFormData({ project_id: event.target.value || undefined })} /></label>
+      <label htmlFor="fixture-unit">Fixture unit<input id="fixture-unit" value={formData.unit_number || ''} onChange={event => updateFormData({ unit_number: event.target.value })} /></label>
+      <label htmlFor="fixture-floor">Fixture floor<input id="fixture-floor" type="number" value={formData.floor ?? ''} onChange={event => updateFormData({ floor: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>
+      <label htmlFor="fixture-total-floors">Fixture total floors<input id="fixture-total-floors" type="number" value={formData.total_floors ?? ''} onChange={event => updateFormData({ total_floors: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>
+      <label htmlFor="fixture-bedrooms">Fixture bedrooms<input id="fixture-bedrooms" type="number" value={formData.bedrooms ?? ''} onChange={event => updateFormData({ bedrooms: Number(event.target.value) })} /></label>
+    </>,
     LocationStep: () => null,
     PricingStep: () => null,
     UtilitiesStep: () => null,
@@ -81,6 +90,89 @@ describe('contained admin property editor', () => {
     mocks.properties = [{ id: 'synthetic-property', updated_at: '2026-10-19T00:00:00Z', approval_status: 'pending', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: Array.from({ length: 15 }, (_, i) => `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>#${i}`) }];
   });
   afterEach(() => { cleanup(); expect(mocks.network).not.toHaveBeenCalled(); });
+
+  it.each([
+    { name: 'monthly', price: 90000, price_period: 'month', price_per_night: null, price_per_month: null, price_per_year: null, sale_price: null, currency: 'USD', sale_currency: null, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false },
+    { name: 'nightly', price: null, price_period: null, price_per_night: 3000, price_per_month: null, price_per_year: null, sale_price: null, currency: 'THB', sale_currency: null, listing_modes: ['rent'], listing_type: 'rent', is_for_sale: false },
+    { name: 'sale', price: 5000000, price_period: null, price_per_night: null, price_per_month: null, price_per_year: null, sale_price: null, currency: 'USD', sale_currency: null, listing_modes: null, listing_type: 'sale', is_for_sale: null },
+    { name: 'dual', price: 90000, price_period: 'month', price_per_night: 3000, price_per_month: 85000, price_per_year: 900000, sale_price: 200000, currency: 'THB', sale_currency: 'EUR', listing_modes: ['rent', 'sale', 'platform'], listing_type: 'rent', is_for_sale: true },
+    { name: 'null and zero', price: 0, price_period: null, price_per_night: null, price_per_month: null, price_per_year: 0, sale_price: null, currency: null, sale_currency: null, listing_modes: null, listing_type: null, is_for_sale: null },
+  ])('preserves the complete $name commercial record on an unrelated edit', async ({ name: _name, ...commercial }) => {
+    mocks.properties = [{ ...mocks.properties[0], ...commercial }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.change(within(editor).getByLabelText('Fixture title'), { target: { value: 'Metadata only' } });
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    expect(await within(editor).findByLabelText('Price per night')).toHaveValue(commercial.price_per_night == null ? '' : String(commercial.price_per_night));
+    expect(within(editor).getByLabelText('Rental / offer currency')).toHaveValue(commercial.currency ?? '');
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    const payload = mocks.update.mock.calls[0][1];
+    expect(payload).toMatchObject(commercial);
+    if (commercial.listing_type === 'rent') {
+      const view = surfaceFromProperty({ ...mocks.properties[0], ...payload } as any, 'rent');
+      // The dual fixture intentionally preserves two different recorded monthly amounts.
+      // Authoring must retain both; public quoting must not choose one silently.
+      const conflictingMonthly = _name === 'dual';
+      expect(view.priceHintThb).toBe(!conflictingMonthly && commercial.currency === 'THB' ? commercial.price_per_month ?? commercial.price ?? commercial.price_per_night : null);
+      const offer = propertyDetailPricing(payload, { price_per_night: payload.price_per_night }, 'rent');
+      expect(offer.canQuoteShortStay).toBe(!conflictingMonthly && commercial.currency === 'THB' && commercial.price_per_night !== null);
+      if (conflictingMonthly) expect(offer.rentalRatesAmbiguous).toBe(true);
+    }
+  });
+
+  it('changes nightly rent and clears sale price without retyping the monthly amount, currencies or dual modes', async () => {
+    mocks.properties = [{ ...mocks.properties[0], price: 90000, price_period: 'month', currency: 'THB', price_per_night: 3000, price_per_month: null, price_per_year: null, sale_price: 200000, sale_currency: 'EUR', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true }];
+    mocks.update.mockResolvedValue({ error: null }); renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    fireEvent.change(await within(editor).findByLabelText('Price per night'), { target: { value: '3200.5' } });
+    fireEvent.change(within(editor).getByLabelText('Sale price'), { target: { value: '' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][1]).toMatchObject({ price: 90000, price_per_night: 3200.5, price_period: 'month', currency: 'THB', sale_price: null, sale_currency: 'EUR', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true });
+  });
+
+  it('creates with explicit separate monthly, nightly and sale values and currencies', async () => {
+    mocks.properties = []; mocks.create.mockResolvedValue({ error: null });
+    render(<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider']}><AdminProperties /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Add property' }));
+    const editor = await screen.findByRole('dialog');
+    fireEvent.change(within(editor).getByLabelText('Fixture title'), { target: { value: 'Synthetic create' } });
+    fireEvent.mouseDown(within(editor).getByRole('tab', { name: 'Pricing' }), { button: 0, ctrlKey: false });
+    await within(editor).findByLabelText('Offer amount');
+    for (const [label, value] of [['Offer amount', '90000'], ['Billing period', 'month'], ['Price per night', '3000'], ['Sale price', '200000'], ['Sale currency', 'USD']]) fireEvent.change(within(editor).getByLabelText(label), { target: { value } });
+    fireEvent.click(within(editor).getByRole('switch', { name: 'Offer for sale' }));
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalled());
+    expect(mocks.create.mock.calls[0][0]).toMatchObject({ price: 90000, price_period: 'month', price_per_night: 3000, price_per_month: null, price_per_year: null, currency: 'THB', sale_price: 200000, sale_currency: 'USD', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true });
+  });
+
+  it('reopens and saves canonical project/unit/floor fields without replacing the physical ID or zero bedrooms', async () => {
+    mocks.properties = [{ ...mocks.properties[0], project_id: 'project', unit_number: 'G-01', floor: 0, total_floors: 4, bedrooms: 0 }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog', { name: 'Edit Property' });
+    expect(within(editor).getByLabelText('Fixture project')).toHaveValue('project');
+    expect(within(editor).getByLabelText('Fixture floor')).toHaveValue(0);
+    expect(within(editor).getByLabelText('Fixture bedrooms')).toHaveValue(0);
+    fireEvent.change(within(editor).getByLabelText('Fixture project'), { target: { value: 'reviewed-project' } });
+    fireEvent.change(within(editor).getByLabelText('Fixture total floors'), { target: { value: '5' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledWith('synthetic-property', expect.objectContaining({ project_id: 'reviewed-project', unit_number: 'G-01', floor: 0, total_floors: 5, bedrooms: 0 }), '2026-10-19T00:00:00Z'));
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it('can explicitly clear an optional project link and unit identifiers', async () => {
+    mocks.properties = [{ ...mocks.properties[0], project_id: 'project', unit_number: 'G-01', floor: 0 }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog', { name: 'Edit Property' });
+    for (const name of ['Fixture project', 'Fixture unit', 'Fixture floor']) fireEvent.change(within(editor).getByLabelText(name), { target: { value: '' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledWith('synthetic-property', expect.objectContaining({ project_id: null, unit_number: null, floor: null }), '2026-10-19T00:00:00Z'));
+  });
 
   it('owns one scrolling body with a protected footer and accessible tab labels', async () => {
     renderEditor();

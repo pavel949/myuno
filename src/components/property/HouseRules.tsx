@@ -1,4 +1,5 @@
 import React from 'react';
+import { propertyCancellationDescription } from '@/lib/propertyCancellationDescription';
 import { 
   FileText, Cigarette, Dog, PartyPopper, Baby, 
   Volume2, Clock, AlertTriangle, Shield 
@@ -39,13 +40,6 @@ interface HouseRulesProps {
   cancellationPolicy?: string;
   className?: string;
 }
-
-const cancellationPolicies: Record<string, { en: string; ru: string }> = {
-  flexible: { en: 'Flexible - Free cancellation 24h before', ru: 'Гибкая - бесплатная отмена за 24ч' },
-  moderate: { en: 'Moderate - Free cancellation 5 days before', ru: 'Умеренная - бесплатная отмена за 5 дней' },
-  strict: { en: 'Strict - 50% refund up to 1 week before', ru: 'Строгая - 50% возврат за неделю' },
-  non_refundable: { en: 'Non-refundable', ru: 'Без возврата' },
-};
 
 export function HouseRules({ 
   rules, 
@@ -184,7 +178,7 @@ export function HouseRules({
               {isRu ? 'Политика отмены' : 'Cancellation Policy'}
             </p>
             <p className="text-sm font-medium">
-              {cancellationPolicies[cancellationPolicy]?.[isRu ? 'ru' : 'en'] || cancellationPolicy}
+              {propertyCancellationDescription(cancellationPolicy, isRu ? 'ru' : 'en')}
             </p>
           </div>
         )}
