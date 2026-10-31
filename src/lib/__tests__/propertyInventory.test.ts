@@ -40,3 +40,12 @@ describe('pre-payment compensation gate', () => {
     expect(await verifyInventoryHold(async () => false, async () => false)).toBe('compensation_failed');
   });
 });
+it('keeps linked request receipts nonblocking until checked confirmation, preserving legacy pending holds', () => {
+  const request = { request_contract: 'rental-request-v1' };
+  expect(propertyOrderHoldsInventory('pending', request)).toBe(false);
+  expect(propertyOrderHoldsInventory('draft', request)).toBe(false);
+  expect(propertyOrderHoldsInventory('confirmed', request)).toBe(true);
+  expect(propertyOrderHoldsInventory('cancelled', request)).toBe(false);
+  expect(propertyOrderHoldsInventory('pending')).toBe(true);
+  expect(propertyBookingHoldsInventory('pending')).toBe(true);
+});

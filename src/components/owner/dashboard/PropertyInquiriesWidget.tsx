@@ -16,6 +16,9 @@ import { formatDistanceToNow, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { decideRentalRequest, listRentalRequests } from '@/lib/rentalRequest';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 // Status mapping aligned with the property_inquiries CHECK constraint:
 // pending | responded | accepted | rejected | cancelled
@@ -32,32 +35,28 @@ type StatusKey = keyof typeof STATUS_CONFIG;
 
 export function PropertyInquiriesWidget() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { allProperties } = useMyProperties();
-  const propertyIds = allProperties.map(p => p.id);
+  const propertyIds = allProperties.map(p => p.property_id);
   const [actingId, setActingId] = useState<string | null>(null);
 
-  const { data: inquiries, isLoading } = useQuery({
-    queryKey: ['property-inquiries-widget', propertyIds],
+  const { data: inquiries, isLoading, error: inquiryError, refetch: refetchInquiries } = useQuery({
+    queryKey: ['property-inquiries-widget', user?.id, companyId, propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
-      const { data, error } = await supabase
-        .from('property_inquiries')
-        .select('*')
-        .in('property_id', propertyIds)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      if (error) throw error;
-      return data || [];
+      return listRentalRequests(propertyIds);
     },
-    enabled: propertyIds.length > 0,
+    enabled: !!user?.id && propertyIds.length > 0,
   });
 
   // Also fetch recent property orders (booking requests) for visibility.
   const { data: bookingRequests } = useQuery({
-    queryKey: ['property-booking-requests-widget', propertyIds],
+    queryKey: ['property-booking-requests-widget', user?.id, companyId, propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
       const { data, error } = await supabase
@@ -73,27 +72,24 @@ export function PropertyInquiriesWidget() {
         return meta?.property_id && propertyIds.includes(meta.property_id);
       });
     },
-    enabled: propertyIds.length > 0,
+    enabled: !!user?.id && propertyIds.length > 0,
   });
 
   const updateInquiryStatus = async (
     inquiryId: string,
-    nextStatus: 'accepted' | 'rejected',
+    nextStatus: 'accepted' | 'rejected' | 'cancelled',
   ) => {
     setActingId(inquiryId);
     try {
-      const { error } = await supabase
-        .from('property_inquiries')
-        .update({ status: nextStatus })
-        .eq('id', inquiryId);
-      if (error) throw error;
+      await decideRentalRequest(inquiryId, nextStatus);
       toast.success(
         nextStatus === 'accepted'
           ? (isRu ? 'Запрос принят' : 'Inquiry accepted')
-          : (isRu ? 'Запрос отклонён' : 'Inquiry rejected'),
+          : nextStatus === 'cancelled' ? (isRu ? 'Запрос отменён' : 'Inquiry cancelled') : (isRu ? 'Запрос отклонён' : 'Inquiry rejected'),
       );
       await queryClient.invalidateQueries({ queryKey: ['property-inquiries-widget'] });
       await queryClient.invalidateQueries({ queryKey: ['my-requests'] });
+      await queryClient.invalidateQueries({ predicate: query => ['property-booking', 'multi-property-booking', 'all-property-booking', 'property-inquiries', 'property-booking-requests-widget'].some(prefix => String(query.queryKey[0]).startsWith(prefix)) });
     } catch (err: any) {
       console.error('[PropertyInquiriesWidget] status update failed:', err);
       toast.error(
@@ -106,6 +102,9 @@ export function PropertyInquiriesWidget() {
     }
   };
 
+  if (inquiryError) {
+    return <Card><CardContent className="py-6" role="alert"><p>{isRu ? 'Не удалось загрузить запросы' : 'Could not load requests'}</p><Button variant="outline" onClick={() => refetchInquiries()}>{isRu ? 'Повторить' : 'Retry'}</Button></CardContent></Card>;
+  }
   if (isLoading) {
     return <Skeleton className="h-[180px] rounded-none" />;
   }
@@ -122,10 +121,12 @@ export function PropertyInquiriesWidget() {
       checkIn: inq.check_in,
       checkOut: inq.check_out,
       guests: inq.guests,
+      estimate: inq.quoted_total == null ? null : `${inq.currency} ${inq.quoted_total}`,
+      linked: !!inq.order_id,
       propertyId: inq.property_id,
       createdAt: inq.created_at,
     })),
-    ...(bookingRequests || []).map(order => {
+    ...(bookingRequests || []).filter(order => !inquiries?.some(inquiry => inquiry.order_id === order.id)).map(order => {
       const meta = order.metadata as any;
       const participant = (order as any).participants?.[0];
       const status = (order.status === 'pending' ? 'pending' : order.status) as StatusKey;
@@ -140,6 +141,8 @@ export function PropertyInquiriesWidget() {
         checkIn: meta?.check_in || null,
         checkOut: meta?.check_out || null,
         guests: meta?.guests || null,
+        estimate: null,
+        linked: false,
         propertyId: meta?.property_id,
         createdAt: order.created_at,
       };
@@ -148,7 +151,7 @@ export function PropertyInquiriesWidget() {
    .slice(0, 8);
 
   const newCount = allItems.filter(i => i.status === 'pending').length;
-  const propertyMap = new Map(allProperties.map(p => [p.id, p]));
+  const propertyMap = new Map(allProperties.map(p => [p.property_id, p]));
 
   if (allItems.length === 0) {
     return (
@@ -195,7 +198,7 @@ export function PropertyInquiriesWidget() {
             const statusCfg = STATUS_CONFIG[statusKey];
             const StatusIcon = statusCfg.icon;
             const isPending = statusKey === 'pending';
-            const canAct = item.type === 'inquiry' && isPending;
+            const canAct = item.type === 'inquiry' && item.linked && isPending;
             const isActing = actingId === item.id;
 
             return (
@@ -232,6 +235,8 @@ export function PropertyInquiriesWidget() {
                       {item.checkIn && ` · ${format(parseISO(item.checkIn), 'd MMM', { locale: isRu ? ru : undefined })}`}
                       {item.guests && ` · ${item.guests} ${isRu ? 'гост.' : 'guests'}`}
                     </p>
+                    {item.type === 'inquiry' && !item.linked && <p className="text-xs text-muted-foreground">{isRu ? 'Требует проверки связи с бронированием' : 'Booking linkage requires review'}</p>}
+                    {item.estimate && <p className="text-xs text-muted-foreground">{isRu ? 'Предварительная сумма: ' : 'Estimated total: '}{item.estimate}</p>}
                   </div>
                 </button>
 
@@ -250,6 +255,11 @@ export function PropertyInquiriesWidget() {
                   </span>
                 </div>
 
+                {item.type === 'inquiry' && item.linked && item.status === 'accepted' && (
+                  <Button size="sm" variant="ghost" disabled={isActing} onClick={() => updateInquiryStatus(item.id, 'cancelled')}>
+                    {isRu ? 'Отменить' : 'Cancel'}
+                  </Button>
+                )}
                 {canAct && (
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Button
@@ -261,7 +271,7 @@ export function PropertyInquiriesWidget() {
                         e.stopPropagation();
                         updateInquiryStatus(item.id, 'accepted');
                       }}
-                      aria-label={isRu ? 'Принять' : 'Accept'}
+                      aria-label={isRu ? 'Подтвердить проживание' : 'Confirm stay'}
                     >
                       {isActing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                     </Button>

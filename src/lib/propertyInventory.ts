@@ -11,6 +11,8 @@ export function propertyBookingHoldsInventory(status: string | null | undefined)
   return status != null && !RELEASED_PROPERTY_BOOKING_STATUSES.some(value => value === status);
 }
 
-export function propertyOrderHoldsInventory(status: string | null | undefined): boolean {
+export function propertyOrderHoldsInventory(status: string | null | undefined, metadata?: unknown): boolean {
+  const request = metadata && typeof metadata === 'object' ? metadata as Record<string, unknown> : null;
+  if (request?.request_contract === 'rental-request-v1' && (status === 'draft' || status === 'pending')) return false;
   return status != null && !RELEASED_PROPERTY_ORDER_STATUSES.some(value => value === status);
 }

@@ -23,20 +23,20 @@ describe('InquiryConfirmation', () => {
   it('renders the EN heading', () => {
     renderComponent();
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Viewing request received' }),
+      screen.getByRole('heading', { level: 2, name: 'Stay request received' }),
     ).toBeInTheDocument();
   });
 
-  it('renders the WhatsApp confirmation body copy', () => {
+  it('renders the request-only body copy', () => {
     renderComponent();
     expect(
-      screen.getByText(/WhatsApp within 24 hours/i),
+      screen.getByText(/Dates are not reserved yet/i),
     ).toBeInTheDocument();
   });
 
-  it('renders a "View booking" CTA button linked to the orderId', () => {
+  it('renders a "View request" CTA button linked to the orderId', () => {
     renderComponent('test-order-123');
-    const viewBookingBtn = screen.getByRole('button', { name: 'View booking' });
+    const viewBookingBtn = screen.getByRole('button', { name: 'View request' });
     expect(viewBookingBtn).toBeInTheDocument();
   });
 
@@ -46,4 +46,15 @@ describe('InquiryConfirmation', () => {
       screen.getByRole('button', { name: 'Browse properties' }),
     ).toBeInTheDocument();
   });
+});
+
+it('replayed accepted receipt displays confirmed status without inventing payment success',()=>{
+  render(<MemoryRouter><InquiryConfirmation orderId="stored-order" requestStatus="accepted" /></MemoryRouter>);
+  expect(screen.getByRole('heading',{name:'Stay confirmed'})).toBeInTheDocument();
+  expect(screen.queryByText(/Dates are not reserved yet/)).not.toBeInTheDocument();
+});
+it('replayed cancelled receipt does not claim a new request was submitted',()=>{
+  render(<MemoryRouter><InquiryConfirmation orderId="stored-order" requestStatus="cancelled" /></MemoryRouter>);
+  expect(screen.getByRole('heading',{name:'Request closed'})).toBeInTheDocument();
+  expect(screen.getByText(/No new request was created/)).toBeInTheDocument();
 });

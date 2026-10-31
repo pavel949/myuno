@@ -147,6 +147,8 @@ Property flywheel is economics, not a required state machine. Services are reven
 ## 12. Financial & Booking invariants
 `[check_in, check_out)`: 10→13 occupies 10,11,12; 13 may host next arrival. Avoid timezone-sensitive date-only parsing. DB overlap/inventory constraints are final authority.
 
+A request-only rental inquiry and its durable retry receipt are not an inventory commitment. Only checked authorized confirmation may create a linked occupied stay; confirmation must fail if that canonical inventory row was not committed. Customer estimates remain distinct from agreed quotes and verified payments.
+
 UI `paid` is not payment truth. Manual/off-platform payment requires authorized actor, trusted order/amount context, canonical reconciliation and accounting consequence. Stripe/webhooks require verified evidence/idempotency.
 
 `ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.

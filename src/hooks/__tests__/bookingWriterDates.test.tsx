@@ -5,7 +5,7 @@ import { civilStaysOverlap, occupiedCivilDates, stayOccupiesDate, type CivilStay
 
 const state = vi.hoisted(() => ({
   blocked: [] as string[],
-  existing: [] as { id: string; check_in: string; check_out: string }[],
+  existing: [] as { id: string; check_in: string; check_out: string; status?: string; metadata?: Record<string,unknown> }[],
   boundary: [] as string[],
   failedTable: '', missingOrder: false,
 }));
@@ -50,7 +50,7 @@ vi.mock('@/integrations/supabase/client', () => {
         const data = table === 'property_availability'
           ? state.blocked.filter(date => passes('date', date)).map(date => ({ date }))
           : table === 'orders'
-            ? state.existing.filter(b => passes('start_at', `${b.check_in}T14:00:00Z`) && passes('end_at', `${b.check_out}T12:00:00Z`) && passes('id', b.id)).map(b => ({ id: b.id }))
+            ? state.existing.filter(b => passes('start_at', `${b.check_in}T14:00:00Z`) && passes('end_at', `${b.check_out}T12:00:00Z`) && passes('id', b.id)).map(b => ({ id: b.id, status: b.status ?? 'confirmed', metadata: b.metadata ?? {} }))
             : table === 'order_items' ? [{ order_id: 'synthetic-existing' }] : [];
         return Promise.resolve(resolve({ data, error: state.failedTable === table ? new Error('Synthetic read failure') : null }));
       },
@@ -137,4 +137,14 @@ describe('timestamp contract ambiguity — evidence, not a new conversion', () =
     expect(dateIn('2026-10-13T23:00:00Z', 'Asia/Bangkok')).toBe('2026-10-14');
     expect(dateIn('2026-10-13T23:00:00+07:00', 'Asia/Bangkok')).toBe('2026-10-13');
   });
+});
+it.each(['create','update'])('%s preflight ignores a linked pending request but keeps legacy pending holds',async mode=>{
+  state.existing=[{id:'synthetic-existing',check_in:'2026-10-10',check_out:'2026-10-13',status:'pending',metadata:{request_contract:'rental-request-v1'}}];
+  const {result}=renderHook(()=>usePropertyBookings('synthetic-home'));
+  const invoke=()=>mode==='create'
+    ? result.current.createBooking({property_id:'synthetic-home',check_in:'2026-10-10',check_out:'2026-10-13'})
+    : result.current.updateBooking({id:'synthetic-current',check_in:'2026-10-10',check_out:'2026-10-13'});
+  await expect(invoke()).rejects.toThrow('SYNTHETIC_WRITE_BOUNDARY');
+  state.boundary=[];state.existing[0].metadata={};
+  await expect(invoke()).rejects.toThrow('пересекаются');expect(state.boundary).toEqual([]);
 });
