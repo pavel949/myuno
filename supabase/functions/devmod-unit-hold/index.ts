@@ -8,7 +8,9 @@
  *   attribution_id?  string (uuid)   — optional, link to lead_attribution
  *   notes?           string
  *
- * Always returns HTTP 200 to avoid FunctionsHttpError in the client.
+ * Request-only containment currently returns HTTP 409 before any mutation.
+ * Legacy implementation below remains quarantined for a separately reviewed replacement.
+ * Legacy behavior returned HTTP 200 to avoid FunctionsHttpError in the client.
  * Status is indicated via the JSON body:
  *   { success: true,  hold_id, expires_at }
  *   { success: false, reason: "conflict" | "bad_request" | "internal", message: "..." }
@@ -16,6 +18,7 @@
  * Deploy: supabase functions deploy devmod-unit-hold
  */
 
+import { newbuildRequestOnlyResponse } from "../_shared/newbuild-request-only.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -42,6 +45,9 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return json({ success: false, reason: "method_not_allowed", message: "POST required" });
   }
+
+  // Containment precedes body parsing, service-role creation and inventory writes.
+  return newbuildRequestOnlyResponse(corsHeaders);
 
   let body: Record<string, unknown>;
   try {

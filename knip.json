@@ -3,7 +3,8 @@
   "entry": [
     "src/main.tsx",
     "src/App.tsx",
-    "src/sw.ts",
+    "src/lib/mcp/index.ts",
+    "src/components/admin/dashboard/AdminKPIGrid.tsx",
     "vite.config.ts",
     "tailwind.config.ts",
     "postcss.config.js",

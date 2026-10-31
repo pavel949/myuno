@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminConsultations, type ConsultationFilters } from '@/hooks/useAdminConsultations';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from '@/hooks/useConsultationRequests';
+import { BuyerRequestSummary } from '@/components/newbuilds/BuyerRequestSummary';
 import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
 import { LeadAIInsights } from '@/components/admin/leads/LeadAIInsights';
 import { FollowUpGenerator } from '@/components/admin/leads/FollowUpGenerator';
@@ -251,6 +252,8 @@ function ConsultationCard({
                       </div>
                     </div>
                   </div>
+
+                  <BuyerRequestSummary metadata={consultation.vertical_metadata} />
 
                   {/* Request details */}
                   <div>
