@@ -1,13 +1,9 @@
-name: DB Mirror Snapshot (Lovable Cloud → Own Supabase)
+name: PostgreSQL Snapshot (source configuration required)
 
-# Snapshots all data from Lovable Cloud Supabase (kakkwibljrjsawxgnupk)
-# into the user's own Supabase project (erfwtoavipwjqmylpizt) every 6 hours.
-#
-# Strategy: REST-based dump via @supabase/supabase-js (bypasses need for direct
-# Postgres replication access, which Lovable Cloud does not provide).
-#
-# IMPORTANT: This is a snapshot mirror — the target DB is overwritten on each
-# run. Do NOT write directly to the target DB; treat it as read-only replica.
+# Native consistent PostgreSQL snapshots only. Restoration is an explicitly
+# selected isolated operation; this workflow never overwrites a hosted target.
+# SOURCE_DATABASE_URL must be provisioned by the credential owner. Without it
+# the job fails closed; no anonymous REST fallback is permitted.
 
 on:
   schedule:
@@ -28,7 +24,7 @@ concurrency:
 
 jobs:
   snapshot:
-    name: Export → Import snapshot
+    name: Export verified PostgreSQL snapshot
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -44,48 +40,29 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Preflight — global WebSocket available
+      - name: Install locked dependencies and PostgreSQL tools
         run: |
-          node -e "if (typeof globalThis.WebSocket !== 'function') { console.error('FATAL: globalThis.WebSocket is unavailable in Node ' + process.version + '. @supabase/realtime-js needs it; use Node >= 22.'); process.exit(1) } else { console.log('WebSocket OK on Node ' + process.version) }"
+          npm ci --no-audit --no-fund
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-      - name: Install dependencies
-        run: npm ci --no-audit --no-fund --prefer-offline
-
-      - name: Export data from Lovable Cloud (source)
+      - name: Export a consistent native database snapshot
         run: node scripts/export-data.mjs
         env:
-          # Source credentials are hardcoded in the script (Lovable anon key
-          # is a publishable token), no env required here.
-          NODE_OPTIONS: '--max-old-space-size=4096'
+          SOURCE_DATABASE_URL: ${{ secrets.SOURCE_DATABASE_URL }}
+          SNAPSHOT_DIRECTORY: tmp/snapshot
+          SNAPSHOT_SCHEMAS: public
 
       - name: Upload export artifact (audit trail, 7-day retention)
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: db-snapshot-${{ github.run_id }}
-          path: tmp/export/
+          path: tmp/snapshot/
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
 
-      - name: Import data into target Supabase (erfwtoavipwjqmylpizt)
-        run: node scripts/import-data.mjs
-        env:
-          SERVICE_ROLE_KEY: ${{ secrets.TARGET_SUPABASE_SERVICE_ROLE_KEY }}
-          NODE_OPTIONS: '--max-old-space-size=4096'
-
-      - name: Report summary
-        if: always()
+      - name: Report bounded backup scope
+        if: success()
         run: |
-          echo "### DB Mirror Snapshot Result" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Run:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Source:** kakkwibljrjsawxgnupk (Lovable Cloud)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target:** erfwtoavipwjqmylpizt (own Supabase)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f tmp/export/_summary.json ]; then
-            echo "**Export summary:**" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat tmp/export/_summary.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
+          echo 'Verified PostgreSQL public-schema snapshot created. No target database was changed. Restore rehearsal and external Auth/Storage/deployment recovery remain separate gates.' >> "$GITHUB_STEP_SUMMARY"
