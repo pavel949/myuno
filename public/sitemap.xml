@@ -18,10 +18,8 @@
     <lastmod>2026-04-23</lastmod>
   </sitemap>
 
-  <!-- M9 · §4.1 — pillar / cluster guides (placeholder URLs) -->
-  <sitemap>
-    <loc>https://www.myuno.app/sitemap-pillars.xml</loc>
-    <lastmod>2026-04-23</lastmod>
-  </sitemap>
+  <!-- M9 · §4.1 — pillar / cluster guides: sitemap-pillars.xml removed from this index 2026-10-31.
+       All 10 /guides/* URLs it lists return 404 (the app has no /guides route yet).
+       Re-add the entry together with the published pillar pages. -->
 </sitemapindex>
 
