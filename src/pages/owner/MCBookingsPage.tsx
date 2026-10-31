@@ -56,7 +56,7 @@ const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string; labelTh: str
 // These rows are order projections. Financial releases use order semantics;
 // completed/checked-out stays remain historical even before their scheduled end.
 function isCurrentStay(booking: PropertyBooking): boolean {
-  return propertyOrderHoldsInventory(booking.status)
+  return propertyOrderHoldsInventory(booking.status, booking.metadata)
     && booking.status !== 'completed' && booking.status !== 'checked_out';
 }
 
@@ -103,7 +103,7 @@ export default function MCBookingsPage() {
           case 'upcoming': return timeStatus === 'upcoming' && isCurrentStay(b);
           case 'active': return timeStatus === 'active' && isCurrentStay(b);
           case 'pending': return b.status === 'pending';
-          case 'completed': return b.status === 'completed' || b.status === 'checked_out' || (timeStatus === 'past' && propertyOrderHoldsInventory(b.status));
+          case 'completed': return b.status === 'completed' || b.status === 'checked_out' || (timeStatus === 'past' && propertyOrderHoldsInventory(b.status, b.metadata));
           case 'cancelled': return b.status === 'cancelled';
           default: return true;
         }

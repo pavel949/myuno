@@ -1,3 +1,5 @@
+import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
+import { toBangkokDateKey } from '@/lib/hotelDates';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -74,8 +76,8 @@ export function useMultiPropertyBookings(
         order_participants?: { id: string; role: string; name: string | null; phone: string | null; email: string | null }[];
       }
 
-      return ((orders || []) as OrderRow[]).map((order) => {
-        const guestParticipant = order.order_participants?.find(p => p.role === 'guest');
+      return ((orders || []) as OrderRow[]).filter(order => propertyOrderHoldsInventory(order.status, order.metadata)).map((order) => {
+        const guestParticipant = (order.order_participants?.find(p => p.role === 'guest') ?? order.order_participants?.find(p => p.role === 'primary'));
         const propertyItem = order.order_items?.find(i => i.item_type === 'property');
         const itemPropertyId = (propertyItem?.metadata as Record<string, unknown>)?.property_id as string || propertyItem?.resource_id;
 
@@ -87,9 +89,9 @@ export function useMultiPropertyBookings(
           guest_name: guestParticipant?.name,
           guest_phone: guestParticipant?.phone,
           guest_email: guestParticipant?.email,
-          check_in: order.start_at?.split('T')[0] || '',
-          check_out: order.end_at?.split('T')[0] || '',
-          guests_count: (order.metadata as Record<string, unknown>)?.guests_count as number | undefined,
+          check_in: order.metadata?.request_contract === 'rental-request-v1' ? toBangkokDateKey(order.start_at) || '' : order.start_at?.split('T')[0] || '',
+          check_out: order.metadata?.request_contract === 'rental-request-v1' ? toBangkokDateKey(order.end_at) || '' : order.end_at?.split('T')[0] || '',
+          guests_count: ((order.metadata as Record<string, unknown>)?.guests_count ?? (order.metadata as Record<string, unknown>)?.guests) as number | undefined,
           total_amount: order.total_amount,
           currency: order.currency,
           source: (order.metadata as Record<string, unknown>)?.source as string | undefined,

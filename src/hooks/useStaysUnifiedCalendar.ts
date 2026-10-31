@@ -1,3 +1,4 @@
+import { toBangkokDateKey } from '@/lib/hotelDates';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO, eachDayOfInterval, subDays } from 'date-fns';
@@ -165,12 +166,12 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
       if (calsRes.error) throw calsRes.error;
 
       // Normalize orders → PropertyBookingRow shape
-      const orderBookings: PropertyBookingRow[] = (ordersRes.data ?? []).filter(o => propertyOrderHoldsInventory(o.status)).map((o) => {
+      const orderBookings: PropertyBookingRow[] = (ordersRes.data ?? []).filter(o => propertyOrderHoldsInventory(o.status, o.metadata)).map((o) => {
         const meta = (o.metadata && typeof o.metadata === 'object' ? o.metadata : {}) as Record<string, unknown>;
         return {
           id: o.id,
-          check_in: (o.start_at || '').slice(0, 10),
-          check_out: (o.end_at || '').slice(0, 10),
+          check_in: meta.request_contract === 'rental-request-v1' ? toBangkokDateKey(o.start_at) || '' : (o.start_at || '').slice(0, 10),
+          check_out: meta.request_contract === 'rental-request-v1' ? toBangkokDateKey(o.end_at) || '' : (o.end_at || '').slice(0, 10),
           source: (meta.source as string) || 'manual',
           source_calendar_id: null,
           conflict_with_booking_id: null,

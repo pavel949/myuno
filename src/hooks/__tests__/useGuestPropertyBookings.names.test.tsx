@@ -23,3 +23,9 @@ it('keeps an empty result empty without a catalogue read',async()=>{s.orders=[];
 it('surfaces authoritative order read failure rather than an empty result',async()=>{s.orderError=true;const {result}=mount();await waitFor(()=>expect(result.current.error).toBeTruthy());expect(result.current.bookings).toBeUndefined();expect(s.calls).toEqual(['orders']);});
 
 it('does not present the legacy generic writer label as a property name',async()=>{s.orders=[{id:'order-a',order_items:[{item_type:'property',resource_id:'missing',item_name:'Property Booking'}]}];const {result}=mount();await waitFor(()=>expect(result.current.isLoading).toBe(false));expect(result.current.bookings?.[0].historicalPropertyName).toBeNull();});
+
+it.each([['rental-request-v1','2030-11-10'],['legacy','2030-11-09']])('uses known request civil dates without reinterpreting legacy timestamps: %s',async(contract,expected)=>{
+ s.orders=[{id:'order-a',start_at:'2030-11-09T17:00:00Z',end_at:'2030-11-12T17:00:00Z',status:'confirmed',metadata:{request_contract:contract,guests:2},order_items:[{item_type:'property',resource_id:'home-a'}],order_participants:[{role:'primary',name:'Primary Guest'}]}];
+ const {result}=mount();await waitFor(()=>expect(result.current.isLoading).toBe(false));
+ expect(result.current.bookings?.[0]).toMatchObject({check_in:expected,guest_name:'Primary Guest',guests_count:2});
+});

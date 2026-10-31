@@ -1,129 +1,43 @@
-# DB Mirror Snapshot — Setup Checklist
+# PostgreSQL snapshot and restore rehearsal
 
-Зеркалирование БД **Lovable Cloud (`kakkwibljrjsawxgnupk`) → собственный Supabase (`erfwtoavipwjqmylpizt`)** через GitHub Actions cron каждые 6 часов.
+The former anonymous REST export plus `ignoreDuplicates` importer was a partial copy, not a faithful snapshot. It could omit RLS-hidden rows, retain stale target values/rows and exit successfully after table failures. It is replaced by native PostgreSQL archives and explicit isolated restoration. The workflow no longer writes to the former hosted mirror target.
 
-Workflow: [`.github/workflows/db-mirror-snapshot.yml`](../.github/workflows/db-mirror-snapshot.yml)
+## Configuration (credential owner only)
 
----
+The scheduled `.github/workflows/db-mirror-snapshot.yml` requires `SOURCE_DATABASE_URL` with direct PostgreSQL access and authorized complete reads of the selected schemas. No URL/credential is hardcoded or guessed. The script rejects an actor without explicit RLS-bypass/superuser capability and uses `row_security=off` so unreadable tables cannot look empty. Credential provisioning, live connection checks and workflow runs are not part of the local repair.
 
-## 🔑 Что нужно добавить в GitHub Secrets
+`pg_dump`/`pg_restore` must support the source server version. The candidate workflow installs PostgreSQL client tools; a server/client version mismatch fails closed and requires a version-pinned runner before activation. It uploads completed archives/manifests only after success; no partial artifacts are called backups.
 
-Перейдите: **GitHub Repo → Settings → Secrets and variables → Actions → New repository secret**
+Local invocation with separately authorized configuration:
 
-| Имя секрета | Где взять | Обязательно? |
-|---|---|---|
-| `TARGET_SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard вашего проекта `erfwtoavipwjqmylpizt` → **Settings → API → Project API keys → `service_role`** (⚠️ **secret**, не `anon`) | ✅ ДА |
-
-> **Только один секрет.** Source credentials (anon key Lovable Cloud) уже захардкожены в `scripts/export-data.mjs` — это безопасно, потому что anon key публичный.
-
-### Как получить service_role key:
-
-1. Откройте https://supabase.com/dashboard/project/erfwtoavipwjqmylpizt/settings/api
-2. Раздел **Project API keys** → строка **`service_role`** → нажмите **Reveal** → скопируйте
-3. ⚠️ Этот ключ обходит RLS — **никогда не коммитьте его, не публикуйте в чатах**
-4. В GitHub: Settings → Secrets and variables → Actions → New repository secret
-   - Name: `TARGET_SUPABASE_SERVICE_ROLE_KEY`
-   - Value: вставьте ключ
-   - Add secret
-
----
-
-## 📋 Pre-flight checklist (один раз перед первым запуском)
-
-### 1. Применить схему в target БД
-Schema (514 миграций, таблицы, RLS, functions, triggers) должна **уже существовать** в `erfwtoavipwjqmylpizt`. Если нет:
-
-```bash
-npm i -g supabase
-supabase login
-supabase link --project-ref erfwtoavipwjqmylpizt
-supabase db push
+```sh
+SOURCE_DATABASE_URL='<provided privately>' SNAPSHOT_DIRECTORY='<new directory>' SNAPSHOT_SCHEMAS=public node scripts/export-data.mjs
 ```
 
-См. `scripts/MIGRATION_HOWTO.md` для полной инструкции.
+Export uses one repeatable-read exported PostgreSQL snapshot for table contents and `pg_dump`. It preserves empty tables and the native schema, constraints, indexes, triggers, functions, policies and privileges in the archive. A manifest records exact per-table sorted canonical row SHA-256/count and schema evidence, including RLS, grants and sequences. There is no allowlist guessed from application `.from()` calls. Export errors exit nonzero; incomplete exports do not produce a completed manifest.
 
-### 2. Создать Storage Buckets вручную
-В Supabase Dashboard `erfwtoavipwjqmylpizt` → Storage → New bucket:
-- `avatars` (public)
-- `listings` (public)
-- `documents` (private)
-- `property-images` (public)
-- `vendor-uploads` (public)
+Manifest v2 also records extensions and their versions/schemas. Extensions in the selected schemas are explicitly included in `pg_dump`, so a `btree_gist`-backed inventory exclusion constraint survives restoration. Extension configuration tables outside the explicitly selected schemas abort export before dumping; data scope is never broadened automatically. Earlier manifest shapes are rejected. The target must have the compatible extension packages available; this tool does not install host packages or certify every external dependency.
 
-> ⚠️ Этот workflow переносит **только данные таблиц**, не файлы Storage. Для Storage нужен отдельный скрипт (Вариант B).
+PostgreSQL sequences are not MVCC objects. Before publishing the manifest, export extracts the archive SEQUENCE SET entries without connecting pg_restore to the source and compares them with captured sequence state. Concurrent changes that disagree fail export before a completed manifest is written. Quiesce allocation/schema/ACL changes or retry; the concurrent-nextval regression verifies this safe rejection.
 
-### 3. Проверить что target БД пустая (или готова к перезаписи)
-Скрипт `import-data.mjs` использует `upsert` с `ignoreDuplicates: true` — старые строки не перезаписываются, новые добавляются. Если хотите **чистый snapshot**, перед первым запуском очистите целевые таблицы вручную.
+## Restore acceptance
 
----
+```sh
+TARGET_DATABASE_URL='<explicit fresh isolated database>' SNAPSHOT_DIRECTORY='<completed snapshot>' RESTORE_CONFIRMATION=fresh-isolated-database node scripts/import-data.mjs
+```
 
-## 🚀 Запуск
+Restoration refuses a nonempty target, does not merge/upsert, does not delete stale records and never offers a production overwrite flag. The built-in empty public schema is preserved; only its CREATE SCHEMA archive entry is omitted from the restore list, retaining its PostgreSQL initial privileges. All object, grant and policy entries are restored with `pg_restore --single-transaction --exit-on-error --no-owner`. Native constraints restore relationships. Any restore or parity failure exits nonzero and writes no success receipt. A failed parity check leaves the isolated restored database unaccepted for inspection; it is not silently deleted or used as production.
 
-### Автоматический
-Cron сработает каждые 6 часов в `:17` минут (00:17, 06:17, 12:17, 18:17 UTC).
+A successful receipt requires archive checksum, exact table row content (not input batch counts), schema definitions, relationships, policies and recorded sequence state to match. Restored object ownership belongs to the restore actor (`--no-owner`); global roles/ownership recreation and identity mappings require a separate plan. Missing roles, external-schema dependencies or privileges fail rather than weakening the archive. Databases with cross-schema foreign keys/functions need an explicitly reviewed complete schema set (`SNAPSHOT_SCHEMAS`), not a public-only completeness claim.
 
-### Ручной (для теста)
-1. GitHub Repo → **Actions** → **DB Mirror Snapshot (Lovable Cloud → Own Supabase)**
-2. Кнопка **Run workflow** → ветка `main` → Run
+## Evidence boundary
 
-### Просмотр результата
-- **Actions → последний run → Summary** — общий отчёт
-- **Artifacts** (внизу страницы run) — `db-snapshot-<run_id>.zip` с JSON всех таблиц (хранится 7 дней)
-- **Logs** — построчный лог по каждой таблице (`✅ table: N rows` / `⚠️ error`)
+The isolated regression uses only synthetic properties/requests and PostgreSQL test roles, including an RLS-hidden table, empty relationships, Unicode JSON, exact updated content, FK/orphan checks, enum/function/view/index/sequence parity, nonempty target refusal and corrupted-content rejection. Run with local PostgreSQL binaries:
 
----
+```sh
+node --test scripts/qa/database-snapshot.test.mjs
+```
 
-## ⚠️ Известные ограничения
+The test harness creates its own socket-only cluster. `RENTAL_TEST_PG_SOCKET=/tmp/<isolated-socket>` optionally selects an already disposable test server with the fixed `isolated_test` actor; hosted URLs are never accepted by this harness.
 
-| Что | Статус | Решение |
-|---|---|---|
-| **Storage files** (изображения, документы) | ❌ Не переносятся | Нужен отдельный скрипт rsync через `supabase.storage.list/download/upload` |
-| **Auth users** (`auth.users`) | ❌ Не переносятся через REST | Используйте `pg_dump` или `auth.admin.listUsers` API |
-| **RLS-блокированные таблицы** | ⚠️ Частично | Anon key не видит закрытые таблицы. См. `tmp/export/_summary.json` после run — там список `blocked` таблиц. Для них нужен service_role key Lovable Cloud (запросите у поддержки Lovable). |
-| **Edge Functions** | ❌ Не зеркалируются | Деплоятся через `supabase functions deploy` |
-| **Секреты Edge Functions** | ❌ Не переносятся | Настройте вручную через `supabase secrets set ...` |
-| **Realtime / Broadcast / Presence** | ❌ Не зеркалируется | Это runtime state, не persistent data |
-| **Лаг** | До 6 часов | Уменьшить cron — но больше нагрузка на API. Для near-real-time см. Вариант B (triggers + Edge Function). |
-
----
-
-## 🛡️ Безопасность
-
-- ✅ `service_role key` хранится только в GitHub Secrets (зашифрован)
-- ✅ Source anon key публичный — безопасно в коде
-- ✅ Workflow запускается только из вашего репо, секрет не доступен в PR от форков
-- ✅ Export artifacts хранятся 7 дней — после автоудаление
-- ⚠️ **НЕ** включайте target БД в production trafffic, пока не верифицируете 1-2 успешных snapshot
-- ⚠️ Не пишите в target БД параллельно — следующий snapshot затрёт изменения
-
----
-
-## 🔧 Troubleshooting
-
-**`SERVICE_ROLE_KEY env var not set`** — проверьте имя секрета: `TARGET_SUPABASE_SERVICE_ROLE_KEY` (точно так, case-sensitive).
-
-**`relation "public.X" does not exist`** — schema не применена в target. Запустите `supabase db push`.
-
-**Много `⚠️` в логе с `permission denied for table X`** — таблица закрыта RLS на source. Для полного дампа нужен service_role key Lovable Cloud (запросите у поддержки).
-
-**Workflow timeout (>45 мин)** — увеличьте `timeout-minutes` в `.github/workflows/db-mirror-snapshot.yml` или уменьшите `BATCH` в `import-data.mjs`.
-
-**FK violation на import** — порядок таблиц в `PRIORITY_TABLES` (см. `import-data.mjs`) может требовать корректировки. Добавьте недостающую родительскую таблицу в начало списка.
-
----
-
-## 📊 Мониторинг
-
-Рекомендуется:
-1. **Включить email-уведомления GitHub** на failure: Settings → Notifications → Actions → "Only failed workflows"
-2. **Telegram-алерт** на failure (опционально): добавить step с `curl` к Telegram Bot API в `if: failure()`
-3. **Ежедневная проверка**: раз в день открывать Actions tab и смотреть, что зелёное
-
----
-
-## 🔄 Дальнейшие шаги (опционально)
-
-- **Storage mirror** — отдельный workflow для файлов
-- **Auth users mirror** — SQL-based dump `auth.users` через service_role
-- **Near-real-time** — Вариант B (DB triggers + Edge Function)
-- **Failover** — DNS-переключение на target Supabase при инциденте Lovable Cloud
+This is PostgreSQL schema/data recovery evidence for the explicit tested schema set. It is **not** full disaster recovery: Auth service users/sessions, Storage files, Edge deployments/secrets, scheduler configuration, global roles, cloud backups/PITR and an actual production restore were not tested. Existing provider backups were not inventoried and are not claimed absent.

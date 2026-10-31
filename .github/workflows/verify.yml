@@ -49,12 +49,26 @@ jobs:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 
       - name: Unit and isolated PostgreSQL tests
+        id: unit
         run: |
-          npm test -- --maxWorkers=2
+          npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
+          node --test scripts/qa/rental-request-security-evidence.test.mjs
+          node scripts/qa/rental-request-security-evidence.mjs unit-results.json artifacts/security/rental-request-evidence.json
           node --test scripts/qa/lighthouse-evidence.test.mjs
+          node --test scripts/qa/database-snapshot.test.mjs
         env:
+          SECURITY_EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           E28_JIT_PROFILE: "1"
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+
+      - name: Retain guarded rental security evidence
+        if: steps.unit.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rental-request-security-evidence
+          path: artifacts/security/rental-request-evidence.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Lint
         run: npm run lint

@@ -7,9 +7,10 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 interface InquiryConfirmationProps {
   orderId: string;
+  requestStatus?: string;
 }
 
-export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
+export function InquiryConfirmation({ orderId, requestStatus = 'pending' }: InquiryConfirmationProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -21,18 +22,16 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </div>
 
       <h2 className="text-2xl font-bold mb-2">
-        {isRu ? 'Запрос на просмотр отправлен' : 'Viewing request received'}
+        {requestStatus === 'accepted' ? (isRu ? 'Проживание подтверждено' : 'Stay confirmed') : ['cancelled', 'rejected'].includes(requestStatus) ? (isRu ? 'Запрос закрыт' : 'Request closed') : (isRu ? 'Запрос на проживание получен' : 'Stay request received')}
       </h2>
 
       <p className="text-muted-foreground mb-8 max-w-sm">
-        {isRu
-          ? 'Свяжемся с вами в WhatsApp в течение 24 часов, чтобы подтвердить время просмотра.'
-          : "We'll message you on WhatsApp within 24 hours to confirm your viewing time."}
+        {requestStatus === 'accepted' ? (isRu ? 'Управляющий подтвердил даты. Откройте запрос для подробностей.' : 'The property manager confirmed your dates. Open the request for details.') : ['cancelled', 'rejected'].includes(requestStatus) ? (isRu ? 'Этот запрос отменён или отклонён. Новый запрос не создавался.' : 'This request was cancelled or rejected. No new request was created.') : (isRu ? 'Даты пока не забронированы. Дождитесь подтверждения от управляющего.' : 'Dates are not reserved yet. Please wait for the property manager to confirm.')}
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <Button size="lg" onClick={() => navigate(APP_ROUTES.BOOKING_DETAIL(orderId))}>
-          {isRu ? 'Открыть бронирование' : 'View booking'}
+          {isRu ? 'Открыть запрос' : 'View request'}
         </Button>
         <Button variant="outline" size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY)}>
           {isRu ? 'Смотреть объекты' : 'Browse properties'}

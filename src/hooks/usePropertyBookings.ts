@@ -1,5 +1,5 @@
 import { addDays, isValid } from 'date-fns';
-import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate } from '@/lib/hotelDates';
+import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, toBangkokDateKey } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
@@ -32,6 +32,7 @@ export interface PropertyBooking {
   updated_at: string;
   // Mapped from orders
   order_id?: string;
+  metadata?: Record<string, unknown>;
 }
 
 /** Transient outcome of the existing preparation writes, not booking/inventory authority. */
@@ -101,7 +102,7 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
     order_items?: Array<{ item_type: string; resource_id: string | null; metadata: Record<string, unknown> | null }> | null;
   };
   const meta = (typeof order.metadata === 'object' && order.metadata !== null ? order.metadata : {}) as Record<string, unknown>;
-  const guestParticipant = order.order_participants?.find((p) => p.role === 'guest');
+  const guestParticipant = (order.order_participants?.find((p) => p.role === 'guest') ?? order.order_participants?.find((p) => p.role === 'primary'));
   const propertyItem = order.order_items?.find((i) => i.item_type === 'property');
   const itemMeta = (propertyItem?.metadata && typeof propertyItem.metadata === 'object' ? propertyItem.metadata : {}) as Record<string, unknown>;
   const itemPropertyId = (itemMeta.property_id as string | undefined) || propertyItem?.resource_id;
@@ -109,14 +110,15 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
   return {
     id: order.id || '',
     order_id: order.id,
+    metadata: meta,
     property_id: itemPropertyId || propertyId,
     owner_id: order.provider_org_id || '',
     guest_name: guestParticipant?.name || undefined,
     guest_phone: guestParticipant?.phone || undefined,
     guest_email: guestParticipant?.email || undefined,
-    check_in: order.start_at?.split('T')[0] || '',
-    check_out: order.end_at?.split('T')[0] || '',
-    guests_count: meta.guests_count as number | undefined,
+    check_in: meta.request_contract === 'rental-request-v1' ? toBangkokDateKey(order.start_at) || '' : order.start_at?.split('T')[0] || '',
+    check_out: meta.request_contract === 'rental-request-v1' ? toBangkokDateKey(order.end_at) || '' : order.end_at?.split('T')[0] || '',
+    guests_count: (meta.guests_count ?? meta.guests) as number | undefined,
     total_amount: order.total_amount ?? undefined,
     currency: order.currency ?? undefined,
     source: meta.source as string | undefined,
@@ -209,7 +211,7 @@ export function usePropertyBookings(propertyId?: string) {
       const [{ data: ordersInRange, error: availabilityError }, { data: blockedDates, error: blocksError }] = await Promise.all([
         supabase
           .from('orders')
-          .select('id')
+          .select('id,status,metadata')
           .eq('vertical', 'property')
           .is('deleted_at', null)
           .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
@@ -226,7 +228,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       if (availabilityError) throw availabilityError;
       if (blocksError) throw blocksError;
-      const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
+      const orderIds = (ordersInRange || []).filter(o => propertyOrderHoldsInventory(o.status, o.metadata)).map(o => o.id);
       const overlapResult = orderIds.length
         ? await supabase
             .from('order_items')
@@ -411,7 +413,7 @@ export function usePropertyBookings(propertyId?: string) {
 
           const { data: ordersInRange, error: availabilityError } = await supabase
             .from('orders')
-            .select('id')
+            .select('id,status,metadata')
             .eq('vertical', 'property')
             .is('deleted_at', null)
             .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
@@ -420,7 +422,7 @@ export function usePropertyBookings(propertyId?: string) {
             .lt('start_at', newEnd);
 
           if (availabilityError) throw availabilityError;
-          const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
+          const orderIds = (ordersInRange || []).filter(o => propertyOrderHoldsInventory(o.status, o.metadata)).map(o => o.id);
           const overlapResult = orderIds.length
             ? await supabase
                 .from('order_items')
@@ -565,7 +567,7 @@ export function usePropertyBookings(propertyId?: string) {
     
     return bookings.some(booking => {
       if (excludeId && booking.id === excludeId) return false;
-      return propertyOrderHoldsInventory(booking.status) && stayOccupiesDate(booking, dateStr);
+      return propertyOrderHoldsInventory(booking.status, booking.metadata) && stayOccupiesDate(booking, dateStr);
     });
   };
 
@@ -576,7 +578,7 @@ export function usePropertyBookings(propertyId?: string) {
     const dateStr = civilDateKey(date);
     
     return bookings.find(booking => 
-      propertyOrderHoldsInventory(booking.status) && stayOccupiesDate(booking, dateStr)
+      propertyOrderHoldsInventory(booking.status, booking.metadata) && stayOccupiesDate(booking, dateStr)
     );
   };
 
@@ -680,13 +682,13 @@ export function useAllPropertyBookings() {
 
   // Upcoming bookings
   const upcomingBookings = bookings?.filter(b => 
-    b.check_in > bangkokTodayISO() && propertyOrderHoldsInventory(b.status) && !['completed', 'checked_out'].includes(b.status ?? '')
+    b.check_in > bangkokTodayISO() && propertyOrderHoldsInventory(b.status, b.metadata) && !['completed', 'checked_out'].includes(b.status ?? '')
   ) || [];
 
   // Active bookings (currently checked in)
   const activeBookings = bookings?.filter(b => {
     const today = bangkokTodayISO();
-    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status) && !['completed', 'checked_out'].includes(b.status ?? '');
+    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status, b.metadata) && !['completed', 'checked_out'].includes(b.status ?? '');
   }) || [];
 
   return {
@@ -767,13 +769,13 @@ export function useGuestPropertyBookings() {
 
   // Upcoming bookings
   const upcomingBookings = bookings?.filter(b => 
-    b.check_in > bangkokTodayISO() && propertyOrderHoldsInventory(b.status) && !['completed', 'checked_out'].includes(b.status ?? '')
+    b.check_in > bangkokTodayISO() && propertyOrderHoldsInventory(b.status, b.metadata) && !['completed', 'checked_out'].includes(b.status ?? '')
   ) || [];
 
   // Active bookings (currently checked in)
   const activeBookings = bookings?.filter(b => {
     const today = bangkokTodayISO();
-    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status) && !['completed', 'checked_out'].includes(b.status ?? '');
+    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status, b.metadata) && !['completed', 'checked_out'].includes(b.status ?? '');
   }) || [];
 
   // Past bookings

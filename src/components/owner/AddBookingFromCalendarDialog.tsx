@@ -114,7 +114,7 @@ const isRu = language === 'ru';
     if (!checkIn || !checkOut || !bookings) return [];
     
     return bookings.filter(booking => {
-      return propertyOrderHoldsInventory(booking.status) && civilStaysOverlap(booking, {
+      return propertyOrderHoldsInventory(booking.status, booking.metadata) && civilStaysOverlap(booking, {
         check_in: civilDateKey(checkIn), check_out: civilDateKey(checkOut),
       });
     });
@@ -151,7 +151,7 @@ const isRu = language === 'ru';
     
     // Add booked dates
     bookings?.forEach(booking => {
-      if (!propertyOrderHoldsInventory(booking.status)) return;
+      if (!propertyOrderHoldsInventory(booking.status, booking.metadata)) return;
       const start = parseCivilDate(booking.check_in);
       const end = parseCivilDate(booking.check_out);
       let current = start;

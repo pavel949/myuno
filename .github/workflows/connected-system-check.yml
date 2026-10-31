@@ -180,15 +180,21 @@ jobs:
       - name: Full unit and isolated PostgreSQL suite
         id: unit
         continue-on-error: true
-        run: npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
+        run: |
+          npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
+          node --test scripts/qa/rental-request-security-evidence.test.mjs
+          node scripts/qa/rental-request-security-evidence.mjs unit-results.json artifacts/security/rental-request-evidence.json
         env:
+          SECURITY_EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload unit and PostgreSQL evidence early
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: connected-unit-evidence
-          path: unit-results.json
+          path: |
+            unit-results.json
+            artifacts/security/rental-request-evidence.json
           if-no-files-found: warn
           retention-days: 14
       - name: Focused connected workflows in three timezones
@@ -199,6 +205,7 @@ jobs:
             TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx src/components/onboarding/Coachmarks.test.tsx || exit 1
           done
           node scripts/qa/scheduled-backup-integrity.mjs
+          node --test scripts/qa/database-snapshot.test.mjs
           node scripts/qa/vendor-outreach-boundary.mjs
           node scripts/qa/transfer-operator-conflicts.mjs
           node scripts/qa/final-order-handlers.mjs
@@ -236,6 +243,7 @@ jobs:
           name: connected-system-evidence
           path: |
             unit-results.json
+            artifacts/security/rental-request-evidence.json
             architecture-results.json
             /tmp/browser/
             /tmp/isolated-vite.log
