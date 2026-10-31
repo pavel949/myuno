@@ -19,12 +19,14 @@ test('native archive restores exact synthetic schema, rows, FK relations and RLS
   for(const name of [sourceName,targetName,brokenName])await admin.unsafe(`CREATE DATABASE ${name}`);
   source=postgres({...connection(sourceName),max:1,onnotice:()=>{}});
   target=postgres({...connection(targetName),max:1,onnotice:()=>{}});
-  await source.unsafe(`CREATE TYPE request_state AS ENUM('pending','accepted','cancelled');
+  await source.unsafe(`CREATE EXTENSION btree_gist;
+   CREATE TYPE request_state AS ENUM('pending','accepted','cancelled');
    CREATE TABLE properties(id integer PRIMARY KEY,title text NOT NULL);
    CREATE SEQUENCE synthetic_receipt_seq START 21;
    SELECT nextval('synthetic_receipt_seq');
    CREATE TABLE requests(id integer PRIMARY KEY,property_id integer NOT NULL REFERENCES properties(id),state request_state NOT NULL,payload jsonb NOT NULL);
    CREATE INDEX requests_property ON requests(property_id);
+   CREATE TABLE occupied_stays(property_id integer REFERENCES properties(id),stay daterange,EXCLUDE USING gist(property_id WITH =,stay WITH &&));
    CREATE SCHEMA operations;
    CREATE TABLE operations.tasks(id integer PRIMARY KEY,request_id integer NOT NULL REFERENCES public.requests(id));
    CREATE FUNCTION property_title(n integer) RETURNS text LANGUAGE sql STABLE AS $$ SELECT title FROM properties WHERE id=n $$;
@@ -34,6 +36,7 @@ test('native archive restores exact synthetic schema, rows, FK relations and RLS
    INSERT INTO properties VALUES(1,'Exact updated title'),(2,'Empty relation parent');
    INSERT INTO requests VALUES(3,1,'pending','{"guests":2,"unicode":"Пхукет","null":null}'),(4,1,'accepted','{"guests":1}');
    INSERT INTO operations.tasks VALUES(5,3);`);
+  await source.unsafe("INSERT INTO occupied_stays VALUES(1,daterange('2030-11-10','2030-11-13','[)'))");
   await exportDatabase({connection:connection(sourceName),directory,schemas:['public','operations']});
   const proof=await restoreDatabase({connection:connection(targetName),directory,confirmation:'fresh-isolated-database'});
   assert.equal(proof.rows.find(r=>r.table==='requests').count,2);
@@ -41,6 +44,8 @@ test('native archive restores exact synthetic schema, rows, FK relations and RLS
   assert.equal((await target`SELECT title FROM properties WHERE id=1`)[0].title,'Exact updated title');
   assert.equal((await target`SELECT count(*)::int n FROM requests r LEFT JOIN properties p ON p.id=r.property_id WHERE p.id IS NULL`)[0].n,0);
   assert.equal((await target`SELECT count(*)::int n FROM operations.tasks t JOIN requests r ON r.id=t.request_id`)[0].n,1);
+  assert.equal(proof.schema.extensions.find(e=>e.name==='btree_gist').schema,'public');
+  await assert.rejects(target.unsafe("INSERT INTO occupied_stays VALUES(1,daterange('2030-11-11','2030-11-14','[)'))"),/exclusion constraint/);
   await assert.rejects(target`INSERT INTO requests VALUES(5,999,'pending','{}')`,/foreign key/);
   assert.equal((await target`SELECT count(*)::int n FROM pg_policies WHERE tablename='requests'`)[0].n,1);
   await assert.rejects(restoreDatabase({connection:connection(targetName),directory,confirmation:'fresh-isolated-database'}),/not an empty/);
@@ -61,6 +66,14 @@ test('native archive restores exact synthetic schema, rows, FK relations and RLS
   const missingDirectory=join(directory,'missing');
   await assert.rejects(exportDatabase({connection:connection(sourceName),directory:missingDirectory,schemas:['missing_schema']}),/pg_dump failed/);
   assert.equal(existsSync(join(missingDirectory,'manifest.json')),false);
+  // Synthetic extension config registration only. Refuse an implicit data read
+  // outside the explicitly selected schemas, before invoking pg_dump.
+  await source.unsafe("UPDATE pg_extension SET extconfig=ARRAY['operations.tasks'::regclass],extcondition=ARRAY[''] WHERE extname='btree_gist'");
+  try {
+    const outsideDirectory=join(directory,'outside-extension-config');
+    await assert.rejects(exportDatabase({connection:connection(sourceName),directory:outsideDirectory,schemas:['public']}),/explicitly reviewed additional schema/);
+    assert.equal(existsSync(join(outsideDirectory,'manifest.json')),false);
+  } finally { await source.unsafe("UPDATE pg_extension SET extconfig=NULL,extcondition=NULL WHERE extname='btree_gist'"); }
   // Sequence state is outside MVCC. Independent backend activity between dump
   // capture and manifest capture must fail export before a success manifest.
   const churn=postgres({...connection(sourceName),max:1,onnotice:()=>{}});

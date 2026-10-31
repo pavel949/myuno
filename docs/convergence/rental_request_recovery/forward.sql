@@ -162,12 +162,90 @@ BEGIN
  OR public.actor_can_operate_property(p.id,p.management_company_id,'bookings','edit'),false);
 END $$;
 REVOKE ALL ON FUNCTION public.rental_request_transition_allowed(uuid,text,text) FROM PUBLIC,anon,authenticated;
-DO $$ DECLARE d text; anchor text:=' -- Customer cancellation is not a refund or cancellation of a live checkout.'; BEGIN
+DO $$ DECLARE d text; BEGIN
  d:=pg_get_functiondef('public.guard_customer_order_update()'::regprocedure);
- IF position(anchor IN d)=0 OR position('order_fields_immutable_use_checked_action' IN d)=0 THEN RAISE EXCEPTION 'rental_request_order_guard_drift'; END IF;
- d:=replace(d,anchor,E' IF public.rental_request_transition_allowed(OLD.id,OLD.status::text,NEW.status::text) THEN RETURN NEW; END IF;\n'||anchor);
+ -- Support the verified legacy predecessor without activating unrelated wallet,
+ -- payment or ledger containment. Preserve its entire non-request branch.
+ IF md5(d)<>'124a15c2f1df3a63cf56e0655b857773' THEN RAISE EXCEPTION 'rental_request_order_guard_drift'; END IF;
+ d:=replace(d,E'BEGIN\n',E'BEGIN\n'||$patch$
+ IF OLD.metadata->>'request_contract'='rental-request-v1'
+ OR NEW.metadata->>'request_contract'='rental-request-v1'
+ OR EXISTS(SELECT 1 FROM public.property_inquiries i WHERE i.order_id=OLD.id AND i.request_payload IS NOT NULL) THEN
+   IF (to_jsonb(NEW)-'status'-'updated_at') IS DISTINCT FROM (to_jsonb(OLD)-'status'-'updated_at') THEN
+     RAISE EXCEPTION 'linked_request_order_fields_immutable' USING ERRCODE='42501'; END IF;
+   IF auth.uid() IS NULL OR OLD.metadata->>'request_contract' IS DISTINCT FROM 'rental-request-v1'
+   OR NOT EXISTS(SELECT 1 FROM public.property_inquiries i WHERE i.id=(OLD.metadata->>'inquiry_id')::uuid
+     AND i.property_id=(OLD.metadata->>'property_id')::uuid AND i.user_id=OLD.customer_user_id
+     AND i.request_payload IS NOT NULL AND (i.order_id=OLD.id OR (i.order_id IS NULL AND OLD.status::text='pending'))) THEN
+     RAISE EXCEPTION 'linked_request_order_actor_or_receipt_required' USING ERRCODE='42501'; END IF;
+   IF NEW.status IS DISTINCT FROM OLD.status
+   AND public.rental_request_transition_allowed(OLD.id,OLD.status::text,NEW.status::text) IS NOT TRUE THEN
+     RAISE EXCEPTION 'linked_request_transition_not_allowed' USING ERRCODE='42501'; END IF;
+   NEW.updated_at:=now();
+   RETURN NEW;
+ END IF;
+$patch$);
  EXECUTE d;
 END $$;
+
+-- Only the checked owner-executed writer may introduce the new contract marker.
+CREATE FUNCTION public.guard_linked_rental_order_insert() RETURNS trigger
+LANGUAGE plpgsql SECURITY INVOKER SET search_path=public AS $$
+BEGIN
+ IF NEW.metadata->>'request_contract'='rental-request-v1'
+ AND current_user<>(SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid='public.orders'::regclass) THEN
+   RAISE EXCEPTION 'linked_request_requires_checked_action' USING ERRCODE='42501'; END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER linked_rental_order_insert_guard BEFORE INSERT ON public.orders
+FOR EACH ROW EXECUTE FUNCTION public.guard_linked_rental_order_insert();
+
+-- The new contract uses one inventory bridge, never the legacy second writer.
+-- It creates no property_availability rows and must not release unrelated manual
+-- rows. Confirmation of a customer estimate is not proof of paid rental income.
+-- Restrict all three exceptions to a durable, actor/property-linked receipt;
+-- retain each existing function unchanged for every legacy/paid booking path.
+DO $$ DECLARE d text; signature text; fingerprint text; predicate text; BEGIN
+ FOR signature,fingerprint,predicate IN SELECT * FROM (VALUES
+  ('public.create_property_booking_from_order()','7b8d680ebce7c742f069f15ffff4bd52',
+   'NEW.metadata->>''request_contract''=''rental-request-v1'' AND EXISTS(SELECT 1 FROM public.property_inquiries i WHERE i.order_id=NEW.id AND i.id=(NEW.metadata->>''inquiry_id'')::uuid AND i.property_id=(NEW.metadata->>''property_id'')::uuid AND i.user_id=NEW.customer_user_id AND i.request_payload IS NOT NULL)'),
+  ('public.trg_release_availability_on_order_cancel()','39238ce3f00ae46e69513341bd9532b0',
+   'NEW.metadata->>''request_contract''=''rental-request-v1'' AND EXISTS(SELECT 1 FROM public.property_inquiries i WHERE i.order_id=NEW.id AND i.id=(NEW.metadata->>''inquiry_id'')::uuid AND i.property_id=(NEW.metadata->>''property_id'')::uuid AND i.user_id=NEW.customer_user_id AND i.request_payload IS NOT NULL)'),
+  ('public.create_financial_from_booking()','295ba909795b7a4ae5d76e4eda84fe87',
+   'EXISTS(SELECT 1 FROM public.orders o JOIN public.property_inquiries i ON i.order_id=o.id WHERE (o.id=NEW.order_id OR o.id::text=NEW.external_id) AND o.metadata->>''request_contract''=''rental-request-v1'' AND o.metadata->>''quote_basis''=''customer_estimate_requires_operator_review'' AND i.id=(o.metadata->>''inquiry_id'')::uuid AND i.property_id=NEW.property_id AND i.property_id=(o.metadata->>''property_id'')::uuid AND i.user_id=o.customer_user_id AND i.request_payload IS NOT NULL)')
+ ) AS predecessors(signature,fingerprint,predicate) LOOP
+   d:=pg_get_functiondef(signature::regprocedure);
+   IF md5(d)<>fingerprint THEN RAISE EXCEPTION 'rental_request_legacy_trigger_drift: %',signature; END IF;
+   d:=replace(d,E'BEGIN\n',E'BEGIN\n IF '||predicate||E' THEN RETURN NEW; END IF;\n');
+   EXECUTE d;
+ END LOOP;
+END $$;
+
+-- Owner RLS on legacy bookings is intentionally retained. Only the new durable
+-- receipt's inventory projection must be changed through its checked order.
+CREATE FUNCTION public.guard_linked_rental_booking() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE i public.property_inquiries; o public.orders;
+BEGIN
+ SELECT r.* INTO i FROM public.property_inquiries r WHERE r.order_id IS NOT NULL AND r.request_payload IS NOT NULL
+ AND ((TG_OP<>'INSERT' AND (r.order_id=OLD.order_id OR r.order_id::text=OLD.external_id))
+   OR (TG_OP<>'DELETE' AND (r.order_id=NEW.order_id OR r.order_id::text=NEW.external_id))) LIMIT 1;
+ IF NOT FOUND THEN IF TG_OP='DELETE' THEN RETURN OLD; END IF; RETURN NEW; END IF;
+ -- A direct browser mutation is depth one; the canonical order trigger is
+ -- nested. Nesting alone never authorizes different property/dates/link/state.
+ IF TG_OP='DELETE' OR pg_trigger_depth()<2 THEN
+   RAISE EXCEPTION 'linked_request_inventory_requires_checked_action' USING ERRCODE='42501'; END IF;
+ SELECT * INTO o FROM public.orders WHERE id=i.order_id;
+ IF NEW.property_id IS DISTINCT FROM i.property_id OR NEW.check_in IS DISTINCT FROM i.check_in
+ OR NEW.check_out IS DISTINCT FROM i.check_out OR NEW.external_id IS DISTINCT FROM i.order_id::text
+ OR (NEW.order_id IS NOT NULL AND NEW.order_id IS DISTINCT FROM i.order_id)
+ OR NEW.status IS DISTINCT FROM (CASE WHEN o.status::text IN ('cancelled','expired','refunded') THEN 'cancelled' ELSE o.status::text END) THEN
+   RAISE EXCEPTION 'linked_request_inventory_projection_mismatch' USING ERRCODE='42501'; END IF;
+ RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION public.guard_linked_rental_booking() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER linked_rental_booking_guard BEFORE INSERT OR UPDATE OR DELETE ON public.property_bookings
+FOR EACH ROW EXECUTE FUNCTION public.guard_linked_rental_booking();
 
 CREATE FUNCTION public.finish_linked_rental_transition() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
@@ -221,7 +299,13 @@ BEGIN
  SELECT * INTO i FROM public.property_inquiries WHERE id=p_inquiry_id FOR UPDATE;
  SELECT * INTO o FROM public.orders WHERE id=i.order_id FOR UPDATE;
  target:=CASE WHEN p_decision='accepted' THEN 'confirmed' ELSE 'cancelled' END;
- IF i.status=p_decision AND o.status::text=target THEN RETURN jsonb_build_object('inquiry_id',i.id,'order_id',o.id,'status',i.status); END IF;
+ IF i.status=p_decision AND o.status::text=target THEN
+   IF p_decision='accepted' AND (SELECT count(*) FROM public.property_bookings b
+     WHERE b.external_id=o.id::text AND b.property_id=i.property_id AND b.check_in=i.check_in
+       AND b.check_out=i.check_out AND b.status='confirmed')<>1 THEN
+     RAISE EXCEPTION 'request_inventory_not_committed' USING ERRCODE='23P01'; END IF;
+   RETURN jsonb_build_object('inquiry_id',i.id,'order_id',o.id,'status',i.status);
+ END IF;
  IF (i.status NOT IN ('pending','responded') AND NOT(i.status='accepted' AND p_decision='cancelled'))
  OR NOT public.rental_request_transition_allowed(o.id,o.status::text,target) THEN RAISE EXCEPTION 'request_transition_not_allowed'; END IF;
  IF p_decision='rejected' THEN UPDATE public.property_inquiries SET status='rejected' WHERE id=i.id; END IF;

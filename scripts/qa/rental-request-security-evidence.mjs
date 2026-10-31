@@ -13,6 +13,12 @@ const controls={
  confirmation_conflict:/concurrent confirmations yield exactly one occupied stay/,
  cancellation_boundary:/confirmed request cannot synthesize paid cancellation/,
  stop_preserves_receipt:/emergency stop disables new writes/,
+ estimate_is_not_paid:/unpaid estimate confirmation and repeated decisions never synthesize paid/,
+ legacy_finance_preserved:/legacy financial trigger branch is preserved/,
+ unrelated_dates_preserved:/cancelling a never-held request preserves unrelated booked availability/,
+ inventory_mutation_guard:/owner cannot directly cancel, redate, delete or unlink/,
+ inventory_replay_check:/acceptance replay rejects a missing occupied row/,
+ restored_receipt_identity:/native restore preserves request receipt identity/,
 };
 export function focusedSecurityEvidence(report,headSha) {
  if(!/^[a-f0-9]{40}$/.test(headSha||''))throw Error('Exact PR head SHA is required');
@@ -20,7 +26,7 @@ export function focusedSecurityEvidence(report,headSha) {
  if(suites.length!==1)throw Error('Exactly one real rental PostgreSQL suite is required');
  const suite=suites[0],cases=suite.assertionResults||[];
  const distinct=new Set(cases.map(c=>c.fullName));
- if(report.success!==true || suite.status!=='passed' || cases.length<25 || distinct.size!==cases.length || cases.some(c=>c.status!=='passed'))throw Error('Security suite is missing, failed, skipped, duplicated or incomplete');
+ if(report.success!==true || suite.status!=='passed' || cases.length<33 || distinct.size!==cases.length || cases.some(c=>c.status!=='passed'))throw Error('Security suite is missing, failed, skipped, duplicated or incomplete');
  const covered=Object.fromEntries(Object.entries(controls).map(([name,pattern])=>[name,cases.filter(c=>pattern.test(c.fullName)).length]));
  if(Object.values(covered).some(count=>count===0))throw Error('Required security control evidence is absent');
  return {version:1,status:'passed',head_sha:headSha,assertions:cases.length,controls:covered,scope:'Actual SQL on isolated synthetic PostgreSQL; no hosted privileges, scanner certification, payment or production acceptance'};

@@ -39,9 +39,19 @@ function archivedSequenceStatements(archive, connection) {
     return pg('pg_restore',['--use-list',list,'--file','-',archive],connection).split('\n').filter(line=>line.startsWith('SELECT pg_catalog.setval(')).sort();
   } finally {rmSync(directory,{recursive:true,force:true});}
 }
+async function dumpSelection(tx,schemas) {
+  const extensions=await tx`SELECT e.extname name,e.extversion version,n.nspname schema FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace WHERE n.nspname IN ${tx(schemas)} ORDER BY e.extname`;
+  // Explicit extension selection can include configuration relations. Never
+  // silently expand the approved data boundary into another schema.
+  const outside=await tx`SELECT e.extname FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace CROSS JOIN LATERAL unnest(e.extconfig) config(oid) JOIN pg_class c ON c.oid=config.oid JOIN pg_namespace cn ON cn.oid=c.relnamespace WHERE n.nspname IN ${tx(schemas)} AND cn.nspname NOT IN ${tx(schemas)}`;
+  if(outside.length)throw new Error('Extension configuration requires an explicitly reviewed additional schema');
+  if(extensions.some(e=>!/^[a-z_][a-z0-9_]*$/.test(e.name)))throw new Error('Extension name requires explicit supported selection');
+  return {extensions,args:[...schemas.flatMap(s=>['--schema',s]),...extensions.flatMap(e=>['--extension',e.name])]};
+}
 async function evidence(tx, schemas, connection) {
   const [{snapshot}]=await tx`SELECT pg_export_snapshot() snapshot`;
-  const schemaSql=pg('pg_dump',['--schema-only','--no-owner','--snapshot',snapshot,...schemas.flatMap(s=>['--schema',s])],connection)
+  const selection=await dumpSelection(tx,schemas);
+  const schemaSql=pg('pg_dump',['--schema-only','--no-owner','--snapshot',snapshot,...selection.args],connection)
     .split('\n').filter(line=>!line.startsWith('--') && !line.startsWith('\\restrict ') && !line.startsWith('\\unrestrict ') && line.trim()).join('\n');
   const tables = await tx`SELECT n.nspname schema,c.relname name,c.relkind kind,c.relrowsecurity rls,c.relforcerowsecurity force_rls
     FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ${tx(schemas)} AND c.relkind IN ('r','p') ORDER BY 1,2`;
@@ -72,7 +82,7 @@ async function evidence(tx, schemas, connection) {
     const [state]=await tx`SELECT last_value::text,is_called FROM ${tx(`${sequence.schema}.${sequence.name}`)}`;
     sequences.push({...sequence,...state});
   }
-  const schema={tables,columns,constraints,views,indexes,functions,triggers,policies,enums,relationPrivileges,functionPrivileges,sequences};
+  const schema={extensions:selection.extensions,tables,columns,constraints,views,indexes,functions,triggers,policies,enums,relationPrivileges,functionPrivileges,sequences};
   return { rows, schema, schemaSha256:hash(canonical(schema)), schemaSqlSha256:hash(schemaSql) };
 }
 async function privileged(tx) {
@@ -90,12 +100,13 @@ export async function exportDatabase({connection,directory,schemas=['public']}) 
     await sql.begin('ISOLATION LEVEL REPEATABLE READ READ ONLY',async tx=>{
       await privileged(tx);
       const [{ snapshot }]=await tx`SELECT pg_export_snapshot() snapshot`;
-      pg('pg_dump',['--format=custom','--strict-names','--snapshot',snapshot,...schemas.flatMap(s=>['--schema',s]),'--file',`${archive}.partial`],connection);
+      const selection=await dumpSelection(tx,schemas);
+      pg('pg_dump',['--format=custom','--strict-names','--snapshot',snapshot,...selection.args,'--file',`${archive}.partial`],connection);
       const archivedSequences=archivedSequenceStatements(`${archive}.partial`,connection);
       const proof=await evidence(tx,schemas,connection);
       const currentSequences=proof.schema.sequences.map(sequence=>`SELECT pg_catalog.setval('${sequence.qualified.replace(/'/g,"''")}', ${sequence.last_value}, ${sequence.is_called});`).sort();
       if(canonical(archivedSequences)!==canonical(currentSequences))throw new Error('sequence_state_changed_during_export; retry a quiescent snapshot');
-      const manifest={version:1,createdAt:new Date().toISOString(),schemas,scope:'PostgreSQL schema/data only; no Auth service, Storage objects, Edge deployment, credentials, globals or PITR',archiveSha256:hash(readFileSync(`${archive}.partial`)),...proof};
+      const manifest={version:2,createdAt:new Date().toISOString(),schemas,scope:'PostgreSQL schema/data only; no Auth service, Storage objects, Edge deployment, credentials, globals or PITR',archiveSha256:hash(readFileSync(`${archive}.partial`)),...proof};
       writeFileSync(join(directory,'manifest.json.partial'),JSON.stringify(manifest,null,2),{mode:0o600});
       renameSync(`${archive}.partial`,archive);
       renameSync(join(directory,'manifest.json.partial'),join(directory,'manifest.json'));
@@ -106,7 +117,7 @@ export async function restoreDatabase({connection,directory,confirmation}) {
   if (confirmation!=='fresh-isolated-database') throw new Error('Restore requires explicit fresh-isolated-database confirmation');
   rmSync(join(directory,'restore-verification.json'),{force:true});
   const manifest=JSON.parse(readFileSync(join(directory,'manifest.json'),'utf8'));
-  if (manifest.version!==1 || !Array.isArray(manifest.schemas) || !manifest.schemas.length || manifest.schemas.some(s=>!s || !/^[a-z_][a-z0-9_]*$/.test(s))) throw new Error('Invalid snapshot manifest');
+  if (manifest.version!==2 || !Array.isArray(manifest.schema?.extensions) || !Array.isArray(manifest.schemas) || !manifest.schemas.length || manifest.schemas.some(s=>!s || !/^[a-z_][a-z0-9_]*$/.test(s))) throw new Error('Invalid snapshot manifest');
   const archive=resolve(directory,'database.dump');
   if (hash(readFileSync(archive))!==manifest.archiveSha256 || hash(canonical(manifest.schema))!==manifest.schemaSha256) throw new Error('Snapshot checksum mismatch');
   const sql=client(connection);

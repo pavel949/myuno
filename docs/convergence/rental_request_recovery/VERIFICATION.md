@@ -1,5 +1,15 @@
 # Local verification — 31 October 2026
 
+## Compatibility revision verification
+
+The SQL harness now uses the existing legacy predecessor definitions and actual additional item/booking/availability/finance triggers rather than loading the separate unactivated restrictive-fixes prerequisite. It applies relevant NOT NULL, FK, unique and date/amount constraints and populates the legacy owner projection so financial/secondary-booking paths cannot silently skip the fixture. No new production definition dump is included.
+
+The revised 33-case request suite passes locally, including direct owner inventory mutation denial, exact acceptance replay, no paid posting from an estimate, preserved legacy financial behavior, unrelated availability preservation and native restore followed by same-key retry and checked confirmation. Guard/finance predecessor drift probes additionally verify whole-transaction rollback before successful candidate installation. Independent review identified the direct booking mutation gap; the correction and extension-aware restore changes were re-reviewed without remaining blocking findings.
+
+Final revised aggregate: **401 files / 4,840 cases passed, zero failures/skips**, including 494 cases in 11 PostgreSQL files. It used two workers with Node 22/PostgreSQL in a network-disabled container; JSON `/tmp/myuno-rental-compat-evidence/final-results.json`, log `/tmp/myuno-rental-compat-final-aggregate.log`. Typecheck and build passed; 11 isolated browser cases passed; lint has zero errors and 2,477 existing warnings. The five evidence-validator tests and native snapshot/restore regression passed separately. The restore regression now includes extension-backed exclusion enforcement and rejects implicit extension-config reads outside selected schemas. This is synthetic schema/data evidence, not an Auth service or production recovery certificate.
+
+The previous aggregate below is historical evidence for the earlier tree; it did not establish compatibility with the legacy order guard or additional trigger chain. It is superseded by the revised aggregate above for this candidate.
+
 Repository `pavel949/myuno`, base `2c9097e560a492dd136c61aaa721775bcaa32028`; local branch `codex/rental-request-recovery-20261031`. No remote workflows, production records, permissions, deployment or billing changed. Candidate SQL is outside migration journals.
 
 ## Real isolated SQL and restore

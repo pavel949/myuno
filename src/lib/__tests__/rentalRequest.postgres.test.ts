@@ -1,8 +1,11 @@
 import { beforeAll, afterAll, beforeEach, describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import postgres from 'postgres';
 import { randomUUID } from 'node:crypto';
 import { disposablePostgres } from '../../../scripts/qa/disposable-postgres.mjs';
+import { exportDatabase,restoreDatabase } from '../../../scripts/database-snapshot.mjs';
 // Explicit synthetic socket only; no URLs, environment credentials or hosted DB.
 let environment: { connection: {host:string;username:string;password:string;port:number};close:()=>void };
 const database = `rental_test_${randomUUID().replace(/-/g, '')}`;
@@ -11,8 +14,8 @@ let sql: ReturnType<typeof postgres>;
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const guest=id(1), owner=id(2), other=id(3), manager=id(4), staff=id(5), company=id(6), space=id(7), property=id(8), foreignProperty=id(9);
 const payload = (changes: Record<string, unknown> = {}) => ({ property_id: property, check_in:'2030-11-10', check_out:'2030-11-13', guests:2, name:'Synthetic Guest',email:'synthetic@example.invalid',phone:'',message:'Synthetic request',quoted_total:9000,quoted_nightly:3000,currency:'THB', ...changes });
-async function as<T>(actor: string | null, work: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
-  return sql.begin(async tx => {
+async function as<T>(actor: string | null, work: (tx: postgres.TransactionSql) => Promise<T>,client=sql): Promise<T> {
+  return client.begin(async tx => {
     await tx.unsafe(`SET LOCAL ROLE ${actor ? 'authenticated' : 'anon'}`);
     await tx`SELECT set_config('request.jwt.claim.sub',${actor ?? ''},true)`;
     await tx`SELECT set_config('request.jwt.claim.role',${actor ? 'authenticated' : 'anon'},true)`;
@@ -44,9 +47,29 @@ beforeAll(async () => {
   await sql.unsafe(`CREATE EXTENSION btree_gist;
     ALTER TABLE properties ADD PRIMARY KEY(id); ALTER TABLE orders ADD PRIMARY KEY(id);
     ALTER TABLE orders ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE orders ALTER COLUMN vertical SET DEFAULT 'property';
-    ALTER TABLE orders ALTER COLUMN order_number SET DEFAULT 'SYNTHETIC'; ALTER TABLE orders ALTER COLUMN created_at SET DEFAULT now();
+    ALTER TABLE orders ALTER COLUMN order_number SET DEFAULT ('SYNTHETIC-'||gen_random_uuid()::text); ALTER TABLE orders ALTER COLUMN created_at SET DEFAULT now();
+    ALTER TABLE orders ALTER COLUMN updated_at SET DEFAULT now(); ALTER TABLE orders ADD UNIQUE(order_number);
+    ALTER TABLE orders ALTER COLUMN order_type SET NOT NULL; ALTER TABLE orders ALTER COLUMN total_amount SET NOT NULL;
     ALTER TABLE property_inquiries ADD PRIMARY KEY(id); ALTER TABLE property_inquiries ALTER COLUMN created_at SET DEFAULT now();
-    ALTER TABLE property_bookings ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE property_bookings ADD UNIQUE(external_id);
+    ALTER TABLE property_inquiries ALTER COLUMN updated_at SET DEFAULT now();
+    ALTER TABLE property_inquiries ALTER COLUMN property_id SET NOT NULL; ALTER TABLE property_inquiries ALTER COLUMN user_id SET NOT NULL;
+    ALTER TABLE property_inquiries ALTER COLUMN name SET NOT NULL; ALTER TABLE property_inquiries ALTER COLUMN created_at SET NOT NULL; ALTER TABLE property_inquiries ALTER COLUMN updated_at SET NOT NULL;
+    ALTER TABLE property_inquiries ADD FOREIGN KEY(property_id) REFERENCES properties(id);
+    ALTER TABLE property_bookings ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE property_bookings ADD PRIMARY KEY(id); ALTER TABLE property_bookings ADD UNIQUE(external_id);
+    ALTER TABLE property_bookings ALTER COLUMN created_at SET DEFAULT now(); ALTER TABLE property_bookings ALTER COLUMN updated_at SET DEFAULT now();
+    ALTER TABLE property_bookings ALTER COLUMN property_id SET NOT NULL; ALTER TABLE property_bookings ALTER COLUMN owner_id SET NOT NULL;
+    ALTER TABLE property_bookings ALTER COLUMN check_in SET NOT NULL; ALTER TABLE property_bookings ALTER COLUMN check_out SET NOT NULL;
+    ALTER TABLE property_bookings ALTER COLUMN created_at SET NOT NULL; ALTER TABLE property_bookings ALTER COLUMN updated_at SET NOT NULL;
+    ALTER TABLE property_bookings ADD FOREIGN KEY(property_id) REFERENCES properties(id); ALTER TABLE property_bookings ADD FOREIGN KEY(order_id) REFERENCES orders(id);
+    ALTER TABLE property_bookings ADD CHECK(check_out>check_in); ALTER TABLE property_bookings ADD CHECK(total_amount IS NULL OR total_amount>=0);
+    ALTER TABLE order_items ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE order_items ADD PRIMARY KEY(id); ALTER TABLE order_items ADD FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE;
+    ALTER TABLE order_items ALTER COLUMN order_id SET NOT NULL; ALTER TABLE order_items ALTER COLUMN item_name SET NOT NULL; ALTER TABLE order_items ALTER COLUMN item_type SET NOT NULL;
+    ALTER TABLE order_items ALTER COLUMN unit_price SET NOT NULL; ALTER TABLE order_items ALTER COLUMN amount SET NOT NULL;
+    ALTER TABLE order_participants ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE order_participants ADD PRIMARY KEY(id); ALTER TABLE order_participants ADD FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE;
+    ALTER TABLE order_participants ALTER COLUMN order_id SET NOT NULL; ALTER TABLE order_participants ALTER COLUMN role SET NOT NULL; ALTER TABLE order_participants ALTER COLUMN name SET NOT NULL;
+    ALTER TABLE order_addresses ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE order_addresses ADD PRIMARY KEY(id); ALTER TABLE order_addresses ADD FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE;
+    ALTER TABLE payment_intents ALTER COLUMN id SET DEFAULT gen_random_uuid(); ALTER TABLE payment_intents ADD PRIMARY KEY(id);
+    ALTER TABLE payment_intents ALTER COLUMN order_id SET NOT NULL; ALTER TABLE payment_intents ALTER COLUMN amount SET NOT NULL; ALTER TABLE payment_intents ALTER COLUMN method SET NOT NULL;
     ALTER TABLE property_bookings ADD CONSTRAINT property_bookings_no_overlap EXCLUDE USING gist(property_id WITH =, daterange(check_in,check_out,'[)') WITH &&) WHERE(status NOT IN ('cancelled','rejected','expired'));
     CREATE TRIGGER trg_guard_customer_order_update BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION guard_customer_order_update();`);
   await sql.unsafe('DROP TABLE public_property_catalog');
@@ -57,22 +80,42 @@ beforeAll(async () => {
   await sql.unsafe('REVOKE ALL ON FUNCTION public.create_order_atomic(text,uuid,uuid,timestamptz,timestamptz,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric) FROM PUBLIC,anon,authenticated');
   await sql.unsafe(readFileSync('drizzle/migrations/0019_canonical_inventory_status_predicate.sql','utf8'));
   await sql.unsafe(readFileSync('drizzle/migrations/0020_preserve_property_booking_lifecycle_status.sql','utf8'));
+  // Use existing predecessor evidence, verified against the private metadata
+  // preflight. Do not install the unactivated restrictive-fixes prerequisite.
+  const predecessors=JSON.parse(readFileSync('docs/convergence/final_order_mutation/functions.json','utf8')).rows;
+  for(const name of ['guard_customer_order_update','trg_sync_order_item_to_property_booking','create_property_booking_from_order','trg_release_availability_on_order_cancel','create_financial_from_booking']) {
+    await sql.unsafe(predecessors.find((r:{proname:string})=>r.proname===name).definition);
+  }
   await sql.unsafe(`CREATE TRIGGER sync_order_to_property_booking AFTER INSERT OR UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION trg_sync_order_to_property_booking();
-    CREATE FUNCTION trg_sync_order_item_to_property_booking() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN UPDATE orders SET updated_at=now() WHERE id=NEW.order_id; RETURN NEW; END $$;
-    CREATE TRIGGER sync_order_item_to_property_booking AFTER INSERT ON order_items FOR EACH ROW EXECUTE FUNCTION trg_sync_order_item_to_property_booking();`);
-  const restrictive=readFileSync('docs/convergence/final_order_mutation/restrictive-fixes.sql','utf8');
-  await sql.unsafe(restrictive.slice(restrictive.indexOf('CREATE OR REPLACE FUNCTION public.guard_customer_order_update()')));
+    CREATE TRIGGER sync_order_item_to_property_booking AFTER INSERT ON order_items FOR EACH ROW EXECUTE FUNCTION trg_sync_order_item_to_property_booking();
+    CREATE TRIGGER trg_create_property_booking AFTER INSERT OR UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION create_property_booking_from_order();
+    CREATE TRIGGER trg_release_availability_on_order_cancel AFTER UPDATE OF deleted_at,status ON orders FOR EACH ROW WHEN(OLD.vertical='property') EXECUTE FUNCTION trg_release_availability_on_order_cancel();
+    CREATE TRIGGER trg_create_financial_from_booking AFTER INSERT OR UPDATE ON property_bookings FOR EACH ROW EXECUTE FUNCTION create_financial_from_booking();`);
+  const candidate=readFileSync('docs/convergence/rental_request_recovery/forward.sql','utf8');
+  for(const [name,error] of [['guard_customer_order_update','order_guard_drift'],['create_financial_from_booking','legacy_trigger_drift']]) {
+    const original=predecessors.find((r:{proname:string})=>r.proname===name).definition;
+    await sql.unsafe(original.replace('BEGIN\n','BEGIN\n -- Synthetic incompatible predecessor\n'));
+    const rejected=await sql.reserve();
+    try { await expect(rejected.unsafe(candidate)).rejects.toThrow(new RegExp(error)); }
+    finally { await rejected.unsafe('ROLLBACK'); rejected.release(); }
+    expect((await sql`SELECT count(*)::int n FROM information_schema.columns WHERE table_schema='public' AND table_name='property_inquiries' AND column_name='request_payload'`)[0].n).toBe(0);
+    expect((await sql`SELECT to_regprocedure('public.submit_rental_request_checked(uuid,jsonb)') name`)[0].name).toBeNull();
+    await sql.unsafe(original);
+  }
   const migration = await sql.reserve();
-  try { await migration.unsafe(readFileSync('docs/convergence/rental_request_recovery/forward.sql','utf8')); } finally { migration.release(); }
+  try { await migration.unsafe(candidate); } finally { migration.release(); }
   await sql`INSERT INTO management_companies(id,operating_spaces_enforced) VALUES(${company},true)`;
   await sql`INSERT INTO properties(id,owner_id,management_company_id,is_active,approval_status,listing_type,listing_modes,instant_booking,max_guests,title_en) VALUES(${property},${owner},${company},true,'approved','rent',ARRAY['rent'],false,4,'Synthetic home'),(${foreignProperty},${other},${company},true,'approved','rent',ARRAY['rent'],false,4,'Other home')`;
+  // Deliberately populate the legacy owner projection: otherwise both omitted
+  // production triggers silently return early and would hide false paid income.
+  await sql`INSERT INTO owner_properties(id,owner_id) VALUES(${property},${owner}),(${foreignProperty},${other})`;
   await sql`INSERT INTO management_company_members(id,company_id,user_id,role,is_active) VALUES(${id(20)},${company},${manager},'manager',true),(${id(21)},${company},${staff},'staff',true)`;
   await sql`INSERT INTO operating_spaces(id,management_company_id,is_active) VALUES(${space},${company},true)`;
   await sql`INSERT INTO operating_space_properties(operating_space_id,property_id,management_company_id) VALUES(${space},${property},${company})`;
   await sql`INSERT INTO operating_space_members(operating_space_id,company_member_id,management_company_id,is_active) VALUES(${space},${id(20)},${company},true),(${space},${id(21)},${company},true)`;
   await sql`INSERT INTO team_member_permissions(company_id,user_id,module,can_view,can_edit) VALUES(${company},${manager},'bookings',true,true),(${company},${staff},'bookings',true,true)`;
 },60000);
-beforeEach(async()=>{ await sql.unsafe('TRUNCATE property_inquiries,order_items,order_participants,order_addresses,property_bookings,orders,payment_intents,ledger_entries,order_status_history,reconciliation_alerts,property_availability CASCADE'); });
+beforeEach(async()=>{ await sql.unsafe('TRUNCATE property_inquiries,order_items,order_participants,order_addresses,property_bookings,orders,payment_intents,ledger_entries,order_status_history,reconciliation_alerts,property_availability,property_financials,property_activity_log CASCADE'); });
 afterAll(async()=>{try {if(sql)await sql.end();if(admin){await admin.unsafe(`DROP DATABASE IF EXISTS ${database} WITH (FORCE)`);await admin.end();}}finally{environment?.close();}});
 
 describe('atomic request receipt and nonblocking inventory',()=>{
@@ -143,6 +186,60 @@ describe('atomic request receipt and nonblocking inventory',()=>{
     expect(await decide(r.inquiry_id,'cancelled')).toMatchObject({order_id:r.order_id,status:'cancelled'});
     expect(await submit(r.inquiry_id)).toMatchObject({order_id:r.order_id,status:'cancelled'});
   });
+  it('unpaid estimate confirmation and repeated decisions never synthesize paid financial entries',async()=>{
+    const r=await submit(); await decide(r.inquiry_id); await decide(r.inquiry_id);
+    expect((await sql`SELECT count(*)::int n FROM property_bookings WHERE status='confirmed'`)[0].n).toBe(1);
+    expect(await sql`SELECT * FROM property_financials`).toHaveLength(0);
+    expect(await sql`SELECT * FROM payment_intents`).toHaveLength(0);
+    expect(await sql`SELECT * FROM ledger_entries`).toHaveLength(0);
+    await decide(r.inquiry_id,'cancelled');
+    expect(await sql`SELECT * FROM property_financials`).toHaveLength(0);
+  });
+  it('legacy financial trigger branch is preserved for bookings outside the new request contract',async()=>{
+    await sql`INSERT INTO property_bookings(property_id,owner_id,guest_name,check_in,check_out,status,total_amount,currency) VALUES(${property},${owner},'Synthetic legacy','2030-12-01','2030-12-04','confirmed',12000,'THB')`;
+    expect((await sql`SELECT category,amount,status FROM property_financials`)[0]).toMatchObject({category:'rent',amount:'12000',status:'paid'});
+  });
+  it('cancelling a never-held request preserves unrelated booked availability and adjacent inventory',async()=>{
+    const r=await submit();
+    await sql`INSERT INTO property_availability(property_id,date,status,note) VALUES(${property},'2030-11-11','booked',NULL)`;
+    await sql`INSERT INTO property_bookings(property_id,owner_id,check_in,check_out,status) VALUES(${property},${owner},'2030-11-13','2030-11-15','confirmed')`;
+    await decide(r.inquiry_id,'cancelled',guest);
+    expect((await sql`SELECT status,note FROM property_availability`)[0]).toEqual({status:'booked',note:null});
+    expect((await sql`SELECT status,check_in::text AS check_in FROM property_bookings`)[0]).toEqual({status:'confirmed',check_in:'2030-11-13'});
+  });
+  it('linked order fields stay immutable even under legacy guard finance bypass or platform administration',async()=>{
+    const r=await submit();
+    await expect(as(guest,tx=>tx`UPDATE orders SET total_amount=1 WHERE id=${r.order_id}`)).rejects.toThrow(/immutable/);
+    expect(await as(owner,tx=>tx`UPDATE orders SET metadata='{}'::jsonb WHERE id=${r.order_id} RETURNING id`)).toHaveLength(0);
+    expect(await as(other,tx=>tx`UPDATE orders SET status='confirmed' WHERE id=${r.order_id} RETURNING id`)).toHaveLength(0);
+    await sql`INSERT INTO user_roles(user_id,role) VALUES(${other},'admin')`;
+    try { await expect(as(other,tx=>tx`UPDATE orders SET metadata='{}'::jsonb WHERE id=${r.order_id}`)).rejects.toThrow(/immutable/); }
+    finally { await sql`DELETE FROM user_roles WHERE user_id=${other} AND role='admin'`; }
+    const [unchanged]=await sql`SELECT status,total_amount FROM orders WHERE id=${r.order_id}`;
+    expect(unchanged.status).toBe('pending'); expect(Number(unchanged.total_amount)).toBe(9000);
+  });
+  it('browser cannot forge the checked request contract on an inserted commercial order',async()=>{
+    await expect(as(guest,tx=>tx`INSERT INTO orders(customer_user_id,order_type,status,total_amount,metadata) VALUES(${guest},'property','pending',9000,'{"request_contract":"rental-request-v1"}'::jsonb)`)).rejects.toThrow(/checked_action|row-level/);
+    expect(await counts()).toMatchObject({inquiries:0,orders:0,bookings:0});
+  });
+  it('owner cannot directly cancel, redate, delete or unlink the checked inventory projection',async()=>{
+    const r=await submit();await decide(r.inquiry_id);
+    for(const change of ["status='cancelled'","check_out='2030-11-14'","external_id=NULL","order_id=NULL,status='pending'"]) {
+      await expect(as(owner,tx=>tx.unsafe(`UPDATE property_bookings SET ${change} WHERE external_id='${r.order_id}'`))).rejects.toThrow(/inventory_requires_checked_action/);
+    }
+    await expect(as(owner,tx=>tx`DELETE FROM property_bookings WHERE external_id=${r.order_id}`)).rejects.toThrow(/inventory_requires_checked_action/);
+    expect((await decide(r.inquiry_id)).status).toBe('accepted');
+    expect(await sql`SELECT * FROM property_financials`).toHaveLength(0);
+  });
+  it('acceptance replay rejects a missing occupied row rather than claiming confirmed inventory',async()=>{
+    const r=await submit();await decide(r.inquiry_id);
+    // Synthetic privileged corruption only, not a permitted production action.
+    await sql.unsafe('ALTER TABLE property_bookings DISABLE TRIGGER linked_rental_booking_guard');
+    try { await sql`DELETE FROM property_bookings WHERE external_id=${r.order_id}`; }
+    finally { await sql.unsafe('ALTER TABLE property_bookings ENABLE TRIGGER linked_rental_booking_guard'); }
+    await expect(decide(r.inquiry_id)).rejects.toThrow(/inventory_not_committed/);
+    expect(await sql`SELECT * FROM property_financials`).toHaveLength(0);
+  });
   it('overlapping pending requests coexist; concurrent confirmations yield exactly one occupied stay',async()=>{
     const [a,b]=await Promise.all([submit(),submit()]); expect(await counts()).toMatchObject({bookings:0});
     const results=await Promise.allSettled([decide(a.inquiry_id),decide(b.inquiry_id)]);
@@ -193,7 +290,7 @@ describe('atomic request receipt and nonblocking inventory',()=>{
     await sql`UPDATE operating_space_members SET is_active=false WHERE company_member_id=${id(20)}`;
     await expect(decide(r.inquiry_id,'accepted',manager)).rejects.toThrow(/forbidden/);
     await sql`UPDATE operating_space_members SET is_active=true WHERE company_member_id=${id(20)}`;
-    await sql`INSERT INTO payment_intents(order_id,status) VALUES(${r.order_id},'pending')`;
+    await sql`INSERT INTO payment_intents(order_id,status,amount,method) VALUES(${r.order_id},'pending',9000,'cash')`;
     await expect(decide(r.inquiry_id,'cancelled')).rejects.toThrow(/transition_not_allowed/);
     expect((await sql`SELECT status FROM property_bookings`)[0].status).toBe('confirmed');
   });
@@ -220,6 +317,28 @@ describe('atomic request receipt and nonblocking inventory',()=>{
     expect(await counts()).toMatchObject({inquiries:0,orders:0,bookings:0});
     await sql`UPDATE properties SET listing_type='rent',listing_modes=ARRAY['rent'] WHERE id=${foreignProperty}`;
   });
+  it('native restore preserves request receipt identity and checked confirmation without paid income',async()=>{
+    const key=randomUUID(),receipt=await submit(key);
+    const targetName=`rental_restore_${randomUUID().replace(/-/g,'')}`;
+    const directory=mkdtempSync(join(tmpdir(),'myuno-rental-restore-'));
+    let restored:ReturnType<typeof postgres>|undefined;
+    try {
+      await admin.unsafe(`CREATE DATABASE ${targetName}`);
+      await exportDatabase({connection:{...environment.connection,database},directory,schemas:['public','auth']});
+      await restoreDatabase({connection:{...environment.connection,database:targetName},directory,confirmation:'fresh-isolated-database'});
+      restored=postgres({...environment.connection,database:targetName,max:1,onnotice:()=>{}});
+      expect(await as(guest,async tx=>(await tx`SELECT submit_rental_request_checked(${key}::uuid,${tx.json(payload())}::jsonb) receipt`)[0].receipt,restored)).toEqual(receipt);
+      expect((await restored!`SELECT count(*)::int n FROM orders`)[0].n).toBe(1);
+      expect((await restored!`SELECT count(*)::int n FROM property_bookings`)[0].n).toBe(0);
+      expect(await as(owner,async tx=>(await tx`SELECT decide_rental_request_checked(${key}::uuid,'accepted') receipt`)[0].receipt,restored)).toMatchObject({inquiry_id:key,order_id:receipt.order_id,status:'accepted'});
+      expect((await restored!`SELECT count(*)::int n FROM property_bookings WHERE external_id=${receipt.order_id} AND status='confirmed'`)[0].n).toBe(1);
+      expect((await restored!`SELECT count(*)::int n FROM property_financials`)[0].n).toBe(0);
+    } finally {
+      if(restored)await restored.end();
+      await admin.unsafe(`DROP DATABASE IF EXISTS ${targetName} WITH (FORCE)`);
+      rmSync(directory,{recursive:true,force:true});
+    }
+  },60000);
   it('emergency stop disables new writes while retaining receipts and allowlisted operator readback',async()=>{
     const r=await submit();await decide(r.inquiry_id);
     const rollback=await sql.reserve();

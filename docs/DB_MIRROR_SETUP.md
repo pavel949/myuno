@@ -16,6 +16,8 @@ SOURCE_DATABASE_URL='<provided privately>' SNAPSHOT_DIRECTORY='<new directory>' 
 
 Export uses one repeatable-read exported PostgreSQL snapshot for table contents and `pg_dump`. It preserves empty tables and the native schema, constraints, indexes, triggers, functions, policies and privileges in the archive. A manifest records exact per-table sorted canonical row SHA-256/count and schema evidence, including RLS, grants and sequences. There is no allowlist guessed from application `.from()` calls. Export errors exit nonzero; incomplete exports do not produce a completed manifest.
 
+Manifest v2 also records extensions and their versions/schemas. Extensions in the selected schemas are explicitly included in `pg_dump`, so a `btree_gist`-backed inventory exclusion constraint survives restoration. Extension configuration tables outside the explicitly selected schemas abort export before dumping; data scope is never broadened automatically. Earlier manifest shapes are rejected. The target must have the compatible extension packages available; this tool does not install host packages or certify every external dependency.
+
 PostgreSQL sequences are not MVCC objects. Before publishing the manifest, export extracts the archive SEQUENCE SET entries without connecting pg_restore to the source and compares them with captured sequence state. Concurrent changes that disagree fail export before a completed manifest is written. Quiesce allocation/schema/ACL changes or retry; the concurrent-nextval regression verifies this safe rejection.
 
 ## Restore acceptance
