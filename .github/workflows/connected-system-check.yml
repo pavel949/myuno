@@ -180,15 +180,21 @@ jobs:
       - name: Full unit and isolated PostgreSQL suite
         id: unit
         continue-on-error: true
-        run: npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
+        run: |
+          npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
+          node --test scripts/qa/rental-request-security-evidence.test.mjs
+          node scripts/qa/rental-request-security-evidence.mjs unit-results.json artifacts/security/rental-request-evidence.json
         env:
+          SECURITY_EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload unit and PostgreSQL evidence early
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: connected-unit-evidence
-          path: unit-results.json
+          path: |
+            unit-results.json
+            artifacts/security/rental-request-evidence.json
           if-no-files-found: warn
           retention-days: 14
       - name: Focused connected workflows in three timezones
@@ -237,6 +243,7 @@ jobs:
           name: connected-system-evidence
           path: |
             unit-results.json
+            artifacts/security/rental-request-evidence.json
             architecture-results.json
             /tmp/browser/
             /tmp/isolated-vite.log
