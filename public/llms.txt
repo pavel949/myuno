@@ -16,25 +16,11 @@ myUNO is a Russian-speaking super-app for foreigners in Phuket, Thailand. The pl
 - [Services](/services): Marketplace of vetted local providers.
 - [Beauty](/beauty), [Fitness](/fitness), [Pets](/pets), [Kids](/kids), [Wedding](/wedding): Lifestyle verticals.
 - [Map](/map): Universal map of properties, services and venues.
-- [ClearView](/clearview): Methodology for rating off-plan developers.
+- [ClearView](/property/clearview): Methodology for rating off-plan developers.
 - [List With Us](/list-with-us): Onboarding for owners, vendors and developers.
 - [Pricing](/pricing): Subscription tiers for property managers and vendors.
-
-## Guides
-
-- [Buying Property in Thailand](/guides/buying-property-thailand): Foreign ownership, freehold vs leasehold, due diligence.
-- [Foreign Ownership](/guides/foreign-ownership-thailand): Legal structures available to non-Thais.
-- [Visas](/guides/visas-thailand): DTV, LTR, Elite, Education and other visa routes.
-- [Taxes for Foreigners](/guides/taxes-thailand-foreigner): Personal income tax, rental tax, remittance rules.
-- [Property Management Phuket](/guides/property-management-phuket): How professional PMS works on the island.
-- [Off-plan Due Diligence](/guides/off-plan-due-diligence): What to verify before signing a reservation.
-- [TM30](/guides/tm30-thailand): Address reporting obligations for foreigners.
-- [Rental Phuket STR vs LTR](/guides/rental-phuket-str-ltr): Short-term vs long-term rental economics.
-- [Bank Account Thailand](/guides/bank-account-thailand): Opening a Thai bank account as a foreigner.
-- [Where to Live in Phuket](/guides/areas/where-to-live-phuket): Area guide by lifestyle and budget.
 
 ## Optional
 
 - [Sitemap](/sitemap.xml): Full machine-readable site index.
-- [Pillar guides sitemap](/sitemap-pillars.xml)
 - [Persona landings sitemap](/sitemap-landings.xml)
