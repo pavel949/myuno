@@ -29,7 +29,7 @@ for(const name of ['export-mc-data','send-property-report']){
    from:table=>{
     const chain={select(){return this},eq(){return this},in(){return this},order(){return this},update(){sequence.push('update');return this},
      single:async()=>({data:{id:ids.report,owner_id:'synthetic-owner',property_id:'synthetic-property',property:{title:'Synthetic'},data:{},report_type:'monthly',period_start:'2026-10-01',period_end:'2026-10-31'},error:null}),
-     then:fn=>fn({data:[],error:null})}; return chain;
+     then:fn=>fn(globalThis.__tableFailure&&globalThis.__tableFailure.table===table?{data:null,error:globalThis.__tableFailure.error}:{data:[],error:null})}; return chain;
    }};
  };
  require(path);
@@ -40,6 +40,22 @@ for(const name of ['export-mc-data','send-property-report']){
  validToken=false;sequence=[];assert.equal((await handler(request())).status,401);assert.ok(!sequence.includes('service'));passed++;
  validToken=true;allowed=false;sequence=[];assert.equal((await handler(request())).status,403);assert.ok(!sequence.includes('service'));assert.ok(!sequence.includes('send'));passed++;
  allowed=true;sequence=[];assert.equal((await handler(request())).status,200);assert.ok(sequence.indexOf('authorize')<sequence.indexOf('service'));passed++;
+ if(name==='export-mc-data'){
+  // owner_reports was dropped (migration 20260429025702): its absence is reported, not fatal; other errors stay fatal.
+  const missing={code:'42P01',message:'relation "public.owner_reports" does not exist'};
+  globalThis.__tableFailure={table:'owner_reports',error:missing};
+  for(const export_type of ['reports','all']){
+   const ok=await handler(request('synthetic-user',{company_id:ids.company,export_type}));
+   assert.equal(ok.status,200,`${export_type}: missing owner_reports must not fail the export`);
+   const json=await ok.json();assert.deepEqual(json.reports,[]);assert.deepEqual(json.skipped_missing_relations,['owner_reports']);passed++;
+  }
+  const csv=await handler(request('synthetic-user',{company_id:ids.company,export_type:'all',format:'csv'}));
+  assert.equal(csv.status,200);const csvText=await csv.text();assert.ok(csvText.includes('## skipped_missing_relations')&&csvText.includes('owner_reports'));passed++;
+  globalThis.__tableFailure={table:'owner_reports',error:{code:'42703',message:'column "company_id" does not exist'}};
+  const drift=await handler(request('synthetic-user',{company_id:ids.company,export_type:'reports'}));
+  assert.notEqual(drift.status,200,'a non-"missing relation" error must still fail the export');passed++;
+  globalThis.__tableFailure=undefined;
+ }
  if(name==='send-property-report'){
   sequence=[];sent=[];const denied=await handler(request('synthetic-service',{...body,recipientEmails:['foreign@example.test']}));
   assert.equal(denied.status,500);assert.equal(sent.length,0);passed++;
