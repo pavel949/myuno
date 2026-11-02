@@ -288,6 +288,10 @@ export default function AirportFastTrackPage() {
             is_primary: i === 0,
           })),
           addon_ids: Array.from(selectedAddons),
+          addon_names: Array.from(selectedAddons).map(id => {
+            const a = addons.find(x => x.id === id);
+            return a ? (isRu ? a.name_ru : a.name_en) : id;
+          }),
         },
       });
 

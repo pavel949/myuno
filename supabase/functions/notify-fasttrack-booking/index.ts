@@ -2,6 +2,7 @@ import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 interface FastTrackBookingPayload {
   user_id: string;
@@ -31,6 +32,7 @@ interface FastTrackBookingPayload {
     is_primary: boolean;
   }>;
   addon_ids: string[];
+  addon_names?: string[];
 }
 
 async function sendWhatsAppNotification(payload: FastTrackBookingPayload, bookingId: string, adminWhatsApp: string): Promise<void> {
@@ -89,14 +91,31 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // The booking is written with the service role, so the caller must be a signed-in
+  // user and the owner is taken from the verified token, never from the request body.
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   const ADMIN_EMAIL = (await getAdminEmails())[0];
   const ADMIN_WHATSAPP = await getAdminWhatsApp();
 
   try {
     const supabase = createServiceClient();
-    const payload: FastTrackBookingPayload = await req.json();
+    const payload: FastTrackBookingPayload = { ...(await req.json()), user_id: authResult.user.id };
 
     console.info('[FastTrack] Creating booking for flight:', payload.flight_number);
+
+    // public.airport_booking_addons was dropped (migration 20260429025702) and never
+    // recreated, so selected add-ons are recorded on the booking itself: operations
+    // see them in special_notes and in the admin alerts. Prices are already summed
+    // into addons_total/total_price by the client.
+    const addonLabels = (payload.addon_names && payload.addon_names.length > 0)
+      ? payload.addon_names
+      : payload.addon_ids;
+    const bookingNotes = [
+      payload.special_notes?.trim() || '',
+      addonLabels.length > 0 ? `Add-ons: ${addonLabels.join(', ')}` : '',
+    ].filter(Boolean).join('\n') || null;
 
     // 1. Insert airport_bookings
     const { data: booking, error: bookingError } = await supabase
@@ -113,7 +132,7 @@ Deno.serve(async (req) => {
         contact_whatsapp: payload.contact_whatsapp || null,
         contact_email: payload.contact_email || null,
         preferred_language: payload.preferred_language,
-        special_notes: payload.special_notes || null,
+        special_notes: bookingNotes,
         base_price: payload.base_price,
         night_surcharge: payload.night_surcharge,
         addons_total: payload.addons_total,
@@ -158,28 +177,10 @@ Deno.serve(async (req) => {
       // Don't throw - booking is already created
     }
 
-    // 3. Insert addon associations
-    if (payload.addon_ids.length > 0) {
-      const addonsToInsert = payload.addon_ids.map(addonId => ({
-        booking_id: bookingId,
-        addon_service_id: addonId,
-        unit_price: 0, // Will be looked up
-        total_price: 0,
-      }));
-
-      const { error: addonError } = await supabase
-        .from('airport_booking_addons')
-        .insert(addonsToInsert);
-
-      if (addonError) {
-        console.error('[FastTrack] Addons insert error:', addonError);
-      }
-    }
-
     // 4. Send WhatsApp (non-blocking). ADMIN_WHATSAPP is handler-scoped, so it
     // must be passed in — referencing it from the module-level helper threw a
     // ReferenceError that silently swallowed every admin WhatsApp alert.
-    sendWhatsAppNotification(payload, bookingId, ADMIN_WHATSAPP).catch(err =>
+    sendWhatsAppNotification({ ...payload, special_notes: bookingNotes ?? undefined }, bookingId, ADMIN_WHATSAPP).catch(err =>
       console.error('[WhatsApp] Failed:', err)
     );
 
@@ -237,7 +238,7 @@ Deno.serve(async (req) => {
                 <div class="l">Contact</div>
                 <div>📱 ${payload.contact_whatsapp || '—'} · 📧 ${payload.contact_email || '—'}</div>
                 <div>🌐 Language: ${payload.preferred_language}</div>
-                ${payload.special_notes ? `<div>📝 ${payload.special_notes}</div>` : ''}
+                ${bookingNotes ? `<div>📝 ${bookingNotes.replace(/\n/g, '<br>')}</div>` : ''}
               </div>
               <div class="d">
                 <div class="l">Booking ID</div>
