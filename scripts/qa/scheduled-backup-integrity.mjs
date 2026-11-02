@@ -16,7 +16,7 @@ class Clock extends RealDate {
   constructor(...args) { super(...(args.length ? args : ['2026-10-01T12:00:00Z'])); }
 }
 
-async function run(failure, denied = false, rowCount = 1) {
+async function run(failure, denied = false, rowCount = 1, failureError = { message: 'synthetic query failure' }) {
   const uploads = [], updates = [];
   let handler;
   const sb = {
@@ -37,7 +37,7 @@ async function run(failure, denied = false, rowCount = 1) {
           } else if (table === 'management_companies') {
             result = { data: companies.slice(offset, Math.min(end + 1, offset + 200)), count: companies.length, error: null };
           } else if (company === 'broken' && (table === failure || (failure === 'later_page' && table === 'owner_reports' && offset > 0))) {
-            result = { data: null, error: { message: 'synthetic query failure' } };
+            result = { data: null, error: failureError };
           } else {
             const rows = Array.from({ length: rowCount }, (_, i) => ({ id: `${company}:${table}${i ? ':' + i : ''}`, company_id: company }));
             result = { data: rows.slice(offset, Math.min(end + 1, offset + 200)), count: rowCount, error: null };
@@ -108,5 +108,24 @@ for (const count of [0, 200, 201, 500, 501, 1001]) {
     }
   }
 }
+// owner_reports was dropped (migration 20260429025702). Only that relation, and only
+// when it is genuinely missing, is recorded as skipped; the backup is still produced.
+for (const missing of [{ code: '42P01', message: 'relation "public.owner_reports" does not exist' }, { code: 'PGRST205', message: "Could not find the table 'public.owner_reports'" }]) {
+  const dropped = await run('owner_reports', false, 1, missing);
+  assert.ok(dropped.body.results.every(x => x.status === 'ok'), 'missing owner_reports must not block the backup');
+  assert.equal(dropped.uploads.length, 2);
+  assert.equal(dropped.updates.length, 2);
+  const brokenUpload = dropped.uploads.find(x => x.payload.company_id === 'broken');
+  assert.deepEqual(brokenUpload.payload.reports, []);
+  assert.deepEqual(brokenUpload.payload.skipped_missing_relations, ['owner_reports'], 'absence is recorded, not presented as empty data');
+}
+// Any other failure on owner_reports (e.g. a missing column) still aborts that company.
+const columnDrift = await run('owner_reports', false, 1, { code: '42703', message: 'column "company_id" does not exist' });
+assert.equal(columnDrift.body.results[0].status, 'error');
+assert.deepEqual(columnDrift.uploads.map(x => x.payload.company_id), ['healthy']);
+// A missing relation is NOT tolerated for the core tables.
+const coreMissing = await run('properties', false, 1, { code: '42P01', message: 'relation "public.properties" does not exist' });
+assert.equal(coreMissing.body.results[0].status, 'error');
+assert.deepEqual(coreMissing.uploads.map(x => x.payload.company_id), ['healthy']);
 await run(null, true);
-console.log('scheduled-backup-integrity: 15/15 scenarios passed');
+console.log('scheduled-backup-integrity: 18/18 scenarios passed');

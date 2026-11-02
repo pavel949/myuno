@@ -6,6 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// owner_reports was dropped by migration 20260429025702. A relation that no longer
+// exists is recorded as skipped (never as an empty dataset); any other read error
+// still aborts the company's backup. Kept local: the CI integrity test runs this
+// entrypoint with its imports stripped.
+function isMissingRelation(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null;
+  return e?.code === '42P01' || e?.code === 'PGRST205' || /relation .* does not exist|Could not find the table/i.test(e?.message ?? '');
+}
+
 // Exact totals prevent an API row cap from masquerading as end-of-data.
 // A stable ID order makes range boundaries deterministic for unchanged data.
 type BackupPage<T> = { data: T[] | null; error: unknown; count: number | null };
@@ -80,9 +89,12 @@ Deno.serve(async (req) => {
         readAll(() => sb.from('owner_reports').select('*', { count: 'exact' }).eq('company_id', company.id).order('id')),
       ]);
 
-      // A missing relation or denied query is not an empty dataset. Never publish
-      // a partial backup or advance its success timestamp.
-      if ([props, contacts, deals, reports].some(result => result.error)) {
+      // A denied query or an unexpected read error is not an empty dataset. Never
+      // publish a partial backup or advance its success timestamp. The only
+      // tolerated absence is the dropped owner_reports relation, which is
+      // recorded explicitly in the payload below.
+      const reportsMissing = Boolean(reports.error) && isMissingRelation(reports.error);
+      if ([props, contacts, deals].some(result => result.error) || (reports.error && !reportsMissing)) {
         console.error(`Backup collection failed for ${company.id}`);
         results.push({ company_id: company.id, status: 'error', tables: 0 });
         continue;
@@ -110,7 +122,8 @@ Deno.serve(async (req) => {
       allData.crm_contacts = contacts.data || [];
       allData.crm_deals = deals.data || [];
       allData.finance_transactions = financeRows;
-      allData.reports = reports.data || [];
+      allData.reports = reportsMissing ? [] : reports.data || [];
+      if (reportsMissing) allData.skipped_missing_relations = ['owner_reports'];
 
       // Upload to storage
       const fileName = `backups/${company.id}/${now.toISOString().slice(0, 10)}-full-backup.json`;

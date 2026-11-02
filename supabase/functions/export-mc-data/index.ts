@@ -6,6 +6,13 @@ import { AccessDenied, authorizeRpc, authorizedService, createActorClient } from
 
 const ExportInput = z.object({ company_id: z.string().uuid(), export_type: z.enum(['all','properties','crm','finance','reports']), format: z.enum(['json','csv']).default('json') }).strict();
 
+/** owner_reports was dropped by migration 20260429025702. A relation that no longer
+ *  exists is reported as skipped (not as an empty dataset); other errors still fail. */
+function isMissingRelation(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null;
+  return e?.code === '42P01' || e?.code === 'PGRST205' || /relation .* does not exist|Could not find the table/i.test(e?.message ?? '');
+}
+
 /** Convert array of objects to CSV string */
 function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return '';
@@ -92,8 +99,13 @@ Deno.serve(async (req) => {
         }
         case 'reports': {
           const { data: reports, error: reportError } = await sb.from('owner_reports').select('*').eq('company_id', company_id);
-          if (reportError) throw reportError;
-          result.reports = reports || [];
+          if (reportError && !isMissingRelation(reportError)) throw reportError;
+          if (reportError) {
+            result.reports = [];
+            result.skipped_missing_relations = ['owner_reports'];
+          } else {
+            result.reports = reports || [];
+          }
           break;
         }
       }
@@ -104,6 +116,10 @@ Deno.serve(async (req) => {
       // For CSV, merge all arrays into separate sections
       const csvParts: string[] = [];
       for (const [key, value] of Object.entries(result)) {
+        if (key === 'skipped_missing_relations') {
+          csvParts.push(`## ${key}`, (value as string[]).join(','), '');
+          continue;
+        }
         if (Array.isArray(value) && value.length > 0) {
           csvParts.push(`## ${key}`);
           csvParts.push(toCsv(value as Record<string, unknown>[]));

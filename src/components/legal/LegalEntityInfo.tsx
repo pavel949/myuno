@@ -69,29 +69,29 @@ export function LegalEntityBlock({
 }) {
   const { language } = useLanguage();
   const l = pick(language);
-  const t = (k: keyof typeof T) => T[k][l];
+  const label = (k: keyof typeof T) => T[k][l];
 
   return (
     <div className={cn('rounded-none bg-muted p-3 text-xs text-muted-foreground', className)}>
       <p className="mb-1 font-medium text-foreground">{getLegalEntityName(language)}</p>
       <p>
-        {t('address')}: {getLegalEntityAddress(language)}
+        {label('address')}: {getLegalEntityAddress(language)}
       </p>
       {L.registrationNumber ? (
         <p>
-          {t('regNo')}: {L.registrationNumber}
+          {label('regNo')}: {L.registrationNumber}
         </p>
       ) : null}
       {L.taxId ? (
         <p>
-          {t('taxId')}: {L.taxId}
+          {label('taxId')}: {L.taxId}
         </p>
       ) : null}
       <p>
         {L.phone} · {L.email}
         {contactEmail ? ` · ${contactEmail}` : ''}
       </p>
-      {showJurisdiction ? <p>{t('jurisdiction')}</p> : null}
+      {showJurisdiction ? <p>{label('jurisdiction')}</p> : null}
       <p className="mt-1">www.myuno.app</p>
     </div>
   );
