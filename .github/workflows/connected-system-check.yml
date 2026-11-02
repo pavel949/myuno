@@ -14,7 +14,7 @@ permissions:
   contents: read
 jobs:
   source:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
@@ -269,7 +269,7 @@ jobs:
   # Separate runners keep dependency setup and the full browser matrix inside
   # the existing 45-minute budget. No fixture/step limits or coverage change.
   browser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
