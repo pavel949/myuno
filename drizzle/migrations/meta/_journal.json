@@ -253,6 +253,13 @@
       "when": 1792288800000,
       "tag": "0035_final_order_mutation_containment",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792289400000,
+      "tag": "0036_atomic_property_order_commitment",
+      "breakpoints": true
     }
   ]
 }
