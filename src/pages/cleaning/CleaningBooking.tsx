@@ -182,8 +182,9 @@ export default function CleaningBooking() {
       payment: {
         method: orderPaymentMethod,
         amount: totalAmount,
-        // Wallet is debited immediately; cash settles later (pending).
-        status: orderPaymentMethod === 'wallet' ? 'paid' : 'pending',
+        // Payment truth is server-authoritative. This generic order path only
+        // records a pending intent; verified settlement must happen server-side.
+        status: 'pending',
       },
       serviceName: language === 'ru' ? service.nameRu : service.nameEn,
     });
