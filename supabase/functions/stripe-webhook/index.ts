@@ -142,26 +142,24 @@ Deno.serve(async (req) => {
           throw new Error('Paid checkout requires reconciliation: order is not payable');
         }
 
-        // ===== IDEMPOTENCY CHECK: Skip if order already confirmed =====
-        if (order.status === 'confirmed') {
-          logStep("IDEMPOTENCY: Order already confirmed, skipping duplicate processing", { orderId });
-          return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        }
+        // A confirmed order is not enough to declare webhook reconciliation
+        // complete. Duplicate/retried provider events must be allowed to repair a
+        // missing payment_intent/ledger write from an earlier partial failure.
+        const alreadyConfirmed = order.status === 'confirmed';
 
         // Atomically claim the confirmation: conditional UPDATE that only matches
         // rows still awaiting payment. Two concurrent duplicate deliveries race here,
         // but only ONE gets a row back (`.select()` returns the affected rows) —
         // the loser sees zero rows and bails before running side-effects. This
         // closes the TOCTOU gap between the status SELECT above and this UPDATE.
-        const { data: confirmedRows, error: orderUpdateError } = await supabaseAdmin
-          .from('orders')
-          .update({ status: 'confirmed', paid_at: new Date().toISOString() })
-          .eq('id', orderId)
-          .in('status', [...PAYABLE_ORDER_STATUSES])
-          .select('id');
+        const { data: confirmedRows, error: orderUpdateError } = alreadyConfirmed
+          ? { data: [{ id: orderId }], error: null }
+          : await supabaseAdmin
+              .from('orders')
+              .update({ status: 'confirmed', paid_at: new Date().toISOString() })
+              .eq('id', orderId)
+              .in('status', [...PAYABLE_ORDER_STATUSES])
+              .select('id');
 
         if (orderUpdateError) {
           logStep("ERROR", `Failed to update order: ${orderUpdateError.message}`);
@@ -193,7 +191,7 @@ Deno.serve(async (req) => {
           .eq('id', expectedPayment.id);
 
         if (paymentUpdateError) {
-          logStep("WARN", `Failed to update payment intent: ${paymentUpdateError.message}`);
+          throw new Error(`Payment intent reconciliation failed: ${paymentUpdateError.message}`);
         }
 
         // ===== IDEMPOTENCY CHECK: Order status history =====
@@ -218,14 +216,12 @@ Deno.serve(async (req) => {
           logStep("IDEMPOTENCY: Order status history already exists, skipping", { orderId });
         }
 
-        // ===== LEDGER ENTRIES via RPC (idempotent — skips if already exist) =====
-        try {
-          await supabaseAdmin.rpc('record_ledger_entries', { p_order_id: orderId });
-          logStep("Ledger entries recorded via RPC", { orderId: redactId(orderId) });
-        } catch (ledgerError: unknown) {
-          const ledgerMsg = ledgerError instanceof Error ? ledgerError.message : String(ledgerError);
-          logStep("WARN", `Ledger entries failed (non-fatal): ${ledgerMsg}`);
-        }
+        // Ledger reconciliation is financial truth, not a best-effort side
+        // effect. A failure must make Stripe retry so a partial confirmation can
+        // be repaired instead of being permanently hidden behind status=confirmed.
+        const { error: ledgerError } = await supabaseAdmin.rpc('record_ledger_entries', { p_order_id: orderId });
+        if (ledgerError) throw new Error(`Ledger reconciliation failed: ${ledgerError.message}`);
+        logStep("Ledger entries reconciled via RPC", { orderId: redactId(orderId) });
 
         // ===== IDEMPOTENCY CHECK: Notification =====
         const { data: existingNotification } = await supabaseAdmin
