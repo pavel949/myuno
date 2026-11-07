@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
 
     const { data: order, error: fetchErr } = await sb()
       .from('orders')
-      .select('id, order_number, order_type, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
+.select('id, order_number, order_type, status, total_amount, currency, paid_at, metadata, order_participants(name, email, phone, role)')
       .eq('id', orderId)
       .single();
 
@@ -216,11 +216,9 @@ Deno.serve(async (req) => {
       note: 'Confirmed by operator via signed link',
     }).catch(() => {});
 
-    // Record ledger entries (idempotent) so admin Финансы panel reflects this booking.
-    await sb().rpc('record_ledger_entries', { p_order_id: orderId }).then(({ error }) => {
-      if (error) console.error('[confirm] record_ledger_entries failed', error);
-    });
-
+    // Operator acceptance is operational authority only. It is NOT payment
+    // evidence and must never post revenue/vendor liability for an unpaid order.
+    // Verified Stripe/manual settlement paths own paid_at + ledger posting.
     const meta = (order.metadata || {}) as Record<string, unknown>;
     const customerLang: Lang = (meta.language === 'en' || meta.language === 'th' || meta.language === 'ru')
       ? (meta.language as Lang)
