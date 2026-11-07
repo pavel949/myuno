@@ -268,13 +268,8 @@ Deno.serve(async (req) => {
       console.error('[Transfer] order enrich failed', e);
     }
 
-    // For cash / concierge_advance: record ledger entries immediately so admin
-    // financial dashboard reflects revenue & vendor payout owed to Klod.
-    if (p.payment_method === 'cash' || p.payment_method === 'concierge_advance') {
-      const { error: ledgerErr } = await sb().rpc('record_ledger_entries', { p_order_id: p.order_id });
-      if (ledgerErr) console.error('[Transfer] record_ledger_entries failed', ledgerErr);
-    }
-
+    // Notification/operational acceptance is not settlement evidence.
+    // Cash/concierge payment is posted only by a verified settlement path.
     const adminEmails = await getAdminEmails();
     const adminWA = await getAdminWhatsApp();
     const { data: secondaryWaRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_admin_wa_secondary').maybeSingle();
