@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { format, addDays } from 'date-fns';
+import { toBangkokDateKey } from '@/lib/hotelDates';
 import type { PropertyBooking } from '@/hooks/usePropertyBookings';
 
 export interface MultiPropertyBookingsResult {
@@ -52,8 +53,8 @@ export function useMultiPropertyBookings(
         .eq('order_items.item_type', 'property')
         .in('order_items.resource_id', propertyIds)
         .is('deleted_at', null)
-        .lte('start_at', `${endStr}T23:59:59Z`)
-        .gte('end_at', `${startStr}T00:00:00Z`)
+        .lt('start_at', `${endStr}T00:00:00+07:00`)
+        .gt('end_at', `${startStr}T00:00:00+07:00`)
         .order('start_at', { ascending: true });
 
       if (error) throw error;
@@ -87,8 +88,8 @@ export function useMultiPropertyBookings(
           guest_name: guestParticipant?.name,
           guest_phone: guestParticipant?.phone,
           guest_email: guestParticipant?.email,
-          check_in: order.start_at?.split('T')[0] || '',
-          check_out: order.end_at?.split('T')[0] || '',
+          check_in: toBangkokDateKey(order.start_at) || '',
+          check_out: toBangkokDateKey(order.end_at) || '',
           guests_count: (order.metadata as Record<string, unknown>)?.guests_count as number | undefined,
           total_amount: order.total_amount,
           currency: order.currency,
