@@ -212,3 +212,19 @@ export async function readPropertyComplexNames(ids?: string[]) {
   const rows = [...(catalogue.data || []), ...(independent.data || [])] as Array<{ id: string; name: string; name_ru: string | null }>;
   return [...new Map(rows.map(row => [row.id, row])).values()].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+/** Guest detail never falls back to private rows, including for signed-in admins. */
+export const PUBLIC_COMPLEX_DETAIL_COLUMNS = 'id,name,name_ru,description_en,description_ru,address,district,cover_image,images,video_url,amenities,services,security_features,infrastructure';
+export type PublicComplexDetail = Pick<PropertyComplex, 'id' | 'name' | 'name_ru' | 'description_en' | 'description_ru' | 'address' | 'district' | 'cover_image' | 'images' | 'video_url' | 'amenities' | 'services' | 'security_features' | 'infrastructure'>;
+export function usePublicComplexDetail(id?: string | null) {
+  return useQuery({
+    queryKey: ['public-complex-detail', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await typedFrom('public_complex_catalog')
+        .select(PUBLIC_COMPLEX_DETAIL_COLUMNS).eq('id', id!).maybeSingle();
+      if (error) throw error;
+      return data as PublicComplexDetail | null;
+    },
+  });
+}

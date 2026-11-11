@@ -2,8 +2,9 @@ import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { usePropertiesByProject } from '../useProperties';
+import { usePropertiesByProject, usePropertiesByComplex, usePropertyWithRentalTerms, PROPERTY_PUBLIC_DETAIL_COLUMNS } from '../useProperties';
 import { GUEST_PROJECT_COLUMNS, usePropertyProject } from '../usePropertyProjects';
+import { PUBLIC_COMPLEX_DETAIL_COLUMNS, usePublicComplexDetail } from '../usePropertyComplexes';
 const mock = vi.hoisted(() => ({ from: vi.fn(), eq: vi.fn(), or: vi.fn(), gt: vi.fn(), select: vi.fn(), order: vi.fn(), limit: vi.fn(), maybeSingle: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mock.from } }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
@@ -70,6 +71,69 @@ describe('guest complex catalog boundaries', () => {
   });
   it('does not query an absent project', () => {
     renderHook(() => usePropertiesByProject(undefined, 24, { mode: 'rent' }), { wrapper: Wrapper });
+    expect(mock.from).not.toHaveBeenCalled();
+  });
+});
+
+describe('managed residential complex public boundary', () => {
+  it('keeps property-type filtering and cache identity when browsing a managed complex', async () => {
+    const { result, rerender } = renderHook(({ propertyType }) => usePropertiesByComplex('managed', 24, { mode: 'rent', propertyType }), {
+      wrapper: Wrapper, initialProps: { propertyType: 'villa' },
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.eq).toHaveBeenCalledWith('complex_id', 'managed');
+    expect(mock.eq).toHaveBeenCalledWith('property_type', 'villa');
+    rerender({ propertyType: 'condo' });
+    await waitFor(() => expect(mock.eq).toHaveBeenCalledWith('property_type', 'condo'));
+    expect(mock.from).toHaveBeenCalledTimes(2);
+    expect(mock.or).toHaveBeenCalledWith('listing_type.eq.rent,listing_modes.cs.{rent}');
+  });
+  it('uses the managed complex FK, with public eligibility and exact counts', async () => {
+    const { result } = renderHook(() => usePropertiesByComplex('managed', 24, { mode: 'buy', managementCompanyId: 'operator' }), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('public_property_catalog');
+    expect(mock.eq).toHaveBeenCalledWith('complex_id', 'managed');
+    expect(mock.eq).not.toHaveBeenCalledWith('project_id', expect.anything());
+    expect(mock.eq).toHaveBeenCalledWith('management_company_id', 'operator');
+    expect(mock.or).toHaveBeenCalledWith('is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}');
+    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0,or(listing_modes.is.null,listing_modes.not.cs.{rent}))');
+    expect(mock.select.mock.calls[0][1]).toEqual({ count: 'exact' });
+  });
+  it('actually selects and returns complex_id through the public unit-detail query', async () => {
+    mock.maybeSingle.mockResolvedValue({ data: { id: 'unit', complex_id: 'managed', project_id: null }, error: null });
+    const { result } = renderHook(() => usePropertyWithRentalTerms('unit'), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('public_property_catalog');
+    expect(mock.select).toHaveBeenCalledWith(PROPERTY_PUBLIC_DETAIL_COLUMNS);
+    expect(PROPERTY_PUBLIC_DETAIL_COLUMNS.split(',').map(value => value.trim())).toContain('complex_id');
+    expect(result.current.data?.complex_id).toBe('managed');
+  });
+  it('reads a descriptive allowlist from the public complex projection only', async () => {
+    const { result } = renderHook(() => usePublicComplexDetail('managed'), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('public_complex_catalog');
+    expect(mock.select).toHaveBeenCalledWith(PUBLIC_COMPLEX_DETAIL_COLUMNS);
+    expect(PUBLIC_COMPLEX_DETAIL_COLUMNS).not.toMatch(/owner|juristic|approval|rejection|management|\*/);
+    expect(result.current.data).toBeNull();
+  });
+  it.each(['42P01', '42501', 'PGRST205'])('fails closed for %s, never reading private or project tables', async code => {
+    mock.maybeSingle.mockResolvedValue({ data: null, error: { code, message: 'catalog unavailable' } });
+    const { result } = renderHook(() => usePublicComplexDetail('managed'), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('public_complex_catalog');
+    expect(result.current.data).toBeUndefined();
+  });
+  it('keeps same-valued project and managed IDs in separate query caches', async () => {
+    const { result } = renderHook(() => ({ project: usePropertiesByProject('same', 24, { mode: 'rent' }), complex: usePropertiesByComplex('same', 24, { mode: 'rent' }) }), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.project.isSuccess && result.current.complex.isSuccess).toBe(true));
+    expect(mock.from).toHaveBeenCalledTimes(2);
+    expect(mock.eq).toHaveBeenCalledWith('project_id', 'same');
+    expect(mock.eq).toHaveBeenCalledWith('complex_id', 'same');
+    expect(mock.or).toHaveBeenCalledTimes(2);
+    expect(mock.or).toHaveBeenCalledWith('listing_type.eq.rent,listing_modes.cs.{rent}');
+  });
+  it('does not query a missing complex ID', () => {
+    renderHook(() => ({ complex: usePublicComplexDetail(undefined), units: usePropertiesByComplex(undefined) }), { wrapper: Wrapper });
     expect(mock.from).not.toHaveBeenCalled();
   });
 });

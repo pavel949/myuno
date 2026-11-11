@@ -12,6 +12,7 @@ import { ProjectLocationPicker } from '@/components/property/ProjectLocationPick
 import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
+import { ManagedComplexPicker } from '../ManagedComplexPicker';
 
 interface LocationStepProps {
   catalogueOnly?: boolean;
@@ -155,6 +156,8 @@ export function LocationStep({ formData, updateFormData, catalogueOnly = false }
               )}
             </>
           )}
+
+          {catalogueOnly && <ManagedComplexPicker value={formData.complex_id} onChange={complex_id => updateFormData({ complex_id })} />}
 
           <ProjectLocationPicker
             value={projectLocationValue}
