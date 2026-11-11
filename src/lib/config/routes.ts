@@ -43,6 +43,7 @@ export const APP_ROUTES = {
   ME_BOOKINGS: '/me/bookings',
   BOOKINGS: '/bookings',
   BOOKING_DETAIL: (id: string) => `/bookings/${id}`,
+  PROPERTY_RESERVATION: (id: string) => `/bookings/${encodeURIComponent(id)}?propertyReservation=1`,
   FAVORITES: '/favorites',
   NOTIFICATIONS: '/notifications',
   NOTIFICATION_SETTINGS: '/profile/notifications',

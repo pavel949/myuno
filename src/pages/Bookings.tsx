@@ -1,3 +1,6 @@
+import { APP_ROUTES } from '@/lib/config/routes';
+import { readPropertyBookingReply } from '@/lib/manualPropertyBooking';
+import { parseCivilDate, toBangkokDateKey } from '@/lib/hotelDates';
 import { pickLang } from '@/lib/i18n/pickLang';
 import type { Language } from '@/i18n';
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
@@ -38,8 +41,9 @@ interface BookingItem {
   date: string;
   createdAt: string;
   status: string;
-  total: number;
-  currency: string;
+  total?: number;
+  currency?: string;
+  propertyReservation?: boolean;
   image?: string;
 }
 
@@ -140,6 +144,47 @@ export default function Bookings() {
   const clusterParam = searchParams.get('cluster') ?? '';
   const statusParam = searchParams.get('status') ?? '';
   const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [legacyActor, setLegacyActor] = useState('');
+  const [propertyState, setPropertyState] = useState<{ actor: string; items: BookingItem[]; loading: boolean; error: boolean }>({ actor: '', items: [], loading: false, error: false });
+  const propertyRead = useRef(0);
+  const actorRef = useRef(user?.id);
+  actorRef.current = user?.id;
+  const propertyItems = useMemo(() => propertyState.actor === user?.id ? propertyState.items : [], [propertyState, user?.id]);
+  const propertyLoading = !!user && (propertyState.actor !== user.id || propertyState.loading);
+  const propertyError = propertyState.actor === user?.id && propertyState.error;
+  const allBookings = useMemo(() => [...(legacyActor === user?.id ? bookings : []), ...propertyItems].sort((a,b) => Date.parse(b.createdAt)-Date.parse(a.createdAt)), [bookings, legacyActor, user?.id, propertyItems]);
+  const loadPropertyReservations = useCallback(async () => {
+    const actor = user?.id;
+    if (!actor) return;
+    const generation = ++propertyRead.current;
+    setPropertyState({ actor, items: [], loading: true, error: false });
+    try {
+      const { data, error } = await (supabase as unknown as { rpc(name: string): PromiseLike<{data: unknown; error: unknown}> }).rpc('list_my_property_reservations_checked');
+      if (error) throw error;
+
+      if (!Array.isArray(data)) throw new Error('Property reservation list unavailable');
+      const items: BookingItem[] = data.map(value => {
+        const id = (value as {order?:{id?:string}})?.order?.id;
+        if (!id) throw new Error('Property reservation identity unavailable');
+        const reply = readPropertyBookingReply(value, id);
+        const order = reply.order;
+        if (typeof order.created_at !== 'string' || !Number.isFinite(Date.parse(order.created_at))) throw new Error('Property reservation date unavailable');
+        const date = toBangkokDateKey(order.start_at);
+        if (!date) throw new Error('Property reservation stay date unavailable');
+        return {id,propertyReservation:true,type:'property',title:getBookingTypeLabel('property',language),date,createdAt:order.created_at,status:order.status,
+          total:typeof order.total_amount==='number'&&Number.isFinite(order.total_amount)?order.total_amount:undefined,
+          currency:typeof order.currency==='string'&&/^[A-Z]{3}$/.test(order.currency)?order.currency:undefined};
+      });
+      if (propertyRead.current===generation && actorRef.current===actor) setPropertyState({actor,items,loading:false,error:false});
+    } catch {
+      if (propertyRead.current===generation && actorRef.current===actor) setPropertyState({actor,items:[],loading:false,error:true});
+    }
+  }, [user?.id, language]);
+  useEffect(() => {
+    if (user?.id) void loadPropertyReservations();
+    const reads = propertyRead;
+    return () => { reads.current++; };
+  }, [user?.id, loadPropertyReservations]);
   const [statusHistory, setStatusHistory] = useState<Record<string, BookingStatusEvent[]>>({});
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedTimelines, setExpandedTimelines] = useState<Record<string, boolean>>({});
@@ -210,6 +255,7 @@ export default function Bookings() {
 
       if (error) throw error;
 
+      if (actorRef.current !== user.id) return;
       const formattedBookings: BookingItem[] = (allBookingsData || []).map((b) => {
         const label = getBookingTypeLabel(b.booking_type, language);
         return {
@@ -226,6 +272,7 @@ export default function Bookings() {
       });
 
       setBookings(formattedBookings);
+      setLegacyActor(user.id);
       setIsLoading(false);
 
 
@@ -285,7 +332,7 @@ export default function Bookings() {
     if (user) {
       loadBookings();
     }
-  }, [user, loadBookings]);
+  }, [user, loadBookings, loadPropertyReservations]);
 
   // Keep a stable ref to the latest bookings list for the realtime handlers
   // (so we can filter incoming events without resubscribing on every change).
@@ -461,8 +508,8 @@ export default function Bookings() {
     if (!user) return;
     invalidateStatusHistoryCache(user.id);
     seenEventIdsRef.current = new Set();
-    await loadBookings(true);
-  }, [user, loadBookings]);
+    await Promise.all([loadBookings(true), loadPropertyReservations()]);
+  }, [user, loadBookings, loadPropertyReservations]);
 
   // Stable ref so the realtime subscribe callback (captured once per channel)
   // can always reach the latest resync without resubscribing the channel.
@@ -503,13 +550,13 @@ export default function Bookings() {
   const handleRefresh = useCallback(async () => {
     // Pull-to-refresh bypasses the cache so users always get fresh data.
     if (user) invalidateStatusHistoryCache(user.id);
-    await loadBookings(true);
-  }, [loadBookings, user]);
+    await Promise.all([loadBookings(true), loadPropertyReservations()]);
+  }, [loadBookings, loadPropertyReservations, user]);
 
   const handleRetry = useCallback(() => {
     if (user) invalidateStatusHistoryCache(user.id);
-    void loadBookings(true);
-  }, [loadBookings, user]);
+    void Promise.all([loadBookings(true), loadPropertyReservations()]);
+  }, [loadBookings, loadPropertyReservations, user]);
 
   const toggleTimeline = useCallback((bookingId: string) => {
     setExpandedTimelines((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
@@ -528,13 +575,13 @@ export default function Bookings() {
   const filterIsActive = !!(allowedTypes || statusParam === 'open');
 
   const filteredBookings = useMemo(() => {
-    if (!filterIsActive) return bookings;
-    return bookings.filter((b) => {
+    if (!filterIsActive) return allBookings;
+    return allBookings.filter((b) => {
       if (allowedTypes && !allowedTypes.includes(b.type)) return false;
       if (statusParam === 'open' && !OPEN_BOOKING_STATUSES.has(b.status)) return false;
       return true;
     });
-  }, [bookings, allowedTypes, statusParam, filterIsActive]);
+  }, [allBookings, allowedTypes, statusParam, filterIsActive]);
 
   const clearFilter = useCallback(() => {
     const next = new URLSearchParams(searchParams);
@@ -555,9 +602,9 @@ export default function Bookings() {
     return null;
   }
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string, civil = false) => {
     try {
-      const date = new Date(dateStr);
+      const date = civil ? parseCivilDate(dateStr) : new Date(dateStr);
       return format(date, 'd MMM yyyy', { locale: language === 'ru' ? ru : language === 'th' ? th : enUS });
     } catch {
       return dateStr;
@@ -574,6 +621,14 @@ export default function Bookings() {
           />
 
           <BookingTrackingOverview />
+          <button type="button" onClick={() => void handleRefresh()} className="mb-3 text-sm underline min-h-[44px]">
+            {pickLang(language,{en:'Refresh bookings',ru:'Обновить бронирования',th:'รีเฟรชการจอง'})}
+          </button>
+          {propertyError && <div role="alert" className="mb-3 border border-border p-3 text-sm">
+            <p>{pickLang(language,{en:'Property reservations could not be loaded. This list may be incomplete.',ru:'Не удалось загрузить бронирования жилья. Список может быть неполным.',th:'ไม่สามารถโหลดการจองที่พัก รายการอาจไม่ครบถ้วน'})}</p>
+            <button type="button" onClick={() => void loadPropertyReservations()} className="underline min-h-[44px]">{pickLang(language,{en:'Retry property reservations',ru:'Повторить загрузку жилья',th:'ลองโหลดการจองที่พักอีกครั้ง'})}</button>
+          </div>}
+          {loadError && filteredBookings.length > 0 && <p role="alert">{pickLang(language,{en:'Legacy bookings could not be loaded. This list may be incomplete.',ru:'Не удалось загрузить прежние бронирования. Список может быть неполным.',th:'ไม่สามารถโหลดการจองเดิม รายการอาจไม่ครบถ้วน'})}</p>}
 
           {/* Active filter pill — surfaces deep-link context from PersonaHalo. */}
           {filterIsActive && (
@@ -600,7 +655,7 @@ export default function Bookings() {
             </div>
           )}
 
-          {isLoading ? <BookingListSkeleton /> : loadError ? (
+          {(isLoading || propertyLoading) && filteredBookings.length === 0 ? <BookingListSkeleton /> : loadError && filteredBookings.length === 0 ? (
             <EmptyState
               icon={AlertCircle}
               title={pickLang(language, { ru: 'Не удалось загрузить заказы', en: 'We could not load your orders', th: 'ไม่สามารถโหลดคำสั่งของคุณได้' })}
@@ -611,7 +666,7 @@ export default function Bookings() {
                 </PremiumButton>
               }
             />
-          ) : filteredBookings.length === 0 ? (
+          ) : filteredBookings.length === 0 && !propertyError ? (
             <EmptyState
               icon={Calendar}
               title={filterIsActive
@@ -638,13 +693,13 @@ export default function Bookings() {
                 const events = statusHistory[booking.id] ?? [];
                 return (
                   <div
-                    key={booking.id}
+                    key={`${booking.propertyReservation ? 'property' : 'legacy'}:${booking.id}`}
                     className="bg-card border border-border rounded-none hover:border-primary/30 transition-all"
                   >
                     {/* Card body */}
                     <button
                       type="button"
-                      onClick={() => navigate(`/bookings/${booking.id}`)}
+                      onClick={() => navigate(booking.propertyReservation ? APP_ROUTES.PROPERTY_RESERVATION(booking.id) : `/bookings/${booking.id}`)}
                       className="p-4 w-full text-left"
                       aria-label={pickLang(language, { ru: `Открыть заказ: ${booking.title}`, en: `Open order: ${booking.title}`, th: `เปิดคำสั่ง: ${booking.title}` })}
                     >
@@ -665,11 +720,11 @@ export default function Bookings() {
                           <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Clock className="w-3.5 h-3.5" />
-                              <span>{formatDate(booking.date)}</span>
+                              <span>{formatDate(booking.date, booking.propertyReservation)}</span>
                             </div>
-                            {booking.total > 0 && (
+                            {typeof booking.total === 'number' && booking.total > 0 && (!booking.propertyReservation || booking.currency) && (
                               <span className="font-medium text-foreground">
-                                ฿{booking.total.toLocaleString()}
+                                {booking.propertyReservation ? `${booking.currency} ` : '฿'}{booking.total.toLocaleString()}
                               </span>
                             )}
                           </div>
@@ -679,7 +734,7 @@ export default function Bookings() {
                     </button>
 
                     {/* Timeline toggle + content */}
-                    <div className="border-t border-border/60">
+                    {!booking.propertyReservation && <div className="border-t border-border/60">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -732,7 +787,7 @@ export default function Bookings() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div>}
                   </div>
                 );
               })}

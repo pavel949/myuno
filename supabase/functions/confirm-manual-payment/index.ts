@@ -85,13 +85,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    const orderId = (mpr as any).order_id as string;
+    const { data: checkoutAllowed, error: checkoutGateError } = await sb.rpc(
+      'property_checkout_allowed_checked', { p_order_id: orderId }
+    );
+    if (checkoutGateError || checkoutAllowed !== true) {
+      throw new Error('Property payment confirmation is unavailable pending payment activation');
+    }
+
     if ((mpr as any).status === 'confirmed') {
       return new Response(JSON.stringify({ ok: true, already: true }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const orderId = (mpr as any).order_id as string;
     const orderNumber = (mpr as any).orders?.order_number as string;
 
     // 1. Update the manual_payment_requests row

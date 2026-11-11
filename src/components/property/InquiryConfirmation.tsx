@@ -7,9 +7,10 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 interface InquiryConfirmationProps {
   orderId: string;
+  status?: 'pending' | 'confirmed' | 'cancelled';
 }
 
-export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
+export function InquiryConfirmation({ orderId, status = 'pending' }: InquiryConfirmationProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -21,17 +22,18 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </div>
 
       <h2 className="text-2xl font-bold mb-2">
-        {isRu ? 'Запрос на просмотр отправлен' : 'Viewing request received'}
+        {status === 'cancelled' ? (isRu ? 'Бронирование отменено' : 'Reservation cancelled')
+          : status === 'confirmed' ? (isRu ? 'Бронирование подтверждено' : 'Reservation confirmed')
+          : (isRu ? 'Запрос на бронирование сохранён' : 'Reservation request saved')}
       </h2>
 
       <p className="text-muted-foreground mb-8 max-w-sm">
-        {isRu
-          ? 'Свяжемся с вами в WhatsApp в течение 24 часов, чтобы подтвердить время просмотра.'
-          : "We'll message you on WhatsApp within 24 hours to confirm your viewing time."}
+        {isRu ? 'Откройте бронирование, чтобы проверить сохранённый статус и управлять им. Оплата не списывалась.'
+          : 'Open the reservation to check its persisted status and manage it. No payment has been collected.'}
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Button size="lg" onClick={() => navigate(APP_ROUTES.BOOKING_DETAIL(orderId))}>
+        <Button size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY_RESERVATION(orderId))}>
           {isRu ? 'Открыть бронирование' : 'View booking'}
         </Button>
         <Button variant="outline" size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY)}>

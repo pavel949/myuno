@@ -1,14 +1,14 @@
+import { useRef } from 'react';
 import { addDays, isValid } from 'date-fns';
-import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate } from '@/lib/hotelDates';
+import { bangkokTodayISO, parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, toBangkokDateKey } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
+import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useStorefront } from '@/contexts/StorefrontContext';
+import { ManualBookingRequestIdentity, createManualBooking, executePropertyBookingChange, readPropertyBookingReply } from '@/lib/manualPropertyBooking';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
-import type { Database } from '@/integrations/supabase/types';
 
 const errorLog = createErrorHandler('usePropertyBookings');
 
@@ -21,6 +21,8 @@ export interface PropertyBooking {
   guest_email?: string;
   check_in: string;
   check_out: string;
+  check_in_time?: string;
+  check_out_time?: string;
   guests_count?: number;
   total_amount?: number;
   currency?: string;
@@ -41,7 +43,7 @@ export interface BookingPreparationOutcome {
   guestDetailsUnconfirmed?: boolean;
 }
 
-export type CreatedPropertyBooking = PropertyBooking & { preparation: BookingPreparationOutcome };
+export type CreatedPropertyBooking = PropertyBooking & { preparation: BookingPreparationOutcome; replayed: boolean };
 
 export interface CreateBookingInput {
   property_id: string;
@@ -114,8 +116,10 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
     guest_name: guestParticipant?.name || undefined,
     guest_phone: guestParticipant?.phone || undefined,
     guest_email: guestParticipant?.email || undefined,
-    check_in: order.start_at?.split('T')[0] || '',
-    check_out: order.end_at?.split('T')[0] || '',
+    check_in: toBangkokDateKey(order.start_at) || '',
+    check_out: toBangkokDateKey(order.end_at) || '',
+    check_in_time: typeof meta.check_in_time === 'string' ? meta.check_in_time : undefined,
+    check_out_time: typeof meta.check_out_time === 'string' ? meta.check_out_time : undefined,
     guests_count: meta.guests_count as number | undefined,
     total_amount: order.total_amount ?? undefined,
     currency: order.currency ?? undefined,
@@ -138,7 +142,7 @@ function requireStayDates(checkIn: string, checkOut: string) {
 export function usePropertyBookings(propertyId?: string) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
-  const { storefront } = useStorefront();
+  const manualRequest = useRef(new ManualBookingRequestIdentity());
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
@@ -179,15 +183,29 @@ export function usePropertyBookings(propertyId?: string) {
         query = query.in('order_items.resource_id', allPropertyIds);
       }
 
-      const { data, error } = await query;
+      const selectedIds = propertyId ? [propertyId] : allPropertyIds;
+      const [raw, checked] = await Promise.all([query,
+        (supabase as unknown as {rpc(name:string,args:Record<string,unknown>):PromiseLike<{data:unknown;error:unknown}>}).rpc('list_property_reservations_checked',{p_property_ids:selectedIds}),
+      ]);
+      const {data,error}=raw;
 
       if (error) {
         errorLog.silent(error, 'fetch_bookings');
         throw error;
       }
 
-      // Map orders to PropertyBooking format
-      return (data || []).map((order) => 
+      if (checked.error) throw checked.error;
+      if (!Array.isArray(checked.data)) throw new Error('Checked property reservations unavailable');
+      const merged = new Map<string,unknown>((data || []).map(order => [order.id,order]));
+      for (const value of checked.data) {
+        const id = (value as {order?:{id?:string}})?.order?.id;
+        if (!id) throw new Error('Checked property reservation identity unavailable');
+        const reply = readPropertyBookingReply(value,id);
+        if (!selectedIds.includes(reply.order_items[0].resource_id)) throw new Error('Checked property reservation scope mismatch');
+        merged.set(id,{...reply.order,order_items:reply.order_items,order_participants:reply.order_participants});
+      }
+      // Checked cohort rows override matching legacy raw projections by identity.
+      return [...merged.values()].map((order) =>
         mapOrderToBooking(order, propertyId || '')
       );
     },
@@ -200,147 +218,29 @@ export function usePropertyBookings(propertyId?: string) {
 
       requireStayDates(input.check_in, input.check_out);
 
-      // P1: Overlap validation — check existing orders and manual blocks
-      const checkInTime = input.check_in_time || '14:00';
-      const checkOutTime = input.check_out_time || '12:00';
-      const newStart = `${input.check_in}T${checkInTime}:00Z`;
-      const newEnd = `${input.check_out}T${checkOutTime}:00Z`;
-
-      const [{ data: ordersInRange, error: availabilityError }, { data: blockedDates, error: blocksError }] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id')
-          .eq('vertical', 'property')
-          .is('deleted_at', null)
-          .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
-          .gt('end_at', newStart)
-          .lt('start_at', newEnd),
-        supabase
-          .from('property_availability')
-          .select('date')
-          .eq('property_id', input.property_id)
-          .eq('status', 'blocked')
-          .gte('date', input.check_in)
-          .lt('date', input.check_out),
-      ]);
-
-      if (availabilityError) throw availabilityError;
-      if (blocksError) throw blocksError;
-      const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
-      const overlapResult = orderIds.length
-        ? await supabase
-            .from('order_items')
-            .select('order_id')
-            .eq('item_type', 'property')
-            .eq('resource_id', input.property_id)
-            .in('order_id', orderIds)
-        : { data: [], error: null };
-      if (overlapResult.error) throw overlapResult.error;
-      if ((overlapResult.data || []).length > 0) {
-        throw new Error('Выбранные даты пересекаются с существующим бронированием');
-      }
-      if ((blockedDates || []).length > 0) {
-        throw new Error('Выбранные даты заблокированы в календаре');
-      }
-
-      // Create order with order_type = 'property' (matches DB constraint)
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_type: 'property',
-          vertical: 'property',
-          customer_user_id: user.id,
-          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
-          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
-          total_amount: input.total_amount || 0,
-          currency: input.currency || 'THB',
-          status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as Database['public']['Enums']['order_status'],
-          notes: input.notes,
-          // Storefront attribution
-          source_storefront_id: storefront?.id || null,
-          source_company_id: storefront?.company_id || null,
-          metadata: {
-            source: input.source || 'manual',
-            external_id: input.external_id,
-            guests_count: input.guests_count,
-            deposit_amount: input.deposit_amount,
-            documents: input.documents,
-            check_in_time: input.check_in_time || '14:00',
-            check_out_time: input.check_out_time || '11:00',
-            ...(storefront ? { storefront_slug: storefront.slug } : {}),
-          },
-        })
-        .select()
-        .single();
-
-      if (orderError) {
-        errorLog.silent(orderError, 'create_order');
-        throw orderError;
-      }
-
-      // Create order_item linking to property
-      // Store property_id in BOTH resource_id and metadata for compatibility
-      // resource_id is used by useAllPropertyBookings for filtering
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          item_type: 'property',
-          item_name: 'Property Booking',
-          unit_price: input.total_amount || 0,
-          amount: input.total_amount || 0,
-          qty: 1,
-          resource_id: input.property_id,
-          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
-          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
-          metadata: {
-            property_id: input.property_id,
-          },
-        });
-
-      if (itemError) {
-        errorLog.silent(itemError, 'create_order_item');
-        // Rollback: delete order
-        await supabase.from('orders').delete().eq('id', order.id);
-        throw itemError;
-      }
-
-      // The saved order must remain identifiable even when secondary guest/task writes fail.
-      const preparation: BookingPreparationOutcome = { status: 'not_requested', unconfirmedTaskTypes: [] };
-
-      // Create guest participant if guest info provided
-      if (input.guest_name || input.guest_phone || input.guest_email) {
-        try {
-          const { error: participantError } = await supabase
-            .from('order_participants')
-            .insert({
-              order_id: order.id,
-              role: 'guest',
-              name: input.guest_name || 'Guest',
-              phone: input.guest_phone,
-              email: input.guest_email,
-            });
-
-          if (participantError) throw participantError;
-        } catch (error) {
-          preparation.guestDetailsUnconfirmed = true;
-          errorLog.silent(error, 'create_participant');
-        }
-      }
+      const requestId = await manualRequest.current.forIntent(user.id, input);
+      // No separate browser order/item/guest writes or raw-write fallback.
+      // The reviewed RPC must be activated before this client is deployed.
+      const result = await createManualBooking(supabase, requestId, input);
+      const order = { ...result.order, order_participants: result.order_participants, order_items: result.order_items };
+      manualRequest.current.acknowledge(requestId);
+      const preparation: BookingPreparationOutcome = result.replayed && order.status === 'confirmed'
+        ? { status: 'needs_attention', unconfirmedTaskTypes: ['cleaning', 'check_in', 'check_out'] }
+        : { status: 'not_requested', unconfirmedTaskTypes: [] };
 
       // P1: Booking message rules — fire booking_confirmed for confirmed bookings
-      if (input.status === 'confirmed') {
-        supabase.functions.invoke('execute-booking-message-rules', {
+      if (!result.replayed && order.status === 'confirmed') {
+        void Promise.resolve().then(() => supabase.functions.invoke('execute-booking-message-rules', {
           body: { immediate_order_id: order.id },
-        }).then(({ error }) => {
+        })).then(({ error }) => {
           if (error) errorLog.silent(error, 'booking_message_rules');
-        });
+        }).catch(error => errorLog.silent(error, 'booking_message_rules'));
       }
 
       // Preparation is secondary: a failed acknowledgement must never make callers
       // retry the already-persisted booking. Do not retry these non-idempotent inserts.
       // P1: Booking lifecycle automation — create operational tasks for check-in, check-out, cleaning
-      if (input.status === 'confirmed' || !input.status) {
+      if (!result.replayed && order.status === 'confirmed') {
         preparation.status = 'complete';
         const guestName = input.guest_name || 'Guest';
         const checkInDate = input.check_in;
@@ -375,174 +275,50 @@ export function usePropertyBookings(propertyId?: string) {
       }
 
       if (preparation.guestDetailsUnconfirmed) preparation.status = 'needs_attention';
-      return { ...mapOrderToBooking(order, input.property_id), preparation };
+      return { ...mapOrderToBooking(order, input.property_id), preparation, replayed: result.replayed };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['multi-property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['guest-property-bookings', user?.id] });
     },
   });
 
+  const changeBooking = async (id: string, updates: Partial<PropertyBooking>) => {
+    if (!user?.id) throw new Error('Not authenticated');
+    const patch: Record<string, unknown> = {};
+    for (const field of ['check_in', 'check_out', 'check_in_time', 'check_out_time', 'guest_name', 'guest_phone', 'guest_email', 'guests_count', 'total_amount', 'currency', 'status', 'notes'] as const) {
+      if (updates[field] !== undefined) patch[field] = updates[field];
+    }
+    if (typeof patch.check_in === 'string' && typeof patch.check_out === 'string') requireStayDates(patch.check_in, patch.check_out);
+    const expected = updates.updated_at || bookings?.find(booking => booking.id === id)?.updated_at;
+    const result = await executePropertyBookingChange(supabase, user.id, id, patch, expected);
+    return mapOrderToBooking({ ...result.order, order_participants: result.order_participants, order_items: result.order_items }, updates.property_id || '');
+  };
+  const invalidateBookings = () => {
+    queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['multi-property-bookings', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['guest-property-bookings', user?.id] });
+  };
   const updateBooking = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => {
-      if (!user?.id) throw new Error('Not authenticated');
-
-      // P1: Overlap validation when dates change (exclude current booking)
-      if (updates.check_in || updates.check_out) {
-        const { data: currentOrder, error: currentError } = await supabase
-          .from('orders')
-          .select('start_at, end_at, order_items!inner(resource_id)')
-          .eq('id', id)
-          .single();
-        if (currentError) throw currentError;
-        if (!currentOrder) throw new Error('Booking not found or access denied');
-        const curr = currentOrder as { start_at?: string; end_at?: string; order_items?: { resource_id: string }[] } | null;
-        const propertyId = curr?.order_items?.[0]?.resource_id;
-        const checkIn = updates.check_in ?? curr?.start_at?.split('T')[0];
-        const checkOut = updates.check_out ?? curr?.end_at?.split('T')[0];
-        if (!propertyId || !checkIn || !checkOut) throw new Error('Booking dates or property unavailable');
-        requireStayDates(checkIn, checkOut);
-        if (propertyId && checkIn && checkOut) {
-          const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
-          const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
-          const newStart = `${checkIn}T${checkInTime}:00Z`;
-          const newEnd = `${checkOut}T${checkOutTime}:00Z`;
-
-          const { data: ordersInRange, error: availabilityError } = await supabase
-            .from('orders')
-            .select('id')
-            .eq('vertical', 'property')
-            .is('deleted_at', null)
-            .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
-            .neq('id', id)
-            .gt('end_at', newStart)
-            .lt('start_at', newEnd);
-
-          if (availabilityError) throw availabilityError;
-          const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
-          const overlapResult = orderIds.length
-            ? await supabase
-                .from('order_items')
-                .select('order_id')
-                .eq('item_type', 'property')
-                .eq('resource_id', propertyId)
-                .in('order_id', orderIds)
-            : { data: [], error: null };
-          if (overlapResult.error) throw overlapResult.error;
-          if ((overlapResult.data || []).length > 0) {
-            throw new Error('Выбранные даты пересекаются с существующим бронированием');
-          }
-
-          const { data: blockedDates, error: blocksError } = await supabase
-            .from('property_availability')
-            .select('date')
-            .eq('property_id', propertyId)
-            .eq('status', 'blocked')
-            .gte('date', checkIn)
-            .lt('date', checkOut);
-          if (blocksError) throw blocksError;
-          if ((blockedDates || []).length > 0) {
-            throw new Error('Выбранные даты заблокированы в календаре');
-          }
-        }
-      }
-
-      // Update the order
-      const orderUpdates: Record<string, string | number> = {};
-      if (updates.check_in) {
-        // Preserve custom check-in time from metadata if available
-        const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
-        orderUpdates.start_at = `${updates.check_in}T${checkInTime}:00Z`;
-      }
-      if (updates.check_out) {
-        const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
-        orderUpdates.end_at = `${updates.check_out}T${checkOutTime}:00Z`;
-      }
-      if (updates.total_amount !== undefined) orderUpdates.total_amount = updates.total_amount;
-      if (updates.currency) orderUpdates.currency = updates.currency;
-      if (updates.status) orderUpdates.status = updates.status;
-      if (updates.notes !== undefined) orderUpdates.notes = updates.notes;
-
-      const { data, error } = await supabase
-        .from('orders')
-        .update(orderUpdates as never)
-        .eq('id', id)
-        .is('deleted_at', null)
-        .select()
-        .single();
-
-      if (error) {
-        errorLog.silent(error, 'update_booking');
-        throw error;
-      }
-      
-      if (!data) throw new Error('Booking not found or access denied');
-
-      // Update guest participant if provided
-      if (updates.guest_name || updates.guest_phone || updates.guest_email) {
-        await supabase
-          .from('order_participants')
-          .upsert({
-            order_id: id,
-            role: 'guest',
-            name: updates.guest_name || 'Guest',
-            phone: updates.guest_phone,
-            email: updates.guest_email,
-          }, {
-            onConflict: 'order_id,role',
-          });
-      }
-
-      return mapOrderToBooking(data, updates.property_id || '');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
-    },
+    mutationFn: ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => changeBooking(id, updates),
+    onSuccess: invalidateBookings,
   });
-
+  // The existing delete action now cancels through the checked inventory writer.
+  // It never hides a still-reserved stay by setting deleted_at.
   const deleteBooking = useMutation({
-    mutationFn: async (id: string) => {
-      if (!user?.id) throw new Error('Not authenticated');
-      
-      // Soft delete by setting deleted_at
-      const { error } = await supabase
-        .from('orders')
-        .update({ 
-          deleted_at: new Date().toISOString(),
-          deleted_by: user.id,
-        })
-        .eq('id', id);
-
-      if (error) {
-        errorLog.silent(error, 'delete_booking');
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
-    },
+    mutationFn: (id: string) => changeBooking(id, { status: 'cancelled' }),
+    onSuccess: invalidateBookings,
   });
-
-  // Bulk update booking statuses
   const bulkUpdateBookings = useMutation({
-    mutationFn: async ({ ids, status }: { ids: string[]; status: string; }) => {
-      if (!ids.length) return;
-      // bookings are stored in the orders table; ids are order IDs
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: status as Database['public']['Enums']['order_status'] })
-        .in('id', ids);
-      if (error) {
-        errorLog.silent(error, 'bulk_update_bookings');
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      // Each order has its own authorized CAS/receipt. This is deliberately not
+      // an all-or-nothing bulk transaction; refresh even on partial failure.
+      try { for (const id of [...new Set(ids)]) await changeBooking(id, { status }); }
+      finally { invalidateBookings(); }
     },
   });
 

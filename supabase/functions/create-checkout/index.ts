@@ -66,6 +66,16 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
        );
      }
 
+     // A new unpaid property reservation has no activated payment contract.
+     // Check trusted receipt ownership server-side before constructing Stripe,
+     // including customer lookup/creation. Missing/unknown contracts fail closed.
+     const { data: checkoutAllowed, error: checkoutGateError } = await serviceClient.rpc(
+       'property_checkout_allowed_checked', { p_order_id: order_id }
+     );
+     if (checkoutGateError || checkoutAllowed !== true) {
+       throw new Error('Property checkout is unavailable pending payment activation');
+     }
+
      const amount = Number(order.total_amount);
      if (!Number.isFinite(amount) || amount <= 0) {
        throw new Error("Order has no valid amount to charge");

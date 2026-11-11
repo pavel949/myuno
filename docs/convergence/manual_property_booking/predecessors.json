@@ -1,0 +1,24 @@
+{
+  "rows": [
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.actor_can_operate_property(p_property_id uuid, p_company_id uuid, p_module text, p_action text DEFAULT 'view'::text)\n RETURNS boolean\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE enforced boolean; actor uuid := auth.uid();\nBEGIN\n IF p_company_id IS NULL OR p_module NOT IN ('properties','bookings','tasks','reports','finance') OR p_action NOT IN ('view','edit','export') THEN RETURN false; END IF;\n IF NOT public.actor_property_scope_ceiling(p_property_id,p_company_id) THEN RETURN false; END IF;\n SELECT operating_spaces_enforced INTO enforced FROM public.management_companies WHERE id=p_company_id;\n IF enforced IS FALSE THEN\n   RETURN public.staff_can_access_property_e28_private(actor,p_property_id) AND public.mc_can_access_e28_private(actor,p_company_id,p_module,p_action);\n END IF;\n IF public.actor_is_operating_company_overseer(p_company_id) THEN RETURN public.mc_can_access_e28_private(actor,p_company_id,p_module,p_action); END IF;\n -- Do not inherit mc_can_access's generic uno_team bypass in enforced mode.\n RETURN EXISTS(SELECT 1 FROM public.management_company_members m JOIN public.team_member_permissions t\n ON t.company_id=m.company_id AND t.user_id=m.user_id\n WHERE m.company_id=p_company_id AND m.user_id=actor AND m.is_active IS TRUE AND t.module=p_module\n AND CASE p_action WHEN 'view' THEN t.can_view WHEN 'edit' THEN t.can_edit WHEN 'export' THEN t.can_export ELSE false END\n AND (m.role <> 'staff' OR EXISTS(SELECT 1 FROM public.property_manager_assignments a\n WHERE a.property_id=p_property_id AND a.manager_user_id=actor AND a.is_active IS TRUE)));\nEND $function$\n",
+      "hash": "781d38004497ca05e31bcc486451a1b8",
+      "proname": "actor_can_operate_property"
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.actor_has_platform_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role='admin')\n$function$\n",
+      "hash": "459831d60535d4e9fcb5c86b2ff52042",
+      "proname": "actor_has_platform_admin"
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.guard_customer_order_update()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid();\nBEGIN\n  IF v_uid IS NULL OR public.is_finance_staff_e28_private(v_uid) THEN RETURN NEW; END IF;\n  IF EXISTS (SELECT 1 FROM public.org_members WHERE org_id = OLD.provider_org_id AND user_id = v_uid) THEN RETURN NEW; END IF;\n  IF OLD.customer_user_id = v_uid THEN\n    IF (to_jsonb(NEW) - 'status' - 'updated_at') IS DISTINCT FROM (to_jsonb(OLD) - 'status' - 'updated_at')\n       OR (NEW.status IS DISTINCT FROM OLD.status AND NEW.status::text <> 'cancelled') THEN\n      RAISE EXCEPTION 'customers can only cancel orders' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n",
+      "hash": "124a15c2f1df3a63cf56e0655b857773",
+      "proname": "guard_customer_order_update"
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.trg_sync_order_item_to_property_booking()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_order orders;\nBEGIN\n  IF NEW.item_type <> 'property' THEN\n    RETURN NEW;\n  END IF;\n  SELECT * INTO v_order FROM orders WHERE id = NEW.order_id;\n  IF v_order.id IS NULL OR v_order.vertical <> 'property' THEN\n    RETURN NEW;\n  END IF;\n  -- Reuse the order-level sync by performing a no-op update touch\n  UPDATE orders SET updated_at = now() WHERE id = NEW.order_id;\n  RETURN NEW;\nEND;\n$function$\n",
+      "hash": "619fdedb524ceb6f763a4660f7ec8a93",
+      "proname": "trg_sync_order_item_to_property_booking"
+    }
+  ]
+}
