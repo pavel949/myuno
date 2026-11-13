@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-13 · Exact Inbox request navigation
+- [ ] Retain source and selected request ID in a reloadable URL; open that exact canonical record rather than a general section.
+- [ ] Verify all five Inbox sources, navigation/reload/back and missing/invalid/denied/error states with isolated fixtures; preserve guards and block production network.
+- [ ] Document evidence and remaining limits; no business-data writes, outbound notifications or publication.
+
 ## 2026-11-13 · Business readiness and first-revenue audit
 - [x] Evaluate real offer/data readiness, audience journeys, admin/MC operations and cross-system coherence using current source, read-only live evidence and existing QA.
 - [x] Separate what can earn without online payments from gated financial workflows; identify the smallest first-revenue operating loop.
