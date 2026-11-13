@@ -17,10 +17,12 @@ Extends the existing `property_projects` / `project_units` catalogue and `projec
 
 ## Isolated verification
 
-Synthetic normalization and diff tests run without backend access. Six PostgreSQL tests execute the exact applied function contracts in a temporary local database, including unknown-status admission, admin authorization, field allowlisting, replay rejection and non-deletion of missing rows. Live migrations and function ACLs are checked by catalog reads only; no hosted import, review application or canonical business write is executed in this tranche.
+Synthetic normalization and diff tests run without backend access. Seven PostgreSQL tests execute the exact applied function contracts in a temporary local database, including unknown-status admission, admin authorization, field allowlisting, replay rejection, `held → blocked`, and non-deletion of missing rows. Final focused result: **34/34 tests PASS**; TypeScript and Deno checks PASS. Browser fixtures verify archive diffs (including `removed_from_source`, never sold), source links, deliberate unknown selection and 384px overflow; all unknown writes and automatic analytics/session/QA mutations were blocked, with no page errors.
+
+Forward migrations `0037` and `0038` correct UUID matching, fully-reviewed status calculation and the canonical held/blocked mapping after isolated reproduction. `drive-import-folder` deployed successfully with submitted source SHA-256 `b80dd1629cde30d40fa85db4158404fdcbb1b2c02e4be1f5ace816b4857c7782`. Live migrations and function ACLs are checked by catalog reads only; no hosted import, review application or canonical business write is executed in this tranche.
 
 ## Rollback / activation boundary
 
 `docs/hardening/rollback/0036_newbuild_source_versioning.sql` revokes the new mutation RPCs without deleting evidence. Reverting the frontend/Edge Function restores the previous entrypoints; archive tables remain private and retained. Existing production projects, units, prices, documents and statuses are not backfilled or rewritten.
 
-Hosted apply and a real Drive import remain NO-GO until separately authorized operational acceptance with supplied source material. No real source sync is triggered here.
+Hosted apply and a real Drive import remain NO-GO until separately authorized operational acceptance with supplied source material. No real source sync is triggered here. Existing pre-review image copying uses the public property-image bucket; do not use it for private source folders until media staging is moved behind the private review boundary in a separately reviewed change.
