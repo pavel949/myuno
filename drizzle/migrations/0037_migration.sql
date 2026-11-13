@@ -1,0 +1,1 @@
+create policy system_settings_public_related_ai_flag_read on public.system_settings for select to anon, authenticated using (key = 'feature_flag:property_related_ai');
