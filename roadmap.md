@@ -1,9 +1,10 @@
 # Roadmap
 
 ## 2026-11-13 · Business readiness and first-revenue audit
-- [ ] Evaluate real offer/data readiness, audience journeys, admin/MC operations and cross-system coherence using current source, read-only live evidence and existing QA.
-- [ ] Separate what can earn without online payments from gated financial workflows; identify the smallest first-revenue operating loop.
-- [ ] Deliver a prioritized action plan with owners/dependencies and explicit UNKNOWNs; no business-data changes, notifications, deployments or publication.
+- [x] Evaluate real offer/data readiness, audience journeys, admin/MC operations and cross-system coherence using current source, read-only live evidence and existing QA.
+- [x] Separate what can earn without online payments from gated financial workflows; identify the smallest first-revenue operating loop.
+- [x] Deliver a prioritized action plan with owners/dependencies and explicit UNKNOWNs in `docs/qa/BUSINESS_READINESS_FIRST_REVENUE_2026_11_13.md`; no business-data changes, notifications, deployments or publication.
+- Next proposed, not authorized: verify the existing 23 active approved properties and select the first 5–10 assisted-rental offers; preserve automatic booking NO-GO until the canonical inventory/lifecycle gates pass.
 
 ## 2026-11-13 · Admin panel streamlining
 - [x] Regroup admin side menu by workflow (requests, real estate, partners, content, growth, AI, system); all pages stay reachable. 125/125 navigation tests pass.
