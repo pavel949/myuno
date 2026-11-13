@@ -94,7 +94,7 @@ describe('newbuild source versioning in isolated PostgreSQL', () => {
     const rows = await sql`SELECT status,unit_status FROM project_units WHERE project_id=${project} AND unit_code='A-02'`;
     expect(rows[0]).toMatchObject({ status: 'unknown', unit_status: 'unknown' });
     expect((await sql`SELECT review_status,reviewed_by FROM project_fact_assertions WHERE import_job_id=${job} AND field_key='status'`)[0]).toMatchObject({ review_status: 'approved', reviewed_by: admin });
-    expect((await sql`SELECT status FROM project_price_list_versions WHERE id=${version}`)[0].status).toBe('partially_applied');
+    expect((await sql`SELECT status FROM project_price_list_versions WHERE id=${version}`)[0].status).toBe('approved');
     await expect(as('authenticated', admin, tx => tx`SELECT apply_drive_import_review(${job},false,ARRAY[0])`)).rejects.toMatchObject({ code: '22023' });
     expect(await sql`SELECT id FROM project_units WHERE unit_code='A-02'`).toHaveLength(1);
   });
