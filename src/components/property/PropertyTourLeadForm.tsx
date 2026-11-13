@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Users, Phone, User, CheckCircle, MapPin, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
+import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface PropertyTourLeadFormProps {
@@ -36,7 +37,6 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
 
     setIsSubmitting(true);
     try {
@@ -46,7 +46,9 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
       // Guests cannot read back consultation_requests (PII) — use the RPC that
       // returns only the new lead id.
-      const receipt = await intake.current!.submit(supabase, {
+      const attempt = intake.current;
+      if (!attempt) throw new Error('Intake recovery is unavailable.');
+      const receipt = await attempt.submit(supabase, {
           request_type: 'property_tour',
           name: formData.name,
           phone: formData.phone,
@@ -80,7 +82,7 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
       toast.success(isRu ? 'Заявка отправлена!' : 'Request submitted!');
     } catch (err) {
       console.error('Lead form error:', err);
-      toast.error(isRu ? 'Ошибка, попробуйте позже' : 'Error, please try again');
+      toast.error(pickLang(language, consultationIntakeErrorCopy(err)));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
+import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,7 +87,9 @@ export function useUniversalLead() {
 
       // Guests cannot read consultation_requests (PII), so insert through the
       // security-definer RPC which returns only the new lead id.
-      const receipt = await intake.current!.submit(supabase, payload, user?.id);
+      const attempt = intake.current;
+      if (!attempt) throw new Error('Intake recovery is unavailable.');
+      const receipt = await attempt.submit(supabase, payload, user?.id);
       const data = { id: receipt.id };
 
       // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
@@ -132,8 +134,8 @@ export function useUniversalLead() {
       
       toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
     },
-    onError: () => {
-      toast.error(pickLang(language, { ru: 'Сохранение заявки не подтверждено.', en: 'Request saving was not confirmed.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้' }));
+    onError: (error) => {
+      toast.error(pickLang(language, consultationIntakeErrorCopy(error)));
     },
   });
 

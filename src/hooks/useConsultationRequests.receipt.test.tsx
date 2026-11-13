@@ -23,6 +23,28 @@ function wrapper({ children }: { children: ReactNode }) { const client = new Que
 beforeEach(() => { vi.stubGlobal('crypto', webcrypto); sessionStorage.clear(); vi.clearAllMocks(); fixture.user = null; fixture.row = null; fixture.readError = false; fixture.readThrows = false; fixture.rpc.mockResolvedValue({ data: 'synthetic-receipt', error: null }); fixture.invoke.mockResolvedValue({ data: null, error: null }); });
 afterEach(() => { cleanup(); clients.forEach(client => client.clear()); clients.length = 0; });
 const input = { request_type: 'full_management', name: 'Synthetic owner', phone: '+66000000000' };
+it.each(['consultation', 'universal'])('allows corrected %s input after definitive legacy rejection without premature side effects', async kind => {
+  fixture.rpc.mockResolvedValueOnce({data:null,error:{code:'P0001',message:'name_required'}}).mockResolvedValue({data:'synthetic-receipt',error:null});
+  const consultation=renderHook(useConsultationRequests,{wrapper});
+  const universal=renderHook(useUniversalLead,{wrapper});
+  const submit=(name:string)=>kind==='consultation'
+    ? consultation.result.current.requestFullManagement.mutateAsync({...input,name})
+    : universal.result.current.submitLead.mutateAsync({...input,name,vertical_id:'properties',lead_source:'cta',entry_point:'synthetic-retry'});
+  await act(async()=>{await expect(submit(input.name)).rejects.toMatchObject({code:'P0001'});});
+  expect(fixture.success).not.toHaveBeenCalled();expect(fixture.invoke).not.toHaveBeenCalled();
+  await act(async()=>{expect(await submit('Corrected synthetic owner')).toMatchObject({id:'synthetic-receipt'});});
+  expect(fixture.rpc).toHaveBeenCalledTimes(2);expect(fixture.success).toHaveBeenCalledOnce();
+});
+it('can recover the original request after an edited network retry is safely blocked',async()=>{
+  fixture.rpc.mockRejectedValueOnce(new Error('synthetic lost response')).mockResolvedValue({data:'synthetic-receipt',error:null});
+  const {result}=renderHook(useConsultationRequests,{wrapper});
+  await act(async()=>{await expect(result.current.requestFullManagement.mutateAsync(input)).rejects.toThrow('lost response');});
+  await act(async()=>{await expect(result.current.requestFullManagement.mutateAsync({...input,notes:'Edited'})).rejects.toThrow('outcome is uncertain');});
+  expect(fixture.rpc).toHaveBeenCalledOnce();expect(fixture.success).not.toHaveBeenCalled();
+  await act(async()=>{expect(await result.current.requestFullManagement.mutateAsync(input)).toMatchObject({id:'synthetic-receipt'});});
+  expect(fixture.rpc).toHaveBeenCalledTimes(2);
+  expect(fixture.rpc.mock.calls[0][1].payload.intake_request_key).toBe(fixture.rpc.mock.calls[1][1].payload.intake_request_key);
+});
 it.each([null, '', '   ', 42])('rejects an unconfirmed consultation receipt %s without success acknowledgement', async data => {
   fixture.rpc.mockResolvedValue({ data, error: null }); const { result } = renderHook(useConsultationRequests, { wrapper });
   await act(async () => { await expect(result.current.requestFullManagement.mutateAsync(input)).rejects.toThrow('receipt was not confirmed'); });

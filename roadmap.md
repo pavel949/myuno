@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-13 · Lead retry monitoring finding
+- [x] Confirm and minimally fix definitive rejection recovery: exact legacy P0001 required-field messages clear pending state; whitespace is rejected before RPC/storage; shared error copy distinguishes validation and unknown status.
+- [x] 35/35 isolated tests and actual PropertyTourLeadForm browser fixture PASS (blank input → no RPC; legacy rejection → corrected name/note → receipt). Production network denied; notification call stubbed. Build OK; no production writes/deploy/publication. Evidence: docs/qa/LEAD_RETRY_2026_11_13.md.
+- [ ] Ambiguous transport recovery remains blocked on verified server idempotency: SELECT-only function metadata shows live RPC has no request key/fingerprint. Existing retry algorithm unchanged; UI no longer promises safe replay. Requires separate reviewed backend tranche, not included here.
+
 ## 2026-10-24 · Protected-page background verification
 - [x] Reconcile parallel guard implementations: preserve same-actor/context drafts with native portal quarantine and stable sibling layouts, without stale admission.
 - [x] Current local reconciliation:91 selected tests (including26 security/shell tests),28 controlled-focus Chromium cases and pointer Retry probe pass. No production access, deployment or publishing. Evidence: docs/qa/guard-background-recheck-20261023.md.
