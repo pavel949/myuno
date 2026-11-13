@@ -34,7 +34,7 @@ describe('platform Today workspace', () => {
     mount();
     expect(screen.getByRole('heading', { name: 'Today' }).closest('.ds-frame-full')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Add property' })).toHaveAttribute('href', '/admin/properties?action=new');
-    expect(screen.getByRole('link', { name: 'Add service' })).toHaveAttribute('href', '/admin/services?action=new');
+    expect(screen.getByRole('link', { name: 'Add service' })).toHaveAttribute('href', '/admin/catalog?tab=services&action=new');
     const search = screen.getByRole('textbox', { name: 'Find a work queue' });
     fireEvent.change(search, { target: { value: 'Support' } });
     expect(document.querySelector('[data-queue="pendingContent"]')).not.toBeInTheDocument();
