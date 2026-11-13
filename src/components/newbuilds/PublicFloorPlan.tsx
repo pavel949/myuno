@@ -383,7 +383,7 @@ export function PublicFloorPlan({ projectId, developerId }: Props) {
   // Units pinned to the active floor
   const floorUnits = rawUnits.filter(u => u.floor_plan_id === activeFloorId && u.pin_x_pct != null && u.pin_y_pct != null);
 
-  const visibleUnits = floorUnits.filter(u => statusMatchesFilter(u.unit_status ?? 'available', filter)) as (DeveloperProjectUnit & { pin_x_pct: number; pin_y_pct: number })[];
+  const visibleUnits = floorUnits.filter(u => statusMatchesFilter(u.unit_status ?? 'unknown', filter)) as (DeveloperProjectUnit & { pin_x_pct: number; pin_y_pct: number })[];
 
   // ── Zoom/pan handlers ────────────────────────────────────────────────────
 
