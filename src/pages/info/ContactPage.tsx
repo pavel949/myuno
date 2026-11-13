@@ -26,7 +26,7 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: isRu ? 'Горячая линия' : 'Hotline',
-      description: isRu ? 'Срочные вопросы и экстренная помощь' : 'Urgent questions and emergency help',
+      description: `${COMPANY_CONTACTS.contactPerson} · ${isRu ? 'Английский и русский' : 'English and Russian'}`,
       action: COMPANY_CONTACTS.phone.display,
       actionLabel: isRu ? 'Позвонить' : 'Call',
       href: getTelLink(),
@@ -34,7 +34,7 @@ export default function ContactPage() {
     {
       icon: MessageCircle,
       title: 'WhatsApp',
-      description: isRu ? 'Быстрые ответы в мессенджере' : 'Quick replies via messenger',
+      description: `${COMPANY_CONTACTS.contactPerson} · ${isRu ? 'Английский и русский' : 'English and Russian'}`,
       action: COMPANY_CONTACTS.phone.display,
       actionLabel: isRu ? 'Написать' : 'Message',
       href: COMPANY_CONTACTS.whatsapp.link,

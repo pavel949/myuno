@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 import { ChevronLeft, Loader2, Star, ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -465,7 +466,7 @@ export default function AirportTransferBooking() {
         // WhatsApp so they can confirm the trip and arrange settlement —
         // matches the «выход на WhatsApp с просьбой оплатить» flow.
         if (formData.paymentMethod === 'concierge_advance') {
-          const adminWa = '66922407355'; // _shared/admin-config.ts default
+          const adminWa = COMPANY_CONTACTS.whatsapp.number;
           const orderRef = result.order_number || result.order_id;
           const summaryLines = [
             language === 'ru'
