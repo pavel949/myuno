@@ -67,6 +67,7 @@ beforeAll(async () => {
   sql = postgres({ host: directory, port: 55492, database: 'postgres', username: owner, password: '', max: 4, onnotice: () => {} });
   await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/newbuild-source-versioning-base.sql', 'utf8'));
   await sql.unsafe(migration);
+  await sql.unsafe(readFileSync('docs/hardening/newbuild-source-versioning/forward.sql', 'utf8'));
 }, 60000);
 
 afterAll(async () => {
