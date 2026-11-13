@@ -15169,6 +15169,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string | null
+          created_by: string | null
           email: string | null
           id: string
           is_active: boolean | null
@@ -15184,6 +15185,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           id?: string
           is_active?: boolean | null
@@ -15199,6 +15201,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           id?: string
           is_active?: boolean | null
