@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-11-13 · Admin panel streamlining
+- [x] Regroup admin side menu by workflow (requests, real estate, partners, content, growth, AI, system); all pages stay reachable. 125/125 navigation tests pass.
+- [ ] Merge/remove duplicate admin pages needs your decision per page.
+
 ## 2026-11-13 · Services booking verification
 - [x] Trace catalogue/provider → slot → request → confirmation → customer/provider read-back: 93/93 isolated tests and 2/2 actual-sheet browser flows PASS, including SLOT_TAKEN recovery and guest read-back. Provider read-back source traced only.
 - [x] Report PASS/FAIL/BLOCKED in docs/qa/SERVICE_BOOKING_VERIFICATION_2026_11_13.md. No real requests, payment, notifications, settings, deployment or publication.
