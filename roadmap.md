@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-11-13 · Services booking verification
+- [ ] Trace catalogue/provider → slot → request → confirmation → customer/provider read-back; run current isolated tests and network-denying actual booking sheet.
+- [ ] Report PASS/FAIL/BLOCKED and remaining production acceptance limits in docs/qa/SERVICE_BOOKING_VERIFICATION_2026_11_13.md. No real requests, payment, notifications, settings, deployment or publication.
+
 ## 2026-11-13 · Core application readiness recheck
 - [x] Verify current Git identity, hosted health and pending monitoring findings: Cloud healthy, 0 pending; tested source ec036d176e32cb7ff5deb821f45b2fddad142e30. Remote CI/published parity not verified.
 - [x] Re-run isolated core search/intake/property/PMS/admin regressions: 551/551 tests, 9/10 browser fixtures PASS (178 records), enquiry form 2 scenarios PASS. Admin focus fixture fails reproducibly; its editor is stubbed, so actual-form production defect remains unproved.
