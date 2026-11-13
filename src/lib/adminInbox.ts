@@ -1,9 +1,35 @@
 import { supabase } from '@/integrations/supabase/client';
 import { LEAD_STATUS_BUCKETS, LEAD_STATUS_NEW, type InboxStatusBucket } from '@/config/leadStatus';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries';
 
 export type InboxStatus = InboxStatusBucket;
+
+export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'listing_applications', 'consultation_requests', 'nb_leads', 'property_inquiries'];
+export function isInboxSource(value: string | null): value is InboxSource {
+  return INBOX_SOURCES.some(source => source === value);
+}
+export function inboxRequestHref(source: InboxSource, id: string) {
+  return `${APP_ROUTES.ADMIN_INBOX}?${new URLSearchParams({ source, request: id })}`;
+}
+
+// Explicit display projections, not a new request model. RLS and the existing
+// admin route remain authoritative; an ID is only a selection, never a grant.
+export const INBOX_DETAIL_FIELDS: Record<InboxSource, readonly (readonly [string, string, string])[]> = {
+  partner_applications: [['business_name', 'Business', 'Компания'], ['contact_name', 'Contact', 'Контактное лицо'], ['contact_email', 'Email', 'Email'], ['contact_phone', 'Phone', 'Телефон'], ['business_category', 'Category', 'Категория'], ['business_description', 'Description', 'Описание'], ['notes', 'Notes', 'Заметки']],
+  listing_applications: [['applicant_name', 'Name', 'Имя'], ['applicant_email', 'Email', 'Email'], ['applicant_phone', 'Phone', 'Телефон'], ['listing_type', 'Listing type', 'Тип объявления'], ['property_type', 'Property type', 'Тип жилья'], ['service_category', 'Service category', 'Категория услуги'], ['product_category', 'Product category', 'Категория товара'], ['city', 'City', 'Город'], ['address', 'Address', 'Адрес'], ['admin_notes', 'Notes', 'Заметки'], ['rejection_reason', 'Rejection reason', 'Причина отклонения']],
+  consultation_requests: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['request_type', 'Request type', 'Тип обращения'], ['vertical_id', 'Service', 'Направление'], ['notes', 'Client notes', 'Пожелания клиента'], ['admin_notes', 'Admin notes', 'Внутренние заметки']],
+  nb_leads: [['full_name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['project_id', 'Project ID', 'ID проекта'], ['source', 'Source', 'Источник'], ['message', 'Message', 'Сообщение']],
+  property_inquiries: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['property_id', 'Property ID', 'ID объекта'], ['check_in', 'Check-in', 'Заезд'], ['check_out', 'Check-out', 'Выезд'], ['guests', 'Guests', 'Гости'], ['message', 'Message', 'Сообщение']],
+};
+export async function fetchInboxRequest(source: InboxSource, id: string): Promise<Record<string, unknown> | null> {
+  if (!isInboxSource(source) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid request selection');
+  const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
+  const { data, error } = await supabase.from(source).select(fields.join(',')).eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data as Record<string, unknown> | null;
+}
 
 export interface InboxItem {
   id: string;
@@ -69,7 +95,7 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
       createdAt: r.created_at!, title: r.business_name || r.contact_name || 'Partner',
       subtitle: r.business_category || null,
       contact: r.contact_email || null,
-      href: '/admin/partner-applications',
+      href: inboxRequestHref('partner_applications', r.id),
       vertical: r.business_category,
     });
   }
@@ -80,7 +106,7 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
       createdAt: r.created_at!, title: r.applicant_name || `Listing ${r.listing_type}`,
       subtitle: r.service_category || r.product_category || r.property_type || r.listing_type,
       contact: r.applicant_email || null,
-      href: '/admin/catalog',
+      href: inboxRequestHref('listing_applications', r.id),
       vertical: r.listing_type,
     });
   }
@@ -91,7 +117,7 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
       createdAt: r.created_at!, title: r.name || 'Consultation',
       subtitle: r.request_type || r.vertical_id,
       contact: r.email || null,
-      href: '/admin/consultations',
+      href: inboxRequestHref('consultation_requests', r.id),
       vertical: r.vertical_id,
     });
   }
@@ -102,7 +128,7 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
       createdAt: r.created_at!, title: r.full_name || 'Newbuild lead',
       subtitle: r.project_id ? `Project ${r.project_id.slice(0, 8)}` : null,
       contact: r.email || r.phone || null,
-      href: '/admin/nb-leads',
+      href: inboxRequestHref('nb_leads', r.id),
     });
   }
   for (const r of propertyInq.data ?? []) {
@@ -112,7 +138,7 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
       createdAt: r.created_at!, title: r.name || 'Property inquiry',
       subtitle: r.message ? r.message.slice(0, 80) : null,
       contact: r.email || r.phone || null,
-      href: '/admin/properties',
+      href: inboxRequestHref('property_inquiries', r.id),
     });
   }
 

@@ -15,7 +15,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Inbox, Search, Filter, ExternalLink, AlertCircle, MessageSquare, Building2, Briefcase, Sparkles, Home } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -24,7 +24,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ru as ruLocale, enUS as enLocale } from 'date-fns/locale';
-import { fetchInbox, type InboxSource, type InboxStatus } from '@/lib/adminInbox';
+import { fetchInbox, isInboxSource, type InboxSource, type InboxStatus } from '@/lib/adminInbox';
+import { InboxRequestDetail } from '@/components/admin/InboxRequestDetail';
 
 const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
   partner_applications:  { labelRu: 'Партнёры',     labelEn: 'Partners',     icon: Briefcase,     color: 'hsl(var(--cluster-build))' },
@@ -53,8 +54,10 @@ export default function AdminInbox() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const [params, setParams] = useSearchParams();
   const [tab, setTab] = useState<InboxStatus | 'all'>('new');
-  const [sourceFilter, setSourceFilter] = useState<InboxSource>('partner_applications');
+  const selectedSource = params.get('source');
+  const sourceFilter: InboxSource = isInboxSource(selectedSource) ? selectedSource : 'partner_applications';
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
 
@@ -124,7 +127,7 @@ export default function AdminInbox() {
                 <button
                   key={src}
                   type="button"
-                  onClick={() => { setSourceFilter(src); setPage(0); }}
+                  onClick={() => { setParams(previous => { const next = new URLSearchParams(previous); next.set('source', src); next.delete('request'); return next; }); setPage(0); }}
                   className={cn(
                     'px-2.5 py-1 text-[11px] font-medium border whitespace-nowrap',
                     isActive
@@ -230,6 +233,7 @@ export default function AdminInbox() {
           </div>
         )}
       </PageShell>
+      {params.has('request') && <InboxRequestDetail key={`${selectedSource}-${params.get('request')}`} source={selectedSource} requestId={params.get('request') ?? ''} onClose={() => setParams(previous => { const next = new URLSearchParams(previous); next.delete('request'); return next; })} />}
     </AppLayout>
   );
 }

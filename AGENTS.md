@@ -30,6 +30,7 @@
 - Forecast/pending/provisional finance is labelled non-posted and excluded from realized P&L until supported by canonical accounting truth.
 - Current P0 is a moving pointer: after an accepted gate, advance to the next unresolved gate and do not rerun accepted work without new contrary evidence.
 - Acquisition reporting reads only recorded channel counts from `mcc_channel_metrics` through the actor-keyed, admin-admitted query; missing metrics remain unknown and unsupported financial ratios are not inferred, preventing placeholder statistics from becoming operational truth.
+- Inbox handoffs carry canonical source plus request ID in the URL and read the exact record through explicit display projections under existing admin admission and RLS; list limits or related property/project IDs must not substitute for the selected request.
 
 ## Source-backed security contracts
 
