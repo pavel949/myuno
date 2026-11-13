@@ -12,7 +12,7 @@
  * refetch через React Query (staleTime 60s). Realtime-канал добавим, когда
  * объёмы заявок превысят ~200/день.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
