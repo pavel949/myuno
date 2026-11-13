@@ -11,7 +11,10 @@ describe('selected INSERT policies — isolated PostgreSQL', () => {
   const root = process.getuid?.() === 0;
   const pgRoot = dirname(dirname(realpathSync(execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim())));
   const libPath = existsSync(join(pgRoot, 'lib', 'dict_snowball.so')) ? join(pgRoot, 'lib') : null;
-  const run = (bin: string, args: string[]) => root ? execFileSync('runuser', ['-u', 'nobody', '--', bin, ...args]) : execFileSync(bin, args);
+  const run = (bin: string, args: string[]) => {
+    const exe = join(pgRoot, 'bin', bin);
+    return root ? execFileSync('runuser', ['-u', 'nobody', '--', exe, ...args]) : execFileSync(exe, args);
+  };
   const actor = '11111111-1111-4111-8111-111111111111';
   const other = '22222222-2222-4222-8222-222222222222';
   const own = '33333333-3333-4333-8333-333333333333';
