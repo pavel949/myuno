@@ -49,6 +49,14 @@ export function driveUnitSource(file: DriveSourceReference): Record<string, unkn
 
 /** AI output is untrusted input. Missing/invalid availability never becomes available. */
 export function normalizeDriveUnit(raw: Record<string, unknown>, source?: DriveSourceReference): NormalizedDriveUnit {
+  const embeddedSource = !source && text(raw._source_file_id) && text(raw._source_file_name)
+    ? {
+        id: text(raw._source_file_id)!,
+        name: text(raw._source_file_name)!,
+        modifiedTime: text(raw._source_modified_at) ?? undefined,
+        webViewLink: text(raw._source_web_view_link) ?? undefined,
+      }
+    : source;
   const sourceStatus = text(raw.status)?.toLowerCase() ?? null;
   const status = DRIVE_UNIT_STATUSES.includes(sourceStatus as DriveUnitStatus)
     ? sourceStatus as DriveUnitStatus
@@ -68,7 +76,7 @@ export function normalizeDriveUnit(raw: Record<string, unknown>, source?: DriveS
   if (!text(raw.unit_type)) reasons.push('missing_unit_type');
   if (price !== null && !currency) reasons.push('missing_or_invalid_currency');
   if (price === null && currency) reasons.push('currency_without_price');
-  if (source && !source.id) reasons.push('missing_source');
+  if (embeddedSource && !embeddedSource.id) reasons.push('missing_source');
 
   return {
     unit_code: unitCode,
@@ -83,7 +91,8 @@ export function normalizeDriveUnit(raw: Record<string, unknown>, source?: DriveS
     status,
     needs_review: reasons.length > 0,
     review_reasons: reasons,
-    ...(source ? driveUnitSource(source) : {}),
+    ...(embeddedSource ? driveUnitSource(embeddedSource) : {}),
+    ...(text(raw._extraction_method) ? { _extraction_method: text(raw._extraction_method) } : {}),
     _raw: raw,
   };
 }

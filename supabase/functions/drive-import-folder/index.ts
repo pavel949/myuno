@@ -11,6 +11,7 @@
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
+import { driveImportContentHash, driveUnitSource, normalizeDriveUnits } from '../_shared/drive-import-normalization.ts';
 
 declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
 
@@ -258,7 +259,7 @@ async function extractUnitsFromFile(
       messages: [{
         role: 'user',
         content: [
-          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый объект с полями. Если файл не прайслист — верни пустой массив.' },
+          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый объект с полями. Если файл не прайслист — верни пустой массив. Не придумывай статус: если он отсутствует или неясен — null.' },
           { type: 'image_url', image_url: { url: dataUrl } },
         ],
       }],
@@ -283,7 +284,7 @@ async function extractUnitsFromFile(
                     price: { type: ['number', 'null'] },
                     currency: { type: 'string', enum: ['THB', 'USD', 'EUR', 'RUB'] },
                     view_type: { type: ['string', 'null'] },
-                    status: { type: 'string', enum: ['available', 'reserved', 'sold', 'held'] },
+                    status: { type: ['string', 'null'], enum: ['available', 'reserved', 'sold', 'held', null] },
                   },
                   required: ['unit_type'],
                 },
@@ -337,7 +338,7 @@ async function extractUnitsFromText(text: string, lovableKey: string): Promise<a
       model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
-        content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери из таблицы; если статуса нет — available. Если это не прайслист — верни пустой массив.\n\n${body}`,
+        content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери только из таблицы; если статуса нет или он неясен — null. Если это не прайслист — верни пустой массив.\n\n${body}`,
       }],
       tools: [{
         type: 'function',
@@ -360,7 +361,7 @@ async function extractUnitsFromText(text: string, lovableKey: string): Promise<a
                     price: { type: ['number', 'null'] },
                     currency: { type: 'string', enum: ['THB', 'USD', 'EUR', 'RUB'] },
                     view_type: { type: ['string', 'null'] },
-                    status: { type: 'string', enum: ['available', 'reserved', 'sold', 'held'] },
+                    status: { type: ['string', 'null'], enum: ['available', 'reserved', 'sold', 'held', null] },
                   },
                   required: ['unit_type'],
                 },
@@ -460,8 +461,11 @@ Deno.serve(async (req) => {
       let skipped = 0;
       const aggregatedUnits: any[] = [];
       let aggregatedProjectMeta: Record<string, any> | null = null;
+      let aggregatedProjectMetaSource: DriveFile | null = null;
       const aggregatedGallery: string[] = [];
       const aggregatedPlans: string[] = [];
+      const aggregatedGallerySources: DriveFile[] = [];
+      const aggregatedPlanSources: DriveFile[] = [];
 
       try {
         const files = await listDriveFiles(folderId, auth);
@@ -474,7 +478,9 @@ Deno.serve(async (req) => {
             try {
               const csv = await exportSheetCsv(file.id, auth);
               const units = await extractUnitsFromText(csv, LOVABLE_API_KEY);
-              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({
+                ...u, ...driveUnitSource(file), _extraction_method: 'ai_table',
+              })));
               processed++;
             } catch (e: any) {
               failed++;
@@ -535,7 +541,9 @@ Deno.serve(async (req) => {
               const units = /\.csv$/i.test(file.name)
                 ? await extractUnitsFromText(new TextDecoder().decode(buf), LOVABLE_API_KEY)
                 : null;
-              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({
+                ...u, ...driveUnitSource(file), _extraction_method: 'ai_table',
+              })));
             }
 
             // Параллельная AI-extraction для маркетинговых файлов
