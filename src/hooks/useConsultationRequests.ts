@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt } from '@/lib/consultationIntake';
+import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -166,7 +166,7 @@ export function useConsultationRequests() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const saved = () => toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
-  const unconfirmed = () => toast.error(pickLang(language, { ru: 'Сохранение заявки не подтверждено.', en: 'Request saving was not confirmed.', th: 'ยังยืนยันการบันทึกคำขอไม่ได้' }));
+  const unconfirmed = (error: unknown) => toast.error(pickLang(language, consultationIntakeErrorCopy(error)));
   const queryClient = useQueryClient();
   const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
   if (!intake.current) intake.current = createConsultationIntakeAttempt();
@@ -194,7 +194,9 @@ export function useConsultationRequests() {
   // created through the security-definer RPC that returns only the new id.
   const createConsultation = useMutation({
     mutationFn: async (input: CreateConsultationInput): Promise<ConsultationSubmissionReceipt> => {
-      const { id: newId } = await intake.current!.submit(supabase, input as unknown as Record<string, unknown>, user?.id);
+      const attempt = intake.current;
+      if (!attempt) throw new Error('Intake recovery is unavailable.');
+      const { id: newId } = await attempt.submit(supabase, input as unknown as Record<string, unknown>, user?.id);
 
       // The RPC receipt acknowledges the committed insert. Optional PII readback
       // must never turn an accepted request into a failed/retried creation.
