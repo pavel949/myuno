@@ -66,12 +66,10 @@ export default function MarketingDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
-              <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                Marketing Command Center
-              </span>
+              {isRu ? 'Маркетинг' : 'Marketing'}
             </h1>
             <p className="text-muted-foreground text-sm">
-              Landing Factory • Growth OS • Funnel Intelligence
+              {isRu ? 'Лендинги, воронки и показатели привлечения' : 'Landing pages, funnels and acquisition metrics'}
             </p>
           </div>
         </div>
