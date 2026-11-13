@@ -37,11 +37,11 @@ let jobSequence = 1000;
 async function stage(units: Array<Record<string, unknown>>, patch: Record<string, unknown> = {}) {
   const job = id(jobSequence++);
   await sql`INSERT INTO drive_import_jobs (id,source_id,project_id,status,ai_extracted_units,ai_project_patch)
-    VALUES (${job},${source},${project},'completed',${sql.json(units)},${sql.json(patch)})`;
+    VALUES (${job},${source},${project},'completed',${sql.json(units as postgres.JSONValue)},${sql.json(patch as postgres.JSONValue)})`;
   const version = await as('service_role', null, tx => tx`SELECT stage_drive_import_version(
-    ${job}, ${tx.json(units)}, ${tx.json(patch)}, '{}', ${hash}, 'synthetic-parser-v1'
+    ${job}, ${tx.json(units as postgres.JSONValue)}, ${tx.json(patch as postgres.JSONValue)}, '{}', ${hash}, 'synthetic-parser-v1'
   ) AS id`);
-  await sql`UPDATE drive_import_jobs SET ai_extracted_units=${sql.json(units)}, ai_project_patch=${sql.json(patch)} WHERE id=${job}`;
+  await sql`UPDATE drive_import_jobs SET ai_extracted_units=${sql.json(units as postgres.JSONValue)}, ai_project_patch=${sql.json(patch as postgres.JSONValue)} WHERE id=${job}`;
   return { job, version: version[0].id as string };
 }
 

@@ -17,7 +17,7 @@ Extends the existing `property_projects` / `project_units` catalogue and `projec
 
 ## Isolated verification
 
-Synthetic normalization and diff tests run without backend access. The migration and deployed Edge Function are verified by catalog/ACL reads only; no import, review application or canonical business write is executed in this tranche.
+Synthetic normalization and diff tests run without backend access. Six PostgreSQL tests execute the exact applied function contracts in a temporary local database, including unknown-status admission, admin authorization, field allowlisting, replay rejection and non-deletion of missing rows. Live migrations and function ACLs are checked by catalog reads only; no hosted import, review application or canonical business write is executed in this tranche.
 
 ## Rollback / activation boundary
 
