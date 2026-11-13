@@ -43,11 +43,11 @@ export default function AcquisitionMetrics() {
           <p className="text-sm text-muted-foreground">
             {t('Latest channel record', 'Последняя запись по каналам')}: {query.data.latestDate}
           </p>
-          <Table>
+          <Table className="min-w-[640px]">
             <TableHeader><TableRow>
               {[t('Channel', 'Канал'), t('Impressions', 'Показы'), t('Clicks', 'Клики'),
                 t('Leads', 'Заявки'), t('Signups', 'Регистрации'), t('Recorded conversions', 'Учтённые конверсии')]
-                .map((label, index) => <TableHead key={label} className={index ? 'text-right' : ''}>{label}</TableHead>)}
+                .map((label, index) => <TableHead key={label} className={index ? 'whitespace-nowrap text-right' : 'whitespace-nowrap'}>{label}</TableHead>)}
             </TableRow></TableHeader>
             <TableBody>{query.data.channels.map(row => <TableRow key={row.channel}>
               <TableCell>{row.channel}</TableCell>
