@@ -33,7 +33,14 @@ export function SimilarProperties({ propertyId, district, propertyType, pricePer
     queryKey: ['property-related-ai', propertyId, mode, language],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('property-related-recommendations', { body: { propertyId, mode, language: isRu ? 'ru' : 'en' } });
-      if (error) throw error;
+      if (error) {
+        const context = 'context' in error ? error.context : null;
+        if (context instanceof Response) {
+          const body = await context.json().catch(() => null);
+          throw new Error(body?.error ?? error.message);
+        }
+        throw error;
+      }
       return allowedRecommendationIds(data?.ids, catalogue.data ?? [], propertyId);
     }, enabled: aiEnabled && !!catalogue.data?.length, staleTime: 300_000, retry: false,
   });
@@ -42,6 +49,7 @@ export function SimilarProperties({ propertyId, district, propertyType, pricePer
   const similar = (ids.length ? [...ids.map(id => items.find(item => item.id === id)).filter(item => item !== undefined), ...items.filter(item => !ids.includes(item.id))] : items).slice(0, 6);
   return <section aria-label={isRu ? 'Вам также может понравиться' : 'You may also like'}>
     <h2 className="text-h3 mb-4">{isRu ? 'Вам также может понравиться' : 'You may also like'}</h2>
+    {aiEnabled && ranking.isError && <p role="status" className="text-xs text-muted-foreground mb-3">{ranking.error.message}</p>}
     {catalogue.isLoading ? <div role="status" className="h-40 bg-muted animate-pulse" aria-label={isRu ? 'Подбираем объекты' : 'Loading related homes'} /> : catalogue.isError ? <div role="alert"><p>{isRu ? 'Не удалось загрузить варианты' : 'Could not load related homes'}</p><Button variant="outline" onClick={() => catalogue.refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button></div> : !similar.length ? <p className="text-sm text-muted-foreground">{isRu ? 'Других предложений пока нет' : 'No other offers yet'}</p> : <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {similar.map(p => {
         const rate = mode === 'rent' ? propertyRentalDisplayPrice(p) : null;

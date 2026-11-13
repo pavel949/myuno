@@ -19,6 +19,7 @@ interface AvailabilityEntry {
 }
 
 interface PropertyDetailDateSheetProps {
+  bookingPricing?: Partial<React.ComponentProps<typeof PropertyBookingCard>>;
   propertyId?: string;
   pricePerNight?: number;
   rentalTerms?: PropertyRentalTerms | null;
@@ -40,7 +41,7 @@ interface PropertyDetailDateSheetProps {
 }
 
 export function PropertyDetailDateSheet({
-  propertyId, pricePerNight, rentalTerms, guestSearch,
+  propertyId, pricePerNight, rentalTerms, guestSearch, bookingPricing,
   open,
   onOpenChange,
   dateRange,
@@ -72,6 +73,7 @@ export function PropertyDetailDateSheet({
         </SheetHeader>
 
         {propertyId && typeof pricePerNight === 'number' ? <PropertyBookingCard
+          {...bookingPricing}
           propertyId={propertyId} pricePerNight={pricePerNight} rentalTerms={rentalTerms} guestSearch={guestSearch}
           initialGuestContext={{ dateRange, guests: guestCount }}
           onGuestContextChange={context => { onDateRangeChange(context.dateRange); onGuestCountChange(context.guests); }}

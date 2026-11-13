@@ -818,6 +818,18 @@ export default function PropertyDetail() {
 
         {/* Mobile Date Picker Sheet */}
         {pricing.canQuoteShortStay && <PropertyDetailDateSheet
+          bookingPricing={{
+            currency: listingCurrency,
+            earlyBookingDiscount: property.early_booking_discount ?? undefined,
+            earlyBookingDays: property.early_booking_days ?? undefined,
+            lastMinuteDiscount: property.last_minute_discount ?? undefined,
+            lastMinuteDays: property.last_minute_days ?? undefined,
+            paymentPolicy: property.payment_policy ?? undefined,
+            prepayPercent: property.prepay_percent ?? undefined,
+            depositAmount: property.deposit_amount ?? undefined,
+            depositCurrency: property.deposit_currency ?? undefined,
+            customLengthDiscounts: property.custom_length_discounts as Array<{ min_nights: number; discount_percent: number }> ?? undefined,
+          }}
           propertyId={id || ''}
           pricePerNight={pricePerNight ?? 0}
           rentalTerms={rentalTerms}
