@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-13 · Property detail option A
+- [ ] Make stay calculation and assisted booking requests explicit on desktop/mobile, preserve configured prices and existing inquiry authority.
+- [ ] Offer contextual WhatsApp questions without forcing sign-in; improve related public catalogue choices without fabricated totals or availability.
+- [ ] Add source-bound Lovable AI ranking, verify focused isolated flows and record any activation blocker; no business-data writes, notifications or publication.
+
 ## 2026-11-13 · Exact Inbox request navigation
 - [x] Retain source and selected request ID in a reloadable URL; open that exact canonical record rather than a general section. Queue filters/search/page also survive selection and reload.
 - [x] Verify all five Inbox sources, navigation/reload/back and missing/invalid/denied/error states with isolated fixtures; 62/62 tests and 10/10 browser scenarios PASS, existing guards preserved, production network blocked.
