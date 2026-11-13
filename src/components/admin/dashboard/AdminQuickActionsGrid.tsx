@@ -11,7 +11,7 @@ export function AdminQuickActionsGrid() {
     <h2 className="mb-3 text-lg font-semibold">{pickLang(language, { en: 'Quick actions', ru: 'Быстрые действия', th: 'การดำเนินการด่วน' })}</h2>
     <div className="space-y-2">
       <Button variant="outline" asChild className="h-auto min-h-11 w-full whitespace-normal py-3"><Link to="/admin/properties?action=new"><Plus className="mr-2 size-4 shrink-0" />{pickLang(language, { en: 'Add property', ru: 'Добавить объект', th: 'เพิ่มที่พัก' })}</Link></Button>
-      <Button variant="outline" asChild className="h-auto min-h-11 w-full whitespace-normal py-3"><Link to="/admin/services?action=new"><Plus className="mr-2 size-4 shrink-0" />{pickLang(language, { en: 'Add service', ru: 'Добавить услугу', th: 'เพิ่มบริการ' })}</Link></Button>
+      <Button variant="outline" asChild className="h-auto min-h-11 w-full whitespace-normal py-3"><Link to="/admin/catalog?tab=services&action=new"><Plus className="mr-2 size-4 shrink-0" />{pickLang(language, { en: 'Add service', ru: 'Добавить услугу', th: 'เพิ่มบริการ' })}</Link></Button>
     </div>
   </Surface>;
 }
