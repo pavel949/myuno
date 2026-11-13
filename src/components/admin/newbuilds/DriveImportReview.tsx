@@ -28,6 +28,7 @@ interface ExtractedUnit {
   review_reasons?: string[];
   _source_file_name?: string | null;
   _source_file_url?: string | null;
+  _source_web_view_link?: string | null;
   [key: string]: unknown;
 }
 
@@ -252,8 +253,8 @@ export function DriveImportReview({ job, projectId, open, onClose }: Props) {
                         )}
                         <p className="mt-1 break-words text-xs text-muted-foreground">
                           {t('Source', 'Источник')}: {unit._source_file_name || t('Not recorded — review required', 'Не записан — требуется проверка')}
-                          {unit._source_file_url && (
-                            <a href={unit._source_file_url} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-0.5 underline">
+                          {(unit._source_file_url || unit._source_web_view_link) && (
+                            <a href={unit._source_file_url || unit._source_web_view_link || undefined} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-0.5 underline">
                               {t('Open', 'Открыть')}<ExternalLink className="h-3 w-3" />
                             </a>
                           )}

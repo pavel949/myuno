@@ -99,6 +99,13 @@ describe('newbuild source versioning in isolated PostgreSQL', () => {
     expect(await sql`SELECT id FROM project_units WHERE unit_code='A-02'`).toHaveLength(1);
   });
 
+  it('maps an explicitly reviewed held source row to the canonical blocked unit status', async () => {
+    const held = sourcedUnit({ unit_code: 'H-01', status: 'held', needs_review: false, review_reasons: [] });
+    const { job } = await stage([held]);
+    await as('authenticated', admin, tx => tx`SELECT apply_drive_import_review(${job},false,ARRAY[0])`);
+    expect((await sql`SELECT status,unit_status FROM project_units WHERE unit_code='H-01'`)[0]).toMatchObject({ status: 'held', unit_status: 'blocked' });
+  });
+
   it('allowlists project fields and rejects admin/publication spoofing', async () => {
     const { job } = await stage([], { name_en: 'Reviewed name', is_approved: true, public_listing_enabled: true });
     await as('authenticated', admin, tx => tx`SELECT apply_drive_import_review(${job},true,'{}')`);
