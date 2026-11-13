@@ -182,7 +182,7 @@ async function extractProjectMetaFromFile(
     method: 'POST',
     headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
         content: [
@@ -254,7 +254,7 @@ async function extractUnitsFromFile(
     method: 'POST',
     headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
         content: [
@@ -334,7 +334,7 @@ async function extractUnitsFromText(text: string, lovableKey: string): Promise<a
     method: 'POST',
     headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
         content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери из таблицы; если статуса нет — available. Если это не прайслист — верни пустой массив.\n\n${body}`,

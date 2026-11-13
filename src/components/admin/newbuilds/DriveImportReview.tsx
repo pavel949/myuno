@@ -31,6 +31,29 @@ interface ExtractedUnit {
   [k: string]: unknown;
 }
 
+function renderPatchValue(key: string, value: unknown) {
+  if ((key === 'gallery_urls' || key === 'marketing_materials') && Array.isArray(value)) {
+    return (
+      <span className="flex flex-wrap gap-1.5">
+        {value.filter((v): v is string => typeof v === 'string').slice(0, 12).map((url) => (
+          <img key={url} src={url} alt="" loading="lazy" className="h-14 w-20 object-cover border border-border" />
+        ))}
+        {value.length > 12 && <span className="text-xs text-muted-foreground">+{value.length - 12}</span>}
+      </span>
+    );
+  }
+  if (key === 'payment_plan' && Array.isArray(value)) {
+    return value.map((step, i) => {
+      const s = step as { stage?: string; percent?: number | null; amount_thb?: number | null };
+      const amount = s.percent != null ? `${s.percent}%` : s.amount_thb != null ? `${s.amount_thb.toLocaleString('ru-RU')} ฿` : '—';
+      return <span key={i} className="block">{s.stage ?? `#${i + 1}`}: {amount}</span>;
+    });
+  }
+  if (Array.isArray(value)) return value.map((v) => (typeof v === 'object' ? JSON.stringify(v) : String(v))).join(', ');
+  if (value && typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
 interface Props {
   job: DriveJob & { ai_project_patch?: Record<string, unknown> | null; ai_extracted_units?: ExtractedUnit[] };
   projectId: string;
@@ -147,7 +170,7 @@ export function DriveImportReview({ job, projectId, open, onClose }: Props) {
                   <div key={key} className="flex gap-2">
                     <span className="text-muted-foreground min-w-[140px]">{key}:</span>
                     <span className="text-foreground break-words">
-                      {Array.isArray(value) ? value.join(', ') : String(value)}
+                      {renderPatchValue(key, value)}
                     </span>
                   </div>
                 ))}
