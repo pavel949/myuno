@@ -29,6 +29,7 @@
 - Service requests are not GMV; recognize Marketplace GMV/revenue only from the configured verified commercial/financial event for the vertical.
 - Forecast/pending/provisional finance is labelled non-posted and excluded from realized P&L until supported by canonical accounting truth.
 - Current P0 is a moving pointer: after an accepted gate, advance to the next unresolved gate and do not rerun accepted work without new contrary evidence.
+- Acquisition reporting reads only recorded channel counts from `mcc_channel_metrics` through the actor-keyed, admin-admitted query; missing metrics remain unknown and unsupported financial ratios are not inferred, preventing placeholder statistics from becoming operational truth.
 
 ## Source-backed security contracts
 
