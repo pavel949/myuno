@@ -7,7 +7,7 @@
 - [x] Verify redirects, retained guards, navigation and affected pages: 35/35 focused tests, 18/18 isolated route/workspace browser cases and 2/2 actual admin-shell layouts pass; automatic build OK. No production data changes or publication. Evidence: docs/qa/ADMIN_CONSOLIDATION_IMPLEMENTATION_2026_11_13.md.
 - [x] Live read-only preview verification with real backend at HEAD `9653990e54a0323fade4b63285b7ea6441cdce49`: admin + guest access, 17/17 desktop tabs, 17/17 mobile tabs, 20/20 legacy redirects, 2/2 hubs and 7/7 inner read flows; no business writes, notifications or publication. Evidence: `docs/qa/ADMIN_LIVE_VERIFICATION_2026_11_13.md`.
 - [ ] Authenticated non-admin/`uno_team` denial matrix — blocked until Pavel identifies an existing non-admin account; no role/context switches, accounts or assignments were created.
-- [ ] Separate approved fix pass: Acquisition tab is a confirmed zeroed stub (`useAcquisitionMetrics.ts`), and AI Intake KPI digits wrap at 384px (`AdminIntakeConfigs.tsx`); QA did not change application code.
+- [ ] Approved fix pass: replace Acquisition zeroed stub with existing read-only analytics and prevent Intake KPI digit wrapping on mobile; preserve access, no business writes, notifications or publication.
 - [ ] Hosted operational write acceptance remains intentionally unverified; production business mutations and outbound notifications stay outside this QA tranche.
 
 ## 2026-11-13 · Services booking verification
