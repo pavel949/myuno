@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-13 · Core application readiness recheck
+- [ ] Verify current Git identity, hosted health and pending monitoring findings.
+- [ ] Re-run isolated core search/intake/property/PMS/admin regressions and safe browser checks; distinguish source/fixture evidence from real hosted E2E.
+- [ ] Record current PASS/FAIL/BLOCKED matrix and exact commands in docs/qa/CORE_APPLICATION_READINESS_2026_11_13.md. No production business writes, notifications, migrations, settings changes, deployments or publication.
+
 ## 2026-11-13 · Lead retry monitoring finding
 - [x] Confirm and minimally fix definitive rejection recovery: exact legacy P0001 required-field messages clear pending state; whitespace is rejected before RPC/storage; shared error copy distinguishes validation and unknown status.
 - [x] 35/35 isolated tests and actual PropertyTourLeadForm browser fixture PASS (blank input → no RPC; legacy rejection → corrected name/note → receipt). Production network denied; notification call stubbed. Build OK; no production writes/deploy/publication. Evidence: docs/qa/LEAD_RETRY_2026_11_13.md.
