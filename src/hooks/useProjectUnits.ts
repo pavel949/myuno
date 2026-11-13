@@ -64,7 +64,7 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
     features: null,
     total_units: 1,
     available_units: u.unit_status === 'available' || u.status === 'available' ? 1 : 0,
-    status: u.unit_status ?? u.status ?? 'available',
+    status: u.unit_status ?? u.status ?? 'unknown',
   };
 }
 
@@ -119,7 +119,7 @@ export function useProjectUnits(projectId?: string) {
         features: u.features,
         total_units: u.total_units,
         available_units: u.available_units,
-        status: u.status || 'available',
+        status: u.status || 'unknown',
       }));
     },
     enabled: !!projectId,

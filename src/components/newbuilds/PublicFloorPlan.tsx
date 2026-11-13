@@ -35,6 +35,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   sold:         { label: 'Продано',     color: '#6B7280', bg: 'rgba(107,114,128,0.15)' },
   blocked:      { label: 'Заблокирован',color: '#EF4444', bg: 'rgba(239,68,68,0.15)' },
   not_for_sale: { label: 'Не продаётся',color: '#374151', bg: 'rgba(55,65,81,0.15)' },
+  unknown:      { label: 'Статус уточняется', color: 'hsl(var(--nb-muted))', bg: 'hsl(var(--nb-glass-bg))' },
 };
 
 type Filter = 'all' | 'available' | 'reserved' | 'sold';
@@ -94,7 +95,7 @@ function UnitSheet({
   developerId?: string;
   onClose: () => void;
 }) {
-  const cfg = STATUS_CONFIG[unit.unit_status ?? 'available'] ?? STATUS_CONFIG.available;
+  const cfg = STATUS_CONFIG[unit.unit_status ?? 'unknown'] ?? STATUS_CONFIG.available;
   const [showLead, setShowLead] = useState(false);
   const [showKyc, setShowKyc] = useState(false);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
@@ -105,7 +106,7 @@ function UnitSheet({
   const { data: buyer } = useBuyerStatus();
 
   const kycOk = buyer && ['submitted', 'verified'].includes(buyer.kyc_status);
-  const isAvailable = (unit.unit_status ?? 'available') === 'available';
+  const isAvailable = (unit.unit_status ?? 'unknown') === 'available';
 
   function handleSoftHold() {
     softHold.mutate(
@@ -546,8 +547,8 @@ export function PublicFloorPlan({ projectId, developerId }: Props) {
 
                 {/* Pins */}
                 {visibleUnits.map(unit => {
-                  const cfg = STATUS_CONFIG[unit.unit_status ?? 'available'] ?? STATUS_CONFIG.available;
-                  const isAvailable = (unit.unit_status ?? 'available') === 'available';
+                  const cfg = STATUS_CONFIG[unit.unit_status ?? 'unknown'] ?? STATUS_CONFIG.available;
+                  const isAvailable = (unit.unit_status ?? 'unknown') === 'available';
                   return (
                     <div
                       key={unit.id}
