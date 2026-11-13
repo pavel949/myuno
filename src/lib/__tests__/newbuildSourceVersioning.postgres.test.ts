@@ -68,6 +68,7 @@ beforeAll(async () => {
   await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/newbuild-source-versioning-base.sql', 'utf8'));
   await sql.unsafe(migration);
   await sql.unsafe(readFileSync('docs/hardening/newbuild-source-versioning/forward.sql', 'utf8'));
+  await sql.unsafe(readFileSync('docs/hardening/newbuild-source-versioning/held-status.sql', 'utf8'));
 }, 60000);
 
 afterAll(async () => {
