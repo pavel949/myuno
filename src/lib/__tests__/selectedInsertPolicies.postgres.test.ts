@@ -37,7 +37,7 @@ describe('selected INSERT policies — isolated PostgreSQL', () => {
       CREATE FUNCTION public.actor_private_property_ceiling(uuid) RETURNS boolean LANGUAGE sql STABLE AS $$SELECT coalesce(current_setting('test.scope',true),'')<>'denied'$$;
       CREATE POLICY operating_space_property_ceiling ON property_activity_log AS RESTRICTIVE FOR ALL TO authenticated USING(actor_private_property_ceiling(property_id)) WITH CHECK(actor_private_property_ceiling(property_id));
       INSERT INTO orgs(name) VALUES('Legacy organization');`);
-    await sql.unsafe(readFileSync('docs/hardening/selected-insert-policies.sql', 'utf8'));
+    await sql.unsafe(readFileSync('drizzle/migrations/0036_bind_selected_insert_policies_to_actor.sql', 'utf8'));
   }, 30000);
   afterAll(async () => { if (sql) await sql.end(); if (started) run('pg_ctl', ['-D', join(directory, 'data'), '-m', 'immediate', '-w', 'stop']); if (directory) rmSync(directory, { recursive: true, force: true }); });
   const as = async (role: string, query: string, scope = '', admin = '') => sql.begin(async tx => {
