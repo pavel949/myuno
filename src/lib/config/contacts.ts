@@ -4,19 +4,21 @@
  */
 
 export const COMPANY_CONTACTS = {
+  contactPerson: 'Pavel',
+  contactLanguages: ['en', 'ru'],
   phone: {
     // Primary hotline number used across the platform
-    hotline: '+66 92 240 7355',
+    hotline: '+66 95 424 3332',
     // Formatted for display
-    display: '+66 92 240 7355',
+    display: '+66 95 424 3332',
     // Raw number for tel: links
-    raw: '+66922407355',
+    raw: '+66954243332',
   },
   whatsapp: {
     // WhatsApp number without + prefix
-    number: '66922407355',
+    number: '66954243332',
     // Full WhatsApp link
-    link: 'https://wa.me/66922407355',
+    link: 'https://wa.me/66954243332',
   },
   telegram: {
     // Telegram support channel
@@ -42,7 +44,7 @@ export const COMPANY_CONTACTS = {
   social: {
     instagram: 'https://instagram.com/myuno.app',
     telegram: 'https://t.me/myuno_support',
-    whatsapp: 'https://wa.me/66922407355',
+    whatsapp: 'https://wa.me/66954243332',
   },
   address: {
     full: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand',

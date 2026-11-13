@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -591,7 +592,7 @@ export default function MCHelpPage() {
                 <Button
                   variant="outline"
                   className="gap-2 shrink-0"
-                  onClick={() => window.open('https://wa.me/66922407355', '_blank')}
+                  onClick={() => window.open(getWhatsAppUrl(), '_blank')}
                 >
                   <MessageSquare className="h-4 w-4" />
                   WhatsApp

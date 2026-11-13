@@ -1,4 +1,5 @@
 import React from 'react';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -398,7 +399,7 @@ const ForManagementCompanies: React.FC = () => {
                 <Zap className="w-5 h-5" />
                 {isRu ? 'Начать 14-дневный триал' : 'Start 14-Day Trial'}
               </Button>
-              <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => window.open('https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank')}>
+              <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => window.open(getWhatsAppUrl("Hi, I'm interested in myUNO for my management company"), '_blank')}>
                 <MessageSquare className="w-5 h-5 mr-2" />
                 {isRu ? 'Связаться в WhatsApp' : 'Chat on WhatsApp'}
               </Button>

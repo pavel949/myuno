@@ -2,6 +2,7 @@
  * PEYLAA Lead Capture Form — Modal overlay
  */
 import React, { useState } from 'react';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { X, Send, Check, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,7 +91,7 @@ export function PeylaaLeadForm({ source, utm, unitId, onClose }: Props) {
             </p>
             <Button
               className="w-full bg-success hover:bg-success text-white"
-              onClick={() => window.open(`https://wa.me/66922407355?text=Здравствуйте! Я ${form.full_name}, оставил заявку на PEYLAA Phuket`, '_blank')}
+              onClick={() => window.open(getWhatsAppUrl(`Здравствуйте! Я ${form.full_name}, оставил заявку на PEYLAA Phuket`), '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Написать в WhatsApp сейчас
