@@ -44,6 +44,7 @@ import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { HostProfileSection } from '@/components/property/HostProfileSection';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { SimilarProperties } from '@/components/property/SimilarProperties';
+import { PropertyQuestionButton } from '@/components/property/PropertyQuestionButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import {
@@ -678,6 +679,9 @@ export default function PropertyDetail() {
                 district={property.district}
                 propertyType={property.property_type}
                 bedrooms={property.bedrooms}
+                pricePerNight={pricePerNight}
+                mode={pricing.mode}
+                guestSearch={new URLSearchParams({ mode: pricing.mode, ...(dateRange?.from && dateRange.to ? { checkIn: format(dateRange.from, 'yyyy-MM-dd'), checkOut: format(dateRange.to, 'yyyy-MM-dd') } : {}), guests: String(guestCount) }).toString()}
                 nights={
                   dateRange?.from && dateRange?.to
                     ? Math.max(0, Math.round((dateRange.to.getTime() - dateRange.from.getTime()) / 86_400_000))
@@ -753,10 +757,11 @@ export default function PropertyDetail() {
                 <div className="flex flex-col gap-3 w-full min-w-0">
                   <PropertyBookingCard
                     key={id}
-                    initialGuestContext={initialGuestContext}
+                    initialGuestContext={{ dateRange, guests: guestCount }}
+                    onGuestContextChange={context => { setDateRange(context.dateRange); setGuestCount(context.guests); }}
                     guestSearch={propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]}
                     propertyId={id || 'prop-1'}
-                    pricePerNight={pricePerNight!}
+                    pricePerNight={pricePerNight ?? 0}
                     rentalTerms={rentalTerms}
                     currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
@@ -771,17 +776,7 @@ export default function PropertyDetail() {
                     negotiationEnabled={property?.negotiation_enabled ?? false}
                     seasonalPricing={rentalTerms?.seasonal_pricing as any ?? undefined}
                   />
-                  <MessageHostButton
-                    propertyId={id || 'prop-1'}
-                    propertyTitle={property.title_en}
-                    propertyTitleRu={property.title_ru}
-                    ownerName={rentalTerms?.manager_name}
-                    variant="ghost"
-                    size="sm"
-                    fullWidth
-                    labelRu="Написать менеджеру"
-                    labelEn="Message manager"
-                  />
+                  <PropertyQuestionButton propertyId={id || ''} title={propertyTitle} context={{ dateRange, guests: guestCount }} className="w-full min-h-11" />
                   <div className="rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
                     <p>
                       {isRu
@@ -823,6 +818,22 @@ export default function PropertyDetail() {
 
         {/* Mobile Date Picker Sheet */}
         {pricing.canQuoteShortStay && <PropertyDetailDateSheet
+          bookingPricing={{
+            currency: listingCurrency,
+            earlyBookingDiscount: property.early_booking_discount ?? undefined,
+            earlyBookingDays: property.early_booking_days ?? undefined,
+            lastMinuteDiscount: property.last_minute_discount ?? undefined,
+            lastMinuteDays: property.last_minute_days ?? undefined,
+            paymentPolicy: property.payment_policy ?? undefined,
+            prepayPercent: property.prepay_percent ?? undefined,
+            depositAmount: property.deposit_amount ?? undefined,
+            depositCurrency: property.deposit_currency ?? undefined,
+            customLengthDiscounts: property.custom_length_discounts as Array<{ min_nights: number; discount_percent: number }> ?? undefined,
+          }}
+          propertyId={id || ''}
+          pricePerNight={pricePerNight ?? 0}
+          rentalTerms={rentalTerms}
+          guestSearch={propertyDetailHref(id || '', 'rent', searchParams.toString()).split('?')[1]}
           open={dateSheetOpen}
           onOpenChange={setDateSheetOpen}
           dateRange={dateRange}

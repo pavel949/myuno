@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Zap, Info, ChevronDown, ChevronUp, Calendar as CalendarIcon, X, Shield, Clock, Award } from 'lucide-react';
+import { Users, Info, ChevronDown, ChevronUp, Calendar as CalendarIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -28,6 +28,7 @@ import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 interface PropertyBookingCardProps {
   propertyId: string;
   initialGuestContext?: PropertyGuestContext;
+  onGuestContextChange?: (context: PropertyGuestContext) => void;
   guestSearch?: string;
   pricePerNight: number;
   rentalTerms?: PropertyRentalTerms | null;
@@ -49,6 +50,7 @@ interface PropertyBookingCardProps {
 export function PropertyBookingCard({
   propertyId,
   initialGuestContext,
+  onGuestContextChange,
   guestSearch,
   pricePerNight,
   rentalTerms,
@@ -77,8 +79,8 @@ export function PropertyBookingCard({
   const [editedGuests, setEditedGuests] = useState<{ propertyId: string; value: number }>();
   const dateRange = editedDates?.propertyId === propertyId ? editedDates.value : initialGuestContext?.dateRange;
   const guests = editedGuests?.propertyId === propertyId ? editedGuests.value : initialGuestContext?.guests ?? 1;
-  const setDateRange = (value: DateRange | undefined) => setEditedDates({ propertyId, value });
-  const setGuests = (value: number) => setEditedGuests({ propertyId, value });
+  const setDateRange = (value: DateRange | undefined) => { setEditedDates({ propertyId, value }); onGuestContextChange?.({ dateRange: value, guests }); };
+  const setGuests = (value: number) => { setEditedGuests({ propertyId, value }); onGuestContextChange?.({ dateRange, guests: value }); };
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { isDesktop } = useBreakpoint();
@@ -200,19 +202,6 @@ export function PropertyBookingCard({
     navigate(`${APP_ROUTES.PROPERTY_INQUIRY(propertyId)}?${params.toString()}`);
   };
 
-  // Trust signals
-  const trustSignals = useMemo(() => {
-    const signals: Array<{ icon: React.ReactNode; text: string }> = [];
-    if (rentalTerms?.instant_booking) {
-      signals.push({ icon: <Zap className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Мгновенное подтверждение' : 'Instant confirmation' });
-    }
-    if (rentalTerms?.cancellation_policy === 'flexible' || rentalTerms?.cancellation_policy === 'moderate') {
-      signals.push({ icon: <Shield className="w-3.5 h-3.5 text-success" />, text: isRu ? 'Бесплатная отмена' : 'Free cancellation' });
-    }
-    signals.push({ icon: <Award className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Гарантия лучшей цены' : 'Best price guarantee' });
-    return signals;
-  }, [rentalTerms, isRu]);
-
   // Sticky positioning is on PropertyDetail aside; do not nest sticky on this Card.
   //
   // A4 (Airbnb-style audit): the "Pay full / Split" toggle (PaymentStageSelector)
@@ -227,6 +216,7 @@ export function PropertyBookingCard({
             - Before dates: invite to pick dates (no nightly teaser, no operational pricing leak)
             - After dates: show TOTAL prominently with "for N nights" subtitle */}
         <div>
+          <h2 className="text-base font-semibold mb-2">{isRu ? 'Стоимость проживания' : 'Stay cost'}</h2>
           {nights > 0 ? (
             <>
               <div className="flex items-baseline gap-1.5">
@@ -240,16 +230,16 @@ export function PropertyBookingCard({
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {isRu ? 'Налоги и сборы включены' : 'Taxes & fees included'}
+                {isRu ? 'Предварительный расчёт по тарифам объекта' : 'Estimate based on this home’s rates'}
               </p>
             </>
           ) : (
             <>
               <p className="text-base font-display font-semibold text-foreground">
-                {isRu ? 'Добавьте даты, чтобы увидеть цену' : 'Add dates to see the total price'}
+                {isRu ? 'Рассчитайте стоимость на ваши даты' : 'Calculate the cost for your dates'}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {isRu ? 'Без скрытых платежей' : 'No hidden fees'}
+                {isRu ? 'Выберите даты и количество гостей' : 'Select dates and number of guests'}
               </p>
             </>
           )}
@@ -416,34 +406,18 @@ export function PropertyBookingCard({
         {/* Reserve Button — gradient CTA */}
         <Button 
           size="lg" 
-          className={cn(
-            "w-full text-base font-semibold h-12 rounded-none",
-            "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
-            "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
-            "transition-all duration-200 hover:shadow-[0_6px_20px_-3px_hsl(var(--primary)/0.5)] ",
-            rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
-          )}
-          onClick={handleReserve}
-          disabled={!availabilityReady || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+          className="w-full min-h-12 h-auto py-3 whitespace-normal text-sm font-semibold"
+          onClick={() => { if (!dateRange?.from || !dateRange?.to) setCalendarOpen(true); else handleReserve(); }}
+          disabled={!availabilityReady || validationErrors.length > 0}
         >
           {!dateRange?.from || !dateRange?.to ? (
-            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Проверить наличие' : 'Check availability'}</>
-          ) : rentalTerms?.instant_booking ? (
-            <><Zap className="w-4 h-4 mr-2" />{isRu ? 'Мгновенное бронирование' : 'Book instantly'}</>
+            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
           ) : (
-            isRu ? 'Забронировать' : 'Reserve'
+            isRu ? 'Запросить прямое бронирование' : 'Request direct booking'
           )}
         </Button>
         
-        {/* Trust Signals */}
-        <div className="flex flex-col gap-1.5">
-          {trustSignals.map((signal, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-              {signal.icon}
-              <span>{signal.text}</span>
-            </div>
-          ))}
-        </div>
+        <p className="text-xs text-muted-foreground">{isRu ? 'Расчёт не подтверждает бронь. На следующем шаге проверьте условия; вопрос менеджеру можно задать без оплаты.' : 'This estimate does not confirm a booking. Review the terms on the next step; asking the manager requires no payment.'}</p>
 
         {!nights ? null : (
           <>
@@ -505,7 +479,7 @@ export function PropertyBookingCard({
               <div className="pt-2 mt-1 space-y-2 p-3 rounded-none bg-muted/40">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {isRu ? `Оплатить сейчас (${pricing.prepayPercent}%)` : `Pay now (${pricing.prepayPercent}%)`}
+                    {isRu ? `Предоплата по условиям (${pricing.prepayPercent}%)` : `Prepayment under the terms (${pricing.prepayPercent}%)`}
                   </span>
                   <span className="font-bold text-primary">
                     {formatPrice(pricing.prepayAmount)}

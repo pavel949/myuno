@@ -10,6 +10,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PropertyBookingCard } from '../PropertyBookingCard';
+import type { PropertyRentalTerms } from '@/hooks/useProperties';
 
 interface AvailabilityEntry {
   date: Date | string;
@@ -17,6 +19,11 @@ interface AvailabilityEntry {
 }
 
 interface PropertyDetailDateSheetProps {
+  bookingPricing?: Partial<React.ComponentProps<typeof PropertyBookingCard>>;
+  propertyId?: string;
+  pricePerNight?: number;
+  rentalTerms?: PropertyRentalTerms | null;
+  guestSearch?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dateRange: DateRange | undefined;
@@ -34,6 +41,7 @@ interface PropertyDetailDateSheetProps {
 }
 
 export function PropertyDetailDateSheet({
+  propertyId, pricePerNight, rentalTerms, guestSearch, bookingPricing,
   open,
   onOpenChange,
   dateRange,
@@ -61,10 +69,15 @@ export function PropertyDetailDateSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-none max-h-[85vh] overflow-y-auto">
         <SheetHeader className="pb-2">
-          <SheetTitle>{isRu ? 'Выберите даты' : 'Select dates'}</SheetTitle>
+          <SheetTitle>{isRu ? 'Стоимость проживания' : 'Stay cost'}</SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-4">
+        {propertyId && typeof pricePerNight === 'number' ? <PropertyBookingCard
+          {...bookingPricing}
+          propertyId={propertyId} pricePerNight={pricePerNight} rentalTerms={rentalTerms} guestSearch={guestSearch}
+          initialGuestContext={{ dateRange, guests: guestCount }}
+          onGuestContextChange={context => { onDateRangeChange(context.dateRange); onGuestCountChange(context.guests); }}
+        /> : <div className="space-y-4">
           <AvailabilityStatus loading={!availabilityReady && !availabilityError} error={availabilityError} onRetry={onRetryAvailability} />
           <div className="flex justify-center">
             <Calendar
@@ -156,7 +169,7 @@ export function PropertyDetailDateSheet({
               ? (isRu ? 'Перейти к бронированию' : 'Continue to booking')
               : (isRu ? 'Выберите даты' : 'Select dates')}
           </Button>
-        </div>
+        </div>}
       </SheetContent>
     </Sheet>
   );

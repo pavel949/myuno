@@ -1,132 +1,86 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, BedDouble, Award } from 'lucide-react';
-import { isGuestFavorite } from './GuestFavoriteBadge';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { Button } from '@/components/ui/button';
+import { MapPin, BedDouble } from 'lucide-react';
+import { allowedRecommendationIds, rankRelatedProperties } from '@/lib/real-estate/relatedProperties';
+import { propertyDetailHref, propertyRentalDisplayPrice, propertySaleAskingPrice, PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 
 interface SimilarPropertiesProps {
-  propertyId: string;
-  district?: string | null;
-  propertyType?: string | null;
-  bedrooms?: number | null;
-  /** When the user has selected dates on the parent detail page, we show
-   *  a "total for N nights" pill instead of the nightly rate, mirroring
-   *  Airbnb's similar-properties strip after dates are chosen. */
-  nights?: number;
+  propertyId: string; district?: string | null; propertyType?: string | null; bedrooms?: number | null;
+  nights?: number; pricePerNight?: number | null; mode?: 'rent' | 'buy'; guestSearch?: string;
 }
-
-export function SimilarProperties({
-  propertyId,
-  district,
-  propertyType,
-  bedrooms: _bedrooms,
-  nights,
-}: SimilarPropertiesProps) {
-  const navigate = useNavigate();
+export function SimilarProperties({ propertyId, district, propertyType, pricePerNight, mode = 'rent', guestSearch }: SimilarPropertiesProps) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
-
-  const { data: similar = [] } = useQuery({
-    queryKey: ['similar-properties', propertyId, district],
+  const aiEnabled = useFeatureFlag('property_related_ai');
+  const catalogue = useQuery({
+    queryKey: ['similar-properties', propertyId, district, propertyType, pricePerNight, mode],
     queryFn: async () => {
-      let q = supabase
-        .from('public_property_catalog')
-        .select('id, title_en, title_ru, district, cover_image, bedrooms, price_per_night, property_type, rating, review_count')
-        .eq('is_active', true)
-        .eq('approval_status', 'approved')
-        .neq('id', propertyId)
-        .limit(6);
-
-      if (district) {
-        q = q.ilike('district', `%${district}%`);
-      }
-      if (propertyType) {
-        q = q.eq('property_type', propertyType);
-      }
-
-      const { data } = await q;
-      return data ?? [];
-    },
-    enabled: !!propertyId,
-    staleTime: 5 * 60 * 1000,
+      const { data, error } = await supabase.from('public_property_catalog')
+        .select('id,title_en,title_ru,district,cover_image,bedrooms,price_per_night,price_per_month,price_per_year,price,price_period,currency,sale_price,sale_currency,property_type,listing_type,listing_modes,is_for_sale')
+        .eq('is_active', true).eq('approval_status', 'approved').or(mode === 'rent' ? PUBLIC_RENT_ELIGIBILITY : PUBLIC_SALE_ELIGIBILITY)
+        .neq('id', propertyId).order('id').limit(100);
+      if (error) throw error;
+      return rankRelatedProperties(data ?? [], { id: propertyId, district, property_type: propertyType, price_per_night: pricePerNight }, mode);
+    }, enabled: !!propertyId, staleTime: 300_000,
   });
-
-  if (similar.length === 0) return null;
-
-  return (
-    <div>
-      <h3 className="text-lg font-semibold mb-3">
-        {isRu ? 'Похожие объекты' : 'Similar Properties'}
-      </h3>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x scrollbar-hide">
-        {similar.map(p => {
-          const nightly = p.price_per_night ?? 0;
-          const showTotal = nights && nights > 0 && nightly > 0;
-          const total = showTotal ? nightly * nights : null;
-          const favourite = isGuestFavorite(p.rating, p.review_count);
-          return (
-            <Card
-              key={p.id}
-              className="min-w-[220px] max-w-[260px] snap-start cursor-pointer hover:shadow-md transition-shadow flex-shrink-0 overflow-hidden"
-              onClick={() => navigate(`/property/${p.id}`)}
-            >
-              <div className="aspect-[4/3] bg-muted relative">
-                {p.cover_image ? (
-                  <img src={p.cover_image} alt="" className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                    {isRu ? 'Нет фото' : 'No photo'}
-                  </div>
-                )}
-                {/* Price pill — Airbnb pattern: prominent on the image to scan
-                    quickly. Switches to "total for N nights" once dates are set. */}
-                {nightly > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute bottom-2 left-2 bg-background/95 text-foreground border border-border/40 font-semibold shadow-sm"
-                  >
-                    {showTotal
-                      ? `${formatPrice(total!)} ${isRu ? 'за ' + nights + (nights === 1 ? ' ночь' : nights < 5 ? ' ночи' : ' ночей') : 'for ' + nights + (nights === 1 ? ' night' : ' nights')}`
-                      : `${formatPrice(nightly)}/${isRu ? 'ночь' : 'night'}`}
-                  </Badge>
-                )}
-                {favourite && (
-                  <span
-                    className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border/40 shadow-sm"
-                    title={isRu ? 'Любимец гостей' : 'Guest favorite'}
-                  >
-                    <Award className="w-3 h-3 text-primary" />
-                    {isRu ? 'Любимец' : 'Favorite'}
-                  </span>
-                )}
-              </div>
-              <CardContent className="p-3">
-                <p className="font-medium text-sm truncate">
-                  {isRu ? (p.title_ru || p.title_en) : (p.title_en || p.title_ru)}
-                </p>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                  {p.district && (
-                    <>
-                      <MapPin className="w-3 h-3" />
-                      <span className="truncate">{p.district}</span>
-                    </>
-                  )}
-                  {p.bedrooms && (
-                    <span className="flex items-center gap-0.5 ml-auto">
-                      <BedDouble className="w-3 h-3" /> {p.bedrooms}
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
+  const ranking = useQuery({
+    queryKey: ['property-related-ai', propertyId, mode, language],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('property-related-recommendations', { body: { propertyId, mode, language: isRu ? 'ru' : 'en' } });
+      if (error) {
+        const context = 'context' in error ? error.context : null;
+        if (context instanceof Response) {
+          const body = await context.json().catch(() => null);
+          throw new Error(body?.error ?? error.message);
+        }
+        throw error;
+      }
+      if (!(data instanceof Response) || !data.body) throw new Error(isRu ? 'Не удалось получить подборку' : 'Could not receive recommendations');
+      const reader = data.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let returnedIds: unknown = [];
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let boundary: number;
+        while ((boundary = buffer.indexOf('\n\n')) >= 0) {
+          const event = buffer.slice(0, boundary); buffer = buffer.slice(boundary + 2);
+          const payload = event.split('\n').find(line => line.startsWith('data: '));
+          if (!payload) continue;
+          const parsed = JSON.parse(payload.slice(6));
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.ids) returnedIds = parsed.ids;
+        }
+      }
+      return allowedRecommendationIds(returnedIds, catalogue.data ?? [], propertyId);
+    }, enabled: aiEnabled && !!catalogue.data?.length, staleTime: 300_000, retry: false,
+  });
+  const items = catalogue.data ?? [];
+  const ids = ranking.data ?? [];
+  const similar = (ids.length ? [...ids.map(id => items.find(item => item.id === id)).filter(item => item !== undefined), ...items.filter(item => !ids.includes(item.id))] : items).slice(0, 6);
+  return <section aria-label={isRu ? 'Вам также может понравиться' : 'You may also like'}>
+    <h2 className="text-h3 mb-4">{isRu ? 'Вам также может понравиться' : 'You may also like'}</h2>
+    {aiEnabled && ranking.isError && <p role="status" className="text-xs text-muted-foreground mb-3">{ranking.error.message}</p>}
+    {catalogue.isLoading ? <div role="status" className="h-40 bg-muted animate-pulse" aria-label={isRu ? 'Подбираем объекты' : 'Loading related homes'} /> : catalogue.isError ? <div role="alert"><p>{isRu ? 'Не удалось загрузить варианты' : 'Could not load related homes'}</p><Button variant="outline" onClick={() => catalogue.refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button></div> : !similar.length ? <p className="text-sm text-muted-foreground">{isRu ? 'Других предложений пока нет' : 'No other offers yet'}</p> : <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      {similar.map(p => {
+        const rate = mode === 'rent' ? propertyRentalDisplayPrice(p) : null;
+        const amount = mode === 'buy' ? (p.sale_currency ?? p.currency)?.toUpperCase() === 'THB' ? propertySaleAskingPrice(p) : null : p.currency?.toUpperCase() === 'THB' ? rate?.amount : null;
+        const period = rate ? ({ night: isRu ? 'ночь' : 'night', week: isRu ? 'нед.' : 'week', month: isRu ? 'мес.' : 'month', year: isRu ? 'год' : 'year', total: '' })[rate.period] : '';
+        return <Link key={p.id} to={propertyDetailHref(p.id, mode, guestSearch)} className="min-w-0 border border-border bg-card overflow-hidden focus-visible:ring-2 focus-visible:ring-ring">
+          <div className="aspect-[4/3] bg-muted">{p.cover_image ? <img src={p.cover_image} alt={(isRu ? p.title_ru || p.title_en : p.title_en || p.title_ru) ?? ''} loading="lazy" className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-sm text-muted-foreground">{isRu ? 'Нет фото' : 'No photo'}</div>}</div>
+          <div className="p-3 space-y-2"><h3 className="text-sm font-semibold break-words">{isRu ? p.title_ru || p.title_en : p.title_en || p.title_ru}</h3>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">{p.district && <span className="flex gap-1 items-center"><MapPin className="h-3 w-3" />{p.district}</span>}{p.bedrooms != null && <span className="flex gap-1 items-center"><BedDouble className="h-3 w-3" />{p.bedrooms}</span>}</div>
+          <p className="text-sm font-mono">{amount ? `${formatPrice(amount)}${period ? ` / ${period}` : ''}` : isRu ? 'Цена по запросу' : 'Price on request'}</p></div>
+        </Link>;
+      })}
+    </div>}
+  </section>;
 }

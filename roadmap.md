@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-11-13 · Property detail option A
+- [x] Make stay calculation and assisted booking requests explicit on desktop/mobile; existing inquiry/payment branch authority remains unchanged, the estimate itself is not a reservation.
+- [x] Offer contextual WhatsApp questions without forcing sign-in; improve related public catalogue choices without fabricated totals or availability.
+- [x] Prepare source-bound Lovable AI ranking; 73/73 focused tests, 4/4 isolated browser cases, Deno check and synthetic gateway ranking pass. No business-data writes, notifications or publication. Evidence: docs/qa/PROPERTY_OPTION_A_2026_11_13.md.
+- [ ] AI activation requires separate reviewed function deployment and feature-flag approval; deterministic public catalogue recommendations work while the flag is off. Hosted request/payment acceptance remains outside this tranche.
+
 ## 2026-11-13 · Exact Inbox request navigation
 - [x] Retain source and selected request ID in a reloadable URL; open that exact canonical record rather than a general section. Queue filters/search/page also survive selection and reload.
 - [x] Verify all five Inbox sources, navigation/reload/back and missing/invalid/denied/error states with isolated fixtures; 62/62 tests and 10/10 browser scenarios PASS, existing guards preserved, production network blocked.

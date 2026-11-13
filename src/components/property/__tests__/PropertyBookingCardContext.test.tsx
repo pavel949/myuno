@@ -23,7 +23,7 @@ describe('booking card initial guest context', () => {
   it('hydrates both dates and party while keeping unknown availability blocked', () => {
     render(<Card />);
     expect(screen.getByText('3 guests')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reserve' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Request direct booking' })).toBeDisabled();
     expect(screen.getByText('Checking availability…')).toBeInTheDocument();
   });
   it('updates untouched dates and guests on same-property URL navigation', () => {
@@ -38,7 +38,7 @@ describe('booking card initial guest context', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
     expect(screen.getByText('2 guests')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reserve' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Request direct booking' })).not.toBeInTheDocument();
   });
   it('does not replace user edits when parent initial context changes', () => {
     mountRouted();
@@ -48,7 +48,7 @@ describe('booking card initial guest context', () => {
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
     expect(screen.getByText('4 guests')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Check-in.*10 Dec 2099.*Check-out.*14 Dec 2099/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reserve' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Request direct booking' })).toBeDisabled();
   });
 });
 
@@ -56,6 +56,6 @@ it('keeps validated intent on the existing desktop inquiry route', () => {
   availability.isSuccess = true;
   function Destination() { const [params] = useSearchParams(); return <output data-testid="inquiry-query">{params.toString()}</output>; }
   render(<MemoryRouter><PropertyBookingCard propertyId="home" pricePerNight={2000} initialGuestContext={context} guestSearch="mode=rent&tenancy=short&intent=holiday" /><Destination /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: 'Reserve' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Request direct booking' }));
   expect(Object.fromEntries(new URLSearchParams(screen.getByTestId('inquiry-query').textContent ?? ''))).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2099-12-01', checkOut: '2099-12-04', guests: '3' });
 });

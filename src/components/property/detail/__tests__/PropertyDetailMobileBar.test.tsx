@@ -20,20 +20,19 @@ describe('mobile property action contract', () => {
   it('opens dates for an undated short stay and preserves dated inquiry context', () => {
     const openDates = vi.fn();
     const view = render(<PropertyDetailMobileBar {...base} onOpenDatePicker={openDates} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Select dates' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate stay cost' }));
     expect(openDates).toHaveBeenCalledOnce();
-    view.rerender(<PropertyDetailMobileBar {...base} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Reserve' }));
-    const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
-    expect(url.pathname).toBe('/property/fixture-home/inquiry');
-    expect(Object.fromEntries(url.searchParams)).toEqual({ checkIn: '2027-11-10', checkOut: '2027-11-15', guests: '3' });
+    view.rerender(<PropertyDetailMobileBar {...base} onOpenDatePicker={openDates} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Cost & booking request' }));
+    expect(openDates).toHaveBeenCalledTimes(2);
+    expect(state.navigate).not.toHaveBeenCalled();
   });
   it('offers the existing manager request for long-stay-only homes without opening short-stay inquiry', () => {
     const openDates = vi.fn();
     render(<PropertyDetailMobileBar {...base} isLongStayOnly onOpenDatePicker={openDates} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
     expect(screen.getByRole('button', { name: 'Request rental' })).toHaveAttribute('data-property-id', 'fixture-home');
-    expect(screen.queryByRole('button', { name: 'Reserve' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Select dates' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Cost & booking request' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Calculate stay cost' })).toBeNull();
     expect(state.navigate).not.toHaveBeenCalled();
     expect(openDates).not.toHaveBeenCalled();
   });
@@ -43,15 +42,9 @@ describe('mobile property action contract', () => {
     expect(screen.queryByRole('button', { name: 'Request rental' })).toBeNull();
   });
 });
-it('keeps validated guest intent on the existing dated inquiry route', () => {
-  render(<PropertyDetailMobileBar {...base} guestSearch="mode=rent&tenancy=short&intent=holiday&guests=4" dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Reserve' }));
-  const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
-  expect(Object.fromEntries(url.searchParams)).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2027-11-10', checkOut: '2027-11-15', guests: '3' });
-});
 it('shows an explicitly monthly long-stay label on the existing request action', () => {
   render(<PropertyDetailMobileBar {...base} isLongStayOnly rentalPriceLabel="45000 / month" />);
   expect(screen.getByText('45000 / month')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Select dates' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Calculate stay cost' })).toBeNull();
 });
