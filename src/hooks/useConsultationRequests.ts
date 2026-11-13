@@ -228,9 +228,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // Request property tour
@@ -244,9 +242,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // Request full management (for owners)
@@ -260,9 +256,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // Request investment advice
@@ -276,9 +270,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // Request vacation rental
@@ -292,9 +284,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // B2B: Phuket developer / project partnership (newbuilds, leads, co-marketing)
@@ -308,9 +298,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   // Request channel management
@@ -324,9 +312,7 @@ export function useConsultationRequests() {
     onSuccess: () => {
       saved();
     },
-    onError: () => {
-      unconfirmed();
-    },
+    onError: unconfirmed,
   });
 
   return {
