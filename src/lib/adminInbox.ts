@@ -28,7 +28,10 @@ export async function fetchInboxRequest(source: InboxSource, id: string): Promis
   const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
   const { data, error } = await supabase.from(source).select(fields.join(',')).eq('id', id).maybeSingle();
   if (error) throw error;
-  return data as Record<string, unknown> | null;
+  const record: unknown = data;
+  if (record === null) return null;
+  if (typeof record !== 'object' || Array.isArray(record) || !('id' in record) || record.id !== id) throw new Error('Request identity mismatch');
+  return record as Record<string, unknown>;
 }
 
 export interface InboxItem {

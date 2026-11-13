@@ -55,11 +55,19 @@ export default function AdminInbox() {
   const { user } = useAuth();
   const isRu = language === 'ru';
   const [params, setParams] = useSearchParams();
-  const [tab, setTab] = useState<InboxStatus | 'all'>('new');
+  const rawTab = params.get('status');
+  const tab = TABS.find(candidate => candidate.id === rawTab)?.id ?? 'new';
   const selectedSource = params.get('source');
   const sourceFilter: InboxSource = isInboxSource(selectedSource) ? selectedSource : 'partner_applications';
-  const [query, setQuery] = useState('');
-  const [page, setPage] = useState(0);
+  const query = params.get('q') ?? '';
+  const rawPage = Number(params.get('page') ?? 0);
+  const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
+  const updateQueue = (changes: Record<string, string>) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    Object.entries(changes).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key));
+    return next;
+  });
+  const setPage = (value: number | ((previous: number) => number)) => updateQueue({ page: String(typeof value === 'function' ? value(page) : value) });
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin-inbox', user?.id, sourceFilter, page, tab, query], enabled: !!user,
@@ -101,7 +109,7 @@ export default function AdminInbox() {
               <button
                 key={t.id}
                 type="button"
-                onClick={() => { setTab(t.id); setPage(0); }}
+                onClick={() => updateQueue({ status: t.id, page: '0' })}
                 role="tab"
                 aria-selected={isActive}
                 className={cn(
@@ -127,7 +135,7 @@ export default function AdminInbox() {
                 <button
                   key={src}
                   type="button"
-                  onClick={() => { setParams(previous => { const next = new URLSearchParams(previous); next.set('source', src); next.delete('request'); return next; }); setPage(0); }}
+                  onClick={() => updateQueue({ source: src, request: '', page: '0' })}
                   className={cn(
                     'px-2.5 py-1 text-[11px] font-medium border whitespace-nowrap',
                     isActive
@@ -147,7 +155,7 @@ export default function AdminInbox() {
               type="search"
               aria-label={isRu ? 'Поиск заявок' : 'Search applications'}
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setPage(0); }}
+              onChange={(e) => updateQueue({ q: e.target.value, page: '0' })}
               placeholder={SEARCH_HINTS[sourceFilter][isRu ? 1 : 0]}
               className="w-full pl-9 pr-3 py-2 text-[13px] border border-border bg-card focus:border-primary outline-none"
             />
@@ -194,7 +202,7 @@ export default function AdminInbox() {
               return (
                 <Link
                   key={`${item.source}-${item.id}`}
-                  to={item.href}
+                  to={(() => { const target = new URL(item.href, window.location.origin); const next = new URLSearchParams(params); target.searchParams.forEach((value, key) => next.set(key, value)); return `${target.pathname}?${next}`; })()}
                   className="group flex items-start gap-3 px-4 py-3 hover:bg-muted/30 transition-colors"
                 >
                   <div
