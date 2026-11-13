@@ -1,6 +1,7 @@
 -- Forward-only repair of the two selected INSERT policies.
 -- Existing organization rows retain NULL authorship; do not invent ownership.
-ALTER TABLE public.orgs ADD COLUMN IF NOT EXISTS created_by uuid DEFAULT auth.uid();
+ALTER TABLE public.orgs ADD COLUMN IF NOT EXISTS created_by uuid;
+ALTER TABLE public.orgs ALTER COLUMN created_by SET DEFAULT auth.uid();
 COMMENT ON COLUMN public.orgs.created_by IS 'Creator identity for new organizations, bound by INSERT RLS. Legacy rows remain NULL; membership remains the organization authority.';
 
 ALTER POLICY "Authenticated users can create orgs" ON public.orgs

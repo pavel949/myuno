@@ -1,14 +1,16 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, chownSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { chmodSync, chownSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import postgres from 'postgres';
 
 // Socket-only disposable database: never accepts production connection variables.
 describe('selected INSERT policies — isolated PostgreSQL', () => {
   let directory: string; let sql: ReturnType<typeof postgres>; let started = false;
   const root = process.getuid?.() === 0;
+  const pgRoot = dirname(dirname(realpathSync(execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim())));
+  const libPath = existsSync(join(pgRoot, 'lib', 'dict_snowball.so')) ? join(pgRoot, 'lib') : null;
   const run = (bin: string, args: string[]) => root ? execFileSync('runuser', ['-u', 'nobody', '--', bin, ...args]) : execFileSync(bin, args);
   const actor = '11111111-1111-4111-8111-111111111111';
   const other = '22222222-2222-4222-8222-222222222222';
@@ -16,8 +18,8 @@ describe('selected INSERT policies — isolated PostgreSQL', () => {
   const foreign = '44444444-4444-4444-8444-444444444444';
   beforeAll(async () => {
     directory = mkdtempSync(join(tmpdir(), 'selected-insert-pg-')); chmodSync(directory, 0o700); if (root) chownSync(directory, 65534, 65534);
-    run('initdb', ['-D', join(directory, 'data'), '-A', 'trust', '--no-locale']);
-    run('pg_ctl', ['-D', join(directory, 'data'), '-l', join(directory, 'server.log'), '-o', `-k ${directory} -h '' -p 55439`, '-w', 'start']); started = true;
+    run('initdb', ['-D', join(directory, 'data'), '-A', 'trust', '--no-locale', ...(libPath ? ['-c', `dynamic_library_path=${libPath}`] : [])]);
+    run('pg_ctl', ['-D', join(directory, 'data'), '-l', join(directory, 'server.log'), '-o', `-k ${directory} -h '' -p 55439${libPath ? ` -c dynamic_library_path=${libPath}` : ''}`, '-w', 'start']); started = true;
     sql = postgres({ host: directory, port: 55439, database: 'postgres', username: root ? 'nobody' : process.env.USER, max: 1 });
     await sql.unsafe(`CREATE ROLE authenticated; CREATE ROLE anon; CREATE ROLE service_role BYPASSRLS;
       CREATE SCHEMA auth; CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
