@@ -2,28 +2,24 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { ADMIN_NAV, SIDEBAR_NAV, getActiveBottomBarItem, getWorkspaceDrawerGroups } from '../navigationModel';
 
-// The pre-redesign admin rail plus its existing Review destination. This guards
-// specialist access when regrouping the five everyday destinations. The duplicate
-// Activities editor keeps its route, while Water activities is its sole rail entry.
+// Consolidated destinations only: merged tools remain available through tabs and
+// query-preserving legacy redirects, not duplicate sidebar entries.
 const EXISTING_ADMIN_PATHS = `
 /admin/add /admin /admin/inbox /admin/catalog /admin/operations /admin/crm
-/admin/providers /admin/transfer-operators /admin/partner-applications
-/admin/restaurants /admin/salons /admin/clinics /admin/gyms /admin/vehicles
+/admin/providers /admin/partner-applications /admin/claims /admin/thai-business
+/admin/restaurants /admin/restaurants/data-quality /admin/salons /admin/clinics /admin/gyms
 /admin/transfers /admin/yachts /admin/water-activities /admin/experiences
 /admin/events /admin/education /admin/legal /admin/insurance
 /admin/pharmacies /admin/stores /admin/pets /admin/cleaning /admin/babysitters
-/admin/flowers /admin/consultations /admin/properties /admin/projects
-/admin/newbuilds /admin/developers /admin/pm-companies /admin/mc-dashboard
-/admin/investments /admin/nb-leads /admin/contracts /admin/finance /admin/control
-/admin/acquisition-metrics /admin/investor-metrics /admin/disputes
-/admin/marketing /admin/lifecycle-messaging /admin/tickets /admin/quick-listings
-/admin/bulk-publish /admin/vendor-prospects /admin/vendor-content /admin/intake
-/admin/data-import /admin/trash /admin/ai-agents /admin/ai-ops /admin/ai-knowledge
-/admin/qa-test-runner /admin/master-catalog /admin/taxonomy /admin/lookups
+/admin/flowers /admin/consultations /admin/properties /admin/newbuilds
+/admin/pm-companies /admin/mc-dashboard /admin/investments /admin/nb-leads
+/admin/contracts /admin/finance /admin/analytics /admin/disputes
+/admin/lifecycle-messaging /admin/tickets /admin/vendor-prospects /admin/trash
+/admin/ai-agents /admin/ai-ops /admin/ai-knowledge /admin/qa-test-runner
 /admin/official-news /admin/legal-documents /admin/experience-categories
 /admin/life-situations /admin/users /admin/uno-team /admin/cities
 /admin/location-knowledge /admin/translations /admin/relocation-articles
-/admin/api-keys /admin/settings /admin/review
+/admin/api-keys /admin/settings /admin/settings/forms /admin/settings/google-maps /admin/review
 `.trim().split(/\s+/).sort();
 
 describe('task-first platform navigation', () => {
@@ -47,6 +43,14 @@ describe('task-first platform navigation', () => {
     expect(SIDEBAR_NAV.admin[1].items.map(item => item.path)).toEqual(['/admin/finance', '/admin/settings']);
     expect(SIDEBAR_NAV.admin.slice(2).every(group => !group.defaultOpen)).toBe(true);
     expect(SIDEBAR_NAV.admin.every(group => group.labelTh)).toBe(true);
+    const verticals = SIDEBAR_NAV.admin.find(group => group.labelEn === 'Verticals')!;
+    expect(verticals.items.map(item => item.labelRu)).toEqual([...verticals.items.map(item => item.labelRu)].sort((a, b) => a.localeCompare(b, 'ru')));
+    const routes = readFileSync('src/components/layout/routes/adminRoutes.tsx', 'utf8');
+    for (const legacyRoute of ['/admin/control', '/admin/master-catalog', '/admin/acquisition-metrics', '/admin/investor-metrics', '/admin/marketing', '/admin/lead-configs', '/admin/intake-configs', '/admin/transfer-operators', '/admin/transfers/sla', '/admin/diagnostics/google-maps']) {
+      expect(routes).toContain(`path="${legacyRoute}"`);
+    }
+    expect(routes).toContain('path="/admin/control" element={<Navigate to="/admin" replace />}');
+    expect(routes).toContain('path="/admin/thai-business" element={<Pages.AdminThaiBusiness />}');
     expect(getWorkspaceDrawerGroups('admin')).toBe(SIDEBAR_NAV.admin);
   });
 
