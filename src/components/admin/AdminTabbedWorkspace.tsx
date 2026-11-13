@@ -51,7 +51,7 @@ export function AdminTabbedWorkspace({
       <Tabs value={activeTab} onValueChange={selectTab} className="w-full">
         <TabsList aria-label={`${title} sections`} className="flex h-auto w-full flex-wrap justify-start gap-1">
           {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="min-h-11 px-3">
+            <TabsTrigger key={tab.value} value={tab.value} className="min-h-11 flex-none px-3 sm:flex-1">
               {isRu ? tab.labelRu : tab.labelEn}
             </TabsTrigger>
           ))}
