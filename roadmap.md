@@ -1,5 +1,9 @@
 # Roadmap
 
+## 2026-11-13 · Lead retry monitoring finding
+- [ ] Confirm and minimally fix definitive rejection recovery; preserve uncertain-outcome duplicate protection and explain safe retry to visitors.
+- [ ] Run isolated regression/UI checks; no production writes, notifications, deployments or publication.
+
 ## 2026-10-24 · Protected-page background verification
 - [x] Reconcile parallel guard implementations: preserve same-actor/context drafts with native portal quarantine and stable sibling layouts, without stale admission.
 - [x] Current local reconciliation:91 selected tests (including26 security/shell tests),28 controlled-focus Chromium cases and pointer Retry probe pass. No production access, deployment or publishing. Evidence: docs/qa/guard-background-recheck-20261023.md.
