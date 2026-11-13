@@ -8,7 +8,7 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthe
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
 vi.mock('@/components/page/PageShell', () => ({ PageShell: ({ children }: { children: React.ReactNode }) => <section>{children}</section> }));
-vi.mock('@/lib/adminInbox', () => ({ fetchInbox: (...args: unknown[]) => read(...args) }));
+vi.mock('@/lib/adminInbox', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/adminInbox')>(), fetchInbox: (...args: unknown[]) => read(...args) }));
 vi.mock('@/components/admin/InboxRequestDetail', () => ({ InboxRequestDetail: () => null }));
 const clients: QueryClient[] = [];
 const mount = () => { const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); clients.push(client); render(<QueryClientProvider client={client}><MemoryRouter><AdminInbox /></MemoryRouter></QueryClientProvider>); };
