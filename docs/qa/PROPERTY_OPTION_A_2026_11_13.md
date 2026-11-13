@@ -19,3 +19,8 @@
 - Existing inquiry chooses request or instant-payment branch from its existing authoritative settings; unchanged here. Estimate/button alone does not reserve capacity or charge money. Copy does not promise a request-only destination for an instant-enabled property.
 - Sansiri monthly working tariff untouched, pending explicit narrow data-change authorization.
 - Tested evolving source, observed HEAD before final documentation: `7cc0ac3a7a3a4aa49b4827c69f39d8ba0549cb22`; not a claim of publication or remote CI parity.
+## 2026-11-13 · AI ranking activation
+- Deployed `property-related-recommendations` (helper moved to `_shared/related-properties.ts`); live call returned 200 with 6 allowlisted IDs; unknown ID → 404.
+- `feature_flag:property_related_ai` = `{"enabled": true}`; migration 0037 lets guests read only this flag key.
+- Browser: AI ranking request made; with forced 500 the fallback list (8 rent links) still renders with a short note.
+- Rollback: set the flag to `{"enabled": false}`; `drop policy system_settings_public_related_ai_flag_read on public.system_settings`.
