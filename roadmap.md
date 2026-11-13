@@ -2,7 +2,10 @@
 
 ## 2026-11-13 · Admin panel streamlining
 - [x] Regroup admin side menu by workflow (requests, real estate, partners, content, growth, AI, system); all pages stay reachable. 125/125 navigation tests pass.
-- [ ] Merge/remove duplicate admin pages needs your decision per page.
+- [x] Pavel approved all D1–D13 recommendations on 2026-11-13: consolidate and rename, preserve functionality and permissions, retain old addresses as redirects; no production data changes or publication.
+- [x] Implement D1–D13 without deleting working pages: combined analytics/catalog/forms/transfers/maps, newbuilds KPIs and data-entry hub, vertical grouping, Thai-business moderation entry, bilingual titles.
+- [x] Verify redirects, retained guards, navigation and affected pages: 35/35 focused tests, 18/18 isolated route/workspace browser cases and 2/2 actual admin-shell layouts pass; automatic build OK. No production data changes or publication. Evidence: docs/qa/ADMIN_CONSOLIDATION_IMPLEMENTATION_2026_11_13.md.
+- [ ] Hosted operational acceptance of real admin forms/data remains separate; this tranche verifies navigation and presentation only, without production business operations.
 
 ## 2026-11-13 · Services booking verification
 - [x] Trace catalogue/provider → slot → request → confirmation → customer/provider read-back: 93/93 isolated tests and 2/2 actual-sheet browser flows PASS, including SLOT_TAKEN recovery and guest read-back. Provider read-back source traced only.

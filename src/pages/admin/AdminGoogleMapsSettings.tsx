@@ -200,7 +200,7 @@ export default function AdminGoogleMapsSettings() {
               Сохранить
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/admin/diagnostics/google-maps">
+              <Link to="/admin/settings/google-maps?tab=diagnostics">
                 Открыть диагностику
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Link>

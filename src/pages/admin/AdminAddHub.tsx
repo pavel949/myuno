@@ -22,6 +22,10 @@ import {
   FileSpreadsheet,
   Inbox,
   ArrowRight,
+  Zap,
+  Rocket,
+  Database,
+  Camera,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -79,7 +83,18 @@ export default function AdminAddHub() {
       descRu: 'Вставьте текст, ссылку или фото одного объекта.',
       whenEn: 'Best for: a referral, walk-in, a single villa or service.',
       whenRu: 'Когда: один объект — реферал, заявка, одна вилла или услуга.',
-      tone: 'from-primary/10 to-transparent text-primary',
+      tone: 'text-primary',
+    },
+    {
+      to: '/admin/quick-listings',
+      icon: Zap,
+      titleEn: 'Quick listings',
+      titleRu: 'Быстрые объявления',
+      descEn: 'Create and review listings through the quick-entry workflow.',
+      descRu: 'Создание и проверка объявлений через быстрый ввод.',
+      whenEn: 'Use the existing quick-listing form and its validation.',
+      whenRu: 'Используйте существующую форму быстрого объявления и её проверки.',
+      tone: 'text-primary',
     },
     {
       to: '/admin/intake?mode=bulk_text',
@@ -90,7 +105,7 @@ export default function AdminAddHub() {
       descRu: 'Вставьте чат, список или много ссылок сразу.',
       whenEn: 'Best for: WhatsApp/Telegram dumps, agent broadcasts.',
       whenRu: 'Когда: дампы из WA/TG, рассылки агентов.',
-      tone: 'from-accent/15 to-transparent text-accent-foreground',
+      tone: 'text-accent',
     },
     {
       to: '/admin/intake?mode=csv',
@@ -101,7 +116,40 @@ export default function AdminAddHub() {
       descRu: 'Загрузите таблицу, сопоставьте колонки, импортируйте.',
       whenEn: 'Best for: partner exports, migrations, 50+ rows.',
       whenRu: 'Когда: выгрузки партнёров, миграции, 50+ строк.',
-      tone: 'from-success/15 to-transparent text-success',
+      tone: 'text-success',
+    },
+    {
+      to: '/admin/data-import',
+      icon: Database,
+      titleEn: 'Structured data import',
+      titleRu: 'Импорт структурированных данных',
+      descEn: 'Open the existing importer for structured platform data.',
+      descRu: 'Откройте существующий импорт структурированных данных платформы.',
+      whenEn: 'For supported import formats and entity-specific validation.',
+      whenRu: 'Для поддерживаемых форматов и проверки отдельных типов данных.',
+      tone: 'text-success',
+    },
+    {
+      to: '/admin/bulk-publish',
+      icon: Rocket,
+      titleEn: 'Bulk publication',
+      titleRu: 'Массовая публикация',
+      descEn: 'Review and publish existing listings in bulk.',
+      descRu: 'Проверка и массовая публикация существующих объявлений.',
+      whenEn: 'Publication changes remain subject to existing confirmation and permissions.',
+      whenRu: 'Публикация выполняется с существующими подтверждениями и правами доступа.',
+      tone: 'text-primary',
+    },
+    {
+      to: '/admin/vendor-content',
+      icon: Camera,
+      titleEn: 'Partner content',
+      titleRu: 'Контент партнёров',
+      descEn: 'Create and edit content on behalf of a partner.',
+      descRu: 'Создание и редактирование контента от имени партнёра.',
+      whenEn: 'Uses the existing partner-content editor and access checks.',
+      whenRu: 'Используется существующий редактор контента партнёров и проверка прав.',
+      tone: 'text-primary',
     },
     {
       to: '/admin/vendor-prospects',
@@ -112,7 +160,7 @@ export default function AdminAddHub() {
       descRu: 'Заявки на саморегистрацию с /vendor/join.',
       whenEn: 'Best for: triage of inbound partner signups.',
       whenRu: 'Когда: разбор входящих заявок партнёров.',
-      tone: 'from-warning/15 to-transparent text-warning',
+      tone: 'text-warning',
       badgeCount: pendingProspects ?? undefined,
     },
   ];
@@ -120,11 +168,11 @@ export default function AdminAddHub() {
   return (
     <PageContainer>
       <PageHeader
-        title={isRu ? 'Добавить' : 'Add'}
+        title={isRu ? 'Добавление данных' : 'Data entry'}
         subtitle={
           isRu
-            ? 'Выберите способ внесения сервиса, продукта или объекта'
-            : 'Choose how to add a service, product, or listing'
+            ? 'Все способы добавления и публикации данных в одном разделе'
+            : 'All data-entry and publication workflows in one place'
         }
       />
 
@@ -139,13 +187,6 @@ export default function AdminAddHub() {
                   'hover:border-primary/40 hover:shadow-md focus-within:border-primary/40'
                 )}
               >
-                <div
-                  className={cn(
-                    'absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none',
-                    card.tone
-                  )}
-                  aria-hidden
-                />
                 <div className="relative space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div

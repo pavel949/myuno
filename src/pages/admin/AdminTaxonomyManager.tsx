@@ -63,17 +63,17 @@ export default function AdminTaxonomyManager() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{t('Taxonomy Manager', 'Управление таксономиями')}</h1>
+            <h1 className="text-2xl font-bold">{t('Taxonomy', 'Таксономия')}</h1>
             <p className="text-muted-foreground">{t('Single source of truth for all platform categories', 'Единый источник всех категорий платформы')}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/admin/intake-configs')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/settings/forms?tab=intake')}>
               <Bot className="h-4 w-4 mr-2" />
-              {t('AI Intake Configs', 'AI Intake')}
+              {t('Data intake settings', 'Настройки приёма данных')}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/admin/lead-configs')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/settings/forms')}>
               <FileText className="h-4 w-4 mr-2" />
-              {t('Lead Forms', 'Лид-формы')}
+              {t('Request forms', 'Формы заявок')}
             </Button>
           </div>
         </div>

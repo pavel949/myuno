@@ -5,7 +5,10 @@ import { projectStartingPrice } from '@/lib/real-estate/publicNewbuildPresentati
  * Inline editing for key fields, featured control, offplan_catalog
  */
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { AdminNewbuildsKpiGrid } from '@/components/admin/AdminNewbuildsKpiGrid';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
@@ -37,6 +40,8 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 export default function AdminNewbuilds() {
   const qc = useQueryClient();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -139,14 +144,25 @@ export default function AdminNewbuilds() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Новостройки — Управление</h1>
-        <div className="flex gap-2 text-xs text-muted-foreground">
-          <span className="px-2 py-1 rounded-none bg-muted">{stats.total} всего</span>
-          <span className="px-2 py-1 rounded-none bg-success/10 text-success">{stats.approved} одобрено</span>
-          <span className="px-2 py-1 rounded-none bg-accent/10 text-accent">{stats.withCatalog} с каталогом</span>
-          <span className="px-2 py-1 rounded-none bg-primary/10 text-primary">{stats.featured} featured</span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">{isRu ? 'Новостройки' : 'New developments'}</h1>
+          <p className="text-sm text-muted-foreground">{isRu ? 'Проекты, застройщики, показатели и заявки' : 'Projects, developers, indicators and leads'}</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/admin/projects"><Button variant="outline">{isRu ? 'Все проекты' : 'All projects'}</Button></Link>
+          <Link to="/admin/developers"><Button variant="outline">{isRu ? 'Застройщики' : 'Developers'}</Button></Link>
+          <Link to="/admin/nb-leads"><Button variant="outline">{isRu ? 'Заявки' : 'Leads'}</Button></Link>
+        </div>
+      </div>
+
+      <AdminNewbuildsKpiGrid />
+
+      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+        <span className="px-2 py-1 rounded-none bg-muted">{stats.total} {isRu ? 'всего' : 'total'}</span>
+        <span className="px-2 py-1 rounded-none bg-success/10 text-success">{stats.approved} {isRu ? 'одобрено' : 'approved'}</span>
+        <span className="px-2 py-1 rounded-none bg-accent/10 text-accent">{stats.withCatalog} {isRu ? 'с каталогом' : 'with catalog'}</span>
+        <span className="px-2 py-1 rounded-none bg-primary/10 text-primary">{stats.featured} {isRu ? 'избранных' : 'featured'}</span>
       </div>
 
       <Tabs defaultValue="all">

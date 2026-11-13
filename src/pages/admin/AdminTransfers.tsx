@@ -259,7 +259,7 @@ export default function AdminTransfers() {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-[1536px] mx-auto w-full">
       <div>
-        <h1 className="text-2xl font-display font-bold">{isRu ? 'Трансферы' : 'Airport Transfers'}</h1>
+        <h1 className="text-2xl font-display font-bold">{isRu ? 'Заказы на трансферы' : 'Transfer orders'}</h1>
         <p className="text-sm text-muted-foreground">{transferOrders.length} {isRu ? 'заказов' : 'orders'}</p>
       </div>
 

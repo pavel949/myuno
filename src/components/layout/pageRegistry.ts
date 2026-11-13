@@ -480,6 +480,11 @@ export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemS
 export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 export const AdminGoogleMapsDiagnostics = lazy(() => import('@/pages/admin/AdminGoogleMapsDiagnostics'));
 export const AdminGoogleMapsSettings = lazy(() => import('@/pages/admin/AdminGoogleMapsSettings'));
+export const AdminCatalogWorkspace = lazy(() => import('@/pages/admin/AdminCatalogWorkspace'));
+export const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
+export const AdminFormSettings = lazy(() => import('@/pages/admin/AdminFormSettings'));
+export const AdminTransfersWorkspace = lazy(() => import('@/pages/admin/AdminTransfersWorkspace'));
+export const AdminGoogleMaps = lazy(() => import('@/pages/admin/AdminGoogleMaps'));
 
 // ── Provider ── (ProviderOnboarding removed 2026-06-12; duplicated /become-partner. /provider/onboarding now redirects.)
 

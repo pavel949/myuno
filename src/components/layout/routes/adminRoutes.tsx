@@ -1,11 +1,18 @@
 /**
  * Admin route definitions — extracted from AnimatedRoutes for readability.
- * 
+ *
  * Returns child <Route> elements rendered inside the AdminRouteLayout outlet.
- * All page lazy imports come from pageRegistry.
+ * Consolidated workspaces keep legacy URLs as query-preserving redirects.
  */
-import { Route, Navigate } from 'react-router-dom';
+import { Route, Navigate, useLocation } from 'react-router-dom';
 import * as Pages from '../pageRegistry';
+
+function AdminTabRedirect({ to, tab }: { to: string; tab: string }) {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  params.set('tab', tab);
+  return <Navigate to={`${to}?${params.toString()}`} replace />;
+}
 
 export const adminRoutes = (
   <>
@@ -13,16 +20,16 @@ export const adminRoutes = (
     <Route path="/admin/inbox" element={<Pages.AdminInbox />} />
     <Route path="/admin/review" element={<Pages.AdminReview />} />
     <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
-    <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
-    <Route path="/admin/master-catalog" element={<Pages.AdminMasterCatalog />} />
+    <Route path="/admin/catalog" element={<Pages.AdminCatalogWorkspace />} />
+    <Route path="/admin/master-catalog" element={<AdminTabRedirect to="/admin/catalog" tab="categories" />} />
     <Route path="/admin/trash" element={<Pages.AdminTrash />} />
-    <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
+    <Route path="/admin/control" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
-    <Route path="/admin/analytics" element={<Pages.AdminAnalyticsDashboard />} />
-    <Route path="/admin/analytics/events" element={<Pages.AdminAnalyticsDashboard />} />
+    <Route path="/admin/analytics" element={<Pages.AdminAnalytics />} />
+    <Route path="/admin/analytics/events" element={<AdminTabRedirect to="/admin/analytics" tab="visits" />} />
     <Route path="/admin/providers" element={<Pages.AdminProviders />} />
     <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
-    <Route path="/admin/services" element={<Pages.AdminServices />} />
+    <Route path="/admin/services" element={<AdminTabRedirect to="/admin/catalog" tab="services" />} />
     <Route path="/admin/partner-applications" element={<Pages.PartnerApplicationsAdmin />} />
     <Route path="/admin/claims" element={<Pages.AdminPoiClaims />} />
     <Route path="/admin/pitch-deck" element={<Navigate to="/admin" replace />} />
@@ -35,7 +42,8 @@ export const adminRoutes = (
     <Route path="/admin/projects" element={<Pages.AdminProjects />} />
     <Route path="/admin/investments" element={<Pages.AdminInvestments />} />
     <Route path="/admin/developers" element={<Pages.AdminDevelopers />} />
-    <Route path="/admin/newbuilds" element={<Pages.AdminNewbuildsConsole />} />
+    <Route path="/admin/newbuilds" element={<Pages.AdminNewbuilds />} />
+    <Route path="/admin/newbuilds/console" element={<Navigate to="/admin/newbuilds" replace />} />
     <Route path="/admin/newbuilds/projects/:id/documents" element={<Pages.AdminProjectDocuments />} />
     <Route path="/admin/pm-companies" element={<Pages.AdminPMCompanies />} />
     <Route path="/admin/mc-dashboard" element={<Pages.AdminMCDashboard />} />
@@ -45,10 +53,10 @@ export const adminRoutes = (
     <Route path="/admin/salons" element={<Pages.AdminSalons />} />
     <Route path="/admin/clinics" element={<Pages.AdminClinics />} />
     <Route path="/admin/gyms" element={<Pages.AdminGyms />} />
-    <Route path="/admin/vehicles" element={<Pages.AdminVehicles />} />
-    <Route path="/admin/transfers" element={<Pages.AdminTransfers />} />
-    <Route path="/admin/transfers/sla" element={<Pages.AdminTransferSLA />} />
-    <Route path="/admin/transfer-operators" element={<Pages.AdminTransferOperators />} />
+    <Route path="/admin/vehicles" element={<AdminTabRedirect to="/admin/transfers" tab="vehicles" />} />
+    <Route path="/admin/transfers" element={<Pages.AdminTransfersWorkspace />} />
+    <Route path="/admin/transfers/sla" element={<AdminTabRedirect to="/admin/transfers" tab="sla" />} />
+    <Route path="/admin/transfer-operators" element={<AdminTabRedirect to="/admin/transfers" tab="operators" />} />
     <Route path="/admin/events" element={<Pages.AdminEvents />} />
     <Route path="/admin/education" element={<Pages.AdminEducation />} />
     <Route path="/admin/legal" element={<Pages.AdminLegal />} />
@@ -59,9 +67,9 @@ export const adminRoutes = (
     <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
     <Route path="/admin/relocation-articles" element={<Pages.AdminRelocationArticles />} />
     <Route path="/admin/bouquets" element={<Navigate to="/admin/flowers" replace />} />
-    <Route path="/admin/lookups" element={<Pages.AdminLookups />} />
-    <Route path="/admin/taxonomy" element={<Pages.AdminTaxonomyManager />} />
-    <Route path="/admin/acquisition-metrics" element={<Pages.AcquisitionMetrics />} />
+    <Route path="/admin/lookups" element={<AdminTabRedirect to="/admin/catalog" tab="lookups" />} />
+    <Route path="/admin/taxonomy" element={<AdminTabRedirect to="/admin/catalog" tab="taxonomy" />} />
+    <Route path="/admin/acquisition-metrics" element={<AdminTabRedirect to="/admin/analytics" tab="acquisition" />} />
     <Route path="/admin/tickets" element={<Pages.AdminTickets />} />
     <Route path="/admin/tickets/:ticketId" element={<Pages.AdminTicketDetail />} />
     <Route path="/admin/pharmacies" element={<Pages.AdminPharmacies />} />
@@ -74,20 +82,20 @@ export const adminRoutes = (
     <Route path="/admin/bulk-publish" element={<Pages.AdminBulkPublish />} />
     <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
     <Route path="/admin/nb-leads" element={<Pages.AdminNbLeads />} />
-
     <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
     <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
     <Route path="/admin/finance" element={<Pages.AdminFinance />} />
     <Route path="/admin/disputes" element={<Pages.AdminDisputes />} />
-    <Route path="/admin/investor-metrics" element={<Pages.AdminInvestorMetrics />} />
+    <Route path="/admin/investor-metrics" element={<AdminTabRedirect to="/admin/analytics" tab="revenue" />} />
     <Route path="/admin/settings" element={<Pages.AdminSystemSettings />} />
+    <Route path="/admin/settings/forms" element={<Pages.AdminFormSettings />} />
     <Route path="/admin/cities" element={<Pages.AdminCities />} />
     <Route path="/admin/translations" element={<Pages.AdminTranslations />} />
     <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
-    <Route path="/admin/user-analytics" element={<Navigate to="/admin/control" replace />} />
+    <Route path="/admin/user-analytics" element={<AdminTabRedirect to="/admin/analytics" tab="visits" />} />
     <Route path="/admin/marketplace/products" element={<Navigate to="/admin/catalog" replace />} />
-    <Route path="/admin/marketplace/categories" element={<Navigate to="/admin/catalog" replace />} />
-    <Route path="/admin/marketplace/subcategories" element={<Navigate to="/admin/catalog" replace />} />
+    <Route path="/admin/marketplace/categories" element={<AdminTabRedirect to="/admin/catalog" tab="categories" />} />
+    <Route path="/admin/marketplace/subcategories" element={<AdminTabRedirect to="/admin/catalog" tab="categories" />} />
     <Route path="/admin/marketplace/vendors" element={<Navigate to="/admin/catalog" replace />} />
     <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
     <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
@@ -96,11 +104,11 @@ export const adminRoutes = (
     <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
     <Route path="/admin/add" element={<Pages.AdminAddHub />} />
     <Route path="/admin/intake" element={<Pages.AdminIntake />} />
-    <Route path="/admin/intake-configs" element={<Pages.AdminIntakeConfigs />} />
-    <Route path="/admin/lead-configs" element={<Pages.AdminLeadConfigs />} />
+    <Route path="/admin/intake-configs" element={<AdminTabRedirect to="/admin/settings/forms" tab="intake" />} />
+    <Route path="/admin/lead-configs" element={<AdminTabRedirect to="/admin/settings/forms" tab="leads" />} />
     <Route path="/admin/vendor-prospects" element={<Pages.AdminVendorProspects />} />
     <Route path="/admin/crm" element={<Pages.AdminCRM />} />
-    <Route path="/admin/marketing" element={<Pages.MarketingDashboard />} />
+    <Route path="/admin/marketing" element={<AdminTabRedirect to="/admin/analytics" tab="marketing" />} />
     <Route path="/admin/lifecycle-messaging" element={<Pages.LifecycleMessaging />} />
     <Route path="/admin/experience-categories" element={<Pages.ExperienceCategoriesPage />} />
     <Route path="/admin/life-situations" element={<Pages.AdminLifeOS />} />
@@ -108,8 +116,8 @@ export const adminRoutes = (
     <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
     <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
     <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
-    <Route path="/admin/diagnostics/google-maps" element={<Pages.AdminGoogleMapsDiagnostics />} />
-    <Route path="/admin/settings/google-maps" element={<Pages.AdminGoogleMapsSettings />} />
+    <Route path="/admin/diagnostics/google-maps" element={<AdminTabRedirect to="/admin/settings/google-maps" tab="diagnostics" />} />
+    <Route path="/admin/settings/google-maps" element={<Pages.AdminGoogleMaps />} />
     <Route path="/admin/official-news" element={<Pages.AdminOfficialNews />} />
   </>
 );
