@@ -17711,9 +17711,6 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
-          drive_file_id: string | null
-          drive_modified_time: string | null
-          drive_web_view_link: string | null
           file_size_bytes: number | null
           file_url: string
           id: string
@@ -17732,9 +17729,6 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
-          drive_file_id?: string | null
-          drive_modified_time?: string | null
-          drive_web_view_link?: string | null
           file_size_bytes?: number | null
           file_url: string
           id?: string
@@ -17753,9 +17747,6 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
-          drive_file_id?: string | null
-          drive_modified_time?: string | null
-          drive_web_view_link?: string | null
           file_size_bytes?: number | null
           file_url?: string
           id?: string
@@ -17851,300 +17842,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_real_estate_projects"
             referencedColumns: ["project_id"]
-          },
-        ]
-      }
-      project_fact_assertions: {
-        Row: {
-          applied_at: string | null
-          created_at: string
-          entity_type: string
-          extraction_method: string
-          field_key: string
-          id: string
-          import_job_id: string
-          price_list_version_id: string | null
-          project_id: string
-          review_status: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          source_file_id: string | null
-          source_file_name: string | null
-          source_file_url: string | null
-          source_files: Json
-          source_item_index: number | null
-          source_modified_at: string | null
-          source_unit_key: string | null
-          source_value_jsonb: Json | null
-          unit_id: string | null
-          value_jsonb: Json
-        }
-        Insert: {
-          applied_at?: string | null
-          created_at?: string
-          entity_type: string
-          extraction_method: string
-          field_key: string
-          id?: string
-          import_job_id: string
-          price_list_version_id?: string | null
-          project_id: string
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          source_file_id?: string | null
-          source_file_name?: string | null
-          source_file_url?: string | null
-          source_files?: Json
-          source_item_index?: number | null
-          source_modified_at?: string | null
-          source_unit_key?: string | null
-          source_value_jsonb?: Json | null
-          unit_id?: string | null
-          value_jsonb: Json
-        }
-        Update: {
-          applied_at?: string | null
-          created_at?: string
-          entity_type?: string
-          extraction_method?: string
-          field_key?: string
-          id?: string
-          import_job_id?: string
-          price_list_version_id?: string | null
-          project_id?: string
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          source_file_id?: string | null
-          source_file_name?: string | null
-          source_file_url?: string | null
-          source_files?: Json
-          source_item_index?: number | null
-          source_modified_at?: string | null
-          source_unit_key?: string | null
-          source_value_jsonb?: Json | null
-          unit_id?: string | null
-          value_jsonb?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_fact_assertions_import_job_id_fkey"
-            columns: ["import_job_id"]
-            isOneToOne: false
-            referencedRelation: "drive_import_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_fact_assertions_price_list_version_id_fkey"
-            columns: ["price_list_version_id"]
-            isOneToOne: false
-            referencedRelation: "project_price_list_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_fact_assertions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "property_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_fact_assertions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_real_estate_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_fact_assertions_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "project_units"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_price_list_items: {
-        Row: {
-          area_sqm: number | null
-          bathrooms: number | null
-          bedrooms: number | null
-          created_at: string
-          currency: string | null
-          floor: number | null
-          id: string
-          item_key: string
-          needs_review: boolean
-          price: number | null
-          raw_record: Json
-          review_reasons: string[]
-          source_file_id: string | null
-          source_file_name: string | null
-          source_file_url: string | null
-          source_item_index: number
-          source_modified_at: string | null
-          status: string
-          unit_code: string | null
-          unit_id: string | null
-          unit_type: string
-          version_id: string
-          view_type: string | null
-        }
-        Insert: {
-          area_sqm?: number | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          created_at?: string
-          currency?: string | null
-          floor?: number | null
-          id?: string
-          item_key: string
-          needs_review?: boolean
-          price?: number | null
-          raw_record?: Json
-          review_reasons?: string[]
-          source_file_id?: string | null
-          source_file_name?: string | null
-          source_file_url?: string | null
-          source_item_index: number
-          source_modified_at?: string | null
-          status?: string
-          unit_code?: string | null
-          unit_id?: string | null
-          unit_type?: string
-          version_id: string
-          view_type?: string | null
-        }
-        Update: {
-          area_sqm?: number | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          created_at?: string
-          currency?: string | null
-          floor?: number | null
-          id?: string
-          item_key?: string
-          needs_review?: boolean
-          price?: number | null
-          raw_record?: Json
-          review_reasons?: string[]
-          source_file_id?: string | null
-          source_file_name?: string | null
-          source_file_url?: string | null
-          source_item_index?: number
-          source_modified_at?: string | null
-          status?: string
-          unit_code?: string | null
-          unit_id?: string | null
-          unit_type?: string
-          version_id?: string
-          view_type?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_price_list_items_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "project_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_price_list_items_version_id_fkey"
-            columns: ["version_id"]
-            isOneToOne: false
-            referencedRelation: "project_price_list_versions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_price_list_versions: {
-        Row: {
-          captured_at: string
-          content_sha256: string
-          coverage: string
-          id: string
-          import_job_id: string
-          parser_version: string
-          previous_version_id: string | null
-          project_id: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          rows_needing_review: number
-          rows_total: number
-          source_id: string
-          status: string
-          version_number: number
-        }
-        Insert: {
-          captured_at?: string
-          content_sha256: string
-          coverage?: string
-          id?: string
-          import_job_id: string
-          parser_version: string
-          previous_version_id?: string | null
-          project_id: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          rows_needing_review?: number
-          rows_total?: number
-          source_id: string
-          status?: string
-          version_number: number
-        }
-        Update: {
-          captured_at?: string
-          content_sha256?: string
-          coverage?: string
-          id?: string
-          import_job_id?: string
-          parser_version?: string
-          previous_version_id?: string | null
-          project_id?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          rows_needing_review?: number
-          rows_total?: number
-          source_id?: string
-          status?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_price_list_versions_import_job_id_fkey"
-            columns: ["import_job_id"]
-            isOneToOne: true
-            referencedRelation: "drive_import_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_price_list_versions_previous_version_id_fkey"
-            columns: ["previous_version_id"]
-            isOneToOne: false
-            referencedRelation: "project_price_list_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_price_list_versions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "property_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_price_list_versions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_real_estate_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_price_list_versions_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "project_drive_sources"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -36967,14 +36664,6 @@ export type Database = {
         }
         Returns: Json
       }
-      apply_drive_import_review: {
-        Args: {
-          p_apply_project: boolean
-          p_job_id: string
-          p_unit_indexes: number[]
-        }
-        Returns: Json
-      }
       apply_lead_score_event: {
         Args: {
           p_contact_id: string
@@ -37250,10 +36939,6 @@ export type Database = {
       devmod_is_broker_or_admin: { Args: never; Returns: boolean }
       devmod_my_developer_id: { Args: never; Returns: string }
       devmod_release_expired_holds: { Args: never; Returns: number }
-      discard_drive_import_review: {
-        Args: { p_job_id: string }
-        Returns: undefined
-      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -37718,17 +37403,6 @@ export type Database = {
       staff_can_access_property_e28_private: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
-      }
-      stage_drive_import_version: {
-        Args: {
-          p_content_sha256: string
-          p_job_id: string
-          p_parser_version: string
-          p_project_patch: Json
-          p_project_sources: Json
-          p_units: Json
-        }
-        Returns: string
       }
       submit_consultation_request: { Args: { payload: Json }; Returns: string }
       sync_properties_clearview_for_project: {

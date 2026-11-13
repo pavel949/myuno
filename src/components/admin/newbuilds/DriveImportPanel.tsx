@@ -23,7 +23,6 @@ import {
   type DriveJob,
 } from '@/hooks/useDriveImport';
 import { DriveImportReview } from './DriveImportReview';
-import { PriceListArchive } from './PriceListArchive';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -225,8 +224,6 @@ export function DriveImportPanel({ projectId }: Props) {
           </div>
         </div>
       )}
-
-      <PriceListArchive projectId={projectId} />
 
       {reviewJob && (
         <DriveImportReview

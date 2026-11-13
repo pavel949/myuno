@@ -11,7 +11,6 @@
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
-import { driveImportContentHash, driveUnitSource, normalizeDriveUnits } from '../_shared/drive-import-normalization.ts';
 
 declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
 
@@ -259,7 +258,7 @@ async function extractUnitsFromFile(
       messages: [{
         role: 'user',
         content: [
-          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый объект с полями. Если файл не прайслист — верни пустой массив. Не придумывай статус: если он отсутствует или неясен — null.' },
+          { type: 'text', text: 'Это прайслист квартир/вилл застройщика. Извлеки каждый объект с полями. Если файл не прайслист — верни пустой массив.' },
           { type: 'image_url', image_url: { url: dataUrl } },
         ],
       }],
@@ -284,7 +283,7 @@ async function extractUnitsFromFile(
                     price: { type: ['number', 'null'] },
                     currency: { type: 'string', enum: ['THB', 'USD', 'EUR', 'RUB'] },
                     view_type: { type: ['string', 'null'] },
-                    status: { type: ['string', 'null'], enum: ['available', 'reserved', 'sold', 'held', null] },
+                    status: { type: 'string', enum: ['available', 'reserved', 'sold', 'held'] },
                   },
                   required: ['unit_type'],
                 },
@@ -338,7 +337,7 @@ async function extractUnitsFromText(text: string, lovableKey: string): Promise<a
       model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
-        content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери только из таблицы; если статуса нет или он неясен — null. Если это не прайслист — верни пустой массив.\n\n${body}`,
+        content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери из таблицы; если статуса нет — available. Если это не прайслист — верни пустой массив.\n\n${body}`,
       }],
       tools: [{
         type: 'function',
@@ -361,7 +360,7 @@ async function extractUnitsFromText(text: string, lovableKey: string): Promise<a
                     price: { type: ['number', 'null'] },
                     currency: { type: 'string', enum: ['THB', 'USD', 'EUR', 'RUB'] },
                     view_type: { type: ['string', 'null'] },
-                    status: { type: ['string', 'null'], enum: ['available', 'reserved', 'sold', 'held', null] },
+                    status: { type: 'string', enum: ['available', 'reserved', 'sold', 'held'] },
                   },
                   required: ['unit_type'],
                 },
@@ -461,11 +460,8 @@ Deno.serve(async (req) => {
       let skipped = 0;
       const aggregatedUnits: any[] = [];
       let aggregatedProjectMeta: Record<string, any> | null = null;
-      let aggregatedProjectMetaSource: DriveFile | null = null;
       const aggregatedGallery: string[] = [];
       const aggregatedPlans: string[] = [];
-      const aggregatedGallerySources: DriveFile[] = [];
-      const aggregatedPlanSources: DriveFile[] = [];
 
       try {
         const files = await listDriveFiles(folderId, auth);
@@ -478,9 +474,7 @@ Deno.serve(async (req) => {
             try {
               const csv = await exportSheetCsv(file.id, auth);
               const units = await extractUnitsFromText(csv, LOVABLE_API_KEY);
-              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({
-                ...u, ...driveUnitSource(file), _extraction_method: 'ai_table',
-              })));
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
               processed++;
             } catch (e: any) {
               failed++;
@@ -521,9 +515,6 @@ Deno.serve(async (req) => {
               mime_type: file.mimeType,
               visibility: 'kyc',
               version: 1,
-              drive_file_id: file.id,
-              drive_modified_time: file.modifiedTime || null,
-              drive_web_view_link: file.webViewLink || null,
             });
 
             // Photos, renders and master plans: copy to the public media bucket so the
@@ -535,7 +526,6 @@ Deno.serve(async (req) => {
               if (!mediaErr) {
                 const url = admin.storage.from(PUBLIC_MEDIA_BUCKET).getPublicUrl(mediaPath).data.publicUrl;
                 (cls.category === 'floor_plans' ? aggregatedPlans : aggregatedGallery).push(url);
-                (cls.category === 'floor_plans' ? aggregatedPlanSources : aggregatedGallerySources).push(file);
               } else {
                 errorLog.push({ file: file.name, error: `media copy: ${mediaErr.message}` });
               }
@@ -545,25 +535,18 @@ Deno.serve(async (req) => {
               const units = /\.csv$/i.test(file.name)
                 ? await extractUnitsFromText(new TextDecoder().decode(buf), LOVABLE_API_KEY)
                 : null;
-              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({
-                ...u, ...driveUnitSource(file), _extraction_method: 'ai_table',
-              })));
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
             }
 
             // Параллельная AI-extraction для маркетинговых файлов
             if (cls.category === 'marketing') {
               if (!aggregatedProjectMeta) {
                 const meta = await extractProjectMetaFromFile(buf, file.mimeType, LOVABLE_API_KEY);
-                if (meta) {
-                  aggregatedProjectMeta = meta;
-                  aggregatedProjectMetaSource = file;
-                }
+                if (meta) aggregatedProjectMeta = meta;
               }
               const units = await extractUnitsFromFile(buf, file.mimeType, LOVABLE_API_KEY);
               if (units && units.length > 0) {
-                aggregatedUnits.push(...units.map(u => ({
-                  ...u, ...driveUnitSource(file), _extraction_method: 'ai_vision',
-                })));
+                aggregatedUnits.push(...units);
               }
             }
 
@@ -581,60 +564,24 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Финал: нормализуем неизвестные значения и атомарно сохраняем источники/снимок для ревью.
-        const normalizedUnits = normalizeDriveUnits(aggregatedUnits);
-        const projectPatch = (aggregatedProjectMeta || aggregatedGallery.length || aggregatedPlans.length)
-          ? {
-              ...(aggregatedProjectMeta || {}),
-              ...(aggregatedGallery.length ? { gallery_urls: aggregatedGallery } : {}),
-              ...(aggregatedPlans.length ? { marketing_materials: aggregatedPlans } : {}),
-            }
-          : null;
-        const projectSources: Record<string, unknown> = {};
-        if (aggregatedProjectMeta && aggregatedProjectMetaSource) {
-          for (const key of Object.keys(aggregatedProjectMeta)) {
-            projectSources[key] = { method: 'ai_vision', files: [{
-              id: aggregatedProjectMetaSource.id,
-              name: aggregatedProjectMetaSource.name,
-              url: aggregatedProjectMetaSource.webViewLink ?? null,
-              modifiedAt: aggregatedProjectMetaSource.modifiedTime ?? null,
-            }] };
-          }
-        }
-        if (aggregatedGallery.length) projectSources.gallery_urls = {
-          method: 'drive_file', files: aggregatedGallerySources.map(file => ({
-            id: file.id, name: file.name, url: file.webViewLink ?? null, modifiedAt: file.modifiedTime ?? null,
-          })),
-        };
-        if (aggregatedPlans.length) projectSources.marketing_materials = {
-          method: 'drive_file', files: aggregatedPlanSources.map(file => ({
-            id: file.id, name: file.name, url: file.webViewLink ?? null, modifiedAt: file.modifiedTime ?? null,
-          })),
-        };
-        if (normalizedUnits.length > 0 || projectPatch) {
-          const { error: stageError } = await admin.rpc('stage_drive_import_version', {
-            p_job_id: job.id,
-            p_units: normalizedUnits,
-            p_project_patch: projectPatch || {},
-            p_project_sources: projectSources,
-            p_content_sha256: await driveImportContentHash({ units: normalizedUnits, projectPatch }),
-            p_parser_version: 'drive-import-v2-2026-11-13',
-          });
-          if (stageError) throw new Error(`Source archive failed: ${stageError.message}`);
-        }
-
+        // Финал: записываем извлечённые AI-данные для ревью
         const finalStatus = failed > 0 && processed === 0 ? 'failed' : (failed > 0 ? 'partial' : 'completed');
-        const { error: completionError } = await admin.from('drive_import_jobs').update({
+        await admin.from('drive_import_jobs').update({
           status: finalStatus,
           files_processed: processed,
           files_failed: failed,
           files_skipped: skipped,
-          ai_project_patch: projectPatch,
-          ai_extracted_units: normalizedUnits.length > 0 ? normalizedUnits : null,
+          ai_project_patch: (aggregatedProjectMeta || aggregatedGallery.length || aggregatedPlans.length)
+            ? {
+                ...(aggregatedProjectMeta || {}),
+                ...(aggregatedGallery.length ? { gallery_urls: aggregatedGallery } : {}),
+                ...(aggregatedPlans.length ? { marketing_materials: aggregatedPlans } : {}),
+              }
+            : null,
+          ai_extracted_units: aggregatedUnits.length > 0 ? aggregatedUnits : null,
           error_log: errorLog.length ? errorLog : null,
           completed_at: new Date().toISOString(),
         }).eq('id', job.id);
-        if (completionError) throw completionError;
 
         await admin.from('project_drive_sources').update({
           last_sync_at: new Date().toISOString(),
