@@ -33,10 +33,6 @@ export type PriceListDiff = {
 
 const comparedFields = ['unit_code', 'unit_type', 'bedrooms', 'bathrooms', 'area_sqm', 'floor', 'price', 'currency', 'view_type', 'status'] as const;
 
-function comparable(item: PriceListItem): Record<string, unknown> {
-  return Object.fromEntries(comparedFields.map(field => [field, item[field]]));
-}
-
 function sameValue(before: PriceListItem, after: PriceListItem): boolean {
   return comparedFields.every(field => Object.is(before[field], after[field]));
 }
@@ -62,8 +58,6 @@ export function comparePriceListItems(current: PriceListItem[], previous: PriceL
     if (!before && after) return { itemKey, unitCode, changeType: 'added', before, after };
     if (before && !after) return { itemKey, unitCode, changeType: 'removed_from_source', before, after };
     if (before && after && !sameValue(before, after)) {
-      // Retain the null-safe comparison contract even if a future serializer changes Object.is semantics.
-      void comparable(before);
       return { itemKey, unitCode, changeType: 'changed', before, after };
     }
     return { itemKey, unitCode, changeType: 'unchanged', before, after };

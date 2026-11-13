@@ -83,13 +83,9 @@ export function normalizeDriveUnit(raw: Record<string, unknown>, source?: DriveS
     status,
     needs_review: reasons.length > 0,
     review_reasons: reasons,
-    ...(source ? driveUnitSource(fileOrNever(source)) : {}),
+    ...(source ? driveUnitSource(source) : {}),
     _raw: raw,
   };
-}
-
-function fileOrNever(source: DriveSourceReference): DriveSourceReference {
-  return source;
 }
 
 export function normalizeDriveUnits(
