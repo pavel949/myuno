@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-13 · Business readiness and first-revenue audit
+- [ ] Evaluate real offer/data readiness, audience journeys, admin/MC operations and cross-system coherence using current source, read-only live evidence and existing QA.
+- [ ] Separate what can earn without online payments from gated financial workflows; identify the smallest first-revenue operating loop.
+- [ ] Deliver a prioritized action plan with owners/dependencies and explicit UNKNOWNs; no business-data changes, notifications, deployments or publication.
+
 ## 2026-11-13 · Admin panel streamlining
 - [x] Regroup admin side menu by workflow (requests, real estate, partners, content, growth, AI, system); all pages stay reachable. 125/125 navigation tests pass.
 - [x] Pavel approved all D1–D13 recommendations on 2026-11-13: consolidate and rename, preserve functionality and permissions, retain old addresses as redirects; no production data changes or publication.
