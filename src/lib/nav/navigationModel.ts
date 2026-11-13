@@ -392,6 +392,9 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     items: [
       { path: '/admin/pharmacies', labelEn: 'Pharmacies', labelRu: 'Аптеки', icon: Pill },
       { path: '/admin/babysitters', labelEn: 'Babysitters', labelRu: 'Няни', icon: Baby },
+      { path: '/admin/pets', labelEn: 'Pets', labelRu: 'Питомцы', icon: PawPrint },
+      { path: '/admin/water-activities', labelEn: 'Water activities', labelRu: 'Водные активности', icon: Waves },
+      { path: '/admin/clinics', labelEn: 'Clinics', labelRu: 'Клиники', icon: Stethoscope },
       { path: '/admin/education', labelEn: 'Education', labelRu: 'Образование', icon: GraduationCap },
       { path: '/admin/legal', labelEn: 'Legal services', labelRu: 'Юридические услуги', icon: Scale },
       { path: '/admin/restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: UtensilsCrossed },
@@ -462,9 +465,10 @@ const adminSecondary: SidebarNavItem[] = [
   { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
 ];
 const adminGroupThai: Record<string, string> = {
-  'Requests & customers': 'คำขอและลูกค้า',
+  'Requests & review': 'คำขอและการตรวจสอบ',
   'Real estate': 'อสังหาริมทรัพย์',
-  'Partners & services': 'พาร์ทเนอร์และบริการ',
+  'Partners & transport': 'พาร์ทเนอร์และการขนส่ง',
+  Verticals: 'ประเภทบริการ',
   'Content & data': 'เนื้อหาและข้อมูล',
   'Growth & analytics': 'การเติบโตและการวิเคราะห์',
   'AI assistants': 'ผู้ช่วย AI',
