@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 import { createOpenAI } from 'npm:@ai-sdk/openai@3';
 import { streamText, Output, jsonSchema } from 'npm:ai@6';
 import { createLovableAiGatewayRunIdFetch } from '../_shared/property-recommendation-run-id.ts';
-import { allowedRecommendationIds, rankRelatedProperties } from '../../../src/lib/real-estate/relatedProperties.ts';
+import { allowedRecommendationIds, rankRelatedProperties } from '../_shared/related-properties.ts';
 
 Deno.serve(async req => {
   const cors = getCorsHeaders(req);
