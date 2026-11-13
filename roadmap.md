@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-11-13 · Newbuild source imports and price-list history
+- [ ] Missing unit status stays `unknown` and requires manual review; never infer availability or sale from absent source data.
+- [ ] Add immutable price-list versions and deterministic differences inside the existing project/unit catalogue; missing rows are not marked sold.
+- [ ] Attach imported facts to their source document, extraction and review state; only explicit review can admit facts to publication.
+- [ ] Verify with synthetic fixtures only; no production business data changes, notifications, frontend publication or parallel catalogue.
+
 ## 2026-11-13 · Admin panel streamlining
 - [x] Regroup admin side menu by workflow (requests, real estate, partners, content, growth, AI, system); all pages stay reachable. 125/125 navigation tests pass.
 - [x] Pavel approved all D1–D13 recommendations on 2026-11-13: consolidate and rename, preserve functionality and permissions, retain old addresses as redirects; no production data changes or publication.
