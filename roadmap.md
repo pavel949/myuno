@@ -1,9 +1,10 @@
 # Roadmap
 
 ## 2026-11-13 · Core application readiness recheck
-- [ ] Verify current Git identity, hosted health and pending monitoring findings.
-- [ ] Re-run isolated core search/intake/property/PMS/admin regressions and safe browser checks; distinguish source/fixture evidence from real hosted E2E.
-- [ ] Record current PASS/FAIL/BLOCKED matrix and exact commands in docs/qa/CORE_APPLICATION_READINESS_2026_11_13.md. No production business writes, notifications, migrations, settings changes, deployments or publication.
+- [x] Verify current Git identity, hosted health and pending monitoring findings: Cloud healthy, 0 pending; tested source ec036d176e32cb7ff5deb821f45b2fddad142e30. Remote CI/published parity not verified.
+- [x] Re-run isolated core search/intake/property/PMS/admin regressions: 551/551 tests, 9/10 browser fixtures PASS (178 records), enquiry form 2 scenarios PASS. Admin focus fixture fails reproducibly; its editor is stubbed, so actual-form production defect remains unproved.
+- [x] Record PASS/FAIL/BLOCKED matrix and exact commands in docs/qa/CORE_APPLICATION_READINESS_2026_11_13.md. No production business writes, notifications, migrations, settings changes, deployments or publication.
+- [ ] Contained hosted enquiry-to-team acceptance remains blocked without an isolated backend/approved operational acceptance; actual admin-form focus reproduction and full hosted lifecycle/permissions acceptance remain unverified. No automatic fix or activation.
 
 ## 2026-11-13 · Lead retry monitoring finding
 - [x] Confirm and minimally fix definitive rejection recovery: exact legacy P0001 required-field messages clear pending state; whitespace is rejected before RPC/storage; shared error copy distinguishes validation and unknown status.
