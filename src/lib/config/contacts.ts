@@ -24,7 +24,7 @@ export const COMPANY_CONTACTS = {
     // Telegram support channel
     support: 'https://t.me/myuno_support',
     // Telegram number link
-    number: 'https://t.me/+66954243332',
+    number: 'https://t.me/+66922407355',
   },
   line: {
     // LINE Official Account id (placeholder until registered).
