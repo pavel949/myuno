@@ -1,113 +1,56 @@
-/**
- * useAcquisitionMetrics — stub for acquisition analytics dashboard.
- * Returns zeroed metrics. TODO: Connect to real analytics data source.
- */
 import { useQuery } from '@tanstack/react-query';
+import { subDays } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { bangkokTodayDate, civilDateKey } from '@/lib/hotelDates';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
+import type { Database } from '@/integrations/supabase/types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PlatformMetric = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type CohortMetric = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type VerticalSummaryItem = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type CrossSellItem = Record<string, any>;
+type ChannelRow = Pick<Database['public']['Tables']['mcc_channel_metrics']['Row'],
+  'id' | 'date' | 'channel' | 'impressions' | 'clicks' | 'leads' | 'signups' | 'conversions'>;
+const fields = ['impressions', 'clicks', 'leads', 'signups', 'conversions'] as const;
+export type ChannelSummary = { channel: string } & Record<typeof fields[number], number | null>;
 
-interface AcquisitionSummary {
-  totalVisitors: number;
-  totalConversions: number;
-  avgCac: number;
-  avgCAC: number;
-  ltv: number;
-  avgLTV: number;
-  ltvCacRatio: number;
-  repeatPurchaseRate: number;
-  crossSellRate: number;
-  avgOrderValue: number;
-  avgTakeRate: number;
-  grossMargin: number;
-  avgD7Retention: number;
-  avgD30Retention: number;
+export function summarizeAcquisition(rows: ChannelRow[]): ChannelSummary[] {
+  const groups = new Map<string, ChannelRow[]>();
+  for (const row of rows) groups.set(row.channel, [...(groups.get(row.channel) ?? []), row]);
+  return [...groups].map(([channel, items]) => {
+    const result: ChannelSummary = { channel, impressions: null, clicks: null, leads: null, signups: null, conversions: null };
+    for (const field of fields) {
+      const values = items.map(row => row[field]);
+      if (values.every((value): value is number => typeof value === 'number' && Number.isFinite(value))) {
+        result[field] = values.reduce((sum, value) => sum + value, 0);
+      }
+    }
+    return result;
+  }).sort((a, b) => a.channel.localeCompare(b.channel));
 }
 
-interface AirbnbMetrics {
-  syncedProperties: number;
-  bookings30d: number;
-  revenue30d: number;
-  avgRating: number;
-  propertyListings: number;
-  propertyOccupancyRate: number;
-  propertyADR: number;
-  propertyRevPAR: number;
-  propertyGMV: number;
-  toursCount: number;
-  toursAvgRating: number;
-  toursGMV: number;
-  yachtsCount: number;
-  yachtsGMV: number;
-  crossSellRate: number;
-  uniqueVerticals: number;
-  totalGMV: number;
-  ltvCacRatio: number;
-}
-
-const EMPTY_SUMMARY: AcquisitionSummary = {
-  totalVisitors: 0,
-  totalConversions: 0,
-  avgCac: 0,
-  avgCAC: 0,
-  ltv: 0,
-  avgLTV: 0,
-  ltvCacRatio: 0,
-  repeatPurchaseRate: 0,
-  crossSellRate: 0,
-  avgOrderValue: 0,
-  avgTakeRate: 0,
-  grossMargin: 0,
-  avgD7Retention: 0,
-  avgD30Retention: 0,
-};
-
-const EMPTY_AIRBNB: AirbnbMetrics = {
-  syncedProperties: 0,
-  bookings30d: 0,
-  revenue30d: 0,
-  avgRating: 0,
-  propertyListings: 0,
-  propertyOccupancyRate: 0,
-  propertyADR: 0,
-  propertyRevPAR: 0,
-  propertyGMV: 0,
-  toursCount: 0,
-  toursAvgRating: 0,
-  toursGMV: 0,
-  yachtsCount: 0,
-  yachtsGMV: 0,
-  crossSellRate: 0,
-  uniqueVerticals: 0,
-  totalGMV: 0,
-  ltvCacRatio: 0,
-};
-
-export function useAcquisitionMetrics(_period: number = 30) {
-  const { isLoading } = useQuery({
-    queryKey: ['acquisition-metrics', _period],
-    queryFn: async () => ({}),
-    staleTime: 5 * 60 * 1000,
+export function useAcquisitionMetrics(period = 30, enabled = false, actorId?: string) {
+  const today = bangkokTodayDate();
+  const endDate = civilDateKey(today);
+  const startDate = civilDateKey(subDays(today, period - 1));
+  return useQuery({
+    queryKey: ['acquisition-metrics', actorId, startDate, endDate],
+    enabled: enabled && Boolean(actorId),
+    queryFn: async () => {
+      try {
+        const rows: ChannelRow[] = [];
+        for (let offset = 0; ; offset += 1000) {
+          const { data, error } = await supabase.from('mcc_channel_metrics')
+            .select('id,date,channel,impressions,clicks,leads,signups,conversions')
+            .gte('date', startDate).lte('date', endDate)
+            .order('date').order('id').range(offset, offset + 999);
+          if (error) throw error;
+          if (!data) throw new Error('Missing acquisition response');
+          rows.push(...data);
+          if (data.length < 1000) break;
+        }
+        return { channels: summarizeAcquisition(rows), rowCount: rows.length,
+          latestDate: rows.at(-1)?.date ?? null };
+      } catch (error) {
+        throw error instanceof Error ? error : new Error('Acquisition read failed');
+      }
+    },
+    ...CACHE_PROFILES.ADMIN,
   });
-
-  return {
-    platformMetrics: [] as PlatformMetric[],
-    cohortMetrics: [] as CohortMetric[],
-    verticalSummary: [] as VerticalSummaryItem[],
-    crossSellMatrix: [] as CrossSellItem[],
-    summary: EMPTY_SUMMARY,
-    isLoading,
-  };
-}
-
-export function useAirbnbMetrics(_period: number = 30) {
-  return {
-    airbnbMetrics: EMPTY_AIRBNB,
-  };
 }
