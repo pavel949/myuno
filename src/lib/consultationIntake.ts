@@ -23,9 +23,9 @@ export function consultationIntakeErrorCopy(error: unknown) {
     th: 'ตรวจสอบชื่อและโทรศัพท์ ช่องที่จำเป็นต้องไม่ว่าง แก้ไขข้อมูลแล้วส่งอีกครั้ง',
   };
   return {
-    ru: 'Сохранение заявки не подтверждено. Повторите отправку с прежними данными, чтобы избежать дублирования.',
-    en: 'Request saving was not confirmed. Retry with the original details to avoid a duplicate request.',
-    th: 'ยังยืนยันการบันทึกคำขอไม่ได้ โปรดส่งอีกครั้งโดยใช้ข้อมูลเดิมเพื่อหลีกเลี่ยงคำขอซ้ำ',
+    ru: 'Статус предыдущей заявки неизвестен. Не отправляйте новую заявку; свяжитесь с командой для проверки.',
+    en: 'The previous request status is unknown. Do not send a new request; contact the team to check it.',
+    th: 'ไม่ทราบสถานะคำขอก่อนหน้า อย่าส่งคำขอใหม่ โปรดติดต่อทีมเพื่อตรวจสอบ',
   };
 }
 
