@@ -5,6 +5,11 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+import type { PriceListItem } from '@/lib/offplan/priceListVersions';
+
+export type PriceListVersion = Database['public']['Tables']['project_price_list_versions']['Row'];
+export type ProjectFactAssertion = Database['public']['Tables']['project_fact_assertions']['Row'];
 
 export interface DriveSource {
   id: string;
