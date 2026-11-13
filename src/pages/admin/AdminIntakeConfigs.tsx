@@ -132,7 +132,7 @@ export default function AdminIntakeConfigs() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export default function AdminIntakeConfigs() {
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{configs.length}</p>
+                  <p className="whitespace-nowrap break-normal font-mono text-2xl font-bold tabular-nums">{configs.length}</p>
                   <p className="text-xs text-muted-foreground">{t('Verticals', 'Вертикалей')}</p>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function AdminIntakeConfigs() {
                   <Tag className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{activeCount}</p>
+                  <p className="whitespace-nowrap break-normal font-mono text-2xl font-bold tabular-nums">{activeCount}</p>
                   <p className="text-xs text-muted-foreground">{t('Active', 'Активных')}</p>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export default function AdminIntakeConfigs() {
                   <FileText className="h-5 w-5 text-info" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className="whitespace-nowrap break-normal font-mono text-2xl font-bold tabular-nums">
                     {configs.reduce((sum, c) => sum + c.keywords.length, 0)}
                   </p>
                   <p className="text-xs text-muted-foreground">{t('Keywords', 'Ключевых слов')}</p>
