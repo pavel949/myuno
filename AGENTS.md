@@ -31,6 +31,7 @@
 - Current P0 is a moving pointer: after an accepted gate, advance to the next unresolved gate and do not rerun accepted work without new contrary evidence.
 - Acquisition reporting reads only recorded channel counts from `mcc_channel_metrics` through the actor-keyed, admin-admitted query; missing metrics remain unknown and unsupported financial ratios are not inferred, preventing placeholder statistics from becoming operational truth.
 - Inbox handoffs carry canonical source plus request ID in the URL and read the exact record through explicit display projections under existing admin admission and RLS; list limits or related property/project IDs must not substitute for the selected request.
+- Direct organization inserts bind `created_by` to the authenticated actor; legacy NULL authorship is not backfilled or used as membership authority. Direct property activity inserts require matching actor identity plus the existing private management helper and scope ceiling, preventing forged cross-property logs.
 
 ## Source-backed security contracts
 
