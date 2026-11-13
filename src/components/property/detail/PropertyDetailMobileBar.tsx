@@ -2,7 +2,6 @@
  * PropertyDetailMobileBar — Fixed bottom CTA for the property detail page on mobile.
  * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
  */
-import { useNavigate } from 'react-router-dom';
 import { useLayoutEffect, useRef } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
@@ -13,7 +12,6 @@ import { MessageHostButton } from '@/components/property';
 import { PropertyQuestionButton } from '@/components/property/PropertyQuestionButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang } from '@/lib/i18n/pickLang';
 
 interface PropertyDetailMobileBarProps {
@@ -51,7 +49,6 @@ export function PropertyDetailMobileBar({
   guestCount,
   onOpenDatePicker,
 }: PropertyDetailMobileBarProps) {
-  const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';

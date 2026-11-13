@@ -41,7 +41,26 @@ export function SimilarProperties({ propertyId, district, propertyType, pricePer
         }
         throw error;
       }
-      return allowedRecommendationIds(data?.ids, catalogue.data ?? [], propertyId);
+      if (!(data instanceof Response) || !data.body) throw new Error(isRu ? 'Не удалось получить подборку' : 'Could not receive recommendations');
+      const reader = data.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let returnedIds: unknown = [];
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let boundary: number;
+        while ((boundary = buffer.indexOf('\n\n')) >= 0) {
+          const event = buffer.slice(0, boundary); buffer = buffer.slice(boundary + 2);
+          const payload = event.split('\n').find(line => line.startsWith('data: '));
+          if (!payload) continue;
+          const parsed = JSON.parse(payload.slice(6));
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.ids) returnedIds = parsed.ids;
+        }
+      }
+      return allowedRecommendationIds(returnedIds, catalogue.data ?? [], propertyId);
     }, enabled: aiEnabled && !!catalogue.data?.length, staleTime: 300_000, retry: false,
   });
   const items = catalogue.data ?? [];

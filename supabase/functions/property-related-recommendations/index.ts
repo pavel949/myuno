@@ -4,7 +4,7 @@ import { getCorsHeaders } from '../_shared/cors.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 import { createOpenAI } from 'npm:@ai-sdk/openai@3';
 import { streamText, Output, jsonSchema } from 'npm:ai@6';
-import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayResponseHeaders } from '../_shared/property-recommendation-run-id.ts';
+import { createLovableAiGatewayRunIdFetch } from '../_shared/property-recommendation-run-id.ts';
 import { allowedRecommendationIds, rankRelatedProperties } from '../../../src/lib/real-estate/relatedProperties.ts';
 
 Deno.serve(async req => {
@@ -28,7 +28,7 @@ Deno.serve(async req => {
     const { data, error } = await client.from('public_property_catalog').select(fields).eq('is_active', true).eq('approval_status', 'approved').neq('id', propertyId).order('id').limit(100);
     if (error) return reply({ error: 'Could not read catalogue' }, 503);
     const candidates = rankRelatedProperties(data ?? [], source, mode).slice(0, 20);
-    if (!candidates.length) return reply({ ids: [] });
+    if (!candidates.length) return new Response('data: {"ids":[]}\n\n', { headers: { ...cors, 'Content-Type': 'text/event-stream' } });
     const run = createLovableAiGatewayRunIdFetch();
     const provider = createOpenAI({ baseURL: 'https://ai.gateway.lovable.dev/v1', apiKey: key, headers: { 'Lovable-API-Key': key, 'X-Lovable-AIG-SDK': 'vercel-ai-sdk' }, fetch: run.fetch });
     const result = streamText({
@@ -38,9 +38,22 @@ Deno.serve(async req => {
       output: Output.object({ schema: jsonSchema<{ ids: string[] }>({ type: 'object', properties: { ids: { type: 'array', items: { type: 'string' } } }, required: ['ids'], additionalProperties: false }) }),
       providerOptions: { openai: { forceReasoning: true, reasoningEffort: 'low', reasoningSummary: 'auto', store: false, include: ['reasoning.encrypted_content'] } },
     });
-    const output = await result.output;
-    const headers = getLovableAiGatewayResponseHeaders(await result.response.then(r => r.headers), { ...cors, 'Content-Type': 'application/json' });
-    return new Response(JSON.stringify({ ids: allowedRecommendationIds(output.ids, candidates, propertyId) }), { headers });
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const output = await result.output;
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ ids: allowedRecommendationIds(output.ids, candidates, propertyId) })}\n\n`));
+        } catch (error) {
+          const failure = error as { responseBody?: string };
+          let safe = 'Could not rank related offers';
+          try { const body = JSON.parse(failure.responseBody ?? '{}'); safe = body.error?.message ?? body.message ?? safe; } catch { /* omit raw details */ }
+          controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ error: safe })}\n\n`));
+        } finally { controller.close(); }
+      },
+    });
+    const runId = await run.waitForRunId();
+    return new Response(stream, { headers: { ...cors, 'Content-Type': 'text/event-stream', ...(runId ? { 'X-Lovable-AIG-Run-ID': runId } : {}) } });
   } catch (error) {
     if (req.signal.aborted) return reply({ error: 'Cancelled' }, 499);
     const e = error as { statusCode?: number; responseBody?: string };

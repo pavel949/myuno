@@ -417,7 +417,7 @@ export function PropertyBookingCard({
           )}
         </Button>
         
-        <p className="text-xs text-muted-foreground">{isRu ? 'Сначала заявка и подтверждение дат менеджером. Это не подтверждённая бронь.' : 'Request first; the manager confirms dates. This is not a confirmed booking.'}</p>
+        <p className="text-xs text-muted-foreground">{isRu ? 'Расчёт не подтверждает бронь. На следующем шаге проверьте условия; вопрос менеджеру можно задать без оплаты.' : 'This estimate does not confirm a booking. Review the terms on the next step; asking the manager requires no payment.'}</p>
 
         {!nights ? null : (
           <>
