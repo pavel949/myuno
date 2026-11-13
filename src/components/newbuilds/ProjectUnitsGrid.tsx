@@ -24,6 +24,7 @@ const STATUS_COLORS: Record<string, string> = {
   reserved: 'bg-accent/10 text-accent border-accent/40',
   sold: 'bg-red-500/10 text-red-600 border-red-200',
   held: 'bg-primary/10 text-primary border-primary/40',
+  unknown: 'bg-muted text-muted-foreground border-border',
 };
 
 const STATUS_LABELS: Record<string, { en: string; ru: string }> = {
@@ -31,6 +32,7 @@ const STATUS_LABELS: Record<string, { en: string; ru: string }> = {
   reserved: { en: 'Reserved', ru: 'Забронирован' },
   sold: { en: 'Sold', ru: 'Продан' },
   held: { en: 'Held', ru: 'Удержан' },
+  unknown: { en: 'Unknown — needs review', ru: 'Неизвестно — требуется проверка' },
 };
 
 export function ProjectUnitsGrid({ projectId }: Props) {
