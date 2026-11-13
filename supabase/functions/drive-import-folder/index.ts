@@ -182,7 +182,7 @@ async function extractProjectMetaFromFile(
     method: 'POST',
     headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
         content: [
@@ -210,6 +210,20 @@ async function extractProjectMetaFromFile(
               project_status: { type: ['string', 'null'], enum: ['offplan', 'under_construction', 'ready', null] },
               amenities: { type: 'array', items: { type: 'string' } },
               unit_types: { type: 'array', items: { type: 'string' } },
+              ownership_types: { type: 'array', items: { type: 'string', enum: ['freehold', 'leasehold'] } },
+              payment_plan: {
+                type: ['array', 'null'],
+                description: 'Developer payment schedule, e.g. reservation, contract, construction milestones, handover',
+                items: {
+                  type: 'object',
+                  properties: {
+                    stage: { type: 'string' },
+                    percent: { type: ['number', 'null'] },
+                    amount_thb: { type: ['number', 'null'] },
+                  },
+                  required: ['stage'],
+                },
+              },
             },
           },
         },
@@ -240,7 +254,7 @@ async function extractUnitsFromFile(
     method: 'POST',
     headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-3.8-flash',
       messages: [{
         role: 'user',
         content: [
@@ -291,6 +305,78 @@ async function extractUnitsFromFile(
   } catch {
     return null;
   }
+}
+
+const SHEET_MIME = 'application/vnd.google-apps.spreadsheet';
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const PUBLIC_MEDIA_BUCKET = 'property-images';
+
+/** Exports a native Google Sheet as CSV text (first sheet). */
+async function exportSheetCsv(fileId: string, auth: DriveAuth): Promise<string> {
+  const qs = new URLSearchParams({ mimeType: 'text/csv' });
+  let response: Response;
+  if (auth.mode === 'public') {
+    qs.set('key', auth.apiKey!);
+    response = await fetch(`${GOOGLE_DRIVE_API}/files/${fileId}/export?${qs}`);
+  } else {
+    response = await fetch(`${GATEWAY_DRIVE_API}/files/${fileId}/export?${qs}`, {
+      headers: { 'Authorization': `Bearer ${auth.lovableKey}`, 'X-Connection-Api-Key': auth.connectorKey! },
+    });
+  }
+  if (!response.ok) throw new Error(`Sheet export failed [${response.status}]: ${await response.text()}`);
+  return await response.text();
+}
+
+/** Extracts unit inventory from tabular price-list text (CSV). Unknown values stay null. */
+async function extractUnitsFromText(text: string, lovableKey: string): Promise<any[] | null> {
+  const body = text.slice(0, 120_000);
+  const r = await fetch(LOVABLE_AI_URL, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${lovableKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'google/gemini-3.8-flash',
+      messages: [{
+        role: 'user',
+        content: `Это таблица (CSV) прайслиста/остатков застройщика. Извлеки каждый объект. Не придумывай значения: если поля нет — null. Статус sold/reserved/available бери из таблицы; если статуса нет — available. Если это не прайслист — верни пустой массив.\n\n${body}`,
+      }],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'extract_units',
+          parameters: {
+            type: 'object',
+            properties: {
+              units: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    unit_code: { type: ['string', 'null'] },
+                    unit_type: { type: 'string' },
+                    bedrooms: { type: ['integer', 'null'] },
+                    bathrooms: { type: ['integer', 'null'] },
+                    area_sqm: { type: ['number', 'null'] },
+                    floor: { type: ['integer', 'null'] },
+                    price: { type: ['number', 'null'] },
+                    currency: { type: 'string', enum: ['THB', 'USD', 'EUR', 'RUB'] },
+                    view_type: { type: ['string', 'null'] },
+                    status: { type: 'string', enum: ['available', 'reserved', 'sold', 'held'] },
+                  },
+                  required: ['unit_type'],
+                },
+              },
+            },
+            required: ['units'],
+          },
+        },
+      }],
+      tool_choice: { type: 'function', function: { name: 'extract_units' } },
+    }),
+  });
+  if (!r.ok) return null;
+  const data = await r.json();
+  const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+  try { return JSON.parse(args).units || []; } catch { return null; }
 }
 
 Deno.serve(async (req) => {
@@ -374,6 +460,8 @@ Deno.serve(async (req) => {
       let skipped = 0;
       const aggregatedUnits: any[] = [];
       let aggregatedProjectMeta: Record<string, any> | null = null;
+      const aggregatedGallery: string[] = [];
+      const aggregatedPlans: string[] = [];
 
       try {
         const files = await listDriveFiles(folderId, auth);
@@ -382,9 +470,21 @@ Deno.serve(async (req) => {
           .eq('id', job.id);
 
         for (const file of files) {
+          if (file.mimeType === SHEET_MIME) {
+            try {
+              const csv = await exportSheetCsv(file.id, auth);
+              const units = await extractUnitsFromText(csv, LOVABLE_API_KEY);
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
+              processed++;
+            } catch (e: any) {
+              failed++;
+              errorLog.push({ file: file.name, error: e.message });
+            }
+            continue;
+          }
           if (file.mimeType.startsWith('application/vnd.google-apps')) {
             skipped++;
-            continue; // Google Docs/Sheets — нужен экспорт, в v2
+            continue; // Docs/Slides: export to PDF is not supported yet
           }
           try {
             const buf = await downloadDriveFile(file.id, auth);
@@ -416,6 +516,27 @@ Deno.serve(async (req) => {
               visibility: 'kyc',
               version: 1,
             });
+
+            // Photos, renders and master plans: copy to the public media bucket so the
+            // review step can offer them as gallery images (applied only after approval).
+            if (file.mimeType.startsWith('image/') && ['marketing', 'construction', 'floor_plans'].includes(cls.category)) {
+              const mediaPath = `projects/${projectId}/drive/${safeName}`;
+              const { error: mediaErr } = await admin.storage.from(PUBLIC_MEDIA_BUCKET)
+                .upload(mediaPath, new Uint8Array(buf), { contentType: file.mimeType, upsert: false });
+              if (!mediaErr) {
+                const url = admin.storage.from(PUBLIC_MEDIA_BUCKET).getPublicUrl(mediaPath).data.publicUrl;
+                (cls.category === 'floor_plans' ? aggregatedPlans : aggregatedGallery).push(url);
+              } else {
+                errorLog.push({ file: file.name, error: `media copy: ${mediaErr.message}` });
+              }
+            }
+
+            if (file.mimeType === XLSX_MIME || /\.csv$/i.test(file.name)) {
+              const units = /\.csv$/i.test(file.name)
+                ? await extractUnitsFromText(new TextDecoder().decode(buf), LOVABLE_API_KEY)
+                : null;
+              if (units && units.length > 0) aggregatedUnits.push(...units.map(u => ({ ...u, _source: file.name })));
+            }
 
             // Параллельная AI-extraction для маркетинговых файлов
             if (cls.category === 'marketing') {
@@ -450,7 +571,13 @@ Deno.serve(async (req) => {
           files_processed: processed,
           files_failed: failed,
           files_skipped: skipped,
-          ai_project_patch: aggregatedProjectMeta,
+          ai_project_patch: (aggregatedProjectMeta || aggregatedGallery.length || aggregatedPlans.length)
+            ? {
+                ...(aggregatedProjectMeta || {}),
+                ...(aggregatedGallery.length ? { gallery_urls: aggregatedGallery } : {}),
+                ...(aggregatedPlans.length ? { marketing_materials: aggregatedPlans } : {}),
+              }
+            : null,
           ai_extracted_units: aggregatedUnits.length > 0 ? aggregatedUnits : null,
           error_log: errorLog.length ? errorLog : null,
           completed_at: new Date().toISOString(),
