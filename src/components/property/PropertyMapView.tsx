@@ -48,12 +48,6 @@ interface PropertyMapViewProps {
 }
 
 
-function shortPrice(price: number): string {
-  if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1)}M`;
-  if (price >= 1_000) return `${Math.round(price / 1_000)}K`;
-  return `${price}`;
-}
-
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
 type PropertyTrustExt = Property & {
@@ -182,7 +176,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
           const surface = surfaceFromProperty(property, mode === 'all' ? propertyDetailMode(property) : mode);
           const price = surface.priceHintThb;
           const suffix = ({ per_night: '/n', per_week: '/wk', per_month: '/mo', per_year: '/yr' } as Record<string, string>)[surface.priceMode] ?? '';
-          const priceLabel = price !== null ? `฿${shortPrice(price)}${suffix}` : '—';
+          const priceLabel = price !== null ? `${formatPrice(price)}${suffix}` : '—';
           const isActive = openId === property.id;
 
           return (

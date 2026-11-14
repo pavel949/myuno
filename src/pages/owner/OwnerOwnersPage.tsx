@@ -34,7 +34,7 @@ export default function OwnerOwnersPage() {
 
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { data: owners, isLoading } = useOwnerAccounts();
+  const { data: owners, isLoading, isError, refetch } = useOwnerAccounts();
   const { data: unlinkedProperties } = useUnlinkedProperties();
   const [search, setSearch] = useState('');
 
@@ -68,6 +68,16 @@ export default function OwnerOwnersPage() {
 
   const totalProperties = owners?.reduce((s, o) => s + o.properties_count, 0) || 0;
   const missingDocs = owners?.filter(o => !o.has_contract || !o.has_passport).length || 0;
+
+  if (isError) {
+    return (
+      <div className="space-y-3 p-6" role="alert">
+        <h1 className="text-2xl font-bold">{isRu ? 'Собственники' : 'Property Owners'}</h1>
+        <p className="text-muted-foreground">{isRu ? 'Не удалось загрузить данные собственников.' : 'Owner data could not be loaded.'}</p>
+        <Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-4 md:p-6 lg:p-8 max-w-[1536px] mx-auto">

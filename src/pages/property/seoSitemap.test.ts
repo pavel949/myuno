@@ -12,6 +12,7 @@ const redirectTargets = [
   '/property/invest',
   '/newbuilds/projects',
   '/newbuilds/developers',
+  '/property/offplan',
 ];
 
 describe('public property SEO contract', () => {
@@ -29,7 +30,6 @@ describe('public property SEO contract', () => {
 
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
     expect(new Set(locs).size).toBe(locs.length);
-    expect(locs).toContain('https://www.myuno.app/property/offplan');
     expect(locs).toContain('https://www.myuno.app/property/developers');
   });
 });

@@ -582,7 +582,7 @@ export function useApplyAsDeveloper() {
         ...data,
         user_id: user.id,
         slug,
-        is_active: true,
+        is_active: false,
         is_verified: false,
         is_featured: false,
       });

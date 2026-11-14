@@ -25,5 +25,6 @@ it.each([['en', 'en_US'], ['ru', 'ru_RU'], ['th', 'th_TH']])('keeps actual %s pa
  render(<HelmetProvider><SEOHead title="Localized page" description="Localized description" /></HelmetProvider>);
  await waitFor(() => expect(document.documentElement.lang).toBe(language));
  expect(document.head.querySelector('meta[property="og:locale"]')).toHaveAttribute('content', ogLocale);
+ expect(document.head.querySelector('link[hreflang="th"]')).toHaveAttribute('href', 'https://www.myuno.app/?lang=th');
  expect([...document.head.querySelectorAll('meta[property="og:locale:alternate"]')].map(node => node.getAttribute('content'))).toEqual(['en_US', 'ru_RU', 'th_TH'].filter(value => value !== ogLocale));
 });

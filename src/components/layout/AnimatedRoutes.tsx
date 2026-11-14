@@ -409,7 +409,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
 
         {/* ── Developer Portal ── */}
-        <Route path="/developer-portal" element={<PageTransition><Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense></PageTransition>}>
+        <Route path="/developer-portal" element={<AuthGuard><PageTransition><Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense></PageTransition></AuthGuard>}>
           <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
           <Route path="projects" element={<LazyPage><Pages.DeveloperProjects /></LazyPage>} />
           <Route path="projects/new" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />

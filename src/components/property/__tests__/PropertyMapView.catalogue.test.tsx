@@ -17,6 +17,7 @@ vi.mock('../TrustStrip', () => ({ TrustStrip: () => null }));
 function Location() { const value = useLocation(); return <output data-testid="location">{value.pathname}{value.search}</output>; }
 const homes = [
   { id: 'synthetic-sale', title_en: 'Sale home', title_ru: 'Продажа', listing_type: 'sale', price: 8000000, sale_price: 9000000, sale_currency: 'THB', lat: 7.9, lng: 98.3 },
+  { id: 'synthetic-usd-sale', title_en: 'USD sale home', title_ru: 'Продажа в долларах', listing_type: 'sale', price: 250000, sale_price: 250000, sale_currency: 'USD', lat: 7.9, lng: 98.3 },
   { id: 'synthetic-unpriced', title_en: 'Unpriced home', title_ru: 'Цена по запросу', listing_type: 'sale', lat: 7.9, lng: 98.3 },
   { id: 'synthetic-month', title_en: 'Monthly home', title_ru: 'На месяц', listing_type: 'rent', price: 30000, price_period: 'month', currency: 'THB', lat: 7.9, lng: 98.3 },
 ] as Property[];
@@ -43,6 +44,9 @@ describe('mixed public catalogue map', () => {
     mount(); expect(screen.getByRole('button', { name: 'Unpriced home' })).toHaveAttribute('data-price', '—');
     fireEvent.click(screen.getByRole('button', { name: 'Unpriced home' }));
     expect(screen.getByText('On request')).toBeVisible();
+  });
+  it('does not relabel a non-THB asking price as a THB marker', () => {
+    mount(); expect(screen.getByRole('button', { name: 'USD sale home' })).toHaveAttribute('data-price', '—');
   });
 
 });

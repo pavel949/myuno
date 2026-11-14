@@ -65,6 +65,15 @@ describe('AREA_LANDINGS', () => {
     }
   });
 
+  it('keeps reviewed metadata available for an explicit Thai-to-English fallback', () => {
+    for (const l of AREA_LANDINGS) {
+      expect(l.seo.metaTitle.en).toBeTruthy();
+      expect(l.seo.metaDescription.en).toBeTruthy();
+      expect(l.seo.metaTitle).not.toHaveProperty('th');
+      expect(l.seo.metaDescription).not.toHaveProperty('th');
+    }
+  });
+
   it('canonicalPath is /area/{slug} without trailing slash', () => {
     for (const l of AREA_LANDINGS) {
       expect(l.seo.canonicalPath).toBe(`/area/${l.slug}`);

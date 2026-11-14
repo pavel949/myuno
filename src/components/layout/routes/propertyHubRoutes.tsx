@@ -64,7 +64,8 @@ export const propertyHubRoutes = (
     <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
     <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
     <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
-    <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
+    {/* Legacy map bookmarks use the canonical public catalogue and its URL-owned filters. */}
+    <Route path="map" element={<PropertySearchRedirect defaults={{ view: 'map' }} />} />
     <Route path="complex/:id" element={<LazyPage><Pages.GuestComplexDetail /></LazyPage>} />
     {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
     <Route path="project/:id" element={<PropertyProjectRedirect />} />

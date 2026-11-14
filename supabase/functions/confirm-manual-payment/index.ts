@@ -85,59 +85,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    if ((mpr as any).status === 'confirmed') {
-      return new Response(JSON.stringify({ ok: true, already: true }), {
-        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const orderId = (mpr as any).order_id as string;
     const orderNumber = (mpr as any).orders?.order_number as string;
 
-    // 1. Update the manual_payment_requests row
-    const { error: updErr } = await sb
-      .from('manual_payment_requests')
-      .update({
-        status: 'confirmed',
-        confirmed_at: new Date().toISOString(),
-        confirmed_by: callerId,
-        amount_rub_actual,
-        payment_method_actual: payment_method,
-        proof_file_path: proof_file_path ?? null,
-      })
-      .eq('id', request_id);
-    if (updErr) throw updErr;
+    // Lock and transition the request + order together. The RPC also requires
+    // the matching active property hold, so an operator cannot confirm a
+    // commercial order that never acquired inventory.
+    const { data: transition, error: transitionError } = await sb.rpc('confirm_manual_payment_atomic', {
+      p_request_id: request_id,
+      p_confirmed_by: callerId,
+      p_amount_rub_actual: amount_rub_actual,
+      p_payment_method: payment_method,
+      p_proof_file_path: proof_file_path ?? null,
+    });
+    if (transitionError) throw transitionError;
 
-    // 2. Flip the order to confirmed
-    const orderMetaUpd = {
-      ...((mpr as any).orders?.metadata || {}),
-      payment_channel: 'rub_manual',
-      manual_payment: {
-        confirmed_at: new Date().toISOString(),
-        confirmed_by: callerId,
-        amount_rub_actual,
-        payment_method,
-        proof_file_path: proof_file_path ?? null,
-      },
-    };
-    await sb
-      .from('orders')
-      .update({
-        status: 'confirmed',
-        paid_at: new Date().toISOString(),
-        metadata: orderMetaUpd,
-      })
-      .eq('id', orderId);
+    const outcome = (transition as { outcome?: string } | null)?.outcome;
 
-    // 2b. Record double-entry ledger so this manual (RUB) payment produces the
+    // Record double-entry ledger so this manual (RUB) payment produces the
     // same audit trail / platform-fee + vendor-payout entries as Stripe orders.
     // Without this the order shows up as a discrepancy in reconciliation_alerts
     // and no vendor payout is ever owed. RPC is idempotent (skips if exists).
-    try {
-      const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
-      if (ledgerErr) console.error('[confirm-manual-payment] record_ledger_entries failed (non-fatal):', ledgerErr);
-    } catch (e) {
-      console.error('[confirm-manual-payment] record_ledger_entries threw (non-fatal):', e);
+    const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
+    if (ledgerErr) {
+      console.error('[confirm-manual-payment] record_ledger_entries failed; retry required:', ledgerErr);
+      return new Response(JSON.stringify({
+        ok: false,
+        recoverable: true,
+        code: 'ledger_pending',
+        error: 'Payment confirmed, but accounting is pending. Retry reconciliation before treating this booking as complete.',
+      }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (outcome === 'already_confirmed') {
+      return new Response(JSON.stringify({ ok: true, already: true }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // 3. Notify guest in-app

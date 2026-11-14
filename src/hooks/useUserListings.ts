@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UserListing, UserListingDraft, ItemCondition } from '@/types/userListing';
+import { validateUserListingDraft } from '@/lib/userListingValidation';
 
 import { toast } from 'sonner';
 export function useUserListings() {
@@ -39,6 +40,12 @@ const fetchListings = useCallback(async () => {
 
   const createListing = async (draft: UserListingDraft): Promise<UserListing | null> => {
     try {
+      const validation = validateUserListingDraft(draft);
+      if ('message' in validation) {
+        toast.error('Incomplete listing', { description: validation.message });
+        return null;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -58,7 +65,7 @@ const fetchListings = useCallback(async () => {
           description_ru: draft.description_ru || null,
           category_slug: draft.category_slug || null,
           subcategory: draft.subcategory || null,
-          price: draft.price || 0,
+          price: draft.price,
           currency: draft.currency,
           is_negotiable: draft.is_negotiable,
           condition: draft.condition,
@@ -219,13 +226,13 @@ export function usePublicListings(options: {
       try {
         setIsLoading(true);
         
-        // Include both 'active' status AND 'pending' with approved moderation
-        // This ensures listings are visible after vendor publishes them
+        // Public publication requires both moderation approval and active status.
+        // Pending rows remain private until the canonical publication transition.
         let query = supabase
           .from('user_listings')
           .select('*')
           .eq('moderation_status', 'approved')
-          .in('status', ['active', 'pending']) // Fix: include pending approved listings
+          .eq('status', 'active')
           .order('created_at', { ascending: false });
 
         if (category) {

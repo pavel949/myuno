@@ -37609,6 +37609,10 @@ export type Database = {
         }
         Returns: Json
       }
+      property_order_has_active_hold: {
+        Args: { p_order_id: string }
+        Returns: boolean
+      }
       property_booking_holds_inventory: {
         Args: { _status: string }
         Returns: boolean

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useUserListings } from '@/hooks/useUserListings';
 import { UserListingDraft, ItemCondition } from '@/types/userListing';
 import { useMarketplaceCategories } from '@/hooks/useMarketplace';
+import { isUserListingStepComplete, validateUserListingDraft } from '@/lib/userListingValidation';
+import { toast } from 'sonner';
 
 import { SellBasicInfoStep } from './steps/SellBasicInfoStep';
 import { SellConditionStep } from './steps/SellConditionStep';
@@ -46,18 +48,65 @@ const initialDraft: UserListingDraft = {
   show_phone: false,
 };
 
+const SELLER_DRAFT_STORAGE_KEY = 'myuno:seller-listing-draft:v1';
+const SELLER_DRAFT_TTL_MS = 1000 * 60 * 60 * 24 * 30;
+type PersistedSellerDraft = {
+  savedAt: number;
+  step: number;
+  draft: UserListingDraft;
+  listingId: string | null;
+};
+
+function loadPersistedDraft(): PersistedSellerDraft {
+  try {
+    const raw = localStorage.getItem(SELLER_DRAFT_STORAGE_KEY);
+    if (!raw) return { savedAt: Date.now(), step: 0, draft: initialDraft, listingId: null };
+    const parsed = JSON.parse(raw) as Partial<PersistedSellerDraft>;
+    if (!parsed.savedAt || Date.now() - parsed.savedAt > SELLER_DRAFT_TTL_MS || !parsed.draft) {
+      localStorage.removeItem(SELLER_DRAFT_STORAGE_KEY);
+      return { savedAt: Date.now(), step: 0, draft: initialDraft, listingId: null };
+    }
+    return {
+      savedAt: parsed.savedAt,
+      step: typeof parsed.step === 'number' ? Math.max(0, Math.min(parsed.step, STEPS.length - 1)) : 0,
+      draft: { ...initialDraft, ...parsed.draft },
+      listingId: typeof parsed.listingId === 'string' ? parsed.listingId : null,
+    };
+  } catch {
+    return { savedAt: Date.now(), step: 0, draft: initialDraft, listingId: null };
+  }
+}
+
 export function SellItemWizard() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { createListing, publishListing } = useUserListings();
+  const { createListing, updateListing, publishListing } = useUserListings();
   const { categories } = useMarketplaceCategories();
   
-  const [currentStep, setCurrentStep] = useState(0);
-  const [draft, setDraft] = useState<UserListingDraft>(initialDraft);
+  const [persistedDraft] = useState(loadPersistedDraft);
+  const [currentStep, setCurrentStep] = useState(persistedDraft.step);
+  const [draft, setDraft] = useState<UserListingDraft>(persistedDraft.draft);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [createdListingId, setCreatedListingId] = useState<string | null>(null);
+  const [createdListingId, setCreatedListingId] = useState<string | null>(persistedDraft.listingId);
+
+  const persistDraft = useCallback(() => {
+    try {
+      localStorage.setItem(SELLER_DRAFT_STORAGE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        step: currentStep,
+        draft,
+        listingId: createdListingId,
+      } satisfies PersistedSellerDraft));
+    } catch {
+      // Draft persistence is best effort; the form remains usable if storage is blocked.
+    }
+  }, [currentStep, draft, createdListingId]);
+
+  useEffect(() => {
+    persistDraft();
+  }, [persistDraft]);
   
   const progress = ((currentStep + 1) / STEPS.length) * 100;
   const currentStepData = STEPS[currentStep];
@@ -67,6 +116,10 @@ export function SellItemWizard() {
   };
   
   const nextStep = () => {
+    if (!isUserListingStepComplete(draft, currentStep)) {
+      toast.error(isRu ? 'Заполните обязательные поля' : 'Complete the required fields before continuing');
+      return;
+    }
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     }
@@ -83,12 +136,29 @@ export function SellItemWizard() {
   };
   
   const handleSubmit = async () => {
+    const validation = validateUserListingDraft(draft);
+    if ('message' in validation) {
+      toast.error(isRu ? 'Объявление заполнено не полностью' : 'Listing is incomplete', { description: validation.message });
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const listing = await createListing(draft);
-      if (listing) {
-        setCreatedListingId(listing.id);
-        await publishListing(listing.id);
+      let listingId = createdListingId;
+      if (listingId) {
+        const saved = await updateListing(listingId, draft);
+        if (!saved) return;
+      } else {
+        const listing = await createListing(draft);
+        if (!listing) return;
+        listingId = listing.id;
+        setCreatedListingId(listingId);
+      }
+      if (listingId && await publishListing(listingId)) {
+        try {
+          localStorage.removeItem(SELLER_DRAFT_STORAGE_KEY);
+        } catch {
+          // A blocked storage implementation must not hide a confirmed publish.
+        }
         setIsSubmitted(true);
       }
     } finally {
@@ -97,6 +167,7 @@ export function SellItemWizard() {
   };
   
   const handleClose = () => {
+    persistDraft();
     navigate(APP_ROUTES.SELL);
   };
   

@@ -40,6 +40,7 @@ function mount(entry: string, navigationState?: unknown) {
     <Route path="/property/search" element={<PropertySearchPage />} />
     <Route path="/property" element={<PropertyHubIndex />} />
     <Route path="/property/browse" element={<PropertySearchRedirect />} />
+    <Route path="/property/map" element={<PropertySearchRedirect defaults={{ view: 'map' }} />} />
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
@@ -126,6 +127,18 @@ describe('one residential results surface', () => {
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
     expect(screen.getByTestId('existing-map-boundary')).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent('view=map');
+  });
+  it('redirects the legacy map URL to the canonical map view while preserving query context', async () => {
+    state.properties = [{ id: 'synthetic-legacy-map-home', title_en: 'Legacy map home', listing_type: 'rent', monthly_rent: 1000 }];
+    mount('/property/map?mode=rent&district=layan&checkIn=2027-01-10&checkOut=2027-01-12&opaque=keep#results');
+    expect(screen.getByTestId('location')).toHaveTextContent('/property/search?mode=rent');
+    expect(screen.getByTestId('location')).toHaveTextContent('district=layan');
+    expect(screen.getByTestId('location')).toHaveTextContent('checkIn=2027-01-10');
+    expect(screen.getByTestId('location')).toHaveTextContent('checkOut=2027-01-12');
+    expect(screen.getByTestId('location')).toHaveTextContent('view=map');
+    expect(screen.getByTestId('location')).toHaveTextContent('opaque=keep');
+    expect(screen.getByTestId('location')).toHaveTextContent('#results');
+    expect(screen.getByTestId('existing-map-boundary')).toBeInTheDocument();
   });
   it.each([['rent-month', 'medium', 'Monthly'], ['rent-long', 'long', 'Yearly']])('hydrates the legacy %s persona bookmark through the catalogue alias', (intent, tenancy, label) => {
     mount(`/property?intent=${intent}&persona=P3&returnTo=%2Ffor%2Flong-stay#anchor`);

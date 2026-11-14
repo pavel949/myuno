@@ -38,6 +38,8 @@ import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
 import { propertyDetailPricing, propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import { propertyCancellationDescription } from '@/lib/propertyCancellationDescription';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { buildPropertyInquiryKey, shouldBlockPropertyInquirySubmission } from '@/lib/propertyInquiryGuards';
 
 
 export default function PropertyInquiry() {
@@ -53,6 +55,7 @@ export default function PropertyInquiry() {
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
   const isRu = language === 'ru';
+  const t = (values: { ru: string; en: string; th: string }) => pickLang(language, values);
   const { createOrder } = useOrders();
 
   // Draft persistence — survives the AuthSheet round-trip (including OAuth
@@ -155,6 +158,7 @@ export default function PropertyInquiry() {
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFieldErrors, setShowFieldErrors] = useState(false);
   const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
@@ -265,9 +269,15 @@ export default function PropertyInquiry() {
 
   // Per-date price overrides from the property calendar (same source the server checks).
   const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
+  const [datePricesLoading, setDatePricesLoading] = useState(false);
+  const [datePricesError, setDatePricesError] = useState(false);
+  const [datePricesRetry, setDatePricesRetry] = useState(0);
   useEffect(() => {
-    if (!id || !checkIn || !checkOut || differenceInDays(checkOut, checkIn) <= 0) { setDateOverrides({}); return; }
+    if (!id || !checkIn || !checkOut || differenceInDays(checkOut, checkIn) <= 0) { setDateOverrides({}); setDatePricesLoading(false); setDatePricesError(false); return; }
     let cancelled = false;
+    setDateOverrides({});
+    setDatePricesLoading(true);
+    setDatePricesError(false);
     const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     (async () => {
       try {
@@ -275,13 +285,13 @@ export default function PropertyInquiry() {
         if (error) throw error;
         const map: Record<string, number> = {};
         for (const r of data ?? []) if (r.price_override != null) map[String(r.date)] = Number(r.price_override);
-        if (!cancelled) setDateOverrides(map);
+        if (!cancelled) { setDateOverrides(map); setDatePricesLoading(false); }
       } catch {
-        if (!cancelled) setDateOverrides({});
+        if (!cancelled) { setDateOverrides({}); setDatePricesLoading(false); setDatePricesError(true); }
       }
     })();
     return () => { cancelled = true; };
-  }, [id, checkIn, checkOut]);
+  }, [id, checkIn, checkOut, datePricesRetry]);
 
   // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
@@ -339,7 +349,13 @@ export default function PropertyInquiry() {
   }, [checkIn, checkOut, rentalTerms, guests, language, isRu]);
 
 
-  const isFormValid = supportsShortStay && formData.name && formData.phone && hasDates && validationErrors.length === 0;
+  const datePricingBlocked = shouldBlockPropertyInquirySubmission(datePricesLoading, datePricesError);
+  const nameError = showFieldErrors && !formData.name.trim();
+  const phoneError = showFieldErrors && !formData.phone.trim();
+  const inquiryKey = useMemo(() => id && user?.id && checkIn && checkOut
+    ? buildPropertyInquiryKey({ userId: user.id, propertyId: id, checkIn: format(checkIn, 'yyyy-MM-dd'), checkOut: format(checkOut, 'yyyy-MM-dd'), guests })
+    : null, [id, user?.id, checkIn, checkOut, guests]);
+  const isFormValid = supportsShortStay && formData.name.trim() && formData.phone.trim() && hasDates && validationErrors.length === 0 && !datePricingBlocked;
   const propertyTitle = isRu ? property?.title_ru : property?.title_en;
   const propertyImage = property?.cover_image || property?.images?.[0];
 
@@ -473,12 +489,25 @@ export default function PropertyInquiry() {
 
           <Separator />
 
+          <div role="status" aria-live="polite" className="sr-only">
+            {datePricesLoading ? t({ ru: 'Проверяем цены по датам…', en: 'Checking date-specific pricing…', th: 'กำลังตรวจสอบราคาตามวันที่…' }) : datePricesError ? t({ ru: 'Цены по датам недоступны. Расчёт заблокирован.', en: 'Date-specific pricing is unavailable. Quoting is blocked.', th: 'ไม่สามารถโหลดราคาตามวันที่ได้ จึงยังคำนวณราคาไม่ได้' }) : ''}
+          </div>
+
           {/* ===== PRICE BREAKDOWN ===== */}
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">{isRu ? 'Стоимость' : 'Price details'}</h2>
-            <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />
+            {!datePricingBlocked && <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />}
+            {datePricesLoading && (
+              <p role="status" className="text-sm text-muted-foreground">{t({ ru: 'Проверяем цену для выбранных дат…', en: 'Checking the price for your selected dates…', th: 'กำลังตรวจสอบราคาสำหรับวันที่เลือก…' })}</p>
+            )}
+            {datePricesError && (
+              <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-sm space-y-2">
+                <p>{t({ ru: 'Не удалось загрузить цены для выбранных дат. Мы не показываем базовую цену как итоговую.', en: 'We could not load pricing for these dates, so the base rate is not presented as a final total.', th: 'ไม่สามารถโหลดราคาสำหรับวันที่เลือกได้ จึงไม่แสดงราคาพื้นฐานเป็นยอดสุดท้าย' })}</p>
+                <Button type="button" variant="outline" size="sm" onClick={() => setDatePricesRetry(value => value + 1)}>{t({ ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}</Button>
+              </div>
+            )}
 
-            <div className="space-y-2">
+            {!datePricingBlocked && <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
                   {formatPrice(pricing.nightlyRate || pricePerNight)} × {nights} {pluralizeNights(nights, language)}
@@ -520,7 +549,7 @@ export default function PropertyInquiry() {
                   <span>{formatPrice(rentalTerms.deposit_amount)}</span>
                 </div>
               )}
-            </div>
+            </div>}
 
             <Separator />
 
@@ -552,8 +581,8 @@ export default function PropertyInquiry() {
                 </Popover>
               </span>
               <span className="flex items-baseline gap-1">
-                {formatPrice(pricing.total)}
-                <sup className="text-[10px] text-muted-foreground font-medium">{listingCurrency}</sup>
+                {datePricingBlocked ? '—' : formatPrice(pricing.total)}
+                {!datePricingBlocked && <sup className="text-[10px] text-muted-foreground font-medium">{listingCurrency}</sup>}
               </span>
             </div>
 
@@ -591,8 +620,10 @@ export default function PropertyInquiry() {
           </section>
 
           {/* Validation Errors */}
-          {validationErrors.length > 0 && (
-            <div className="p-3 rounded-none bg-destructive/10 border border-destructive/20 space-y-1">
+          {(validationErrors.length > 0 || nameError || phoneError) && (
+            <div id="inquiry-validation-summary" role="alert" tabIndex={-1} className="p-3 rounded-none bg-destructive/10 border border-destructive/20 space-y-1">
+              {nameError && <a className="block text-sm text-destructive underline" href="#name">{t({ ru: 'Укажите имя.', en: 'Enter your name.', th: 'กรุณาระบุชื่อ' })}</a>}
+              {phoneError && <a className="block text-sm text-destructive underline" href="#phone">{t({ ru: 'Укажите телефон.', en: 'Enter your phone number.', th: 'กรุณาระบุหมายเลขโทรศัพท์' })}</a>}
               {validationErrors.map((error, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -627,8 +658,11 @@ export default function PropertyInquiry() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder={isRu ? 'Ваше имя' : 'Your name'}
                   required
+                  aria-invalid={nameError}
+                  aria-describedby={nameError ? 'name-error' : undefined}
                   className="mt-1"
                 />
+                {nameError && <p id="name-error" className="mt-1 text-sm text-destructive">{t({ ru: 'Укажите имя.', en: 'Enter your name.', th: 'กรุณาระบุชื่อ' })}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -651,8 +685,11 @@ export default function PropertyInquiry() {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+66..."
                     required
+                    aria-invalid={phoneError}
+                    aria-describedby={phoneError ? 'phone-error' : undefined}
                     className="mt-1"
                   />
+                  {phoneError && <p id="phone-error" className="mt-1 text-sm text-destructive">{t({ ru: 'Укажите телефон.', en: 'Enter your phone number.', th: 'กรุณาระบุหมายเลขโทรศัพท์' })}</p>}
                 </div>
               </div>
               <div>
@@ -819,6 +856,8 @@ export default function PropertyInquiry() {
               disabled={isSubmitting}
               onClick={async () => {
                 if (isSubmitting) return;
+                setShowFieldErrors(true);
+                if (!formData.name.trim() || !formData.phone.trim() || datePricingBlocked) return;
 
                 // Strict e-mail validation: confirmations and voucher emails are
                 // sent to this address, so a typo means a silently lost booking.
@@ -887,8 +926,35 @@ export default function PropertyInquiry() {
                     return;
                   }
 
-                  // 1. Save to property_inquiries for owner dashboard visibility
-                  const { error: inquiryError } = await supabase
+                  // 1. Reuse an existing matching order/inquiry on retry. This is a
+                  // client/server read guard only; it does not claim transaction semantics.
+                  const { data: existingOrders } = inquiryKey ? await supabase
+                    .from('orders')
+                    .select('id')
+                    .eq('customer_user_id', user!.id)
+                    .eq('order_type', 'property')
+                    .contains('metadata', { inquiry_key: inquiryKey })
+                    .limit(1) : { data: [] as Array<{ id: string }> };
+                  const existingOrderId = existingOrders?.[0]?.id;
+                  if (existingOrderId) {
+                    if (draftKey) { try { localStorage.removeItem(draftKey); } catch { /* ignore */ } }
+                    setSubmittedOrderId(existingOrderId);
+                    return;
+                  }
+
+                  const { data: existingInquiries } = await supabase
+                    .from('property_inquiries')
+                    .select('id')
+                    .eq('property_id', id!)
+                    .eq('user_id', user!.id)
+                    .eq('check_in', format(checkIn!, 'yyyy-MM-dd'))
+                    .eq('check_out', format(checkOut!, 'yyyy-MM-dd'))
+                    .eq('guests', guests)
+                    .eq('status', 'pending')
+                    .limit(1);
+
+                  // 2. Save to property_inquiries for owner dashboard visibility
+                  const { error: inquiryError } = existingInquiries?.length ? { error: null } : await supabase
                     .from('property_inquiries')
                     .insert({
                       property_id: id!,
@@ -940,6 +1006,7 @@ export default function PropertyInquiry() {
                       prepay_amount: pricing.prepayAmount,
                       prepay_percent: pricing.prepayPercent,
                       booking_mode: 'request',
+                      ...(inquiryKey ? { inquiry_key: inquiryKey } : {}),
                       ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
                       ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
                     },

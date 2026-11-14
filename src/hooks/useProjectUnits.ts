@@ -10,6 +10,7 @@ import { useLegacyUnitTablesEnabled } from '@/lib/real-estate/unitSourceFlag';
 
 export interface ProjectUnit {
   id: string;
+  property_id: string | null;
   name: string;
   name_ru: string | null;
   unit_type: string;
@@ -18,6 +19,7 @@ export interface ProjectUnit {
   bathrooms: number | null;
   price: number | null;
   price_per_sqm: number | null;
+  currency: string | null;
   floor_from: number | null;
   floor_to: number | null;
   floor_plan_url: string | null;
@@ -30,6 +32,7 @@ export interface ProjectUnit {
 
 interface ProjectUnitRow {
   id: string;
+  property_id: string | null;
   unit_code: string | null;
   unit_type: string | null;
   area_sqm: number | null;
@@ -37,6 +40,7 @@ interface ProjectUnitRow {
   bathrooms: number | null;
   price: number | null;
   price_per_sqm: number | null;
+  currency: string | null;
   floor: number | null;
   floor_number: number | null;
   floor_plan_url: string | null;
@@ -49,6 +53,7 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
   const floor = u.floor ?? u.floor_number ?? null;
   return {
     id: u.id,
+    property_id: u.property_id ?? null,
     name: u.unit_code || u.unit_type || 'Unit',
     name_ru: null,
     unit_type: u.unit_type || 'studio',
@@ -57,6 +62,7 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
     bathrooms: u.bathrooms,
     price: Number(u.price ?? 0),
     price_per_sqm: u.price_per_sqm !== null ? Number(u.price_per_sqm) : null,
+    currency: u.currency ?? null,
     floor_from: floor,
     floor_to: floor,
     floor_plan_url: u.floor_plan_url,
@@ -80,7 +86,7 @@ export function useProjectUnits(projectId?: string) {
       const { data, error } = await supabase
         .from('project_units')
         .select(
-          'id, unit_code, unit_type, area_sqm, bedrooms, bathrooms, price, price_per_sqm, floor, floor_number, floor_plan_url, view_type, status, unit_status',
+          'id, property_id, unit_code, unit_type, area_sqm, bedrooms, bathrooms, price, price_per_sqm, currency, floor, floor_number, floor_plan_url, view_type, status, unit_status',
         )
         .eq('project_id', projectId)
         .order('id');
@@ -104,6 +110,7 @@ export function useProjectUnits(projectId?: string) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (legacy || []).map((u: any) => publicNewbuildUnit({
         id: u.id,
+        property_id: u.property_id ?? null,
         name: u.name,
         name_ru: u.name_ru,
         unit_type: u.unit_type || 'studio',
@@ -112,6 +119,7 @@ export function useProjectUnits(projectId?: string) {
         bathrooms: u.bathrooms,
         price: u.price,
         price_per_sqm: u.price_per_sqm,
+        currency: u.currency ?? null,
         floor_from: u.floor_from,
         floor_to: u.floor_to,
         floor_plan_url: u.floor_plan_url,

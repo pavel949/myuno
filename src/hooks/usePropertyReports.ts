@@ -233,7 +233,7 @@ export function useGenerateReport() {
         currency: string | null;
         status: string | null;
         notes: string | null;
-        metadata: { source?: string; deposit_amount?: number } | null;
+        metadata: { source?: string; deposit_amount?: number; deposit_paid_at?: string | null; security_deposit_amount?: number; security_deposit_returned_amount?: number; security_deposit_returned_at?: string | null; security_deposit_deduction_amount?: number; security_deposit_return_status?: string } | null;
         order_items: OrderItemRow[] | null;
         order_participants: ParticipantRow[] | null;
       };
@@ -251,30 +251,14 @@ export function useGenerateReport() {
           total_amount: Number(o.total_amount || 0),
           source: meta.source || 'direct',
           deposit_amount: meta.deposit_amount || 0,
-          deposit_paid_at: null as string | null, // deposit tracking via booking_operations when available
+          deposit_paid_at: meta.deposit_paid_at || null,
+          security_deposit_amount: Number(meta.security_deposit_amount || 0),
+          security_deposit_returned_amount: Number(meta.security_deposit_returned_amount || 0),
+          security_deposit_returned_at: meta.security_deposit_returned_at || null,
+          security_deposit_deduction_amount: Number(meta.security_deposit_deduction_amount || 0),
+          security_deposit_return_status: meta.security_deposit_return_status || null,
         };
       });
-
-      // Fetch booking_operations for security deposits (legacy: references property_bookings; empty for orders)
-      const bIds = bookings.map((b) => b.id);
-      type OperationRow = {
-        booking_id: string;
-        deposit_amount: number | null;
-        deposit_received_at: string | null;
-        deposit_returned_amount: number | null;
-        deposit_returned_at: string | null;
-        deposit_deduction_amount: number | null;
-        deposit_return_status: string | null;
-      };
-      let operations: OperationRow[] = [];
-      if (bIds.length > 0) {
-        const { data: ops } = await supabase
-          .from('booking_operations')
-          .select('booking_id, deposit_amount, deposit_received_at, deposit_returned_amount, deposit_returned_at, deposit_deduction_amount, deposit_return_status')
-          .in('booking_id', bIds);
-        operations = (ops || []) as unknown as OperationRow[];
-      }
-      const opsMap = new Map(operations.map((o) => [o.booking_id, o]));
 
       // Calculate report data
       const income = {
@@ -370,17 +354,17 @@ export function useGenerateReport() {
         }
       });
 
-      // Calculate security deposit tracking from booking_operations
+      // Calculate security deposit tracking from the order metadata contract.
+      // Legacy booking_operations rows are keyed by property_bookings.id and
+      // must not be joined to canonical order IDs.
       let secTotalReceived = 0;
       let secTotalReturned = 0;
       let secTotalDeductions = 0;
       const securityDepositItems: ReportData['security_deposits']['items'] = [];
       (bookings || []).forEach((b) => {
-        const op = opsMap.get(b.id);
-        if (!op) return;
-        const received = Number(op.deposit_amount || 0);
-        const returned = Number(op.deposit_returned_amount || 0);
-        const deducted = Number(op.deposit_deduction_amount || 0);
+        const received = Number(b.security_deposit_amount || 0);
+        const returned = Number(b.security_deposit_returned_amount || 0);
+        const deducted = Number(b.security_deposit_deduction_amount || 0);
         if (received === 0) return;
         secTotalReceived += received;
         secTotalReturned += returned;
@@ -391,7 +375,7 @@ export function useGenerateReport() {
           received,
           returned,
           deducted,
-          status: op.deposit_return_status || (op.deposit_returned_at ? 'returned' : 'held'),
+          status: b.security_deposit_return_status || (b.security_deposit_returned_at ? 'returned' : 'held'),
         });
       });
 

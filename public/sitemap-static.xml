@@ -62,15 +62,6 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/search?lang=th"/>
   </url>
   <url>
-    <loc>https://www.myuno.app/property/offplan</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/property/offplan?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/property/offplan?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/offplan?lang=th"/>
-  </url>
-  <url>
     <loc>https://www.myuno.app/property/developers</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>

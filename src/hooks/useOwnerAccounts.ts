@@ -94,14 +94,18 @@ export function useOwnerAccounts() {
           ? supabase.from('property_financials').select('property_id, transaction_type, amount').in('property_id', propertyIds)
           : Promise.resolve({ data: [] as { property_id: string; transaction_type: string; amount: number | null }[] }),
         propertyIds.length > 0
-          ? supabase.from('property_bookings').select('property_id, check_in, check_out, status').in('property_id', propertyIds).in('status', ['confirmed', 'completed', 'checked_in'])
-          : Promise.resolve({ data: [] as { property_id: string; check_in: string | null; check_out: string | null; status: string }[] }),
+          ? supabase.from('orders').select('id, start_at, end_at, status, order_items!inner(resource_id, item_type)').eq('vertical', 'property').is('deleted_at', null).eq('order_items.item_type', 'property').in('order_items.resource_id', propertyIds).in('status', ['confirmed', 'completed', 'checked_in'])
+          : Promise.resolve({ data: [] as { id: string; start_at: string | null; end_at: string | null; status: string; order_items: { resource_id: string | null; item_type: string }[] }[] }),
       ]);
 
       const terms = termsRes.data || [];
       const docs = docsRes.data || [];
       const allFinancials = financialsRes.data || [];
-      const allBookings = bookingsRes.data || [];
+      type OwnerOrder = { id: string; start_at: string | null; end_at: string | null; status: string; order_items?: { resource_id: string | null; item_type: string }[] | null };
+      const allBookings = ((bookingsRes.data || []) as unknown as OwnerOrder[]).flatMap((order) => {
+        const item = order.order_items?.find((candidate) => candidate.item_type === 'property');
+        return item?.resource_id ? [{ property_id: item.resource_id, check_in: order.start_at?.split('T')[0] ?? null, check_out: order.end_at?.split('T')[0] ?? null, status: order.status }] : [];
+      });
 
       type ContactExt = (typeof contacts)[number] & {
         linked_user_id?: string | null;
@@ -265,7 +269,7 @@ export function useOwnerAccountDetail(contactId: string | null) {
 
       const [financials, bookings, reports, documents, tasks] = await Promise.all([
         supabase.from('property_financials').select('*').in('property_id', propIds).order('date', { ascending: false }).limit(100),
-        supabase.from('property_bookings').select('id, property_id, check_in, check_out, total_amount, currency, status, guest_name').in('property_id', propIds).order('check_in', { ascending: false }).limit(50),
+        supabase.from('orders').select('id, start_at, end_at, total_amount, currency, status, order_items!inner(resource_id, item_type), order_participants(role, name)').eq('vertical', 'property').is('deleted_at', null).eq('order_items.item_type', 'property').in('order_items.resource_id', propIds).order('start_at', { ascending: false }).limit(50),
         supabase.from('property_reports').select('*').in('property_id', propIds).order('created_at', { ascending: false }).limit(20),
         supabase.from('crm_documents').select('*').eq('company_id', companyId).eq('contact_id', contactId).eq('is_archived', false).order('created_at', { ascending: false }),
         supabase.from('crm_tasks').select('*').eq('company_id', companyId).eq('contact_id', contactId).order('due_date', { ascending: false }).limit(30),
@@ -274,7 +278,16 @@ export function useOwnerAccountDetail(contactId: string | null) {
       return {
         properties: properties || [],
         financials: financials.data || [],
-        bookings: bookings.data || [],
+        bookings: ((bookings.data || []) as unknown as Array<{ id: string; start_at: string | null; end_at: string | null; total_amount: number | null; currency: string | null; status: string; order_items?: Array<{ resource_id: string | null; item_type: string }>; order_participants?: Array<{ role: string; name: string | null }> }>).map((order) => ({
+          id: order.id,
+          property_id: order.order_items?.find((item) => item.item_type === 'property')?.resource_id ?? '',
+          check_in: order.start_at?.split('T')[0] ?? '',
+          check_out: order.end_at?.split('T')[0] ?? '',
+          total_amount: order.total_amount,
+          currency: order.currency,
+          status: order.status,
+          guest_name: order.order_participants?.find((participant) => participant.role === 'guest')?.name ?? null,
+        })),
         reports: reports.data || [],
         documents: documents.data || [],
         tasks: tasks.data || [],

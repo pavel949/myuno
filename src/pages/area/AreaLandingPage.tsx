@@ -156,6 +156,10 @@ const AreaLandingPage = () => {
   if (!landing) return <NotFound />;
 
   const { area, seo, relatedPersonaSlugs, relatedClusterSlugs } = landing;
+  // Area copy currently has reviewed RU/EN fields only. Keep Thai runtime
+  // pages usable with an explicit English fallback; do not fabricate a TH
+  // translation or index an RU/EN object with a missing `th` key.
+  const metadataLanguage: 'ru' | 'en' = language === 'ru' ? 'ru' : 'en';
   const name = isRu ? area.name_ru : area.name_en;
   const description = isRu ? area.description_ru : area.description_en;
   const highlights = isRu ? area.highlights_ru : area.highlights_en;
@@ -196,7 +200,7 @@ const AreaLandingPage = () => {
     '@context': 'https://schema.org',
     '@type': 'Place',
     name: `${area.name_en}, Phuket`,
-    description: seo.metaDescription[language as 'ru' | 'en'],
+    description: seo.metaDescription[metadataLanguage],
     url: canonicalUrl,
     geo: { '@type': 'GeoCoordinates', latitude: area.lat, longitude: area.lng },
   };
@@ -205,8 +209,8 @@ const AreaLandingPage = () => {
     <AppLayout>
       <Helmet>
         <html lang={language} />
-        <title>{seo.metaTitle[language as 'ru' | 'en']}</title>
-        <meta name="description" content={seo.metaDescription[language as 'ru' | 'en']} />
+        <title>{seo.metaTitle[metadataLanguage]}</title>
+        <meta name="description" content={seo.metaDescription[metadataLanguage]} />
         <link rel="canonical" href={canonicalUrl} />
         {seo.hreflangAlternates.map((alt) => (
           <link key={alt.lang} rel="alternate" hrefLang={alt.lang} href={alt.href} />
@@ -223,8 +227,8 @@ const AreaLandingPage = () => {
             <>
               <link rel="preload" as="image" href={og} type={OG_IMAGE_TYPE} />
               <meta property="og:type" content="website" />
-              <meta property="og:title" content={seo.metaTitle[language as 'ru' | 'en']} />
-              <meta property="og:description" content={seo.metaDescription[language as 'ru' | 'en']} />
+              <meta property="og:title" content={seo.metaTitle[metadataLanguage]} />
+              <meta property="og:description" content={seo.metaDescription[metadataLanguage]} />
               <meta property="og:url" content={canonicalUrl} />
               <meta property="og:image" content={og} />
               <meta property="og:image:secure_url" content={og} />
@@ -235,8 +239,8 @@ const AreaLandingPage = () => {
               <meta property="og:locale" content={isRu ? 'ru_RU' : 'en_US'} />
               <meta property="og:site_name" content="myUNO" />
               <meta name="twitter:card" content="summary_large_image" />
-              <meta name="twitter:title" content={seo.metaTitle[language as 'ru' | 'en']} />
-              <meta name="twitter:description" content={seo.metaDescription[language as 'ru' | 'en']} />
+              <meta name="twitter:title" content={seo.metaTitle[metadataLanguage]} />
+              <meta name="twitter:description" content={seo.metaDescription[metadataLanguage]} />
               <meta name="twitter:image" content={og} />
               <meta name="twitter:image:alt" content={ogAlt} />
             </>

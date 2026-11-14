@@ -47,6 +47,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
 import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import type { ProjectUnit } from '@/hooks/useProjectUnits';
 import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
@@ -91,6 +92,7 @@ export default function OffplanDetail() {
   const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
   const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const { data: developer } = useDeveloper(project?.developerId || '');
@@ -296,7 +298,7 @@ export default function OffplanDetail() {
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             {/* Development Units / Floor Plans */}
-            {id && <DevelopmentUnitsSection developmentId={id} />}
+            {id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setSelectedUnit(unit); setShowLeadForm(true); }} />}
 
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
@@ -429,7 +431,7 @@ export default function OffplanDetail() {
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
+        title={pickLang(language, { ru: selectedUnit ? 'Запросить информацию о юните' : 'Обсудить проект', en: selectedUnit ? 'Ask about this unit' : 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
         <LandingLeadForm
@@ -438,7 +440,10 @@ export default function OffplanDetail() {
           entryPoint={`offplan_project_${project.id}`}
           leadSource="cta"
           universalRequestType="property_purchase"
-          contextMetadata={{ project_id: project.id }}
+          contextMetadata={{
+            project_id: project.id,
+            ...(selectedUnit ? { unit_id: selectedUnit.id, property_id: selectedUnit.property_id } : {}),
+          }}
         />
       </ResponsiveModal>
     </div>

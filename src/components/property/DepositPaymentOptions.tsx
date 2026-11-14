@@ -228,7 +228,8 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           return false;
         }
 
-        // 1. Create order — Order-First, audit trail preserved.
+        // Create through the canonical property order writer. The item type and
+        // resource_id are part of the trigger contract that creates the hold.
         const orderResult = await createOrder({
           order_type: 'property',
           provider_org_id: providerOrgId,
@@ -247,13 +248,14 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           },
           items: [{
             item_name: propertyTitle,
-            item_type: 'property_rental',
+            item_type: 'property',
+            resource_id: propertyId,
             qty: nights,
             unit_price: nights > 0 ? Math.round(totalAmount / nights) : totalAmount,
             amount: totalAmount,
             start_at: checkIn,
             end_at: checkOut,
-            metadata: { source_id: propertyId },
+            metadata: { property_id: propertyId, source_id: propertyId },
           }],
           participants: [{
             role: 'primary',
@@ -270,6 +272,30 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
               ? 'Не удалось создать заявку. Попробуйте ещё раз.'
               : 'Could not create the request. Please try again.',
           );
+          return false;
+        }
+
+        // The availability RPC above is only a preflight. Do not expose an
+        // operator request unless the canonical order writer actually created
+        // the matching inventory hold under the exclusion constraint.
+        const { data: hasHold, error: holdError } = await supabase.rpc(
+          'property_order_has_active_hold',
+          { p_order_id: orderResult.order_id },
+        );
+        if (holdError || hasHold !== true) {
+          console.error('[DepositPaymentOptions] canonical inventory hold missing:', holdError);
+          Sentry.captureException(holdError ?? new Error('canonical inventory hold missing'), {
+            extra: { scope: 'rub_manual.inventory_hold', orderId: orderResult.order_id, propertyId },
+          });
+          // The order writer may have persisted a commercial row without its
+          // hold on an older deployment. Never let that become a request that
+          // an operator can confirm; release the order if possible.
+          await supabase
+            .from('orders')
+            .update({ status: 'cancelled', notes: 'Manual checkout rejected: canonical inventory hold missing' })
+            .eq('id', orderResult.order_id)
+            .in('status', ['pending', 'pending_deposit']);
+          toast.error(isRu ? 'Не удалось удержать выбранные даты.' : 'Could not hold the selected dates.');
           return false;
         }
 
