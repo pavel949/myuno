@@ -1,9 +1,10 @@
 # Roadmap
 
 ## 2026-11-14 · Guest feature-switch access
-- [ ] Trace public consumers and compare enabled flags with actual anonymous visibility; do not expose private or intentionally disabled switches.
-- [ ] Test and apply only a proven public-key read boundary, retaining all write/admin permissions and all stored values.
-- [ ] Verify anonymous catalogue flows and private-setting denial; record evidence, rollback and residual unknowns. No business writes, notifications or publication.
+- [x] Trace public consumers and compare enabled flags with actual anonymous visibility; internal/admin/legacy and unconfirmed onboarding admission remain hidden.
+- [x] Apply exact multi-unit/Thai public-switch SELECT policy as migration 0038; all stored states and existing admin/write permissions unchanged.
+- [x] 8/8 isolated PostgreSQL tests and 8/8 hosted anonymous-read assertions PASS; guest property renders without runtime errors, function/writes blocked. Evidence/rollback: docs/qa/GUEST_FEATURE_FLAG_ACCESS_2026_11_14.md. No business writes, notifications or publication.
+- [ ] Public onboarding admission remains unconfirmed (stored true versus QA-only/default-OFF documentation); requires a separate explicit activation decision. Populated resort/Thai business acceptance is not certified by flag tests.
 
 ## 2026-11-13 · Property detail option A
 - [x] Make stay calculation and assisted booking requests explicit on desktop/mobile; existing inquiry/payment branch authority remains unchanged, the estimate itself is not a reservation.

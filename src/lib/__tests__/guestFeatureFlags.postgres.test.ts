@@ -32,7 +32,7 @@ describe('guest catalogue flags — socket-only isolated PostgreSQL', () => {
       ('feature_flag:property_related_ai','{"enabled":true}'),('feature_flag:legacy_unit_tables','true'),
       ('feature_flag:home_v2','true'),('feature_flag:command_palette','true'),('feature_flag:concierge_routing_v2_canonical','true'),
       ('feature_flag:auth_phone','false'),('admin_emails','"synthetic-private"'),('future_private_setting','"synthetic-private"');`);
-    await sql.unsafe(readFileSync('scripts/qa/guest-feature-flags.sql', 'utf8'));
+    await sql.unsafe(readFileSync('drizzle/migrations/0038_guest_catalog_flag_reads.sql', 'utf8'));
   }, 30000);
   afterAll(async () => {
     if (sql) await sql.end();
