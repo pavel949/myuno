@@ -101,12 +101,6 @@ fd90b8eaf999dd2aa3e4f653ceb22e19b539eed2
 1aeae2c7637bf7af35b690cf0864cba160ef1ba8
 eed7e67b1cbdb40913228d1d6c3616ae9f6ab3cf
 f18db558a0e24510a44f47c8fca3ddfaae2373b2
-4c7c66b63b5f0fe73bb02124
-```
-
-Correction: the last abbreviated entry above is not a SHA record; use the exact record below:
-
-```text
 85c2859f4e889acd4c7c66b63b5f0fe73bb02124
 877a9415fcf9282eb77cd88311d83005ef885f28
 6b3bde870d863381809838caf1f07ac5ace8f1e1
