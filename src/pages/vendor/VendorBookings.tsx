@@ -37,6 +37,7 @@ import { ru } from 'date-fns/locale';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { getCurrencySymbol } from '@/lib/config/currencies';
 
 /**
  * Inline status-history block for a single vendor booking.
@@ -249,10 +250,17 @@ const VendorBookings = () => {
 
                   <div className="flex items-center justify-between pt-3 border-t">
                     <div>
-                      <p className="text-lg font-bold">{booking.amount.toLocaleString()} ₽</p>
-                      <p className="text-xs text-muted-foreground">
-                        {isRussian ? 'Ваш доход:' : 'Your earnings:'} {booking.net_amount.toLocaleString()} ₽
-                      </p>
+                      {(() => {
+                        const currencySymbol = getCurrencySymbol(booking.service?.currency || 'THB');
+                        return (
+                          <>
+                            <p className="text-lg font-bold">{currencySymbol}{booking.amount.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {isRussian ? 'Ваш доход:' : 'Your earnings:'} {currencySymbol}{booking.net_amount.toLocaleString()}
+                            </p>
+                          </>
+                        );
+                      })()}
                     </div>
 
                     {booking.status === 'pending' && (

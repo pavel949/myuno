@@ -775,17 +775,17 @@ const queryClient = useQueryClient();
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{isRu ? 'Удалить объект?' : 'Delete property?'}</AlertDialogTitle>
+          <AlertDialogTitle>{isRu ? 'Архивировать объект?' : 'Archive property?'}</AlertDialogTitle>
             <AlertDialogDescription>
               {isRu
-                ? 'Это действие необратимо. Все данные объекта, включая бронирования и финансовую историю, будут удалены.'
-                : 'This action cannot be undone. All property data including bookings and financial history will be deleted.'}
+                ? 'Объект будет скрыт и деактивирован. Бронирования и финансовая история сохранятся; восстановление доступно из архива.'
+                : 'The property will be hidden and deactivated. Bookings and financial history are retained; you can restore it from the archive.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {isRu ? 'Удалить' : 'Delete'}
+              {isRu ? 'Архивировать' : 'Archive'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -800,8 +800,8 @@ const queryClient = useQueryClient();
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isRu
-                ? 'Это действие необратимо. Все данные выбранных объектов будут удалены безвозвратно.'
-                : 'This action cannot be undone. All data for selected properties will be permanently deleted.'}
+                ? 'Выбранные объекты будут скрыты и деактивированы. Бронирования и финансовая история сохранятся.'
+                : 'Selected properties will be hidden and deactivated. Bookings and financial history will be retained.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -811,7 +811,7 @@ const queryClient = useQueryClient();
               disabled={bulkProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {bulkProcessing ? (isRu ? 'Удаление...' : 'Deleting...') : (isRu ? 'Удалить' : 'Delete')}
+              {bulkProcessing ? (isRu ? 'Архивация...' : 'Archiving...') : (isRu ? 'Архивировать' : 'Archive')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -56,6 +56,7 @@ import { ru, enUS } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type ReportScope = 'property' | 'complex' | 'owner' | 'portfolio';
 
@@ -144,7 +145,7 @@ export default function ReportsPage() {
 
   const { allProperties: ownedProperties } = useMyProperties();
   const { data: managedProperties } = useManagedProperties();
-  const { data: reports, isLoading } = usePropertyReports();
+  const { data: reports, isLoading, isError: reportsError, error: reportsQueryError, refetch: refetchReports } = usePropertyReports();
   const { data: complexes } = usePropertyComplexes();
   const { data: ownerContacts } = useOwnerContacts();
   const generateReport = useGenerateReport();
@@ -275,22 +276,34 @@ export default function ReportsPage() {
     } else {
       setIsBatchGenerating(true);
       try {
+        const failedPropertyIds: string[] = [];
         // Parallel batch generation (chunks of 5)
         const chunkSize = 5;
         for (let i = 0; i < ids.length; i += chunkSize) {
           const chunk = ids.slice(i, i + chunkSize);
-          await Promise.allSettled(
-            chunk.map(propId =>
-              generateReport.mutateAsync({
+          const results = await Promise.allSettled(
+            chunk.map(async (propId) => {
+              await generateReport.mutateAsync({
                 property_id: propId,
                 report_type: result.reportType,
                 period_start: result.periodStart,
                 period_end: result.periodEnd,
-              })
-            )
+              });
+              return propId;
+            })
           );
+          results.forEach((batchResult, index) => {
+            if (batchResult.status === 'rejected') failedPropertyIds.push(chunk[index]);
+          });
         }
-        setShowWizard(false);
+        if (failedPropertyIds.length > 0) {
+          toast.error(isRu
+            ? `Не удалось создать отчёты для ${failedPropertyIds.length} объектов. Повторите попытку.`
+            : `Failed to generate ${failedPropertyIds.length} report(s). Please retry.`);
+        } else {
+          toast.success(isRu ? 'Отчёты созданы' : 'Reports generated');
+          setShowWizard(false);
+        }
       } finally {
         setIsBatchGenerating(false);
       }
@@ -585,6 +598,19 @@ export default function ReportsPage() {
             <div className="space-y-3">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full" />)}
             </div>
+          ) : reportsError ? (
+            <Card>
+              <CardContent className="p-8 text-center" role="alert">
+                <FileText className="h-10 w-10 mx-auto text-destructive mb-3" />
+                <h3 className="font-medium mb-1">{isRu ? 'Не удалось загрузить отчёты' : 'Unable to load reports'}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {reportsQueryError instanceof Error ? reportsQueryError.message : (isRu ? 'Данные временно недоступны.' : 'Financial data is temporarily unavailable.')}
+                </p>
+                <Button onClick={() => void refetchReports()} size="sm">
+                  {isRu ? 'Повторить' : 'Retry'}
+                </Button>
+              </CardContent>
+            </Card>
           ) : filteredReports.length > 0 ? (
             <div className="grid gap-3">
               {filteredReports.map((report) => <ReportCard key={report.id} report={report} />)}

@@ -7,7 +7,7 @@ const fixture=vi.hoisted(()=>({loading:false,writes:vi.fn()}));
 vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:{id:'synthetic-vendor'},isLoading:fixture.loading})}));
 vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
 vi.mock('@/hooks/useUserContext',()=>({useUserContext:()=>({activeOrg:{id:'synthetic-org',name:'Synthetic provider'},vendorOrgs:[{org:{id:'synthetic-org'}}],isLoading:false})}));
-vi.mock('@/hooks/useVendor',()=>({useVendorProfile:()=>({profile:{id:'synthetic-profile'}})}));
+vi.mock('@/hooks/useVendor',()=>({useVendorProfile:()=>({profile:{id:'synthetic-profile'}}),useVendorServices:()=>({services:[],isLoading:false})}));
 vi.mock('@/hooks/useOrders',()=>({useVendorOrders:()=>({orders:[{id:'synthetic-order',order_number:'SYNTHETIC-CANCELLED',status:'cancelled',created_at:'2026-10-24T12:00:00Z',total_amount:2500}],isLoading:false,stats:{totalRevenue:7500,pendingCount:0,confirmedCount:0,completedCount:0},updateStatus:fixture.writes})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{from:()=>{const q={select:()=>q,eq:()=>q,then:(f:(x:unknown)=>unknown)=>Promise.resolve({count:0,error:null}).then(f)};return q;}}}));
 vi.mock('@/components/vendor/VendorRevenueWidget',()=>({VendorRevenueWidget:()=> <p>Synthetic revenue widget boundary</p>}));

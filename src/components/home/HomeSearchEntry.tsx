@@ -16,9 +16,9 @@ export function HomeSearchEntry() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   return <div className="home-search-entry">
-    <Link className="home-search-entry-button" to={R.SEARCH}>
+    <Link className="home-search-entry-button" to={R.DISCOVER}>
       <Search className="home-search-symbol" size={23} aria-hidden="true" />
-      <span className="home-search-entry-copy"><strong>{t({ ru: 'Найти жильё или услугу', en: 'Find a home or a service', th: 'ค้นหาที่พักหรือบริการ' })}</strong><small>{t({ ru: 'Даты и район — когда будете готовы', en: 'Dates and area are optional', th: 'วันที่และย่านเป็นตัวเลือก' })}</small></span>
+      <span className="home-search-entry-copy"><strong>{t({ ru: 'Выбрать жильё или услугу', en: 'Explore homes and services', th: 'สำรวจที่พักและบริการ' })}</strong><small>{t({ ru: 'Выберите задачу, даты и район — когда будете готовы', en: 'Choose a task; dates and area are optional', th: 'เลือกสิ่งที่ต้องการ วันที่และย่านเป็นตัวเลือก' })}</small></span>
       <span className="home-search-entry-action" aria-hidden="true"><span>{t({ ru: 'Найти', en: 'Explore', th: 'ค้นหา' })}</span><ArrowRight size={20} /></span>
     </Link>
   </div>;

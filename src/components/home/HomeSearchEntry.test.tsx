@@ -13,7 +13,7 @@ afterEach(cleanup);
 function Location() { const loc = useLocation(); const nav = useNavigate(); return <><output>{loc.pathname + loc.search}</output><button onClick={() => nav(-1)}>Back</button></>; }
 it.each(homeSearchIntents)('navigates $id straight to canonical results and preserves it in history', intent => {
   render(<MemoryRouter><HomeSearchEntry /><HomePlanLinks /><Location /></MemoryRouter>);
-  expect(screen.getByRole('link', { name: /Найти жильё или услугу/ })).toHaveAttribute('href', '/search');
+  expect(screen.getByRole('link', { name: /Выбрать жильё или услугу/ })).toHaveAttribute('href', '/discover');
   expect(screen.getAllByRole('link').filter(a => a.getAttribute('href')?.startsWith('/property/search'))).toHaveLength(4);
   expect(screen.queryByRole('form')).toBeNull();
   fireEvent.click(screen.getByRole('link', { name: new RegExp(intent.title.ru) }));

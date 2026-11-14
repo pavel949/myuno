@@ -45,7 +45,7 @@ import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
-import { useVendorProfile } from '@/hooks/useVendor';
+import { useVendorProfile, useVendorServices } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
@@ -63,6 +63,7 @@ const VendorDashboard = () => {
   const { language } = useLanguage();
   const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
   const { profile: vendorProfile } = useVendorProfile();
+  const { services: vendorServices } = useVendorServices(vendorProfile?.id);
   const { orders, isLoading: ordersLoading, stats, updateStatus } = useVendorOrders();
 
   // State for FAB actions
@@ -157,10 +158,10 @@ const VendorDashboard = () => {
   const completedOnboardingSteps = useMemo(() => {
     const steps: string[] = [];
     if (user?.user_metadata?.name) steps.push('profile');
-    if (stats.completedCount > 0) steps.push('first-listing');
+    if (vendorServices.length > 0) steps.push('first-listing');
     // Add more checks as needed
     return steps;
-  }, [user, stats]);
+  }, [user, vendorServices]);
 
   // Onboarding state: auto-hide when complete, persist dismissal in localStorage
   const [showOnboarding, setShowOnboarding] = useState(() => {

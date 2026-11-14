@@ -330,7 +330,7 @@ export default function OffplanIndex() {
           <p className="text-sm text-muted-foreground mb-3">
             {pickLang(language, {"ru": "Разместите свой проект на платформе myUNO", "en": "List your project on the myUNO platform", "th": "นำเสนอโครงการของคุณบน myUNO"})}
           </p>
-          <Button variant="outline" onClick={() => navigate('/property/invest/raise')}>
+          <Button variant="outline" onClick={() => navigate('/developer-portal/apply')}>
             {pickLang(language, {"ru": "Подать заявку", "en": "Submit Application", "th": "ส่งคำขอ"})}
           </Button>
         </div>

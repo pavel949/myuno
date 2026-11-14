@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ const statusColors: Record<string, string> = {
 
 export function OperationsInquiriesTab() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRussian = language === 'ru';
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -188,10 +190,10 @@ export function OperationsInquiriesTab() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Просмотр' : 'View'}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Просмотр' : 'View'} onClick={() => navigate(`/admin/tickets/${inquiry.id}`)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Ответить' : 'Reply'}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Ответить' : 'Reply'} onClick={() => navigate(`/admin/tickets/${inquiry.id}`)}>
                             <Reply className="h-4 w-4" />
                           </Button>
                         </div>
