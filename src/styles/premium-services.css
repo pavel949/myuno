@@ -49,4 +49,34 @@
   margin-inline: auto;
 }
 
+/* Marketplace presentation: task first, taxonomy second. */
+.service-marketplace-intro {
+  display: grid;
+  grid-template-columns: minmax(16rem, .8fr) minmax(0, 1.5fr);
+  gap: var(--public-detail-gap);
+  align-items: end;
+  padding: var(--public-detail-gap);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+.service-marketplace-intro-copy { min-width: 0; }
+.service-marketplace-eyebrow { margin: 0 0 .625rem; color: hsl(var(--muted-foreground)); font-size: var(--public-caption-size); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.service-marketplace-intro h2 { margin: 0; font-family: var(--font-display); font-size: var(--public-section-size); font-weight: 400; line-height: 1.12; }
+.service-marketplace-intro-copy > p:last-child { max-width: var(--public-width-reading); margin: .75rem 0 0; color: hsl(var(--muted-foreground)); font-size: var(--public-body-size); line-height: 1.5; }
+.service-quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
+.service-quick-card { display: flex; min-width: 0; min-height: 3.5rem; align-items: center; justify-content: flex-start; gap: .625rem; padding: .75rem; text-align: left; }
+.service-quick-card-icon { display: inline-flex; flex: 0 0 2rem; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 999px; background: hsl(var(--muted)); color: hsl(var(--primary)); }
+.service-quick-card > span:nth-child(2) { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.service-quick-card-arrow { flex: 0 0 auto; color: hsl(var(--muted-foreground)); }
+.service-category-card { transition: border-color var(--public-motion), background var(--public-motion), transform var(--public-motion); }
+.service-category-card:hover { border-color: hsl(var(--primary) / .5); background: hsl(var(--muted) / .45); transform: translateY(-1px); }
+.premium-services .public-commerce--services > section:first-of-type { margin-top: var(--public-detail-gap); }
+
 .premium-service-request > button { min-width: 2.75rem; min-height: 2.75rem; }
+
+@media(max-width:767px) {
+  .service-marketplace-intro { grid-template-columns: 1fr; gap: 1.25rem; padding: 1rem; }
+  .service-marketplace-intro h2 { font-size: var(--type-h2-size); }
+  .service-quick-grid { grid-template-columns: 1fr; }
+  .service-quick-card { min-height: 3rem; }
+}

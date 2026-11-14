@@ -110,6 +110,20 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter={false} showEcosystemHint={false}>
     {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
     <section aria-label={t('Подбор услуг', 'Find services', 'ค้นหาบริการ')} className="space-y-4">
+      {situations.length > 0 && <div className="service-marketplace-intro">
+        <div className="service-marketplace-intro-copy">
+          <p className="service-marketplace-eyebrow">{t('Marketplace myUNO', 'myUNO marketplace', 'มาร์เก็ตเพลส myUNO')}</p>
+          <h2>{t('Что нужно решить сегодня?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
+          <p>{t('Начните с задачи — мы покажем подходящие услуги и следующий шаг.', 'Start with the task. We’ll show relevant services and the next safe step.', 'เริ่มจากสิ่งที่ต้องการ เราจะแสดงบริการที่เกี่ยวข้องและขั้นตอนถัดไป')}</p>
+        </div>
+        <div className="service-quick-grid" aria-label={t('Популярные задачи', 'Popular tasks', 'งานยอดนิยม')}>
+          {situations.slice(0, 6).map(item => <Button key={item.code} variant="outline" className="service-quick-card" onClick={() => update('situation', item.code)}>
+            <span className="service-quick-card-icon"><Wrench className="size-4" aria-hidden="true" /></span>
+            <span>{pickLang(language, { ru: item.titleRu, en: item.titleEn })}</span>
+            <ArrowRight className="service-quick-card-arrow" aria-hidden="true" />
+          </Button>)}
+        </div>
+      </div>}
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList className="h-auto min-h-11" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
@@ -157,7 +171,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
       {filters.view === 'categories' ? <>
         <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-discovery-menu">
-          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left" onClick={() => update('category', item.id)}>
+          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="service-category-card h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left" onClick={() => update('category', item.id)}>
             <item.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span className="min-w-0"><span className="block font-medium">{label(item)}</span><span id={`service-menu-${item.id}`} className="mt-1 block text-xs font-normal text-muted-foreground">{item.services.slice(0, 2).map(label).join(' · ')}</span></span>
           </Button>)}
           {menu.yacht && <Button asChild variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left"><Link to={menu.yacht.path} state={{ returnTo }} aria-label={label(menu.yacht)}><menu.yacht.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span><span className="block font-medium">{label(menu.yacht)}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{t('Открыть раздел', 'Open service', 'เปิดบริการ')}</span></span><ArrowRight className="ml-auto size-4 shrink-0" aria-hidden="true" /></Link></Button>}
