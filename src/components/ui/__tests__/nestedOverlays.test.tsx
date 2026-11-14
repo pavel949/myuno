@@ -1,5 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../sheet';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../dialog';
@@ -24,26 +23,24 @@ describe.each(['sheet', 'dialog'] as const)('nested popover in %s', (parent) => 
   }
 
   it('closes only the child on first Escape, restores focus, then closes the parent', async () => {
-    const user = userEvent.setup();
     render(<Fixture />);
-    await user.click(screen.getByRole('button', { name: 'Open parent' }));
-    await user.click(screen.getByRole('button', { name: 'Open child' }));
-    await user.click(screen.getByRole('button', { name: 'Child action' }));
-    await user.keyboard('{Escape}');
+    fireEvent.click(screen.getByRole('button', { name: 'Open parent' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open child' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Child action' }));
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Child action' })).not.toBeInTheDocument());
     expect(screen.getByRole('dialog', { name: 'Parent window' })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Open child' })).toHaveFocus());
-    await user.keyboard('{Escape}');
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(screen.getByRole('button', { name: 'Open parent' })).toHaveFocus());
   });
 
   it('respects a child Escape veto without dismissing its parent', async () => {
-    const user = userEvent.setup();
     render(<Fixture preventEscape />);
-    await user.click(screen.getByRole('button', { name: 'Open parent' }));
-    await user.click(screen.getByRole('button', { name: 'Open child' }));
-    await user.keyboard('{Escape}');
+    fireEvent.click(screen.getByRole('button', { name: 'Open parent' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open child' }));
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
     expect(screen.getByRole('button', { name: 'Child action' })).toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Parent window' })).toBeInTheDocument();
   });

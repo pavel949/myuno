@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { fileURLToPath } from "url";
+import { radixOverlayAliases } from './scripts/radix-overlay-resolution.mjs';
 
 /** ESM-safe __dirname so setup path resolves inside this repo (not parent OneDrive folder). */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +29,6 @@ export default defineConfig({
     ],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: { ...radixOverlayAliases, "@": path.resolve(__dirname, "./src") },
   },
 });
