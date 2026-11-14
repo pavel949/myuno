@@ -1,5 +1,13 @@
 # Roadmap
 
+## 2026-11-14 · Attached platform cleanup master prompt
+- [ ] Inventory current shells/tokens/routes/query recovery/role surfaces and audit findings; preserve existing reviewed commits and working source.
+- [ ] Correct confirmed shared UX, routing, recovery and version-generation defects; retain all authorization and domain contracts.
+- [ ] Run current validation gates and isolated responsive/browser role scenarios; document exact results and environment blockers.
+- [ ] Final report: source identity, changed/removed files, route classification, tests, public smoke, rollback and READY/NOT READY decision.
+- [ ] Production release is gated on passing validation and verified deployment identity; direct Git commit/push and Vercel deployment control are unavailable in this Lovable sandbox, so never substitute an unrelated Lovable publication.
+- Boundaries: no production business test writes/messages, no Auth/invitation/enforcement changes, no migrations or financial activation.
+
 ## 2026-11-14 · Guest feature-switch access
 - [x] Trace public consumers and compare enabled flags with actual anonymous visibility; internal/admin/legacy and unconfirmed onboarding admission remain hidden.
 - [x] Apply exact multi-unit/Thai public-switch SELECT policy as migration 0038; all stored states and existing admin/write permissions unchanged.
