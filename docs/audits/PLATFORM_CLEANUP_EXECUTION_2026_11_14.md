@@ -28,6 +28,24 @@ The requested full cleanup and production release are **not completed**. A bound
 
 ### Implemented corrections
 
+#### 07:04 UTC follow-up: nested overlay defect resolved
+
+The original failed nested Sheet → Popover → action click → Escape reproduction was rerun against actual shared components with all network requests denied except locally fulfilled fixture assets. Before the correction it again failed: enclosing dialog count was **0**, expected **1**. This is fresh reproduction, not reliance on the preceding audit.
+
+**Confirmed cause:** installed Dialog and Popover resolve different physical copies of Radix `react-dismissable-layer` and `react-focus-scope`. Independent registries each consider their own window topmost; document-level Escape reaches both, and focus scopes compete. Pointer-events styling alone cannot resolve this. No custom Escape suppression or changes to business screens were added.
+
+**Minimal correction:** `scripts/radix-overlay-resolution.mjs` resolves both stateful registries through the existing Popover dependency (which supports its current API). Vite, Vitest and the existing isolated shared-component bundler use those exact aliases. Vitest inlines Radix imports so Node externalization cannot bypass aliases. No dependencies were installed or changed; no dependency lockfiles edited. `scripts/radix-overlay-resolution.d.mts` supplies the narrow declaration. Existing public component APIs and Escape veto callbacks remain unchanged.
+
+**Regression evidence:**
+- `npm test -- src/components/ui/__tests__/nestedOverlays.test.tsx src/components/ui/__tests__/sheet.overlayClick.test.tsx src/components/concierge/ConciergeHelpSheet.focus.test.tsx src/components/owner/__tests__/BookingDetailSheet.test.tsx src/components/owner/__tests__/AddBookingFromCalendarDialog.preparation.test.tsx src/components/owner/CalendarDayEventsSheet.test.tsx src/components/admin/operations/ModerationDetailDialog.test.tsx src/components/auth/RoleGuard.verification.test.tsx src/test/layout/mobile-overflow.test.tsx` — **9 files, 60/60 PASS**.
+- New `nestedOverlays.test.tsx`: **4/4 PASS** (Sheet and Dialog, child-only Escape with focus return then parent Escape; consumer Escape veto keeps both open).
+- `node scripts/qa/shared-surfaces-ui.mjs --build-only && python3 scripts/qa/nested-overlays.py /tmp/browser/shared-surfaces-isolated` — **20/20 PASS**: RU/EN × light/dark × widths 320/375/390/430/1280, height 1800. Each scenario verifies clickable child, child-only Escape, focus return, repeat opening, subsequent dropdown Escape without parent dismissal, final parent Escape and opener focus. No runtime errors. All non-fixture requests blocked; no backend or notifications used. This is isolated browser QA, not live E2E. Mobile screenshot `nested-ru-375-light.png` reviewed: Sheet remains visible after nested controls close, focus ring on Options.
+- Automatic managed build **build OK at 07:03:28 UTC** after adding the declaration; `git diff --check` PASS. Initial new-test attempt lacked unavailable user-event package; replaced with existing Testing Library fireEvent without installation. Initial Vitest externalization failed to apply aliases to Radix internals; corrected inlining, then all tests above passed.
+
+Changed files: `vite.config.ts`, `vitest.config.ts`, `scripts/radix-overlay-resolution.mjs`, `scripts/radix-overlay-resolution.d.mts`, `scripts/qa/shared-surfaces-ui.mjs`, `scripts/qa/nested-overlays.py`, `src/components/ui/__tests__/nestedOverlays.test.tsx`, `AGENTS.md`, `roadmap.md`, this report. Starting follow-up HEAD `9139b22a2b8df404afcf131ade7a12fa15a72c42`; implementation HEAD observed before this documentation update `42d0488faec8aa2488b814b23b2bd3a730a3219c` (not a release/deployment identity).
+
+**Scope acceptance:** nested overlay defect PASS. Overall master-prompt/platform production readiness remains NOT READY for the previously documented unverified gates; this targeted fix does not assert complete accessibility or role E2E coverage. No production data, migrations, deployments, Auth/invitations, permission changes or publication.
+
 1. Pharmacy reads now propagate failures through the existing QueryClient, preserve same-key stale data and expose retry; entity/category/actor keys prevent another pharmacy or actor's result being reused. Explicit display projections exclude moderation fields; pharmacy list/detail require active + approved. No RLS changes.
 2. Shared catalog list/map distinguishes error from empty and suppresses unknown counts; pharmacy detail/product sections show safe localized recovery. List/map controls have 44px geometry and pressed state.
 3. Developer profile read failure no longer redirects as if no profile exists; private outlet remains unmounted. Projects/leads have error/retry; overview unresolved counts remain `—`. Failed developer lookup propagates from the leads hook instead of successful `[]`.
