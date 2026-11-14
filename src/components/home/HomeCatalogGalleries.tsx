@@ -54,7 +54,7 @@ export function CatalogState({
   );
 }
 
-function CatalogPhoto({ image, onUnavailable }: { image?: string | null; onUnavailable?: (image: string) => void }) {
+function CatalogPhoto({ image, alt, onUnavailable }: { image?: string | null; alt: string; onUnavailable?: (image: string) => void }) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const safe = complexMediaUrl(image);
   return (
@@ -63,7 +63,7 @@ function CatalogPhoto({ image, onUnavailable }: { image?: string | null; onUnava
         <img
           onError={() => { setFailedImage(safe); onUnavailable?.(safe); }}
           src={safe}
-          alt=""
+          alt={alt}
           loading="lazy"
           decoding="async"
           width="600"
@@ -92,7 +92,7 @@ export function HomeLocationGallery() {
     description={t({ ru: 'Сначала познакомьтесь с районом, затем выбирайте жильё.', en: 'Get to know an area before choosing a home.', th: 'ทำความรู้จักย่านก่อนเลือกที่พัก' })}
     href={R.AREA_INDEX} linkLabel={t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}>
     {AREA_GUIDES.map(area => { const cover = homeAreaCover(area.slug); return <article className="home-guide-card" key={area.slug}><Link className="home-area-guide-link" to={R.AREA_DETAIL(area.slug)}>
-      <div className="home-area-cover"><img src={cover.src} alt="" width="640" height="360" loading="lazy" decoding="async" />{cover.kind === 'illustration' && <span className="home-area-cover-label">{t({ ru: 'Иллюстрация', en: 'Illustration', th: 'ภาพประกอบ' })}</span>}</div>
+      <div className="home-area-cover"><img src={cover.src} alt={t(area.name)} width="640" height="360" loading="lazy" decoding="async" />{cover.kind === 'illustration' && <span className="home-area-cover-label">{t({ ru: 'Иллюстрация', en: 'Illustration', th: 'ภาพประกอบ' })}</span>}</div>
       <div className="home-guide-copy"><h3>{t(area.name)}</h3><p>{t({ ru: 'Знакомство с районом', en: 'Explore the area guide', th: 'ทำความรู้จักย่าน' })}</p>
       <span>{t({ ru: 'О районе', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
     </Link></article>; })}
@@ -160,7 +160,11 @@ export function HomeExperienceGallery() {
           {preview.map(({ item, image }) => (
             <article className="home-catalog-card" key={item.id}>
               <Link to={R.EXPERIENCE_DETAIL(item.id)}>
-                <CatalogPhoto image={image} onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))} />
+                <CatalogPhoto
+                  image={image}
+                  alt={(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}
+                  onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))}
+                />
                 <div className="home-catalog-copy">
                   <Compass size={18} aria-hidden="true" />
                   <h3>
@@ -187,10 +191,10 @@ export function HomeExperienceGallery() {
   );
 }
 
-function ServiceCategoryArt({ image }: { image: string }) {
+function ServiceCategoryArt({ image, alt }: { image: string; alt: string }) {
   const [failed, setFailed] = useState(false);
-  return <div className="home-service-category-art" aria-hidden="true">
-    {failed ? <ImageOff size={36} /> : <img src={image} alt="" width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} />}
+  return <div className="home-service-category-art">
+    {failed ? <ImageOff size={36} aria-hidden="true" /> : <img src={image} alt={alt} width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} />}
   </div>;
 }
 
@@ -211,7 +215,7 @@ export function HomeServiceGallery() {
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
       {categories.map(category => <article className="home-service-category-card" key={category.id}>
         <Link to={category.path}>
-          <ServiceCategoryArt image={category.image} />
+          <ServiceCategoryArt image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
           <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
             <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>

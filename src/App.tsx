@@ -11,7 +11,6 @@ import { PublicTelemetry } from '@/components/analytics/PublicTelemetry';
 import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SkipToContent } from "@/components/a11y/SkipToContent";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
@@ -117,7 +116,6 @@ function AppContent() {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <LanguageProfileHydrate />
-        <SkipToContent />
         <PlatformViewAsBanner />
         <Sonner />
         <PWAUpdatePrompt />
@@ -127,9 +125,8 @@ function AppContent() {
           <PublicTelemetry />
           {/*
             Coming Soon gate retired 2026-06-18 — site is fully public.
-            Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,
-            because NavShell renders the canonical <main> landmark for every route
-            that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
+            NavShell owns the canonical skip link and <main> landmark for every
+            route that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
           */}
           <div
             id="main-content"

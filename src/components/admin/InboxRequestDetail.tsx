@@ -25,7 +25,7 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
   });
   return (
     <Sheet open onOpenChange={open => { if (!open) onClose(); }}>
-      <SheetContent side="bottom" className="max-h-[85dvh] sm:mx-auto sm:max-w-3xl" closeLabel={isRu ? 'Закрыть' : 'Close'}>
+      <SheetContent side="bottom" className="max-h-[85dvh]" closeLabel={isRu ? 'Закрыть' : 'Close'}>
         <SheetHeader>
           <SheetTitle>{isRu ? 'Обращение' : 'Request'}</SheetTitle>
           <SheetDescription className="break-all font-mono">{requestId}</SheetDescription>

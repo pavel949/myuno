@@ -57,6 +57,7 @@ export function BackButton({
         "flex items-center justify-center rounded-full transition-all duration-200",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         "touch-manipulation",
+        "min-h-11 min-w-11",
         sizeClasses[size],
         variantClasses[variant],
         className

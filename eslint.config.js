@@ -181,6 +181,10 @@ export default tseslint.config(
       "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       ...JSX_A11Y_WARN_RULES,
+      // label-has-for is the legacy predecessor of label-has-associated-control;
+      // enabling both reports every unassociated label twice without adding
+      // coverage. Keep the stronger rule as the single diagnostic.
+      "jsx-a11y/label-has-for": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       // Allow console.warn / console.error everywhere (deliberate signals);
@@ -260,4 +264,3 @@ export default tseslint.config(
     },
   },
 );
-

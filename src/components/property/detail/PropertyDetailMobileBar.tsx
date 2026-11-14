@@ -87,7 +87,7 @@ export function PropertyDetailMobileBar({
 
   return (
     <div ref={actionBarRef} data-property-detail-action-bar className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
-      <div className="max-w-[1536px] mx-auto flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {isSaleListing || isLongStayOnly ? (
           <>
             <div className="flex-1 min-w-0">

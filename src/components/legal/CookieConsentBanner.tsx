@@ -98,7 +98,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {t('Мы используем cookie для улучшения работы сервиса. Вы можете настроить предпочтения.', 'We use cookies to improve our service. You can customize your preferences.', "เราใช้คุกกี้เพื่อปรับปรุงบริการของเรา คุณสามารถปรับแต่งการตั้งค่าได้")}
                   {' '}
-                  <Link to="/cookies" className="text-primary hover:underline">
+                  <Link to="/cookies" className="inline-flex min-h-11 items-center text-primary hover:underline">
                     {t('Подробнее', 'Learn more', "อ่านเพิ่มเติม")}
                   </Link>
                 </p>
@@ -108,7 +108,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
                 onClick={rejectOptional}
                 aria-label={t('Закрыть баннер согласия на cookie', 'Dismiss cookie consent banner', "ปิดแบนเนอร์ความยินยอมใช้คุกกี้")}
                 title={t('Закрыть', 'Dismiss', "ปิด")}
-                className="text-muted-foreground hover:text-foreground p-1"
+                className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -154,18 +154,18 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
               variant="ghost"
               size="sm"
               onClick={() => setShowSettings(!showSettings)}
-              className="text-xs gap-1.5"
+              className="min-h-11 text-xs gap-1.5"
             >
               <Settings className="w-3.5 h-3.5" />
               {t('Настроить', 'Customize', "ตั้งค่า")}
             </Button>
             <div className="flex-1" />
             {showSettings ? (
-              <Button size="sm" onClick={acceptSelected} className="text-xs">
+              <Button size="sm" onClick={acceptSelected} className="min-h-11 text-xs">
                 {t('Сохранить выбор', 'Save preferences', "บันทึกการตั้งค่า")}
               </Button>
             ) : (
-              <Button size="sm" onClick={acceptAll} className="text-xs">
+              <Button size="sm" onClick={acceptAll} className="min-h-11 text-xs">
                 {t('Принять все', 'Accept all', "ยอมรับทั้งหมด")}
               </Button>
             )}
@@ -175,4 +175,3 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
     </AnimatePresence>
   );
 });
-

@@ -30,7 +30,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
   };
   if (!image) return null;
   return <article className="home-listing"><Link to={propertyDetailHref(property.id, 'rent')}>
-    {image && <div className="home-listing-photo"><img key={image} src={image} alt="" width="640" height="480" loading="lazy" decoding="async" onError={() => {
+    {image && <div className="home-listing-photo"><img key={image} src={image} alt={title} width="640" height="480" loading="lazy" decoding="async" onError={() => {
       const next = new Set(failedImages).add(image);
       setFailedImages(next);
       if (images.every(url => next.has(url))) onUnavailable?.(property.id);

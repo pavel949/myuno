@@ -18,7 +18,7 @@ function CommunityCard({ project }: { project: PropertyProject }) {
   const image = images.find(url => !failed.has(url));
   const title = (language === 'ru' ? project.name_ru : project.name_en) || project.name_en || project.name_ru;
   return <article className="home-community-card"><Link to={complexDetailHref(project.id, 'rent')} aria-label={title}>
-    <div className={`home-community-art${image ? '' : ' home-community-art--symbol'}`}>{image ? <img src={image} width="640" height="480" alt="" loading="lazy" decoding="async" onError={() => setFailed(previous => new Set(previous).add(image))} /> : <Building2 size={40} aria-hidden="true" />}</div>
+    <div className={`home-community-art${image ? '' : ' home-community-art--symbol'}`}>{image ? <img src={image} width="640" height="480" alt={title} loading="lazy" decoding="async" onError={() => setFailed(previous => new Set(previous).add(image))} /> : <Building2 size={40} aria-hidden="true" />}</div>
     <div className="home-community-copy"><h3>{title}</h3>{project.district && <p>{getDistrictLabel(project.district, language === 'ru' ? 'ru' : 'en')}</p>}<span>{pickLang(language, { ru: 'О комплексе', en: 'Explore the community', th: 'ดูรายละเอียดโครงการ' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
   </Link></article>;
 }

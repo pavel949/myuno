@@ -43,18 +43,20 @@ export default function AcquisitionMetrics() {
           <p className="text-sm text-muted-foreground">
             {t('Latest channel record', 'Последняя запись по каналам')}: {query.data.latestDate}
           </p>
-          <Table className="min-w-[640px]">
-            <TableHeader><TableRow>
-              {[t('Channel', 'Канал'), t('Impressions', 'Показы'), t('Clicks', 'Клики'),
-                t('Leads', 'Заявки'), t('Signups', 'Регистрации'), t('Recorded conversions', 'Учтённые конверсии')]
-                .map((label, index) => <TableHead key={label} className={index ? 'whitespace-nowrap text-right' : 'whitespace-nowrap'}>{label}</TableHead>)}
-            </TableRow></TableHeader>
-            <TableBody>{query.data.channels.map(row => <TableRow key={row.channel}>
-              <TableCell>{row.channel}</TableCell>
-              {[row.impressions, row.clicks, row.leads, row.signups, row.conversions].map((value, index) =>
-                <TableCell key={index} className="whitespace-nowrap text-right font-mono tabular-nums">{number(value)}</TableCell>)}
-            </TableRow>)}</TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[640px]">
+              <TableHeader><TableRow>
+                {[t('Channel', 'Канал'), t('Impressions', 'Показы'), t('Clicks', 'Клики'),
+                  t('Leads', 'Заявки'), t('Signups', 'Регистрации'), t('Recorded conversions', 'Учтённые конверсии')]
+                  .map((label, index) => <TableHead key={label} className={index ? 'whitespace-nowrap text-right' : 'whitespace-nowrap'}>{label}</TableHead>)}
+              </TableRow></TableHeader>
+              <TableBody>{query.data.channels.map(row => <TableRow key={row.channel}>
+                <TableCell>{row.channel}</TableCell>
+                {[row.impressions, row.clicks, row.leads, row.signups, row.conversions].map((value, index) =>
+                  <TableCell key={index} className="whitespace-nowrap text-right font-mono tabular-nums">{number(value)}</TableCell>)}
+              </TableRow>)}</TableBody>
+            </Table>
+          </div>
         </>
       ) : <p role="status" className="text-muted-foreground">{t('No channel metrics recorded for this period.', 'За выбранный период показатели каналов не записаны.')}</p>}
     </section>

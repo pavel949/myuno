@@ -33,7 +33,7 @@ export function MiniCart({ className }: MiniCartProps) {
   if (totalItems === 0) {
     return (
       <button
-        className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
+        className={cn("relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 hover:bg-muted transition-colors", className)}
         onClick={() => navigate('/cart')}
         aria-label={language === 'ru' ? 'Корзина' : 'Cart'}
       >
@@ -46,7 +46,7 @@ export function MiniCart({ className }: MiniCartProps) {
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className={cn("relative p-2 rounded-full hover:bg-muted transition-colors", className)}
+          className={cn("relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 hover:bg-muted transition-colors", className)}
           aria-label={language === 'ru' ? 'Корзина' : 'Cart'}
         >
           <ShoppingCart className="w-6 h-6" />
