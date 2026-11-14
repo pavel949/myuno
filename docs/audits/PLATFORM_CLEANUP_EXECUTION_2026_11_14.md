@@ -26,7 +26,7 @@ No new shell, schema/model, grants, production business writes, notifications, A
 
 The requested full cleanup and production release are **not completed**. The nested-overlay defect is corrected and isolated role/isolation contracts pass, but hosted authenticated non-admin acceptance and exact current Vercel deployment identity remain unverified. The public site serves an older build without a commit identity, so current-HEAD release acceptance is **NO-GO**. No business data, migrations, Auth/invitations, notifications or publication were changed.
 
-### Final role, isolation and release follow-up — 07:08 UTC
+### Final role, isolation and release follow-up — 07:07 UTC
 
 Tested source before this documentation update: `e5f3bec5a908a451f771d12a243468573383c064` (`HEAD`, local `main` and managed `origin/main` agree). This is managed Git parity only, not independent GitHub/Vercel parity.
 
@@ -79,7 +79,7 @@ python3 /tmp/browser/role-release/check_roles.py
 
 - At 07:05 UTC, `https://myuno.app/version.json` redirected to `https://www.myuno.app/version.json`; the response was HTTP 200 with `Cache-Control: no-store`, `version=3.55.5`, `buildTime=2026-11-14T02:33:08.392Z`, and **no `commit` or `branch`**.
 - Current source HEAD was committed at **07:04:22 UTC**. The public build predates it and also predates the shared build-identity correction landed at 06:42 UTC. Therefore the public service is not verified as the current cleanup release.
-- The latest source at or before the public build timestamp is `4c15a8d465f574d38a04af805cc503b0773d253d`; this is only a timestamp candidate, **not a proven deployed SHA**.
+- The latest source at or before the public build timestamp is `4c15a8d465f574d38a04af805cc503b0773d253d`; this is only a timestamp candidate, **not a proven deployed SHA**. The deployed entry asset contains the old public build timestamp and does not contain current HEAD `e5f3bec5a908a451f771d12a243468573383c064`.
 - Cloudflare serves the public responses. No Vercel deployment ID, READY state, alias attachment or exact GitHub-main parity was available. No credentials were created or read, and no deployment/publication was attempted.
 - Build identity unit tests are **9/9 PASS**. They validate future metadata generation, not the identity of the already deployed public bundle.
 
@@ -111,7 +111,7 @@ Changed files: `vite.config.ts`, `vitest.config.ts`, `scripts/radix-overlay-reso
 4. Owner/MC property-source failure no longer opens first-time onboarding. Aggregated fetch state disables retry during refresh. Vendor orders expose error/retry/data presence; failed initial reads no longer show zero KPIs, empty orders or all-clear alerts/charts.
 5. Developer slug/UUID alias uses existing resolver. Four Vercel offplan redirects removed because they reversed canonical client destinations and lost direct detail routing. Host redirect now matches requested/observed www canonical host.
 6. Prebuild and direct Vite version emission share verified SHA/branch resolution; no fabricated main/commit. Narrow named existing-client wrapper repairs generated-type drift for existing hold RPC without changing arguments, payment/inventory behavior or managed generated files. Source migration existence does not prove hosted RPC deployment.
-7. Reproduced nested popover `pointer-events:none` inside modal repaired via explicit pointer events. **Escape still dismisses enclosing Sheet in the browser fixture; not fixed or accepted.** Experimental Escape handlers were reverted.
+7. Reproduced nested popover `pointer-events:none` inside modal repaired via explicit pointer events. The initially remaining Escape dismissal was subsequently corrected by the shared Radix layer/focus resolution in the 07:04 UTC follow-up; regression acceptance is recorded above.
 8. Test fixtures repaired: calendar saved-record/preparation suite isolates portal timing while retaining exact outcome assertions; source-route fixture binds the new alias; landing clearance assertion follows current 64px token. No business assertion was weakened.
 
 ### Inventory and route classification
@@ -234,4 +234,4 @@ vercel.json
 
 Rollback reference: restore only this bounded source diff through a reviewed platform change against initial SHA; no live DB rollback is required because none was changed. Prior production deployment identity is UNKNOWN; do not invent a rollback deployment ID. Preserve unrelated later edits and do not reset history.
 
-**Remaining release blockers:** nested overlay browser failure, incomplete exhaustive role/domain flows and accessibility/dead-code/all-links inventory, exact GitHub-main/Vercel deployment identity and public version SHA acceptance. No successful production release claim.
+**Remaining release blockers:** hosted authenticated non-admin role matrix, live enforced-portfolio acceptance once such a portfolio is separately approved, exhaustive hosted write/accessibility/dead-code/all-links inventory, and exact GitHub-main/Vercel deployment identity/public version SHA acceptance. The nested overlay blocker is resolved. The currently public build is not verified against current source; no successful current-cleanup production release claim.
