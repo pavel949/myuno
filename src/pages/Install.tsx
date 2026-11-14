@@ -487,7 +487,7 @@ const Install = () => {
             <Card className="bg-card/50 border-border/50">
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-3">{t.benefitsTitle}</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
                   {t.benefits.map((item, index) => (
                     <div key={index} className="flex items-start gap-2 text-sm">
                       <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">

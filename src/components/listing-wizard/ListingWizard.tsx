@@ -164,7 +164,7 @@ export function ListingWizard() {
       </header>
       
       {/* Content */}
-      <main className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto">
         <div className="max-w-lg mx-auto px-4 py-6">
           <AnimatePresence mode="wait">
             <motion.div
@@ -182,7 +182,7 @@ export function ListingWizard() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </main>
+      </div>
       
       {/* Saving indicator */}
       {isSaving && (

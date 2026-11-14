@@ -5,10 +5,12 @@
   --home-search-overlap: 3rem;
   --home-soft-border: color-mix(in srgb, hsl(var(--primary)) 12%, transparent);
 }
+/* The hero grows with its content. A fixed height clipped the goal cards and
+   the owner link under the overlapping search entry on desktop and tablet. */
 .home-refined .home-hero {
-  height: clamp(31.25rem, 40vw, 35rem);
-  min-height: 0;
-  padding-bottom: 0;
+  height: auto;
+  min-height: clamp(31.25rem, 40vw, 35rem);
+  padding-bottom: 3rem;
 }
 .home-refined .home-hero-copy { padding-top: clamp(4rem, 6vw, 6rem); }
 .home-refined .home-hero-copy h1 {
@@ -155,14 +157,14 @@
   :is(.home-refined,.premium-personal-discovery) .home-properties .home-section-heading > .home-text-link { padding-right: 0; }
 }
 @media(max-width:1023px) {
-  .home-refined .home-hero { height: 29rem; }
+  .home-refined .home-hero { min-height: 29rem; }
   .home-refined .home-hero-copy { padding-top: 3.5rem; }
   .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); max-width: var(--public-width-hero); }
   .home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:767px) {
   .home-refined { --home-search-overlap: 1.5rem; }
-  .home-refined .home-hero { height: auto; min-height: 23rem; padding-bottom: 4rem; }
+  .home-refined .home-hero { height: auto; min-height: 23rem; padding-bottom: 2rem; }
   .home-refined .home-hero-copy { padding-top: 2.5rem; }
   .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); line-height: 1.12; letter-spacing: -.018em; }
   .home-refined .home-hero-copy p { font-size: var(--public-body-size); margin-top: 1rem; max-width: var(--public-width-summary); }
@@ -254,12 +256,14 @@
 /* First-screen conversion: make the next action explicit before broad discovery. */
 .home-refined .home-hero-choices { max-width: var(--public-width-hero); margin-top: 1.5rem; }
 .home-refined .home-hero-choices-label { margin: 0 0 .625rem; color: hsl(var(--primary-foreground) / .82); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
-.home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .625rem; }
-.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 6.25rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--brand-navy) / .42); color: hsl(var(--primary-foreground)); text-decoration: none; backdrop-filter: blur(8px); transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
+/* 2×2: the hero column is width-capped, so four columns leave ~170px cells
+   that split RU labels ("недвижим|ость") at every desktop width. */
+.home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
+.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 4.75rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--brand-navy) / .42); color: hsl(var(--primary-foreground)); text-decoration: none; backdrop-filter: blur(8px); transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
 .home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-foreground) / .7); background: hsl(var(--brand-navy) / .68); transform: translateY(-2px); }
 .home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: 999px; background: hsl(var(--primary-foreground) / .14); }
 .home-refined .home-hero-choice-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: .2rem; }
-.home-refined .home-hero-choice-copy strong { overflow-wrap: anywhere; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
+.home-refined .home-hero-choice-copy strong { hyphens: auto; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
 .home-refined .home-hero-choice-copy small { display: -webkit-box; overflow: hidden; color: hsl(var(--primary-foreground) / .78); font-size: var(--public-caption-size); line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .home-refined .home-hero-choice > svg { flex: 0 0 auto; margin-top: .125rem; }
 .home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
@@ -279,4 +283,12 @@
   .home-refined .home-hero-actions { margin-top: .25rem; }
   .home-partners-group { margin-top: 2.5rem; padding-block: 2.5rem .5rem; }
   .home-group-heading h2 { font-size: var(--type-h3-size); }
+}
+/* Phones: two columns leave ~90px for the label, which chops long RU words
+   ("недвижим|ость") and clamps the description to a meaningless stub. One
+   full-width row per goal keeps every label and description whole. */
+@media(max-width: 519px) {
+  .home-refined .home-hero-choice-grid { grid-template-columns: minmax(0, 1fr); gap: .375rem; }
+  .home-refined .home-hero-choice { align-items: center; min-height: 3.75rem; padding: .5rem .75rem; }
+  .home-refined .home-hero-choice > svg { margin-top: 0; }
 }

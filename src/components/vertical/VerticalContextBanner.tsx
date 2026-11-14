@@ -60,10 +60,11 @@ export function VerticalContextBanner({ verticalId, className }: VerticalContext
       {config.dismissible && (
         <button
           onClick={() => setDismissed(true)}
-          className="shrink-0 w-6 h-6 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-          aria-label="Dismiss"
+          type="button"
+          className="shrink-0 -my-2 -mr-2 inline-flex min-h-11 min-w-11 items-center justify-center rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          aria-label={isRu ? 'Скрыть' : 'Dismiss'}
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
       )}
     </div>

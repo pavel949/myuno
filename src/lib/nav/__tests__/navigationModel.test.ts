@@ -326,11 +326,15 @@ describe('consumer journey ownership', () => {
 
 
 describe('public business entry', () => {
-  it('includes one localized business destination in the top menu only', () => {
-    const entries = GUEST_TOP_NAV.filter(item => item.path === APP_ROUTES.FOR_BUSINESS);
-    expect(entries).toHaveLength(1);
-    expect(entries[0].labelRu).toBe('Бизнес');
-    expect(entries[0].labelEn).toBe('Business');
+  // Since the public-navigation reorganisation the business destination lives in
+  // the header's "For partners" menu (ConsumerHeader), not in the consumer tabs.
+  it('keeps the business destination out of the consumer top menu and bottom tabs', () => {
+    expect(GUEST_TOP_NAV.map(item => item.path)).toEqual([
+      APP_ROUTES.PROPERTY,
+      APP_ROUTES.EXPERIENCES,
+      APP_ROUTES.GOAL_SERVICES,
+      APP_ROUTES.BOOKINGS,
+    ]);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);
   });

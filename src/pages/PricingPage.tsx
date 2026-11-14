@@ -82,7 +82,7 @@ export default function PricingPage() {
       <header className="sticky top-0 z-10 bg-background/95 border-b border-border">
         <LandingContainer className="flex items-center justify-between gap-3 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'}>
+            <Link to={APP_ROUTES.HOME} aria-label={isRu ? 'Назад' : 'Back'} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center">
               <ArrowLeft className="h-5 w-5 shrink-0 text-foreground" />
             </Link>
             <div className="min-w-0">
@@ -98,6 +98,7 @@ export default function PricingPage() {
         </LandingContainer>
       </header>
 
+      <main>
       <LandingContainer className="pb-16">
       <Section
         id="trust"
@@ -129,6 +130,7 @@ export default function PricingPage() {
         items={POST_TX_ITEMS.map(withResolvedRate)}
       />
       </LandingContainer>
+      </main>
     </div>
   );
 }

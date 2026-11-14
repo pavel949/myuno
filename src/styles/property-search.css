@@ -1,8 +1,9 @@
 /* Guest catalogue: existing navy/cream tokens, compact controls, results first. */
 .property-discovery{margin-inline:auto}
 .property-discovery-header{display:grid;gap:12px;padding-block:16px}
-.property-discovery-intent{display:inline-flex;border-bottom:1px solid hsl(var(--border));gap:24px}
-.property-discovery-intent button{min-height:44px;padding:0 4px;border-bottom:2px solid transparent;color:hsl(var(--muted-foreground));font-size:15px}
+.property-discovery-intent{display:inline-flex;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid hsl(var(--border));gap:clamp(14px,4vw,24px)}
+.property-discovery-intent::-webkit-scrollbar{display:none}
+.property-discovery-intent button{flex:0 0 auto;white-space:nowrap;min-height:44px;padding:0 4px;border-bottom:2px solid transparent;color:hsl(var(--muted-foreground));font-size:15px}
 .property-discovery-intent button[aria-pressed=true]{border-color:hsl(var(--primary));color:hsl(var(--primary));font-weight:600}
 .property-discovery-summary{display:flex;align-items:center;gap:16px;padding:12px 16px;border:1px solid hsl(var(--border));background:hsl(var(--card))}
 .property-discovery-edit{min-height:44px;max-width:112px;flex-shrink:0;padding:8px 12px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font-size:13px;line-height:1.4}
