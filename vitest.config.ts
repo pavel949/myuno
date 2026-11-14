@@ -13,6 +13,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    // Apply the same overlay aliases inside Radix's transitive imports, rather
+    // than letting Node load independent externalized layer/focus registries.
+    server: { deps: { inline: [/@radix-ui\//] } },
     // Unit tests may import the client through route registries. Never use the
     // developer/production credentials just to construct that client.
     env: {
