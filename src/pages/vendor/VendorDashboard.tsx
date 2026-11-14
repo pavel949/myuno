@@ -48,6 +48,7 @@ import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/componen
 import { useVendorProfile, useVendorServices } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -64,7 +65,7 @@ const VendorDashboard = () => {
   const { activeOrg, vendorOrgs, isLoading: contextLoading } = useUserContext();
   const { profile: vendorProfile } = useVendorProfile();
   const { services: vendorServices } = useVendorServices(vendorProfile?.id);
-  const { orders, isLoading: ordersLoading, stats, updateStatus } = useVendorOrders();
+  const { orders, isLoading: ordersLoading, stats, updateStatus, error: ordersError, refetch: refetchOrders, isFetching: ordersFetching, hasData } = useVendorOrders();
 
   // State for FAB actions
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -250,10 +251,11 @@ const VendorDashboard = () => {
       <VendorRevenueWidget />
 
       {/* KPI Cards with Comparison */}
+      {ordersError && <QueryRecovery onRetry={refetchOrders} isRetrying={ordersFetching} stale={hasData} />}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <VendorKPICard 
           title={isRu ? 'Выручка' : 'Revenue'} 
-          value={formatCurrency(stats.totalRevenue)} 
+          value={ordersError && !hasData ? '—' : formatCurrency(stats.totalRevenue)} 
           icon={DollarSign} 
           iconColor="text-success" 
           loading={ordersLoading} 
@@ -263,7 +265,7 @@ const VendorDashboard = () => {
         />
         <VendorKPICard 
           title={isRu ? 'Заказы' : 'Orders'} 
-          value={stats.pendingCount + stats.confirmedCount + stats.completedCount} 
+          value={ordersError && !hasData ? '—' : stats.pendingCount + stats.confirmedCount + stats.completedCount} 
           icon={Calendar} 
           iconColor="text-info" 
           loading={ordersLoading} 
@@ -271,30 +273,30 @@ const VendorDashboard = () => {
         />
         <VendorKPICard 
           title={isRu ? 'Завершено' : 'Completed'} 
-          value={stats.completedCount} 
+          value={ordersError && !hasData ? '—' : stats.completedCount} 
           icon={CheckCircle} 
           iconColor="text-success" 
           loading={ordersLoading} 
         />
         <VendorKPICard 
           title={isRu ? 'Ожидает' : 'Pending'} 
-          value={stats.pendingCount} 
+          value={ordersError && !hasData ? '—' : stats.pendingCount} 
           icon={Clock} 
           iconColor="text-warning" 
           loading={ordersLoading} 
         />
       </div>
 
-      <VendorAlertPanel newOrders={newOrdersCount} pendingConfirmation={stats.pendingCount} unreadMessages={unreadCount} loading={ordersLoading} />
+      {(!ordersError || hasData) && <VendorAlertPanel newOrders={newOrdersCount} pendingConfirmation={stats.pendingCount} unreadMessages={unreadCount} loading={ordersLoading} />}
       
       {/* Revenue Chart with Period Selector */}
-      <VendorRevenueChart 
+      {(!ordersError || hasData) && <VendorRevenueChart 
         data={chartData} 
         loading={ordersLoading}
         period={chartPeriod}
         onPeriodChange={setChartPeriod}
         previousPeriodRevenue={previousPeriodRevenue}
-      />
+      />}
       
       <VendorQuickActions />
       
@@ -320,7 +322,7 @@ const VendorDashboard = () => {
         <CardContent className="pt-0 space-y-2">
           {ordersLoading ? (
             [1, 2, 3].map(i => <Skeleton key={i} className="h-14" />)
-          ) : recentOrders.length === 0 ? (
+          ) : ordersError && recentOrders.length === 0 ? null : recentOrders.length === 0 ? (
             <p className="text-center py-6 text-sm text-muted-foreground">{isRu ? 'Нет заказов' : 'No orders'}</p>
           ) : (
             recentOrders.map(order => (

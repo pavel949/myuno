@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'qualified', 'deal', 'lost'];
 const STATUS_LABELS: Record<string, string> = {
@@ -19,7 +20,7 @@ function ScoreBadge({ score }: { score: number }) {
 }
 
 export default function DeveloperLeads() {
-  const { data: leads = [], isLoading } = useDeveloperLeads();
+  const { data: leads = [], isLoading, error, refetch, isFetching } = useDeveloperLeads();
   const updateStatus = useUpdateLeadStatus();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -43,6 +44,7 @@ export default function DeveloperLeads() {
         <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Лиды</h1>
         <div className="flex gap-2">
           <select
+            aria-label="Статус заявки"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             className="rounded-none bg-[hsl(var(--nb-surface))] border border-[hsl(var(--nb-glass-border))] px-3 py-2 text-sm text-[hsl(var(--nb-text))]"
@@ -50,16 +52,17 @@ export default function DeveloperLeads() {
             <option value="">Все статусы</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
           </select>
-          <Button size="sm" variant="outline" onClick={exportCSV} className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+          <Button size="sm" variant="outline" onClick={exportCSV} disabled={isLoading || !!error} className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
             <Download className="w-4 h-4 mr-1" /> CSV
           </Button>
         </div>
       </div>
 
       <p className="text-sm text-[hsl(var(--nb-muted))]">
-        Найдено: {filtered.length} лидов
+        Найдено: {isLoading || error ? '—' : filtered.length} лидов
       </p>
 
+      {error && <QueryRecovery onRetry={refetch} isRetrying={isFetching} stale={leads.length > 0} />}
       <div className="nb-glass overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -94,6 +97,7 @@ export default function DeveloperLeads() {
                 <td className="p-4"><ScoreBadge score={lead.score} /></td>
                 <td className="p-4" onClick={e => e.stopPropagation()}>
                   <select
+                    aria-label="Статус заявки"
                     value={lead.status}
                     onChange={e => updateStatus.mutate({ id: lead.id, status: e.target.value })}
                     className="rounded-none bg-[hsl(var(--nb-bg))] border border-[hsl(var(--nb-glass-border))] px-2 py-1 text-xs text-[hsl(var(--nb-text))]"
@@ -103,7 +107,7 @@ export default function DeveloperLeads() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {!error && filtered.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-8 text-center text-[hsl(var(--nb-muted))]">
                   {isLoading ? 'Загрузка...' : 'Лиды не найдены'}

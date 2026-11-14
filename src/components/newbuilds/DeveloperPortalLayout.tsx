@@ -11,6 +11,7 @@ import { LayoutDashboard, FolderKanban, Users, BarChart3, Building2, ArrowLeft, 
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 
 import { PROPERTY_VERTICAL_MUTED_LINK } from '@/design-system/propertyVertical';
 
@@ -27,11 +28,13 @@ export default function DeveloperPortalLayout() {
   const { user, isLoading: authLoading } = useAuth();
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
-  const { data: developer, isLoading: devLoading } = useDeveloperProfile();
+  const { data: developer, isLoading: devLoading, error, refetch, isFetching } = useDeveloperProfile();
   const location = useLocation();
 
   if (authLoading || devLoading) return <NewbuildsLayout><LoadingState /></NewbuildsLayout>;
   if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  // A failed read does not prove profile absence or continuing admission.
+  if (error) return <NewbuildsLayout><QueryRecovery onRetry={refetch} isRetrying={isFetching} /></NewbuildsLayout>;
   // Single gate: users without a developer profile go to the marketing landing
   // (`/for-developers`) — from there they can apply / register. After registration
   // (developer profile exists) the portal opens normally. This makes every entry
@@ -93,7 +96,7 @@ export default function DeveloperPortalLayout() {
         </aside>
 
         {/* Mobile nav */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[hsl(var(--nb-surface))] border-t border-[hsl(var(--nb-glass-border))] flex">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex pb-safe">
           {navItems.map((item) => {
             const active = item.exact
               ? location.pathname === item.path
@@ -103,7 +106,7 @@ export default function DeveloperPortalLayout() {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex-1 flex flex-col items-center py-3 text-xs transition-colors',
+                  'min-w-0 flex-1 flex flex-col items-center justify-center min-h-11 px-1 py-3 text-caption text-center break-words transition-colors',
                   active ? 'text-[hsl(var(--nb-gold))]' : 'text-[hsl(var(--nb-muted))]'
                 )}
               >

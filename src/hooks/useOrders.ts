@@ -348,7 +348,7 @@ export function useVendorOrders(orgId?: string) {
   
   const effectiveOrgId = orgId || activeOrgId;
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vendor-orders', effectiveOrgId],
     queryFn: async (): Promise<Order[]> => {
       if (!effectiveOrgId) return [];
@@ -414,6 +414,10 @@ export function useVendorOrders(orgId?: string) {
   return {
     orders: orders || [],
     isLoading,
+    error,
+    refetch,
+    isFetching,
+    hasData: orders !== undefined,
     updateStatus: updateStatus.mutateAsync,
     isUpdating: updateStatus.isPending,
     stats: {

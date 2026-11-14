@@ -10,7 +10,7 @@
 import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolveBuildCommit } from './build-identity.mjs';
+import { resolveBuildCommit, resolveBuildBranch } from './build-identity.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -19,8 +19,9 @@ const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const version = pkg.version;
 const buildTime = new Date().toISOString();
 const commit = resolveBuildCommit();
+const branch = resolveBuildBranch();
 
-const payload = { version, buildTime, ...(commit ? { commit } : {}) };
+const payload = { version, buildTime, ...(commit ? { commit } : {}), ...(branch ? { branch } : {}) };
 
 const outDir = resolve(root, 'public');
 mkdirSync(outDir, { recursive: true });
