@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as Router from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { readFileSync } from 'node:fs';
@@ -50,7 +50,7 @@ function actualRoutes() {
 }
 function Navigation(){const navigate=Router.useNavigate();return <><button onClick={()=>navigate('/admin/properties')}>Properties</button><button onClick={()=>navigate(-1)}>Back</button><button onClick={()=>navigate(1)}>Forward</button></>;}
 beforeEach(()=>{state.error=null;state.retry.mockReset();for(const key of Object.keys(pages))delete pages[key];layoutMounts=0;layoutUnmounts=0;state.auth={user:{id:'actor-a'},isLoading:false};state.resolved={context:{role:'admin'},isLoading:false,permissions:['*']};});
-afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();});
+afterEach(()=>{cleanup();vi.useRealTimers();vi.restoreAllMocks();});
 describe('stable source loading boundaries',()=>{
  it('does not remount children or repeat mount work after the first animation frame',async()=>{
   let frame:FrameRequestCallback=()=>{};vi.spyOn(window,'requestAnimationFrame').mockImplementation(callback=>{frame=callback;return 1;});

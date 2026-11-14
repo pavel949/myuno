@@ -7,7 +7,7 @@
  * - `landing` — gradient hero + optional WhatsApp CTA (legacy `LandingLayout`)
  */
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
-import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle, LayoutGrid, MapPin } from 'lucide-react';
+import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle, LayoutGrid, MapPin, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,6 +28,8 @@ import { SEOHead } from '@/components/seo';
 import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
 import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/UnifiedCatalogMap';
 import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
+import { EmptyState } from '@/components/page/EmptyState';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 // ── Mini-app (catalog) types & implementation ─────────────────────────────
 
@@ -95,6 +97,9 @@ export interface MiniAppLayoutProps {
   resultsLabel?: string;
   quickActions?: ReactNode;
   isLoading?: boolean;
+  isError?: boolean;
+  onRetry?: () => void | Promise<unknown>;
+  errorText?: string;
   isEmpty?: boolean;
   emptyIcon?: LucideIcon;
   emptyText?: string;
@@ -180,6 +185,13 @@ function MiniappMode({
   onMapMarkerSelect,
   mapIconChar,
   defaultMapView = 'list',
+  isLoading = false,
+  isError = false,
+  onRetry,
+  errorText,
+  isEmpty = false,
+  emptyIcon,
+  emptyText,
 }: MiniAppLayoutProps) {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
@@ -489,7 +501,26 @@ function MiniappMode({
             }
           />
         ) : (
-          children
+          isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title={errorText || (language === 'ru' ? 'Не удалось загрузить данные' : 'Could not load data')}
+              description={language === 'ru' ? 'Проверьте соединение и попробуйте ещё раз.' : 'Check your connection and try again.'}
+              action={onRetry ? <Button variant="outline" onClick={() => void onRetry()}>{language === 'ru' ? 'Повторить' : 'Try again'}</Button> : undefined}
+              compact
+            />
+          ) : isLoading ? (
+            <LoadingState scope="content" message={language === 'ru' ? 'Загрузка…' : 'Loading…'} />
+          ) : isEmpty ? (
+            <EmptyState
+              icon={emptyIcon}
+              title={emptyText || (language === 'ru' ? 'Ничего не найдено' : 'No results found')}
+              description={language === 'ru' ? 'Попробуйте изменить поиск или фильтры.' : 'Try changing your search or filters.'}
+              compact
+            />
+          ) : (
+            children
+          )
         )}
 
         {crossSellVertical && (

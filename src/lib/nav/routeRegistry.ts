@@ -71,16 +71,18 @@ function buildKnownRouteSet(): Set<string> {
 /** Every literal route string declared in `APP_ROUTES`. Frozen at module load. */
 export const KNOWN_ROUTES: ReadonlySet<string> = buildKnownRouteSet();
 
-/**
- * Static prefixes derived from KNOWN_ROUTES — used to recognise dynamic
- * routes whose final segment is the placeholder we injected. e.g. factory
- * `(id) => /property/${id}` becomes `/property/__id__`; we strip the
- * trailing placeholder so `/property/abc-123` still matches.
- */
-const KNOWN_DYNAMIC_PREFIXES: ReadonlyArray<string> = Array.from(KNOWN_ROUTES)
+/** Escape a literal route segment before embedding it in a dynamic regex. */
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Exact patterns for factory routes, preserving their number of parameters. */
+const KNOWN_DYNAMIC_PATTERNS: ReadonlyArray<RegExp> = Array.from(KNOWN_ROUTES)
   .filter((p) => p.includes(ROUTE_PARAM_PLACEHOLDER))
-  .map((p) => p.split(ROUTE_PARAM_PLACEHOLDER)[0])
-  // Longest first — so `/property/offplan/__id__` wins over `/property/__id__`.
+  .map((p) => new RegExp(`^${p.split(ROUTE_PARAM_PLACEHOLDER).map(escapeRegex).join('[^/]+')}$`));
+
+/** Prefixes for React Router-style parameter declarations (e.g. `/communities/:slug`). */
+const KNOWN_COLON_PREFIXES: ReadonlyArray<string> = Array.from(KNOWN_ROUTES)
+  .filter((p) => p.split('/').some((segment) => segment.startsWith(':')))
+  .map((p) => p.slice(0, p.indexOf('/:') + 1))
   .sort((a, b) => b.length - a.length);
 
 /**
@@ -98,13 +100,17 @@ export function isKnownRoute(path: string): boolean {
 
   if (KNOWN_ROUTES.has(pathname)) return true;
 
-  // Dynamic-prefix match: `/property/abc` ⇢ `/property/__id__` whose static
-  // prefix is `/property/`. We require the prefix to end at a path segment
-  // boundary so `/propertyx` doesn't match `/property/`.
-  for (const prefix of KNOWN_DYNAMIC_PREFIXES) {
-    if (pathname.startsWith(prefix) && pathname.length > prefix.length) {
-      return true;
-    }
+  // Match the complete dynamic route shape, so `/mc/operations` does not
+  // become valid merely because another route exists under `/mc/:id`.
+  if (KNOWN_DYNAMIC_PATTERNS.some((pattern) => pattern.test(pathname))) return true;
+
+  // APP_ROUTES also contains a small number of literal React Router patterns
+  // (currently `/communities/:slug`). Match exactly one non-empty segment for
+  // those declarations; do not turn a one-segment route into a catch-all.
+  for (const prefix of KNOWN_COLON_PREFIXES) {
+    if (!pathname.startsWith(prefix)) continue;
+    const remainder = pathname.slice(prefix.length);
+    if (remainder.length > 0 && !remainder.includes('/')) return true;
   }
   return false;
 }

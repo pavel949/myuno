@@ -53,7 +53,7 @@ export function LandingChrome({
             <>
               <Link
                 to={APP_ROUTES.AUTH}
-                className="hidden sm:inline-flex h-8 items-center rounded-none px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                className="hidden sm:inline-flex min-h-11 items-center rounded-none px-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 {isRu ? 'Войти' : 'Sign in'}
               </Link>
@@ -61,7 +61,7 @@ export function LandingChrome({
                 to={`${APP_ROUTES.AUTH}?mode=signup`}
                 aria-label={isRu ? 'Создать аккаунт' : 'Get started'}
                 className={cn(
-                  'inline-flex h-8 items-center justify-center gap-1 rounded-none px-3 text-[13px] font-semibold whitespace-nowrap shrink-0',
+                  'inline-flex min-h-11 items-center justify-center gap-1 rounded-none px-3 text-xs font-semibold whitespace-nowrap shrink-0',
                   'bg-foreground text-background hover:bg-foreground/90 transition-colors',
                 )}
               >

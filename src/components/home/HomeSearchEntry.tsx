@@ -18,8 +18,8 @@ export function HomeSearchEntry() {
   return <div className="home-search-entry">
     <Link className="home-search-entry-button" to={R.DISCOVER}>
       <Search className="home-search-symbol" size={23} aria-hidden="true" />
-      <span className="home-search-entry-copy"><strong>{t({ ru: 'Выбрать жильё или услугу', en: 'Explore homes and services', th: 'สำรวจที่พักและบริการ' })}</strong><small>{t({ ru: 'Выберите задачу, даты и район — когда будете готовы', en: 'Choose a task; dates and area are optional', th: 'เลือกสิ่งที่ต้องการ วันที่และย่านเป็นตัวเลือก' })}</small></span>
-      <span className="home-search-entry-action" aria-hidden="true"><span>{t({ ru: 'Найти', en: 'Explore', th: 'ค้นหา' })}</span><ArrowRight size={20} /></span>
+      <span className="home-search-entry-copy"><strong>{t({ ru: 'С чего начнём?', en: 'What are you looking for?', th: 'คุณกำลังมองหาอะไร' })}</strong><small>{t({ ru: 'Аренда, покупка, переезд или услуга — сначала выберите задачу', en: 'Rent, buy, move or find a service — choose your goal first', th: 'เช่า ซื้อ ย้ายมาอยู่ หรือหาบริการ — เลือกเป้าหมายก่อน' })}</small></span>
+      <span className="home-search-entry-action" aria-hidden="true"><span>{t({ ru: 'Выбрать', en: 'Choose', th: 'เลือก' })}</span><ArrowRight size={20} /></span>
     </Link>
   </div>;
 }

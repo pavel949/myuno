@@ -44,7 +44,7 @@ export default function Landing() {
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
           <p>{t({ ru: 'Жильё, услуги и управление недвижимостью — в одном месте. Найдите свой вариант или расскажите команде, что вам нужно.', en: 'Homes, local services, and property management in one place. Find your next step or tell our team what you need.', th: 'ที่พัก บริการท้องถิ่น และการจัดการอสังหาริมทรัพย์ในที่เดียว ค้นหาสิ่งที่ต้องการหรือบอกทีมงานของเรา' })}</p>
           <div className="home-hero-actions">
-            <Link className="home-hero-primary" to={R.DISCOVER}>{t({ ru: 'Найти жильё или услугу', en: 'Find a home or service', th: 'ค้นหาที่พักหรือบริการ' })}<ArrowRight size={18} aria-hidden="true" /></Link>
+            <Link className="home-hero-primary" to={R.DISCOVER}>{t({ ru: 'Выбрать, что нужно', en: 'Choose what you need', th: 'เลือกสิ่งที่ต้องการ' })}<ArrowRight size={18} aria-hidden="true" /></Link>
             <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'Я собственник', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}</Link>
           </div>
         </div>

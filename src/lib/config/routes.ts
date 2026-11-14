@@ -625,9 +625,9 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/offplan': '/property/offplan',
   '/developers': '/property/developers',
   '/complexes': '/property/projects',
-  '/invest': '/property/invest',
-  '/invest/dashboard': '/property/invest/dashboard',
-  '/invest/raise': '/property/invest/raise',
+  '/invest': APP_ROUTES.INVEST,
+  '/invest/dashboard': APP_ROUTES.INVEST_DASHBOARD,
+  '/invest/raise': APP_ROUTES.INVEST_RAISE,
   '/new-developments': '/newbuilds',
   /** Catalog moved to Property Hub; themed /newbuilds/tools remain separate routes. */
   '/newbuilds/projects': '/property/offplan',

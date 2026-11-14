@@ -7,7 +7,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * Replaces scattered status badge implementations.
  */
 const statusPillVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-none whitespace-nowrap',
+  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-caption font-semibold leading-none whitespace-nowrap',
   {
     variants: {
       status: {

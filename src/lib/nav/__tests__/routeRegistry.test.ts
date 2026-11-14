@@ -14,7 +14,7 @@ import {
   findUnknownCatalogPaths,
 } from '../routeRegistry';
 import { CLUSTER_CATALOG_FLAT } from '../clusterCatalog';
-import { APP_ROUTES } from '@/lib/config/routes';
+import { APP_ROUTES, getLegacyRedirect } from '@/lib/config/routes';
 
 describe('routeRegistry — KNOWN_ROUTES derivation', () => {
   it('captures every static APP_ROUTES string', () => {
@@ -30,6 +30,11 @@ describe('routeRegistry — KNOWN_ROUTES derivation', () => {
     expect(isKnownRoute(APP_ROUTES.RESTAURANT_DETAIL('xyz'))).toBe(true);
   });
 
+  it('recognizes mounted colon-parameter routes with one concrete segment', () => {
+    expect(isKnownRoute('/communities/phuket-expat-club')).toBe(true);
+    expect(isKnownRoute('/communities/phuket-expat-club/events')).toBe(false);
+  });
+
   it('does NOT match arbitrary unrelated paths', () => {
     expect(isKnownRoute('/totally/made/up')).toBe(false);
     expect(isKnownRoute('/mc/operations')).toBe(false); // legacy typo
@@ -39,6 +44,12 @@ describe('routeRegistry — KNOWN_ROUTES derivation', () => {
   it('strips query strings and hashes before matching', () => {
     expect(isKnownRoute(`${APP_ROUTES.DISCOVER}?cluster=live`)).toBe(true);
     expect(isKnownRoute(`${APP_ROUTES.ACCOUNT}#settings`)).toBe(true);
+  });
+
+  it('keeps legacy investment aliases pointed at the canonical investment hub', () => {
+    expect(getLegacyRedirect('/invest')).toBe(APP_ROUTES.INVEST);
+    expect(getLegacyRedirect('/invest/dashboard')).toBe(APP_ROUTES.INVEST_DASHBOARD);
+    expect(getLegacyRedirect('/invest/raise')).toBe(APP_ROUTES.INVEST_RAISE);
   });
 });
 

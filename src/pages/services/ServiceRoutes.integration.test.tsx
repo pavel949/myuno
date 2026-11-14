@@ -36,7 +36,7 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.
 afterEach(cleanup);
 
 describe('integrated direct service route ownership', () => {
-  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {
+  it.each(['/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);
     await act(async () => { await vi.dynamicImportSettled(); });
@@ -56,7 +56,7 @@ describe('integrated direct service route ownership', () => {
     expect(screen.getByTestId('location')).toHaveTextContent(original);
 
   });
-  it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves provider offer filters and return path at %s', async path => {
+  it.each(['/discover/services', '/services', '/me/services'])('preserves provider offer filters and return path at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);
     await act(async () => { await vi.dynamicImportSettled(); });
@@ -74,7 +74,7 @@ describe('integrated direct service route ownership', () => {
     expect(await screen.findByRole('link', { name: 'Fixture provider' })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent(providerContext);
   });
-  it.each(['/discover', '/discover/services', '/me/services'])('keeps unsupported categories empty at %s', async path => {
+  it.each(['/discover/services', '/services', '/me/services'])('keeps unsupported categories empty at %s', async path => {
     mount(`${path}?category=photography&ref=fixture`);
     expect(await screen.findByText('No services found')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^AC Cleaning$/ })).not.toBeInTheDocument();

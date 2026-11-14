@@ -232,8 +232,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
         
         {/* ── User ── */}
-        {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
-            /navigator, /catalog, /categories — все редиректят на /discover. */}
+        {/* Intent-first discovery: /discover asks what the visitor needs;
+            each goal then opens its own focused catalogue. */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
         {["stay","live","buy","services"].map((g) => (
           <Route key={g} path={`${APP_ROUTES.DISCOVER}/${g}`} element={<LazyPage><Pages.GoalEntryPage goal={g} /></LazyPage>} />

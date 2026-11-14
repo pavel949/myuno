@@ -26,6 +26,20 @@ export interface DeveloperProfile {
   devmod_status: string | null;
 }
 
+export interface DeveloperProjectSummary {
+  id: string;
+  name_ru: string | null;
+  name_en: string | null;
+  cover_image: string | null;
+  project_status: string | null;
+  is_approved: boolean | null;
+  district: string | null;
+  location_area: string | null;
+  price_from: number | null;
+  construction_progress: number | null;
+  units_available: number | null;
+}
+
 export interface DeveloperProjectUnit {
   id: string;
   project_id: string;
@@ -557,7 +571,7 @@ export function useCreateMaskedChannel() {
 export function useDeveloperProjects(developerId?: string) {
   return useQuery({
     queryKey: ['developer-projects', developerId],
-    queryFn: async () => {
+    queryFn: async (): Promise<DeveloperProjectSummary[]> => {
       if (!developerId) return [];
       const { data, error } = await supabase
         .from('property_projects')
