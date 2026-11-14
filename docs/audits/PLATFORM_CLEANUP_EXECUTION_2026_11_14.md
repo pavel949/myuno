@@ -24,7 +24,67 @@ No new shell, schema/model, grants, production business writes, notifications, A
 
 ### Decision: NOT READY
 
-The requested full cleanup and production release are **not completed**. A bounded confirmed-defect pass is implemented and checked; release is not requested because nested overlay acceptance and full role-flow/deployment evidence are missing. No business data, migrations, Auth/invitations, notifications or publication were changed.
+The requested full cleanup and production release are **not completed**. The nested-overlay defect is corrected and isolated role/isolation contracts pass, but hosted authenticated non-admin acceptance and exact current Vercel deployment identity remain unverified. The public site serves an older build without a commit identity, so current-HEAD release acceptance is **NO-GO**. No business data, migrations, Auth/invitations, notifications or publication were changed.
+
+### Final role, isolation and release follow-up — 07:07 UTC
+
+Tested source before this documentation update: `e5f3bec5a908a451f771d12a243468573383c064` (`HEAD`, local `main` and managed `origin/main` agree). This is managed Git parity only, not independent GitHub/Vercel parity.
+
+#### Role and cross-company evidence
+
+| Layer | Result | Evidence and limit |
+|---|---|---|
+| Guest/admin/company director/manager/owner/`uno_team` route and helper contracts | **PASS (isolated)** | 7 files, **160/160** tests: RoleGuard verification, actor-bound admin resolution, company access, cache/scope fail-closed behavior, inactive/revoked access and cross-space/company cases. |
+| Generic `uno_team`, managed property/complex publication, foreign IDs and sibling private records | **PASS (isolated)** | 3 files, **216/216** tests on Unix-socket-only PostgreSQL fixtures. Covers direct foreign-ID reads, denied isolated writes, module/action checks, owner/customer rights, inactive membership, property duty and checked publication. No hosted credentials or business data used. |
+| Combined role/isolation regression total | **PASS (isolated)** | **10 files, 376/376 tests**. These are fresh results at the tested HEAD, not inherited audit claims. |
+| Live administrator | **PASS, read-only** | Existing Pavel session opened `/admin`; server-authorized operational counts loaded. No record contents were exported. |
+| Live signed-out guest | **PASS, read-only** | `/admin/catalog?tab=services&action=old` redirected to `/auth` with the complete path/query preserved. Direct `orders` returned 401; `property_bookings`, `property_financials`, `crm_contacts` and `user_roles` exposed zero rows. |
+| Live authenticated non-admin / ordinary `uno_team` / owner / vendor | **BLOCKED** | No separately identified existing account was supplied. Pavel's administrator role overrides denial paths; switching display labels would not prove authorization. No account was arbitrarily selected and no role, membership, impersonation or assignment was changed. |
+| Live enforced cross-company spaces | **NOT APPLICABLE / not activated** | Read-only production aggregates: 2 companies, **0 enforced companies, 0 operating spaces, 0 property assignments, 0 space memberships**, 4 active company memberships. Source/fixture enforcement tests pass, but there is no live enforced portfolio to accept end-to-end. |
+| Hosted private helper definitions | **Consistent with reviewed boundary** | Read-only catalog inspection shows actor-derived platform-admin checks, company membership/module/action checks and property scope ceilings; generic `uno_team` is not global private authority in the inspected helpers. This does not replace the missing non-admin hosted actor matrix. |
+
+Browser evidence: `/tmp/browser/role-release/results.json` plus reviewed admin/guest screenshots. Two role scenarios and ten count-only direct-read checks completed with **0 page errors**. The network guard blocked `ensure_multi_role_qa_bundle`, `analytics_events` and `user_sessions`; no other write or notification was allowed. Admin screenshots contain operational information and are not copied into project documentation.
+
+Fresh commands:
+
+```bash
+POSTGRES_TEST_BIN_DIR=/nix/store/z2f083ivabcgibvnmlva7da7dgn5q619-postgresql-17.11/bin \
+POSTGRES_TEST_SHARE_DIR=/nix/store/z2f083ivabcgibvnmlva7da7dgn5q619-postgresql-17.11/share/postgresql \
+POSTGRES_TEST_LIB_DIR=/nix/store/z2f083ivabcgibvnmlva7da7dgn5q619-postgresql-17.11/lib \
+PATH=/nix/store/z2f083ivabcgibvnmlva7da7dgn5q619-postgresql-17.11/bin:$PATH \
+npm test -- src/lib/__tests__/operatingSpaces.postgres.test.ts \
+  src/lib/__tests__/operationalScope.test.ts \
+  src/components/auth/RoleGuard.verification.test.tsx \
+  src/hooks/__tests__/useIsAdmin.actor.test.tsx \
+  src/test/lib/companyMemberAccess.test.ts \
+  src/test/lib/companyAccessOperation.test.tsx \
+  src/components/admin/__tests__/AdminTools.access.test.tsx --reporter=dot
+# 7 files / 160 tests PASS
+
+# Same isolated PostgreSQL environment:
+npm test -- src/lib/__tests__/unoTeam.postgres.test.ts \
+  src/lib/__tests__/managedPropertyPublication.postgres.test.ts \
+  src/lib/__tests__/managedComplexPublication.postgres.test.ts --reporter=dot
+# 3 files / 216 tests PASS
+
+npm test -- src/lib/__tests__/buildIdentity.test.ts \
+  src/lib/__tests__/deploymentMetadata.test.ts --reporter=dot
+# 2 files / 9 tests PASS
+
+python3 /tmp/browser/role-release/check_roles.py
+# admin + guest, read-only network guard; no runtime errors
+```
+
+#### Vercel/public release identity
+
+- At 07:05 UTC, `https://myuno.app/version.json` redirected to `https://www.myuno.app/version.json`; the response was HTTP 200 with `Cache-Control: no-store`, `version=3.55.5`, `buildTime=2026-11-14T02:33:08.392Z`, and **no `commit` or `branch`**.
+- Current source HEAD was committed at **07:04:22 UTC**. The public build predates it and also predates the shared build-identity correction landed at 06:42 UTC. Therefore the public service is not verified as the current cleanup release.
+- The latest source at or before the public build timestamp is `4c15a8d465f574d38a04af805cc503b0773d253d`; this is only a timestamp candidate, **not a proven deployed SHA**. The deployed entry asset contains the old public build timestamp and does not contain current HEAD `e5f3bec5a908a451f771d12a243468573383c064`.
+- Cloudflare serves the public responses. No Vercel deployment ID, READY state, alias attachment or exact GitHub-main parity was available. No credentials were created or read, and no deployment/publication was attempted.
+- Build identity unit tests are **9/9 PASS**. They validate future metadata generation, not the identity of the already deployed public bundle.
+- Automatic managed builds at **07:07:13 UTC and 07:07:20 UTC** both report `build OK`; `git diff --check` PASS. These validate the current source, not public deployment parity.
+
+**Final release disposition:** current-source Vercel parity **FAIL / NOT VERIFIED**; overall platform release **NOT READY**. Remaining role acceptance requires Pavel to identify an existing non-admin test account, followed by the same read-only hosted matrix. A separate authorized Vercel deployment must then emit a full 40-character commit matching reviewed `main`; publishing from Lovable is not a substitute.
 
 ### Implemented corrections
 
@@ -52,7 +112,7 @@ Changed files: `vite.config.ts`, `vitest.config.ts`, `scripts/radix-overlay-reso
 4. Owner/MC property-source failure no longer opens first-time onboarding. Aggregated fetch state disables retry during refresh. Vendor orders expose error/retry/data presence; failed initial reads no longer show zero KPIs, empty orders or all-clear alerts/charts.
 5. Developer slug/UUID alias uses existing resolver. Four Vercel offplan redirects removed because they reversed canonical client destinations and lost direct detail routing. Host redirect now matches requested/observed www canonical host.
 6. Prebuild and direct Vite version emission share verified SHA/branch resolution; no fabricated main/commit. Narrow named existing-client wrapper repairs generated-type drift for existing hold RPC without changing arguments, payment/inventory behavior or managed generated files. Source migration existence does not prove hosted RPC deployment.
-7. Reproduced nested popover `pointer-events:none` inside modal repaired via explicit pointer events. **Escape still dismisses enclosing Sheet in the browser fixture; not fixed or accepted.** Experimental Escape handlers were reverted.
+7. Reproduced nested popover `pointer-events:none` inside modal repaired via explicit pointer events. The initially remaining Escape dismissal was subsequently corrected by the shared Radix layer/focus resolution in the 07:04 UTC follow-up; regression acceptance is recorded above.
 8. Test fixtures repaired: calendar saved-record/preparation suite isolates portal timing while retaining exact outcome assertions; source-route fixture binds the new alias; landing clearance assertion follows current 64px token. No business assertion was weakened.
 
 ### Inventory and route classification
@@ -90,7 +150,7 @@ Focused suites: usePharmacy.recovery, useDeveloperLeads.recovery, buildIdentity,
 
 `python3 /tmp/browser/platform-cleanup/public_smoke.py`: **36/36 initial-render probes**, 9 routes × widths 375/390/430/1280, height 1800, reduced motion. All nonblank, no horizontal overflow or pageerror. Routes: `/`, `/property/search?mode=rent`, `/property/map?mode=rent&view=map`, `/newbuilds`, `/discover/services`, `/school-finder`, `/cost-of-living`, `/visa/quiz`, `/market/categories`. Non-GET/HEAD/OPTIONS, function calls and nonallowlisted data requests blocked. Screenshots reviewed for mobile search and calculator. Search screenshot was **still loading**: these probes do not prove settled catalogue loading or full E2E.
 
-Shared primitive fixture built using `node scripts/qa/shared-surfaces-ui.mjs --build-only`, then bundled Chromium via adapted temporary Python driver (no manual app build). Network denied. **FAIL** at first RU/320/light nested sheet→popover→Escape→options flow: pointer issue fixed and retested, parent dismissal remains. No 32-case shared-primitive PASS claimed. Upstream Python fixture was not rewritten; only temporary diagnostic copies adjusted browser launch and screenshot behavior.
+Initial shared primitive fixture built using `node scripts/qa/shared-surfaces-ui.mjs --build-only`, then bundled Chromium via adapted temporary Python driver (no manual app build). Network denied. The initial RU/320/light nested sheet→popover→Escape→options flow **FAILED** before the later correction: the pointer issue was fixed first, while parent dismissal still remained at that checkpoint. The subsequent 07:04 UTC follow-up above resolves this defect and supersedes this historical failure with 20/20 passing scenarios. Upstream Python fixture was not rewritten; only temporary diagnostic copies adjusted browser launch and screenshot behavior.
 
 | Role/flow | Disposition |
 |---|---|
@@ -175,4 +235,4 @@ vercel.json
 
 Rollback reference: restore only this bounded source diff through a reviewed platform change against initial SHA; no live DB rollback is required because none was changed. Prior production deployment identity is UNKNOWN; do not invent a rollback deployment ID. Preserve unrelated later edits and do not reset history.
 
-**Remaining release blockers:** nested overlay browser failure, incomplete exhaustive role/domain flows and accessibility/dead-code/all-links inventory, exact GitHub-main/Vercel deployment identity and public version SHA acceptance. No successful production release claim.
+**Remaining release blockers:** hosted authenticated non-admin role matrix, live enforced-portfolio acceptance once such a portfolio is separately approved, exhaustive hosted write/accessibility/dead-code/all-links inventory, and exact GitHub-main/Vercel deployment identity/public version SHA acceptance. The nested overlay blocker is resolved. The currently public build is not verified against current source; no successful current-cleanup production release claim.
