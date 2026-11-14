@@ -10,6 +10,13 @@ vi.mock('@/hooks/usePropertyAvailabilityManagement', () => ({ usePropertyAvailab
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 vi.mock('sonner', () => ({ toast: Object.assign(state.notify, { warning: state.warning, error: state.error }) }));
 vi.mock('@/components/ui/calendar', () => ({ Calendar: ({ onSelect }: { onSelect: (date: Date) => void }) => <button onClick={() => onSelect(new Date(2030, 0, 12))}>Choose synthetic checkout</button> }));
+// This suite tests saved-record/preparation outcomes, not Radix portal animation.
+// Keep the controlled open contract while isolating portal timing in jsdom.
+vi.mock('@/components/ui/popover', () => ({
+  Popover: ({ open, children }: { open: boolean; children: React.ReactNode }) => <div data-open={open}>{children}</div>,
+  PopoverTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  PopoverContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 const initialDate = new Date(2030, 0, 10);
 function Harness() {
   const [open, setOpen] = useState(true);
@@ -17,10 +24,8 @@ function Harness() {
 }
 async function submit() {
   render(<Harness />);
-  // Let Radix finish initial dialog focus before opening the nested popover.
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Выбрать' : 'Select' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Choose synthetic checkout' }));
+  // Both date controls are present in this non-portal fixture; choose checkout.
+  fireEvent.click(screen.getAllByRole('button', { name: 'Choose synthetic checkout' })[1]);
   fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Добавить бронирование' : 'Add Booking' }));
   await waitFor(() => expect(state.create).toHaveBeenCalledTimes(1));
 }
