@@ -14,6 +14,7 @@ import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/Home
 import { HomeSearchEntry, HomePlanLinks } from '@/components/home/HomeSearchEntry';
 import { HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
+import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-desktop.webp';
 import '@/styles/cinematic-home.css';
@@ -42,10 +43,10 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
-          <p>{t({ ru: 'Жильё, услуги и управление недвижимостью — в одном месте. Найдите свой вариант или расскажите команде, что вам нужно.', en: 'Homes, local services, and property management in one place. Find your next step or tell our team what you need.', th: 'ที่พัก บริการท้องถิ่น และการจัดการอสังหาริมทรัพย์ในที่เดียว ค้นหาสิ่งที่ต้องการหรือบอกทีมงานของเรา' })}</p>
+          <p>{t({ ru: 'Найдите жильё, купите недвижимость или решите задачу на Пхукете — с понятным следующим шагом и поддержкой команды.', en: 'Find a home, buy property, or solve an everyday task in Phuket — with a clear next step and human support.', th: 'หาที่พัก ซื้ออสังหาริมทรัพย์ หรือจัดการเรื่องต่าง ๆ ในภูเก็ต พร้อมขั้นตอนถัดไปที่ชัดเจนและทีมงานช่วยเหลือ' })}</p>
+          <HomeHeroChoices />
           <div className="home-hero-actions">
-            <Link className="home-hero-primary" to={R.DISCOVER}>{t({ ru: 'Выбрать, что нужно', en: 'Choose what you need', th: 'เลือกสิ่งที่ต้องการ' })}<ArrowRight size={18} aria-hidden="true" /></Link>
-            <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'Я собственник', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}</Link>
+            <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>

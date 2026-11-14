@@ -250,3 +250,25 @@
   .home-trust li { padding: .5rem .75rem; }
   .home-prompt-actions { align-items: flex-start; flex-direction: column; gap: .5rem; }
 }
+
+/* First-screen conversion: make the next action explicit before broad discovery. */
+.home-refined .home-hero-choices { max-width: var(--public-width-hero); margin-top: 1.5rem; }
+.home-refined .home-hero-choices-label { margin: 0 0 .625rem; color: hsl(var(--primary-foreground) / .82); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
+.home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .625rem; }
+.home-refined .home-hero-choice { display: flex; align-items: center; gap: .75rem; min-height: 4.5rem; padding: .75rem .875rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--brand-navy) / .42); color: hsl(var(--primary-foreground)); text-decoration: none; backdrop-filter: blur(8px); transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
+.home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-foreground) / .7); background: hsl(var(--brand-navy) / .68); transform: translateY(-2px); }
+.home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.5rem; width: 2.5rem; height: 2.5rem; border-radius: 999px; background: hsl(var(--primary-foreground) / .14); }
+.home-refined .home-hero-choice-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: .2rem; }
+.home-refined .home-hero-choice-copy strong { font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
+.home-refined .home-hero-choice-copy small { color: hsl(var(--primary-foreground) / .78); font-size: var(--public-caption-size); line-height: 1.35; }
+.home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
+.home-refined .home-hero-help:hover { color: hsl(var(--primary-foreground)); }
+.home-refined .home-hero-secondary { background: hsl(var(--brand-navy) / .2); }
+@media(max-width: 767px) {
+  .home-refined .home-hero-choices { margin-top: 1.25rem; }
+  .home-refined .home-hero-choice-grid { grid-template-columns: 1fr; gap: .5rem; }
+  .home-refined .home-hero-choice { min-height: 3.75rem; padding: .625rem .75rem; }
+  .home-refined .home-hero-choice-icon { flex-basis: 2.25rem; width: 2.25rem; height: 2.25rem; }
+  .home-refined .home-hero-help { justify-content: center; width: 100%; text-align: center; }
+  .home-refined .home-hero-actions { margin-top: .25rem; }
+}

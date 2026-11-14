@@ -30,8 +30,10 @@ export interface DeveloperProjectSummary {
   id: string;
   name_ru: string | null;
   name_en: string | null;
+  description_en: string | null;
   cover_image: string | null;
   project_status: string | null;
+  is_active: boolean | null;
   is_approved: boolean | null;
   district: string | null;
   location_area: string | null;
