@@ -329,8 +329,10 @@
   --section-gap-tight: 1rem;
   --touch-target:      2.75rem;    /* 44px WCAG */
   --nav-icon-size:     1.25rem;
-  /* Shared mobile navigation: 64px content + device safe area. */
-  --bottom-nav-h:      calc(64px + env(safe-area-inset-bottom, 0px));
+  /* Shared mobile navigation: 64px content + its 1px top border + device safe
+     area. Must equal the bar's rendered height: floating controls and content
+     clearance are positioned from this value. */
+  --bottom-nav-h:      calc(64px + 1px + env(safe-area-inset-bottom, 0px));
   --floating-chat-size: 3rem;
   --floating-chat-gap: 1rem;
 

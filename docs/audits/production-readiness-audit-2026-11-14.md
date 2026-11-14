@@ -45,6 +45,8 @@ The "Connected system" and "design-system" workflows run only on pull requests. 
 | Fixture | Assertion | Source |
 |---|---|---|
 | `ds-workspace-pages` | fixture for `@/hooks/useVendor` lacks `useVendorServices`, imported by `VendorDashboard` | **fixed here** |
+| `services-compact-accessibility`, `services-floating-clearance` | crash with "No QueryClient set": `useMarketplaceAvailability` (added in `be1224b`) was not stubbed, unlike in `services-discovery-ui` | **fixed here** |
+| `services-floating-clearance` at 390px | chat launcher 15px above the bottom bar, 16px required: the bar gained a 1px top border in `6837890` but `--bottom-nav-h` stayed at 64px | **fixed here** (token now includes the border) |
 | `services-discovery-ui` | expects one `role="status"`; the services page now renders two | open |
 | `homepage-galleries-{en,ru,th}-ui` | expects 3 `.home-rail-viewport`, finds 4 | open |
 | `guest-complex-ui` | expects one unit link, finds two | open |

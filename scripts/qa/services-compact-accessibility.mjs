@@ -26,6 +26,8 @@ const virtual = {
   '@/hooks/useOrders': `export const useOrders=()=>({isCreating:false,createOrder:async body=>{window.fixtureAttempts.push(body);throw Error('Synthetic intercepted failure')}});`,
   '@/hooks/useGeolocation': `export const useGeolocation=()=>({hasLocation:false,loading:false,getPosition:()=>{throw Error('Geolocation forbidden')}});`,
   '@/hooks/useServiceMarketplace': `import{useSyncExternalStore}from'react';let retried=false;const listeners=new Set();const subscribe=listener=>{listeners.add(listener);return()=>listeners.delete(listener)};export const useMarketplaceServices=()=>{useSyncExternalStore(subscribe,()=>retried);const mode=new URLSearchParams(location.search).get('mode');return{data:[],isLoading:mode==='loading',isError:mode==='error'&&!retried,refetch:()=>{retried=true;listeners.forEach(listener=>listener())}}};`,
+  // Same synthetic availability boundary as services-discovery-ui: the real hook needs a QueryClient and reads Supabase.
+  '@/hooks/useMarketplaceAvailability': `export const useMarketplaceAvailability=()=>({data:{},isFetching:false,refetch:()=>{}});`,
   '@/components/services': `export {ServiceFunctionCard} from '${root}/src/components/services/ServiceFunctionCard.tsx';`,
   './ServiceBookingSheet': `export const ServiceBookingSheet=()=>null;`,
   '@/integrations/supabase/client': `export const supabase={functions:{invoke:async(name,args)=>{window.fixtureInquiries.push({name,args});return{data:null,error:new Error('Synthetic unavailable')}}}};`,
