@@ -267,6 +267,13 @@
       "when": 1794593337281,
       "tag": "0037_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1794617285055,
+      "tag": "0038_guest_catalog_flag_reads",
+      "breakpoints": true
     }
   ]
 }
