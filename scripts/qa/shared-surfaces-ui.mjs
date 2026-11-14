@@ -4,6 +4,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 const root=process.cwd();
 const output = process.env.SHARED_SURFACES_OUTPUT || '/tmp/browser/shared-surfaces-isolated';
 await mkdir(output,{recursive:true});
@@ -12,7 +13,7 @@ const virtual={
  '@/hooks/useFeedbackSettings':`export const getFeedbackSettings=()=>({hapticEnabled:false,soundEnabled:false,typingSoundEnabled:false});`,
  '@/integrations/supabase/client':`throw Error('Production database forbidden');`,
 };
-await build({stdin:{contents:`
+await build({alias:radixOverlayAliases,stdin:{contents:`
 import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter} from 'react-router-dom';
 import {useForm} from 'react-hook-form';
 import {PageShell} from '@/components/page/PageShell'; import {PageHeader} from '@/components/page/PageHeader';

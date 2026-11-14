@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { fileURLToPath } from "url";
+import { radixOverlayAliases } from './scripts/radix-overlay-resolution.mjs';
 
 /** ESM-safe __dirname so setup path resolves inside this repo (not parent OneDrive folder). */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -12,6 +13,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    // Apply the same overlay aliases inside Radix's transitive imports, rather
+    // than letting Node load independent externalized layer/focus registries.
+    server: { deps: { inline: [/@radix-ui\//] } },
     // Unit tests may import the client through route registries. Never use the
     // developer/production credentials just to construct that client.
     env: {
@@ -28,6 +32,6 @@ export default defineConfig({
     ],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: { ...radixOverlayAliases, "@": path.resolve(__dirname, "./src") },
   },
 });

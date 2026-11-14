@@ -6,6 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { themeBootstrapPlugin } from "./scripts/vite-theme-bootstrap";
 import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
 import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
+import { radixOverlayAliases } from "./scripts/radix-overlay-resolution.mjs";
 import { version } from "./package.json";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
@@ -255,6 +256,7 @@ export default defineConfig(({ mode, command }) => {
     ].filter(Boolean),
     resolve: {
       alias: {
+        ...radixOverlayAliases,
         "@": path.resolve(__dirname, "./src"),
       },
       dedupe: ['react', 'react-dom', 'react/jsx-runtime'],

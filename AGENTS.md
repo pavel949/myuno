@@ -27,6 +27,7 @@
 - Calendar/date logic uses shared civil-date helpers; avoid UTC/date-only parsing that shifts Phuket/Bangkok dates.
 - Shared query recovery renders safe localized failures separately from confirmed empty states; pharmacy reads use the existing QueryClient with identity/category-bound keys so failures and route changes cannot retain another entity's result.
 - Version prebuild and Vite emission share `scripts/build-identity.mjs`; emit only verified commit/branch metadata, never label an unknown or review build as main.
+- Vite, Vitest and isolated overlay fixtures use `scripts/radix-overlay-resolution.mjs` for one Radix layer/focus registry; duplicate transitive copies otherwise dismiss parent windows on child Escape and compete for focus.
 - Additive RPC contracts missing from managed generated types use narrow, named wrappers around the existing client; never regenerate by hand, create another client or replace runtime authority with a type cast.
 - Convergence/audit docs are evidence, not permanent normative authority. Promote accepted durable rules into PROJECT.md / AGENTS.md / canonical docs.
 

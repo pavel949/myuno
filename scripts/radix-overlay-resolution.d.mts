@@ -1,0 +1,1 @@
+export const radixOverlayAliases: Record<string, string>;
