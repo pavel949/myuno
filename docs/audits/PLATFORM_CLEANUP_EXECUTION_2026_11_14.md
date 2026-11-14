@@ -82,6 +82,7 @@ python3 /tmp/browser/role-release/check_roles.py
 - The latest source at or before the public build timestamp is `4c15a8d465f574d38a04af805cc503b0773d253d`; this is only a timestamp candidate, **not a proven deployed SHA**. The deployed entry asset contains the old public build timestamp and does not contain current HEAD `e5f3bec5a908a451f771d12a243468573383c064`.
 - Cloudflare serves the public responses. No Vercel deployment ID, READY state, alias attachment or exact GitHub-main parity was available. No credentials were created or read, and no deployment/publication was attempted.
 - Build identity unit tests are **9/9 PASS**. They validate future metadata generation, not the identity of the already deployed public bundle.
+- Automatic managed builds at **07:07:13 UTC and 07:07:20 UTC** both report `build OK`; `git diff --check` PASS. These validate the current source, not public deployment parity.
 
 **Final release disposition:** current-source Vercel parity **FAIL / NOT VERIFIED**; overall platform release **NOT READY**. Remaining role acceptance requires Pavel to identify an existing non-admin test account, followed by the same read-only hosted matrix. A separate authorized Vercel deployment must then emit a full 40-character commit matching reviewed `main`; publishing from Lovable is not a substitute.
 
@@ -149,7 +150,7 @@ Focused suites: usePharmacy.recovery, useDeveloperLeads.recovery, buildIdentity,
 
 `python3 /tmp/browser/platform-cleanup/public_smoke.py`: **36/36 initial-render probes**, 9 routes × widths 375/390/430/1280, height 1800, reduced motion. All nonblank, no horizontal overflow or pageerror. Routes: `/`, `/property/search?mode=rent`, `/property/map?mode=rent&view=map`, `/newbuilds`, `/discover/services`, `/school-finder`, `/cost-of-living`, `/visa/quiz`, `/market/categories`. Non-GET/HEAD/OPTIONS, function calls and nonallowlisted data requests blocked. Screenshots reviewed for mobile search and calculator. Search screenshot was **still loading**: these probes do not prove settled catalogue loading or full E2E.
 
-Shared primitive fixture built using `node scripts/qa/shared-surfaces-ui.mjs --build-only`, then bundled Chromium via adapted temporary Python driver (no manual app build). Network denied. **FAIL** at first RU/320/light nested sheet→popover→Escape→options flow: pointer issue fixed and retested, parent dismissal remains. No 32-case shared-primitive PASS claimed. Upstream Python fixture was not rewritten; only temporary diagnostic copies adjusted browser launch and screenshot behavior.
+Initial shared primitive fixture built using `node scripts/qa/shared-surfaces-ui.mjs --build-only`, then bundled Chromium via adapted temporary Python driver (no manual app build). Network denied. The initial RU/320/light nested sheet→popover→Escape→options flow **FAILED** before the later correction: the pointer issue was fixed first, while parent dismissal still remained at that checkpoint. The subsequent 07:04 UTC follow-up above resolves this defect and supersedes this historical failure with 20/20 passing scenarios. Upstream Python fixture was not rewritten; only temporary diagnostic copies adjusted browser launch and screenshot behavior.
 
 | Role/flow | Disposition |
 |---|---|
