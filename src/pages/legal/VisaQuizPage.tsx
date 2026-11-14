@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, ChevronRight, CheckCircle2, ArrowLeft, FileText, Clock, DollarSign, AlertTriangle, Scale, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -245,10 +245,16 @@ export default function VisaQuizPage() {
   };
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
+    <AppLayout showBottomNav>
       <SEOHead
         title={isRu ? 'Какая виза мне нужна? — Квиз' : 'Which Visa Do I Need? — Quiz'}
         description={isRu ? 'Пройдите квиз и узнайте какая виза подходит для вашей поездки в Таиланд' : 'Take a quick quiz to find the right visa for your Thailand trip'}
+      />
+
+      <UnifiedHeader
+        title={isRu ? 'Визовый квиз' : 'Visa quiz'}
+        showBack
+        fallbackPath="/discover"
       />
 
       {!started ? (

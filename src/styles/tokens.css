@@ -329,7 +329,8 @@
   --section-gap-tight: 1rem;
   --touch-target:      2.75rem;    /* 44px WCAG */
   --nav-icon-size:     1.25rem;
-  --bottom-nav-h:      calc(60px + env(safe-area-inset-bottom, 0px));
+  /* Shared mobile navigation: 64px content + device safe area. */
+  --bottom-nav-h:      calc(64px + env(safe-area-inset-bottom, 0px));
   --floating-chat-size: 3rem;
   --floating-chat-gap: 1rem;
 

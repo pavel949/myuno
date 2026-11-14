@@ -106,27 +106,22 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           onFocus={() => handlePrefetch(path)}
           aria-label={label}
           aria-current={active ? 'page' : undefined}
-          className="flex flex-col items-center justify-center gap-[3px] relative pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
+          className="myuno-bottom-nav-item flex flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
         >
           {active && (
             <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
+              className="myuno-bottom-nav-active"
               aria-hidden
             />
           )}
-          <div
-            className={cn(
-              'transition-all duration-200',
-              active ? 'text-primary scale-110' : 'text-muted-foreground',
-            )}
-          >
+          <div className="myuno-bottom-nav-icon">
             <Icon className="size-5" aria-hidden />
           </div>
           <span
             className={cn(
-              'max-w-full px-0.5 text-center text-[11px] leading-tight',
+              'myuno-bottom-nav-label px-0.5 text-center',
               mobileLabelRu && 'whitespace-nowrap',
-              active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground',
+              active ? 'font-semibold' : 'font-medium',
             )}
           >
             {mobileLabel}
@@ -139,21 +134,12 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       <>
         <nav
           ref={ref}
-          className={cn('fixed bottom-0 left-0 right-0 z-[100] md:hidden', className)}
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          className={cn('myuno-bottom-nav fixed bottom-0 left-0 right-0 z-[100] md:hidden', className)}
           {...props}
         >
           <div
-            className="absolute inset-0 border-t border-border bg-[hsl(var(--bg-surface)/0.85)]"
-            style={{
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            }}
-          />
-
-          <div
             className={cn(
-              'relative grid gap-0 h-[60px] px-2 max-w-screen-sm mx-auto',
+              'myuno-bottom-nav-inner relative grid gap-0 max-w-screen-sm mx-auto',
               gridCols,
             )}
           >
@@ -166,12 +152,12 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
                   setAppsOpen(true);
                 }}
                 aria-label={pickLang(language, { ru: 'Все сервисы', en: 'All apps', th: 'บริการทั้งหมด' })}
-                className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
+                className="myuno-bottom-nav-apps flex flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
               >
-                <div className="w-10 h-10 rounded-none flex items-center justify-center bg-primary/10 border border-primary/25">
+                <div className="flex size-6 items-center justify-center border border-primary/25 bg-primary/10">
                   <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/80 leading-none">
+                <span className="myuno-bottom-nav-label font-medium text-muted-foreground/80">
                   {pickLang(language, { ru: 'Сервисы', en: 'Apps', th: 'บริการ' })}
                 </span>
               </button>

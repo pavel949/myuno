@@ -10,6 +10,7 @@
    `.onboarding-scope` so it never leaks into other surfaces. */
 @import './styles/onboarding.css';
 @import './styles/consumer-system.css';
+@import './styles/unified-experience.css';
 
 /* Fonts loaded via index.html for better performance */
 
@@ -563,5 +564,4 @@ html.light .hero-dots {
   @page { size: A4; margin: 15mm; }
   body { background: white !important; }
 }
-
 

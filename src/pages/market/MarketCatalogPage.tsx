@@ -7,13 +7,13 @@ import {
   useMarketplaceProducts,
 } from '@/hooks/useMarketplace';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { Search, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
 import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 
 // Fallback icons
 const getCategoryIcon = (slug: string): string => {
@@ -74,57 +74,29 @@ const MarketCatalogPage = () => {
   }, [categories, searchQuery]);
 
   return (
-    <AppLayout showHeader={false} showBottomNav={true}>
+    <AppLayout showBottomNav>
       <div className="min-h-screen bg-background pb-24">
-        
-        {/* Clean Header */}
-        <div className="sticky top-0 z-40 bg-background border-b border-border">
-          {/* Title Row */}
-          <div className="px-4 py-4 flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0 -ml-2"
-              onClick={() => navigate('/market')}
-              aria-label={language === 'ru' ? 'Назад' : 'Back'}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold">
-                {language === 'ru' ? 'Каталог' : 'Catalog'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {sortedCategories.length} {language === 'ru' ? 'категорий' : 'categories'}
-              </p>
-            </div>
-
-            <GlobalPreferencesControls size="sm" themeVariant="dropdown" className="shrink-0" />
-
-            {/* Drawer Trigger */}
-            <CategoryDrawer 
-              trigger={
-                <Button variant="outline" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Каталог' : 'Catalog'}>
-                  <Menu className="w-5 h-5" />
-                </Button>
-              }
-            />
-          </div>
-          
-          {/* Search */}
-          <div className="px-4 pb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={language === 'ru' ? 'Найти категорию' : 'Find category'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 rounded-none bg-muted border-0"
+        <UnifiedHeader
+          title={language === 'ru' ? 'Каталог' : 'Catalog'}
+          subtitle={`${sortedCategories.length} ${language === 'ru' ? 'категорий' : 'categories'}`}
+          showBack
+          fallbackPath="/market"
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder={language === 'ru' ? 'Найти категорию' : 'Find category'}
+          rightAction={(
+            <>
+              <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
+              <CategoryDrawer
+                trigger={
+                  <Button variant="outline" size="icon" className="min-h-11 min-w-11" aria-label={language === 'ru' ? 'Каталог' : 'Catalog'}>
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                }
               />
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+        />
 
         {/* Categories List */}
         <div className="p-4">

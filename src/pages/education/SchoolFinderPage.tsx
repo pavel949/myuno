@@ -4,11 +4,11 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, Search, MapPin, Globe, Users, DollarSign, Filter, Star } from 'lucide-react';
+import { Search, MapPin, Globe, Users, DollarSign, Filter, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -134,27 +134,18 @@ export default function SchoolFinderPage() {
   };
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
+    <AppLayout showBottomNav>
       <SEOHead
         title={isRu ? 'Подбор школы на Пхукете' : 'School Finder Phuket'}
         description={isRu ? 'Найдите идеальную школу: фильтр по возрасту, языку и бюджету' : 'Find the perfect school: filter by age, language and budget'}
       />
 
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border/50">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <BackButton fallbackPath="/education" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-semibold truncate">{isRu ? 'Подбор школы' : 'School Finder'}</h1>
-            <p className="text-xs text-muted-foreground">
-              {filtered.length} {isRu ? 'школ' : 'schools'}
-            </p>
-          </div>
-          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-      </div>
+      <UnifiedHeader
+        title={isRu ? 'Подбор школы' : 'School Finder'}
+        subtitle={`${filtered.length} ${isRu ? 'школ' : 'schools'}`}
+        showBack
+        fallbackPath="/education"
+      />
 
       <div className="max-w-lg mx-auto px-4 py-4 pb-24 space-y-4">
         {/* Filters */}

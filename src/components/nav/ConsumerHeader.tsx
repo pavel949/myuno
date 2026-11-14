@@ -57,6 +57,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
     { to: R.FOR_LOCAL_SERVICE_PROVIDERS, label: t('Поставщикам услуг', 'For service providers', 'สำหรับผู้ให้บริการ') },
     { to: R.FOR_REAL_ESTATE_DEVELOPERS, label: t('Застройщикам', 'For developers', 'สำหรับผู้พัฒนา') },
   ];
+  const partnerActive = partnerLinks.some(link => pathname === link.to || pathname.startsWith(`${link.to}/`));
   return (
     <header ref={headerRef} className={`consumer-header${overlay ? ' consumer-header-overlay' : ''}`}>
       <div className="consumer-header-inner" data-public-frame={overlay ? 'overlay' : frame} style={!overlay && frame !== 'default' ? { maxWidth: PUBLIC_CONTENT_WIDTH[frame] } : undefined}>
@@ -65,7 +66,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
             {links.map(l => <Link key={l.to} to={l.to} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
           </nav>
           <details className="consumer-partner-menu">
-            <summary>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
+            <summary aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
             <div className="consumer-partner-menu-panel">
               {partnerLinks.map(link => <Link key={link.to} to={link.to}>{link.label}</Link>)}
             </div>

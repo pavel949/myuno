@@ -1,0 +1,103 @@
+/*
+ * Unified experience layer.
+ *
+ * Shared chrome is intentionally boring: one geometry contract, one active
+ * state, one touch target, and no glassmorphism. Domain pages can still own
+ * their content and commercial interactions without inventing new chrome.
+ */
+
+:root {
+  --ux-touch-target: var(--touch-target, 2.75rem);
+  --ux-bottom-nav-content-height: 64px;
+  --ux-control-height: 44px;
+  --ux-transition-fast: 160ms;
+}
+
+/* The public search field uses the same control language as forms and filters. */
+.ux-search-control {
+  min-height: var(--ux-control-height);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  transition: border-color var(--ux-transition-fast) ease, background-color var(--ux-transition-fast) ease;
+}
+
+.ux-search-control:hover {
+  background: hsl(var(--surface-raised));
+}
+
+.ux-search-control:focus-visible {
+  border-color: hsl(var(--ring));
+  outline: 2px solid hsl(var(--ring) / 0.22);
+  outline-offset: 1px;
+}
+
+/* Canonical mobile navigation geometry. Solid surfaces prevent content from
+   becoming unreadable underneath a blurred translucent bar. */
+.myuno-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+}
+
+.myuno-bottom-nav-inner {
+  height: var(--ux-bottom-nav-content-height);
+  padding-inline: var(--section-gap-tight);
+}
+
+.myuno-bottom-nav-item,
+.myuno-bottom-nav-apps {
+  position: relative;
+  min-width: var(--ux-touch-target);
+  min-height: var(--ux-touch-target);
+  padding: 4px 2px;
+  color: hsl(var(--muted-foreground));
+  transition: color var(--ux-transition-fast) ease, background-color var(--ux-transition-fast) ease;
+}
+
+.myuno-bottom-nav-item:hover,
+.myuno-bottom-nav-item:focus-visible,
+.myuno-bottom-nav-apps:hover,
+.myuno-bottom-nav-apps:focus-visible {
+  background: hsl(var(--surface-raised));
+  color: hsl(var(--foreground));
+}
+
+.myuno-bottom-nav-item[aria-current='page'] {
+  color: hsl(var(--primary));
+}
+
+.myuno-bottom-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: color var(--ux-transition-fast) ease;
+}
+
+.myuno-bottom-nav-label {
+  max-width: 100%;
+  font-size: var(--type-caption-size);
+  line-height: 1.15;
+}
+
+.myuno-bottom-nav-active {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 24px;
+  height: 3px;
+  transform: translateX(-50%);
+  background: hsl(var(--primary));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ux-search-control,
+  .myuno-bottom-nav-item,
+  .myuno-bottom-nav-apps,
+  .myuno-bottom-nav-icon {
+    transition: none;
+  }
+}

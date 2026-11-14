@@ -4,11 +4,11 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calculator, Home, Utensils, Car, Stethoscope, GraduationCap, Wifi, ShoppingBag, Dumbbell, PlusCircle, MinusCircle } from 'lucide-react';
+import { Home, Utensils, Car, Stethoscope, GraduationCap, Wifi, ShoppingBag, Dumbbell, PlusCircle, MinusCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -119,25 +119,18 @@ export default function CostOfLivingPage() {
     : (isRu ? '👑 Люкс' : '👑 Luxury');
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
+    <AppLayout showBottomNav>
       <SEOHead
         title={isRu ? 'Стоимость жизни на Пхукете — Калькулятор' : 'Cost of Living in Phuket — Calculator'}
         description={isRu ? 'Рассчитайте ежемесячные расходы: жильё, еда, транспорт, медицина' : 'Calculate monthly expenses: housing, food, transport, healthcare'}
       />
 
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border/50">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <BackButton fallbackPath="/discover" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-semibold truncate">{isRu ? 'Стоимость жизни' : 'Cost of Living'}</h1>
-            <p className="text-xs text-muted-foreground">Phuket, Thailand</p>
-          </div>
-          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center">
-            <Calculator className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-      </div>
+      <UnifiedHeader
+        title={isRu ? 'Стоимость жизни' : 'Cost of Living'}
+        subtitle="Phuket, Thailand"
+        showBack
+        fallbackPath="/discover"
+      />
 
       <div className="max-w-lg mx-auto px-4 py-4 pb-24 space-y-4">
         {/* Total card */}

@@ -85,7 +85,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
             onClick={isSearchClickable ? onSearchClick : undefined}
             readOnly={isSearchClickable}
             className={cn(
-              "pl-10 pr-4 h-10 rounded-full bg-muted/60 border-0 text-sm",
+              "ux-search-control pl-10 pr-4 text-sm",
               isSearchClickable && "cursor-pointer"
             )}
           />
