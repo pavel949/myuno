@@ -548,11 +548,12 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       // Get project info if property has project_id
       let projectData: PropertyProject | null = null;
       if (property.project_id) {
-        const { data: project } = await supabase
+        const { data: project, error: projectError } = await supabase
           .from('property_projects')
           .select('*')
           .eq('id', property.project_id)
           .single();
+        if (projectError) throw projectError;
         projectData = project as PropertyProject | null;
       }
 

@@ -122,18 +122,30 @@ function PropertyListingCardBase({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
     <div
       ref={rootRef}
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
       aria-selected={isSelected}
+      role={onSelect ? 'button' : 'link'}
+      tabIndex={0}
+      aria-label={title || districtDisplay}
       className={cn(
         "group min-w-0 cursor-pointer transition-shadow",
         isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm",
         className,
       )}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >

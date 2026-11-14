@@ -98,3 +98,24 @@ export function useManagementCompanyBySlug(slug: string | undefined) {
     enabled: !!slug,
   });
 }
+
+export function useManagementCompanyById(id: string | null | undefined) {
+  return useQuery({
+    queryKey: ['management-company-by-id', id],
+    queryFn: async (): Promise<ManagementCompany | null> => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from('management_companies_public')
+        .select(MANAGEMENT_COMPANY_PUBLIC_COLUMNS)
+        .eq('id', id)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      return data ? data as unknown as ManagementCompany : null;
+    },
+    enabled: !!id,
+  });
+}

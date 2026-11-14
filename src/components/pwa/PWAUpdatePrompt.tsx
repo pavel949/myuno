@@ -134,11 +134,11 @@ export function PWAUpdatePrompt() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.95 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-          className="fixed bottom-20 left-4 right-4 z-[100] md:left-auto md:right-6 md:bottom-6 md:w-96"
+          className="pointer-events-none fixed left-4 right-4 top-20 z-40 md:left-auto md:right-6 md:top-24 md:w-96"
           role="status"
           aria-live="polite"
         >
-          <div className="bg-background border-2 border-primary/50 rounded-none p-4 shadow-lg">
+          <div className="pointer-events-auto bg-background border-2 border-primary/50 rounded-none p-4 shadow-lg">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-12 h-12 rounded-none bg-primary flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-primary-foreground" />

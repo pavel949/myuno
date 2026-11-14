@@ -13,6 +13,7 @@ import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SEOHead } from '@/components/seo';
 import {
   Building2, Star, Phone, Mail, Globe, MapPin,
   Shield, Calendar, MessageCircle, Users, Loader2,
@@ -66,9 +67,18 @@ export default function ManagementCompanyProfile() {
 
   const name = isRu ? company.name_ru : company.name_en;
   const description = isRu ? company.description_ru : company.description_en;
+  const seoDescription = description || (isRu
+    ? `${name} — управляющая компания на Пхукете.`
+    : `${name} — property management company in Phuket.`);
 
   return (
     <AppLayout showHeader={false} showBottomNav>
+      <SEOHead
+        title={name}
+        description={seoDescription}
+        image={company.cover_image || company.logo || undefined}
+        url={`https://www.myuno.app/company/${encodeURIComponent(company.slug)}`}
+      />
       <div className="min-h-screen bg-background pb-24">
         {/* Cover */}
         <div className="relative h-48 sm:h-64 bg-muted">

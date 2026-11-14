@@ -68,6 +68,7 @@ export interface PropertyFormData {
   ownership_form?: 'freehold' | 'leasehold' | 'company' | 'foreign_company';
   is_for_sale: boolean;
   sale_price: string;
+  sale_currency: string;
   // House Rules
   pets_allowed?: boolean;
   pet_deposit?: number;

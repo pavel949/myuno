@@ -81,10 +81,10 @@ describe('Stripe deposit allocation', () => {
   it('preserves the exact deposit with fractional cleaning amounts', () => {
     for (const cleaningFee of [0, 500, 505, 505.55]) {
       const split = splitDepositMinorUnits(950, cleaningFee);
-      expect(split.rental + split.cleaning).toBe(95000);
-      expect(split.cleaning).toBe(Math.round(cleaningFee * 10));
+      expect(split.rental + split.cleaning).toBe(950);
+      expect(split.cleaning).toBe(Math.round(cleaningFee / 10));
     }
-    expect(splitDepositMinorUnits(950, 505)).toEqual({ rental: 89950, cleaning: 5050 });
+    expect(splitDepositMinorUnits(950, 505)).toEqual({ rental: 899, cleaning: 51 });
   });
   it('rejects invalid allocations instead of emitting negative Stripe amounts', () => {
     expect(() => splitDepositMinorUnits(0, 500)).toThrow();

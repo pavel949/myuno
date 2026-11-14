@@ -100,6 +100,7 @@ export default function AddProperty() {
             authoringOnly={wizard.managedCreation}
             canEditPricing={wizard.authoringCapabilities.pricing}
             canEditBookingTerms={wizard.authoringCapabilities.bookings}
+            saleCurrency={wizard.formData.sale_currency}
             formData={wizard.formData}
             updateFormData={wizard.updateFormData}
             selectedProject={wizard.selectedProject}

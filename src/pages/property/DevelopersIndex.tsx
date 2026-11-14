@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
+import { SEOHead } from '@/components/seo';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -24,6 +25,11 @@ export default function DevelopersIndex() {
 
   return (
     <div className="public-commerce public-commerce--developers px-4 py-6 pb-24 space-y-6">
+        <SEOHead
+          title={isRu ? 'Застройщики Пхукета' : 'Phuket Property Developers'}
+          description={isRu ? 'Проверенные застройщики Пхукета и их проекты с рейтингом myUNO.' : 'Explore verified Phuket property developers and their projects with myUNO ratings.'}
+          url={`https://www.myuno.app${APP_ROUTES.DEVELOPERS}`}
+        />
         {/* Hero */}
         <div className="public-commerce-intro border-b border-border py-4">
           <div className="flex items-center gap-3 mb-3">

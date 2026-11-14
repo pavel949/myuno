@@ -499,17 +499,22 @@ function PricingStepInner({ formData, updateFormData, selectedProject, authoring
           </div>
 
           {formData.is_for_sale && (
-            <div className="space-y-2">
-              <Label>{isRu ? 'Цена продажи' : 'Sale Price'} ({saleCurrency || (isRu ? 'валюта не задана' : 'currency not set')})</Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.sale_price}
-                onChange={(e) => updateFormData({ sale_price: e.target.value })}
-                placeholder="5000000"
-                className="text-lg"
-              />
-
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="sale-currency">{isRu ? 'Валюта продажи' : 'Sale currency'}</Label>
+                <Input id="sale-currency" value={formData.sale_currency} onChange={(e) => updateFormData({ sale_currency: e.target.value.toUpperCase() })} placeholder="THB" maxLength={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>{isRu ? 'Цена продажи' : 'Sale Price'} ({saleCurrency || (isRu ? 'валюта не задана' : 'currency not set')})</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.sale_price}
+                  onChange={(e) => updateFormData({ sale_price: e.target.value })}
+                  placeholder="5000000"
+                  className="text-lg"
+                />
+              </div>
             </div>
           )}
         </div>

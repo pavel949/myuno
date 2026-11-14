@@ -48,7 +48,7 @@ it.each(['ForManagementCompanies', 'ForLocalServices'])('%s owns one explicit fr
 
 it('retains MC pricing, trial queries and section destinations', () => {
   const text = source('ForManagementCompanies');
-  for (const value of [199, 399, 799]) expect(text).toContain(`priceUsd: ${value}`);
+  for (const value of [125, 375, 1250]) expect(text).toContain(`priceUsd: ${value}`);
   expect(text).toContain('/auth?redirect=/mc/onboarding&trial=true');
   expect(text).toContain("'/auth?redirect=/mc/onboarding&trial=true&tier=' + tier.id");
   expect(text).toContain('id="pricing"');

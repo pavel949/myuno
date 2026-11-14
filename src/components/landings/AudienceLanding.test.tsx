@@ -12,7 +12,7 @@ vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({children, usePage
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 afterEach(cleanup);
 const entries = [
- {path:'/for-owners', Page:ForOwners, primary:'#paths', secondary:'/my-property', next:'/mc/onboarding'},
+ {path:'/for-owners', Page:ForOwners, primary:'#paths', secondary:'/my-property', next:'/owner/onboarding'},
  {path:'/for-developers', Page:ForDevelopers, primary:'/developer-portal/apply', secondary:'/developer-portal', next:'/developer-portal/projects'},
  {path:'/for/agent', Page:AgentLanding, primary:'/become-partner', secondary:'/partner/status', next:'/property/search'},
  {path:'/partners', Page:Partners, primary:'/vendor/onboarding', secondary:'/partner/status', next:'/for-developers'},

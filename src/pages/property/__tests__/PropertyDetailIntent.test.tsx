@@ -13,6 +13,7 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: '
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'THB' } }) }));
 vi.mock('@/hooks/useFeatureFlag', () => ({ useFeatureFlag: () => false }));
+vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanyById: () => ({ data: null }) }));
 vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDates: () => ({ data: [], isSuccess: true, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/hooks/usePropertyListingQuality', () => ({ usePropertyMedia: () => ({ data: [] }), mediaAlt: () => '', mediaCaption: () => '' }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: vi.fn(() => ({})) }));

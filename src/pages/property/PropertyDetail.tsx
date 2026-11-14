@@ -73,6 +73,7 @@ import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatin
 import { StayRulesSection } from '@/components/property/StayRulesSection';
 import { RoomCategoryOffers } from '@/components/property/RoomCategoryOffers';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useManagementCompanyById } from '@/hooks/useManagementCompanies';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -113,7 +114,8 @@ export default function PropertyDetail() {
   const [editedDates, setEditedDates] = useState<{ id?: string; value?: DateRange }>();
   const [editedGuests, setEditedGuests] = useState<{ id?: string; value: number }>();
 
-  const { data: mediaItems = [] } = usePropertyMedia(id);
+  const mediaQuery = usePropertyMedia(id);
+  const { data: mediaItems = [] } = mediaQuery;
   const availabilityQuery = usePropertyUnavailableDates(id);
   const availability = useMemo(() => (availabilityQuery.data ?? []).map(entry => ({
     date: entry.date, status: entry.kind,
@@ -132,6 +134,7 @@ export default function PropertyDetail() {
   );
 
   const { data: property, isLoading, isError, refetch } = usePropertyWithRentalTerms(id);
+  const managementCompanyQuery = useManagementCompanyById(property?.management_company_id);
   const rentalTerms = property?.rentalTerms;
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
@@ -382,6 +385,14 @@ export default function PropertyDetail() {
         </div>
 
         {/* Image Gallery */}
+        {mediaQuery.isError && (
+          <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-border p-3 text-sm">
+            <span>{isRu ? 'Дополнительные фотографии временно недоступны.' : 'Additional photos are temporarily unavailable.'}</span>
+            <Button variant="outline" size="sm" onClick={() => mediaQuery.refetch()}>
+              {isRu ? 'Повторить' : 'Retry'}
+            </Button>
+          </div>
+        )}
         <PropertyDetailGallery key={id}
           images={images}
           alt={galleryFallbackAlt}
@@ -513,6 +524,21 @@ export default function PropertyDetail() {
                 <>
                   <Separator />
                   <ProjectInfoCard project={property.project} mode={isSaleListing ? 'buy' : 'rent'} />
+                </>
+              )}
+
+              {managementCompanyQuery.data && (
+                <>
+                  <Separator />
+                  <section aria-label={isRu ? 'Управляющая компания' : 'Management company'}>
+                    <h2 className="text-xl lg:text-2xl font-semibold mb-2">{isRu ? 'Управляющая компания' : 'Management company'}</h2>
+                    <Link
+                      to={APP_ROUTES.MANAGEMENT_COMPANY(managementCompanyQuery.data.slug)}
+                      className="inline-flex min-h-11 items-center text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {isRu ? managementCompanyQuery.data.name_ru || managementCompanyQuery.data.name_en : managementCompanyQuery.data.name_en || managementCompanyQuery.data.name_ru}
+                    </Link>
+                  </section>
                 </>
               )}
 

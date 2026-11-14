@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { ExternalLink, Plus, Pencil, Trash2, Lock, Unlock, Image as ImageIcon, FileText, TrendingUp, Map, Globe } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
+import { publicationPayload } from '@/lib/developerProjectPublication';
 
 const AREAS = ['Bang Tao', 'Rawai', 'Kamala', 'Laguna', 'Surin', 'Nai Harn', 'Nai Thon', 'Layan', 'Kata', 'Karon', 'Patong', 'Cherng Talay', 'Other'];
 const UNIT_TYPES = ['studio', '1br', '2br', '3br', 'penthouse', 'villa'];
@@ -294,7 +295,7 @@ export default function DeveloperProjectEditor() {
 
   const update = (k: string, v: unknown) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const handleSave = async () => {
+  const handleSave = async (submitForReview = false) => {
     if (!developer || !form.name_en) return;
     setSaving(true);
     try {
@@ -321,7 +322,7 @@ export default function DeveloperProjectEditor() {
         developer_id: developer.id,
         developer_name: developer.name_en,
         slug,
-        is_approved: false,
+        ...publicationPayload(existing, submitForReview),
         is_active: true,
       };
 
@@ -329,11 +330,11 @@ export default function DeveloperProjectEditor() {
         const { error } = await supabase.from('property_projects').update(payload).eq('id', id);
         if (error) throw error;
         await invalidateProjectPriceReaders(projectQueryClient);
-        toast.success('Проект обновлён');
+        toast.success(submitForReview ? 'Проект отправлен на проверку' : 'Проект сохранён');
       } else {
         const { data: created, error } = await supabase.from('property_projects').insert(payload).select('id').single();
         if (error) throw error;
-        toast.success('Проект создан и отправлен на проверку');
+        toast.success(submitForReview ? 'Проект создан и отправлен на проверку' : 'Проект сохранён как черновик');
         navigate(`/developer-portal/projects/${created.id}`);
         return;
       }
@@ -375,13 +376,22 @@ export default function DeveloperProjectEditor() {
         <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">
           {id ? 'Редактировать проект' : 'Новый проект'}
         </h1>
-        <button
-          className="nb-btn-gold shrink-0"
-          disabled={!form.name_en || saving}
-          onClick={handleSave}
-        >
-          {saving ? 'Сохранение...' : id ? 'Сохранить' : 'Создать проект'}
-        </button>
+        <div className="flex flex-wrap justify-end gap-2 shrink-0">
+          <button
+            className="nb-btn-gold"
+            disabled={!form.name_en || saving}
+            onClick={() => handleSave(false)}
+          >
+            {saving ? 'Сохранение...' : 'Сохранить черновик'}
+          </button>
+          <button
+            className="rounded-none border border-[hsl(var(--nb-gold)/0.5)] px-3 py-2 text-sm text-[hsl(var(--nb-gold))]"
+            disabled={!form.name_en || saving}
+            onClick={() => handleSave(true)}
+          >
+            Отправить на проверку
+          </button>
+        </div>
       </div>
 
       <Tabs defaultValue="основное">
@@ -739,7 +749,10 @@ export default function DeveloperProjectEditor() {
                 Открыть публичную страницу
               </a>
               {existing && !existing.is_approved && (
-                <p className="text-xs text-accent mt-2">⏳ Проект ожидает проверки — пока недоступен в каталоге</p>
+                <p className="text-xs text-accent mt-2">Проект не опубликован: сохраните черновик или отправьте его на проверку.</p>
+              )}
+              {existing?.is_approved && existing?.public_listing_enabled && (
+                <p className="text-xs text-success mt-2">Проект опубликован. Обычное сохранение не снимает публикацию.</p>
               )}
             </div>
           )}

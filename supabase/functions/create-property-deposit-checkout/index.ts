@@ -37,6 +37,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let compensationOrderId: string | null = null;
+  let compensationClient: ReturnType<typeof createClient> | null = null;
   try {
     logStep("Starting property deposit checkout");
     
@@ -108,6 +110,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+    compensationClient = supabaseAdmin;
 
     // ── Resort / hotel: booking by room category + rate plan ───────────────
     const room_category_id = (body as { room_category_id?: string }).room_category_id;
@@ -318,6 +321,7 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
+    compensationOrderId = order.order_id;
 
     logStep("Order created in database", { orderId: order.order_id, orderNumber: order.order_number });
 
@@ -480,6 +484,16 @@ Deno.serve(async (req) => {
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    if (compensationClient && compensationOrderId) {
+      const { error: compensationError } = await compensationClient
+        .from("orders")
+        .update({ status: "cancelled", notes: "Auto-cancelled: checkout session creation failed" })
+        .eq("id", compensationOrderId)
+        .in("status", ["pending", "pending_deposit"]);
+      if (compensationError) {
+        logStep("ERROR: Checkout compensation failed", { orderId: compensationOrderId, error: compensationError.message });
+      }
+    }
     logStep("ERROR", { message: errorMessage });
     return new Response(
       JSON.stringify({ error: errorMessage }),

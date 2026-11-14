@@ -62,6 +62,9 @@ export function validateWizardStep({ stepId, formData, ownershipData, isRu }: Va
         min_stay_nights: formData.min_stay_nights,
         max_guests: formData.max_guests,
         deposit_amount: formData.deposit_amount,
+        is_for_sale: formData.is_for_sale,
+        sale_price: formData.sale_price,
+        sale_currency: formData.sale_currency,
       });
       if (errors.length > 0) {
         toast.error(isRu ? 'Проверьте данные' : 'Check pricing fields', {

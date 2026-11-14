@@ -62,15 +62,6 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/search?lang=th"/>
   </url>
   <url>
-    <loc>https://www.myuno.app/property/projects</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/property/projects?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/property/projects?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/projects?lang=th"/>
-  </url>
-  <url>
     <loc>https://www.myuno.app/property/offplan</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>daily</changefreq>
@@ -98,13 +89,13 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/resale?lang=th"/>
   </url>
   <url>
-    <loc>https://www.myuno.app/property/invest</loc>
+    <loc>https://www.myuno.app/invest</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/property/invest?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/property/invest?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/invest?lang=th"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/invest?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/invest?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/invest?lang=th"/>
   </url>
   <url>
     <loc>https://www.myuno.app/property/consultation</loc>
@@ -134,24 +125,6 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/newbuilds?lang=en"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/newbuilds?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/newbuilds?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/newbuilds/projects</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/newbuilds/projects?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/newbuilds/projects?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/newbuilds/projects?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/newbuilds/developers</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/newbuilds/developers?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/newbuilds/developers?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/newbuilds/developers?lang=th"/>
   </url>
 
   <!-- ===== Experiences ===== -->

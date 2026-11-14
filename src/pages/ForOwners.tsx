@@ -11,7 +11,7 @@ export default function ForOwnersPage() {
     choicesTitle={c('Как вы хотите управлять домом?', 'How would you like to manage your home?', 'คุณต้องการดูแลบ้านอย่างไร?')}
     choices={[
       { title: c('Обсудить управление', 'Discuss property management', 'ปรึกษาการจัดการที่พัก'), description: c('Расскажите об объекте и задачах. Объём работы и условия нужно согласовать перед началом.', 'Tell us about your property and the support you need. Scope and terms are agreed before work begins.', 'แจ้งข้อมูลที่พักและความช่วยเหลือที่ต้องการ โดยตกลงขอบเขตงานและเงื่อนไขก่อนเริ่ม'), href: APP_ROUTES.OWNER_MANAGEMENT_LANDING },
-      { title: c('Управлять самостоятельно', 'Manage it yourself', 'จัดการด้วยตนเอง'), description: c('Перейдите к настройке рабочего пространства. Доступные инструменты и условия зависят от выбранного подключения.', 'Continue to workspace setup. Available tools and terms depend on your setup.', 'เริ่มตั้งค่าพื้นที่ทำงาน เครื่องมือและเงื่อนไขขึ้นอยู่กับการตั้งค่าของคุณ'), href: '/mc/onboarding' },
+      { title: c('Управлять самостоятельно', 'Manage it yourself', 'จัดการด้วยตนเอง'), description: c('Откройте пространство собственника и добавьте объект. Доступные инструменты зависят от подтверждённого доступа.', 'Open the owner workspace and add a property. Available tools depend on confirmed access.', 'เปิดพื้นที่เจ้าของและเพิ่มที่พัก เครื่องมือขึ้นอยู่กับสิทธิ์ที่ยืนยันแล้ว'), href: '/owner/onboarding' },
     ]}
     nextTitle={c('Полезное для следующего шага', 'Useful next steps', 'สิ่งที่ช่วยให้เริ่มต้นได้')}
     next={[

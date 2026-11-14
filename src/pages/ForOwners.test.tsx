@@ -16,7 +16,7 @@ it.each(['en', 'ru', 'th'])('preserves both canonical owner journeys without con
  expect(paths).toHaveClass('scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)]');
  const cards = paths.querySelectorAll('article');expect(cards).toHaveLength(2);
  expect(cards[0].querySelector('a')).toHaveAttribute('href','/owner/management-landing');
- expect(cards[1].querySelector('a')).toHaveAttribute('href','/mc/onboarding');
+ expect(cards[1].querySelector('a')).toHaveAttribute('href','/owner/onboarding');
  expect(container.querySelector('a[href="/my-property"]')).not.toBeNull();
  expect(container.textContent).not.toMatch(/70\s*\/\s*30|\$25|\$199|\$399/);
 });

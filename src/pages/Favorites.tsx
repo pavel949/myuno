@@ -202,13 +202,21 @@ export default function Favorites() {
               {!loading && filteredFavorites.length === 0 && (
                 <EmptyState
                   icon={Heart}
-                  title={language === 'ru' ? 'Пока пусто' : 'No favorites yet'}
-                  description={language === 'ru' 
-                    ? 'Добавляйте понравившиеся курсы и услуги, нажимая на сердечко' 
-                    : 'Add your favorite courses and services by tapping the heart icon'}
+                  title={filter === 'property'
+                    ? (language === 'ru' ? 'Нет сохранённой недвижимости' : 'No saved properties yet')
+                    : (language === 'ru' ? 'Пока пусто' : 'No favorites yet')}
+                  description={filter === 'property'
+                    ? (language === 'ru'
+                      ? 'Сохраняйте понравившиеся объекты, чтобы вернуться к ним позже'
+                      : 'Save properties you like to come back to them later')
+                    : (language === 'ru'
+                      ? 'Добавляйте понравившиеся курсы и услуги, нажимая на сердечко'
+                      : 'Add your favorite courses and services by tapping the heart icon')}
                   action={
-                    <Button onClick={() => navigate('/discover')}>
-                      {language === 'ru' ? 'Начать поиск' : 'Browse Services'}
+                    <Button onClick={() => navigate(filter === 'property' ? APP_ROUTES.PROPERTY_SEARCH : '/discover')}>
+                      {filter === 'property'
+                        ? (language === 'ru' ? 'Найти недвижимость' : 'Search properties')
+                        : (language === 'ru' ? 'Начать поиск' : 'Browse Services')}
                     </Button>
                   }
                 />

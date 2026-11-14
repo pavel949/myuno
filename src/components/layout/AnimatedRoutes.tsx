@@ -17,6 +17,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard, InvestorGuard } from '@/components/auth';
 import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
+import { OwnerEntryRoute } from '@/components/auth/OwnerEntryRoute';
 import ManageHubGate from '@/components/layout/ManageHubGate';
 
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
@@ -780,7 +781,7 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── Owner → MC Redirects (legacy backward compat) ── */}
         <Route path="/owner/landing" element={<Navigate to="/mc" replace />} />
-        <Route path="/owner/onboarding" element={<Navigate to="/mc/setup" replace />} />
+        <Route path="/owner/onboarding" element={<OwnerEntryRoute />} />
         <Route path="/owner/guide" element={<Navigate to="/mc/guide" replace />} />
         <Route path="/owner/setup" element={<Navigate to="/mc/setup" replace />} />
         <Route path="/owner/portfolio" element={<Navigate to="/mc/portfolio" replace />} />

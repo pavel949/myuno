@@ -21,7 +21,7 @@ export function buildPropertyPayload({
   const {
     title, title_ru, description, description_ru,
     rental_platforms, custom_platform, platform_listed,
-    is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
+    is_for_sale, sale_price, sale_currency, area_sqm, price_per_night, deposit_amount,
     smoking_allowed, seasonal_pricing,
     ...cleanData
   } = formData;
@@ -38,6 +38,7 @@ export function buildPropertyPayload({
     price_per_night: price_per_night ? Number(price_per_night) : undefined,
     deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
     sale_price: sale_price ? Number(sale_price) : undefined,
+    sale_currency: sale_currency?.trim() ? sale_currency.trim().toUpperCase() : undefined,
     is_for_sale,
     smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
     seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,

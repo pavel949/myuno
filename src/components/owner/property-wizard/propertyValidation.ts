@@ -27,6 +27,15 @@ export const pricingSchema = z.object({
     z.string().regex(/^\d*\.?\d*$/).transform(Number).pipe(z.number().min(0)),
     z.literal(''),
   ]),
+  is_for_sale: z.boolean().optional(),
+  sale_price: z.union([
+    z.string().regex(/^\d+(\.\d{1,2})?$/, 'Enter a valid sale price').transform(Number).pipe(z.number().positive('Sale price must be positive')),
+    z.literal(''),
+  ]),
+  sale_currency: z.string().regex(/^[a-z]{3}$/i, 'Use a three-letter sale currency code').or(z.literal('')),
+}).superRefine((data, ctx) => {
+  if (data.is_for_sale && !data.sale_price) ctx.addIssue({ code: 'custom', path: ['sale_price'], message: 'Sale price is required when the property is for sale' });
+  if (data.is_for_sale && !data.sale_currency) ctx.addIssue({ code: 'custom', path: ['sale_currency'], message: 'Sale currency is required when the property is for sale' });
 });
 
 export type BasicInfoValidation = z.input<typeof basicInfoSchema>;

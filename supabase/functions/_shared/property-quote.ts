@@ -1,5 +1,6 @@
 // Pure, dependency-free server quote for nightly property stays (F06).
 // Used by create-property-deposit-checkout; unit-tested from Vitest.
+import { stripeMinorUnitMultiplier } from './currency.ts';
 
 export const DEPOSIT_PERCENT = 10;
 export const MAX_NIGHTS = 365;
@@ -217,8 +218,9 @@ export function bangkokToday(now = new Date()): string {
 
 /** Allocate Stripe line items in minor units so rounding cannot change the deposit. */
 export function splitDepositMinorUnits(deposit: number, cleaningFee: number) {
-  const total = Math.round(deposit * 100);
-  const cleaning = Math.round(cleaningFee * DEPOSIT_PERCENT);
+  const multiplier = stripeMinorUnitMultiplier(SUPPORTED_CURRENCY);
+  const total = Math.round(deposit * multiplier);
+  const cleaning = Math.round(cleaningFee * (DEPOSIT_PERCENT / 100) * multiplier);
   if (!Number.isSafeInteger(total) || total <= 0 || !Number.isSafeInteger(cleaning) || cleaning < 0 || cleaning > total) {
     throw new Error('Invalid deposit allocation');
   }

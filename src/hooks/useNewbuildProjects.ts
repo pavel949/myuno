@@ -36,6 +36,8 @@ export interface NewbuildProject {
   project_status: string | null;
   is_featured: boolean;
   is_approved: boolean;
+  public_listing_enabled?: boolean | null;
+  needs_review?: boolean | null;
   developer_id: string | null;
   developer_name: string | null;
   amenities: string[] | null;

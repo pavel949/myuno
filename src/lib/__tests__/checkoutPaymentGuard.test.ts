@@ -1,12 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { PAYABLE_ORDER_STATUSES, validateCheckoutPayment } from '../../../supabase/functions/_shared/checkout-payment-guard';
+import { stripeMinorUnitMultiplier, toStripeMinorUnits } from '../../../supabase/functions/_shared/currency';
 
-const session = { id: 'cs_1', payment_status: 'paid', amount_total: 95000, currency: 'thb', payment_intent: 'pi_1' };
+const session = { id: 'cs_1', payment_status: 'paid', amount_total: 950, currency: 'thb', payment_intent: 'pi_1' };
 const payment = { amount: 950, currency: 'THB', provider_ref: 'cs_1', status: 'pending' };
 
 describe('signed checkout payment validation', () => {
+  it('converts Stripe amounts using the currency minor-unit contract', () => {
+    expect(stripeMinorUnitMultiplier('THB')).toBe(1);
+    expect(toStripeMinorUnits(950, 'THB')).toBe(950);
+    expect(toStripeMinorUnits(950, 'USD')).toBe(95000);
+    expect(() => toStripeMinorUnits(0, 'THB')).toThrow('Invalid Stripe amount');
+  });
   it('accepts a settled deposit against its payment record, not the full order', () => {
     expect(validateCheckoutPayment(session, payment)).toBeNull();
+  });
+  it('uses two-decimal minor units for USD while THB remains zero-decimal', () => {
+    expect(validateCheckoutPayment({ ...session, amount_total: 95000, currency: 'usd' }, { ...payment, currency: 'USD' })).toBeNull();
+    expect(validateCheckoutPayment({ ...session, amount_total: 95000 }, payment)).toBe('amount_mismatch');
   });
   it('rejects unpaid and no-payment-required sessions for money orders', () => {
     for (const payment_status of ['unpaid', 'no_payment_required']) {

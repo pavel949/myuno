@@ -181,6 +181,7 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     ownership_form: data.ownership_form,
     is_for_sale: data.is_for_sale ?? (data.listing_type === 'sale' || (data.listing_modes?.includes('sale') ?? false)),
     sale_price: data.sale_price || '',
+    sale_currency: data.sale_currency || 'THB',
     pets_allowed: data.pets_allowed,
     pet_deposit: data.pet_deposit,
     smoking_allowed: data.smoking_allowed,

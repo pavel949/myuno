@@ -46,7 +46,7 @@ export function PropertyAmenitiesSection({
 }: PropertyAmenitiesSectionProps) {
   const { language } = useLanguage();
   const locale = (language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en') as MediaLocale;
-  const { data: amenities = [], isLoading } = usePropertyAmenities(propertyId);
+  const { data: amenities = [], isLoading, isError, refetch } = usePropertyAmenities(propertyId);
   const [expanded, setExpanded] = useState(false);
 
   const grouped = useMemo(() => {
@@ -72,6 +72,20 @@ export function PropertyAmenitiesSection({
           ))}
         </div>
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section role="status" className="space-y-3">
+        <h2 className="text-xl lg:text-2xl font-semibold">{title}</h2>
+        <p className="text-sm text-muted-foreground">
+          {locale === 'ru' ? 'Удобства временно недоступны.' : locale === 'th' ? 'สิ่งอำนวยความสะดวกใช้งานไม่ได้ชั่วคราว' : 'Amenities are temporarily unavailable.'}
+        </p>
+        <Button variant="outline" onClick={() => refetch()}>
+          {locale === 'ru' ? 'Повторить' : locale === 'th' ? 'ลองอีกครั้ง' : 'Retry'}
+        </Button>
+      </section>
     );
   }
 

@@ -1,6 +1,6 @@
 import { propertyCommercialInitial, propertyCommercialPayload, propertyCommercialValues } from '@/lib/propertyCommercialFields';
 import { propertyDetailPricing } from '@/lib/real-estate/propertyDetailIntent';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { PropertyListingCard } from '../PropertyListingCard';
@@ -91,8 +91,16 @@ it('keeps the monthly card and independent nightly inquiry consistent after an e
   expect(screen.queryByText(/Estimated/)).toBeNull();
  });
 
- it('keeps the request-only fallback when multiple recorded rates have unsupported currency', () => {
+it('keeps the request-only fallback when multiple recorded rates have unsupported currency', () => {
   mount({ currency: 'USD', price: 3000, price_period: 'month', price_per_night: 3000 });
   expect(screen.getByText('Price on request')).toBeVisible();
   expect(screen.queryByLabelText('Rental rates')).toBeNull();
  });
+
+it('activates the card from the keyboard without changing its visual content', () => {
+  mount({ title_en: 'Keyboard home' });
+  const card = document.querySelector('[data-listing-id="test"]') as HTMLElement;
+  expect(card).toHaveAttribute('tabindex', '0');
+  fireEvent.keyDown(card, { key: 'Enter' });
+  expect(within(card).getByRole('link', { name: 'Keyboard home' })).toHaveAttribute('href', '/property/test?mode=rent');
+});

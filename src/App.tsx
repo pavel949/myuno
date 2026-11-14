@@ -123,16 +123,8 @@ function AppContent() {
         <LegalComplianceModal />
         <BrowserRouter>
           <PublicTelemetry />
-          {/*
-            Coming Soon gate retired 2026-06-18 — site is fully public.
-            NavShell owns the canonical skip link and <main> landmark for every
-            route that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
-          */}
-          <div
-            id="main-content"
-            tabIndex={-1}
-            className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
-          >
+          {/* NavShell owns the canonical skip link and main landmark. */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <AnimatedRoutes />
           </div>
           <UnifiedChatFAB />

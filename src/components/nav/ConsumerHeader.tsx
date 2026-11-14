@@ -71,7 +71,6 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
             </div>
           </details>
         <div className="consumer-utilities">
-          <Link className="consumer-owner" to={R.FOR_OWNERS}>{t('Собственникам', 'For owners', 'สำหรับเจ้าของ')}</Link>
           {onSearch && <button type="button" onClick={onSearch} className="consumer-icon" aria-label={t('Поиск', 'Search', 'ค้นหา')}><Search aria-hidden="true" /></button>}
           <div className="consumer-secondary-utilities"><GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} /></div>
           {headerActions}
@@ -88,7 +87,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
               </div>
               <nav aria-label={t('Меню', 'Menu', 'เมนู')} className="mt-6 flex flex-col gap-1">
                 {onSearch && <Button variant="outline" className="mb-4 justify-start" onClick={() => { setOpen(false); onSearch(); }}><Search aria-hidden="true" />{t('Поиск по сайту', 'Search the site', 'ค้นหาเว็บไซต์')}</Button>}
-                {[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }, { to: R.SUPPORT, label: t('Помощь', 'Help', 'ความช่วยเหลือ') }, { to: user ? R.ACCOUNT : signInPath, label: user ? t('Мой аккаунт', 'My account', 'บัญชีของฉัน') : t('Войти', 'Sign in', 'เข้าสู่ระบบ') }].map(l => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} aria-current={('active' in l ? l.active : pathname === l.to) ? "page" : undefined} className="aria-[current=page]:bg-muted aria-[current=page]:font-semibold flex min-h-12 items-center border-b border-border px-2 py-3 text-base text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{l.label}</Link>)}
+                {[...links, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }, { to: R.SUPPORT, label: t('Помощь', 'Help', 'ความช่วยเหลือ') }, { to: user ? R.ACCOUNT : signInPath, label: user ? t('Мой аккаунт', 'My account', 'บัญชีของฉัน') : t('Войти', 'Sign in', 'เข้าสู่ระบบ') }].map(l => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} aria-current={('active' in l ? l.active : pathname === l.to) ? "page" : undefined} className="aria-[current=page]:bg-muted aria-[current=page]:font-semibold flex min-h-12 items-center border-b border-border px-2 py-3 text-base text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{l.label}</Link>)}
                 <p className="consumer-menu-section-label">{t('Для партнёров', 'For partners', 'สำหรับพาร์ทเนอร์')}</p>
                 {partnerLinks.map(link => <Link key={link.to} to={link.to} onClick={() => setOpen(false)} className="flex min-h-12 items-center border-b border-border px-2 py-3 text-base text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{link.label}</Link>)}
               </nav>
