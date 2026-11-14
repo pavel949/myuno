@@ -13,6 +13,7 @@ import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
 import { HomeSearchEntry, HomePlanLinks } from '@/components/home/HomeSearchEntry';
 import { HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-desktop.webp';
 import '@/styles/cinematic-home.css';
@@ -41,17 +42,23 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
-          <p>{t(copy.lead)}</p>
+          <p>{t({ ru: 'Жильё, услуги и управление недвижимостью — в одном месте. Найдите свой вариант или расскажите команде, что вам нужно.', en: 'Homes, local services, and property management in one place. Find your next step or tell our team what you need.', th: 'ที่พัก บริการท้องถิ่น และการจัดการอสังหาริมทรัพย์ในที่เดียว ค้นหาสิ่งที่ต้องการหรือบอกทีมงานของเรา' })}</p>
+          <div className="home-hero-actions">
+            <Link className="home-hero-primary" to={R.DISCOVER}>{t({ ru: 'Найти жильё или услугу', en: 'Find a home or service', th: 'ค้นหาที่พักหรือบริการ' })}<ArrowRight size={18} aria-hidden="true" /></Link>
+            <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'Я собственник', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}</Link>
+          </div>
         </div>
       </section>
       <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
+      <HomeAudienceGrid />
+      <HomeTrustBar />
       <HomePlanLinks />
       <HomeHousingPreview />
       <HomeNewbuildsPreview />
       <HomeServiceGallery />
       <HomeLocationGallery />
       <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
-      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t({ ru: 'Познакомимся с объектом и вашими ожиданиями. Если сможем управлять — предложим индивидуальные условия.', en: 'We review your property and expectations. If we can manage it, we propose individual terms.', th: 'ศึกษาทรัพย์สินและความคาดหวัง หากเรารับจัดการได้จะเสนอเงื่อนไขเฉพาะ' })}</p></div><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link></section>
+      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t({ ru: 'Познакомимся с объектом и вашими ожиданиями. Если сможем управлять — предложим индивидуальные условия.', en: 'We review your property and expectations. If we can manage it, we propose individual terms.', th: 'ศึกษาทรัพย์สินและความคาดหวัง หากเรารับจัดการได้จะเสนอเงื่อนไขเฉพาะ' })}</p></div><div className="home-prompt-actions"><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="home-text-link" to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Для управляющих компаний', en: 'For management companies', th: 'สำหรับบริษัทจัดการ' })}<ArrowRight size={18} aria-hidden="true" /></Link></div></section>
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>

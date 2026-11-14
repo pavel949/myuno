@@ -5,7 +5,7 @@ import type { LangValues } from '@/lib/i18n/pickLang';
 export const homeCopy = {
   place: { ru: 'Ваш дом и жизнь', en: 'Your home and life', th: 'บ้านและชีวิตของคุณ' },
   headline: { ru: 'на Пхукете', en: 'in Phuket', th: 'ในภูเก็ต' },
-  lead: { ru: 'Найдите место, в котором вам будет хорошо. Начните с жилья или познакомьтесь с районами острова.', en: 'Find a place that feels right for you. Start with a home or get to know the island’s areas.', th: 'ที่พักสำหรับวันหยุดหรือการอยู่อาศัยระยะยาว บริการท้องถิ่น และทีมงานที่พร้อมช่วยเหลือบนเกาะ' },
+  lead: { ru: 'Жильё, услуги и управление недвижимостью на Пхукете — в одном месте. Начните с вашей задачи, а мы подскажем следующий шаг.', en: 'Homes, local services, and property management in Phuket — in one place. Start with your task and we’ll guide you to the next step.', th: 'ที่พัก บริการท้องถิ่น และการจัดการอสังหาริมทรัพย์ในภูเก็ตในที่เดียว เริ่มจากสิ่งที่ต้องการแล้วให้เราช่วยแนะนำขั้นตอนต่อไป' },
   stays: { ru: 'Найдите свой дом', en: 'Find your home', th: 'ที่พักสำหรับคุณ' },
   staysLead: { ru: 'Посмотрите фото и условия. Доступность на ваши даты уточняется отдельно.', en: 'Explore photos and terms. Availability for your dates is checked separately.', th: 'ดูที่พักที่ลงประกาศ แล้วเปิดรายละเอียดเพื่อเลือกวันเข้าพัก' },
   layantara: { ru: 'Layantara Villas', en: 'Layantara Villas', th: 'Layantara Villas' },
