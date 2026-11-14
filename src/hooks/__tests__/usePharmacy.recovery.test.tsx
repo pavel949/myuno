@@ -25,7 +25,7 @@ it('exposes rejected catalogue reads and recovers with the same key', async () =
   await waitFor(() => expect(result.current.isError).toBe(true));
   sdk.execute.mockResolvedValueOnce({ data: [{ id: 'synthetic', images: null, working_hours: null }], error: null });
   await act(async () => { await result.current.refetch(); });
-  expect(result.current.isSuccess).toBe(true);
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
   expect(result.current.pharmacies[0].id).toBe('synthetic');
   expect(fetch).not.toHaveBeenCalled();
 });
@@ -45,6 +45,6 @@ it('separates product failure from confirmed empty and preserves same-key stale 
   await waitFor(() => expect(result.current.products).toHaveLength(1));
   sdk.execute.mockResolvedValueOnce({ data: null, error: { code: 'PGRST000' } });
   await act(async () => { await result.current.refetch(); });
-  expect(result.current.isError).toBe(true);
+  await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.products[0].id).toBe('product');
 });

@@ -17,6 +17,8 @@ function Harness() {
 }
 async function submit() {
   render(<Harness />);
+  // Let Radix finish initial dialog focus before opening the nested popover.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Выбрать' : 'Select' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Choose synthetic checkout' }));
   fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Добавить бронирование' : 'Add Booking' }));
