@@ -103,12 +103,13 @@ export function useDeveloperLeads() {
     queryFn: async (): Promise<NewbuildLead[]> => {
       if (!user) return [];
       // Get developer_id for current user
-      const { data: dev } = await supabase
+      const { data: dev, error: developerError } = await supabase
         .from('developers')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
       
+      if (developerError) throw developerError;
       if (!dev) return [];
 
       const { data, error } = await supabase

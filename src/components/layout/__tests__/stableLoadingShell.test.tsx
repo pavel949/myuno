@@ -42,7 +42,7 @@ function actualRoutes() {
     ActiveCompanyProvider:Wrapper,AdminLayout:Layout,VendorLayout:Layout,GuestLayout:Layout,MCLayout:Layout,StaffLayout:Layout,CapitalLayout:Layout,
     AdminGuard:({children}:{children:React.ReactNode})=><RoleGuard allowedRoles={['admin']}>{children}</RoleGuard>,
     VendorGuard:Wrapper,TeamGuard:Wrapper,AuthGuard,StaffGuard:Wrapper,MCGuard:Wrapper,InvestorGuard:Wrapper,MCPortalGuard:Wrapper,
-    PageTransition:Wrapper,ScrollToTop:Empty,ManageHubGate:Wrapper,NbCompareProvider:Wrapper,NewbuildProjectToOffplanRedirect:Empty,
+    PageTransition:Wrapper,ScrollToTop:Empty,ManageHubGate:Wrapper,NbCompareProvider:Wrapper,NewbuildProjectToOffplanRedirect:Empty,NewbuildDeveloperToHubRedirect:Empty,
     ErrorBoundary:Wrapper,OwnerEntryRoute:Empty,PropertySearchRedirect:Empty,ForBusinessSkeleton:Empty,Auth:()=> <p>Sign in</p>,OAuthConsent:Empty,NotFound:Empty,Unsubscribe:Empty,
     useAuth:()=>state.auth,useNavigationDirection:()=>{},adminRoutes:sourceModule(readFileSync('src/components/layout/routes/adminRoutes.tsx','utf8'),{React,...Router,Pages:pages}).adminRoutes,mcRoutes:()=>null,propertyHubRoutes:()=>null,Pages:pages,
     require:()=>({default:Empty}),

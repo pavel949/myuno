@@ -4,12 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { deploymentMetadataPlugin } from '../../../scripts/vite-deployment-metadata';
 
 function metadata(env: Record<string, string | undefined>) {
-  const plugin = deploymentMetadataPlugin('3.55.5', env, '2026-10-19T00:00:00.000Z');
+  const plugin = deploymentMetadataPlugin('3.55.5', env, '2026-10-19T00:00:00.000Z', () => '', () => '');
   const configHook = plugin.config;
-  const config = Reflect.apply(typeof configHook === 'function' ? configHook : configHook!.handler, {}, []);
+  if (!configHook) throw new Error('Missing metadata config hook');
+  const config = Reflect.apply(typeof configHook === 'function' ? configHook : configHook.handler, {}, []);
   const emitFile = vi.fn();
   const generateHook = plugin.generateBundle;
-  Reflect.apply(typeof generateHook === 'function' ? generateHook : generateHook!.handler, { emitFile }, []);
+  if (!generateHook) throw new Error('Missing metadata emission hook');
+  Reflect.apply(typeof generateHook === 'function' ? generateHook : generateHook.handler, { emitFile }, []);
   return { config, asset: emitFile.mock.calls[0][0] };
 }
 
@@ -29,6 +31,10 @@ describe('single build identity', () => {
   });
   it('skips invalid provider metadata and accepts a valid fallback', () => {
     expect(JSON.parse(metadata({ VERCEL_GIT_COMMIT_SHA: 'bad', COMMIT_REF: 'b'.repeat(40) }).asset.source).commit).toBe('b'.repeat(40));
+  });
+  it('records verified production branch without labelling every build main', () => {
+    expect(JSON.parse(metadata({ GITHUB_SHA: 'b'.repeat(40), GITHUB_REF_NAME: 'main' }).asset.source).branch).toBe('main');
+    expect(JSON.parse(metadata({ VERCEL_GIT_COMMIT_REF: 'review/cleanup' }).asset.source).branch).toBe('review/cleanup');
   });
   it('wires identity emission and disables the PWA library automatic page reload in the entrypoints', () => {
     expect(viteSource).toContain('deploymentMetadataPlugin(version)');

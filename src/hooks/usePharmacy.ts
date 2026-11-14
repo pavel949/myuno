@@ -1,5 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/contexts/AuthContext';
+
+const PHARMACY_FIELDS = 'id,provider_id,name_en,name_ru,description_en,description_ru,cover_image,images,address,lat,lng,phone,email,website,working_hours,delivery_available,delivery_fee,delivery_radius_km,min_order_amount,is_24h,has_pharmacist,rating,review_count,is_active,is_verified,license_number' as const;
+const PRODUCT_FIELDS = 'id,pharmacy_id,name_en,name_ru,description_en,description_ru,category,image,price,currency,stock_quantity,requires_prescription,dosage,manufacturer,active_ingredients,is_active' as const;
 
 export interface Pharmacy {
   id: string;
@@ -50,89 +54,63 @@ export interface PharmacyProduct {
 }
 
 export const usePharmacies = () => {
-  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchPharmacies = useCallback(async (isMounted: { current: boolean }) => {
-    if (isMounted.current) setIsLoading(true);
-    try {
-      const { data } = await supabase
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ['pharmacies', user?.id ?? null],
+    queryFn: async (): Promise<Pharmacy[]> => {
+      const { data, error } = await supabase
         .from('pharmacies')
-        .select('*')
+        .select(PHARMACY_FIELDS)
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .order('rating', { ascending: false });
       
-      if (isMounted.current) {
-        const formatted: Pharmacy[] = (data || []).map(p => ({
+      if (error) throw error;
+      return (data || []).map(p => ({
           ...p,
           images: p.images || [],
           working_hours: (p.working_hours as Record<string, string>) || {},
-        }));
-        setPharmacies(formatted);
-      }
-    } catch { /* ignored */ } finally {
-      if (isMounted.current) setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const isMounted = { current: true };
-    fetchPharmacies(isMounted);
-    return () => { isMounted.current = false; };
-  }, [fetchPharmacies]);
-  
-  return { pharmacies, isLoading, refetch: () => fetchPharmacies({ current: true }) };
+      }));
+    },
+  });
+  return { ...query, pharmacies: query.data ?? [] };
 };
 
 export const usePharmacy = (pharmacyId: string | undefined) => {
-  const [pharmacy, setPharmacy] = useState<Pharmacy | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!pharmacyId) { setIsLoading(false); return; }
-    const fetch = async () => {
-      setIsLoading(true);
-      try {
-        const { data } = await supabase
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ['pharmacy', user?.id ?? null, pharmacyId],
+    enabled: !!pharmacyId,
+    queryFn: async (): Promise<Pharmacy | null> => {
+      if (!pharmacyId) return null;
+      const { data, error } = await supabase
           .from('pharmacies')
-          .select('*')
+          .select(PHARMACY_FIELDS)
           .eq('id', pharmacyId)
+          .eq('is_active', true)
+          .eq('approval_status', 'approved')
           .maybeSingle();
-        if (isMounted && data) {
-          setPharmacy({
+      if (error) throw error;
+      return data ? {
             ...data,
             images: data.images || [],
             working_hours: (data.working_hours as Record<string, string>) || {},
-          });
-        }
-      } catch { /* ignored */ } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetch();
-    
-    return () => { isMounted = false; };
-  }, [pharmacyId]);
-
-  return { pharmacy, isLoading };
+      } : null;
+    },
+  });
+  return { ...query, pharmacy: query.data ?? null };
 };
 
 export const usePharmacyProducts = (pharmacyId: string | undefined, category?: string) => {
-  const [products, setProducts] = useState<PharmacyProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    if (!pharmacyId) { setIsLoading(false); return; }
-    const fetch = async () => {
-      setIsLoading(true);
-      try {
+  const { user } = useAuth();
+  const result = useQuery({
+    queryKey: ['pharmacy-products', user?.id ?? null, pharmacyId, category],
+    enabled: !!pharmacyId,
+    queryFn: async (): Promise<PharmacyProduct[]> => {
+      if (!pharmacyId) return [];
         let query = supabase
           .from('pharmacy_products')
-          .select('*')
+          .select(PRODUCT_FIELDS)
           .eq('pharmacy_id', pharmacyId)
           .eq('is_active', true);
         
@@ -140,16 +118,10 @@ export const usePharmacyProducts = (pharmacyId: string | undefined, category?: s
           query = query.eq('category', category);
         }
         
-        const { data } = await query.order('name_en');
-        if (isMounted) setProducts(data || []);
-      } catch { /* ignored */ } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetch();
-    
-    return () => { isMounted = false; };
-  }, [pharmacyId, category]);
-
-  return { products, isLoading };
+      const { data, error } = await query.order('name_en');
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  return { ...result, products: result.data ?? [] };
 };

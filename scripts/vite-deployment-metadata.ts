@@ -1,14 +1,17 @@
 import type { Plugin } from 'vite';
+import { resolveBuildCommit, resolveBuildBranch } from './build-identity.mjs';
 
 /** One build-time identity for both the bundled client and its public metadata. */
 export function deploymentMetadataPlugin(
   version: string,
   env: Record<string, string | undefined> = process.env,
   buildTime = new Date().toISOString(),
+  gitCommitRead?: () => string,
+  gitBranchRead?: () => string,
 ): Plugin {
-  const commit = [env.VERCEL_GIT_COMMIT_SHA, env.COMMIT_REF, env.GITHUB_SHA]
-    .find(value => value && /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/i.test(value))?.toLowerCase();
-  const metadata = { version, buildTime, ...(commit ? { commit } : {}) };
+  const commit = resolveBuildCommit(env, gitCommitRead);
+  const branch = resolveBuildBranch(env, gitBranchRead);
+  const metadata = { version, buildTime, ...(commit ? { commit } : {}), ...(branch ? { branch } : {}) };
   return {
     name: 'myuno-deployment-metadata',
     config() {

@@ -9,36 +9,38 @@ import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadg
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 
 export default function DeveloperProjects() {
   const { data: developer } = useDeveloperProfile();
-  const { data: projects = [], isLoading } = useDeveloperProjects(developer?.id);
+  const { data: projects = [], isLoading, error, refetch, isFetching } = useDeveloperProjects(developer?.id);
 
   return (
     <div className="p-6 lg:p-10 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Мои проекты</h1>
         <Link to="/developer-portal/projects/new">
-          <button className="nb-btn-gold flex items-center gap-2 text-sm">
+          <Button className="flex items-center gap-2">
             <Plus className="w-4 h-4" /> Новый проект
-          </button>
+          </Button>
         </Link>
       </div>
 
+      {error && <QueryRecovery onRetry={refetch} isRetrying={isFetching} stale={projects.length > 0} />}
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => <div key={i} className="nb-glass h-24 animate-pulse" />)}
         </div>
-      ) : projects.length === 0 ? (
+      ) : error && projects.length === 0 ? null : projects.length === 0 ? (
         <div className="nb-glass p-12 text-center">
           <p className="text-[hsl(var(--nb-text-secondary))] mb-4">У вас пока нет проектов</p>
           <Link to="/developer-portal/projects/new">
-            <button className="nb-btn-gold">Создать первый проект</button>
+            <Button>Создать первый проект</Button>
           </Link>
         </div>
       ) : (
         <div className="space-y-3">
-          {projects.map((project: any) => (
+          {projects.map(project => (
             <div key={project.id} className="nb-glass p-5 flex flex-col md:flex-row md:items-center gap-4">
               {/* Thumbnail */}
               {project.cover_image && (

@@ -29,7 +29,7 @@ import { GuestLayout } from '@/components/guest/GuestLayout';
 import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { NewbuildProjectToOffplanRedirect } from '@/components/routing/NewbuildLegacyRedirects';
+import { NewbuildProjectToOffplanRedirect, NewbuildDeveloperToHubRedirect } from '@/components/routing/NewbuildLegacyRedirects';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ForBusinessSkeleton from '@/components/landings/ForBusinessSkeleton';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
@@ -398,7 +398,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
-        <Route path="/newbuilds/developers/:slug" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path="/newbuilds/developers/:slug" element={<NewbuildDeveloperToHubRedirect />} />
         <Route element={<NewbuildsContextOutlet />}>
           <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
           <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />

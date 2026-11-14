@@ -82,6 +82,6 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
  const css = readFileSync(`${process.cwd()}/src/styles/cinematic-home.css`, 'utf8');
  const tokens = readFileSync(`${process.cwd()}/src/styles/tokens.css`, 'utf8');
  expect(css).toContain('padding-bottom:calc(28px + var(--bottom-nav-h, 0px))');
- expect(tokens).toMatch(/--bottom-nav-h:\s*calc\(60px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+ expect(tokens).toMatch(/--bottom-nav-h:\s*calc\(64px \+ env\(safe-area-inset-bottom, 0px\)\)/);
  expect(tokens).toMatch(/@media \(min-width: 768px\)[\s\S]*--bottom-nav-h:\s*0px/);
 });

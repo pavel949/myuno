@@ -7,42 +7,53 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, Users, TrendingUp, Plus, ArrowRight, AlertTriangle, PenLine, Banknote, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 export default function DeveloperOverview() {
-  const { data: developer, isLoading } = useDeveloperProfile();
-  const { data: projects = [] } = useDeveloperProjects(developer?.id);
-  const { data: leads = [] } = useDeveloperLeads();
+  const profile = useDeveloperProfile();
+  const { data: developer, isLoading } = profile;
+  const projectQuery = useDeveloperProjects(developer?.id);
+  const leadQuery = useDeveloperLeads();
+  const projects = projectQuery.data ?? [];
+  const leads = leadQuery.data ?? [];
   const navigate = useNavigate();
 
-  if (isLoading) return null;
+  if (isLoading) return <LoadingState />;
+  if (profile.error) return <QueryRecovery onRetry={profile.refetch} isRetrying={profile.isFetching} />;
+  if (!developer) return null;
 
   const newLeads = leads.filter(l => l.status === 'new').length;
-  const activeProjects = projects.filter((p: any) => p.is_active).length;
+  const activeProjects = projects.filter(p => p.is_active).length;
 
   // Projects waiting approval
-  const pendingApproval = projects.filter((p: any) => p.is_approved === false && p.is_active === true);
+  const pendingApproval = projects.filter(p => p.is_approved === false && p.is_active === true);
 
   // Projects needing attention (no cover or short description)
-  const attentionProjects = projects.filter((p: any) =>
+  const attentionProjects = projects.filter(p =>
     !p.cover_image || !p.description_en || (p.description_en as string).length < 50
   );
 
   const kpis = [
-    { label: 'Проекты', value: activeProjects, icon: Building2 },
-    { label: 'Новые лиды', value: newLeads, icon: Users },
-    { label: 'Всего лидов', value: leads.length, icon: TrendingUp },
+    { label: 'Проекты', value: projectQuery.data === undefined ? '—' : activeProjects, icon: Building2 },
+    { label: 'Новые лиды', value: leadQuery.data === undefined ? '—' : newLeads, icon: Users },
+    { label: 'Всего лидов', value: leadQuery.data === undefined ? '—' : leads.length, icon: TrendingUp },
   ];
 
   return (
     <div className="p-6 lg:p-10 space-y-8">
       <div>
         <h1 className="nb-display text-3xl text-[hsl(var(--nb-text))]">
-          Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer!.name_en}</span>
+          Добрый день, <span className="text-[hsl(var(--nb-gold))]">{developer.name_en}</span>
         </h1>
-        {!developer!.is_verified && (
+        {!developer.is_verified && (
           <p className="text-sm text-accent mt-2">⏳ Аккаунт на проверке</p>
         )}
       </div>
+
+      {projectQuery.error && <QueryRecovery onRetry={projectQuery.refetch} isRetrying={projectQuery.isFetching} stale={projectQuery.data !== undefined} />}
+      {leadQuery.error && <QueryRecovery onRetry={leadQuery.refetch} isRetrying={leadQuery.isFetching} stale={leadQuery.data !== undefined} />}
+      {(projectQuery.isLoading || leadQuery.isLoading) && <LoadingState />}
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -75,7 +86,7 @@ export default function DeveloperOverview() {
             <h2 className="text-sm font-semibold text-[hsl(var(--nb-text))]">Требуют внимания</h2>
           </div>
           <div className="space-y-2">
-            {attentionProjects.map((p: any) => {
+            {attentionProjects.map(p => {
               const issues: string[] = [];
               if (!p.cover_image) issues.push('нет обложки');
               if (!p.description_en || (p.description_en as string).length < 50) issues.push('описание слишком короткое');
