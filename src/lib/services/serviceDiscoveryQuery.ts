@@ -23,7 +23,7 @@ export function updateServiceDiscoveryQuery(source: URLSearchParams, key: 'q' | 
 }
 export function clearServiceDiscoveryQuery(source: URLSearchParams) {
   const next = new URLSearchParams(source);
-  ['q', 'category', 'home', 'type', 'sort', 'section', 'situation'].forEach(key => next.delete(key));
+  ['q', 'category', 'home', 'type', 'sort', 'section', 'situation', 'district', 'date', 'minPrice', 'maxPrice', 'currency', 'today'].forEach(key => next.delete(key));
   return next;
 }
 

@@ -17,6 +17,7 @@ vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { ch
 vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
 vi.mock('@/components/services/ServiceBookingSheet', () => ({ ServiceBookingSheet: () => null }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: [{ id: 'cleaning', name_en: 'Fixture cleaning', provider_id: 'fixture', provider: { id: 'fixture', name: 'Fixture provider' } }], isLoading: false, isError: false }) }));
+vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: {}, isFetching: false, refetch: vi.fn() }) }));
 vi.mock('@/components/navigation/v3/NavigatorPageV3', () => ({ default: () => <p>Optional situation navigator</p> }));
 
 function Location() { const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}</output>; }

@@ -19,9 +19,12 @@ export interface MarketplaceService {
   duration_minutes: number | null;
   images: string[] | null;
   lead_time_hours: number | null;
+  unit?: string | null;
+  pricing_model?: string | null;
   is_active: boolean | null;
   approval_status: string | null;
-  provider: { id: string; name: string; is_verified: boolean | null; rating: number | null; logo_url: string | null } | null;
+  location?: { district: string | null } | null;
+  provider: { id: string; name: string; is_verified: boolean | null; rating: number | null; logo_url: string | null; review_count?: number | null; coverage_areas?: string[] | null } | null;
 }
 
 export interface ServiceOrderRow {
@@ -43,7 +46,7 @@ export interface ServiceOrderRow {
 }
 
 const SERVICE_COLS =
-  'id,provider_id,name_en,name_ru,description_en,description_ru,price,currency,duration_minutes,images,lead_time_hours,is_active,approval_status';
+  'id,provider_id,name_en,name_ru,description_en,description_ru,price,currency,duration_minutes,images,lead_time_hours,is_active,approval_status,unit,pricing_model';
 
 export function useMarketplaceServices() {
   return useQuery({
@@ -51,14 +54,30 @@ export function useMarketplaceServices() {
     queryFn: async (): Promise<MarketplaceService[]> => {
       const { data, error } = await supabase
         .from('public_service_catalog')
-        .select(`${SERVICE_COLS}, provider`)
+        .select(`${SERVICE_COLS}, provider, location:locations(district)`)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
-        .not('provider', 'is', null)
+        .not('provider_id', 'is', null)
         .order('created_at', { ascending: false })
         .limit(60);
       if (error) throw error;
-      return (data ?? []) as unknown as MarketplaceService[];
+      const services = (data ?? []) as unknown as MarketplaceService[];
+      const ids = [...new Set(services.map(service => service.provider_id))];
+      if (!ids.length) return services;
+      const publicProviders = await supabase.from('public_provider_catalog')
+        .select('id,name,rating,is_verified,review_count,coverage_areas,is_demo').in('id', ids).limit(60);
+      // Trust/demo visibility is part of the public supply boundary, not
+      // optional decoration. Failed reads must not bypass that boundary.
+      if (publicProviders.error) throw publicProviders.error;
+      const providers = new Map((publicProviders.data ?? []).map(provider => [provider.id, provider]));
+      return services.filter(service => providers.has(service.provider_id) && providers.get(service.provider_id)?.is_demo !== true).map(service => {
+        const provider = providers.get(service.provider_id);
+        return { ...service, provider: {
+          id: service.provider_id, name: provider?.name ?? '',
+          rating: provider?.rating ?? null, is_verified: provider?.is_verified ?? null, logo_url: null,
+          review_count: provider?.review_count ?? null, coverage_areas: provider?.coverage_areas ?? null,
+        } };
+      });
     },
     staleTime: 60_000,
   });

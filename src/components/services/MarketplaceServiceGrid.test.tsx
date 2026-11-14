@@ -9,6 +9,7 @@ let isError = false;
 const refetch = vi.fn();
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data, isLoading, isError, refetch }) }));
+vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: {}, isFetching: false, refetch: vi.fn() }) }));
 vi.mock('./ServiceBookingSheet', () => ({ ServiceBookingSheet: () => null }));
 const service = { id: 'test-service', name_en: 'Fixture cleaning', provider_id: 'provider-1', provider: { id: 'provider-1', name: 'Fixture provider' } } as MarketplaceService;
 const mount = (search = '') => render(<MemoryRouter><MarketplaceServiceGrid search={search} returnTo="/discover/services?q=cleaning" /></MemoryRouter>);

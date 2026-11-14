@@ -19,13 +19,31 @@ vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => {
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
-vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: () => null }));
+vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: ({ onConcierge }: { onConcierge: () => void }) => <button onClick={onConcierge}>Fixture concierge fallback</button> }));
+vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: ({ sourceData }: { sourceData: Record<string, unknown> }) => <output data-testid="concierge-context">{JSON.stringify(sourceData)}</output> }));
 vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
 function Location() { const l = useLocation(); const navigate = useNavigate(); return <><output data-testid="location">{l.pathname}{l.search}{l.hash}|{JSON.stringify(l.state)}</output><button onClick={() => navigate(-1)}>Back fixture</button><button onClick={() => navigate(1)}>Forward fixture</button></>; }
 function mount(path = '/discover/services') { return render(<MemoryRouter initialEntries={[{ pathname: path.split('?')[0], search: path.includes('?') ? '?'+path.split('?')[1] : '', state: { from: 'trip' } }]}><Routes><Route path="/discover/services" element={<ServicesIndex />} /><Route path="/services/order/:id" element={<div>Request details</div>} /></Routes><Location /></MemoryRouter>); }
 beforeEach(() => { state.loading = false; state.error = false; state.fallback = false; state.providerOnly = false; state.legacyHome = false; state.homeShape = ''; Element.prototype.scrollIntoView = vi.fn(); Element.prototype.hasPointerCapture = vi.fn(() => false); });
 const select = (name: string, option: string) => { fireEvent.keyDown(screen.getByRole('combobox', { name }), { key: 'Enter' }); fireEvent.click(screen.getByRole('option', { name: option })); };
 describe('canonical services hub', () => {
+  it('labels offer filters inactive for templates then preserves them on provider handoff', () => {
+    mount('/discover/services?category=ac&district=Rawai&date=2099-01-01&maxPrice=1000&ref=trip');
+    expect(screen.getByText(/filters are saved but inactive for request templates/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Browse provider offers' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('district=Rawai');
+    expect(screen.getByTestId('location')).toHaveTextContent('maxPrice=1000');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('category=ac');
+  });
+  it('hands the current offer filters to concierge without another booking writer', async () => {
+    mount('/discover/services?q=cleaning&district=Rawai&date=2099-01-01&minPrice=0&maxPrice=1000&currency=THB&ref=trip');
+    fireEvent.click(screen.getByRole('button', { name: 'Fixture concierge fallback' }));
+    const output = await screen.findByTestId('concierge-context');
+    const context = JSON.parse(output.textContent!);
+    expect(context.filters).toMatchObject({ q: 'cleaning', district: 'Rawai', date: '2099-01-01', minPrice: '0', maxPrice: '1000', currency: 'THB', ref: 'trip' });
+    expect(context.returnTo).toContain('district=Rawai');
+    expect(context.handoff).toBe('structured_service_request_when_matched');
+  });
   it('preserves the selected child when search follows before the router commits', () => {
     state.legacyHome = true;
     mount('/discover/services?category=cat-home-living&ref=rapid');

@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 import { computeSlots, formatPhuketTime, phuketToday, addDays } from '@/lib/services/slots';
+import { validServiceDate } from '@/lib/services/marketplaceDiscovery';
 import { useProviderHours, useBusySlots, useCreateServiceOrder, orderErrorCode } from '@/hooks/useServiceMarketplace';
 
 export interface BookableService {
@@ -25,18 +26,21 @@ export interface BookableService {
   leadTimeHours?: number | null;
 }
 
-export function ServiceBookingSheet({ service, open, onOpenChange }: {
+export function ServiceBookingSheet({ service, open, onOpenChange, initialDate, onConcierge }: {
   service: BookableService | null;
   open: boolean;
   onOpenChange: (o: boolean) => void;
+  initialDate?: string;
+  onConcierge?: () => void;
 }) {
   const { language } = useLanguage();
   const L = (ru: string, en: string, th?: string) => pickLang(language, { ru, en, th });
   const { user } = useAuth();
   const navigate = useNavigate();
   const today = phuketToday();
-  const days = useMemo(() => Array.from({ length: 14 }, (_, i) => addDays(today, i)), [today]);
-  const [date, setDate] = useState(today);
+  const firstDate = initialDate && validServiceDate(initialDate) && initialDate >= today ? initialDate : today;
+  const days = useMemo(() => Array.from({ length: 14 }, (_, i) => addDays(firstDate, i)), [firstDate]);
+  const [date, setDate] = useState(firstDate);
   const [slot, setSlot] = useState<Date | null>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -149,6 +153,8 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
                 </div>
               )}
             </div>
+
+            {onConcierge && (noHours || hoursQ.isError || busyQ.isError || (hoursQ.isSuccess && busyQ.isSuccess && slots.length === 0)) && <Button variant="outline" className="w-full" onClick={onConcierge}>{L('Уточнить время с консьержем', 'Ask concierge about availability', 'สอบถามเวลาจากคอนเซียร์จ')}</Button>}
 
             {slot && (
               <div className="space-y-2">

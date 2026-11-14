@@ -32,6 +32,7 @@ const virtual = {
   '@/hooks/useGeolocation': `export const useGeolocation=()=>({hasLocation:false,getPosition:()=>{throw Error('Geolocation forbidden in navigation QA')},loading:false});`,
   '@/hooks/useServiceMarketplace': `const providerPhase=new URLSearchParams(location.search).get('phase');export const useMarketplaceServices=()=>({data:providerPhase==='provider'?[{id:'offer-synthetic',provider_id:'provider-synthetic',name_en:'Synthetic AC service',name_ru:'Синтетическая услуга',description_en:'Synthetic fixture, not a real offer',price:950,currency:'THB',duration_minutes:60,lead_time_hours:2,images:[],provider:{id:'provider-synthetic',name:'Synthetic team',is_verified:false}}]:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/components/services': `export {ServiceFunctionCard} from '${root}/src/components/services/ServiceFunctionCard.tsx';`,
+  '@/hooks/useMarketplaceAvailability': `export const useMarketplaceAvailability=()=>({data:{},isFetching:false,refetch:()=>{}});`,
   './ServiceBookingSheet': `export const ServiceBookingSheet=()=>null;`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database forbidden')}});`,
 };
