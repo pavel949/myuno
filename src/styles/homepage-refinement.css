@@ -10,7 +10,7 @@
 .home-refined .home-hero {
   height: auto;
   min-height: clamp(31.25rem, 40vw, 35rem);
-  padding-bottom: 3rem;
+  padding-bottom: calc(var(--home-search-overlap) + 2rem);
 }
 .home-refined .home-hero-copy { padding-top: clamp(4rem, 6vw, 6rem); }
 .home-refined .home-hero-copy h1 {
@@ -164,7 +164,7 @@
 }
 @media(max-width:767px) {
   .home-refined { --home-search-overlap: 1.5rem; }
-  .home-refined .home-hero { height: auto; min-height: 23rem; padding-bottom: 2rem; }
+  .home-refined .home-hero { height: auto; min-height: 23rem; padding-bottom: 4rem; }
   .home-refined .home-hero-copy { padding-top: 2.5rem; }
   .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); line-height: 1.12; letter-spacing: -.018em; }
   .home-refined .home-hero-copy p { font-size: var(--public-body-size); margin-top: 1rem; max-width: var(--public-width-summary); }

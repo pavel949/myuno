@@ -11,7 +11,7 @@ import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
-import { HomePlanLinks } from '@/components/home/HomeSearchEntry';
+import { HomeSearchEntry, HomePlanLinks } from '@/components/home/HomeSearchEntry';
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
@@ -52,6 +52,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
       <HomePlanLinks />
       <HomeHousingPreview />
       <HomeNewbuildsPreview />

@@ -38,6 +38,20 @@ The two failures at base:
 1. `navigationModel.test.ts › public business entry` — **pre-existing**. Commit `4956121` moved "For business" from the top menu into the header's "For partners" menu and left the test asserting the old layout. Test updated to the shipped contract.
 2. `convergence-guard.test.ts` — introduced and fixed within this change (a `text-white` class on an edited line).
 
+### CI browser fixtures are stale against `main`
+
+The "Connected system" and "design-system" workflows run only on pull requests. Their last green run was 2 November; `main` has since taken direct commits that never ran them. On this PR they fail on assertions about code this change does not touch:
+
+| Fixture | Assertion | Source |
+|---|---|---|
+| `ds-workspace-pages` | fixture for `@/hooks/useVendor` lacks `useVendorServices`, imported by `VendorDashboard` | **fixed here** |
+| `services-discovery-ui` | expects one `role="status"`; the services page now renders two | open |
+| `homepage-galleries-{en,ru,th}-ui` | expects 3 `.home-rail-viewport`, finds 4 | open |
+| `guest-complex-ui` | expects one unit link, finds two | open |
+| combined-layout, admin-dashboard, admin-dashboard-shell, public-wide | case output not retrievable (log truncated, artifacts unreachable from the audit sandbox) | UNKNOWN |
+
+These scripts refuse to launch a browser outside GitHub Actions, and that guard was left in place, so the open rows could not be reproduced or repaired locally.
+
 ## 3. Findings fixed in this change
 
 ### P0 — desktop homepage: primary actions were clipped
@@ -62,12 +76,6 @@ Measured with a per-word line-box detector across 21 routes at 375px: 10 split w
 A global hypothesis (`body { word-break: break-word }`) was tested and **rejected**: removing it changed nothing in the measurements, so it was reverted rather than shipped on a guess.
 
 After: **0 split words** at 320 / 375 / 600 / 768 / 1024 / 1280 / 1440.
-
-### P1 — homepage: three competing entry points
-
-Within the first screen and a half the guest homepage offered: four goal cards plus "Not sure? We'll help you choose" → `/discover`; a full-width bar "What are you looking for? · Choose" → `/discover` (same destination, and in Russian the identical label "С чего начнём?" twice on one screen); and four plan links.
-
-**Fix:** removed the duplicate bar and its component. Goal cards remain the single primary choice; plan links remain as tenancy shortcuts. This is a visible product change — see §5.
 
 ### P1 — 13 of 25 public routes shared one generic tab title
 
@@ -105,7 +113,7 @@ Covered ~27% of a 375×812 screen; a 44px-tall inline "Learn more" link stretche
 
 ## 5. Decisions for the owner
 
-1. **Homepage bar removal.** The "What are you looking for? · Choose" bar was added recently and is now removed as a duplicate. If it was intentional (for example as an SEO or A/B element), revert `src/pages/Landing.tsx` and `HomeSearchEntry.tsx`; the hero fix does not depend on it.
+1. **Homepage has three overlapping entry points.** Within the first screen and a half: four goal cards plus "Not sure? We'll help you choose" → `/discover`; a full-width bar "What are you looking for? · Choose" → `/discover` (same destination, and in Russian the identical label "С чего начнём?" twice on one screen); and four plan links. Removing the bar was tried and reverted in this change: the browser fixtures `homepage-galleries-ui.py` and `mobile-home-header.py` assert that it exists, so removal is a product-contract decision, not a routine fix.
 2. **Static `<title>` and Open Graph tags in `index.html`** still say "Phuket Super-App for Foreigners". Runtime titles are fixed, but link previews and non-JS crawlers read the static tags. Changing them is a positioning decision.
 3. **`/auth` headline** reads "Everything for life in Phuket, in one app · 68+ services under one account", which also conflicts with PROJECT.md §02.
 
@@ -126,7 +134,6 @@ Covered ~27% of a 375×812 screen; a 44px-tall inline "Learn more" link stretche
 - `/property` with zero results says "Try changing filters · Reset filters" even when no filter is applied.
 - Bottom tab bar highlights "Services" on `/discover`, which is the cross-domain goal hub.
 - Dev-only: `public/version.json` is committed, so every local session shows an "Update available" prompt; `supabase/functions/mcp/index.ts` is regenerated with a different dependency version on every dev start and build, which makes accidental edge-function diffs likely.
-- Dead CSS for `.home-search-entry*` (24 rules across three stylesheets) after the bar removal.
 - ~690 `any` usages outside tests; 4,000 baseline design-token findings (tracked, not growing).
 - **`CLAUDE.md` is stale** against the code and PROJECT.md v3.2.1: it states React 18 (code is 19.2), v3.55.5 "last sync 2026-06-21", 165 edge functions / 757 migrations (now 178 / 823), and frames the product as "59 micro-apps", which PROJECT.md §02 explicitly rejects. It is loaded as the instruction file for AI agents, so the drift actively misdirects them.
 
@@ -134,10 +141,11 @@ Covered ~27% of a 375×812 screen; a 44px-tall inline "Learn more" link stretche
 
 - `src/styles/homepage-refinement.css`, `src/styles/property-search.css`
 - `src/pages/Landing.tsx`, `Search.tsx`, `Install.tsx`, `Profile.tsx`, `PricingPage.tsx`, `transport/TransportIndex.tsx`, `discover/DiscoveryHubPage.tsx`
-- `src/components/home/HomeSearchEntry.tsx`, `legal/CookieConsentBanner.tsx`, `listing-wizard/ListingWizard.tsx`, `transport/TransportFilterSidebar.tsx`, `vertical/VerticalContextBanner.tsx`, `seo/SEOHead.tsx`
+- `src/components/legal/CookieConsentBanner.tsx`, `listing-wizard/ListingWizard.tsx`, `transport/TransportFilterSidebar.tsx`, `vertical/VerticalContextBanner.tsx`, `seo/SEOHead.tsx`
 - New: `src/components/seo/RouteTitleFallback.tsx` (+ test)
 - `src/App.tsx`, `index.html` (marker attribute on the static `<title>` only)
-- Tests: `navigationModel.test.ts`, `Landing.anonymous-home.test.tsx`, `Landing.motion.test.tsx`, `HomeSearchEntry.test.tsx`
+- Tests: `navigationModel.test.ts`, `Landing.anonymous-home.test.tsx`
+- CI fixture: `scripts/qa/ds-workspace-pages.mjs` (missing `useVendorServices` export)
 
 ## 8. Recommended next tranches
 
