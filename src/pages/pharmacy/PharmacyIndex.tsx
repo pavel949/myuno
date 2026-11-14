@@ -21,7 +21,7 @@ const PHARMACY_CATEGORIES = [
 export default function PharmacyIndex() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
-  const { pharmacies, isLoading } = usePharmacies();
+  const { pharmacies, isLoading, error, refetch, isFetching } = usePharmacies();
   const isRu = language === 'ru';
 
   return (
@@ -30,6 +30,9 @@ export default function PharmacyIndex() {
       fallbackPath="/discover"
       items={pharmacies}
       isLoading={isLoading}
+      error={error}
+      onRetry={refetch}
+      isFetching={isFetching}
       categories={PHARMACY_CATEGORIES}
       filterConfig={withGeoSection(pharmacyFilterConfig)}
       searchPlaceholder={isRu ? 'Найти аптеку...' : 'Search pharmacies...'}
@@ -93,7 +96,7 @@ export default function PharmacyIndex() {
           isVerified={pharmacy.is_verified ?? undefined}
           badge={
             pharmacy.is_24h
-              ? { text: '24/7', className: 'bg-success text-white' }
+              ? { text: '24/7', className: 'bg-success text-success-foreground' }
               : undefined
           }
           tags={[

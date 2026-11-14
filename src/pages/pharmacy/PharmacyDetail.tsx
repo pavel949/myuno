@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { usePharmacy, usePharmacyProducts } from "@/hooks/usePharmacy";
+import { usePharmacy, usePharmacyProducts, type PharmacyProduct } from "@/hooks/usePharmacy";
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { useCart } from "@/contexts/CartContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -32,9 +33,9 @@ export default function PharmacyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language, t } = useLanguage();
-  const { pharmacy, isLoading } = usePharmacy(id);
+  const { pharmacy, isLoading, error, refetch, isFetching } = usePharmacy(id);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { products, isLoading: productsLoading } = usePharmacyProducts(id, selectedCategory);
+  const { products, isLoading: productsLoading, error: productsError, refetch: refetchProducts, isFetching: productsFetching } = usePharmacyProducts(id, selectedCategory);
   const { addItem } = useCart();
   const { showAddedToast } = useCartToast();
 
@@ -47,6 +48,10 @@ export default function PharmacyDetail() {
         </PageContainer>
       </AppLayout>
     );
+  }
+
+  if (error && !pharmacy) {
+    return <AppLayout><PageContainer><QueryRecovery onRetry={refetch} isRetrying={isFetching} /></PageContainer></AppLayout>;
   }
 
   if (!pharmacy) {
@@ -64,7 +69,7 @@ export default function PharmacyDetail() {
     );
   }
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: PharmacyProduct) => {
     const item = {
       id: product.id,
       type: 'product' as const,
@@ -84,6 +89,7 @@ export default function PharmacyDetail() {
   return (
     <AppLayout>
       <PageContainer className="pb-24">
+        {error && <QueryRecovery onRetry={refetch} isRetrying={isFetching} stale />}
         {/* Header */}
         <div className="relative -mx-4 -mt-4">
           <img
@@ -165,13 +171,14 @@ export default function PharmacyDetail() {
             ))}
           </div>
 
+          {productsError && <QueryRecovery onRetry={refetchProducts} isRetrying={productsFetching} stale={products.length > 0} />}
           {productsLoading ? (
             <div className="grid grid-cols-2 gap-3">
               {[1, 2, 3, 4].map(i => (
                 <Skeleton key={i} className="h-48 rounded-none" />
               ))}
             </div>
-          ) : products.length === 0 ? (
+          ) : productsError && products.length === 0 ? null : products.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {t('pharmacy.noProducts')}
             </div>
@@ -182,7 +189,7 @@ export default function PharmacyDetail() {
                   <div className="relative">
                     <img
                       src={product.image || PLACEHOLDER_IMAGES.pharmacyProduct}
-                      alt=""
+                      alt={language === 'ru' ? product.name_ru : product.name_en}
                       className="w-full h-28 object-cover"
                     />
                     {product.requires_prescription && (

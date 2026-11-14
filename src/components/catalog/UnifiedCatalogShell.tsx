@@ -28,6 +28,8 @@ import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/Unifi
 import { useUrlFilterState, type CatalogView } from '@/hooks/useUrlFilterState';
 import type { FilterConfig, FilterValues } from '@/components/filters/UniversalFilter';
 import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 export interface UnifiedCatalogShellProps<T> {
   // Layout
@@ -41,6 +43,9 @@ export interface UnifiedCatalogShellProps<T> {
   // Data
   items: T[] | undefined;
   isLoading?: boolean;
+  error?: unknown;
+  onRetry?: () => unknown;
+  isFetching?: boolean;
   /** Map row → unified marker. Return null if row has no coords. */
   toMarker: (row: T) => UnifiedMapMarker | null;
   /** Pure client-side filtering function. Receives current state. */
@@ -88,6 +93,9 @@ export function UnifiedCatalogShell<T extends { id: string }>(
     heroSubtitle,
     items,
     isLoading,
+    error,
+    onRetry,
+    isFetching,
     toMarker,
     applyFilters,
     categories,
@@ -180,18 +188,20 @@ export function UnifiedCatalogShell<T extends { id: string }>(
       <Button
         variant={view === 'list' ? 'default' : 'ghost'}
         size="sm"
-        className={cn('h-8 px-2 rounded-none', view === 'list' && 'shadow-sm')}
+        className={cn('h-11 min-w-11 px-2 rounded-none', view === 'list' && 'shadow-sm')}
         onClick={() => setView('list')}
         aria-label={isRu ? 'Список' : 'List'}
+        aria-pressed={view === 'list'}
       >
         <LayoutGrid className="w-4 h-4" />
       </Button>
       <Button
         variant={view === 'map' ? 'default' : 'ghost'}
         size="sm"
-        className={cn('h-8 px-2 rounded-none', view === 'map' && 'shadow-sm')}
+        className={cn('h-11 min-w-11 px-2 rounded-none', view === 'map' && 'shadow-sm')}
         onClick={() => setView('map')}
         aria-label={isRu ? 'Карта' : 'Map'}
+        aria-pressed={view === 'map'}
       >
         <MapPin className="w-4 h-4" />
       </Button>
@@ -210,7 +220,7 @@ export function UnifiedCatalogShell<T extends { id: string }>(
     return (
       <MiniAppLayout
         title={title}
-        subtitle={subtitle ?? `${markers.length} ${isRu ? 'на карте' : 'on map'}`}
+        subtitle={subtitle ?? (error || isLoading ? undefined : `${markers.length} ${isRu ? 'на карте' : 'on map'}`)}
         fallbackPath={fallbackPath}
         showHero={false}
         showSearch={showSearch}
@@ -228,7 +238,8 @@ export function UnifiedCatalogShell<T extends { id: string }>(
         headerActions={combinedHeaderActions}
         contentClassName="!p-0"
       >
-        <UnifiedCatalogMap
+        {error && onRetry && <QueryRecovery onRetry={onRetry} isRetrying={isFetching} stale={(items?.length ?? 0) > 0} />}
+        {isLoading && !items?.length ? <LoadingState /> : error && !items?.length ? null : <UnifiedCatalogMap
           markers={markers}
           userLocation={userLocation}
           distanceKm={distanceKm}
@@ -242,7 +253,7 @@ export function UnifiedCatalogShell<T extends { id: string }>(
                 : 'No items with coordinates'
               : undefined
           }
-        />
+        />}
       </MiniAppLayout>
     );
   }
@@ -251,7 +262,7 @@ export function UnifiedCatalogShell<T extends { id: string }>(
   return (
     <MiniAppLayout
       title={title}
-      subtitle={subtitle ?? `${filteredForList.length} ${isRu ? 'найдено' : 'found'}`}
+      subtitle={subtitle ?? (error || isLoading ? undefined : `${filteredForList.length} ${isRu ? 'найдено' : 'found'}`)}
       fallbackPath={fallbackPath}
       showHero={showHero}
       heroTitle={heroTitle}
@@ -270,11 +281,12 @@ export function UnifiedCatalogShell<T extends { id: string }>(
       showFilter={!!filterConfig}
       headerActions={combinedHeaderActions}
       isLoading={isLoading}
-      isEmpty={!isLoading && filteredForList.length === 0}
+      isEmpty={!error && !isLoading && filteredForList.length === 0}
       emptyText={emptyText}
       emptyIcon={emptyIcon}
       contentClassName={contentClassName}
     >
+      {error && onRetry && <QueryRecovery onRetry={onRetry} isRetrying={isFetching} stale={(items?.length ?? 0) > 0} />}
       {renderList ? renderList(filteredForList) : (
         <div className="grid gap-4">
           {filteredForList.map((item) => (

@@ -234,7 +234,7 @@ function MiniappMode({
             type="button"
             variant={view === 'list' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 px-2 rounded-none"
+            className="h-11 min-w-11 px-2 rounded-none"
             onClick={() => setView('list')}
             aria-label={language === 'ru' ? 'Список' : 'List'}
             aria-pressed={view === 'list'}
@@ -245,7 +245,7 @@ function MiniappMode({
             type="button"
             variant={view === 'map' ? 'default' : 'ghost'}
             size="sm"
-            className="h-8 px-2 rounded-none"
+            className="h-11 min-w-11 px-2 rounded-none"
             onClick={() => setView('map')}
             aria-label={language === 'ru' ? 'Карта' : 'Map'}
             aria-pressed={view === 'map'}
