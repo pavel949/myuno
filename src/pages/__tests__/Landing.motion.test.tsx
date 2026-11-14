@@ -11,7 +11,7 @@ vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: ({ headerAct
 vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => null }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
-vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => null, HomePlanLinks: () => null }));
+vi.mock('@/components/home/HomeSearchEntry', () => ({ HomePlanLinks: () => null }));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => null }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/components/home/HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => null, HomeNewbuildsPreview: () => null }));

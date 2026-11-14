@@ -30,6 +30,7 @@ import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { CommandPaletteMount } from "@/components/command/CommandPaletteMount";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { OrganizationJsonLdHydrator } from "@/components/seo/OrganizationJsonLdHydrator";
+import { RouteTitleFallback } from "@/components/seo/RouteTitleFallback";
 
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
@@ -123,6 +124,7 @@ function AppContent() {
         <LegalComplianceModal />
         <BrowserRouter>
           <PublicTelemetry />
+          <RouteTitleFallback />
           {/* NavShell owns the canonical skip link and main landmark. */}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <AnimatedRoutes />
