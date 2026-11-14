@@ -25,6 +25,9 @@
 - Consultation retry handling stays in the shared intake helper: clear only proven validation rejections; preserve uncertain-outcome keys and guide unchanged retries to avoid duplicate leads.
 - Protected guards may preserve an already-admitted subtree only for the same actor/context/company/policy during verification, hidden and inert with native-modal quarantine for body-portaled overlays; failures/revocations remove it so state retention never grants cached authority. Keep shared sibling layouts stable; router paths do not replace actor/scope checks. Without native quarantine, safely unmount.
 - Calendar/date logic uses shared civil-date helpers; avoid UTC/date-only parsing that shifts Phuket/Bangkok dates.
+- Shared query recovery renders safe localized failures separately from confirmed empty states; pharmacy reads use the existing QueryClient with identity/category-bound keys so failures and route changes cannot retain another entity's result.
+- Version prebuild and Vite emission share `scripts/build-identity.mjs`; emit only verified commit/branch metadata, never label an unknown or review build as main.
+- Additive RPC contracts missing from managed generated types use narrow, named wrappers around the existing client; never regenerate by hand, create another client or replace runtime authority with a type cast.
 - Convergence/audit docs are evidence, not permanent normative authority. Promote accepted durable rules into PROJECT.md / AGENTS.md / canonical docs.
 
 - Accepted quote snapshots may preserve historical agreed commercial state without becoming competing canonical truth.

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AddBookingFromCalendarDialog } from '../AddBookingFromCalendarDialog';
-import { DialogReadinessProvider } from '@/components/ui/dialog-readiness';
 
 const state = vi.hoisted(() => ({ language: 'en', create: vi.fn(), success: vi.fn(), notify: vi.fn(), warning: vi.fn(), error: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
@@ -17,9 +16,9 @@ function Harness() {
   return <AddBookingFromCalendarDialog open={open} onOpenChange={setOpen} propertyId="synthetic-home" initialDate={initialDate} onSuccess={state.success} />;
 }
 async function submit() {
-  render(<DialogReadinessProvider><Harness /></DialogReadinessProvider>);
+  render(<Harness />);
   fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Выбрать' : 'Select' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Choose synthetic checkout' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Choose synthetic checkout' }));
   fireEvent.click(screen.getByRole('button', { name: state.language === 'ru' ? 'Добавить бронирование' : 'Add Booking' }));
   await waitFor(() => expect(state.create).toHaveBeenCalledTimes(1));
 }

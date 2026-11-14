@@ -1,0 +1,2 @@
+export function resolveBuildCommit(env?: Record<string, string | undefined>, gitRead?: () => string): string | null;
+export function resolveBuildBranch(env?: Record<string, string | undefined>, gitRead?: () => string): string | null;

@@ -17,6 +17,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { readPropertyOrderHold } from '@/lib/propertyOrderHold';
 
 interface DepositPaymentOptionsProps {
   propertyId: string;
@@ -278,10 +279,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
         // The availability RPC above is only a preflight. Do not expose an
         // operator request unless the canonical order writer actually created
         // the matching inventory hold under the exclusion constraint.
-        const { data: hasHold, error: holdError } = await supabase.rpc(
-          'property_order_has_active_hold',
-          { p_order_id: orderResult.order_id },
-        );
+        const { data: hasHold, error: holdError } = await readPropertyOrderHold(orderResult.order_id);
         if (holdError || hasHold !== true) {
           console.error('[DepositPaymentOptions] canonical inventory hold missing:', holdError);
           Sentry.captureException(holdError ?? new Error('canonical inventory hold missing'), {
