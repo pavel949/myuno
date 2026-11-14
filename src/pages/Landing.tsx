@@ -62,7 +62,7 @@ export default function Landing() {
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>
-          <Link to={R.FOR_OWNERS}>{t(copy.owners)}</Link><Link to={R.FOR_BUSINESS}>{t(copy.business)}</Link><Link to={R.VENDOR_JOIN}>{t(copy.partners)}</Link><Link to={R.FOR_REAL_ESTATE_DEVELOPERS}>{t({ ru: 'Застройщикам', en: 'For developers', th: 'สำหรับผู้พัฒนา' })}</Link>
+          <Link to={R.FOR_OWNERS}>{t(copy.owners)}</Link><Link to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Управляющим компаниям', en: 'Management companies', th: 'สำหรับบริษัทจัดการ' })}</Link><Link to={R.FOR_LOCAL_SERVICE_PROVIDERS}>{t(copy.partners)}</Link><Link to={R.FOR_REAL_ESTATE_DEVELOPERS}>{t({ ru: 'Застройщикам', en: 'For developers', th: 'สำหรับผู้พัฒนา' })}</Link><Link to={R.FOR_BUSINESS}>{t(copy.business)}</Link>
           <Link to={R.PRIVACY}>{t({ ru: 'Конфиденциальность', en: 'Privacy', th: 'ความเป็นส่วนตัว' })}</Link><Link to={R.TERMS}>{t({ ru: 'Условия', en: 'Terms', th: 'ข้อกำหนด' })}</Link>
         </nav><LegalCopyright />
       </footer>

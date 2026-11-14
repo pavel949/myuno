@@ -35,6 +35,13 @@ const audiences: AudienceCard[] = [
     action: { ru: 'Посмотреть платформу', en: 'View the platform', th: 'ดูแพลตฟอร์ม' },
   },
   {
+    icon: Building2,
+    href: R.FOR_REAL_ESTATE_DEVELOPERS,
+    title: { ru: 'Я застройщик или девелопер', en: 'I am a developer', th: 'เป็นผู้พัฒนาโครงการ' },
+    description: { ru: 'Размещайте проекты, принимайте обращения покупателей и управляйте лидами.', en: 'List projects, capture buyer enquiries, and manage your development leads.', th: 'ลงประกาศโครงการ รับคำถามผู้ซื้อ และจัดการลีดของโครงการ' },
+    action: { ru: 'Для застройщиков', en: 'For developers', th: 'สำหรับผู้พัฒนา' },
+  },
+  {
     icon: Sparkles,
     href: R.FOR_LOCAL_SERVICE_PROVIDERS,
     title: { ru: 'Предлагаю услуги', en: 'I provide local services', th: 'ให้บริการท้องถิ่น' },
