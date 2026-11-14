@@ -52,10 +52,12 @@ export {
 };
 export type { NavRoleKey, NavItem };
 
-/** Public header and its mobile menu; business is intentionally not a sixth bottom tab. */
+/** Public header: keep the desktop menu task-focused; partner paths live in a separate menu. */
 export const GUEST_TOP_NAV: NavItem[] = [
-  ...GUEST_NAV.filter(item => item.path !== APP_ROUTES.HOME && item.path !== APP_ROUTES.ACCOUNT),
-  { path: APP_ROUTES.FOR_BUSINESS, icon: Briefcase, labelEn: 'Business', labelRu: 'Бизнес', labelTh: 'ธุรกิจ' },
+  { path: APP_ROUTES.PROPERTY, icon: Building2, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
+  { path: APP_ROUTES.EXPERIENCES, icon: Compass, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
+  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
 ];
 
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */

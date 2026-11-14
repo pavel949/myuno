@@ -56,6 +56,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
     { to: R.FOR_MANAGEMENT_COMPANIES, label: t('Управляющим компаниям', 'For management companies', 'สำหรับบริษัทจัดการ') },
     { to: R.FOR_LOCAL_SERVICE_PROVIDERS, label: t('Поставщикам услуг', 'For service providers', 'สำหรับผู้ให้บริการ') },
     { to: R.FOR_REAL_ESTATE_DEVELOPERS, label: t('Застройщикам', 'For developers', 'สำหรับผู้พัฒนา') },
+    { to: R.FOR_BUSINESS, label: t('Для бизнеса', 'For business', 'สำหรับธุรกิจ') },
   ];
   const partnerActive = partnerLinks.some(link => pathname === link.to || pathname.startsWith(`${link.to}/`));
   return (

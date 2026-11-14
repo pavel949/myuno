@@ -12,7 +12,7 @@ import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
 import { HomeSearchEntry, HomePlanLinks } from '@/components/home/HomeSearchEntry';
-import { HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
@@ -51,13 +51,22 @@ export default function Landing() {
         </div>
       </section>
       <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
-      <HomeAudienceGrid />
-      <HomeTrustBar />
       <HomePlanLinks />
       <HomeHousingPreview />
       <HomeNewbuildsPreview />
-      <HomeServiceGallery />
-      <HomeLocationGallery />
+      <div className="home-life-group">
+        <HomeExperienceGallery />
+        <HomeServiceGallery />
+        <HomeLocationGallery />
+      </div>
+      <section className="home-partners-group" aria-labelledby="home-partners-title">
+        <div className="home-container home-group-heading">
+          <p className="home-group-eyebrow">{t({ ru: 'Для профессионалов', en: 'For professionals', th: 'สำหรับมืออาชีพ' })}</p>
+          <h2 id="home-partners-title">{t({ ru: 'Развивайте недвижимость и сервисы вместе с myUNO', en: 'Grow your property and services with myUNO', th: 'เติบโตไปกับ myUNO' })}</h2>
+        </div>
+        <HomeAudienceGrid />
+        <HomeTrustBar />
+      </section>
       <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t({ ru: 'Познакомимся с объектом и вашими ожиданиями. Если сможем управлять — предложим индивидуальные условия.', en: 'We review your property and expectations. If we can manage it, we propose individual terms.', th: 'ศึกษาทรัพย์สินและความคาดหวัง หากเรารับจัดการได้จะเสนอเงื่อนไขเฉพาะ' })}</p></div><div className="home-prompt-actions"><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="home-text-link" to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Для управляющих компаний', en: 'For management companies', th: 'สำหรับบริษัทจัดการ' })}<ArrowRight size={18} aria-hidden="true" /></Link></div></section>
       <footer className="home-footer home-container">

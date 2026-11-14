@@ -1,4 +1,4 @@
-import { ArrowRight, Compass, Home, Sparkles } from 'lucide-react';
+import { ArrowRight, Building2, Compass, Home, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
@@ -19,16 +19,22 @@ const choices: HeroChoice[] = [
     description: { ru: 'На отпуск, несколько месяцев или надолго', en: 'For a holiday, a few months, or longer', th: 'สำหรับวันหยุด หลายเดือน หรือระยะยาว' },
   },
   {
-    icon: Compass,
+    icon: Building2,
     href: `${R.PROPERTY_SEARCH}?mode=buy`,
     label: { ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาริมทรัพย์' },
-    description: { ru: 'Дома, квартиры и новые проекты', en: 'Homes, condos, and new developments', th: 'บ้าน คอนโด และโครงการใหม่' },
+    description: { ru: 'Дома, квартиры, новые проекты', en: 'Homes, condos, new projects', th: 'บ้าน คอนโด โครงการใหม่' },
+  },
+  {
+    icon: Compass,
+    href: R.EXPERIENCES,
+    label: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' },
+    description: { ru: 'Идеи для отдыха и островной жизни', en: 'Ideas for island days and nights', th: 'ไอเดียสำหรับวันพักผ่อนบนเกาะ' },
   },
   {
     icon: Sparkles,
     href: R.GOAL_SERVICES,
     label: { ru: 'Найти услугу', en: 'Find a service', th: 'ค้นหาบริการ' },
-    description: { ru: 'Трансфер, уборка, переезд и помощь', en: 'Transfers, cleaning, moving, and more', th: 'รถรับส่ง ทำความสะอาด ย้ายบ้าน และอื่น ๆ' },
+    description: { ru: 'Трансфер, уборка, переезд и помощь', en: 'Transfers, cleaning, moving, and help', th: 'รถรับส่ง ทำความสะอาด ย้ายบ้าน และอื่น ๆ' },
   },
 ];
 
