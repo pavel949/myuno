@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from '@/contexts/AuthContext';
+
+const PHARMACY_FIELDS = 'id,provider_id,name_en,name_ru,description_en,description_ru,cover_image,images,address,lat,lng,phone,email,website,working_hours,delivery_available,delivery_fee,delivery_radius_km,min_order_amount,is_24h,has_pharmacist,rating,review_count,is_active,is_verified,license_number' as const;
+const PRODUCT_FIELDS = 'id,pharmacy_id,name_en,name_ru,description_en,description_ru,category,image,price,currency,stock_quantity,requires_prescription,dosage,manufacturer,active_ingredients,is_active' as const;
 
 export interface Pharmacy {
   id: string;
@@ -50,13 +54,15 @@ export interface PharmacyProduct {
 }
 
 export const usePharmacies = () => {
+  const { user } = useAuth();
   const query = useQuery({
-    queryKey: ['pharmacies'],
+    queryKey: ['pharmacies', user?.id ?? null],
     queryFn: async (): Promise<Pharmacy[]> => {
       const { data, error } = await supabase
         .from('pharmacies')
-        .select('*')
+        .select(PHARMACY_FIELDS)
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .order('rating', { ascending: false });
       
       if (error) throw error;
@@ -71,15 +77,18 @@ export const usePharmacies = () => {
 };
 
 export const usePharmacy = (pharmacyId: string | undefined) => {
+  const { user } = useAuth();
   const query = useQuery({
-    queryKey: ['pharmacy', pharmacyId],
+    queryKey: ['pharmacy', user?.id ?? null, pharmacyId],
     enabled: !!pharmacyId,
     queryFn: async (): Promise<Pharmacy | null> => {
       if (!pharmacyId) return null;
       const { data, error } = await supabase
           .from('pharmacies')
-          .select('*')
+          .select(PHARMACY_FIELDS)
           .eq('id', pharmacyId)
+          .eq('is_active', true)
+          .eq('approval_status', 'approved')
           .maybeSingle();
       if (error) throw error;
       return data ? {
@@ -93,14 +102,15 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
 };
 
 export const usePharmacyProducts = (pharmacyId: string | undefined, category?: string) => {
+  const { user } = useAuth();
   const result = useQuery({
-    queryKey: ['pharmacy-products', pharmacyId, category],
+    queryKey: ['pharmacy-products', user?.id ?? null, pharmacyId, category],
     enabled: !!pharmacyId,
     queryFn: async (): Promise<PharmacyProduct[]> => {
       if (!pharmacyId) return [];
         let query = supabase
           .from('pharmacy_products')
-          .select('*')
+          .select(PRODUCT_FIELDS)
           .eq('pharmacy_id', pharmacyId)
           .eq('is_active', true);
         

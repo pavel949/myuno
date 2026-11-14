@@ -2,7 +2,8 @@ import React from 'react';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const sdk = vi.hoisted(() => ({ execute: vi.fn(), from: vi.fn() }));
+const sdk = vi.hoisted(() => ({ execute: vi.fn(), from: vi.fn(), actor: null as null | { id: string } }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: sdk.actor }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: sdk.from } }));
 import { usePharmacies, usePharmacy, usePharmacyProducts } from '../usePharmacy';
 const clients: QueryClient[] = [];
@@ -13,6 +14,7 @@ function wrapper() {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  sdk.actor = null;
   vi.stubGlobal('fetch', vi.fn(() => { throw new Error('Production network forbidden'); }));
   const query = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
     maybeSingle: () => sdk.execute(), then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) => sdk.execute().then(resolve, reject) };
@@ -47,4 +49,18 @@ it('separates product failure from confirmed empty and preserves same-key stale 
   await act(async () => { await result.current.refetch(); });
   await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.products[0].id).toBe('product');
+});
+it('does not reuse a signed-in catalogue cache after actor changes and excludes moderation fields', async () => {
+  sdk.actor = { id: 'actor-a' };
+  sdk.execute.mockResolvedValueOnce({ data: [{ id: 'actor-a-result', images: [], working_hours: {} }], error: null });
+  const { result, rerender } = renderHook(usePharmacies, { wrapper: wrapper() });
+  await waitFor(() => expect(result.current.pharmacies).toHaveLength(1));
+  const query = sdk.from.mock.results[0].value;
+  expect(query.select.mock.calls[0][0]).not.toMatch(/\*|rejection_reason|reviewed_by|reviewed_at/);
+  expect(query.eq.mock.calls).toContainEqual(['approval_status', 'approved']);
+  sdk.execute.mockResolvedValueOnce({ data: [], error: null });
+  sdk.actor = null;
+  rerender();
+  expect(result.current.pharmacies).toEqual([]);
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
 });
