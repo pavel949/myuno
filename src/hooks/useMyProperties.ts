@@ -72,9 +72,9 @@ export function useMyProperties() {
   const isOwner = hasRole('owner');
   const isManager = hasRole('property_manager');
 
-  const { data: ownedRaw, isLoading: ownedLoading, error: ownedError, refetch: refetchOwned } = useOwnerProperties();
-  const { properties: managedRaw, isLoading: managedLoading, error: managedError, refetch: refetchManaged } = useAssignedProperties();
-  const { data: companyRaw, isLoading: companyLoading, error: companyError, refetch: refetchCompany } = useCompanyProperties();
+  const { data: ownedRaw, isLoading: ownedLoading, isFetching: ownedFetching, error: ownedError, refetch: refetchOwned } = useOwnerProperties();
+  const { properties: managedRaw, isLoading: managedLoading, isFetching: managedFetching, error: managedError, refetch: refetchManaged } = useAssignedProperties();
+  const { data: companyRaw, isLoading: companyLoading, isFetching: companyFetching, error: companyError, refetch: refetchCompany } = useCompanyProperties();
 
   // When an active MC is selected, only show properties belonging to that MC
   const isInMCMode = !!activeCompanyId;
@@ -210,6 +210,7 @@ export function useMyProperties() {
     error: ownedError || managedError || companyError,
     refetch: () => Promise.all([refetchOwned(), refetchManaged(), refetchCompany()]),
     isLoading: ownedLoading || managedLoading || companyLoading,
+    isFetching: ownedFetching || managedFetching || companyFetching,
     isOwner,
     isManager,
     hasProperties: allProperties.length > 0,

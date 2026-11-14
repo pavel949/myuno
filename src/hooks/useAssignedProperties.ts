@@ -48,7 +48,7 @@ export function useAssignedProperties() {
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id || null;
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ['assigned-properties', user?.id, activeCompanyId],
     queryFn: async (): Promise<AssignedProperty[]> => {
       if (!user?.id) return [];
@@ -184,6 +184,7 @@ export function useAssignedProperties() {
     properties: data || [],
     stats,
     isLoading,
+    isFetching,
     error,
     refetch,
     hasProperties: (data?.length || 0) > 0,

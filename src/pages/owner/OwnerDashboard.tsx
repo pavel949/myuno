@@ -346,7 +346,7 @@ export default function OwnerDashboard() {
   const isDesktop = useIsDesktop();
   const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
-  const { allProperties, isLoading: propsLoading, error: propsError, refetch: refetchProperties } = useMyProperties();
+  const { allProperties, isLoading: propsLoading, isFetching: propsFetching, error: propsError, refetch: refetchProperties } = useMyProperties();
   const { activeCompany, isLoading: companyLoading } = useActiveCompany();
   const { data: onboardingProgress } = useMcOnboarding();
 
@@ -419,7 +419,7 @@ export default function OwnerDashboard() {
   // First-time MC empty state — no properties yet → render onboarding checklist
   // instead of skeleton-then-blank widget grid.
   if (propsError) {
-    return <PageShell width="narrow"><QueryRecovery onRetry={refetchProperties} isRetrying={propsLoading} /></PageShell>;
+    return <PageShell width="narrow"><QueryRecovery onRetry={refetchProperties} isRetrying={propsFetching} /></PageShell>;
   }
   const isFirstTimeMC =
     !propsLoading && !companyLoading && allProperties.length === 0 && !!activeCompany;
