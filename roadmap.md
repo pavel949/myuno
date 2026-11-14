@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-11-14 · Guest feature-switch access
+- [ ] Trace public consumers and compare enabled flags with actual anonymous visibility; do not expose private or intentionally disabled switches.
+- [ ] Test and apply only a proven public-key read boundary, retaining all write/admin permissions and all stored values.
+- [ ] Verify anonymous catalogue flows and private-setting denial; record evidence, rollback and residual unknowns. No business writes, notifications or publication.
+
 ## 2026-11-13 · Property detail option A
 - [x] Make stay calculation and assisted booking requests explicit on desktop/mobile; existing inquiry/payment branch authority remains unchanged, the estimate itself is not a reservation.
 - [x] Offer contextual WhatsApp questions without forcing sign-in; improve related public catalogue choices without fabricated totals or availability.
