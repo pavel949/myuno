@@ -1,10 +1,11 @@
 # Roadmap
 
 ## 2026-11-14 · Attached platform cleanup master prompt
-- [ ] Inventory current shells/tokens/routes/query recovery/role surfaces and audit findings; preserve existing reviewed commits and working source.
-- [ ] Correct confirmed shared UX, routing, recovery and version-generation defects; retain all authorization and domain contracts.
-- [ ] Run current validation gates and isolated responsive/browser role scenarios; document exact results and environment blockers.
-- [ ] Final report: source identity, changed/removed files, route classification, tests, public smoke, rollback and READY/NOT READY decision.
+- [x] Inventory current shells/tokens/routes/query recovery/role surfaces and audit findings; preserve existing reviewed commits and working source.
+- [x] Correct confirmed pharmacy/developer/owner/vendor recovery, developer alias, Vercel reverse redirects and version-generation defects; retain authorization and domain writers.
+- [x] Run current validation gates and isolated tests; 4939/4940 passed before final design finding correction, then 51/51 focused tests passed including that gate; 36/36 public preview layout probes nonblank, no overflow/runtime errors. Do not call initial-loading probes full E2E.
+- [x] Final report: docs/audits/PLATFORM_CLEANUP_EXECUTION_2026_11_14.md; NOT READY for complete master acceptance.
+- [ ] Nested sheet→popover Escape browser regression remains open; pointer interaction repaired, parent dismissal still reproduced. Exhaustive role/write/mobile/zoom/high-contrast acceptance remains incomplete without contained QA fixtures/environment.
 - [ ] Production release is gated on passing validation and verified deployment identity; direct Git commit/push and Vercel deployment control are unavailable in this Lovable sandbox, so never substitute an unrelated Lovable publication.
 - Boundaries: no production business test writes/messages, no Auth/invitation/enforcement changes, no migrations or financial activation.
 
