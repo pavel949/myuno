@@ -6,8 +6,10 @@
 - [x] Run current validation gates and isolated tests; 4939/4940 passed before final design finding correction, then 51/51 focused tests passed including that gate; 36/36 public preview layout probes nonblank, no overflow/runtime errors. Do not call initial-loading probes full E2E.
 - [x] Final report: docs/audits/PLATFORM_CLEANUP_EXECUTION_2026_11_14.md; NOT READY for complete master acceptance.
 - [x] Nested sheet→popover Escape repaired via shared Radix layer/focus resolution; 60/60 targeted regression tests and 20/20 network-denied browser scenarios PASS. Evidence: PLATFORM_CLEANUP_EXECUTION_2026_11_14.md follow-up.
-- [ ] Exhaustive role/write/mobile/zoom/high-contrast acceptance remains incomplete without contained QA fixtures/environment.
-- [ ] Production release is gated on passing validation and verified deployment identity; direct Git commit/push and Vercel deployment control are unavailable in this Lovable sandbox, so never substitute an unrelated Lovable publication.
+- [x] Fresh role/isolation verification: 376/376 isolated tests across 10 files cover guest/admin/director/manager/owner/`uno_team`, inactive/revoked access, foreign company/space/property IDs and checked publication. Live read-only admin + guest checks PASS; private guest reads return zero/401 and full auth redirect is preserved. Evidence: PLATFORM_CLEANUP_EXECUTION_2026_11_14.md final follow-up.
+- [ ] Hosted authenticated non-admin/owner/vendor/`uno_team` denial matrix remains BLOCKED until Pavel identifies an existing account; production has 0 enforced companies/spaces/assignments, so live enforced-portfolio acceptance is not applicable yet. No roles, accounts, assignments or business writes were created.
+- [ ] Exhaustive hosted write/mobile/zoom/high-contrast acceptance remains incomplete without contained QA fixtures/environment; isolated writes do not certify production workflows.
+- [ ] Production release remains NO-GO: public myuno.app serves buildTime 2026-11-14T02:33:08.392Z without commit/branch, while tested HEAD is e5f3bec5a908a451f771d12a243468573383c064 (07:04:22 UTC). Exact GitHub-main/Vercel READY deployment and alias identity are unverified; never substitute an unrelated Lovable publication.
 - Boundaries: no production business test writes/messages, no Auth/invitation/enforcement changes, no migrations or financial activation.
 
 ## 2026-11-14 · Guest feature-switch access
