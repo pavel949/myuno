@@ -97,7 +97,7 @@ export default function ExperiencesIndex() {
   return (
     <MiniAppLayout
       contentClassName="public-commerce public-commerce--experiences"
-      title={isRu ? 'Туры и активности' : 'Tours & Activities'}
+      title={isRu ? 'Впечатления' : 'Experiences'}
       subtitle={isRu ? `Найдено: ${sorted.length}` : `${sorted.length} results`}
       fallbackPath="/"
       showSearch={false}
@@ -173,7 +173,7 @@ export default function ExperiencesIndex() {
       }
     >
       <SEOHead
-        title={isRu ? 'Туры и экскурсии на Пхукете' : 'Tours & Experiences in Phuket'}
+        title={isRu ? 'Впечатления на Пхукете' : 'Experiences in Phuket'}
         description={isRu
           ? 'Туры, экскурсии и активности на Пхукете — с проверенными операторами.'
           : 'Tours, excursions, and activities in Phuket — with verified operators.'}
