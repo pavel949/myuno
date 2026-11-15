@@ -509,7 +509,7 @@ export default function AirportFastTrackPage() {
                       type="button"
                       onClick={() => setSelectedServiceId(service.id)}
                       className={cn(
-                        "w-full min-w-0 p-4 rounded-lg border-2 text-left transition-all",
+                        "w-full min-w-0 p-4 rounded-none border-2 text-left transition-all",
                         isSelected
                           ? "border-primary bg-primary/5 shadow-sm"
                           : "border-border hover:border-primary/30"
