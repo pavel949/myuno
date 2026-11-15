@@ -25,7 +25,7 @@ vi.mock('@/integrations/supabase/client',async()=>{const {matchesLiteralOr}=awai
     insert:state.write,update:state.write,delete:state.write};return query;
 }}});});
 const clients:QueryClient[]=[];
-function setup(cached=false,search=''){const client=new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}});clients.push(client);if(cached)client.setQueryData(['admin','providers','synthetic-admin','unverified','',0,null],{rows:[{id:'cached',name:'Cached provider',business_category:'legal',is_active:true,is_verified:false}],count:1});render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/admin/providers?filter=unverified'+(search?'&q='+encodeURIComponent(search):'')]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><AdminProviders/></MemoryRouter></QueryClientProvider>);}
+function setup(cached=false,search=''){const client=new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}});clients.push(client);if(cached)client.setQueryData(['admin','providers','synthetic-admin','unverified','',0,null],{rows:[{id:'cached',name:'Cached provider',business_category:'legal',is_active:true,is_verified:false}],count:1});render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/admin/providers?filter=unverified'+(search?'&q='+encodeURIComponent(search):'')]}><AdminProviders/></MemoryRouter></QueryClientProvider>);}
 beforeEach(()=>{state.error=false;state.mode='cap';state.reads=[];vi.clearAllMocks();});
 afterEach(()=>{cleanup();clients.splice(0).forEach(client=>client.clear());});
 describe('provider queue exact reads',()=>{

@@ -44,7 +44,7 @@ describe('provider edit waits for the real query refetch', () => {
     await act(async () => resolve({ data: [provider], error: null }));
     const dialog = await screen.findByRole('dialog', { name: 'Edit Provider' });
     expect(within(dialog).getByDisplayValue(provider.name)).toBeTruthy();
-    expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive');
+    await waitFor(()=>expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive'));
     await waitFor(()=>expect(state.from).toHaveBeenCalledTimes(2));
     expect(state.from).toHaveBeenCalledWith('providers');
   });
@@ -61,7 +61,7 @@ describe('provider edit waits for the real query refetch', () => {
       ? 'Не удалось загрузить провайдеров. Попробуйте ещё раз.'
       : 'Could not load providers. Please try again.'));
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive');
+    await waitFor(()=>expect(screen.getByLabelText('Current route').textContent).toBe('/admin/providers?q=keep&filter=inactive'));
     await waitFor(()=>expect(state.from).toHaveBeenCalledTimes(2));
   });
 });

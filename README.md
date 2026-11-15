@@ -142,3 +142,7 @@ Production is deployed through Vercel from the repository's production branch/co
 ## Ownership
 
 Proprietary · Ignatev Group · Phuket, Thailand.
+
+### Reproducible dependency installation
+
+Use `npm ci` with the committed `package-lock.json` for release and CI builds. `package.json` overrides own transitive compatibility/security constraints; parallel Bun/Yarn resolutions are not maintained. The manual Playwright job uses the same npm lock and remains opt-in because its legacy backend fixture can write data.

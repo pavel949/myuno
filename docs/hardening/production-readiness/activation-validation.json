@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-15",
+  "parent_sha": "08a7da3f62147acece35662889d93603155c14dd",
+  "production_mutations": false,
+  "activation": "NOT_APPLIED",
+  "release_decision": "NO_GO_PENDING_RECOVERY_AND_RUNTIME_ACCEPTANCE",
+  "local_environment": {
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "ci_node": "22",
+    "ci_result": "not established by local checks"
+  },
+  "checks": {
+    "full_suite": {
+      "passed": 5070,
+      "files": 443,
+      "failed": 0,
+      "skipped": 0,
+      "unhandled_errors": 0,
+      "duration_seconds": 547.39
+    },
+    "financial_postgres": 72,
+    "recipient_configuration_postgres": 9,
+    "router_browser": 16,
+    "node_handlers_snapshot_xlsx": 20,
+    "dependency_policy": 4,
+    "signed_operator_ingress": 19,
+    "transfer_conflicts": 5,
+    "typecheck": "pass",
+    "lint": {
+      "errors": 0,
+      "warnings": 2214
+    },
+    "build": {
+      "status": "pass",
+      "modules": 7184
+    },
+    "lockfile_offline_dry_run": "pass",
+    "production_dependency_vulnerabilities": 0,
+    "all_dependency_vulnerabilities": {
+      "reviewed_build_only_low": 4,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    }
+  },
+  "approved_recipient": {
+    "legal_name": "Ignatev Estate Co., LTD",
+    "scope": "all 24 active properties including Show Property Phuket",
+    "configured": false,
+    "private_manifest_sha256": "67e66ffbed7e61d238ade9f1fdf23928961f2fa701a8b6a62a12bfc5e51f421d"
+  },
+  "earlier_full_run": {
+    "assertions_passed": 5070,
+    "unhandled_errors": 1,
+    "accepted": false,
+    "correction": "Discover test fixture now defines the clicked destination and awaits arrival"
+  }
+}

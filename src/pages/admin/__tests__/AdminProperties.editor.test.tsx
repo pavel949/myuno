@@ -67,7 +67,7 @@ function LocationProbe() {
   return <output data-testid="location">{location.pathname}{location.search}</output>;
 }
 function editorElement() {
-  return (<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AdminProperties /><LocationProbe /></MemoryRouter>);
+  return (<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']}><AdminProperties /><LocationProbe /></MemoryRouter>);
 }
 function renderEditor() { return render(editorElement()); }
 async function openPhotos() {
@@ -215,7 +215,7 @@ describe('contained admin property editor', () => {
       return <output data-testid="location">{location.pathname}{location.search}</output>;
     }
     render(
-      <MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']}>
         <React.Suspense fallback={<span>Waiting for navigation</span>}>
           <AdminProperties />
           <DeferredRouteProbe />

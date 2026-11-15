@@ -1,0 +1,91 @@
+{
+  "checked_on": "2026-11-15",
+  "project": "pavel949/myuno",
+  "project_ref": "kakkwibljrjsawxgnupk",
+  "read_only": true,
+  "financial_function_versions": {
+    "rows": [
+      {
+        "atomic_marker": false,
+        "definition_md5": "11d66e688a45f681cec66bf474c9eefb",
+        "signature": "create_order_atomic(text,uuid,uuid,timestamp with time zone,timestamp with time zone,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric)"
+      },
+      {
+        "atomic_marker": false,
+        "definition_md5": "62f26cda6ac8eda0b835be281fa879c5",
+        "signature": "create_order_checked(text,uuid,timestamp with time zone,timestamp with time zone,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric,uuid)"
+      },
+      {
+        "atomic_marker": false,
+        "definition_md5": "124a15c2f1df3a63cf56e0655b857773",
+        "signature": "guard_customer_order_update()"
+      },
+      {
+        "atomic_marker": false,
+        "definition_md5": "abb8bf8e00cbe002302aba2e69fe0ac5",
+        "signature": "record_ledger_entries(uuid)"
+      },
+      {
+        "atomic_marker": false,
+        "definition_md5": "de2464f4d21aa7157f61f3e0bbe2bd39",
+        "signature": "submit_consultation_request(jsonb)"
+      }
+    ]
+  },
+  "proof_bucket": {
+    "rows": [
+      {
+        "allowed_mime_types": null,
+        "file_size_limit": null,
+        "id": "manual_payment_proofs",
+        "public": false
+      }
+    ]
+  },
+  "receipt_and_recipient_counts": {
+    "rows": [
+      {
+        "active_properties_without_recipient": 24,
+        "legacy_unverified_receipts": 0,
+        "orders": 31,
+        "property_orders_without_recipient": 3,
+        "succeeded_receipts": 0
+      }
+    ]
+  },
+  "recipient_binding_policies": {
+    "rows": [
+      {
+        "cmd": "SELECT",
+        "policyname": "Signed-in users read links of bookable providers",
+        "qual": "(EXISTS ( SELECT 1\n   FROM providers p\n  WHERE ((p.id = provider_org_links.provider_id) AND (p.is_active = true) AND (p.approval_status = 'approved'::text) AND (COALESCE(p.is_demo, false) = false))))",
+        "with_check": null
+      },
+      {
+        "cmd": "ALL",
+        "policyname": "Staff manage provider org links",
+        "qual": "is_finance_staff_e28_private(auth.uid())",
+        "with_check": "is_finance_staff_e28_private(auth.uid())"
+      }
+    ]
+  },
+  "recipient_authority_helpers": {
+    "rows": [
+      {
+        "definition": "CREATE OR REPLACE FUNCTION public.actor_has_platform_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role='admin')\n$function$\n",
+        "proname": "actor_has_platform_admin"
+      },
+      {
+        "definition": "CREATE OR REPLACE FUNCTION public.is_finance_staff_e28_private(_uid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _uid\n    AND role IN ('admin'::app_role,'staff'::app_role,'finance'::app_role));\n$function$\n",
+        "proname": "is_finance_staff_e28_private"
+      }
+    ]
+  },
+  "additional_verified_counts": {
+    "proof_objects": 0,
+    "provider_org_links": 0,
+    "active_orgs": 2,
+    "active_properties_with_managing_org": 0
+  },
+  "production_writes": false
+}

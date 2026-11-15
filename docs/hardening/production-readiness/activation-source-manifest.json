@@ -1,0 +1,221 @@
+{
+  "parent_sha": "08a7da3f62147acece35662889d93603155c14dd",
+  "note": "Follow-up manifest excludes itself. The release SHA is the commit containing these exact files. Original source-manifest.json and validation.json describe the historical parent candidate. Registered source migrations are not applied production history.",
+  "files": [
+    {
+      "path": ".github/workflows/connected-system-check.yml",
+      "sha256": "434f7edbd76ed0728040882b02c5585e924ac338b193aff2fc65a7c9174ab148",
+      "deleted": false
+    },
+    {
+      "path": ".github/workflows/e2e.yml",
+      "sha256": "7d8e9ebbe71d6839cf9d81c989c0d67806e48d9538358e0f297bb24e4737a975",
+      "deleted": false
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "sha256": "c42e0c1425f4b8ac36340eeeb93984f9964dd7b93a26adf45d03fc681342542a",
+      "deleted": false
+    },
+    {
+      "path": "README.md",
+      "sha256": "5cf1b9481ada9eda0ead166c1d3668fb88cc50e34bd32ae88ff02c657d305f8d",
+      "deleted": false
+    },
+    {
+      "path": "bun.lock",
+      "sha256": null,
+      "deleted": true
+    },
+    {
+      "path": "docs/hardening/production-readiness/DEPENDENCY_UPGRADE_PROPOSAL.md",
+      "sha256": "02bb199fc3fb0d4d54daedfdf5ec1c954583ac2fcbb152883ffd5f30ab25eb03",
+      "deleted": false
+    },
+    {
+      "path": "docs/hardening/production-readiness/RELEASE.md",
+      "sha256": "f4828615ce00b3c0417d1c2b05de8cbaa144ffcac1c3568a2b04f94218189d70",
+      "deleted": false
+    },
+    {
+      "path": "docs/hardening/production-readiness/activation-preflight-2026-11-15.json",
+      "sha256": "d47b078e2851ec1aa5839706da816208bf705a2c019b9e36778e372e5f131562",
+      "deleted": false
+    },
+    {
+      "path": "docs/hardening/production-readiness/activation-validation.json",
+      "sha256": "0d6fcbd5302fb559ea1d6c1a799f394116d69bc02f39f11bfe86ecf78732c6f2",
+      "deleted": false
+    },
+    {
+      "path": "docs/hardening/production-readiness/configure-ignatev-recipients.sql",
+      "sha256": "1eb69c0f651af8bb4f3617a0711f2ee14d9f18532dcff74f776d7ca74e4b51cc",
+      "deleted": false
+    },
+    {
+      "path": "docs/hardening/rollback/production_readiness_atomic_payments.sql",
+      "sha256": "59c75cd39ae6ca10efe30291f73fa7e19d6f5f296f8c160c6b3d8b33572edf67",
+      "deleted": false
+    },
+    {
+      "path": "docs/qa/PRODUCTION_READINESS_ACTIVATION_2026_11_15.md",
+      "sha256": "70a54593e337ef0317e69e99739a59d35e40228c96b9c2e8e1fafadee6495ef1",
+      "deleted": false
+    },
+    {
+      "path": "docs/qa/PRODUCTION_READINESS_FIXES_2026_11_15.md",
+      "sha256": "fa72be7ab2259e9bb9ccb3b9a70942086f8f1b346bbb1a218ae05cade87c3c3b",
+      "deleted": false
+    },
+    {
+      "path": "docs/security/dependency-audit-policy.json",
+      "sha256": "df262c1ecd4a062109fd401525044a8b2bb8af106eb27319fe22c6f1c4d56efc",
+      "deleted": false
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "f69d6116fcc02bc762fd16cf6c914e8cacef8b49f687fe5ca4348692a1393bb9",
+      "deleted": false
+    },
+    {
+      "path": "package.json",
+      "sha256": "cb3f7a4b336b37670d27bae1ac93a1725068c3645b532b1653480414860d430b",
+      "deleted": false
+    },
+    {
+      "path": "scripts/prepare-production-readiness-migration.mjs",
+      "sha256": "a0f434eae43aaa71073e4df6a87029e5a67fd0c275add6f90c01a116725bf499",
+      "deleted": false
+    },
+    {
+      "path": "scripts/qa/dependency-audit-gate.mjs",
+      "sha256": "c72636d98cce353ae443ccfcce2819e429519b80989c210de25ae13c3500af30",
+      "deleted": false
+    },
+    {
+      "path": "scripts/qa/dependency-audit-gate.test.mjs",
+      "sha256": "84c4fc671a251a358d3f689e960525e227ea3f7e7d739623cd6e67baef23440c",
+      "deleted": false
+    },
+    {
+      "path": "scripts/qa/export-dependency.check.mjs",
+      "sha256": "fed24f7cbfeb4215203383782a2463b2d630a6a57ad3ecd81c815fa6435adbf0",
+      "deleted": false
+    },
+    {
+      "path": "scripts/qa/recipient-configuration.postgres.check.mjs",
+      "sha256": "7425b5d9ea70cbc2c5d8ce4584e6801729968b239375cc36e1bb303606f41cd7",
+      "deleted": false
+    },
+    {
+      "path": "scripts/qa/router-upgrade-ui.mjs",
+      "sha256": "01ef4268aca369f0b7af6a89cfe9a9a2eb9d8b66659a0006f22e1ae6cc1e84bb",
+      "deleted": false
+    },
+    {
+      "path": "src/components/admin/operations/OperationsBookingsTab.filters.test.tsx",
+      "sha256": "40c711c01a32a297997357bd1293cb1de3508add2310ca12749247c932d3e10b",
+      "deleted": false
+    },
+    {
+      "path": "src/components/admin/operations/OperationsModerationTab.test.tsx",
+      "sha256": "db72008d45779dbddf6ce24a618b1134c6cd494b7d49fba08e4dbc333ef12b4a",
+      "deleted": false
+    },
+    {
+      "path": "src/components/layout/__tests__/stableLoadingShell.test.tsx",
+      "sha256": "644145d6048b5d3340b36bed76c1f626466b35535eeaf3d722d837b3e5f0edf8",
+      "deleted": false
+    },
+    {
+      "path": "src/components/navigation/v3/__tests__/discoverFilterState.test.tsx",
+      "sha256": "5eceb5ee3f7c55b28f210e37e64baad0a26f2fb0ccc84b73c79dfab6f189a8d3",
+      "deleted": false
+    },
+    {
+      "path": "src/components/property/PropertySearchRedirect.tsx",
+      "sha256": "68beaaa28d8122a8d6ff491be14387fd92dfba7c2a4c543421c6187634b10990",
+      "deleted": false
+    },
+    {
+      "path": "src/hooks/useAdminTickets.queue.test.tsx",
+      "sha256": "f6583240bffa78a359f9c7277431df1d2fff578138c7f8f81fa5b84a883bd960",
+      "deleted": false
+    },
+    {
+      "path": "src/lib/__tests__/consultationIntake.postgres.test.ts",
+      "sha256": "af6480d3ea5d2106a77410ef749e157f969f1b4057225f646debffec3170cc56",
+      "deleted": false
+    },
+    {
+      "path": "src/lib/__tests__/manualReceipts.postgres.test.ts",
+      "sha256": "e68bfb1980e53a66ddb72e02da2cf63ddc1798a215d16ca4d6a7ec82e8e571be",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/AdminProviders.tsx",
+      "sha256": "b67ab3f6fe4f26debd93a27890064f13107070a2b3e3d6313af6289b19a45c0e",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/AdminDashboard.today.test.tsx",
+      "sha256": "b45e6ffdbabd2a2be49f1d6cacf421566a177bdcd0c333919563bb353547b50a",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/AdminProperties.editor.test.tsx",
+      "sha256": "1ceae29e51120415c6101a4b5fe2c07031db2bbcc300fce8d2195ee105db546b",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/AdminProviders.queueRead.test.tsx",
+      "sha256": "b95ac0cd3f847cba9be2cfa1549cb8bcbc99568e7c1527b754e1f2676b1a6d0f",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/AdminProviders.refetchRoute.test.tsx",
+      "sha256": "d6588b310242e6536138e1f9f547cf9af836f9b41ef5f74485797c50192afccb",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/AdminReviewQueues.test.tsx",
+      "sha256": "052808a3f9feec14ae890c54f3bad9f4aaf7b638979d10a026d9357ef5012817",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/admin/__tests__/PartnerApplicationsAdmin.filters.test.tsx",
+      "sha256": "a57152648ec5f61737993eb23bd2c254755138e22c64ffcccb5ffb500d435013",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/mc/operations/__tests__/PmsTodayPage.test.tsx",
+      "sha256": "17ee8e52cfbac2fb8a0a5c86e2bbe4070eb25fe81a5ba9a8eee0e88fe568b102",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/owner/__tests__/MCBookingsPage.test.tsx",
+      "sha256": "4de64448477f5806258068cbfebe15a275328ddb62c3cfd9ccd99e17ac9d4100",
+      "deleted": false
+    },
+    {
+      "path": "src/pages/team/TeamDashboard.platformBoundary.test.tsx",
+      "sha256": "c1a7a4b79af35e5c996935aedd6f583e28dcd1586569f377c5c2e2543aad216b",
+      "deleted": false
+    },
+    {
+      "path": "supabase/migrations/20261115101016_production_readiness_atomic_payments.sql",
+      "sha256": "78a80f0b0ec6493c8ea692e19e62494d5125e6d99941c6cb0c54e9f8b9d97428",
+      "deleted": false
+    },
+    {
+      "path": "supabase/migrations/20261115101107_checked_consultation_intake.sql",
+      "sha256": "f847f30fad454f2b29c316b50918ebb6c83de3021f33598cd039b20638121990",
+      "deleted": false
+    },
+    {
+      "path": "supabase/migrations/20261115102726_restrict_unchecked_payment_recipient_mutations.sql",
+      "sha256": "8e150e988e258a5abb11b0f548b900d490affcc412e61435a0fb487197d81bdf",
+      "deleted": false
+    }
+  ]
+}

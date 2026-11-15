@@ -21,13 +21,16 @@ jobs:
       VITE_BYPASS_COMING_SOON: 'true'
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Install deps
-        run: bun install --frozen-lockfile
+        run: npm ci
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       - name: Run Playwright (CI config, chromium only)
-        run: bunx playwright test --config=playwright.ci.config.ts
+        run: npx playwright test --config=playwright.ci.config.ts
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4

@@ -72,13 +72,18 @@ describe('stable source loading boundaries',()=>{
   state.resolved={context:{role:'user'},isLoading:false,permissions:[]};view.rerender(<Router.MemoryRouter initialEntries={['/admin/properties']}><Routes/></Router.MemoryRouter>);
   await screen.findByRole('alert');expect(screen.queryByText('AdminProperties')).toBeNull();expect(layoutMounts).toBe(0);
  });
- it('keeps route-level lazy pending inside the retained shell instead of taking the viewport',async()=>{
+ it('retains the authorized page and shell while concurrent sibling navigation is pending',async()=>{
   let finish:(value:{default:React.ComponentType})=>void=()=>{};
   pages.AdminProperties=React.lazy(()=>new Promise<{default:React.ComponentType}>(resolve=>{finish=resolve;}));
   const Routes=actualRoutes();render(<Router.MemoryRouter initialEntries={['/admin']}><Navigation/><Routes/></Router.MemoryRouter>);
   await screen.findByText('AdminDashboard');fireEvent.click(screen.getByText('Properties'));
-  const pending=await screen.findByRole('status');expect(pending.getAttribute('data-loading-scope')).toBe('content');expect(pending.style.minHeight).toBe('12rem');expect(layoutMounts).toBe(1);
+  expect(screen.getByText('AdminDashboard')).toBeVisible();expect(screen.getByRole('region',{name:'retained shell'})).toBeVisible();expect(layoutMounts).toBe(1);expect(layoutUnmounts).toBe(0);
   await act(async()=>{finish({default:()=> <p>Loaded property page</p>});});await screen.findByText('Loaded property page');expect(layoutMounts).toBe(1);
+ });
+ it('bounds the loading indicator when the first admitted route is still lazy',()=>{
+  pages.AdminProperties=React.lazy(()=>new Promise<{default:React.ComponentType}>(()=>{}));
+  const Routes=actualRoutes();render(<Router.MemoryRouter initialEntries={['/admin/properties']}><Routes/></Router.MemoryRouter>);
+  const pending=screen.getByRole('status');expect(pending).toHaveAttribute('data-loading-scope','content');expect(pending.style.minHeight).toBe('12rem');expect(layoutMounts).toBe(1);
  });
  it('distinguishes authority read failure from denial and offers a safe retry',()=>{
   state.error=new Error('Network unavailable');state.resolved={context:null,isLoading:false,permissions:[]};

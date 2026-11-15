@@ -22,7 +22,7 @@ vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 vi.mock('@/components/ds', () => ({ SectionHeader: ({ title }: { title: string }) => <h2>{title}</h2> }));
 
 let client: QueryClient;
-const wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={client}><MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{children}</MemoryRouter></QueryClientProvider>;
+const wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={client}><MemoryRouter>{children}</MemoryRouter></QueryClientProvider>;
 beforeEach(() => { state.isAdmin = false; state.checking = false; state.language = 'en'; state.from.mockClear(); client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); });
 afterEach(() => { cleanup(); client.clear(); });
 

@@ -1,3 +1,5 @@
+> Follow-up: [dependency and activation evidence](PRODUCTION_READINESS_ACTIVATION_2026_11_15.md). This original report describes the parent candidate; consult the follow-up for the current release scope.
+
 # myuno: исправления после проверки готовности
 
 Дата: 15 ноября 2026. Репозиторий: `pavel949/myuno`. Ветка: `fix/production-readiness-20261115`. Исходный коммит: `be1224b5ed838bffebffddf12b127871adf41bad`. Это **myuno**, не отдельный проект myUNO-final.

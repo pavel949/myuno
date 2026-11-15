@@ -298,6 +298,21 @@ jobs:
             dirname "$binary" >> "$GITHUB_PATH"
             break
           done
+      - name: Router 7 provider editor and public redirect acceptance
+        timeout-minutes: 5
+        run: |
+          export MYUNO_BROWSER_EXECUTABLE="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          node scripts/qa/router-upgrade-ui.mjs
+          node --input-type=module -e "import fs from 'node:fs'; const rows=JSON.parse(fs.readFileSync('/tmp/myuno-router-upgrade-ui/results.json','utf8')); if(rows.length!==16 || rows.some(row=>row.passed!==true)) process.exit(1);"
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload Router 7 acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: router-upgrade-ui
+          path: /tmp/myuno-router-upgrade-ui/
+          retention-days: 14
       - name: Network-denying PMS browser fixtures
         timeout-minutes: 30
         id: browser

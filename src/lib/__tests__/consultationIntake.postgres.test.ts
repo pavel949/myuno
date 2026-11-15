@@ -30,7 +30,7 @@ beforeAll(async()=>{
  sql=postgres({host:directory,port:55491,username,database:'postgres',password:'',max:8});
  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/consultation-intake-base.sql','utf8'));
  const migration = await sql.reserve();
- try { await migration.unsafe(readFileSync('docs/hardening/consultation-intake/forward.sql','utf8')); } catch(error) { await migration.unsafe('ROLLBACK'); throw error; } finally { migration.release(); }
+ try { await migration.unsafe(readFileSync('supabase/migrations/20261115101107_checked_consultation_intake.sql','utf8')); } catch(error) { await migration.unsafe('ROLLBACK'); throw error; } finally { migration.release(); }
  await sql`INSERT INTO property_projects VALUES(${project},true,true,true),(${otherProject},true,true,true),(${hiddenProject},false,true,true)`;
  await sql`INSERT INTO properties VALUES(${property},${project},${owner},true,'approved',NULL),(${privateProperty},NULL,${owner},false,'pending',NULL)`;
  await sql`INSERT INTO project_units VALUES(${unit},${project},${property})`;
@@ -91,7 +91,7 @@ describe('unapplied checked consultation intake against isolated PostgreSQL',()=
      await expect(submit(payload())).rejects.toMatchObject({code:'55000'});
      await actor('authenticated',admin,c=>c`UPDATE consultation_requests SET admin_notes='Rollback follow-up' WHERE id=${id}`);
      const [row]=await sql`SELECT intake_request_key,admin_notes FROM consultation_requests WHERE id=${id}`;expect(row.intake_request_key).toBeTruthy();expect(row.admin_notes).toBe('Rollback follow-up');
-   }finally{const restored=await sql.reserve();try{await restored.unsafe(readFileSync('docs/hardening/consultation-intake/forward.sql','utf8'));}finally{restored.release();}}
+   }finally{const restored=await sql.reserve();try{await restored.unsafe(readFileSync('supabase/migrations/20261115101107_checked_consultation_intake.sql','utf8'));}finally{restored.release();}}
  });
 
 });

@@ -57,11 +57,9 @@ beforeAll(async()=>{
  await sql.unsafe(`REVOKE ALL ON FUNCTION create_order_atomic(text,uuid,uuid,timestamptz,timestamptz,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric) FROM PUBLIC,anon,authenticated;
   GRANT EXECUTE ON FUNCTION create_order_atomic(text,uuid,uuid,timestamptz,timestamptz,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric) TO service_role;
   CREATE TRIGGER sync_order_to_property_booking AFTER INSERT OR UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION trg_sync_order_to_property_booking()`);
- await script('docs/convergence/atomic_property_order/forward.sql');
- await script('docs/hardening/production-readiness/managed-booking.sql');
- await script('docs/hardening/production-readiness/order-authority.sql');
- await script('docs/hardening/production-readiness/manual-request.sql');
- await script('docs/hardening/production-readiness/manual-receipts.sql');
+ await script('supabase/migrations/20261115101016_production_readiness_atomic_payments.sql');
+ await sql.unsafe('GRANT SELECT,INSERT,UPDATE,DELETE,TRUNCATE ON provider_org_links TO authenticated');
+ await script('supabase/migrations/20261115102726_restrict_unchecked_payment_recipient_mutations.sql');
  await sql.unsafe(`GRANT SELECT,UPDATE ON orders TO authenticated;
   CREATE TRIGGER checked_order_guard BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION guard_customer_order_update()`);
 },30000);
@@ -170,6 +168,12 @@ describe('approved manual RUB receipt transaction',()=>{
   try{await expect(confirm()).rejects.toThrow(/permission denied/);expect(await sql`SELECT id FROM payment_intents`).toHaveLength(1);}
   finally{await sql.unsafe('GRANT EXECUTE ON FUNCTION confirm_manual_receipt_checked(uuid,numeric,numeric,numeric,text,text,text) TO authenticated');}
  });
+ it.each([admin,delegate,stranger])('browser actor %s cannot redirect checkout by writing trusted recipient bindings',async actor=>{
+  await expect(sql.begin(async tx=>{await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${actor},true)`;
+   await tx`UPDATE provider_org_links SET org_id=${id(99)} WHERE provider_id=${provider}`;
+  })).rejects.toThrow(/permission denied/);
+  expect((await sql`SELECT org_id FROM provider_org_links WHERE provider_id=${provider}`)[0].org_id).toBe(recipient);
+ });
  it('direct browser receipt forgery is denied even to admin',async()=>{
   await expect(sql.begin(async tx=>{await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${admin},true)`;
    await tx`UPDATE manual_payment_requests SET status='confirmed',amount_rub_actual=19000 WHERE id=${requestId}`;
@@ -196,4 +200,15 @@ describe('atomic manual request intake',()=>{
   await intake();await expect(intake(id(51))).rejects.toThrow();
   expect(await sql`SELECT id FROM orders`).toHaveLength(2);expect(await sql`SELECT id FROM manual_payment_requests`).toHaveLength(2);
  });
+ it('compiled release rollback closes every public writer without deleting financial evidence',async()=>{
+  await confirm();await script('docs/hardening/rollback/production_readiness_atomic_payments.sql');
+  expect(await sql`SELECT id FROM payment_intents`).toHaveLength(1);
+  expect((await sql`SELECT paid_at FROM orders WHERE id=${orderId}`)[0].paid_at).not.toBeNull();
+  const [grants]=await sql`SELECT has_function_privilege('authenticated','public.confirm_manual_receipt_checked(uuid,numeric,numeric,numeric,text,text,text)','EXECUTE') AS manual,
+   has_function_privilege('authenticated','public.create_managed_property_booking_checked(jsonb)','EXECUTE') AS managed,
+   has_function_privilege('service_role','public.settle_stripe_order_checked(uuid,uuid,text,text,bigint,text)','EXECUTE') AS stripe,
+   has_function_privilege('service_role','public.create_order_atomic(text,uuid,uuid,timestamptz,timestamptz,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric)','EXECUTE') AS atomic`;
+  expect(grants).toEqual({manual:false,managed:false,stripe:false,atomic:false});
+ });
+
 });

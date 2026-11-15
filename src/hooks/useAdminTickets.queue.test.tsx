@@ -44,7 +44,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
 const clients: QueryClient[] = [];
 function mount(route = '/admin/tickets?status=active') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); clients.push(client);
-  return renderHook(useAdminTickets, { wrapper: ({ children }) => <MemoryRouter initialEntries={[route]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><QueryClientProvider client={client}>{children}</QueryClientProvider></MemoryRouter> });
+  return renderHook(useAdminTickets, { wrapper: ({ children }) => <MemoryRouter initialEntries={[route]}><QueryClientProvider client={client}>{children}</QueryClientProvider></MemoryRouter> });
 }
 beforeEach(() => { fixture.rows = []; fixture.calls = []; fixture.failList = false; fixture.failCounts = false; fixture.writes.mockClear(); });
 afterEach(() => { clients.forEach(client => client.clear()); clients.length = 0; expect(fixture.writes).not.toHaveBeenCalled(); });

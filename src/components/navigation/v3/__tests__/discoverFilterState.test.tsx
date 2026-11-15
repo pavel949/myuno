@@ -92,6 +92,7 @@ function renderApp(initial = '/discover', source = 'navigator_v3_for_you') {
     [
       { path: '/discover', element: <DiscoverScreen source={source} /> },
       { path: '/map', element: <MapScreen /> },
+      { path: buildSituationListUrl('visa_extension'), element: <p>Visa destination</p> },
     ],
     { initialEntries: [initial] },
   );
@@ -164,12 +165,14 @@ describe('browser back restores list and map without re-applying the filter', ()
 
 describe('analytics matches what was actually applied', () => {
   it('sends the resolved href and the applied filters on click', async () => {
-    renderApp('/discover?q=visa');
+    const { router } = renderApp('/discover?q=visa');
     const link = screen.getByRole('link', { name: /EN visa/ });
     const expectedHref = buildSituationListUrl('visa_extension');
     expect(link).toHaveAttribute('href', expectedHref);
 
     await act(async () => { link.click(); });
+    await waitFor(() => expect(router.state.location.pathname).toBe(expectedHref));
+    expect(screen.getByText('Visa destination')).toBeInTheDocument();
     expect(trackSituationClick).toHaveBeenCalledTimes(1);
     expect(trackSituationClick).toHaveBeenCalledWith(
       'visa_extension',

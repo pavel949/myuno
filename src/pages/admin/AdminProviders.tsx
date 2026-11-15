@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { parseProviderFilter, parseQueuePage, type ProviderFilter } from '@/lib/adminDashboardQueues';
@@ -89,6 +89,8 @@ const LANGUAGE_OPTIONS = [
 
 export default function AdminProviders() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const consumedDialogCommand = useRef<string | null>(null);
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
@@ -212,17 +214,25 @@ export default function AdminProviders() {
     setIsDialogOpen(true);
   }, []);
 
+  const commandActorId=user?.id;
+
   // Consume one-shot dialog commands only after the existing admin gate and
   // exact editor read is ready. A URL ID selects a row but never authorizes it.
   useEffect(() => {
-    if (authLoading || adminLoading || !user || !isAdmin || providersLoading) return;
+    if (authLoading || adminLoading || !commandActorId || !isAdmin || providersLoading) return;
     const editId = searchParams.get('edit');
     const createNew = searchParams.get('action') === 'new';
-    if (editId === null && !createNew) return;
+    if (editId === null && !createNew) { consumedDialogCommand.current=null; return; }
+    if (editId !== null && providersFetching) return;
+    // Router 7 can defer URL replacement while urgent form updates render.
+    // Record this actor/history command before opening the dialog, so the old
+    // URL cannot reopen/reset it during that transition. This never grants access.
+    const commandKey=JSON.stringify([commandActorId,location.key,editId,createNew]);
+    if(consumedDialogCommand.current===commandKey)return;
+    consumedDialogCommand.current=commandKey;
 
     if (editId !== null) {
       // Cached rows are not the completed result of an in-flight refresh.
-      if (providersFetching) return;
       const provider = providers.find(item => item.id === editId);
       if (providersError) toast.error(isRussian ? 'Не удалось загрузить провайдеров. Попробуйте ещё раз.' : 'Could not load providers. Please try again.');
       else if (provider) openEditDialog(provider);
@@ -238,7 +248,7 @@ export default function AdminProviders() {
       if (createNew) next.delete('action');
       return next;
     }, { replace: true });
-  }, [authLoading, adminLoading, user, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
+  }, [authLoading, adminLoading, commandActorId, location.key, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.business_category) {

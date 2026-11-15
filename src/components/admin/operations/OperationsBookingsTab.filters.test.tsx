@@ -32,7 +32,7 @@ function Boundary() {
 }
 function setup() {
   state.reads=[];
-  render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}})}><MemoryRouter initialEntries={['/admin/operations?tab=bookings&status=pending&created_before=2026-10-19T00%3A00%3A00.000Z&source=dashboard']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><OperationsBookingsTab/><Boundary/></MemoryRouter></QueryClientProvider>);
+  render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}})}><MemoryRouter initialEntries={['/admin/operations?tab=bookings&status=pending&created_before=2026-10-19T00%3A00%3A00.000Z&source=dashboard']}><OperationsBookingsTab/><Boundary/></MemoryRouter></QueryClientProvider>);
 }
 afterEach(()=>{cleanup();state.error=false;state.many=false;state.noCount=false;});
 describe('actual operations order queue URL',()=>{

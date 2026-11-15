@@ -53,10 +53,10 @@ function LocationProbe({ navigation = false }: { navigation?: boolean }) {
     <button onClick={() => navigate(-1)}>Back fixture</button>
   </>}</>;
 }
-function mount(route = '/admin/operations?tab=moderation', transitions = false, navigation = false) {
+function mount(route = '/admin/operations?tab=moderation', navigation = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[route]} future={transitions ? { v7_startTransition: true, v7_relativeSplatPath: true } : undefined}><OperationsModerationTab /><LocationProbe navigation={navigation} /></MemoryRouter></QueryClientProvider>);
+  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[route]}><OperationsModerationTab /><LocationProbe navigation={navigation} /></MemoryRouter></QueryClientProvider>);
 }
 beforeEach(() => {
   state.language = 'en'; state.writes.length = 0; state.fetch.mockReset(); state.success.mockReset(); state.error.mockReset(); state.response = null; state.pending = null; state.filters.length = 0;
@@ -165,7 +165,7 @@ describe('source-specific review pages', () => {
     expect(state.writes).toEqual([]);
   });
   it('keeps rapid filter changes composed before concurrent router commits', async () => {
-    mount('/admin/operations?tab=moderation&type=property&page=4&q=Ownerless', true); await ready('Ownerless villa');
+    mount('/admin/operations?tab=moderation&type=property&page=4&q=Ownerless'); await ready('Ownerless villa');
     act(() => {
       fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
       fireEvent.change(screen.getByRole('combobox', { name: 'Content type' }), { target: { value: 'listing' } });

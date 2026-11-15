@@ -25,7 +25,7 @@ function stats() {
     pendingProviders: 4, openTickets: 1, openDisputes: 0, pendingManualPayments: 0, pendingPartnerApplications: 0,
     sourceErrors: {}, sourceUpdatedAt: { pendingOrders: Date.now() }, ordersCreatedBefore: '2026-10-19T00:00:00.000Z' } as DashboardStats;
 }
-const mount = () => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AdminDashboard /></MemoryRouter>);
+const mount = () => render(<MemoryRouter><AdminDashboard /></MemoryRouter>);
 beforeEach(() => { vi.clearAllMocks(); mocks.roles = [{ role: 'admin' }]; mocks.checking = false; mocks.roleError = null; mocks.stats.mockReturnValue({ data: stats(), isLoading: false, isError: false, isFetching: false }); });
 afterEach(cleanup);
 

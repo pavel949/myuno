@@ -36,7 +36,7 @@ import MCBookingsPage from '../MCBookingsPage';
 
 function mount(language: FixtureLanguage) {
   mocks.language = language;
-  render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><MCBookingsPage /></MemoryRouter>);
+  render(<MemoryRouter><MCBookingsPage /></MemoryRouter>);
 }
 function selectFirst(language: FixtureLanguage) {
   const name = bookingsListFixtures(language)[0].guest_name;

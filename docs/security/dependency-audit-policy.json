@@ -1,0 +1,11 @@
+{
+  "reviewed_on": "2026-11-15",
+  "advisory": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+  "status": "Not reachable from untrusted input at the reviewed build-only callsite; upstream has no patched release",
+  "allowed_dev_nodes": ["deepmerge", "@rollup/plugin-node-resolve", "workbox-build", "vite-plugin-pwa"],
+  "reviewed_installed_sources": [
+    {"path": "node_modules/@rollup/plugin-node-resolve/dist/es/index.js", "sha256": "e3d3dd4cee934cc57e6a335005c2db4111b1333bbaddce39f08a7d505ee9ccea"},
+    {"path": "node_modules/@rollup/plugin-node-resolve/dist/cjs/index.js", "sha256": "98eee3d5a03aac277c01f78be8af18fe19cae7cb0fe79e2b9817af44051a07b9"}
+  ],
+  "rationale": "Both ESM and CJS consumers invoke deepmerge only once as deepMerge({}, defaults). defaults is a module-local constant; caller options are subsequently spread shallowly. Neither user data nor plugin options reach deepmerge. These tools are devDependencies and are absent from the production dependency graph. This is a reviewed reachability classification, not a claim that deepmerge 4.3.1 was patched. Changes to either consumer require renewed review."
+}

@@ -43,6 +43,13 @@ jobs:
             break
           done
 
+      - name: Dependency advisory gate
+        run: |
+          npm audit --json > /tmp/myuno-all-audit.json || true
+          npm audit --omit=dev --json > /tmp/myuno-production-audit.json || true
+          node scripts/qa/dependency-audit-gate.mjs /tmp/myuno-all-audit.json /tmp/myuno-production-audit.json
+          node scripts/qa/dependency-audit-gate.test.mjs
+
       - name: Typecheck
         run: npm run typecheck
         env:
@@ -52,7 +59,8 @@ jobs:
         run: |
           npm test -- --maxWorkers=2
           node --test scripts/qa/lighthouse-evidence.test.mjs
-          node --experimental-strip-types --test scripts/qa/data-snapshot.check.mjs scripts/qa/stripe-settlement-handler.check.mjs scripts/qa/manual-receipt-handler.check.mjs scripts/qa/manual-request-handler.check.mjs
+          node --experimental-strip-types --test scripts/qa/data-snapshot.check.mjs scripts/qa/stripe-settlement-handler.check.mjs scripts/qa/manual-receipt-handler.check.mjs scripts/qa/manual-request-handler.check.mjs scripts/qa/export-dependency.check.mjs
+          node scripts/qa/recipient-configuration.postgres.check.mjs
           node scripts/qa/final-order-handlers.mjs
           node scripts/qa/transfer-operator-conflicts.mjs
         env:

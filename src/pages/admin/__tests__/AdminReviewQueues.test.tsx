@@ -39,7 +39,7 @@ function RouteProbe() {
   return <><div data-testid="route">{location.pathname}{location.search}</div><button onClick={() => navigate(-1)}>Back fixture</button></>;
 }
 function renderPage(page: 'properties' | 'projects', entries: string[]) {
-  return render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={entries} initialIndex={entries.length - 1} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{page === 'properties' ? <AdminProperties /> : <AdminProjects />}<RouteProbe /></MemoryRouter></QueryClientProvider>);
+  return render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={entries} initialIndex={entries.length - 1}>{page === 'properties' ? <AdminProperties /> : <AdminProjects />}<RouteProbe /></MemoryRouter></QueryClientProvider>);
 }
 const pendingProperty = { id: 'pending', title_en: 'Pending coastal home', approval_status: 'pending', is_active: true };
 const approvedProperty = { id: 'approved', title_en: 'Approved coastal home', approval_status: 'approved', is_active: true };
