@@ -541,10 +541,7 @@ export default function AirportTransferBooking() {
             </h1>
             <p className="text-xs text-muted-foreground">Phuket (HKT)</p>
           </div>
-          <div className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 rounded-full">
-            <Star className="w-3.5 h-3.5 text-primary fill-primary" />
-            <span className="text-xs font-semibold text-primary">4.9</span>
-          </div>
+          
         </div>
 
         <BookingStepProgress steps={transferSteps} currentStep={step} className="py-2" />
@@ -609,7 +606,7 @@ export default function AirportTransferBooking() {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
       >
         <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex-1 min-w-0">
               {formData.destinationAddress ? (
                 <p className="text-xs text-muted-foreground truncate">
@@ -621,7 +618,7 @@ export default function AirportTransferBooking() {
                   {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
                 </p>
               )}
-              <p className="text-lg font-bold">฿{totalPrice.toLocaleString()}</p>
+              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{formData.vehicleType ? `฿${totalPrice.toLocaleString()}` : (language === "ru" ? "Выберите автомобиль" : "Select a vehicle")}</p>
             </div>
             {selectedVehicleLabel && (
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">
