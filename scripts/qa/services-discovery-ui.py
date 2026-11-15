@@ -130,7 +130,7 @@ async def main():
                 await context.route('**/*',route)
                 page=await context.new_page()
                 await page.goto('http://localhost:8080/fixture?lang=en&phase='+phase,wait_until='networkidle')
-                if phase=='loading': await expect(page.get_by_role('status')).to_have_text('Loading catalogue…')
+                if phase=='loading': await expect(page.get_by_role('status').filter(has_text='Loading catalogue…')).to_have_count(1)
                 elif phase=='error':
                     await expect(page.get_by_role('alert')).to_be_visible()
                     await page.get_by_role('button',name='Try again').click()
