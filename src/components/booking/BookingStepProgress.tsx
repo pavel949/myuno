@@ -27,7 +27,7 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
         <div 
           className="absolute top-4 left-0 h-0.5 bg-primary transition-all duration-500 ease-out"
           style={{ 
-            width: `${Math.min(100, (currentStep / (steps.length - 1)) * 100)}%` 
+            width: `${steps.length > 1 ? Math.min(100, (currentStep / (steps.length - 1)) * 100) : 100}%` 
           }}
         />
 
@@ -39,7 +39,7 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
           return (
             <div 
               key={step.id} 
-              className="relative flex flex-col items-center z-10"
+              className="relative flex min-w-0 flex-1 flex-col items-center z-10"
             >
               {/* Step circle */}
               <div
@@ -60,7 +60,7 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
               {/* Step label */}
               <span 
                 className={cn(
-                  "text-xs mt-2 text-center max-w-[80px] transition-colors duration-300",
+                  "text-xs mt-2 text-center max-w-full px-1 break-words transition-colors duration-300",
                   (isCompleted || isCurrent) ? "text-foreground font-medium" : "text-muted-foreground"
                 )}
               >
