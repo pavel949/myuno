@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertyTourPromo } from '@/components/experiences/PropertyTourPromo';
+import { MarketplaceDiscoveryHero } from '@/components/services/MarketplaceDiscoveryHero';
 import { useExperiences, ExperienceType } from '@/hooks/useExperiences';
 import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { mapExperienceToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
@@ -178,6 +179,7 @@ export default function ExperiencesIndex() {
           : 'Tours, excursions, and activities in Phuket — with verified operators.'}
       />
 
+      <MarketplaceDiscoveryHero kind="experiences" />
       <VerticalContextBanner verticalId="experience" />
 
       {isLoading ? (
