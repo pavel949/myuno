@@ -104,7 +104,7 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
     const targetPhone = phoneOverride || ADMIN_WHATSAPP;
     
     console.info('[WhatsApp] Notification prepared for:', targetPhone);
-    console.info('[WhatsApp] Message:', message);
+    // Do not log customer PII or full notification content.
     
     // Try to send via UltraMsg API if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -122,12 +122,15 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
       });
       
       const result = await response.json();
-      console.info('[WhatsApp] UltraMsg response:', result);
+      if (!response.ok || result?.error || result?.sent === false) {
+        throw new Error(`WhatsApp provider rejected message (${response.status})`);
+      }
     } else {
-      console.info('[WhatsApp] No API configured, logging message only');
+      throw new Error('WhatsApp provider is not configured');
     }
   } catch (error) {
     console.error('[WhatsApp] Error sending notification:', error);
+    throw error;
   }
 }
 
@@ -155,10 +158,11 @@ Deno.serve(async (req) => {
 
     console.info('Sending admin notification for order:', payload.order_number);
 
-    // Send WhatsApp notification to admin (non-blocking)
-    sendWhatsAppNotification(payload).catch(err => 
-      console.error('[WhatsApp] Failed to send:', err)
-    );
+    // Wait for both channels; never report complete success for a fire-and-forget WhatsApp call.
+    const whatsappDelivery = sendWhatsAppNotification(payload).then(() => true).catch(err => {
+      console.error('[WhatsApp] Failed to send:', err);
+      return false;
+    });
 
     // Public lead input may notify configured platform contacts, never supplied third parties.
 
@@ -328,10 +332,14 @@ Deno.serve(async (req) => {
       html: emailHtml,
     });
 
-    console.info('Email sent successfully:', emailResponse);
+    if (emailResponse.error || !emailResponse.data?.id) {
+      throw new Error('Email provider did not accept notification');
+    }
+    const whatsappSent = await whatsappDelivery;
+    console.info('Email accepted by provider:', emailResponse.data.id);
 
     return new Response(
-      JSON.stringify({ success: true, email_id: emailResponse.data?.id }),
+      JSON.stringify({ success: true, email_id: emailResponse.data.id, whatsapp_sent: whatsappSent, partial_delivery: !whatsappSent }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
