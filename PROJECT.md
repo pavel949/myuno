@@ -149,6 +149,12 @@ Property flywheel is economics, not a required state machine. Services are reven
 
 UI `paid` is not payment truth. Manual/off-platform payment requires authorized actor, trusted order/amount context, canonical reconciliation and accounting consequence. Stripe/webhooks require verified evidence/idempotency.
 
+Negotiated prices are approved by a protected administrator or a person explicitly authorized by that administrator. Delegation uses persisted company/property/action duties, never employment alone. A server quote derives one amount from eligible stored tariffs; conflicting tariffs require approval rather than allowing the caller to choose a price envelope.
+
+Stripe THB amounts use satang: 950 THB = 95000 minor units. A partial provider receipt is not full payment or full-order realized revenue. Receipt, order, inventory and ledger reconciliation must recover on replay; an already-confirmed status cannot skip unfinished accounting. Operational transfer acceptance never establishes received money.
+
+Manual RUB receipts require a protected administrator or explicitly delegated property/company approver, an agreed RUB-per-THB rate, actual received RUB amount and an immutable private document with a unique reference. Browser estimates are not payment evidence. Partial receipts preserve the remaining THB debt; full settlement requires reconciled canonical receipts, counterparty, inventory and ledger. Overpayment and refunds require a separate recorded decision. Existing agreed order totals cannot be silently rewritten during receipt confirmation.
+
 `ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.
 
 **Operational forecasts, pending amounts and provisional accruals may exist, but must be explicitly labelled non-posted/provisional and must not be included in realized P&L as though they were posted ledger truth.**

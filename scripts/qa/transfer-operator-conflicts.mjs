@@ -75,14 +75,16 @@ async function run({ action, mutation, status = 'pending', expected }) {
     assert.equal(body.already_confirmed, undefined);
     assert.equal(body.already_cancelled, undefined);
   }
-  assert.equal(mutations, status === 'pending' ? 1 : 0);
+  assert.equal(mutations, status === 'pending' && action === 'confirm' ? 1 : 0);
   return body;
 }
 
-for (const action of ['confirm', 'reject']) {
+for (const action of ['confirm']) {
   await run({ action, mutation: { data: null, error: { message: 'synthetic failure' } }, expected: 500 });
   await run({ action, mutation: { data: [], error: null }, expected: 409 });
 }
+await run({ action: 'reject', status: 'pending', expected: 503 });
+await run({ action: 'reject', status: 'confirmed', expected: 503 });
 const replay = await run({ action: 'confirm', status: 'confirmed', expected: 200 });
 assert.equal(replay.already_confirmed, true);
 console.log('transfer-operator-conflicts: 5/5 scenarios passed');

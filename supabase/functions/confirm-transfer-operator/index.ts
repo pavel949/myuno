@@ -122,66 +122,14 @@ Deno.serve(async (req) => {
     const customerPhone = primary.phone || null;
     const customerName = primary.name || '';
 
-    // ===== REJECT FLOW =====
+    // A signed operational link is not settlement/refund authority. The existing
+    // refund writer is deliberately contained; never cancel first and report a
+    // successful rejection while the financial reversal remains unproved.
     if (action === 'reject') {
-      if (order.status === 'cancelled') {
-        return new Response(JSON.stringify({ success: true, already_cancelled: true, order_number: order.order_number }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      const { data: rejUpd, error: rejectUpdateError } = await sb()
-        .from('orders')
-        .update({ status: 'cancelled' })
-        .eq('id', orderId)
-        .in('status', ['pending', 'confirmed'])
-        .eq('order_type', 'transfer')
-        .select('id');
-
-      if (rejectUpdateError) {
-        console.error('[reject] atomic update failed', rejectUpdateError);
-        return new Response(JSON.stringify({ error: 'Update failed' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (!rejUpd || rejUpd.length === 0) {
-        return new Response(JSON.stringify({ error: 'Transfer changed; reload before retrying' }), {
-          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      await sb().from('order_status_history').insert({
-        order_id: orderId,
-        from_status: order.status,
-        to_status: 'cancelled',
-        changed_by_role: 'operator',
-        note: `Rejected by operator via signed link${rejectReason ? `: ${rejectReason}` : ''}`,
-      }).catch(() => {});
-
-      // Auto-refund (idempotent inside the function).
-      const { data: refundResult, error: refundErr } = await sb().functions.invoke('refund-transfer-order', {
-        body: { order_id: orderId, reason: rejectReason || 'operator_reject' },
-      });
-      if (refundErr) console.error('[reject] refund failed', refundErr);
-
-      await sb().from('booking_notifications_log').insert({
-        channel: 'system',
-        notification_type: 'transfer_rejected',
-        sent_at: new Date().toISOString(),
-        metadata: {
-          order_id: orderId,
-          order_number: order.order_number,
-          recipients: { customer_email: customerEmail },
-          status: refundErr ? 'partial' : 'sent',
-          reject_reason: rejectReason,
-        },
-      }).catch((e) => console.error('[log]', e));
-
       return new Response(JSON.stringify({
-        success: true,
-        rejected: true,
-        order_number: order.order_number,
-        refund: refundResult || null,
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        error: 'Transfer rejection requires authorized cancellation and payment reconciliation',
+        code: 'checked_cancellation_required',
+      }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // ===== CONFIRM FLOW =====
@@ -222,10 +170,8 @@ Deno.serve(async (req) => {
       note: 'Confirmed by operator via signed link',
     }).catch(() => {});
 
-    // Record ledger entries (idempotent) so admin Финансы panel reflects this booking.
-    await sb().rpc('record_ledger_entries', { p_order_id: orderId }).then(({ error }) => {
-      if (error) console.error('[confirm] record_ledger_entries failed', error);
-    });
+    // Operator acceptance is operational only. Verified payment writers own
+    // receipt/accounting; accepting an unpaid transfer must never post revenue.
 
     const meta = (order.metadata || {}) as Record<string, unknown>;
     const customerLang: Lang = (meta.language === 'en' || meta.language === 'th' || meta.language === 'ru')

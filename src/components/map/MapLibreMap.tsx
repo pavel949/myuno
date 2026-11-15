@@ -1,5 +1,6 @@
 import { useEffect, useRef, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
-import maplibregl, { Map as MlMap, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import { Map as MlMap, type MapGeoJSONFeature, type StyleSpecification } from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
 import { Crosshair, Loader2 } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';

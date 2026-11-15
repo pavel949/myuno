@@ -52,6 +52,9 @@ jobs:
         run: |
           npm test -- --maxWorkers=2
           node --test scripts/qa/lighthouse-evidence.test.mjs
+          node --experimental-strip-types --test scripts/qa/data-snapshot.check.mjs scripts/qa/stripe-settlement-handler.check.mjs scripts/qa/manual-receipt-handler.check.mjs scripts/qa/manual-request-handler.check.mjs
+          node scripts/qa/final-order-handlers.mjs
+          node scripts/qa/transfer-operator-conflicts.mjs
         env:
           E28_JIT_PROFILE: "1"
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs

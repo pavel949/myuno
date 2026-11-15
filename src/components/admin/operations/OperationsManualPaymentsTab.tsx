@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Loader2, MessageCircle, CheckCircle2, XCircle, Clock,
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -24,6 +23,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,7 +36,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 
 type Status = 'awaiting_admin' | 'contacted' | 'paid' | 'confirmed' | 'rejected' | 'expired';
 
-interface RequestRow {
+export interface RequestRow {
   id: string;
   order_id: string;
   status: Status;
@@ -55,7 +55,7 @@ interface RequestRow {
   contacted_at: string | null;
   confirmed_at: string | null;
   metadata: Record<string, any> | null;
-  orders: { order_number: string | null; metadata: Record<string, any> | null } | null;
+  orders: { total_amount: number; currency: string; order_number: string | null; metadata: Record<string, any> | null } | null;
 }
 
 const STATUS_FILTERS: { id: ManualPaymentFilter; en: string; ru: string }[] = [
@@ -78,15 +78,8 @@ const STATUS_BADGE: Record<Status, { en: string; ru: string; cls: string }> = {
   expired:        { en: 'Expired',        ru: 'Истекло',        cls: 'bg-muted text-muted-foreground' },
 };
 
-const REJECT_REASONS: { id: string; en: string; ru: string }[] = [
-  { id: 'no_response', en: 'Guest unreachable', ru: 'Гость не отвечает' },
-  { id: 'no_payment', en: 'Payment not received', ru: 'Оплата не поступила' },
-  { id: 'fraud', en: 'Suspected fraud', ru: 'Подозрение на мошенничество' },
-  { id: 'guest_cancelled', en: 'Guest cancelled', ru: 'Гость отменил' },
-  { id: 'other', en: 'Other', ru: 'Другое' },
-];
-
 export function OperationsManualPaymentsTab() {
+  const { user } = useAuth();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const qc = useQueryClient();
@@ -101,7 +94,8 @@ export function OperationsManualPaymentsTab() {
   const [detailTarget, setDetailTarget] = useState<RequestRow | null>(null);
 
   const { data: result, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ['manual-payment-requests', filter, page],
+    queryKey: ['manual-payment-requests', user?.id, filter, page],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
       let q = supabase
         .from('manual_payment_requests')
@@ -109,7 +103,7 @@ export function OperationsManualPaymentsTab() {
           id, order_id, status, amount_listing, currency_listing, amount_rub_estimate, amount_rub_actual, payment_method_actual,
           guest_name, guest_phone, guest_email, hold_expires_at, rejected_reason, proof_file_path,
           created_at, contacted_at, confirmed_at, metadata,
-          orders ( order_number, metadata )
+          orders ( order_number, metadata, total_amount, currency )
         `, { count: 'exact' })
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
@@ -407,7 +401,7 @@ function DetailSheet({
   const propertyTitle = row.orders?.metadata?.property_title || (isRu ? 'Объект' : 'Property');
   const expiresAt = parseISO(row.hold_expires_at);
   const badge = STATUS_BADGE[row.status];
-  const isActionable = row.status === 'awaiting_admin' || row.status === 'contacted' || row.status === 'paid';
+  const isActionable = row.status === 'awaiting_admin' || row.status === 'contacted' || row.status === 'paid' || (row.status === 'confirmed' && row.metadata?.receipt_outcome === 'partial');
 
   const copyOrderRef = () => {
     navigator.clipboard.writeText(orderNumber).then(
@@ -551,6 +545,14 @@ function DetailSheet({
             </>
           )}
 
+          {row.status === 'confirmed' && row.metadata?.receipt_outcome !== 'settled' && (
+            <p className="text-sm p-3 border border-warning/40" role="status">
+              {row.metadata?.receipt_outcome === 'partial'
+                ? (isRu ? `Поступление учтено. Осталось оплатить: ${row.metadata.receipt_remaining_thb} THB.` : `Receipt recorded. Balance due: ${row.metadata.receipt_remaining_thb} THB.`)
+                : (isRu ? 'Поступление требует сверки. Полная оплата не подтверждена.' : 'Receipt requires reconciliation. Full payment is unconfirmed.')}
+            </p>
+          )}
+
           {row.proof_file_path && (
             <>
               <Separator />
@@ -592,7 +594,7 @@ function DetailSheet({
               className="gap-1.5 bg-success hover:bg-success/90 text-success-foreground"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              {isRu ? 'Подтвердить оплату' : 'Confirm payment'}
+              {isRu ? 'Учесть поступление' : 'Record receipt'}
             </Button>
             <Button
               size="sm"
@@ -612,63 +614,76 @@ function DetailSheet({
 
 // ──────────────────────────────────────────────────────────
 // Confirm dialog — admin enters actual RUB amount + payment method,
-// optionally uploads proof file.
+// requires an agreed FX rate and an immutable proof document.
 // ──────────────────────────────────────────────────────────
-function ConfirmPaymentDialog({
+export function ConfirmPaymentDialog({
   row, isRu, onClose, onDone,
-}: { row: RequestRow; isRu: boolean; onClose: () => void; onDone: () => void }) {
-  const [amount, setAmount] = useState<string>(row.amount_rub_estimate ? String(row.amount_rub_estimate) : '');
+}: { row: Pick<RequestRow, 'id' | 'amount_rub_estimate' | 'amount_listing' | 'orders'>; isRu: boolean; onClose: () => void; onDone: () => void }) {
+  const [amount, setAmount] = useState<string>('');
+  const [fx, setFx] = useState('');
+  const [total, setTotal] = useState(String(row.orders?.total_amount ?? row.amount_listing));
+  const [reference, setReference] = useState('');
+  const uploadedProof = useRef<{ file: File; path: string } | null>(null);
+  const inFlight = useRef(false);
   const [method, setMethod] = useState<string>('sbp');
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
     const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) {
-      toast.error(isRu ? 'Введите сумму' : 'Enter amount');
+    if (inFlight.current) return;
+    if (![amt, Number(fx), Number(total)].every(n => Number.isFinite(n) && n > 0) || reference.trim().length < 3 || !proofFile || !['image/jpeg', 'image/png', 'application/pdf'].includes(proofFile.type) || proofFile.size > 10 * 1024 * 1024) {
+      toast.error(isRu ? 'Укажите сумму, курс, согласованную стоимость, номер документа и PDF/JPG/PNG до 10 МБ' : 'Enter amount, exchange rate, approved total, receipt reference and PDF/JPG/PNG up to 10 MB');
       return;
     }
+    inFlight.current = true;
     setSubmitting(true);
     try {
-      let proofPath: string | null = null;
-      if (proofFile) {
-        const ext = proofFile.name.split('.').pop() || 'bin';
-        const path = `${row.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from('manual_payment_proofs')
-          .upload(path, proofFile, { upsert: false });
+      let proofPath = uploadedProof.current?.file === proofFile ? uploadedProof.current.path : null;
+      if (!proofPath) {
+        const ext = proofFile.type === 'application/pdf' ? 'pdf' : proofFile.type === 'image/png' ? 'png' : 'jpg';
+        const path = `${row.id}/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('manual_payment_proofs').upload(path, proofFile, { upsert: false });
         if (upErr) throw upErr;
+        uploadedProof.current = { file: proofFile, path };
         proofPath = path;
       }
 
-      const { error } = await supabase.functions.invoke('confirm-manual-payment', {
+      const { data, error } = await supabase.functions.invoke('confirm-manual-payment', {
         body: {
           request_id: row.id,
           amount_rub_actual: amt,
+          fx_rate_rub_per_thb: Number(fx),
+          approved_total_thb: Number(total),
+          receipt_reference: reference.trim(),
           payment_method: method,
           proof_file_path: proofPath,
         },
       });
       if (error) throw error;
-      toast.success(isRu ? 'Оплата подтверждена' : 'Payment confirmed');
+      if (!data?.ok || !data.order_id || !['settled', 'partial', 'overpayment_requires_reconciliation', 'legacy_receipt_requires_reconciliation', 'recipient_requires_reconciliation', 'inventory_requires_reconciliation'].includes(data.outcome)) throw new Error(isRu ? 'Нет подтверждения. Проверьте заявку перед повтором.' : 'Acknowledgement missing. Check the request before retrying.');
+      const message = data.outcome === 'settled' ? (isRu ? 'Оплата и бронирование подтверждены' : 'Payment and booking confirmed') : data.outcome === 'partial' ? (isRu ? `Поступление учтено. Остаток: ${data.remaining_thb} THB` : `Receipt recorded. Balance: ${data.remaining_thb} THB`) : (isRu ? 'Поступление учтено. Требуется отдельная сверка.' : 'Receipt recorded. Separate reconciliation required.');
+      toast.success(message);
       onDone();
     } catch (e: any) {
       toast.error(isRu ? 'Не удалось подтвердить' : 'Confirmation failed', { description: e?.message });
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   };
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isRu ? 'Подтвердить оплату' : 'Confirm payment'}</DialogTitle>
+          <DialogTitle>{isRu ? 'Подтвердить поступление' : 'Confirm receipt'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label>{isRu ? 'Сумма получена (₽)' : 'Amount received (₽)'}</Label>
+            <Label htmlFor="receipt-amount">{isRu ? 'Сумма получена (₽)' : 'Amount received (₽)'}</Label>
             <Input
+              id="receipt-amount"
               type="number"
               inputMode="decimal"
               value={amount}
@@ -677,26 +692,38 @@ function ConfirmPaymentDialog({
             />
           </div>
           <div>
-            <Label>{isRu ? 'Способ оплаты' : 'Payment method'}</Label>
+            <Label htmlFor="receipt-fx">{isRu ? 'Курс: RUB за 1 THB (по согласованию)' : 'Agreed rate: RUB per 1 THB'}</Label>
+            <Input id="receipt-fx" type="number" inputMode="decimal" value={fx} onChange={e => setFx(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="receipt-total">{isRu ? 'Согласованная полная стоимость (THB)' : 'Approved full order total (THB)'}</Label>
+            <Input id="receipt-total" type="number" inputMode="decimal" value={total} onChange={e => setTotal(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="receipt-reference">{isRu ? 'Уникальный номер банковского документа' : 'Unique bank receipt reference'}</Label>
+            <Input id="receipt-reference" value={reference} onChange={e => setReference(e.target.value)} maxLength={200} />
+          </div>
+          <div>
+            <Label htmlFor="receipt-method">{isRu ? 'Способ оплаты' : 'Payment method'}</Label>
             <Select value={method} onValueChange={setMethod}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger id="receipt-method"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="sbp">{isRu ? 'СБП' : 'SBP'}</SelectItem>
                 <SelectItem value="ru_card">{isRu ? 'Карта РФ' : 'Russian card'}</SelectItem>
-                <SelectItem value="crypto">{isRu ? 'Крипта' : 'Crypto'}</SelectItem>
                 <SelectItem value="cash">{isRu ? 'Наличные' : 'Cash'}</SelectItem>
                 <SelectItem value="other">{isRu ? 'Другое' : 'Other'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label className="flex items-center gap-2">
+            <Label htmlFor="receipt-proof" className="flex items-center gap-2">
               <Upload className="w-3.5 h-3.5" />
-              {isRu ? 'Чек / скриншот (необязательно)' : 'Proof (optional)'}
+              {isRu ? 'Документ (обязательно, до 10 МБ)' : 'Document (required, up to 10 MB)'}
             </Label>
             <Input
+              id="receipt-proof"
               type="file"
-              accept="image/*,.pdf"
+              accept="image/jpeg,image/png,application/pdf"
               onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
             />
           </div>
@@ -717,74 +744,14 @@ function ConfirmPaymentDialog({
 // Reject dialog
 // ──────────────────────────────────────────────────────────
 function RejectDialog({
-  row, isRu, onClose, onDone,
+  isRu, onClose,
 }: { row: RequestRow; isRu: boolean; onClose: () => void; onDone: () => void }) {
-  const [reasonId, setReasonId] = useState<string>('no_payment');
-  const [extra, setExtra] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const submit = async () => {
-    setSubmitting(true);
-    try {
-      const reasonLabel = REJECT_REASONS.find((r) => r.id === reasonId);
-      const reasonText = [reasonLabel ? (isRu ? reasonLabel.ru : reasonLabel.en) : reasonId, extra].filter(Boolean).join(' · ');
-      const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase
-        .from('manual_payment_requests')
-        .update({
-          status: 'rejected',
-          rejected_reason: reasonText,
-          rejected_at: new Date().toISOString(),
-          rejected_by: u.user?.id,
-        })
-        .eq('id', row.id);
-      if (error) throw error;
-
-      // Cancel the underlying order so dates free up
-      await supabase
-        .from('orders')
-        .update({ status: 'cancelled' })
-        .eq('id', row.order_id);
-
-      toast.success(isRu ? 'Заявка отклонена' : 'Request rejected');
-      onDone();
-    } catch (e: any) {
-      toast.error(isRu ? 'Не удалось отклонить' : 'Reject failed', { description: e?.message });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isRu ? 'Отклонить заявку' : 'Reject request'}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div>
-            <Label>{isRu ? 'Причина' : 'Reason'}</Label>
-            <Select value={reasonId} onValueChange={setReasonId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {REJECT_REASONS.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>{isRu ? r.ru : r.en}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>{isRu ? 'Комментарий (опционально)' : 'Comment (optional)'}</Label>
-            <Textarea value={extra} onChange={(e) => setExtra(e.target.value)} rows={3} />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>{isRu ? 'Отмена' : 'Cancel'}</Button>
-          <Button variant="destructive" onClick={submit} disabled={submitting}>
-            {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-            {isRu ? 'Отклонить' : 'Reject'}
-          </Button>
-        </DialogFooter>
+        <DialogHeader><DialogTitle>{isRu ? 'Требуется отдельное решение' : 'Separate decision required'}</DialogTitle></DialogHeader>
+        <p>{isRu ? 'Отмена бронирования и возврат требуют проверенной атомарной операции. Зафиксируйте решение для сверки; заявка и платёжные документы сохранены.' : 'Cancellation and refunds require a checked atomic operation. Record a reconciliation decision; the request and receipt evidence are preserved.'}</p>
+        <DialogFooter><Button onClick={onClose}>{isRu ? 'Закрыть' : 'Close'}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );

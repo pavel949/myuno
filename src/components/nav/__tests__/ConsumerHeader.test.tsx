@@ -10,6 +10,19 @@ vi.mock('@/components/market/MiniCart', () => ({ MiniCart: () => null }));
 vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => null }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); locale.language = 'ru'; });
+it.each([
+ ['ru', 'Партнёрам', 'Для бизнеса'],
+ ['en', 'For partners', 'For business'],
+ ['th', 'สำหรับพาร์ทเนอร์', 'สำหรับธุรกิจ'],
+])('retains the localized business destination in the partner menu in %s', (language, partners, business) => {
+ locale.language = language;
+ const { container } = render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
+ const menu = container.querySelector('details.consumer-partner-menu')!;
+ expect(menu.querySelector('summary')).toHaveTextContent(partners);
+ menu.setAttribute('open', '');
+ expect(within(menu as HTMLElement).getByRole('link', { name: business })).toHaveAttribute('href', '/for-business');
+ expect(within(screen.getByRole('navigation')).queryByRole('link', { name: business })).not.toBeInTheDocument();
+});
 it('provides a named modal menu with direct destinations, sign-in and Escape handling', async () => {
  render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
  const trigger = screen.getByRole('button', { name: 'Открыть меню' });

@@ -15,12 +15,13 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from(table: strin
     eq(key: string, value: unknown) { filters.push(['eq', key, value]); return query; },
     is(key: string, value: unknown) { filters.push(['is', key, value]); return query; },
     lt(key: string, value: unknown) { filters.push(['lt', key, value]); return query; },
+    or(value: string) { filters.push(['or', '', value]); return query; },
     in(key: string, value: unknown[]) { filters.push(['in', key, value]); return query; },
     then(resolve: (value: unknown) => unknown, reject: (error: unknown) => unknown) {
       if (fixture.thrown.has(table)) return Promise.reject(new Error('synthetic transport failure')).then(resolve, reject);
       const rows = (fixture.rows[table] ?? []).filter(row => filters.every(([op, key, value]) => {
         const current = row[String(key)];
-        return op === 'eq' ? current === value : op === 'is' ? current == null : op === 'lt' ? String(current) < String(value) : (value as unknown[]).includes(current);
+        return op === 'or' ? ['awaiting_admin','contacted','paid'].includes(String(row.status)) || (row.status==='confirmed' && (row.metadata as Record<string, unknown> | undefined)?.receipt_outcome !== 'settled') : op === 'eq' ? current === value : op === 'is' ? current == null : op === 'lt' ? String(current) < String(value) : (value as unknown[]).includes(current);
       }));
       return Promise.resolve({ data: null, error: fixture.failed.has(table) ? { message: 'synthetic read failure' } : null,
         count: fixture.missingCount.has(table) ? null : rows.length }).then(resolve, reject);
@@ -43,7 +44,7 @@ describe('dashboard independent exact source reads', () => {
     fixture.rows.support_tickets = ['open', 'in_progress', 'resolved', 'closed'].map(status => ({ status }));
     fixture.rows.providers = [{ is_verified: false }, { is_verified: true }, { is_verified: null }];
     const result = await fetchAdminDashboardStats(new Date('2026-10-20T00:00:00.000Z'));
-    expect(result).toMatchObject({ pendingOrders: 2, pendingOrders24h: 1, pendingBookings: 3, pendingManualPayments: 2, openTickets: 2, pendingProviders: 1, ordersCreatedBefore: '2026-10-19T00:00:00.000Z' });
+    expect(result).toMatchObject({ pendingOrders: 2, pendingOrders24h: 1, pendingBookings: 3, pendingManualPayments: 4, openTickets: 2, pendingProviders: 1, ordersCreatedBefore: '2026-10-19T00:00:00.000Z' });
     expect(fixture.calls.filter(call => call.table === 'orders').map(call => call.filters)).toEqual([
       [['is', 'deleted_at', null], ['eq', 'status', 'pending']],
       [['is', 'deleted_at', null], ['eq', 'status', 'pending'], ['lt', 'created_at', '2026-10-19T00:00:00.000Z']],

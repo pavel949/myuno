@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useStorefront } from '@/contexts/StorefrontContext';
+import { createManagedBooking } from '@/lib/createManagedBooking';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
@@ -138,7 +138,6 @@ function requireStayDates(checkIn: string, checkOut: string) {
 export function usePropertyBookings(propertyId?: string) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
-  const { storefront } = useStorefront();
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
@@ -200,135 +199,13 @@ export function usePropertyBookings(propertyId?: string) {
 
       requireStayDates(input.check_in, input.check_out);
 
-      // P1: Overlap validation — check existing orders and manual blocks
-      const checkInTime = input.check_in_time || '14:00';
-      const checkOutTime = input.check_out_time || '12:00';
-      const newStart = `${input.check_in}T${checkInTime}:00Z`;
-      const newEnd = `${input.check_out}T${checkOutTime}:00Z`;
-
-      const [{ data: ordersInRange, error: availabilityError }, { data: blockedDates, error: blocksError }] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('id')
-          .eq('vertical', 'property')
-          .is('deleted_at', null)
-          .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
-          .gt('end_at', newStart)
-          .lt('start_at', newEnd),
-        supabase
-          .from('property_availability')
-          .select('date')
-          .eq('property_id', input.property_id)
-          .eq('status', 'blocked')
-          .gte('date', input.check_in)
-          .lt('date', input.check_out),
-      ]);
-
-      if (availabilityError) throw availabilityError;
-      if (blocksError) throw blocksError;
-      const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
-      const overlapResult = orderIds.length
-        ? await supabase
-            .from('order_items')
-            .select('order_id')
-            .eq('item_type', 'property')
-            .eq('resource_id', input.property_id)
-            .in('order_id', orderIds)
-        : { data: [], error: null };
-      if (overlapResult.error) throw overlapResult.error;
-      if ((overlapResult.data || []).length > 0) {
-        throw new Error('Выбранные даты пересекаются с существующим бронированием');
-      }
-      if ((blockedDates || []).length > 0) {
-        throw new Error('Выбранные даты заблокированы в календаре');
-      }
-
-      // Create order with order_type = 'property' (matches DB constraint)
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_type: 'property',
-          vertical: 'property',
-          customer_user_id: user.id,
-          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
-          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
-          total_amount: input.total_amount || 0,
-          currency: input.currency || 'THB',
-          status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as Database['public']['Enums']['order_status'],
-          notes: input.notes,
-          // Storefront attribution
-          source_storefront_id: storefront?.id || null,
-          source_company_id: storefront?.company_id || null,
-          metadata: {
-            source: input.source || 'manual',
-            external_id: input.external_id,
-            guests_count: input.guests_count,
-            deposit_amount: input.deposit_amount,
-            documents: input.documents,
-            check_in_time: input.check_in_time || '14:00',
-            check_out_time: input.check_out_time || '11:00',
-            ...(storefront ? { storefront_slug: storefront.slug } : {}),
-          },
-        })
-        .select()
-        .single();
-
-      if (orderError) {
-        errorLog.silent(orderError, 'create_order');
-        throw orderError;
-      }
-
-      // Create order_item linking to property
-      // Store property_id in BOTH resource_id and metadata for compatibility
-      // resource_id is used by useAllPropertyBookings for filtering
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          item_type: 'property',
-          item_name: 'Property Booking',
-          unit_price: input.total_amount || 0,
-          amount: input.total_amount || 0,
-          qty: 1,
-          resource_id: input.property_id,
-          start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
-          end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
-          metadata: {
-            property_id: input.property_id,
-          },
-        });
-
-      if (itemError) {
-        errorLog.silent(itemError, 'create_order_item');
-        // Rollback: delete order
-        await supabase.from('orders').delete().eq('id', order.id);
-        throw itemError;
-      }
+      // One actor-bound transaction owns authorization, negotiated-price authority,
+      // order/items/guest and inventory. Missing RPC never falls back to direct writes.
+      const order = await createManagedBooking(input);
 
       // The saved order must remain identifiable even when secondary guest/task writes fail.
       const preparation: BookingPreparationOutcome = { status: 'not_requested', unconfirmedTaskTypes: [] };
 
-      // Create guest participant if guest info provided
-      if (input.guest_name || input.guest_phone || input.guest_email) {
-        try {
-          const { error: participantError } = await supabase
-            .from('order_participants')
-            .insert({
-              order_id: order.id,
-              role: 'guest',
-              name: input.guest_name || 'Guest',
-              phone: input.guest_phone,
-              email: input.guest_email,
-            });
-
-          if (participantError) throw participantError;
-        } catch (error) {
-          preparation.guestDetailsUnconfirmed = true;
-          errorLog.silent(error, 'create_participant');
-        }
-      }
-
-      // P1: Booking message rules — fire booking_confirmed for confirmed bookings
       if (input.status === 'confirmed') {
         supabase.functions.invoke('execute-booking-message-rules', {
           body: { immediate_order_id: order.id },

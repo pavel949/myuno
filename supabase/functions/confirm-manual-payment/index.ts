@@ -1,130 +1,49 @@
-// Admin-only: marks a manual_payment_request as confirmed, records the payment,
-// flips the underlying order to 'confirmed', and notifies the guest.
-//
-// Service-role + caller role check (must have admin app_role).
-//
-// POST body: { request_id, amount_rub_actual, payment_method, proof_file_path? }
-
+// Manual RUB receipt: protected admin or explicitly delegated object approver.
+// The actor-bound SQL writer owns FX evidence, receipt identity, balance and ledger.
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient, createServiceClient } from '../_shared/supabase.ts';
 import { getCorsHeaders } from '../_shared/cors.ts';
-
 interface Payload {
-  request_id: string;
-  amount_rub_actual: number;
-  payment_method: string;
-  proof_file_path?: string | null;
+  request_id: string; amount_rub_actual: number; fx_rate_rub_per_thb: number;
+  approved_total_thb: number; receipt_reference: string; payment_method: string; proof_file_path: string;
 }
-
 Deno.serve(async (req) => {
-  // Restrict CORS to allow-listed origins — this endpoint confirms money
-  // movements (manual RUB payments → order confirmed + ledger entries).
-  const corsHeaders = getCorsHeaders(req);
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+  const corsHeaders=getCorsHeaders(req);
+  const reply=(body:Record<string,unknown>,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
+  if(req.method==='OPTIONS')return new Response(null,{headers:corsHeaders});
+  if(req.method!=='POST')return reply({error:'Method not allowed'},405);
   try {
-    // Verify caller is an admin
-    const authHeader = req.headers.get('Authorization') || '';
-    const jwt = authHeader.replace(/^Bearer\s+/i, '');
-    if (!jwt) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: userRes, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userRes.user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    const callerId = userRes.user.id;
-
-    const sb = createServiceClient();
-    const { data: roleRows } = await sb
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', callerId)
-      .in('role', ['admin', 'super_admin']);
-
-    if (!roleRows || roleRows.length === 0) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const body = (await req.json()) as Payload;
-    const { request_id, amount_rub_actual, payment_method, proof_file_path } = body;
-    if (!request_id || !amount_rub_actual || amount_rub_actual <= 0) {
-      return new Response(JSON.stringify({ error: 'Invalid payload' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Fetch request + order
-    const { data: mpr, error: mprErr } = await sb
-      .from('manual_payment_requests')
-      .select(`
-        id, order_id, user_id, status, amount_listing, currency_listing,
-        guest_name, guest_email,
-        orders ( id, order_number, metadata, total_amount, currency )
-      `)
-      .eq('id', request_id)
-      .single();
-
-    if (mprErr || !mpr) {
-      return new Response(JSON.stringify({ error: 'Request not found' }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const orderId = (mpr as any).order_id as string;
-    const orderNumber = (mpr as any).orders?.order_number as string;
-
-    // Lock and transition the request + order together. The RPC also requires
-    // the matching active property hold, so an operator cannot confirm a
-    // commercial order that never acquired inventory.
-    const { data: transition, error: transitionError } = await sb.rpc('confirm_manual_payment_atomic', {
-      p_request_id: request_id,
-      p_confirmed_by: callerId,
-      p_amount_rub_actual: amount_rub_actual,
-      p_payment_method: payment_method,
-      p_proof_file_path: proof_file_path ?? null,
+    const authHeader=req.headers.get('Authorization')||'';
+    if(!/^Bearer\s+\S+/i.test(authHeader))return reply({error:'Unauthorized'},401);
+    const userClient=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_ANON_KEY')!,{global:{headers:{Authorization:authHeader}}});
+    const {data:userResult,error:userError}=await userClient.auth.getUser();
+    if(userError||!userResult.user)return reply({error:'Unauthorized'},401);
+    const body=await req.json() as Payload;
+    const {request_id,amount_rub_actual,fx_rate_rub_per_thb,approved_total_thb,receipt_reference,payment_method,proof_file_path}=body;
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(request_id??'')
+      ||![amount_rub_actual,fx_rate_rub_per_thb,approved_total_thb].every(n=>typeof n==='number'&&Number.isFinite(n)&&n>0)
+      ||typeof receipt_reference!=='string'||receipt_reference.trim().length<3
+      ||typeof proof_file_path!=='string'||!proof_file_path.startsWith(`${request_id}/`)
+      ||!['sbp','ru_card','cash','other'].includes(payment_method))return reply({error:'Receipt, approved total, exchange rate and document are required'},400);
+    const {data:allowed,error:accessError}=await userClient.rpc('can_confirm_manual_receipt',{p_request_id:request_id});
+    if(accessError)return reply({ok:false,code:'manual_payment_unavailable',error:'Manual receipt confirmation is temporarily unavailable'},503);
+    if(allowed!==true)return reply({error:'Forbidden'},403);
+    const {data:result,error:receiptError}=await userClient.rpc('confirm_manual_receipt_checked',{
+      p_request_id:request_id,p_amount_rub_actual:amount_rub_actual,p_fx_rate_rub_per_thb:fx_rate_rub_per_thb,
+      p_approved_total_thb:approved_total_thb,p_receipt_reference:receipt_reference.trim(),
+      p_payment_method:payment_method,p_proof_file_path:proof_file_path,
     });
-    if (transitionError) throw transitionError;
+    if(receiptError)return reply({ok:false,code:receiptError.code,error:'Receipt confirmation was not completed. Check the request before retrying.'},['PGRST202','42883'].includes(receiptError.code)?503:409);
+    const outcomes=['settled','partial','overpayment_requires_reconciliation','legacy_receipt_requires_reconciliation','recipient_requires_reconciliation','inventory_requires_reconciliation'];
+    if(!result||!outcomes.includes(result.outcome)||!result.order_id)return reply({ok:false,error:'Receipt acknowledgement is missing. Check the request before retrying.'},503);
+    if(result.already||result.outcome!=='settled')return reply({ok:true,...result});
 
-    const outcome = (transition as { outcome?: string } | null)?.outcome;
-
-    // Record double-entry ledger so this manual (RUB) payment produces the
-    // same audit trail / platform-fee + vendor-payout entries as Stripe orders.
-    // Without this the order shows up as a discrepancy in reconciliation_alerts
-    // and no vendor payout is ever owed. RPC is idempotent (skips if exists).
-    const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
-    if (ledgerErr) {
-      console.error('[confirm-manual-payment] record_ledger_entries failed; retry required:', ledgerErr);
-      return new Response(JSON.stringify({
-        ok: false,
-        recoverable: true,
-        code: 'ledger_pending',
-        error: 'Payment confirmed, but accounting is pending. Retry reconciliation before treating this booking as complete.',
-      }), {
-        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (outcome === 'already_confirmed') {
-      return new Response(JSON.stringify({ ok: true, already: true }), {
-        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
+    // Side effects follow committed full settlement, never provisional receipt or FX.
+    const sb=createServiceClient();
+    const {data:mpr,error:mprError}=await sb.from('manual_payment_requests').select('user_id,guest_name,guest_email').eq('id',request_id).single();
+    if(mprError||!mpr)return reply({ok:true,...result,delivery_pending:true});
+    const orderId=result.order_id as string;
+    const orderNumber=result.order_number as string;
     // 3. Notify guest in-app
     await sb.from('notifications').insert({
       user_id: (mpr as any).user_id,
@@ -138,7 +57,7 @@ Deno.serve(async (req) => {
     // 4. Email guest (best effort)
     const resendKey = Deno.env.get('RESEND_API_KEY');
     const guestEmail = (mpr as any).guest_email as string;
-    const guestName = (mpr as any).guest_name as string;
+    const guestName = String(mpr.guest_name ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]!));
     if (resendKey && guestEmail) {
       try {
         const resend = new Resend(resendKey);
@@ -169,16 +88,13 @@ Deno.serve(async (req) => {
     }
 
     // 5. Generate voucher (non-blocking)
-    sb.functions.invoke('generate-booking-voucher', { body: { order_id: orderId } })
+    sb.functions.invoke('generate-booking-voucher', { body: { orderId } })
       .catch((e) => console.error('[confirm-manual-payment] voucher gen:', e));
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, ...result }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (err) {
-    console.error('[confirm-manual-payment] fatal:', err);
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+  } catch {
+    return reply({ok:false,error:'Receipt confirmation is unavailable. Check the request before retrying.'},503);
   }
 });

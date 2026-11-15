@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePropertyBookings } from '../usePropertyBookings';
 
 const state = vi.hoisted(() => ({
+  calls: [] as Record<string, unknown>[],
   writes: [] as { table: string; payload: Record<string, unknown> }[],
   taskResults: [] as ('ok' | 'error' | 'throw')[],
   orderError: false, guestFailure: '' as '' | 'error' | 'throw',
@@ -14,6 +15,12 @@ vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCo
 vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefront: null }) }));
 vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: async () => ({ allIds: [] }) }));
 vi.mock('@/lib/errorHandler', () => ({ createErrorHandler: () => ({ silent: vi.fn() }) }));
+vi.mock('@/lib/createManagedBooking', () => ({ createManagedBooking: async (input: Record<string, unknown>) => {
+  state.calls.push(input);
+  if (state.orderError) throw new Error('Synthetic order failure');
+  if (state.guestFailure) throw new Error('Synthetic atomic guest failure');
+  return {id:'saved-order',start_at:'2030-01-10T14:00:00+07:00',end_at:'2030-01-12T12:00:00+07:00',status:input.status??'pending'};
+} }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   functions: { invoke: vi.fn().mockResolvedValue({ error: null }) },
   from: (table: string) => {
@@ -47,7 +54,7 @@ function mount() {
   const hook = renderHook(() => usePropertyBookings('synthetic-home'), { wrapper: ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> });
   return { ...hook, invalidate };
 }
-beforeEach(() => { state.writes = []; state.taskResults = []; state.orderError = false; state.guestFailure = ''; });
+beforeEach(() => { state.writes = []; state.calls = []; state.taskResults = []; state.orderError = false; state.guestFailure = ''; });
 afterEach(cleanup);
 describe('saved booking preparation outcome', () => {
   it.each(['error', 'throw'] as const)('keeps saved booking result after a task %s, without retries', async failure => {
@@ -55,8 +62,8 @@ describe('saved booking preparation outcome', () => {
     const { result, invalidate } = mount();
     const booking = await act(() => result.current.createBooking(input));
     expect(booking).toMatchObject({ id: 'saved-order', property_id: 'synthetic-home', preparation: { status: 'needs_attention', unconfirmedTaskTypes: ['check_in'] } });
-    expect(state.writes.filter(w => w.table === 'orders')).toHaveLength(1);
-    expect(state.writes.filter(w => w.table === 'order_items')).toHaveLength(1);
+    expect(state.calls).toHaveLength(1);
+    expect(state.writes.some(w => ['orders','order_items','order_participants'].includes(w.table))).toBe(false);
     expect(state.writes.filter(w => w.table === 'property_operational_tasks').map(w => w.payload.task_type)).toEqual(['cleaning', 'check_in', 'check_out']);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['operational-tasks'] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['property-bookings', 'synthetic-user'] });
@@ -66,7 +73,8 @@ describe('saved booking preparation outcome', () => {
     const { result } = mount();
     const booking = await act(() => result.current.createBooking(input));
     expect(booking.preparation.unconfirmedTaskTypes).toEqual(['cleaning', 'check_in', 'check_out']);
-    expect(state.writes.filter(w => w.table === 'orders')).toHaveLength(1);
+    expect(state.calls).toHaveLength(1);
+    expect(state.writes.some(w => ['orders','order_items','order_participants'].includes(w.table))).toBe(false);
   });
   it('retains the booking object and reports complete preparation when all inserts succeed', async () => {
     const { result } = mount();
@@ -84,14 +92,15 @@ describe('saved booking preparation outcome', () => {
     state.orderError = true;
     const { result } = mount();
     await act(async () => { await expect(result.current.createBooking(input)).rejects.toThrow('Synthetic order failure'); });
-    expect(state.writes.map(w => w.table)).toEqual(['orders']);
+    expect(state.calls).toHaveLength(1);
+    expect(state.writes).toEqual([]);
   });
 });
 
-it.each(['error', 'throw'] as const)('saved primary record survives guest %s with explicit warning, without retry', async failure => {
+it.each(['error', 'throw'] as const)('atomic guest %s rejects before any preparation or second write', async failure => {
   state.guestFailure = failure;
   const { result } = mount();
-  const booking = await act(() => result.current.createBooking({ ...input, guest_name: 'Synthetic guest' }));
-  expect(booking).toMatchObject({ id: 'saved-order', preparation: { status: 'needs_attention', guestDetailsUnconfirmed: true } });
-  expect(state.writes.filter(w => w.table === 'orders')).toHaveLength(1);
+  await act(async () => { await expect(result.current.createBooking({ ...input, guest_name: 'Synthetic guest' })).rejects.toThrow('Synthetic atomic guest failure'); });
+  expect(state.calls).toHaveLength(1);
+  expect(state.writes).toEqual([]);
 });

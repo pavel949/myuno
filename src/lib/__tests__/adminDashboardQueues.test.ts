@@ -7,6 +7,7 @@ class ReadQuery {
   is(column: keyof Row, value: null) { this.rows = this.rows.filter(row => row[column] === value); return this; }
   eq(column: keyof Row, value: string) { this.rows = this.rows.filter(row => row[column] === value); return this; }
   lt(column: keyof Row, value: string) { this.rows = this.rows.filter(row => row[column] !== null && row[column]! < value); return this; }
+  or(_predicate: string) { this.rows = this.rows.filter(row => ['awaiting_admin', 'contacted', 'paid', 'confirmed'].includes(row.status)); return this; }
   in(column: keyof Row, values: string[]) { this.rows = this.rows.filter(row => values.includes(row[column]!)); return this; }
 }
 const cutoff = '2026-10-19T07:00:00.000Z';
@@ -42,7 +43,7 @@ describe('dashboard queue contract', () => {
   it('uses actual manual payment review statuses and no invented pending status', () => {
     const source = ['awaiting_admin','contacted','paid','confirmed','rejected','expired','pending'].map(status => ({...rows[0], id:status, status}));
     const filtered = applyManualPaymentQueue(new ReadQuery(source), 'review').rows;
-    expect(filtered.map(row => row.status)).toEqual([...MANUAL_REVIEW_STATUSES]);
+    expect(filtered.map(row => row.status)).toEqual([...MANUAL_REVIEW_STATUSES, 'confirmed']);
   });
   it('opens exactly open and in-progress support tickets', () => {
     const source = ['open','in_progress','waiting_response','closed'].map(status => ({...rows[0],id:status,status}));

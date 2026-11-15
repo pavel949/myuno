@@ -13,11 +13,9 @@ import { ContactAdminButton } from './ContactAdminButton';
 import { PaymentMethodPicker } from './PaymentMethodPicker';
 import { useLastPaymentMethod, type PaymentMethodId } from '@/hooks/useLastPaymentMethod';
 import { useRubEstimate } from '@/hooks/useRubEstimate';
-import { useOrders } from '@/hooks/useOrders';
+import { requestManualPropertyPayment } from '@/lib/manualPaymentIntake';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { logger } from '@/lib/logger';
-import { readPropertyOrderHold } from '@/lib/propertyOrderHold';
 
 interface DepositPaymentOptionsProps {
   propertyId: string;
@@ -34,7 +32,7 @@ interface DepositPaymentOptionsProps {
   guestPhone: string;
   guestEmail: string;
   providerOrgId?: string;
-  /** Owner of the property — receives manual-payment notifications alongside admins. */
+  /** Legacy caller context; recipient and owner authority are derived on the server. */
   ownerUserId?: string;
   /** Prepayment amount calculated by the central pricing engine. Defaults to 10% if omitted. */
   prepayAmount?: number;
@@ -69,7 +67,6 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
       guestPhone,
       guestEmail,
       providerOrgId,
-      ownerUserId,
       prepayAmount,
       prepayPercent,
       payInFull = false,
@@ -83,8 +80,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
     const isRu = language === 'ru';
     const [isProcessing, setIsProcessing] = useState(false);
     const { method, setMethod } = useLastPaymentMethod('card');
-    const { createOrder } = useOrders();
-    const { amountRub, rate, source: rateSource } = useRubEstimate(totalAmount, currency);
+    const { amountRub } = useRubEstimate(totalAmount, currency);
 
     // Notify parent of initial + future selection so the sticky footer can re-label.
     React.useEffect(() => {
@@ -198,152 +194,19 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
 
     /**
      * Manual RUB payment flow:
-     *   1. Atomic re-check dates (same guard as Stripe path)
-     *   2. Create order with status='pending_manual_payment' + payment_channel='rub_manual'
-     *   3. Insert manual_payment_requests row (admin work card)
-     *   4. Fire-and-forget notify-manual-payment-request edge function (email + WA + in-app)
-     *   5. Redirect to /property/booking/manual-payment/:orderId
+     *   Server derives the quote and commits order, hold, guest and request atomically.
+     *   Unchanged retries reuse the same receipt key before redirecting to the request.
      */
     const handleManualRubPayment = async (): Promise<boolean> => {
       setIsProcessing(true);
       try {
-        const { data: isAvailable, error: availErr } = await supabase.rpc(
-          'check_property_dates_available',
-          {
-            p_property_id: propertyId,
-            p_check_in: format(checkIn, 'yyyy-MM-dd'),
-            p_check_out: format(checkOut, 'yyyy-MM-dd'),
-          },
-        );
-        if (availErr) {
-          console.error('[DepositPaymentOptions] RUB availability error:', availErr);
-          toast.error(isRu ? 'Не удалось проверить доступность дат.' : 'Could not verify availability.');
-          return false;
-        }
-        if (isAvailable === false) {
-          toast.error(
-            isRu
-              ? 'Эти даты только что были забронированы. Выберите другие.'
-              : 'These dates were just booked. Please pick different dates.',
-          );
-          return false;
-        }
-
-        // Create through the canonical property order writer. The item type and
-        // resource_id are part of the trigger contract that creates the hold.
-        const orderResult = await createOrder({
-          order_type: 'property',
-          provider_org_id: providerOrgId,
-          start_at: checkIn,
-          end_at: checkOut,
-          total_amount: totalAmount,
-          currency,
-          metadata: {
-            property_id: propertyId,
-            property_title: propertyTitle,
-            guests,
-            nights,
-            payment_channel: 'rub_manual',
-            guest_locale: isRu ? 'ru' : 'en',
-            booking_mode: 'manual_rub',
-          },
-          items: [{
-            item_name: propertyTitle,
-            item_type: 'property',
-            resource_id: propertyId,
-            qty: nights,
-            unit_price: nights > 0 ? Math.round(totalAmount / nights) : totalAmount,
-            amount: totalAmount,
-            start_at: checkIn,
-            end_at: checkOut,
-            metadata: { property_id: propertyId, source_id: propertyId },
-          }],
-          participants: [{
-            role: 'primary',
-            name: guestName,
-            phone: guestPhone,
-            email: guestEmail || undefined,
-          }],
-          serviceName: propertyTitle,
+        const orderResult = await requestManualPropertyPayment({
+          property_id:propertyId,property_title:propertyTitle,
+          check_in:format(checkIn,'yyyy-MM-dd'),check_out:format(checkOut,'yyyy-MM-dd'),
+          guests,nights,total_amount:totalAmount,deposit_amount:depositAmount,cleaning_fee:cleaningFee,
+          guest_name:guestName,guest_phone:guestPhone,guest_email:guestEmail,
         });
-
-        if (!orderResult.success || !orderResult.order_id) {
-          toast.error(
-            isRu
-              ? 'Не удалось создать заявку. Попробуйте ещё раз.'
-              : 'Could not create the request. Please try again.',
-          );
-          return false;
-        }
-
-        // The availability RPC above is only a preflight. Do not expose an
-        // operator request unless the canonical order writer actually created
-        // the matching inventory hold under the exclusion constraint.
-        const { data: hasHold, error: holdError } = await readPropertyOrderHold(orderResult.order_id);
-        if (holdError || hasHold !== true) {
-          console.error('[DepositPaymentOptions] canonical inventory hold missing:', holdError);
-          Sentry.captureException(holdError ?? new Error('canonical inventory hold missing'), {
-            extra: { scope: 'rub_manual.inventory_hold', orderId: orderResult.order_id, propertyId },
-          });
-          // The order writer may have persisted a commercial row without its
-          // hold on an older deployment. Never let that become a request that
-          // an operator can confirm; release the order if possible.
-          await supabase
-            .from('orders')
-            .update({ status: 'cancelled', notes: 'Manual checkout rejected: canonical inventory hold missing' })
-            .eq('id', orderResult.order_id)
-            .in('status', ['pending', 'pending_deposit']);
-          toast.error(isRu ? 'Не удалось удержать выбранные даты.' : 'Could not hold the selected dates.');
-          return false;
-        }
-
-        // 2. Insert into manual_payment_requests (admin task card).
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        const { error: reqError } = await supabase
-          .from('manual_payment_requests')
-          .insert({
-            order_id: orderResult.order_id,
-            property_id: propertyId,
-            user_id: authUser?.id ?? null,
-            manager_user_id: ownerUserId ?? null,
-            channel: 'rub_manual',
-            amount_listing: totalAmount,
-            currency_listing: currency,
-            amount_rub_estimate: amountRub,
-            fx_rate_used: rate,
-            guest_name: guestName,
-            guest_phone: guestPhone,
-            guest_email: guestEmail,
-            metadata: {
-              property_title: propertyTitle,
-              nights,
-              guests,
-              check_in: format(checkIn, 'yyyy-MM-dd'),
-              check_out: format(checkOut, 'yyyy-MM-dd'),
-              fx_source: rateSource,
-            },
-          });
-        if (reqError) {
-          console.error('[DepositPaymentOptions] manual_payment_requests insert:', reqError);
-          Sentry.captureException(reqError, { extra: { scope: 'rub_manual.insert', orderId: orderResult.order_id } });
-          // Order exists — keep going, admin will see the orphaned order; surface a soft warning.
-          toast.warning(
-            isRu
-              ? 'Заявка создана, но уведомление не ушло. Менеджер всё равно её увидит.'
-              : 'Request created, but notification failed. Manager will still see it.',
-          );
-        }
-
-        // 3. Fire-and-forget notification (don't block redirect).
-        supabase.functions.invoke('notify-manual-payment-request', {
-          body: { order_id: orderResult.order_id },
-        }).catch((err) => {
-          logger.warn('[DepositPaymentOptions] notify-manual-payment-request failed:', err);
-        });
-
-        toast.success(
-          isRu ? 'Заявка отправлена! Менеджер свяжется в течение 30 минут.' : 'Request sent! Manager will reach out within 30 min.',
-        );
+        toast.success(isRu ? 'Заявка сохранена. Условия оплаты подтвердит команда.' : 'Request saved. The team will confirm payment terms.');
         navigate(`/property/booking/manual-payment/${orderResult.order_id}`, { replace: true });
         return true;
       } catch (error) {
@@ -372,8 +235,6 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           return true;
         },
       }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [method, payInFull, totalAmount, chargeNow, propertyId, amountRub, rate],
     );
 
     return (
@@ -534,7 +395,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
             ) : method === 'rub_manual' ? (
               <>
                 <Wallet className="w-3 h-3" />
-                {isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)'}
+                {isRu ? 'Команда проверит заявку и согласует условия оплаты' : 'Our team will review the request and agree payment terms'}
               </>
             ) : (
               <>

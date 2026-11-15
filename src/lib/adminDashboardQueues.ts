@@ -1,6 +1,6 @@
 /** Shared read-only queue predicates. URL filters select records, never authority. */
 export const ORDER_QUEUE_STATUSES = ['all', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] as const;
-export const MANUAL_REVIEW_STATUSES = ['awaiting_admin', 'contacted'] as const;
+export const MANUAL_REVIEW_STATUSES = ['awaiting_admin', 'contacted', 'paid'] as const;
 export const MANUAL_PAYMENT_FILTERS = ['all', 'review', 'awaiting_admin', 'contacted', 'paid', 'confirmed', 'rejected', 'expired'] as const;
 export const OPEN_TICKET_STATUSES = ['open', 'in_progress'] as const;
 export const TICKET_QUEUE_STATUSES = ['all', 'active', 'open', 'in_progress', 'waiting_response', 'resolved', 'closed'] as const;
@@ -26,6 +26,7 @@ interface QueueQuery {
   is(column: string, value: null): QueueQuery;
   eq(column: string, value: string | boolean): QueueQuery;
   lt(column: string, value: string): QueueQuery;
+  or(predicate: string): QueueQuery;
   in(column: string, values: readonly string[]): QueueQuery;
 }
 export function applyOrderQueue<T>(query: T, filter: Pick<OrderQueueFilter, 'status' | 'createdBefore'>): T {
@@ -42,7 +43,7 @@ export function orderQueueHref({ olderThan24h = false, now = new Date() } = {}):
 export const parseManualPaymentFilter = (params: URLSearchParams): ManualPaymentFilter => valid(params.get('manual_status'), MANUAL_PAYMENT_FILTERS, 'all');
 export function applyManualPaymentQueue<T>(query: T, filter: ManualPaymentFilter): T {
   const result = query as unknown as QueueQuery;
-  return (filter === 'review' ? result.in('status', MANUAL_REVIEW_STATUSES) : filter === 'all' ? result : result.eq('status', filter)) as unknown as T;
+  return (filter === 'review' ? result.or('status.in.(awaiting_admin,contacted,paid),and(status.eq.confirmed,metadata->>receipt_outcome.neq.settled),and(status.eq.confirmed,metadata->>receipt_outcome.is.null)') : filter === 'all' ? result : result.eq('status', filter)) as unknown as T;
 }
 export const parseProviderFilter = (params: URLSearchParams): ProviderFilter => valid(params.get('filter'), PROVIDER_FILTERS, 'all');
 export function matchesProviderFilter(provider: { is_active?: boolean | null; is_verified?: boolean | null }, filter: ProviderFilter): boolean {

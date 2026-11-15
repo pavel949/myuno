@@ -21,7 +21,9 @@ export interface PropertyPricingRow {
   weekly_discount: number | null;
   monthly_discount: number | null;
   early_booking_discount: number | null;
+  early_booking_days?: number | null;
   last_minute_discount: number | null;
+  last_minute_days?: number | null;
   custom_length_discounts: unknown;
   /** Legacy JSONB month/day rules used by the booking page. */
   seasonal_pricing?: unknown;
@@ -36,7 +38,9 @@ export interface RateSeasonRow {
   weekly_discount?: number | null;
   monthly_discount?: number | null;
   early_booking_discount?: number | null;
+  early_booking_days?: number | null;
   last_minute_discount?: number | null;
+  last_minute_days?: number | null;
 }
 
 export interface QuoteInput {
@@ -172,40 +176,59 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
     .map((x) => ({ ...x, s: dayNumber(x.start_date), e: dayNumber(x.end_date) }))
     .filter((x) => x.s !== null && x.e !== null)
     .sort((a, b) => (b.s as number) - (a.s as number));
-  let low = 0;
-  let high = 0;
-  let discount = maxStackedDiscount(p, nights);
+  let subtotal = 0;
+  let discountSource = p;
   for (let d = inDay; d < outDay; d++) {
-    const season = seasons.find((x) => d >= (x.s as number) && d <= (x.e as number));
+    const matching = seasons.filter((x) => d >= (x.s as number) && d <= (x.e as number));
+    const season = matching[0];
     const key = new Date(d * 86_400_000).toISOString().slice(0, 10);
     const override = Number(input.dateOverrides?.[key]);
-    const candidates = [season ? Number(season.nightly_rate) : rate];
     const legacy = jsonbSeasonRate(p, d, rate);
-    if (legacy !== null && legacy > 0) candidates.push(legacy);
-    if (Number.isFinite(override) && override > 0) candidates.splice(0, candidates.length, override);
-    low += Math.min(...candidates);
-    high += Math.max(...candidates);
-    if (season) {
-      if (d === inDay && season.min_stay_nights && nights < season.min_stay_nights) {
-        return fail('min_stay', `Minimum stay is ${season.min_stay_nights} nights`);
+    if (!Number.isFinite(override) || override <= 0) {
+      const explicitRates = matching.map(x => Number(x.nightly_rate));
+      if (new Set(explicitRates).size > 1 || (season && legacy !== null && legacy > 0 && legacy !== Number(season.nightly_rate))) {
+        return fail('price_confirmation_required', 'Conflicting tariffs require an authorized price confirmation');
       }
-      discount = Math.max(discount, maxStackedDiscount({ ...p,
-        weekly_discount: season.weekly_discount ?? null, monthly_discount: season.monthly_discount ?? null,
-        early_booking_discount: season.early_booking_discount ?? null, last_minute_discount: season.last_minute_discount ?? null,
-        custom_length_discounts: null }, nights));
+    }
+    subtotal += Number.isFinite(override) && override > 0 ? override
+      : season ? Number(season.nightly_rate) : legacy !== null && legacy > 0 ? legacy : rate;
+    if (d === inDay && season) {
+      if (season.min_stay_nights && nights < season.min_stay_nights) return fail('min_stay', `Minimum stay is ${season.min_stay_nights} nights`);
+      discountSource = { ...p,
+        weekly_discount: season.weekly_discount ?? p.weekly_discount,
+        monthly_discount: season.monthly_discount ?? p.monthly_discount,
+        early_booking_discount: season.early_booking_discount ?? p.early_booking_discount,
+        early_booking_days: season.early_booking_days ?? p.early_booking_days,
+        last_minute_discount: season.last_minute_discount ?? p.last_minute_discount,
+        last_minute_days: season.last_minute_days ?? p.last_minute_days,
+      };
     }
   }
-  // The booking page sends the stay total WITHOUT cleaning (fee sent separately);
-  // older callers may include it. Accept either and charge stay + cleaning.
-  const minStay = Math.floor(low * (1 - discount / 100));
-  const maxStay = Math.ceil(high);
+  // Use the existing pricingEngine contract: best eligible length discount plus
+  // best eligible timing discount, each rounded separately. The caller cannot
+  // choose any amount inside a broad discount/season envelope.
+  let length = 0;
+  if (nights >= 7) length = Math.max(length, pct(discountSource.weekly_discount));
+  if (nights >= 28) length = Math.max(length, pct(discountSource.monthly_discount));
+  if (Array.isArray(discountSource.custom_length_discounts)) {
+    for (const tier of discountSource.custom_length_discounts as Array<Record<string, unknown>>) {
+      const min = Number(tier?.min_nights ?? tier?.minNights ?? tier?.nights);
+      if (Number.isFinite(min) && min > 0 && nights >= min) length = Math.max(length, pct(tier?.discount_percent ?? tier?.percent ?? tier?.discount));
+    }
+  }
+  const daysAhead = inDay - today;
+  const earlyDays = Number(discountSource.early_booking_days);
+  const lastDays = Number(discountSource.last_minute_days);
+  const early = Number.isFinite(earlyDays) && earlyDays > 0 && daysAhead >= earlyDays ? pct(discountSource.early_booking_discount) : 0;
+  const last = Number.isFinite(lastDays) && lastDays > 0 && daysAhead <= lastDays ? pct(discountSource.last_minute_discount) : 0;
+  const serverStay = subtotal - Math.round(subtotal * length / 100) - Math.round(subtotal * Math.max(early,last) / 100);
+  if (!Number.isFinite(serverStay) || serverStay <= 0) return fail('price_confirmation_required', 'A positive approved tariff is required');
   const sent = Number(input.total_amount);
-  if (!Number.isFinite(sent)) return fail('total', 'Booking total does not match the current price');
-  const inRange = (v: number) => v >= minStay - 1 && v <= maxStay + 1;
-  let total: number;
-  if (inRange(sent)) total = sent + appliedCleaning;
-  else if (appliedCleaning > 0 && inRange(sent - appliedCleaning)) total = sent;
-  else return fail('total', 'Booking total does not match the current price');
+  const equalMoney = (a: number,b: number) => Number.isFinite(a) && Math.round(a*100) === Math.round(b*100);
+  if (!equalMoney(sent,serverStay) && !equalMoney(sent,serverStay+appliedCleaning)) {
+    return fail('total', 'Booking total does not match the current price');
+  }
+  const total = serverStay + appliedCleaning;
   const rounded = Math.round(total);
   const deposit = Math.round((rounded * DEPOSIT_PERCENT) / 100);
   if (deposit <= 0) return fail('deposit', 'Invalid deposit');

@@ -14,6 +14,18 @@ export interface LocalizedError {
  * Known RPC error codes and their user-friendly messages
  */
 export const RPC_ERROR_MESSAGES: Record<string, LocalizedError> = {
+  'checked_price_authority_required': {
+    en: 'An administrator or an authorized team member must approve this price. Contact the team to continue.',
+    ru: 'Цену должен согласовать администратор или уполномоченный сотрудник. Обратитесь к команде для продолжения.',
+  },
+  'verified_payment_writer_required': {
+    en: 'Use the verified payment flow. This action cannot record a payment.',
+    ru: 'Используйте подтверждённый способ оплаты. Это действие не может зарегистрировать платёж.',
+  },
+  'atomic_inventory_writer_unavailable': {
+    en: 'Booking is temporarily unavailable. Contact the team.',
+    ru: 'Бронирование временно недоступно. Обратитесь к команде.',
+  },
   // Wallet/Payment errors
   'insufficient_wallet': {
     en: 'Insufficient wallet balance',

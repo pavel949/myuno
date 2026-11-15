@@ -16,8 +16,9 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { verifySnapshot } from './lib/data-snapshot.mjs';
 
 // ── Target (new) Supabase ──
 const TARGET_URL = 'https://erfwtoavipwjqmylpizt.supabase.co';
@@ -50,7 +51,7 @@ const SKIP_TABLES = [
   '_summary', // our summary file
 ];
 
-async function importTable(table, rows) {
+async function importTable(table, rows, primaryKey) {
   if (rows.length === 0) return { table, inserted: 0 };
 
   const BATCH = 500;
@@ -62,19 +63,12 @@ async function importTable(table, rows) {
     const { error } = await supabase
       .from(table)
       .upsert(batch, {
-        onConflict: 'id',
-        ignoreDuplicates: true,
+        onConflict: primaryKey.join(','),
+        ignoreDuplicates: false,
       });
 
     if (error) {
-      // Try insert instead of upsert (some tables don't have id as PK)
-      const { error: insertError } = await supabase
-        .from(table)
-        .insert(batch);
-
-      if (insertError) {
-        return { table, inserted, error: insertError.message, failedAt: i };
-      }
+      return { table, inserted, error: error.message, failedAt: i };
     }
 
     inserted += batch.length;
@@ -90,9 +84,16 @@ async function main() {
     process.exit(1);
   }
 
-  const files = readdirSync(EXPORT_DIR)
-    .filter(f => f.endsWith('.json') && !f.startsWith('_'))
-    .map(f => f.replace('.json', ''));
+  const summary = JSON.parse(readFileSync(join(EXPORT_DIR, '_summary.json'), 'utf8'));
+  if (summary.source === TARGET_URL) throw new Error('Source and target must be different databases');
+  const verified = verifySnapshot(summary, table => readFileSync(join(EXPORT_DIR, `${table}.json`), 'utf8'));
+  const primaryKeys = new Map(summary.tables.map(entry => [entry.table, entry.primaryKey]));
+  for (const entry of verified) {
+    const key = primaryKeys.get(entry.table);
+    if (!Array.isArray(key) || !key.length || key.some(column => !/^[a-z][a-z0-9_]*$/.test(column))) throw new Error(`Verified primary key missing for ${entry.table}`);
+  }
+  const verifiedRows = new Map(verified.map(entry => [entry.table, entry.rows]));
+  const files = verified.map(entry => entry.table);
 
   console.log(`\n📥 Importing ${files.length} tables into ${TARGET_URL}...\n`);
 
@@ -109,7 +110,7 @@ async function main() {
     if (!existsSync(filePath)) continue;
 
     try {
-      const rows = JSON.parse(readFileSync(filePath, 'utf-8'));
+      const rows = verifiedRows.get(table);
 
       if (!Array.isArray(rows) || rows.length === 0) {
         results.skipped.push(table);
@@ -117,7 +118,7 @@ async function main() {
         continue;
       }
 
-      const result = await importTable(table, rows);
+      const result = await importTable(table, rows, primaryKeys.get(table));
 
       if (result.error) {
         results.errors.push({ table, error: result.error, inserted: result.inserted });
@@ -143,6 +144,8 @@ async function main() {
   }
 
   console.log('');
+  if (results.errors.length) throw new Error('Snapshot import incomplete');
 }
 
-main().catch(console.error);
+
+main().catch(() => { console.error('Snapshot import failed'); process.exitCode = 1; });

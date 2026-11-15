@@ -1,5 +1,14 @@
 # Roadmap
 
+## 2026-11-15 · myuno production-readiness corrections
+- [x] Audit the actual `pavel949/myuno` source and read-only live database; distinguish the unrelated myUNO-final project. Baseline `be1224b5ed838bffebffddf12b127871adf41bad`.
+- [x] Implement THB minor units, exact server pricing, actor-bound atomic managed/manual booking and reviewed Stripe/manual receipt settlement candidates, with security-preserving rollback and no unsafe fallback.
+- [x] Incorporate owner-approved manual RUB rules: protected admin/delegate, explicit agreed FX and unique private document, partial debt, separate overpayment/refund decision. Remove browser-created paid orders and false guest payment/voucher claims.
+- [x] Harden encrypted row snapshots; read-only public inventory is 432 base tables with actual primary keys. Automatic target import is disabled; no secrets or production business data changed.
+- [x] Remove critical/high npm audit findings through compatible updates and tested MapLibre/Vitest/MCP upgrades. Remaining 28 moderate/2 low require review.
+- [x] Verification: 5064/5064 full-suite PASS (443 files, no skips), then 68/68 final PostgreSQL financial checks PASS; final sequential typecheck/lint/build PASS. Reviewed activation package: `docs/qa/PRODUCTION_READINESS_FIXES_2026_11_15.md`.
+- [ ] Production activation remains NO-GO until coordinated migration/Edge/frontend review, existing payment reconciliation, verified recipient/team assignments, recovery drill, representative load and exact deployed-SHA acceptance. Do not seed roles/spaces or execute a live test transaction to close this gate.
+
 ## 2026-11-14 · Attached platform cleanup master prompt
 - [x] Inventory current shells/tokens/routes/query recovery/role surfaces and audit findings; preserve existing reviewed commits and working source.
 - [x] Correct confirmed pharmacy/developer/owner/vendor recovery, developer alias, Vercel reverse redirects and version-generation defects; retain authorization and domain writers.

@@ -1,0 +1,83 @@
+{
+  "baseline_sha": "be1224b5ed838bffebffddf12b127871adf41bad",
+  "branch": "fix/production-readiness-20261115",
+  "date": "2026-11-15",
+  "target": "pavel949/myuno (not myUNO-final)",
+  "local_environment": {
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "postgres": "18.6",
+    "hosted_backend_network": "denied during verification"
+  },
+  "full_suite": {
+    "passed": 5064,
+    "failed": 0,
+    "skipped": 0,
+    "files": 443,
+    "duration_seconds": 580.88,
+    "workers": 2,
+    "report_sha256": "e876e5d30be7fa9e7316368c662d9c9af338261c0dd11830e1e729cb15a77266"
+  },
+  "post_full_suite_follow_up": {
+    "reason": "Unique immutable proof path; protect confirmed receipt workflow from contact-status downgrade",
+    "files": [
+      "docs/hardening/production-readiness/manual-receipts.sql",
+      "src/lib/__tests__/manualReceipts.postgres.test.ts"
+    ],
+    "final_financial_postgres_suites": 3,
+    "passed": 68,
+    "failed": 0,
+    "duration_seconds": 6.46
+  },
+  "node_provider_backup_boundary_checks": {
+    "passed": 19,
+    "failed": 0,
+    "real_provider_signature_sdk_and_delivery": "stubbed"
+  },
+  "signed_transfer_checks": {
+    "ingress_passed": 19,
+    "conflicts_passed": 5,
+    "failed": 0,
+    "real_refund_or_messages": false
+  },
+  "typecheck": {
+    "exit_code": 0
+  },
+  "lint": {
+    "exit_code": 0,
+    "errors": 0,
+    "warnings": 2214
+  },
+  "build": {
+    "exit_code": 0,
+    "modules": 7176,
+    "duration": "2m 1s",
+    "PWA": true,
+    "credentials": "loopback verification; not deployable artifact"
+  },
+  "npm_audit": {
+    "info": 0,
+    "low": 2,
+    "moderate": 28,
+    "high": 0,
+    "critical": 0,
+    "total": 30
+  },
+  "production": {
+    "read_only_metadata_queries": true,
+    "business_writes": false,
+    "migrations_applied": false,
+    "edge_deployments": false,
+    "payments_refunds_messages": false,
+    "roles_or_assignments_changed": false,
+    "release_decision": "NO-GO pending documented activation and recovery gates"
+  },
+  "earlier_failed_run": {
+    "passed": 5047,
+    "failed": 13,
+    "files": 442,
+    "concurrent_build": true,
+    "accepted_as_green": false,
+    "resolution": "Four failing files passed on isolated rerun; subsequent complete suite passed without concurrent build"
+  }
+}

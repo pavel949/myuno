@@ -79,7 +79,7 @@ const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: Civ
 ];
 
 beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; });
-describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
+describe.each(['update'] as const)('%s real booking writer preflight — synthetic only', mode => {
   it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
     state.blocked = blocked;
     state.existing = existing ? [{ ...existing, id: 'synthetic-existing' }] : [];
@@ -87,15 +87,13 @@ describe.each(['create', 'update'] as const)('%s real booking writer preflight �
     expect(uiAllowed).toBe(allowed);
     expect(blocked.some(day => occupiedCivilDates(stay).includes(day))).toBe(blocked.some(day => stayOccupiesDate(stay, day)));
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
-      : result.current.updateBooking({ id: 'synthetic-current', ...stay });
+    const attempt = result.current.updateBooking({ id: 'synthetic-current', ...stay });
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
-    expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
+    expect(state.boundary).toEqual(allowed ? ['orders.update'] : []);
   });
 });
 
-describe.each(['create', 'update'] as const)('%s fails closed before mutation', mode => {
+describe.each(['update'] as const)('%s fails closed before mutation', mode => {
   it.each(['orders', 'order_items', 'property_availability'])('rejects failed %s availability source', async table => {
     state.failedTable = table;
     state.existing = [{ id: 'synthetic-other', check_in: '2026-10-10', check_out: '2026-10-13' }];
@@ -103,16 +101,13 @@ describe.each(['create', 'update'] as const)('%s fails closed before mutation', 
     const dates = { check_in: '2026-10-11', check_out: '2026-10-14' };
     // For block-source failure, no earlier overlap should stop the read.
     if (table === 'property_availability') state.existing = [];
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...dates })
-      : result.current.updateBooking({ id: 'synthetic-current', ...dates });
+    const attempt = result.current.updateBooking({ id: 'synthetic-current', ...dates });
     await expect(attempt).rejects.toThrow('Synthetic read failure');
     expect(state.boundary).toEqual([]);
   });
   it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('rejects invalid stay %s → %s', async (check_in, check_out) => {
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
-    const attempt = mode === 'create' ? result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out })
-      : result.current.updateBooking({ id: 'synthetic-current', check_in, check_out });
+    const attempt = result.current.updateBooking({ id: 'synthetic-current', check_in, check_out });
     await expect(attempt).rejects.toThrow(mode === 'update' && !check_in ? 'Booking dates or property unavailable' : 'корректные даты');
     expect(state.boundary).toEqual([]);
   });

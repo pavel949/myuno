@@ -326,11 +326,8 @@ describe('consumer journey ownership', () => {
 
 
 describe('public business entry', () => {
-  it('includes one localized business destination in the top menu only', () => {
-    const entries = GUEST_TOP_NAV.filter(item => item.path === APP_ROUTES.FOR_BUSINESS);
-    expect(entries).toHaveLength(1);
-    expect(entries[0].labelRu).toBe('Бизнес');
-    expect(entries[0].labelEn).toBe('Business');
+  it('keeps business destinations in the partner menu rather than the consumer navigation', () => {
+    expect(GUEST_TOP_NAV.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);
   });

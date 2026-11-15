@@ -1,4 +1,6 @@
-import "@testing-library/jest-dom";
+import { expect } from 'vitest';
+import * as domMatchers from '@testing-library/jest-dom/matchers';
+expect.extend(domMatchers);
 import { transferableAbortController } from 'node:util';
 
 // React Router builds Node Request objects. jsdom's AbortSignal belongs to a

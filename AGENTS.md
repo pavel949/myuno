@@ -16,6 +16,8 @@
 - Empty/invalid authorized scope never means All. Scope preferences and cache never authorize data.
 - Public property/provider/service/salon reads use safe allowlisted projections; private operational records require object/server authorization.
 - Money-moving functions derive actor server-side and never trust client identity, totals, payment status or recipient fields.
+- Stripe THB has two decimal places. Reject legacy hundredfold underpayments; never add a zero-decimal compatibility fallback. Partial receipts preserve explicit debt without full-order ledger; manual RUB installments follow the approved documented FX/receipt contract. Overpayment and refunds require a separate decision.
+- Negotiated price approval requires protected admin or explicit persisted delegation for the property/company; managed booking creation uses one checked transaction and never falls back to separate browser order/item inserts.
 - Before creating a new table, enum, hook, context/provider or workflow engine, search current code/schema for the canonical implementation and prove it cannot represent the requirement.
 - Unknown is UNKNOWN, not false/default. Never invent catalogues, prices, availability, provider mappings, property facts or production state.
 - Public feature-switch reads use an exact-key allowlist backed by public capability admission; wildcard queries never justify revealing internal switches or other settings, and flag visibility never grants domain authority.

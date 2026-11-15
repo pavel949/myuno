@@ -1,0 +1,283 @@
+{
+  "baseline_sha": "be1224b5ed838bffebffddf12b127871adf41bad",
+  "branch": "fix/production-readiness-20261115",
+  "note": "Manifest excludes itself. Release SHA is the commit containing these exact files. SQL candidates are not applied migrations.",
+  "files": [
+    {
+      "path": ".github/workflows/db-mirror-snapshot.yml",
+      "sha256": "a50430ef559a50f6b3e22bd70bb01f6db47d4094a814b91f9e2ae27596a7442b"
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "sha256": "dd0108ce408cc9dcb8220b9c8cc0a612c8703e1166c23392cb24e58f6ad1234f"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "752d01b14399eb5ed54ff64a5ad91aa4dca35e2f0049e902b21f8a18c572982b"
+    },
+    {
+      "path": "PROJECT.md",
+      "sha256": "ce1e99ec886b59b48bbebf3894094e0f3298d2e49973acba654202ff604f1ea9"
+    },
+    {
+      "path": "docs/hardening/production-readiness/CONTRACT.md",
+      "sha256": "5023e078730172917d52e3414a70d2e61492e8c27b663c1439764256ca8701aa"
+    },
+    {
+      "path": "docs/hardening/production-readiness/RELEASE.md",
+      "sha256": "0db16f20b7439d6452d36b7bd758badbdf2b2e5283a1c32e44388a778d6a6ff1"
+    },
+    {
+      "path": "docs/hardening/production-readiness/managed-booking-rollback.sql",
+      "sha256": "6c23117932901c0975f6b56c22377a3ade9093c7036fafd8c9912887e32f463c"
+    },
+    {
+      "path": "docs/hardening/production-readiness/managed-booking.sql",
+      "sha256": "65edc3c703fe3367c36d3bb1f2818601d926ba8b6748c1ca8172f8c31e12849c"
+    },
+    {
+      "path": "docs/hardening/production-readiness/manual-receipts-rollback.sql",
+      "sha256": "a6d57c3b2f191b278436b7f8b0f089306546b83055a5e962c68bbdab71864944"
+    },
+    {
+      "path": "docs/hardening/production-readiness/manual-receipts.sql",
+      "sha256": "8f29fe20e841f8ef11920d6739a8af64970cac2d3fd581a85c3a089059399986"
+    },
+    {
+      "path": "docs/hardening/production-readiness/manual-request-rollback.sql",
+      "sha256": "f73bfdafa0afcf2ca154dc719e845574bf5078d00b5c1d4e729f997d6e4115b5"
+    },
+    {
+      "path": "docs/hardening/production-readiness/manual-request.sql",
+      "sha256": "6552b7e2eb34030d5eba287be8ab23cf95d70d3e675c8c8308b71c9ee127d543"
+    },
+    {
+      "path": "docs/hardening/production-readiness/order-authority-rollback.sql",
+      "sha256": "3ce1374025c0fd6b5f41e2036f0284dcd77e60c202ab75fef51d191e53471eae"
+    },
+    {
+      "path": "docs/hardening/production-readiness/order-authority.sql",
+      "sha256": "926137f2950fd6091709162487cbb6635ba7724c27ae3b91a94abd0c670e82c2"
+    },
+    {
+      "path": "docs/hardening/production-readiness/preflight.sql",
+      "sha256": "19ec20d86d44518bb7eed43e721553cc4e7e5564787691a43d2c869c90786d33"
+    },
+    {
+      "path": "docs/hardening/production-readiness/stripe-settlement-rollback.sql",
+      "sha256": "86fdee629b33e9aa107e90d46bf1651fb4aa1b8ae38d599b3ffbf8d1631e4731"
+    },
+    {
+      "path": "docs/hardening/production-readiness/stripe-settlement.sql",
+      "sha256": "9b222520f6825591ea2108310807b3b66784009e50d4ff8506273cb1adb5af59"
+    },
+    {
+      "path": "docs/hardening/production-readiness/validation.json",
+      "sha256": "6a1437926d66842360318d5ab5eb8f955b65885b1ec926649ac6d9703c89a785"
+    },
+    {
+      "path": "docs/qa/PRODUCTION_READINESS_FIXES_2026_11_15.md",
+      "sha256": "117960f1e9c17ae22bfab4322f6717ee9f1137f04b17ebf08792fe98f1f90d1a"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "647c473d0b09b15dc8c3f8b6afb8e1cb03284dda710cbd06810c2160efc1f72f"
+    },
+    {
+      "path": "package.json",
+      "sha256": "2483446ae82bcf3ea8b36c325649f3cfe7297c6d2de706a9af22f28f8f282ee2"
+    },
+    {
+      "path": "roadmap.md",
+      "sha256": "846c046702071530228a51152a5023c40a445ad73c2d2e9cc875725e0513f95c"
+    },
+    {
+      "path": "scripts/encrypt-snapshot.mjs",
+      "sha256": "39e98b2da33a802c8b8b43408a5c9d080c33fd45bbc97a2e9c4cd2e4540e20af"
+    },
+    {
+      "path": "scripts/export-data.mjs",
+      "sha256": "51e61cb8ad2f5405d1ea900392782e9899855bec91c4b7c1df143eba54f4d3dd"
+    },
+    {
+      "path": "scripts/import-data.mjs",
+      "sha256": "a08856cfbbfaa283a8e4f4fbd661a82113aab641a9723833bcac8ffa633d6209"
+    },
+    {
+      "path": "scripts/lib/data-snapshot.mjs",
+      "sha256": "515de95e72fed052c33952e6119095df08843b2f0b2e61042abfe83234cc72be"
+    },
+    {
+      "path": "scripts/lib/snapshot-inventory.json",
+      "sha256": "f4376dbbb86760902c6626028cea9c018ad297f8ffc008b95a84ee136beb71a7"
+    },
+    {
+      "path": "scripts/qa/data-snapshot.check.mjs",
+      "sha256": "c10b7821fa0027b5d3bb3882bb33da7a7899799aed4354d57fa7ff13af761b90"
+    },
+    {
+      "path": "scripts/qa/final-order-handlers.mjs",
+      "sha256": "86ef22a164dfa7c0fef8188112c6a1d348377db4d566cc79f1d52f439eae8686"
+    },
+    {
+      "path": "scripts/qa/manual-receipt-handler.check.mjs",
+      "sha256": "5a8499691f200cd100b21e0a7f94aa34b689292c58075a6d1e3580beb53313b0"
+    },
+    {
+      "path": "scripts/qa/manual-request-handler.check.mjs",
+      "sha256": "6491bdb07de811486e3c5d2b599a3178b123b6323d860386c9af642c85e4e6a4"
+    },
+    {
+      "path": "scripts/qa/stripe-settlement-handler.check.mjs",
+      "sha256": "7a0c916286dbbb4344caa3a6333414615d13bd8aa574486546d36cc5fe0620a4"
+    },
+    {
+      "path": "scripts/qa/transfer-operator-conflicts.mjs",
+      "sha256": "1e09639dadf194f97451bb1d9e394c119fe3834d3fed556bdd358d2552d9511d"
+    },
+    {
+      "path": "src/components/admin/finance/ManualPaymentForm.tsx",
+      "sha256": "7e00b38d8dd13a3858e144295e5ff7df8f868fd7e31818200b84db8fe67c85b5"
+    },
+    {
+      "path": "src/components/admin/operations/OperationsManualPaymentsTab.receipt.test.tsx",
+      "sha256": "53eb424adce3f6738b075f309c38df5fda09be5f2a67ff1547b2144e29b8f2f5"
+    },
+    {
+      "path": "src/components/admin/operations/OperationsManualPaymentsTab.tsx",
+      "sha256": "e5fecbb7fbffece3a479048252680cf1e3bb34051e16b2d22aed60cd0cc8ad86"
+    },
+    {
+      "path": "src/components/map/MapLibreMap.tsx",
+      "sha256": "37affc066ca0c67f0f2ca4b5bb41e355d27482529af27fd123515b4f390914c7"
+    },
+    {
+      "path": "src/components/nav/__tests__/ConsumerHeader.test.tsx",
+      "sha256": "a9b98e51337a192bb21246fba5cd95d740bcfd43387f3f461d9f9799ec5ee1ed"
+    },
+    {
+      "path": "src/components/property/DepositPaymentOptions.manual.test.tsx",
+      "sha256": "df6714e6547c2a9170fb0c23a1225f7e3bb4dc1130cf4ff33d223cfc0075e2a7"
+    },
+    {
+      "path": "src/components/property/DepositPaymentOptions.tsx",
+      "sha256": "2d5327f35239b9ab3ecda12fef60e6857d78388c114a6f6fdbd143cdf44731c9"
+    },
+    {
+      "path": "src/hooks/__tests__/bookingWriterDates.test.tsx",
+      "sha256": "175453da39bde7ecf564d388b8740a5ff4bd9908e7cdb3d85a0a83682d6f1995"
+    },
+    {
+      "path": "src/hooks/__tests__/usePropertyBookings.preparation.test.tsx",
+      "sha256": "065a888361cc753ae7b90f4908c27d7c149d7fb0367bc3747343e739e5040d71"
+    },
+    {
+      "path": "src/hooks/useAdminDashboardStats.test.ts",
+      "sha256": "0e9db3cc37a9762626f96d4be6cd316d47922f0770b4dff0a07bda4a67541bd5"
+    },
+    {
+      "path": "src/hooks/usePropertyBookings.ts",
+      "sha256": "ccd20ed92b46b0d59a42835be0a4f4eeef034315242c7fb83cfb15ac8516f08a"
+    },
+    {
+      "path": "src/lib/__tests__/adminDashboardQueues.test.ts",
+      "sha256": "d0302140c3248963f778f12aa964a52dadb726dffa18d1aa07ef4fa8363c60e9"
+    },
+    {
+      "path": "src/lib/__tests__/checkoutPaymentGuard.test.ts",
+      "sha256": "6a48883f7bd81eaa708cd329ec2454c5af9c965f7d3b539b350237e0f4c453fb"
+    },
+    {
+      "path": "src/lib/__tests__/createManagedBooking.test.ts",
+      "sha256": "81bc3c61c3a6dd085a8954117ecd885da5f9f45ead775c912d940a813d9bd6cd"
+    },
+    {
+      "path": "src/lib/__tests__/managedBooking.postgres.test.ts",
+      "sha256": "7a1efb7e125d97d665d50c5a19f70e26308e609d7cabba0bb2bb3fa63a2c285a"
+    },
+    {
+      "path": "src/lib/__tests__/manualPaymentIntake.test.ts",
+      "sha256": "72e4becc3aad9bf6a3ecfc386d837f146c9397b465f9d0a701377b36ecc3ab80"
+    },
+    {
+      "path": "src/lib/__tests__/manualReceipts.postgres.test.ts",
+      "sha256": "0f6b5afcd21514e1bda190cf3377d97d792b2c3451539b92233eed80b395a503"
+    },
+    {
+      "path": "src/lib/__tests__/propertyQuote.test.ts",
+      "sha256": "ca18ba501f7eec29b0d4c2520f15f41d0ba4b98f0f7f7f8363e99880b1559397"
+    },
+    {
+      "path": "src/lib/__tests__/stripeSettlement.postgres.test.ts",
+      "sha256": "5087d1ab119f24a179edcdc54cce33e5af760f795c1b25b03cef80cc9214fbc4"
+    },
+    {
+      "path": "src/lib/adminDashboardQueues.ts",
+      "sha256": "dadf5a8e6f82842099711d611681d8938cb2106bcbf98a229101b6a4721fe3be"
+    },
+    {
+      "path": "src/lib/createManagedBooking.ts",
+      "sha256": "c90767b496cb89a5c762a6335a1862bfabbdf2884482e3289a2ebf77c03a6729"
+    },
+    {
+      "path": "src/lib/manualPaymentIntake.ts",
+      "sha256": "14d30b09bc9a77cec806846e569cd338e4334e3c2dfe339071f334ec5a5e953b"
+    },
+    {
+      "path": "src/lib/nav/__tests__/navigationModel.test.ts",
+      "sha256": "9aed96507f7ee90c2e11b3a8cbd651a66d6cc7168637d7d8d740886ac88f2fc9"
+    },
+    {
+      "path": "src/lib/rpcErrorMessages.ts",
+      "sha256": "8376932397260e92f34bff0a51349062b4de5e13de39753310cf6cb2943b0774"
+    },
+    {
+      "path": "src/pages/property/ManualPaymentPending.receipt.test.tsx",
+      "sha256": "ed2ddc3c68ca0324932cd15e4b2f9820b6b9c350a72483e822699128e92598cb"
+    },
+    {
+      "path": "src/pages/property/ManualPaymentPending.tsx",
+      "sha256": "dca47db3d58800e14b17e0c17829a9a4b07a8681fcbb48b0c43d82ceb2d9c960"
+    },
+    {
+      "path": "src/test/dom-matchers.d.ts",
+      "sha256": "e44a83ec2e3754a8b5cbf95c30aa5a619570b9ca3c976f92e4ec1c8905953490"
+    },
+    {
+      "path": "src/test/setup.ts",
+      "sha256": "1f0b9d21c252513373e5f3bcb47f8714c0ae4367fd24a93579c0a4557f1bb3ef"
+    },
+    {
+      "path": "supabase/functions/_shared/currency.ts",
+      "sha256": "7b1925888b23b0830f564ef458e04bd3db8c7673d99c2340685bc2dfbb92a3e2"
+    },
+    {
+      "path": "supabase/functions/_shared/manual-request-key.ts",
+      "sha256": "29d60e0d9190410a5e17aa1434781eae00a4e402955b4b61e430df2386fa8a50"
+    },
+    {
+      "path": "supabase/functions/_shared/property-quote.ts",
+      "sha256": "bd3696b5e78bfcdfc825d6b5aa1977e2be86692a077c1431403ff5781cfe7520"
+    },
+    {
+      "path": "supabase/functions/confirm-manual-payment/index.ts",
+      "sha256": "82062bb0108358dabe3f6d17fb94229d65b60dffa2968bef791efa8413c81519"
+    },
+    {
+      "path": "supabase/functions/confirm-transfer-operator/index.ts",
+      "sha256": "14106155f5000587c4462c5964d0fd7facfd3a0dcbff7823d8ee2ef0e52e9c13"
+    },
+    {
+      "path": "supabase/functions/create-property-deposit-checkout/index.ts",
+      "sha256": "9fda418361b56b3f692a37e9213f6d8b8a3a61b1db25e1a58ba8af2850ab7d14"
+    },
+    {
+      "path": "supabase/functions/mcp/index.ts",
+      "sha256": "a71057fed3be7b3797c1eeb52e5f676fec575a6e6b431491402f589c2deedc49"
+    },
+    {
+      "path": "supabase/functions/stripe-webhook/index.ts",
+      "sha256": "58b3380da59c8b100d727027570a86c9d34965d177a1ceceb102ac20baccec81"
+    }
+  ]
+}

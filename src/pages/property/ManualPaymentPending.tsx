@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, Clock, Copy, MessageCircle, Loader2, Home, AlertCircle, FileCheck2, XCircle } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
@@ -9,9 +9,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { readManualReceiptApproval } from '@/lib/manualPaymentIntake';
 import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
+
+const ConfirmReceiptDialog = lazy(() => import('@/components/admin/operations/OperationsManualPaymentsTab').then(module => ({default:module.ConfirmPaymentDialog})));
 
 interface ManualPaymentRequestRow {
   id: string;
@@ -23,9 +26,12 @@ interface ManualPaymentRequestRow {
   hold_expires_at: string;
   guest_name: string;
   rejected_reason: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface OrderRow {
+  total_amount: number;
+  currency: string;
   order_number: string | null;
   metadata: Record<string, unknown> | null;
 }
@@ -48,33 +54,57 @@ export default function ManualPaymentPending() {
 
   const [request, setRequest] = useState<ManualPaymentRequestRow | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
+  const [loadedActor, setLoadedActor] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   // Initial load
   useEffect(() => {
-    if (!orderId) return;
+    setRequest(null); setOrder(null);
+    if (!orderId || !user?.id) { setIsLoading(false); return; }
+    const actor=user.id;
     let cancelled = false;
     (async () => {
       setIsLoading(true);
-      const [{ data: req }, { data: ord }] = await Promise.all([
+      setLoadError(false);
+      const [{ data: req, error: reqError }, { data: ord, error: ordError }] = await Promise.all([
         supabase
           .from('manual_payment_requests')
-          .select('id, order_id, status, amount_listing, currency_listing, amount_rub_estimate, hold_expires_at, guest_name, rejected_reason')
+          .select('id, order_id, status, amount_listing, currency_listing, amount_rub_estimate, hold_expires_at, guest_name, rejected_reason, metadata')
           .eq('order_id', orderId)
+          .order('created_at', { ascending: false }).limit(1)
           .maybeSingle(),
         supabase
           .from('orders')
-          .select('order_number, metadata')
+          .select('order_number, metadata, total_amount, currency')
           .eq('id', orderId)
           .maybeSingle(),
       ]);
       if (cancelled) return;
+      setLoadError(Boolean(reqError || ordError));
       setRequest((req as ManualPaymentRequestRow | null) ?? null);
       setOrder((ord as OrderRow | null) ?? null);
+      setLoadedActor(actor);
       setIsLoading(false);
-    })();
+    })().catch(() => {if(!cancelled){setLoadError(true);setLoadedActor(actor);setIsLoading(false);}});
     return () => { cancelled = true; };
-  }, [orderId]);
+  }, [orderId, user?.id, retry]);
+
+  // The same request URL is available to an explicitly appointed approver.
+  // Capability is actor/request-bound; customer ownership alone never grants it.
+  const [approval, setApproval] = useState<{actor:string;requestId:string;allowed:boolean} | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  useEffect(() => {
+    if (!request?.id || !user?.id) return;
+    let cancelled=false;
+    const actor=user.id, requestId=request.id;
+    void readManualReceiptApproval(requestId)
+      .then(allowed => {if(!cancelled)setApproval({actor,requestId,allowed});});
+    return () => {cancelled=true;};
+  }, [request?.id,user?.id]);
+  const canApprove=approval?.actor===user?.id && approval?.requestId===request?.id && approval?.allowed===true;
 
   // Realtime — flip the UI as soon as admin confirms or rejects.
   useEffect(() => {
@@ -93,7 +123,7 @@ export default function ManualPaymentPending() {
           const next = payload.new as ManualPaymentRequestRow;
           setRequest(next);
           if (next.status === 'confirmed') {
-            toast.success(isRu ? 'Оплата подтверждена!' : 'Payment confirmed!');
+            toast.success(isRu ? 'Статус поступления обновлён' : 'Receipt status updated');
           } else if (next.status === 'rejected') {
             toast.error(isRu ? 'Заявка отклонена' : 'Request rejected');
           }
@@ -125,13 +155,15 @@ export default function ManualPaymentPending() {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || loadedActor !== user?.id) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
+
+  if (loadError) return <div className="p-6 text-center space-y-4"><p>{isRu ? 'Не удалось загрузить заявку' : 'Unable to load request'}</p><Button onClick={() => setRetry(n => n + 1)}>{isRu ? 'Повторить' : 'Retry'}</Button></div>;
 
   if (!request || !order) {
     return (
@@ -150,6 +182,10 @@ export default function ManualPaymentPending() {
 
   // === Status-driven hero ===
   const isConfirmed = request.status === 'confirmed';
+  const outcome = request.metadata?.receipt_outcome;
+  const remaining = Number(request.metadata?.receipt_remaining_thb);
+  const receiptTitle = outcome === 'settled' ? (isRu ? 'Оплата подтверждена' : 'Payment confirmed') : (isRu ? 'Поступление учтено' : 'Receipt recorded');
+  const receiptDescription = outcome === 'settled' ? (isRu ? 'Бронирование подтверждено.' : 'Your booking is confirmed.') : outcome === 'partial' && Number.isFinite(remaining) ? (isRu ? `Осталось оплатить: ${remaining} THB. Бронь ожидает полной оплаты.` : `Balance due: ${remaining} THB. Full payment is still pending.`) : (isRu ? 'Требуется сверка администратором. Полная оплата не подтверждена.' : 'Administrator reconciliation is required. Full payment is unconfirmed.');
   const isRejected = request.status === 'rejected';
   const isExpired = request.status === 'expired';
   const isAwaiting = !isConfirmed && !isRejected && !isExpired;
@@ -172,6 +208,8 @@ export default function ManualPaymentPending() {
         </div>
 
         <div className="p-4 space-y-5 max-w-xl mx-auto">
+          {canApprove && <Button onClick={() => setConfirmOpen(true)}>{isRu ? 'Учесть поступление' : 'Record receipt'}</Button>}
+          {canApprove && confirmOpen && <Suspense fallback={<p role="status">{isRu ? 'Загрузка…' : 'Loading…'}</p>}><ConfirmReceiptDialog row={{id:request.id,amount_listing:request.amount_listing,amount_rub_estimate:request.amount_rub_estimate,orders:order}} isRu={isRu} onClose={() => setConfirmOpen(false)} onDone={() => {setConfirmOpen(false);setRetry(n=>n+1);}} /></Suspense>}
           {/* === Status hero === */}
           {isConfirmed && (
             <Card className="border-success/40 bg-success/5">
@@ -179,12 +217,10 @@ export default function ManualPaymentPending() {
                 <CheckCircle2 className="w-8 h-8 text-success shrink-0" />
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg">
-                    {isRu ? 'Оплата подтверждена!' : 'Payment confirmed!'}
+                    {receiptTitle}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {isRu
-                      ? 'Бронирование подтверждено. Ваучер отправлен на email.'
-                      : 'Your booking is confirmed. Voucher sent to email.'}
+                    {receiptDescription}
                   </p>
                 </div>
               </CardContent>
@@ -217,8 +253,8 @@ export default function ManualPaymentPending() {
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {isRu
-                      ? 'Даты освобождены. Если хотите забронировать снова — напишите нам.'
-                      : 'Dates released. Reach out if you still want to book.'}
+                      ? 'Срок заявки истёк. Свяжитесь с командой для проверки доступности дат.'
+                      : 'The request has expired. Contact the team to check date availability.'}
                   </p>
                 </div>
               </CardContent>
@@ -235,8 +271,8 @@ export default function ManualPaymentPending() {
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {isRu
-                      ? 'Менеджер myUNO свяжется с вами в течение 30 минут (9:00–22:00 ICT).'
-                      : 'A myUNO manager will reach out within 30 minutes (9am–10pm ICT).'}
+                      ? 'Команда myUNO проверит заявку и согласует условия оплаты.'
+                      : 'The myUNO team will review your request and agree payment terms.'}
                   </p>
                 </div>
               </CardContent>

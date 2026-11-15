@@ -4,6 +4,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { PAYABLE_ORDER_STATUSES, validateCheckoutPayment } from "../_shared/checkout-payment-guard.ts";
 
+class RetryableSettlementError extends Error {}
 
 /**
  * Redacted logger — logs event flow without sensitive data (PCI/GDPR).
@@ -142,90 +143,26 @@ Deno.serve(async (req) => {
           throw new Error('Paid checkout requires reconciliation: order is not payable');
         }
 
-        // ===== IDEMPOTENCY CHECK: Skip if order already confirmed =====
-        if (order.status === 'confirmed') {
-          logStep("IDEMPOTENCY: Order already confirmed, skipping duplicate processing", { orderId });
-          return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
+        // The checked writer locks the order and reconciles payment, inventory,
+        // ledger and history together. Replays repair incomplete confirmed orders.
+        // Missing deployment or any failure must be retried, never direct-written.
+        const providerPaymentId = typeof session.payment_intent === 'string'
+          ? session.payment_intent : session.payment_intent?.id;
+        const { data: settlement, error: settlementError } = await supabaseAdmin.rpc('settle_stripe_order_checked', {
+          p_order_id: orderId,
+          p_payment_id: expectedPayment.id,
+          p_checkout_id: session.id,
+          p_provider_payment_id: providerPaymentId ?? null,
+          p_amount_minor: session.amount_total,
+          p_currency: session.currency,
+        });
+        if (settlementError) throw new RetryableSettlementError('Payment reconciliation is unavailable; retry required');
+        if (settlement?.outcome === 'partial_requires_reconciliation') {
+          return new Response(JSON.stringify({ received: true, reconciliation_required: true }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 202,
           });
         }
-
-        // Atomically claim the confirmation: conditional UPDATE that only matches
-        // rows still awaiting payment. Two concurrent duplicate deliveries race here,
-        // but only ONE gets a row back (`.select()` returns the affected rows) —
-        // the loser sees zero rows and bails before running side-effects. This
-        // closes the TOCTOU gap between the status SELECT above and this UPDATE.
-        const { data: confirmedRows, error: orderUpdateError } = await supabaseAdmin
-          .from('orders')
-          .update({ status: 'confirmed', paid_at: new Date().toISOString() })
-          .eq('id', orderId)
-          .in('status', [...PAYABLE_ORDER_STATUSES])
-          .select('id');
-
-        if (orderUpdateError) {
-          logStep("ERROR", `Failed to update order: ${orderUpdateError.message}`);
-          throw orderUpdateError;
-        }
-
-        if (!confirmedRows || confirmedRows.length === 0) {
-          // The conditional update may have lost to cancellation as well as to
-          // another payment. Only the confirmed case is a duplicate success.
-          const { data: latestOrder, error: latestOrderError } = await supabaseAdmin
-            .from('orders').select('status').eq('id', orderId).single();
-          if (latestOrderError || latestOrder?.status !== 'confirmed') {
-            throw new Error('Paid checkout lost confirmation race; reconciliation required');
-          }
-          logStep("IDEMPOTENCY: Order confirmed by concurrent delivery, skipping side-effects", { orderId });
-          return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        }
-
-        // Update payment_intent status
-        const { error: paymentUpdateError } = await supabaseAdmin
-          .from('payment_intents')
-          .update({ 
-            status: 'succeeded',
-            provider_ref: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id,
-          })
-          .eq('id', expectedPayment.id);
-
-        if (paymentUpdateError) {
-          logStep("WARN", `Failed to update payment intent: ${paymentUpdateError.message}`);
-        }
-
-        // ===== IDEMPOTENCY CHECK: Order status history =====
-        const { data: existingHistory } = await supabaseAdmin
-          .from('order_status_history')
-          .select('id')
-          .eq('order_id', orderId)
-          .eq('to_status', 'confirmed')
-          .limit(1);
-
-        if (!existingHistory || existingHistory.length === 0) {
-          await supabaseAdmin
-            .from('order_status_history')
-            .insert({
-              order_id: orderId,
-              from_status: order.status || 'pending',
-              to_status: 'confirmed',
-              reason: `Payment confirmed via Stripe. Session: ${session.id}`,
-            });
-          logStep("Order status history created", { orderId });
-        } else {
-          logStep("IDEMPOTENCY: Order status history already exists, skipping", { orderId });
-        }
-
-        // ===== LEDGER ENTRIES via RPC (idempotent — skips if already exist) =====
-        try {
-          await supabaseAdmin.rpc('record_ledger_entries', { p_order_id: orderId });
-          logStep("Ledger entries recorded via RPC", { orderId: redactId(orderId) });
-        } catch (ledgerError: unknown) {
-          const ledgerMsg = ledgerError instanceof Error ? ledgerError.message : String(ledgerError);
-          logStep("WARN", `Ledger entries failed (non-fatal): ${ledgerMsg}`);
-        }
+        if (settlement?.outcome !== 'settled') throw new RetryableSettlementError('Settlement acknowledgement missing');
 
         // ===== IDEMPOTENCY CHECK: Notification =====
         const { data: existingNotification } = await supabaseAdmin
@@ -1180,7 +1117,7 @@ Deno.serve(async (req) => {
     logStep("ERROR", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: error instanceof RetryableSettlementError ? 503 : 400 }
     );
   }
 });

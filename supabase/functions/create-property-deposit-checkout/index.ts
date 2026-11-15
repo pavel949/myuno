@@ -7,6 +7,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
 import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
 import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
+import { manualPropertyIntentFingerprint } from "../_shared/manual-request-key.ts";
 import { verifyInventoryHold } from "../_shared/inventory-hold.ts";
 
 
@@ -24,6 +25,8 @@ interface PropertyDepositRequest {
   guest_phone: string;
   guest_email: string;
   provider_org_id?: string;
+  payment_channel?: 'rub_manual';
+  request_key?: string;
 }
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -36,6 +39,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  if (req.method !== 'POST') return new Response(JSON.stringify({error:'Method not allowed'}),{status:405,headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   let compensationOrderId: string | null = null;
   let compensationClient: ReturnType<typeof createClient> | null = null;
@@ -68,7 +73,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
 
     // Rate limiting — payment endpoint. This function bypasses the shared
     // checkout handler, so the throttle must be applied explicitly here.
@@ -94,8 +99,8 @@ Deno.serve(async (req) => {
       guest_name,
       guest_phone,
       guest_email,
-      provider_org_id,
     } = body;
+    let { provider_org_id } = body;
 
     logStep("Request body parsed", { 
       property_id, 
@@ -111,6 +116,24 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
     compensationClient = supabaseAdmin;
+
+    const manual = body.payment_channel === 'rub_manual';
+    const fingerprint = manual ? await manualPropertyIntentFingerprint(body) : null;
+    if (manual) {
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.request_key ?? '')) {
+        return new Response(JSON.stringify({ error: 'A request key is required' }), { status:400,headers:{...corsHeaders,'Content-Type':'application/json'} });
+      }
+      const {data:existing,error:recoveryError}=await supabaseAdmin.from('manual_payment_requests')
+        .select('id, order_id, metadata').eq('user_id',user.id).eq('intake_request_key',body.request_key).maybeSingle();
+      if(recoveryError)return new Response(JSON.stringify({error:'Manual requests are temporarily unavailable'}),{status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
+      if(existing){
+        if(existing.metadata?.request_fingerprint!==fingerprint)return new Response(JSON.stringify({error:'Request details changed; check the original request first'}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
+        return new Response(JSON.stringify({success:true,already:true,order_id:existing.order_id,request_id:existing.id}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+      }
+    }
+
+    const {data:publicProperty,error:publicError}=await supabaseAdmin.from('public_property_catalog').select('id').eq('id',property_id).maybeSingle();
+    if(publicError||!publicProperty)return new Response(JSON.stringify({error:'Property is not available for public booking'}),{status:publicError?503:404,headers:{...corsHeaders,'Content-Type':'application/json'}});
 
     // ── Resort / hotel: booking by room category + rate plan ───────────────
     const room_category_id = (body as { room_category_id?: string }).room_category_id;
@@ -153,14 +176,11 @@ Deno.serve(async (req) => {
 
     // ── Authoritative server quote (F06) ───────────────────────────────────
     if (!categoryMeta) {
-    // Nights are derived from the dates in the Bangkok calendar, the property
-    // must be active/THB, guests and minimum stay are enforced, the cleaning
-    // fee must equal the stored fee, the total must lie between the base price
-    // minus the property's own largest configured discount and the undiscounted
-    // base price, and the deposit is computed here (client value is ignored).
+    // Stored eligible rates determine one exact quote. Caller totals are consistency
+    // checks only; conflicting tariffs require an authorized pricing decision.
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing, property_kind, room_category_id")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, early_booking_days, last_minute_discount, last_minute_days, custom_length_discounts, seasonal_pricing, property_kind, room_category_id")
       .eq("id", property_id)
       .maybeSingle();
 
@@ -184,7 +204,7 @@ Deno.serve(async (req) => {
 
     const { data: seasonRows, error: seasonErr } = await supabaseAdmin
       .from("property_rate_seasons")
-      .select("start_date, end_date, nightly_rate, min_stay_nights, is_active, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount")
+      .select("start_date, end_date, nightly_rate, min_stay_nights, is_active, weekly_discount, monthly_discount, early_booking_discount, early_booking_days, last_minute_discount, last_minute_days")
       .eq("property_id", property_id)
       .eq("is_active", true)
       .lte("start_date", check_out)
@@ -235,6 +255,32 @@ Deno.serve(async (req) => {
     cleaning_fee = quote.cleaningFee;
     }
 
+    if (manual) {
+      const {data:receipt,error:requestError}=await supabaseAdmin.rpc('create_manual_property_request_atomic',{
+        p_customer_id:user.id,p_request_key:body.request_key,p_fingerprint:fingerprint,p_property_id:property_id,
+        p_start_at:`${check_in}T14:00:00+07:00`,p_end_at:`${check_out}T12:00:00+07:00`,p_total_thb:total_amount,
+        p_guest_name:guest_name,p_guest_phone:guest_phone||'',p_guest_email:guest_email||user.email||'',
+      });
+      if(requestError||receipt?.success!==true)return new Response(JSON.stringify({error:'Request was not acknowledged. Check your bookings before retrying.'}),{status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
+      return new Response(JSON.stringify(receipt),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+    }
+
+    // Settlement counterparties come only from the protected provider→org link.
+    // A submitted org (or a provider UUID used as an org) is never authority.
+    const { data: payableProperty, error: counterpartyPropertyError } = await supabaseAdmin
+      .from('properties').select('provider_id').eq('id', property_id).maybeSingle();
+    const providerId = payableProperty?.provider_id;
+    const link = providerId ? await supabaseAdmin.from('provider_org_links')
+      .select('org_id, orgs!inner(id, is_active)').eq('provider_id', providerId).single() : null;
+    if (counterpartyPropertyError || !providerId || link?.error || !link?.data?.org_id
+        || link.data.orgs?.is_active !== true || (provider_org_id && provider_org_id !== link.data.org_id)) {
+      return new Response(JSON.stringify({ code: 'provider_mapping_required',
+        error: 'Online payment is unavailable until the property payment recipient is verified. Contact the team.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 409,
+      });
+    }
+    provider_org_id = link.data.org_id;
+
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
       'check_property_dates_available',
@@ -270,8 +316,8 @@ Deno.serve(async (req) => {
       qty: nights,
       unit_price: Math.round(total_amount / nights),
       amount: total_amount,
-      start_at: `${check_in}T14:00:00.000Z`,
-      end_at: `${check_out}T12:00:00.000Z`,
+      start_at: `${check_in}T14:00:00.000+07:00`,
+      end_at: `${check_out}T12:00:00.000+07:00`,
       metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0, ...(categoryMeta ?? {}) },
     }];
 
@@ -286,8 +332,8 @@ Deno.serve(async (req) => {
       p_order_type: 'property',
       p_customer_user_id: user.id,
       p_provider_org_id: provider_org_id || null,
-      p_start_at: `${check_in}T14:00:00.000Z`,
-      p_end_at: `${check_out}T12:00:00.000Z`,
+      p_start_at: `${check_in}T14:00:00.000+07:00`,
+      p_end_at: `${check_out}T12:00:00.000+07:00`,
       p_total_amount: total_amount,
       p_currency: 'THB',
       p_notes: `Deposit: ${deposit_amount} THB (10%)`,

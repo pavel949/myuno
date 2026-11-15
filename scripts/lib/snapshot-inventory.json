@@ -1,0 +1,2603 @@
+{
+  "source_project_ref": "kakkwibljrjsawxgnupk",
+  "verified_at": "2026-11-15",
+  "coverage": "public base tables only; Auth, Storage and schema excluded",
+  "tables": [
+    {
+      "table": "achievement_definitions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "admin_audit_logs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "admin_notes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "agent_deal_activities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "agent_deals",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_agent_knowledge",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_agent_logs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_agents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_artifacts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_decisions_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_intake_sessions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_knowledge_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ai_task_suggestions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "airport_bookings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "airport_passengers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "airport_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "airport_suppliers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "amenity_catalog",
+      "primaryKey": [
+        "code"
+      ]
+    },
+    {
+      "table": "analytics_events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "api_keys",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_conflicts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_cross_sell_offers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_message_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_notifications_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_operations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_payments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_status_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "booking_vouchers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "bookings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "bouquets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "business_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "buyers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "calendar_sync_logs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cancellation_policies",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "capital_campaigns",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "capital_contacts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "capital_intro_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "capital_pipeline",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "capital_projects",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cart_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cashback_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "catalog_facet_definitions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "catalog_hygiene_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "catalog_life_map",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "category_groups",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "category_suggestions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "chat_message_flags",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "chat_violation_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "city_areas",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "city_content",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cleaning_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "clearview_categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "clearview_purchases",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "cluster_life_situations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "commission_agreements",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "communities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "company_category_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "company_storefronts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "compliance_filings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "compliance_obligation_types",
+      "primaryKey": [
+        "code"
+      ]
+    },
+    {
+      "table": "concierge_journeys",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "concierge_sessions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "consultation_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "contact_identities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "contact_identity_links",
+      "primaryKey": [
+        "source_table",
+        "source_id"
+      ]
+    },
+    {
+      "table": "contact_relationships",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "contact_tags",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "contract_analyses",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_access_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_activities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_assignment_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_comm_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_companies",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_contact_notes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_contacts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_custom_field_values",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_custom_fields",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_custom_options",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_email_accounts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_emails",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_meetings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_nurture_queue",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_oauth_states",
+      "primaryKey": [
+        "state"
+      ]
+    },
+    {
+      "table": "crm_pipeline_stages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_pipelines",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_quotes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_scoring_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_sequence_enrollments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_sequence_steps",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_sequences",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_tasks",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_web_form_submissions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_web_forms",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_workflow_actions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "crm_workflows",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "currencies",
+      "primaryKey": [
+        "code"
+      ]
+    },
+    {
+      "table": "currency_rates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deal_field_changes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deal_pipeline_stages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deal_scheduled_activities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deal_stage_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deposit_vault_photos",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "deposit_vaults",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "developer_impersonation_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "developer_users",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "developers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "development_units",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "dispute_packs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "disputes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "doctors",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "drive_import_jobs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "due_diligence_reports",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "education_providers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "email_send_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "email_send_state",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "email_subscriptions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "email_unsubscribe_tokens",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "experience_categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "experience_media",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "experience_pricing",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "favorites",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "floor_plans",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "flower_addons",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "flower_shops",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "goods_receipts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "google_place_cache",
+      "primaryKey": [
+        "place_id"
+      ]
+    },
+    {
+      "table": "guest_check_in_data",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "guest_loyalty_tiers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "gyms",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "help_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "insurance_plans",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "insurance_providers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "inventory_inspections",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "inventory_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "investment_articles",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "investment_deals",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "investment_interests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "investment_projects",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "investor_inquiries",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "juristic_contacts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "juristic_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "knowledge_pillars",
+      "primaryKey": [
+        "slug"
+      ]
+    },
+    {
+      "table": "lead_activity_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lead_attributions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lead_magnet_submissions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lead_magnets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lead_score_events",
+      "primaryKey": [
+        "event_key"
+      ]
+    },
+    {
+      "table": "ledger_accounts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ledger_entries",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "legal_acceptances",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "legal_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "legal_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "life_scenarios",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "life_situations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "life_tasks",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lifecycle_executions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lifecycle_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lifeos_governance",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lifeos_routes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "listing_applications",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "location_knowledge",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "locations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "lookup_values",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "magnet_landings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "management_companies",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "management_company_members",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "management_terms_activity",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "manual_payment_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_delivery_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_international_shipping",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_product_attributes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_products",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_promo_codes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_promotions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_reviews",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_subcategories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "marketplace_vendors",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mc_onboarding_progress",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mc_property_slots",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_ab_tests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_channel_metrics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_landing_events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_landing_registry",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_state_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "mcc_user_states",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "medical_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "message_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "moderation_queue",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "nb_alert_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "nb_alert_preferences",
+      "primaryKey": [
+        "user_id"
+      ]
+    },
+    {
+      "table": "nb_leads",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "nb_project_updates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "nb_saved_searches",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "notification_deliveries",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "notification_preferences",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "notification_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "notifications",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "offer_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "official_news",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "operating_space_assignment_audit",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "operating_space_members",
+      "primaryKey": [
+        "operating_space_id",
+        "company_member_id"
+      ]
+    },
+    {
+      "table": "operating_space_properties",
+      "primaryKey": [
+        "operating_space_id",
+        "property_id"
+      ]
+    },
+    {
+      "table": "operating_spaces",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_addresses",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_attachments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_item_flower_details",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_item_transport_details",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_item_yacht_details",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_participants",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_status_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "order_translations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "orders",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "org_members",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "orgs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ota_listing_connections",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ota_sync_logs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ota_synced_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "outreach_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_invoices",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_notifications",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_payouts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_performance_metrics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_portal_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_prospects",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_service_vendors",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_statement_approvals",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "owner_vault_files",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "page_views",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "partner_applications",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "payment_intents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "payout_runs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "persona_detection_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "personal_reminders",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "pharmacies",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "pharmacy_products",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "phuket_osm_pois",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "platform_events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "platform_metrics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "platform_news",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "platform_recommendations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "poi_claim_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "portal_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "pricing_recommendations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "products",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "profiles",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_drive_sources",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_fact_assertions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_price_list_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_price_list_versions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "project_units",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "promoted_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "properties",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_accounting_policies",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_activity_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_amenities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_analytics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_availability",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_booking_status_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_bookings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_budgets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_chat_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_checklist_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_complexes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_delegates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_external_calendars",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_financial_models",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_financials",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_guidebook",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_inquiries",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_inspections",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_inventory_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_key_assignments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_listing_scores",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_management_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_management_terms",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_manager_assignments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_media",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_notes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_operational_tasks",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_owners",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_ownership_invites",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_payout_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_price_offers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_projects",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_promotions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_rate_plans",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_rate_seasons",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_reports",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_reviews",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_room_categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_service_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_stay_restrictions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_stays_subscriptions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "property_utility_schedules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_availability",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_badges",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_contracts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_input_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_org_links",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "provider_payout_methods",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "providers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "purchase_order_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "purchase_orders",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "push_subscriptions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "pwa_installs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "qa_test_runs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "quick_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "rate_limit_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "realtime_stats",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "reconciliation_alerts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "referral_codes",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "referral_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "referrals",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "relocation_articles",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "relocation_plans",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "resale_properties",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "reservations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "restaurant_menu_categories",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "restaurant_menu_items",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "returning_guests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "review_helpful",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "reviews",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "rln_events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "salon_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "salon_staff",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "salons",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "service_jtbd_clusters",
+      "primaryKey": [
+        "service_id",
+        "cluster"
+      ]
+    },
+    {
+      "table": "service_orders",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "service_promotions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "signature_request_signer_tokens",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "signature_request_signers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "signature_requests",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "simulation_runs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "social_content_calendar",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "social_posts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "staff_members",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "stays_subscription_tiers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "stores",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "subscription_plans",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "support_tickets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "suppressed_emails",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "sys_intake_configs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "sys_lead_configs",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "system_config",
+      "primaryKey": [
+        "key"
+      ]
+    },
+    {
+      "table": "system_settings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "tags",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "task_comments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "tax_filings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "taxonomy_definitions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "taxonomy_normalization",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_achievements",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_activity_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_channels",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_gamification",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_member_permissions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_members",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_shifts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_timesheets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "team_user_achievements",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "terms_acceptances",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_bookings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_business_reviews",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_business_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_businesses",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_chat_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_chats",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "thai_partner_leads",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "ticket_messages",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transfer_meeting_points",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transfer_night_surcharge_config",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transfer_operators",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transfers",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "translations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transport_destinations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "transport_vehicle_types",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "trust_badges",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "unit_holds",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "uno_team_permissions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_achievements",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_active_context",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_addresses",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_documents_vault",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_events",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_listings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_loyalty_status",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_passports",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_payment_methods",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_personas",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_pins",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_roles",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_segments",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_sessions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "user_visa_status",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_analytics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_bookings",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_documents",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_location_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_locations",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_outreach_log",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_outreach_templates",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_payouts",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_prospect_activity",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_prospects",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vendor_subscriptions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "venues",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "vertical_commission_rules",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "veterinary_clinics",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "view_history",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "visa_records",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "visa_services",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "wallet_transactions",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "wallets",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "water_activities",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "webhook_deliveries",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "webhook_endpoints",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "yacht_availability",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "yacht_external_calendars",
+      "primaryKey": [
+        "id"
+      ]
+    },
+    {
+      "table": "yacht_pricing_rules",
+      "primaryKey": [
+        "id"
+      ]
+    }
+  ]
+}

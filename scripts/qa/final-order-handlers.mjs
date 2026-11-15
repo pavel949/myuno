@@ -43,5 +43,5 @@ for (status of ['cancelled','refunded','completed','expired','checked_in','check
 status='pending';orderType='property';assert.equal(await call(),403);assert.equal(writes,0);
 orderType='transfer';status='confirmed';assert.equal(await call(),200);assert.equal(writes,0);
 status='pending';assert.equal(await call(),409);assert.ok(updates[0].some(([k,v])=>k==='status'&&v==='pending'));
-status='confirmed';assert.equal(await call('reject'),409);assert.ok(updates[0].some(([k,v])=>k==='status'&&Array.isArray(v)&&v.join(',')==='pending,confirmed'));
+status='confirmed';assert.equal(await call('reject'),503);assert.equal(writes,0);
 console.log(`${cases}/${cases} actual signed operator ingress/terminal-state cases; SDK/refund/messaging boundaries stubbed, network forbidden`);

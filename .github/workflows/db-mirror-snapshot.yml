@@ -1,13 +1,12 @@
 name: DB Mirror Snapshot (Lovable Cloud → Own Supabase)
 
-# Snapshots all data from Lovable Cloud Supabase (kakkwibljrjsawxgnupk)
-# into the user's own Supabase project (erfwtoavipwjqmylpizt) every 6 hours.
+# Verified public-table row mirror, not a full database/Auth/Storage backup.
 #
 # Strategy: REST-based dump via @supabase/supabase-js (bypasses need for direct
 # Postgres replication access, which Lovable Cloud does not provide).
 #
-# IMPORTANT: This is a snapshot mirror — the target DB is overwritten on each
-# run. Do NOT write directly to the target DB; treat it as read-only replica.
+# Existing rows are updated; absent source rows are not deleted. Full recovery
+# requires a separately tested database and Storage backup. Never upload plaintext.
 
 on:
   schedule:
@@ -21,10 +20,19 @@ on:
         required: false
         default: 'manual snapshot'
 
+      restore_to_mirror:
+        description: 'Explicitly import verified rows into isolated mirror (may execute target triggers)'
+        type: boolean
+        required: false
+        default: false
+
 concurrency:
   # Prevent overlapping runs (a long export must finish before next starts)
   group: db-mirror-snapshot
   cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   snapshot:
@@ -51,27 +59,42 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund --prefer-offline
 
+      - name: Verify required backup credentials
+        env:
+          SOURCE_SERVICE_ROLE_KEY: ${{ secrets.SOURCE_SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          node --input-type=module -e "import { requirePrivilegedKey } from './scripts/lib/data-snapshot.mjs'; import { snapshotEncryptionKey } from './scripts/encrypt-snapshot.mjs'; requirePrivilegedKey(process.env.SOURCE_SERVICE_ROLE_KEY); snapshotEncryptionKey(process.env.BACKUP_ENCRYPTION_KEY);"
+
       - name: Export data from Lovable Cloud (source)
         run: node scripts/export-data.mjs
         env:
-          # Source credentials are hardcoded in the script (Lovable anon key
-          # is a publishable token), no env required here.
+          SOURCE_SERVICE_ROLE_KEY: ${{ secrets.SOURCE_SUPABASE_SERVICE_ROLE_KEY }}
           NODE_OPTIONS: '--max-old-space-size=4096'
 
-      - name: Upload export artifact (audit trail, 7-day retention)
-        if: always()
+      - name: Encrypt verified snapshot
+        run: node scripts/encrypt-snapshot.mjs
+        env:
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+
+      - name: Upload encrypted export artifact
         uses: actions/upload-artifact@v4
         with:
           name: db-snapshot-${{ github.run_id }}
-          path: tmp/export/
+          path: tmp/encrypted/snapshot.bin
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Import data into target Supabase (erfwtoavipwjqmylpizt)
+        if: github.event_name == 'workflow_dispatch' && inputs.restore_to_mirror == true
         run: node scripts/import-data.mjs
         env:
           SERVICE_ROLE_KEY: ${{ secrets.TARGET_SUPABASE_SERVICE_ROLE_KEY }}
           NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Remove plaintext row exports
+        if: always()
+        run: rm -rf tmp/export
 
       - name: Report summary
         if: always()
@@ -83,9 +106,4 @@ jobs:
           echo "- **Source:** kakkwibljrjsawxgnupk (Lovable Cloud)" >> $GITHUB_STEP_SUMMARY
           echo "- **Target:** erfwtoavipwjqmylpizt (own Supabase)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f tmp/export/_summary.json ]; then
-            echo "**Export summary:**" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat tmp/export/_summary.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "- **Coverage:** verified public-table rows; Auth, Storage objects and schema are outside this mirror" >> $GITHUB_STEP_SUMMARY
