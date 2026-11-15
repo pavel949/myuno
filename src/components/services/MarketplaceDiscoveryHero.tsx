@@ -24,10 +24,10 @@ export function MarketplaceDiscoveryHero({ kind }: { kind: 'services' | 'experie
   return <section className="space-y-4" aria-label={t('Подборка myUNO', 'myUNO discovery', 'ค้นหาบริการ myUNO')}>
     <div className="border border-border bg-card p-[var(--card-padding)] sm:p-6 lg:p-8">
       <p className="text-xs font-semibold uppercase tracking-widest text-accent">{t('myUNO · Пхукет', 'myUNO · Phuket', 'myUNO · ภูเก็ต')}</p>
-      <h2 className="mt-3 max-w-3xl font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">{isExperience
+      <h2 className="mt-3 font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">{isExperience
         ? t('Впечатления, которые запоминаются', 'Experiences worth remembering', 'ประสบการณ์ที่น่าจดจำ')
         : t('Пхукет становится проще', 'Phuket, made effortless', 'ภูเก็ตง่ายขึ้น')}</h2>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">{isExperience
+      <p className="mt-3 text-base leading-relaxed text-muted-foreground">{isExperience
         ? t('Выбирайте, исследуйте предложения и отправляйте заявку. Мы покажем следующий шаг без ложных обещаний доступности.', 'Explore offers and request an experience. Availability is confirmed before booking.', 'สำรวจข้อเสนอและส่งคำขอ โดยต้องยืนยันความพร้อมก่อนจอง')
         : t('Проверяйте услуги, выбирайте удобный вариант и отправляйте заявку в одном месте.', 'Discover useful services and request what you need, all in one place.', 'ค้นหาและขอรับบริการที่ต้องการได้ในที่เดียว')}</p>
       <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-border pt-4 text-xs text-muted-foreground">
