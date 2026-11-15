@@ -60,7 +60,7 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
               {/* Step label */}
               <span 
                 className={cn(
-                  "text-xs mt-2 text-center max-w-full px-1 break-words transition-colors duration-300",
+                  "text-xs mt-2 text-center max-w-full break-words transition-colors duration-300",
                   (isCompleted || isCurrent) ? "text-foreground font-medium" : "text-muted-foreground"
                 )}
               >
