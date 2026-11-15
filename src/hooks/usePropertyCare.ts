@@ -474,6 +474,29 @@ export function useCreateServiceRequest() {
         .single();
       
       if (error) throw error;
+      // This request is persisted even if notification transport fails.
+      // Send an operator alert with its real database ID for reconciliation.
+      try {
+        const notification = await supabase.functions.invoke('notify-admin-order', {
+          body: {
+            order_id: result.id,
+            order_number: String(result.id).slice(0, 8),
+            order_type: 'cleaning',
+            total_amount: 0,
+            currency: 'THB',
+            customer_name: data.guest_name || 'Property owner',
+            customer_phone: data.guest_phone || undefined,
+            scheduled_at: data.scheduled_at,
+            notes: `Property service request: ${data.service_type || 'service'}. Property: ${data.property_id || ''}. ${data.description || ''}`,
+            items: [{ name: data.service_type || 'Property service', quantity: 1, price: 0 }],
+          },
+        });
+        if (notification.error || notification.data?.success === false || notification.data?.partial_delivery) {
+          console.warn('[Property service] Operator notification requires follow-up', result.id);
+        }
+      } catch {
+        console.warn('[Property service] Operator notification failed', result.id);
+      }
       return result as PropertyServiceRequest;
     },
     onSuccess: () => {
