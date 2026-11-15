@@ -6,8 +6,8 @@
 import { createServiceClient } from "./supabase.ts";
 
 const DEFAULTS = {
-  admin_emails: ["pavel@ignatevestate.com", "pi@myuno.app"],
-  admin_whatsapp: "66922407355",
+  admin_emails: ["pavel@myuno.app", "pavel@ignatevestate.com"],
+  admin_whatsapp: "66954243332",
   mail_from: "myUNO <noreply@resend.dev>",
 };
 
