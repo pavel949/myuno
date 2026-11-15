@@ -147,6 +147,29 @@ export function useCreateServiceOrder() {
         .select('id')
         .single();
       if (error) throw error;
+      // The order is durable before any external notification is attempted.
+      // Never claim delivery unless the notification function reports it.
+      try {
+        const notification = await supabase.functions.invoke('notify-admin-order', {
+          body: {
+            order_id: data.id,
+            order_number: String(data.id).slice(0, 8),
+            order_type: 'general',
+            total_amount: 0,
+            currency: 'THB',
+            customer_name: input.guestName,
+            customer_phone: input.guestPhone,
+            scheduled_at: input.scheduledAt.toISOString(),
+            notes: `Marketplace service request ${input.serviceId}; provider ${input.providerId}. ${input.notes}`,
+            items: [{ name: 'Marketplace service request', quantity: 1, price: 0 }],
+          },
+        });
+        if (notification.error || notification.data?.success === false || notification.data?.partial_delivery) {
+          console.warn('[Marketplace] Admin notification requires retry', data.id);
+        }
+      } catch {
+        console.warn('[Marketplace] Admin notification failed', data.id);
+      }
       return data;
     },
     onSuccess: (_d, v) => {
