@@ -7,7 +7,7 @@ function shellRows() {
     language, width, state, outcome: 'PASS', actualShell: true, actualAdminLayout: true,
     geometry: {viewport: width, documentWidth: width, bad: [], touchTargets: Array.from({length: 5}, () => ({width: 44, height: 44}))},
     keyboard: {searchFocusReturned: true, dashboardSearchKeptFocus: true, avatarFocusReturned: true, singleCommandDialog: true, commandFocusReturned: true, preferencesFocusReturned: true, commands: Object.fromEntries(['ctrl', 'meta'].map(modifier => [modifier, {ready: {dialog: {state: 'open', containsFocus: true, animations: []}}, dismissed: true, focusReturned: true, closed: {dialogs: []}}]))},
-    navigation: {uniqueActualRoutes: 73, renderedMenuButtons: 73, singleActiveToday: true}, afterInteractionGeometry: {viewport: width, bad: []},
+    navigation: {uniqueActualRoutes: 63, renderedMenuButtons: 63, singleActiveToday: true}, afterInteractionGeometry: {viewport: width, bad: []},
   }))));
 }
 test('accepts a complete unique shell matrix with interaction evidence', () => assert.equal(assertUiEvidence(shellRows(), 18), 18));
@@ -27,7 +27,7 @@ function dashboardRows() {
     for (const width of [375, 1280]) for (const role of ['staff', 'unauthorized']) rows.push({language, width, scenario: 'full', role});
   }
   return rows.map(row => ({...row, outcome: 'PASS', geometry: {viewport: row.width, documentWidth: row.width, bad: []},
-    proof: {counts: Object.fromEntries(['pendingContent', 'pendingListings', 'pendingProperties', 'pendingProviders', 'pendingOrders', 'openTickets', 'pendingManualPayments', 'pendingPartnerApplications', 'openDisputes'].map(key => [key, {value: row.scenario === 'one-source-failure' && key === 'pendingProviders' ? null : 1, state: row.scenario === 'one-source-failure' && key === 'pendingProviders' ? 'unavailable' : 'ready'}])), destinations: ['/admin/providers?filter=unverified', '/admin/operations?tab=bookings&status=pending', '/admin/tickets?status=active', '/admin/operations?tab=manual-payments&manual_status=review', '/admin/properties?action=new', '/admin/services?action=new'], snapshotCells: ['0', '0', '0'], platformStatuses: Array(6).fill('fixture')},
+    proof: {counts: Object.fromEntries(['pendingContent', 'pendingListings', 'pendingProperties', 'pendingProviders', 'pendingOrders', 'openTickets', 'pendingManualPayments', 'pendingPartnerApplications', 'openDisputes'].map(key => [key, {value: row.scenario === 'one-source-failure' && key === 'pendingProviders' ? null : 1, state: row.scenario === 'one-source-failure' && key === 'pendingProviders' ? 'unavailable' : 'ready'}])), destinations: ['/admin/providers?filter=unverified', '/admin/operations?tab=bookings&status=pending', '/admin/tickets?status=active', '/admin/operations?tab=manual-payments&manual_status=review', '/admin/properties?action=new', '/admin/catalog?tab=services&action=new'], snapshotCells: ['0', '0', '0'], platformStatuses: Array(6).fill('fixture')},
     interactions: {period: 30, linkPushAndMemoryHistory: '/admin/providers?filter=unverified', singleFlight: {before: {stats: 1, health: 1, snapshots: 1}, after: {stats: 2, health: 2, snapshots: 2}}},
     accessProof: {noPlatformReads: true, noPlatformHooks: true},
   }));

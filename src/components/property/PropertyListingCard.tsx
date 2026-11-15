@@ -136,7 +136,10 @@ function PropertyListingCardBase({
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
       aria-selected={isSelected}
-      role={onSelect ? 'button' : 'link'}
+      // Not role="link": the card already contains the real title link, and a
+      // link nested in a link is announced twice. The group stays focusable so
+      // Enter/Space still opens the listing.
+      role={onSelect ? 'button' : 'group'}
       tabIndex={0}
       aria-label={title || districtDisplay}
       className={cn(

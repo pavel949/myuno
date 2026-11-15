@@ -68,7 +68,7 @@ async def check_admin(page, scenario):
     destinations = [
         '/admin/providers?filter=unverified', '/admin/operations?tab=bookings&status=pending',
         '/admin/tickets?status=active', '/admin/operations?tab=manual-payments&manual_status=review',
-        '/admin/properties?action=new', '/admin/services?action=new',
+        '/admin/properties?action=new', '/admin/catalog?tab=services&action=new',
     ]
     for href in destinations:
         assert await page.locator(f'a[href="{href}"]').count() > 0, href

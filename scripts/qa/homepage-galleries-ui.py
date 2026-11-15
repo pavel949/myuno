@@ -40,7 +40,7 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(3)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
@@ -106,9 +106,9 @@ async def main():
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
                     # One universal entry plus four native shortcuts; no intermediate sheet.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
-                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/search')
+                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/discover')
                     await page.locator('.home-search-entry-button').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/search')
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover')
                     choices=page.locator('.premium-plan-links a')
                     await expect(choices).to_have_count(4)
                     for index,query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
@@ -161,7 +161,7 @@ async def main():
             if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(3)
+                await expect(page.get_by_role('alert')).to_have_count(4)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()

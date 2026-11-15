@@ -38,21 +38,32 @@ The two failures at base:
 1. `navigationModel.test.ts › public business entry` — **pre-existing**. Commit `4956121` moved "For business" from the top menu into the header's "For partners" menu and left the test asserting the old layout. Test updated to the shipped contract.
 2. `convergence-guard.test.ts` — introduced and fixed within this change (a `text-white` class on an edited line).
 
-### CI browser fixtures are stale against `main`
+### CI browser fixtures were stale against `main`
 
-The "Connected system" and "design-system" workflows run only on pull requests. Their last green run was 2 November; `main` has since taken direct commits that never ran them. On this PR they fail on assertions about code this change does not touch:
+The "Connected system" and "design-system" workflows run only on pull requests. Their last green run was 2 November; `main` has since taken direct commits that never ran them. With the owner's go-ahead the browser suites were run locally with the CI environment variables set, which made every failure reproducible.
 
-| Fixture | Assertion | Source |
+**Real defects the suites caught (fixed in the app)**
+
+| Fixture | Defect | Introduced by |
 |---|---|---|
-| `ds-workspace-pages` | fixture for `@/hooks/useVendor` lacks `useVendorServices`, imported by `VendorDashboard` | **fixed here** |
-| `services-compact-accessibility`, `services-floating-clearance` | crash with "No QueryClient set": `useMarketplaceAvailability` (added in `be1224b`) was not stubbed, unlike in `services-discovery-ui` | **fixed here** |
-| `services-floating-clearance` at 390px | chat launcher 15px above the bottom bar, 16px required: the bar gained a 1px top border in `6837890` but `--bottom-nav-h` stayed at 64px | **fixed here** (token now includes the border) |
-| `services-discovery-ui` | expects one `role="status"`; the services page now renders two | open |
-| `homepage-galleries-{en,ru,th}-ui` | expects 3 `.home-rail-viewport`, finds 4 | open |
-| `guest-complex-ui` | expects one unit link, finds two | open |
-| combined-layout, admin-dashboard, admin-dashboard-shell, public-wide | case output not retrievable (log truncated, artifacts unreachable from the audit sandbox) | UNKNOWN |
+| `guest-complex-ui` | `PropertyListingCard` wrapper had `role="link"` and the listing's name while containing the real title link: a link nested in a link, announced twice. Now a labelled, still keyboard-activatable group. | `4c15a8d` |
+| `services-floating-clearance` | Chat launcher 15px above the bottom bar on phones, 16px required: the bar gained a 1px top border but `--bottom-nav-h` stayed at 64px. Token now includes the border. | `6837890` |
+| `homepage-galleries-*` | Rail arrows outside `.home-gallery` rendered ~19px instead of the 16px used elsewhere. One rule now covers every rail. | newer home rail |
+| `public-wide-layout` | At 320px RU the property tab "Покупка" left the viewport. **Caused by this change** (first no-wrap fix); tabs now wrap as whole labels. | this PR |
 
-These scripts refuse to launch a browser outside GitHub Actions, and that guard was left in place, so the open rows could not be reproduced or repaired locally.
+**Stale test expectations (updated to shipped behaviour)**
+
+| Fixture | Was expecting | App ships | Changed in |
+|---|---|---|---|
+| `ds-workspace-pages`, `services-compact-accessibility`, `services-floating-clearance` | harness without `useVendorServices` / `useMarketplaceAvailability` | hooks in use | `d4dd5ab`, `be1224b` |
+| `combined-layout` | WhatsApp `66922407355` | canonical number in `contacts.ts` | `54e601f` |
+| `combined-layout` | owners "Manage it yourself" → `/mc/onboarding` | `/owner/onboarding` | `4c15a8d` |
+| `admin-dashboard`, `assert-ui-evidence` | quick action `/admin/services?action=new` | `/admin/catalog?tab=services&action=new` (unit test already agrees) | `39b0c70` |
+| `assert-ui-evidence` | 73 admin menu routes | 63 (the shell fixture itself already said 63) | admin nav trim |
+| `services-discovery-ui` | one `role="status"`, one combobox, offers section hidden on a no-match search | offers grid adds its own status, two filter selects, and stays mounted so filters remain reachable | `be1224b` |
+| `homepage-galleries-ui` | 3 rails / 3 error alerts, entry bar → `/search` | 4 rails / 4 alerts, entry bar → `/discover` | `ab5efdc`, `4956121` |
+
+One behaviour worth an owner glance: on a search with no matches the services page now shows "No services found" **and** the provider-offers section with its filters. That follows from `be1224b` and the test was updated to it, not the other way round.
 
 ## 3. Findings fixed in this change
 

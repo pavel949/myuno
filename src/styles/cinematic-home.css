@@ -187,6 +187,8 @@
 .home-rail-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px}
 .home-rail-controls[hidden]{display:none}
 .home-rail-controls button{display:inline-flex;justify-content:center;align-items:center;width:44px;height:44px;border:1px solid #cfcac2;background:transparent;color:var(--home-navy)}
+/* One glyph size for every rail, not only rails inside .home-gallery. */
+.home-rail-controls svg{width:16px;height:16px;flex-shrink:0}
 .home-rail-controls button:hover:not([aria-disabled=true]){background:#e8e6e0}
 .home-rail-controls button[aria-disabled=true]{opacity:.35;cursor:default}
 .home-rail-viewport{display:flex;gap:20px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scroll-padding-inline:4px;padding:6px 4px 18px;scrollbar-width:thin;scrollbar-color:#bdb7ae transparent;min-width:0}
