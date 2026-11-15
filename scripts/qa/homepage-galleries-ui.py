@@ -40,7 +40,7 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(3)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
