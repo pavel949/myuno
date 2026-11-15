@@ -58,6 +58,7 @@ export const GUEST_TOP_NAV: NavItem[] = [
   { path: APP_ROUTES.EXPERIENCES, icon: Compass, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
   { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { path: APP_ROUTES.FOR_BUSINESS, icon: Briefcase, labelEn: 'Business', labelRu: 'Бизнес', labelTh: 'ธุรกิจ' },
 ];
 
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */
