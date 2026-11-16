@@ -307,6 +307,7 @@ export default function PropertySearchPage() {
               }}>{mode === 'all' ? text('Все объекты', 'All homes', 'ที่พักทั้งหมด') : mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
+          {!catalogueAll && propertyMode === 'buy' && <p data-testid="property-buy-scope" className="text-body-sm text-muted-foreground">{text('Выберите вторичную недвижимость или новостройки. Поиск ниже показывает прямые предложения продажи и не включает эти отдельные каталоги.', 'Choose resale homes or new developments. The search below shows direct sale listings and does not include those separate catalogues.', 'เลือกบ้านมือสองหรือโครงการใหม่ การค้นหาด้านล่างแสดงประกาศขายโดยตรงและไม่รวมแคตตาล็อกแยกเหล่านั้น')}</p>}
           {!catalogueAll && propertyMode === 'buy' && <nav aria-label={text('Рынок недвижимости', 'Property market', 'ตลาดอสังหาริมทรัพย์')} className="grid gap-2 sm:grid-cols-2">
             {GOAL_ENTRIES.buy.primary.slice(0, 2).map(market => <Link key={market.path} to={market.path} className="min-h-11 border border-border bg-card px-4 py-3 text-body-sm font-medium text-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <span className="block">{pickLang(language, { ru: market.ru, en: market.en, th: market.th })}</span>
@@ -362,7 +363,7 @@ export default function PropertySearchPage() {
         <div className="py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
-              {isLoading ? (text('Ищем жильё…', 'Finding homes…', 'กำลังค้นหาที่พัก…')) : isError ? (text('Каталог недоступен', 'Catalogue unavailable', 'ไม่สามารถโหลดรายการที่พักได้')) : <>{availability.enabled ? availabilityText('Проверено, подходит по датам:', 'Checked date matches:', 'ที่พักที่ตรวจสอบแล้วตรงกับวันที่:') : hasNextPage ? text('Загружено объектов:', 'Homes loaded:', 'โหลดที่พักแล้ว:') : text('Найдено объектов:', 'Places found:', 'พบที่พัก:')} {properties.length}</>}
+              {isLoading ? (text('Ищем жильё…', 'Finding homes…', 'กำลังค้นหาที่พัก…')) : isError ? (text('Каталог недоступен', 'Catalogue unavailable', 'ไม่สามารถโหลดรายการที่พักได้')) : <>{availability.enabled ? availabilityText('Проверено, подходит по датам:', 'Checked date matches:', 'ที่พักที่ตรวจสอบแล้วตรงกับวันที่:') : hasNextPage ? text('Загружено объектов:', 'Homes loaded:', 'โหลดที่พักแล้ว:') : (!catalogueAll && propertyMode === 'buy' ? text('Прямых предложений продажи:', 'Direct sale listings:', 'ประกาศขายโดยตรง:') : text('Найдено объектов:', 'Places found:', 'พบที่พัก:'))} {properties.length}</>}
             </h2>
             <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
@@ -463,8 +464,8 @@ export default function PropertySearchPage() {
           {!isLoading && !isError && !availability.pending && !availability.failed && !hasNextPage && properties.length === 0 && (
             <div className="text-center py-8">
               <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{text('Ничего не найдено', 'No properties found', 'ไม่พบที่พัก')}</h3>
-              <p className="text-muted-foreground mb-4">{text('Попробуйте изменить фильтры', 'Try adjusting your filters', 'ลองเปลี่ยนตัวกรอง')}</p>
+              <h3 className="text-lg font-semibold mb-2">{!catalogueAll && propertyMode === 'buy' ? text('Прямых предложений по этим условиям нет', 'No direct sale listings match these criteria', 'ไม่มีประกาศขายโดยตรงที่ตรงเงื่อนไข') : text('Ничего не найдено', 'No properties found', 'ไม่พบที่พัก')}</h3>
+              <p className="text-muted-foreground mb-4">{!catalogueAll && propertyMode === 'buy' ? text('Измените фильтры или посмотрите отдельные каталоги вторичной недвижимости и новостроек выше.', 'Adjust your filters or explore the separate resale and new-development catalogues above.', 'ปรับตัวกรองหรือดูแคตตาล็อกบ้านมือสองและโครงการใหม่ด้านบน') : text('Попробуйте изменить фильтры', 'Try adjusting your filters', 'ลองเปลี่ยนตัวกรอง')}</p>
               <Button variant="outline" onClick={clearAllFilters}>
                 {text('Сбросить фильтры', 'Reset filters', 'ล้างตัวกรอง')}
               </Button>

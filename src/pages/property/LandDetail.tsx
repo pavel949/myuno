@@ -1,3 +1,8 @@
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useLocation as useJourneyLocation, useNavigate as useJourneyNavigate } from 'react-router-dom';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { commercialRecordedPrice } from '@/lib/real-estate/commercialPricePresentation';
 /**
  * Land plot detail page (Phase 1, read-only).
  */
@@ -5,7 +10,6 @@ import { useParams } from 'react-router-dom';
 import { Trees, ShieldCheck, Route, Mail, BadgeCheck } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,25 +24,29 @@ import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 export default function LandDetail() {
   const { id } = useParams<{ id: string }>();
+  const journeyLocation = useJourneyLocation();
+  const journeyNavigate = useJourneyNavigate();
+  const returnToCatalogue = () => { const plan = publicJourneyReturn(journeyLocation, '/property/land'); if ('delta' in plan) journeyNavigate(plan.delta); else journeyNavigate(plan.href, { replace: plan.replace, state: plan.state }); };
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
-  const { data: property, isLoading, error } = useCommercialProperty(id);
+  const { data: property, isLoading, error, refetch } = useCommercialProperty(id);
 
   if (isLoading) {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath="/property/land" onClick={returnToCatalogue} /></div>
         <Skeleton className="aspect-[16/9] mx-4 rounded-none mt-3" />
       </div>
     );
   }
 
-  if (error || !property) {
+  if (error) return <div className={ECOSYSTEM_PAGE_CONTAINER}><div className="space-y-4 px-4 py-4"><BackButton fallbackPath="/property/land" onClick={returnToCatalogue} /><QueryRecovery onRetry={refetch} /></div></div>;
+
+  if (!property || property.asset_class !== 'land') {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath="/property/land" onClick={returnToCatalogue} /></div>
         <div className="px-4 py-12 text-center">
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Участок не найден' : 'Plot not found'}
@@ -57,21 +65,17 @@ export default function LandDetail() {
   const sqm = property.land_size_sqm ?? (property.land_size_rai ? property.land_size_rai * 1600 : null);
   const sizeLabel = sqm ? formatLandSize(sqm, isRu) : null;
 
-  const priceMain = property.sale_price
-    ? formatPrice(property.sale_price)
-    : property.price
-    ? formatPrice(property.price)
-    : null;
+  const priceMain = commercialRecordedPrice(property, language);
 
   return (
     <>
       <SEOHead title={`${title} — myUNO`} description={description.slice(0, 160)} />
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath="/property/land" onClick={returnToCatalogue} /></div>
 
         <div className="relative aspect-[16/9] mx-4 mt-3 rounded-none overflow-hidden bg-muted">
           {cover ? (
-            <img src={cover} alt={title} className="w-full h-full object-cover" />
+            <OptimizedImage aspectRatio="auto" priority src={cover} alt={title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Trees className="w-12 h-12 text-muted-foreground" />

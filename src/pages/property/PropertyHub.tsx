@@ -142,6 +142,7 @@ const TABS: TabConfig[] = [
 function getActiveTab(pathname: string, search: string): string {
   if (pathname.startsWith('/property/my')) return 'my';
   if (pathname.startsWith(APP_ROUTES.INVEST)) return 'my';
+  if (pathname.startsWith(APP_ROUTES.HOTELS)) return 'hotels';
   if (pathname.startsWith(APP_ROUTES.COMMERCIAL)) return 'commercial';
   if (pathname.startsWith(APP_ROUTES.LAND)) return 'land';
   if (pathname.startsWith(APP_ROUTES.RESALE)) return 'resale';
@@ -242,7 +243,7 @@ export function PropertyHubTabs() {
 
   const isDetailPage =
     /^\/property\/[a-f0-9-]{36}/.test(location.pathname) ||
-    /^\/property\/(offplan|resale|developers|invest|commercial|land)\/[a-f0-9-]/.test(location.pathname) ||
+    /^\/property\/(offplan|resale|developers|invest|commercial|land|hotels)\/[a-f0-9-]{36}\/?$/.test(location.pathname) ||
     /^\/property\/project\//.test(location.pathname) ||
     /^\/property\/deposit-success/.test(location.pathname);
 
@@ -251,7 +252,7 @@ export function PropertyHubTabs() {
   const visibleTabs = TABS.filter(
     (tab) =>
       (!tab.authOnly || user) &&
-      (!tab.personaGated || tab.personaGated.some((p) => personas.includes(p))),
+      (!tab.personaGated || tab.id === activeTab || tab.personaGated.some((p) => personas.includes(p))),
   );
 
   return (

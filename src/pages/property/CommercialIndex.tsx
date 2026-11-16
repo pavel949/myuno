@@ -1,3 +1,5 @@
+import { publicAssetFilterIssue, publicAssetNumber, clearPublicAssetFilters } from '@/lib/real-estate/publicAssetFilters';
+import { PublicAssetFilterNotice } from '@/components/property/commercial/PublicAssetFilterNotice';
 /**
  * Commercial RE landing — Phase 1.
  * Shows intent toggle (Rent/Sale), type chips, and a featured grid.
@@ -14,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useCommercialProperties } from '@/hooks/useCommercialProperties';
 import { CommercialPropertyCard } from '@/components/property/commercial/CommercialPropertyCard';
-import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { CommercialFilters, type CommercialFiltersValue } from '@/components/property/commercial/CommercialFilters';
 import { COMMERCIAL_TYPES, HOTEL_PROPERTY_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
@@ -28,7 +30,9 @@ export default function CommercialIndex() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const intent = (searchParams.get('intent') as Intent) || 'sale';
+  const filterIssue = publicAssetFilterIssue(searchParams, 'commercial');
+  const resetPublicFilters = () => setSearchParams(clearPublicAssetFilters(searchParams));
+  const intent: Intent = searchParams.get('intent') === 'rent' ? 'rent' : 'sale';
   const type = searchParams.get('type') || 'all';
 
   const filterValues: CommercialFiltersValue = {
@@ -44,13 +48,13 @@ export default function CommercialIndex() {
   // Exclude hotels from generic Commercial feed unless a hotel sub-type is explicitly chosen.
   const isHotelTypeSelected = (HOTEL_PROPERTY_TYPES as string[]).includes(type);
 
-  const { data, isLoading, error } = useCommercialProperties({
+  const { data, isLoading, error, refetch } = useCommercialProperties({
     intent,
     propertyType: type,
-    minPrice: filterValues.minPrice ? Number(filterValues.minPrice) : undefined,
-    maxPrice: filterValues.maxPrice ? Number(filterValues.maxPrice) : undefined,
-    minAreaSqm: filterValues.minAreaSqm ? Number(filterValues.minAreaSqm) : undefined,
-    maxAreaSqm: filterValues.maxAreaSqm ? Number(filterValues.maxAreaSqm) : undefined,
+    minPrice: intent === 'sale' ? publicAssetNumber(searchParams, 'minPrice') : undefined,
+    maxPrice: intent === 'sale' ? publicAssetNumber(searchParams, 'maxPrice') : undefined,
+    minAreaSqm: publicAssetNumber(searchParams, 'minArea'),
+    maxAreaSqm: publicAssetNumber(searchParams, 'maxArea'),
     excludeHotels: type === 'all' && !isHotelTypeSelected,
   });
 
@@ -58,16 +62,13 @@ export default function CommercialIndex() {
     let list = data ?? [];
     if (filterValues.minCapRate) {
       const min = Number(filterValues.minCapRate);
-      list = list.filter((p) => (p.cap_rate_pct ?? 0) >= min);
+      list = list.filter((p) => typeof p.cap_rate_pct === 'number' && Number.isFinite(p.cap_rate_pct) && p.cap_rate_pct >= min);
     }
     if (filterValues.chanoteOnly) {
       list = list.filter((p) => p.title_deed_type === 'chanote');
     }
-    if (filterValues.withTenant) {
-      list = list.filter((p) => (p.lease_remaining_months ?? 0) > 0);
-    }
     return list;
-  }, [data, filterValues.minCapRate, filterValues.chanoteOnly, filterValues.withTenant]);
+  }, [data, filterValues.minCapRate, filterValues.chanoteOnly]);
 
   const setParam = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
@@ -98,14 +99,14 @@ export default function CommercialIndex() {
         title={isRu ? 'Коммерческая недвижимость в Пхукете — myUNO' : 'Commercial Real Estate Phuket — myUNO'}
         description={
           isRu
-            ? 'Офисы, склады, рестораны, отели — аренда и продажа коммерческой недвижимости с метриками доходности (Cap Rate, NOI, Yield).'
-            : 'Offices, warehouses, restaurants, hotels — rent and sale of commercial real estate with yield metrics (Cap Rate, NOI).'
+            ? 'Офисы, склады, рестораны, отели — аренда и продажа коммерческой недвижимости Условия и показатели уточняются по объявлению.'
+            : 'Offices, warehouses, restaurants, hotels — rent and sale of commercial real estate Confirm terms and recorded figures for each listing.'
         }
       />
 
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3 pb-2">
-          <BackButton />
+          <BackButton fallbackPath="/property" />
         </div>
 
         <div className="px-4 pb-3">
@@ -123,15 +124,15 @@ export default function CommercialIndex() {
         </div>
 
         <div className="px-4 space-y-4">
-          <PersonaGatePrompt />
 
           {/* Intent toggle */}
-          <div className="inline-flex p-1 rounded-full bg-muted">
+          <div className="inline-flex p-1 rounded-full bg-muted" role="group" aria-label={isRu ? 'Тип предложения' : 'Offer type'}>
             {(['sale', 'rent'] as Intent[]).map((i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setParam('intent', i)}
+                aria-pressed={intent === i}
                 className={cn(
                   'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
                   intent === i
@@ -145,13 +146,14 @@ export default function CommercialIndex() {
           </div>
 
           {/* Type chips + filters drawer */}
-          <div className="flex items-center gap-2">
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 scrollbar-hide flex-1">
               <button
                 type="button"
                 onClick={() => setParam('type', 'all')}
+                aria-pressed={type === 'all'}
                 className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                  'shrink-0 min-h-11 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
                   type === 'all'
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-background text-muted-foreground border-border hover:text-foreground',
@@ -164,7 +166,7 @@ export default function CommercialIndex() {
                 type="button"
                 onClick={() => navigate(APP_ROUTES.HOTELS)}
                 className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                  'shrink-0 min-h-11 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
                   'bg-accent/10 text-accent dark:text-accent border-accent/40 hover:bg-accent/20',
                 )}
               >
@@ -177,8 +179,9 @@ export default function CommercialIndex() {
                   key={t.id}
                   type="button"
                   onClick={() => setParam('type', t.id)}
+                  aria-pressed={type === t.id}
                   className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
+                    'shrink-0 min-h-11 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors',
                     type === t.id
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-background text-muted-foreground border-border hover:text-foreground',
@@ -189,11 +192,12 @@ export default function CommercialIndex() {
                 </button>
               ))}
             </div>
-            <CommercialFilters value={filterValues} onChange={updateFilters} />
+            <CommercialFilters value={filterValues} onChange={updateFilters} priceEnabled={intent === 'sale'} />
           </div>
 
+          {filterIssue && <PublicAssetFilterNotice issue={filterIssue} onReset={resetPublicFilters} />}
           {/* Grid */}
-          {isLoading && (
+          {!filterIssue && isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="aspect-[16/10] rounded-none" />
@@ -201,22 +205,18 @@ export default function CommercialIndex() {
             </div>
           )}
 
-          {!isLoading && error && (
-            <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
-              {isRu ? 'Не удалось загрузить листинги' : 'Failed to load listings'}
-            </div>
-          )}
+          {!filterIssue && !isLoading && error && <QueryRecovery onRetry={refetch} />}
 
-          {!isLoading && !error && items.length === 0 && (
+          {!filterIssue && !isLoading && !error && items.length === 0 && (
             <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Building2 className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
-                {isRu ? 'Скоро здесь будут объекты' : 'Listings coming soon'}
+                {isRu ? 'Нет опубликованных предложений по этим условиям' : 'No published offers match these filters'}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
                 {isRu
-                  ? 'Мы собираем эксклюзивный пул коммерческих объектов с проверенной доходностью.'
-                  : 'We are curating an exclusive pool of commercial assets with verified yield.'}
+                  ? 'Измените условия поиска или уточните доступные варианты.'
+                  : 'Change the search criteria or enquire about available options.'}
               </p>
               <Button size="sm" variant="outline" asChild>
                 <a href="mailto:capital@myuno.app">
@@ -226,7 +226,7 @@ export default function CommercialIndex() {
             </div>
           )}
 
-          {!isLoading && !error && items.length > 0 && (
+          {!filterIssue && !isLoading && !error && items.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((p) => (
                 <CommercialPropertyCard key={p.id} property={p} />

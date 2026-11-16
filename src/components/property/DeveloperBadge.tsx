@@ -17,6 +17,7 @@ interface DeveloperBadgeProps {
   className?: string;
   showLink?: boolean;
   size?: 'sm' | 'md';
+  navigationState?: unknown;
 }
 
 export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
@@ -28,6 +29,7 @@ export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
     className,
     showLink = true,
     size = 'sm',
+    navigationState,
   }, ref) {
   const { language } = useLanguage();
   
@@ -69,7 +71,7 @@ export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
 
   if (showLink && developerId) {
     return (
-      <Link to={`/developers/${developerId}`} className="inline-flex">
+      <Link state={navigationState} to={`/property/developers/${developerId}`} className="inline-flex">
         {content}
       </Link>
     );

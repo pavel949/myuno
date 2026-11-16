@@ -1,3 +1,8 @@
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useLocation as useJourneyLocation, useNavigate as useJourneyNavigate } from 'react-router-dom';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { commercialRecordedPrice } from '@/lib/real-estate/commercialPricePresentation';
 /**
  * Commercial property detail (Phase 1, read-only).
  * Hero + key metrics + specs + CTA. Lead routing to capital@myuno.app
@@ -25,18 +30,22 @@ import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 export default function CommercialDetail() {
   const { id } = useParams<{ id: string }>();
+  const journeyLocation = useJourneyLocation();
+  const journeyNavigate = useJourneyNavigate();
+  const catalogueFallback = journeyLocation.pathname.startsWith('/property/hotels/') ? '/property/hotels' : '/property/commercial';
+  const returnToCatalogue = () => { const plan = publicJourneyReturn(journeyLocation, catalogueFallback); if ('delta' in plan) journeyNavigate(plan.delta); else journeyNavigate(plan.href, { replace: plan.replace, state: plan.state }); };
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
   const isRu = language === 'ru';
 
-  const { data: property, isLoading, error } = useCommercialProperty(id);
+  const { data: property, isLoading, error, refetch } = useCommercialProperty(id);
   const isHotel = isHotelType(property?.property_type);
 
   if (isLoading) {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath={catalogueFallback} onClick={returnToCatalogue} /></div>
         <Skeleton className="aspect-[16/9] mx-4 rounded-none mt-3" />
         <div className="px-4 py-4 space-y-3">
           <Skeleton className="h-6 w-2/3" />
@@ -46,10 +55,12 @@ export default function CommercialDetail() {
     );
   }
 
-  if (error || !property) {
+  if (error) return <div className={ECOSYSTEM_PAGE_CONTAINER}><div className="space-y-4 px-4 py-4"><BackButton fallbackPath={catalogueFallback} onClick={returnToCatalogue} /><QueryRecovery onRetry={refetch} /></div></div>;
+
+  if (!property || property.asset_class !== 'commercial' || (catalogueFallback === '/property/hotels' && !isHotelType(property.property_type))) {
     return (
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath={catalogueFallback} onClick={returnToCatalogue} /></div>
         <div className="px-4 py-12 text-center">
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Объект не найден' : 'Listing not found'}
@@ -66,26 +77,19 @@ export default function CommercialDetail() {
   const titleDeed = getTitleDeedLabel(property.title_deed_type ?? null, isRu);
   const cover = property.cover_image || property.images?.[0] || null;
 
-  const priceMain =
-    isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
-      : property.sale_price
-      ? formatPrice(property.sale_price)
-      : property.price
-      ? formatPrice(property.price)
-      : null;
+  const priceMain = commercialRecordedPrice(property, language);
 
   return (
     <>
       <SEOHead title={`${title} — myUNO`} description={description.slice(0, 160)} />
 
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
-        <div className="px-4 pt-3"><BackButton /></div>
+        <div className="px-4 pt-3"><BackButton fallbackPath={catalogueFallback} onClick={returnToCatalogue} /></div>
 
         {/* Hero */}
         <div className="relative aspect-[16/9] mx-4 mt-3 rounded-none overflow-hidden bg-muted">
           {cover && (
-            <img src={cover} alt={title} className="w-full h-full object-cover" />
+            <OptimizedImage aspectRatio="auto" priority src={cover} alt={title} className="w-full h-full object-cover" />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className="bg-background/95 text-foreground">{typeLabel}</Badge>

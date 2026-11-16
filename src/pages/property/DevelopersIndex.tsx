@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import '@/styles/public-commerce.css';
 /**
  * DevelopersIndex - Catalog of property developers
@@ -6,6 +8,7 @@ import '@/styles/public-commerce.css';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, CheckCircle2, ExternalLink, Star } from 'lucide-react';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,10 +21,11 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function DevelopersIndex() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const { data: developers, isLoading } = useDevelopers();
+  const { data: developers, isLoading, isError, refetch } = useDevelopers();
 
   return (
     <div className="public-commerce public-commerce--developers px-4 py-6 pb-24 space-y-6">
@@ -62,10 +66,10 @@ export default function DevelopersIndex() {
               <Skeleton key={i} className="h-32 rounded-none" />
             ))}
           </div>
-        ) : developers && developers.length > 0 ? (
+        ) : isError ? <QueryRecovery onRetry={refetch} /> : developers && developers.length > 0 ? (
           <div className="space-y-4">
             {developers.map(dev => {
-              const goToDetail = () => navigate(APP_ROUTES.DEVELOPER_DETAIL(dev.id));
+              const goToDetail = () => navigate(APP_ROUTES.DEVELOPER_DETAIL(dev.id), { state: publicJourneyState(location) });
               const devName = isRu ? dev.nameRu : dev.nameEn;
               return (
               <div
@@ -75,7 +79,7 @@ export default function DevelopersIndex() {
                 aria-label={isRu ? `Открыть профиль ${devName}` : `Open profile of ${devName}`}
                 onClick={goToDetail}
                 onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToDetail(); }
+                  if (e.target === e.currentTarget && !e.repeat && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); goToDetail(); }
                 }}
                 className={cn(
                   "rounded-none border bg-card p-4 cursor-pointer",

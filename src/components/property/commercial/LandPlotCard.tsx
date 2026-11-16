@@ -1,3 +1,7 @@
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useLocation } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { commercialRecordedPrice } from '@/lib/real-estate/commercialPricePresentation';
 /**
  * Card surface for land-plot listings — focuses on rai/ngan/wah, zoning,
  * title deed, road frontage, beachfront proximity.
@@ -8,7 +12,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import {
   getLandTypeLabel,
   getTitleDeedLabel,
@@ -23,7 +26,7 @@ interface Props {
 
 export function LandPlotCard({ property, className }: Props) {
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
+  const journey = publicJourneyState(useLocation());
   const isRu = language === 'ru';
 
   const isRent = property.listing_type === 'rent';
@@ -32,17 +35,14 @@ export function LandPlotCard({ property, className }: Props) {
   const cover = property.cover_image || property.images?.[0] || null;
   const titleDeed = getTitleDeedLabel(property.title_deed_type ?? null, isRu);
 
-  const priceMain = property.sale_price
-    ? formatPrice(property.sale_price)
-    : property.price
-    ? formatPrice(property.price)
-    : null;
+  const priceMain = commercialRecordedPrice(property, language);
 
   const sqm = property.land_size_sqm ?? (property.land_size_rai ? property.land_size_rai * 1600 : null);
   const sizeLabel = sqm ? formatLandSize(sqm, isRu) : null;
 
   return (
     <Link
+      state={journey}
       to={APP_ROUTES.LAND_DETAIL(property.id)}
       className={cn(
         'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
@@ -51,10 +51,10 @@ export function LandPlotCard({ property, className }: Props) {
     >
       <div className="relative aspect-[16/10] bg-muted overflow-hidden">
         {cover ? (
-          <img
+          <OptimizedImage
             src={cover}
             alt={title}
-            loading="lazy"
+            aspectRatio="auto"
             className="w-full h-full object-cover transition-transform duration-300"
           />
         ) : (

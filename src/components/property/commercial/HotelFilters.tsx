@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { HOTEL_LICENSE_TYPES, HOTEL_MANAGEMENT_STATUSES } from '@/lib/real-estate/commercialTaxonomy';
+import { HOTEL_LICENSE_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 
 export interface HotelFiltersValue {
   minKeys?: string;
@@ -45,7 +45,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={next => { if (next) setDraft({ ...value, managementStatus: undefined, minOccupancy: undefined }); setOpen(next); }}>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 shrink-0">
           <SlidersHorizontal className="w-4 h-4" />
@@ -73,6 +73,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
                 type="number"
                 min={0}
                 placeholder={isRu ? 'От' : 'Min'}
+                aria-label={isRu ? 'Номеров от' : 'Minimum rooms'}
                 value={draft.minKeys ?? ''}
                 onChange={(e) => setDraft({ ...draft, minKeys: e.target.value || undefined })}
               />
@@ -80,6 +81,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
                 type="number"
                 min={0}
                 placeholder={isRu ? 'До' : 'Max'}
+                aria-label={isRu ? 'Номеров до' : 'Maximum rooms'}
                 value={draft.maxKeys ?? ''}
                 onChange={(e) => setDraft({ ...draft, maxKeys: e.target.value || undefined })}
               />
@@ -118,7 +120,8 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
               {isRu ? 'Лицензия' : 'License'}
             </Label>
             <select
-              value={draft.licenseType ?? ''}
+              aria-label={isRu ? 'Тип лицензии' : 'License type'}
+                value={draft.licenseType ?? ''}
               onChange={(e) => setDraft({ ...draft, licenseType: e.target.value || undefined })}
               className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
             >
@@ -131,39 +134,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
             </select>
           </div>
 
-          {/* Management status */}
-          <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-              {isRu ? 'Статус управления' : 'Management status'}
-            </Label>
-            <select
-              value={draft.managementStatus ?? ''}
-              onChange={(e) => setDraft({ ...draft, managementStatus: e.target.value || undefined })}
-              className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
-            >
-              <option value="">{isRu ? 'Любой' : 'Any'}</option>
-              {HOTEL_MANAGEMENT_STATUSES.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {isRu ? m.labelRu : m.labelEn}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Min occupancy */}
-          <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-              {isRu ? 'Загрузка от, %' : 'Min occupancy, %'}
-            </Label>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              placeholder="65"
-              value={draft.minOccupancy ?? ''}
-              onChange={(e) => setDraft({ ...draft, minOccupancy: e.target.value || undefined })}
-            />
-          </div>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Загрузка и договоры управления уточняются по запросу.' : 'Occupancy and management agreements require an enquiry.'}</p>
         </div>
 
         <SheetFooter className="flex-row gap-2">

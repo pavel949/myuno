@@ -1,3 +1,4 @@
+import { PublicAssetFilterNotice } from '@/components/property/commercial/PublicAssetFilterNotice';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import '@/styles/public-commerce.css';
@@ -39,7 +40,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOffplanProjects, useProjectDistricts, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
-import { SaveOffplanSearchDialog } from '@/components/property/SaveOffplanSearchDialog';
+import { CopyPublicSearchLink } from '@/components/property/CopyPublicSearchLink';
 import {
   applyOffplanUiFilters,
   activeOffplanFilterCount,
@@ -52,7 +53,7 @@ import {
   type RecLabel,
   type OffplanSortKey,
 } from '@/lib/offplan/types';
-import { BUDGET_OPTIONS, YEAR_OPTIONS, OWN_OPTIONS, BEACH_OPTIONS, SORT_OPTIONS, filterByBudget } from '@/lib/offplan/catalogFacets';
+import { BUDGET_OPTIONS, SORT_OPTIONS, filterByBudget } from '@/lib/offplan/catalogFacets';
 
 export default function OffplanIndex() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function OffplanIndex() {
   const selectedDistrict = params.get('district') || '';
   const selectedDeveloper = params.get('developer') || '';
   const sortParam = params.get('sort') as OffplanSortKey | null;
-  const SORTS: OffplanSortKey[] = ['score', 'price_asc', 'price_desc', 'completion', 'yield', 'beach'];
+  const SORTS: OffplanSortKey[] = ['score', 'price_asc', 'price_desc'];
   const ui: OffplanUiFilterState = {
     ...defaultOffplanUiFilterState(),
     q: params.get('q') || '',
@@ -74,6 +75,8 @@ export default function OffplanIndex() {
     fSort: sortParam && SORTS.includes(sortParam) ? sortParam : 'score',
   };
   const budget = params.get('budget') || '';
+  const unavailableFacets = ['year', 'own', 'beach', 'rec', 'seg', 'risk', 'mgmt', 'focus'].some(key => !!params.get(key)) || !!sortParam && ['completion', 'yield', 'beach', 'risk', 'rating'].includes(sortParam);
+  const queryIssue = unavailableFacets ? 'unsupported' as const : (budget && !BUDGET_OPTIONS.some(option => option.value === budget) || sortParam && !SORTS.includes(sortParam)) ? 'invalid' as const : undefined;
   const updateFilters = (changes: Record<string, string>) => setParams(previous => {
     const next = new URLSearchParams(previous);
     Object.entries(changes).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key));
@@ -89,7 +92,15 @@ export default function OffplanIndex() {
     sessionStorage.removeItem('nb_apply_saved_search');
     try {
       const f = JSON.parse(raw) as Partial<OffplanUiFilterState>;
-      setParams(previous => { const next = new URLSearchParams(previous); if (f.q) next.set('q', f.q); else next.delete('q'); if (f.fDev) next.set('developerName', f.fDev); else next.delete('developerName'); return next; }, { replace: true });
+      setParams(previous => {
+        const next = new URLSearchParams(previous);
+        for (const key of ['district', 'developer', 'developerName', 'q', 'year', 'own', 'beach', 'budget', 'sort', 'rec', 'seg', 'risk', 'mgmt', 'focus']) next.delete(key);
+        const developerKey = typeof f.fDev === 'string' && /^[a-f0-9-]{36}$/i.test(f.fDev) ? 'developer' : 'developerName';
+        for (const [field, key] of [['q', 'q'], ['fDev', developerKey], ['fZone', 'district'], ['fYear', 'year'], ['fOwn', 'own'], ['fBeach', 'beach'], ['fSort', 'sort'], ['fRec', 'rec'], ['fSeg', 'seg'], ['fRisk', 'risk'], ['fMgmt', 'mgmt'], ['fFocus', 'focus']] as const) {
+          const value = f[field]; if (typeof value === 'string' && value) next.set(key, value);
+        }
+        return next;
+      }, { replace: true });
     } catch { /* ignore */ }
   }, [setParams]);
 
@@ -116,7 +127,7 @@ export default function OffplanIndex() {
   const hasAnyFilters = totalFilterBadge > 0 || Boolean(ui.q);
 
   const clearAll = () => {
-    updateFilters({ district: '', developer: '', developerName: '', q: '', year: '', own: '', beach: '', budget: '', sort: '' });
+    updateFilters({ district: '', developer: '', developerName: '', q: '', year: '', own: '', beach: '', budget: '', sort: '', rec: '', seg: '', risk: '', mgmt: '', focus: '' });
   };
 
   const seoTitle = isRu
@@ -182,7 +193,7 @@ export default function OffplanIndex() {
                     value={selectedDistrict || '_all'}
                     onValueChange={(v) => setSelectedDistrict(v === '_all' ? '' : v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger aria-label={pickLang(language, { ru: 'Район', en: 'District', th: 'ย่าน' })}>
                       <SelectValue placeholder={pickLang(language, {"ru": "Все районы", "en": "All districts", "th": "ทุกย่าน"})} />
                     </SelectTrigger>
                     <SelectContent>
@@ -196,23 +207,13 @@ export default function OffplanIndex() {
                   </Select>
                 </div>
 
-
-
-
-
-
-
-
-
-
-
                 <div>
                   <label className="text-sm font-medium mb-2 block">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</label>
                   <Select
                     value={selectedDeveloper || '_all'}
                     onValueChange={(v) => setSelectedDeveloper(v === '_all' ? '' : v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger aria-label={pickLang(language, { ru: 'Застройщик', en: 'Developer', th: 'ผู้พัฒนา' })}>
                       <SelectValue placeholder={pickLang(language, {"ru": "Все", "en": "All", "th": "ทั้งหมด"})} />
                     </SelectTrigger>
                     <SelectContent>
@@ -229,6 +230,7 @@ export default function OffplanIndex() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">{pickLang(language, {"ru": "Поиск застройщика (текст)", "en": "Developer contains", "th": "ค้นหาชื่อผู้พัฒนา"})}</label>
                   <Input
+                    aria-label={pickLang(language, { ru: 'Название застройщика', en: 'Developer name', th: 'ชื่อผู้พัฒนา' })}
                     value={ui.fDev}
                     onChange={(e) => updateFilters({ developerName: e.target.value })}
                     placeholder="Sansiri, Laguna…"
@@ -237,9 +239,6 @@ export default function OffplanIndex() {
 
                 {([
                   ['budget', budget, BUDGET_OPTIONS, { ru: 'Бюджет', en: 'Budget', th: 'งบประมาณ' }],
-                  ['year', ui.fYear, YEAR_OPTIONS, { ru: 'Срок сдачи', en: 'Completion', th: 'กำหนดแล้วเสร็จ' }],
-                  ['own', ui.fOwn, OWN_OPTIONS, { ru: 'Форма собственности', en: 'Ownership', th: 'กรรมสิทธิ์' }],
-                  ['beach', ui.fBeach, BEACH_OPTIONS, { ru: 'До пляжа', en: 'To the beach', th: 'ระยะถึงชายหาด' }],
                 ] as const).map(([key, value, options, label]) => (
                   <div key={key}>
                     <label className="text-sm font-medium mb-2 block">{pickLang(language, label)}</label>
@@ -267,10 +266,7 @@ export default function OffplanIndex() {
               {pickLang(language, o.label)}
             </Button>
           ))}
-          <Button variant={ui.fOwn === 'freehold' ? 'default' : 'outline'} size="sm" className="shrink-0 rounded-full"
-            aria-pressed={ui.fOwn === 'freehold'} onClick={() => updateFilters({ own: ui.fOwn === 'freehold' ? '' : 'freehold' })}>
-            Freehold
-          </Button>
+
 
           {hasAnyFilters && (
             <Button variant="ghost" size="sm" onClick={clearAll} aria-label={pickLang(language, {"ru": "Сбросить фильтры", "en": "Clear filters", "th": "ล้างตัวกรอง"})} className="shrink-0 text-muted-foreground">
@@ -278,23 +274,23 @@ export default function OffplanIndex() {
             </Button>
           )}
 
-          <SaveOffplanSearchDialog filters={ui} resultCount={displayedProjects.length} />
+          {!queryIssue && <CopyPublicSearchLink />}
         </div>
 
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">
-            {displayedProjects.length} {pickLang(language, {"ru": "результатов", "en": "results", "th": "ผลลัพธ์"})}
+          <span role="status" className="text-sm text-muted-foreground">
+            {queryIssue ? pickLang(language, { ru: 'Проверьте параметры', en: 'Check filters', th: 'ตรวจสอบตัวกรอง' }) : isLoading ? pickLang(language, { ru: 'Загрузка…', en: 'Loading…', th: 'กำลังโหลด…' }) : isError ? pickLang(language, { ru: 'Каталог недоступен', en: 'Catalogue unavailable', th: 'ไม่สามารถโหลดแคตตาล็อก' }) : <>{displayedProjects.length} {pickLang(language, { ru: 'результатов', en: 'results', th: 'ผลลัพธ์' })}</>}
           </span>
           <Select value={ui.fSort} onValueChange={(v) => updateFilters({ sort: v === 'score' ? '' : v })}>
             <SelectTrigger className="h-9 w-auto min-w-[11rem]" aria-label={pickLang(language, { ru: 'Сортировка', en: 'Sort', th: 'เรียงลำดับ' })}><SelectValue /></SelectTrigger>
             <SelectContent>
-              {SORT_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{pickLang(language, o.label)}</SelectItem>)}
+              {SORT_OPTIONS.filter(option => SORTS.includes(option.value)).map((o) => <SelectItem key={o.value} value={o.value}>{pickLang(language, o.label)}</SelectItem>)}
             </SelectContent>
           </Select>
 
         </div>
 
-        {isLoading ? (
+        {queryIssue ? <PublicAssetFilterNotice issue={queryIssue} onReset={clearAll} /> : isLoading ? (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i}>

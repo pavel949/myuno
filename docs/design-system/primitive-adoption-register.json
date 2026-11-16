@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 892,
-      "sourceInstances": 2920
+      "directConsumerFiles": 894,
+      "sourceInstances": 2921
     },
     "Card": {
       "directConsumerFiles": 532,
@@ -55,7 +55,7 @@
       "sourceInstances": 68
     },
     "Input": {
-      "directConsumerFiles": 399,
+      "directConsumerFiles": 400,
       "sourceInstances": 1565
     },
     "SelectTrigger": {
@@ -14935,6 +14935,31 @@
       ]
     },
     {
+      "file": "src/components/property/CopyPublicSearchLink.tsx",
+      "sha256": "3226044bd48156a3db3577951e71b6c70624ee6bb567c638ade72c7be632f32e",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            24
+          ]
+        },
+        {
+          "name": "Input",
+          "source": "@/components/ui/input",
+          "instances": 1,
+          "lines": [
+            29
+          ]
+        }
+      ]
+    },
+    {
       "file": "src/components/property/DepositPaymentOptions.tsx",
       "sha256": "6e5958f6666ea05787434d0600b317ed5971136464e7a99541ef735943b5c866",
       "directRouteDeclarations": [],
@@ -15227,7 +15252,7 @@
     },
     {
       "file": "src/components/property/OffplanCTASection.tsx",
-      "sha256": "1b520e3d40ab8324a9670abb1ab21b0fa658b7e894a8596b25d5263c6a1456c8",
+      "sha256": "3f52396e36774f58e8a18813a2ac6b063730b148065c1a5560a38e72be730e13",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -16103,7 +16128,7 @@
     },
     {
       "file": "src/components/property/commercial/CommercialFilters.tsx",
-      "sha256": "2b29e71336629f24284b0714e05341b48ecf00ef724b166cdeb111eedc3c9f45",
+      "sha256": "4654ede6000ee29d03d596e2b930ef26d5ca94fe00a7bf53c9024d515fa8c2a2",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -16113,9 +16138,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            52,
-            148,
-            152
+            53,
+            149,
+            153
           ]
         },
         {
@@ -16123,11 +16148,11 @@
           "source": "@/components/ui/input",
           "instances": 5,
           "lines": [
-            73,
-            79,
-            93,
+            74,
+            82,
             99,
-            112
+            107,
+            122
           ]
         },
         {
@@ -16135,14 +16160,14 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            50
+            51
           ]
         }
       ]
     },
     {
       "file": "src/components/property/commercial/HotelFilters.tsx",
-      "sha256": "3f015183d3561a2c2f49a071defe6b2de0411ad789bbc0bf4caf0603d1cbc14e",
+      "sha256": "581b6e36c445c7408524225e2b2bc74ef09299223880e0891b8ef41aae15e339",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -16153,18 +16178,17 @@
           "instances": 3,
           "lines": [
             50,
-            170,
-            173
+            141,
+            144
           ]
         },
         {
           "name": "Input",
           "source": "@/components/ui/input",
-          "instances": 3,
+          "instances": 2,
           "lines": [
             72,
-            79,
-            158
+            80
           ]
         },
         {
@@ -16236,6 +16260,23 @@
           "lines": [
             36,
             46
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/property/commercial/PublicAssetFilterNotice.tsx",
+      "sha256": "a1806cea7782b0d7156daf4d4a2d591367ce7b44d7ab1cb21359d6631ddb2e12",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            17
           ]
         }
       ]
@@ -38890,7 +38931,7 @@
     },
     {
       "file": "src/pages/property/CommercialDetail.tsx",
-      "sha256": "c9092b15f8f2369a59d2fcac7b9ecdcf7c07189d7c33a2f0dab9939673867da3",
+      "sha256": "848500bc338b5be77dc783f6c746097386523ab59a149df51c12411524ef0f37",
       "directRouteDeclarations": [
         {
           "id": "c2e17b16f0d4c018",
@@ -38913,15 +38954,15 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            266,
-            272
+            270,
+            276
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/CommercialIndex.tsx",
-      "sha256": "903aa898c1fce018b70f40923383ae11d9c2f19a9dd4a97da1137c1dbca81099",
+      "sha256": "56e914a0717b4e4812a83f3faf6e8f95b4543bf54d903f3a8091db9ef06c2f7f",
       "directRouteDeclarations": [
         {
           "id": "a2312b98753250b9",
@@ -38951,7 +38992,7 @@
     },
     {
       "file": "src/pages/property/DeveloperDetail.tsx",
-      "sha256": "e7302be8174fb03a95e47c4eb478de204be07776779c4d096967194a9cba4550",
+      "sha256": "43fbce2b9c797ca261b7703c929426f4f04826ed7e30917bf7033c8b3ee9c2a6",
       "directRouteDeclarations": [
         {
           "id": "760be5e2e6696e59",
@@ -38968,16 +39009,16 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            55,
-            56,
-            68
+            59,
+            60,
+            72
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/DevelopersIndex.tsx",
-      "sha256": "cb500c1ed671b391b0248653277622743b05f3f5236e31991f25032b5d56e912",
+      "sha256": "cd4b4241331059aaa35adaadb45490c91ec43b102b840d2e5993090ea3d96665",
       "directRouteDeclarations": [
         {
           "id": "37147ce04274cb98",
@@ -38994,8 +39035,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            48,
-            137
+            52,
+            141
           ]
         }
       ]
@@ -39033,7 +39074,7 @@
     },
     {
       "file": "src/pages/property/HotelsIndex.tsx",
-      "sha256": "f67f9e5c3c69d407a9294a827614d62c4b222c5a6605838e5027b2283cfc7e17",
+      "sha256": "b1fc7c6db0e62db80606b401123658993fffe3fe171e479110b46e5ef747649b",
       "directRouteDeclarations": [
         {
           "id": "f6f3225d7781b3d4",
@@ -39048,16 +39089,17 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 1,
+          "instances": 2,
           "lines": [
-            185
+            166,
+            190
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/LandDetail.tsx",
-      "sha256": "b49a7cc6d0fcbcfcbde409a8d288a46c4fc964769257de8855d6d6edefe21d2d",
+      "sha256": "29fc2265ba659be3ea19ef5322807988dec3b8015a01053a64baa80d8608f3ab",
       "directRouteDeclarations": [
         {
           "id": "ceb933725b912021",
@@ -39074,14 +39116,14 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            129
+            133
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/LandIndex.tsx",
-      "sha256": "6e97a2a2ca3f7d5b26a8625fc46814513fc30bc54d7ea3b2249398f6c755ea1c",
+      "sha256": "395f07438fa3e2592aa4bcd5a622923d6a5a7566e977a6b9d595e8fd8d3fbdf6",
       "directRouteDeclarations": [
         {
           "id": "2a8ce660c56f3662",
@@ -39104,14 +39146,14 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            149
+            152
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/ManagementCompanyProfile.tsx",
-      "sha256": "c85ee61a3d37b1d4180f549c39af52e316bfebf17cb75e9d1bd2c840f9a7fcde",
+      "sha256": "f126f4393e7c94b16d34d8bb9adbebf155aa692dac584824423499cfcafc9e3c",
       "directRouteDeclarations": [
         {
           "id": "a60f1d37cd88f6da",
@@ -39128,11 +39170,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            59,
-            176,
-            184,
-            192,
-            200
+            62,
+            179,
+            187,
+            195,
+            203
           ]
         }
       ]
@@ -39203,7 +39245,7 @@
     },
     {
       "file": "src/pages/property/OffplanDetail.tsx",
-      "sha256": "b8ef780f1dc9632bfe083233b9689ffc7dd443eb84827d3302cdb5a82f1cedf9",
+      "sha256": "4303db48d96e334fd9fe509dddd130310381d75a179053607b5807608ca67a9b",
       "directRouteDeclarations": [
         {
           "id": "31f1716176fa049f",
@@ -39218,13 +39260,12 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 5,
+          "instances": 4,
           "lines": [
-            114,
-            123,
-            227,
-            363,
-            403
+            129,
+            233,
+            369,
+            409
           ]
         },
         {
@@ -39232,14 +39273,14 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            287
+            293
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/OffplanIndex.tsx",
-      "sha256": "c80039ad9db56f491cc2c1fcc86472ee8e0003990d32a9e315244686ca9cbbdf",
+      "sha256": "e4f7020c92c3d9d575f54af248c3c5bd8bb4425db8ecf9a5354bf75f10446030",
       "directRouteDeclarations": [
         {
           "id": "f23c35daefe556b6",
@@ -39254,17 +39295,16 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 9,
+          "instances": 8,
           "lines": [
-            164,
+            175,
+            255,
             256,
-            257,
-            265,
-            270,
-            276,
-            310,
-            315,
-            333
+            264,
+            272,
+            306,
+            311,
+            329
           ]
         },
         {
@@ -39272,8 +39312,8 @@
           "source": "@/components/ui/input",
           "instances": 2,
           "lines": [
-            152,
-            231
+            163,
+            232
           ]
         },
         {
@@ -39281,10 +39321,10 @@
           "source": "@/components/ui/select",
           "instances": 4,
           "lines": [
-            185,
-            215,
-            247,
-            289
+            196,
+            216,
+            246,
+            285
           ]
         },
         {
@@ -39292,7 +39332,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            162
+            173
           ]
         }
       ]
@@ -39617,7 +39657,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "8aaf8d4d89a14f0ec47828405d13dd998ce2d6caedd5f82cdf6885a5d076cc07",
+      "sha256": "b4119c9f57fad4cbca498e47d66ffa51edd853ef0331fe1b793b73f7607d722b",
       "directRouteDeclarations": [
         {
           "id": "3d68906b3367f767",
@@ -39634,12 +39674,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            359,
-            371,
-            382,
-            451,
-            461,
-            468
+            360,
+            372,
+            383,
+            452,
+            462,
+            469
           ]
         }
       ]

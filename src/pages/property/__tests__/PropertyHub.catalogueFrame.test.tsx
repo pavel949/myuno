@@ -31,3 +31,12 @@ it('keeps resale context selected and does not show unrelated tabs on its UUID d
   render(<MemoryRouter initialEntries={['/property/resale/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Resale detail boundary</p>} /></Route></Routes></MemoryRouter>);
   expect(screen.queryByRole('group', { name: 'Property sections' })).not.toBeInTheDocument();
 });
+
+it.each([['/property/commercial','Commercial'],['/property/land','Land'],['/property/hotels','Hotels']])('keeps the current public section visible for an anonymous visitor on %s', (path,label) => {
+ render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Public section</p>} /></Route></Routes></MemoryRouter>);
+ expect(screen.getByRole('button',{name:new RegExp(label),pressed:true})).toBeVisible(); expect(screen.getAllByRole('button',{pressed:true})).toHaveLength(1);
+});
+it('hides unrelated menu tabs on a hotel UUID detail', () => {
+ render(<MemoryRouter initialEntries={['/property/hotels/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Hotel detail</p>} /></Route></Routes></MemoryRouter>);
+ expect(screen.queryByRole('group',{name:'Property sections'})).toBeNull();
+});

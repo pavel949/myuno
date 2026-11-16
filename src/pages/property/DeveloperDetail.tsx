@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 /**
  * DeveloperDetail - Developer profile page
  */
@@ -31,6 +33,8 @@ import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 export default function DeveloperDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnToCatalogue = () => { const plan = publicJourneyReturn(location, APP_ROUTES.DEVELOPERS); if ('delta' in plan) navigate(plan.delta); else navigate(plan.href, { replace: plan.replace, state: plan.state }); };
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -39,7 +43,7 @@ export default function DeveloperDetail() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4"><BackButton fallbackPath={APP_ROUTES.DEVELOPERS} onClick={returnToCatalogue} />
         <Skeleton className="h-24 rounded-none" />
         <Skeleton className="h-40 rounded-none" />
         <Skeleton className="h-60 rounded-none" />
@@ -53,7 +57,7 @@ export default function DeveloperDetail() {
         <Building2 className="h-16 w-16 text-muted-foreground/30" aria-hidden="true" />
         <p>{isRu ? 'Не удалось загрузить профиль застройщика' : language === 'th' ? 'โหลดโปรไฟล์ผู้พัฒนาไม่สำเร็จ' : 'Developer profile could not be loaded'}</p>
         <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : language === 'th' ? 'ลองอีกครั้ง' : 'Try again'}</Button>
-        <Button variant="link" onClick={() => navigate(APP_ROUTES.DEVELOPERS)}>{isRu ? 'Вернуться к списку' : language === 'th' ? 'กลับไปที่รายการ' : 'Back to list'}</Button>
+        <Button variant="link" onClick={returnToCatalogue}>{isRu ? 'Вернуться к списку' : language === 'th' ? 'กลับไปที่รายการ' : 'Back to list'}</Button>
       </div>
     );
   }
@@ -65,7 +69,7 @@ export default function DeveloperDetail() {
         <p className="text-muted-foreground">
           {isRu ? 'Застройщик не найден' : 'Developer not found'}
         </p>
-        <Button variant="link" onClick={() => navigate('/property/developers')}>
+        <Button variant="link" onClick={returnToCatalogue}>
           {isRu ? 'Вернуться к списку' : 'Back to list'}
         </Button>
       </div>
@@ -107,7 +111,7 @@ export default function DeveloperDetail() {
       />
       {/* Cover */}
       <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
-        <BackButton fallbackPath={APP_ROUTES.DEVELOPERS} className="absolute top-4 left-4" />
+        <BackButton onClick={returnToCatalogue} fallbackPath={APP_ROUTES.DEVELOPERS} className="absolute top-4 left-4" />
       </div>
 
       {/* Profile card */}

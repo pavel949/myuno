@@ -1,3 +1,4 @@
+import { projectStartingPrice } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * Client-side filters for off-plan projects (DB columns + offplan_catalog JSON).
  * Behaviour aligned with github.com/pavel949/OFFPLAN/lib/filters.ts
@@ -81,8 +82,12 @@ export function sortOffplanProjects(
 ): OffplanProject[] {
   const arr = [...list];
   arr.sort((a, b) => {
-    if (fSort === 'price_asc') return (a.priceFrom || 0) - (b.priceFrom || 0);
-    if (fSort === 'price_desc') return (b.priceFrom || 0) - (a.priceFrom || 0);
+    if (fSort === 'price_asc' || fSort === 'price_desc') {
+      const left = projectStartingPrice(a.priceFrom), right = projectStartingPrice(b.priceFrom);
+      if (left === null) return right === null ? 0 : 1;
+      if (right === null) return -1;
+      return fSort === 'price_asc' ? left - right : right - left;
+    }
     if (fSort === 'yield') return (b.roiProjected || 0) - (a.roiProjected || 0);
     if (fSort === 'risk') {
       const ra = parseRiskStars(a) ?? 3;

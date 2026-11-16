@@ -22,6 +22,13 @@ export interface CommercialProperty {
   cover_image?: string | null;
   images?: string[] | null;
   price?: number | null;
+  price_period?: string | null;
+  price_per_night?: number | null;
+  price_per_month?: number | null;
+  price_per_year?: number | null;
+  sale_currency?: string | null;
+  listing_modes?: string[] | null;
+  is_for_sale?: boolean | null;
   sale_price?: number | null;
   monthly_rent_thb?: number | null;
   currency?: string | null;
@@ -67,7 +74,8 @@ const COMMERCIAL_COLUMNS = `
   id, title_en, title_ru, description_en, description_ru,
   property_type, listing_type, asset_class,
   district, address, cover_image, images,
-  price, sale_price, currency,
+  price, price_period, price_per_night, price_per_month, price_per_year,
+  sale_price, sale_currency, currency, listing_modes, is_for_sale,
   floor_area_sqm, land_size_sqm, land_size_rai,
   frontage_m, road_access, zoning, title_deed_type,
   electricity_load_kw, water_supply,
@@ -95,6 +103,7 @@ export function useCommercialProperties(filters: CommercialFilters = {}) {
   return useQuery({
     queryKey: ['commercial-properties', filters],
     queryFn: async (): Promise<CommercialProperty[]> => {
+      if ([filters.minAreaSqm, filters.maxAreaSqm].some(value => value !== undefined && (!Number.isFinite(value) || value < 0))) throw new Error('Invalid public area filter');
       let query = supabase
         .from('public_property_catalog')
         .select(COMMERCIAL_COLUMNS)
@@ -112,6 +121,13 @@ export function useCommercialProperties(filters: CommercialFilters = {}) {
       }
       if (filters.district && filters.district !== 'all') {
         query = query.eq('district', filters.district);
+      }
+      // A THB sale filter cannot compare unknown currencies or rental periods.
+      if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+        if (filters.intent !== 'sale' || [filters.minPrice, filters.maxPrice].some(value => value !== undefined && (!Number.isFinite(value) || value < 0))) throw new Error('Unsupported public price filter');
+        query = query.eq('sale_currency', 'THB').gt('sale_price', 0);
+        if (filters.minPrice !== undefined) query = query.gte('sale_price', filters.minPrice);
+        if (filters.maxPrice !== undefined) query = query.lte('sale_price', filters.maxPrice);
       }
       if (filters.minAreaSqm !== undefined) query = query.gte('floor_area_sqm', filters.minAreaSqm);
       if (filters.maxAreaSqm !== undefined) query = query.lte('floor_area_sqm', filters.maxAreaSqm);
