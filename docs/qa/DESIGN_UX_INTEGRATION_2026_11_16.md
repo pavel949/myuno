@@ -18,6 +18,7 @@ The #207 omissions are `src/hooks/usePropertyCare.ts`, `src/hooks/useServiceMark
 
 ## Resolved intersections
 
+- Keep one visible Rent/Buy/Sell/Manage primary journey; retain the older specialized property searches under an accessible native disclosure. The general discovery link targets Discover rather than reloading the same property hub.
 - Keep current Discover entry and direct rental/purchase plan links; do not restore an older homepage search sheet.
 - Keep the current owner landing and canonical owner onboarding. Do not restore old hardcoded management prices or unsupported marketing promises.
 - Keep existing catalogue/rate helpers, simultaneous recorded tariff display, request-only/quote eligibility and management-company reads.
@@ -38,7 +39,7 @@ The #207 omissions are `src/hooks/usePropertyCare.ts`, `src/hooks/useServiceMark
 - Initial affected-file run: 212 pass, 18 fail due to a missing management-company test boundary. The boundary was corrected; its 18 cases then passed. This failed run is not counted as final acceptance.
 - Typecheck passed before the final gallery-label-only correction; final exact-source verification is required.
 - Authored-source lint passed with 0 errors and 2,224 existing warnings before the final gallery-label-only correction. Final exact-source verification is required.
-- Full isolated suite, production build and broader browser gates: in progress. No full PASS claim until results are captured.
+- First complete isolated suite: 5,072 pass / 2 failures / 0 skipped across 446 files. The two failures expected the former area-link label and a single card anchor; both were corrected while retaining real history/route and image-recovery assertions, and their 40 focused tests passed. A final complete rerun, production build and broader browser gates remain in progress.
 
 ## Boundaries and rollback
 

@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { Home, BadgeCheck, Scale, ShieldCheck, MapPin } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { PlatformJourneyLinks } from '@/components/landing/PlatformJourneyLinks';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -49,7 +50,10 @@ export default function PropertyLanding() {
       <div className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'py-8 pb-24 space-y-10')}>
         <HubHero t={t} isRu={isRu} />
         <PlatformJourneyLinks journey="property" />
-        <SeekerLane t={t} />
+        <details className="min-w-0 border border-border bg-card">
+          <summary className="min-h-11 cursor-pointer px-4 py-3 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language,{ru:'Ещё варианты поиска',en:'More property searches',th:'ตัวเลือกค้นหาที่พักเพิ่มเติม'})}</summary>
+          <div className="p-4"><SeekerLane t={t} /></div>
+        </details>
         <RentFeaturedRow t={t} />
         <OffplanFeaturedRow t={t} />
         <ResaleFeaturedRow t={t} />
