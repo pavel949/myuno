@@ -32,7 +32,7 @@ export const P3_EU_GUESTS: PersonaLanding = {
   ],
   faq: [
     { q: { ru: 'Можно платить в EUR?', en: 'Can I pay in EUR?' }, a: { ru: 'Да — SEPA, EUR-карта или Wise. Курс фиксируется на день оплаты.', en: 'Yes, SEPA, EUR card or Wise. Rate locked on payment day.' } },
-    { q: { ru: 'Поддерживаете long-stay (1–3 месяца)?', en: 'Do you support long-stay (1-3 months)?' }, a: { ru: 'Да, со скидкой 20–35% от nightly rate. Контракт на английском.', en: 'Yes, with a 20-35% discount on nightly rate. English contract.' } },
+    { q: { ru: 'Поддерживаете long-stay (1–3 месяца)?', en: 'Do you support long-stay (1-3 months)?' }, a: { ru: 'Выберите даты и срок аренды. Цена и возможные скидки зависят от опубликованных тарифов и подтверждённых условий конкретного объекта.', en: 'Choose dates and the rental period. Prices and any discounts depend on the property’s published rates and confirmed terms.' } },
   ],
   primaryCta: { label: { ru: 'Подобрать виллу', en: 'Find a villa' }, href: '/property/rent' },
   secondaryCta: { label: { ru: 'Связаться с консьержем', en: 'Talk to concierge' }, href: '/contact' },

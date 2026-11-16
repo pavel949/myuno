@@ -9,18 +9,18 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const STEPS = [
-  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Chanote / Nor Sor 3 Gor, clean title only', descRu: 'Chanote / Nor Sor 3 Gor — только чистый титул', path: '/property/browse?type=land', color: 'primary', external: false },
-  { icon: FileSignature, labelEn: 'Title & ownership', labelRu: 'Титул и оформление', descEn: 'Thai company, lease 30+30+30, due diligence', descRu: 'Тайская компания, lease 30+30+30, due diligence', path: APP_ROUTES.LEGAL, color: 'accent-purple', external: false },
+  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Explore published land offers and their documents', descRu: 'Изучите предложения земли и документы', path: '/property/browse?type=land', color: 'primary', external: false },
+  { icon: FileSignature, labelEn: 'Title & ownership', labelRu: 'Титул и оформление', descEn: 'Discuss ownership options and document checks', descRu: 'Обсудите варианты владения и проверку документов', path: APP_ROUTES.LEGAL, color: 'accent-purple', external: false },
   { icon: Ruler, labelEn: 'Architect & permits', labelRu: 'Архитектор и разрешения', descEn: 'EIA, building permit, utility hookup', descRu: 'EIA, building permit, подключение коммуникаций', path: APP_ROUTES.LEGAL, color: 'cluster-arrive', external: true },
-  { icon: Hammer, labelEn: 'Build & contractor', labelRu: 'Строительство и подрядчик', descEn: 'Vetted contractors, milestone escrow', descRu: 'Проверенные подрядчики, эскроу по этапам', path: APP_ROUTES.LEGAL, color: 'accent-amber', external: true },
-  { icon: ShieldCheck, labelEn: 'Independent supervision', labelRu: 'Независимый надзор', descEn: 'Inspector on site, photo report monthly', descRu: 'Инспектор на стройке, ежемесячный фото-отчёт', path: APP_ROUTES.LEGAL, color: 'cluster-manage', external: true },
-  { icon: KeyRound, labelEn: 'Handover & PM', labelRu: 'Сдача и управление', descEn: 'Snag list, warranty, then we run the rentals', descRu: 'Snag list, гарантия, затем сдача в управление', path: '/mc', color: 'cluster-invest', external: false },
+  { icon: Hammer, labelEn: 'Build & contractor', labelRu: 'Строительство и подрядчик', descEn: 'Discuss the scope, contractor and contract terms', descRu: 'Обсудите состав работ, подрядчика и договор', path: APP_ROUTES.LEGAL, color: 'accent-amber', external: true },
+  { icon: ShieldCheck, labelEn: 'Independent supervision', labelRu: 'Независимый надзор', descEn: 'Agree inspection scope and reporting frequency', descRu: 'Согласуйте объём проверок и формат отчётности', path: APP_ROUTES.LEGAL, color: 'cluster-manage', external: true },
+  { icon: KeyRound, labelEn: 'Handover & PM', labelRu: 'Сдача и управление', descEn: 'Discuss handover and property management', descRu: 'Обсудите приёмку и управление объектом', path: '/mc', color: 'cluster-invest', external: false },
 ];
 
 const STATS = [
-  { numRu: '฿35-60K', numEn: '฿35-60K', labelEn: 'THB / sqm build', labelRu: 'Стройка ฿/м²' },
-  { numRu: '14–18 мес', numEn: '14-18 mo', labelEn: 'Villa cycle', labelRu: 'Цикл виллы' },
-  { numRu: '5% / сделка', numEn: '5% / deal', labelEn: 'Land commission', labelRu: 'Комиссия по земле' },
+  { numRu: 'Земля', numEn: 'Land', labelEn: 'Offers and documents', labelRu: 'Предложения и документы' },
+  { numRu: 'Проект', numEn: 'Project', labelEn: 'Scope and required checks', labelRu: 'Задачи и необходимые проверки' },
+  { numRu: 'Условия', numEn: 'Terms', labelEn: 'Agreed for your project', labelRu: 'Согласуются для проекта' },
 ];
 
 export default function BuildSurfaceLandingPage() {
@@ -37,7 +37,7 @@ export default function BuildSurfaceLandingPage() {
       <LandingLayout
         icon={HardHat}
         title={t ? 'Построить виллу на Пхукете' : 'Build a villa in Phuket'}
-        subtitle={t ? 'Земля → титул → стройка → сдача → сдача в аренду. Один контракт, один координатор, понятная цена.' : 'Land → title → build → handover → rentals. One contract, one coordinator, transparent pricing.'}
+        subtitle={t ? 'Земля, документы, проект и приёмка — определите задачи и согласуйте специалистов и условия для каждого этапа.' : 'Land, documents, design and handover — define your needs and agree specialists and terms for each stage.'}
         gradient="from-primary via-accent to-cluster-manage"
         heroCta={{ label: t ? 'Обсудить проект' : 'Discuss my project', onClick: () => window.open(whatsappUrl, '_blank') }}
         whatsappUrl={whatsappUrl}
@@ -80,10 +80,10 @@ export default function BuildSurfaceLandingPage() {
         </div>
 
         <div className="px-4 py-10 text-center bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">{t ? 'Бюджет типовой 3BR виллы под ключ' : 'Typical 3BR turnkey villa budget'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">$350K — $1.2M</p>
+          <p className="text-sm text-muted-foreground mb-2">{t ? 'Условия вашего проекта' : 'Your project terms'}</p>
+          <p className="text-3xl font-bold font-display text-foreground tabular-nums">{t ? 'Индивидуальные условия' : 'Individual terms'}</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Эскроу по этапам, фиксированная смета, независимый надзор, гарантия 1 год.' : 'Milestone escrow, fixed quote, independent supervision, 1-year warranty.'}
+            {t ? 'Бюджет, сроки, договоры и гарантии зависят от конкретного проекта и подтверждаются выбранными специалистами.' : 'Budget, timing, contracts and warranties depend on the project and must be confirmed with the selected specialists.'}
           </p>
         </div>
       </LandingLayout>

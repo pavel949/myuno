@@ -88,7 +88,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
           </p>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section className={cn('grid gap-3', goal === 'buy' ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>
           {entry.primary.map((l) => <Tile key={l.path} link={l} large />)}
         </section>
 

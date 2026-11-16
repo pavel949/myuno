@@ -3,6 +3,7 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +13,8 @@ import { LandingChrome, LandingContainer } from '@/components/landings';
 import { MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
 import {
   Building2, BarChart3, Users, Calendar, FileText,
-  MessageSquare, Shield, Zap, Check, ArrowRight,
-  Globe, Smartphone, Clock, DollarSign,
+  MessageSquare, Shield, Zap, ArrowRight,
+  Globe, Smartphone, Clock,
   KanbanSquare, Wrench, ClipboardList, Sun, Receipt, Wallet,
   RefreshCw, Sparkles, CalendarRange, Mailbox, FileSignature,
   AlertTriangle, ShoppingCart, ScrollText,
@@ -36,15 +37,15 @@ const modules: ModuleSpec[] = [
     badge: 'PMS',
     titleRu: 'PMS — управление объектами и бронированиями',
     titleEn: 'PMS — properties & bookings',
-    leadRu: 'Один календарь, один тариф, один канал-менеджер. Объекты, доступность и цены везде синхронны.',
-    leadEn: 'One calendar, one rate plan, one channel manager. Listings, availability and prices stay in sync everywhere.',
+    leadRu: 'Объекты, бронирования и календарь в рабочем кабинете компании. Проверяйте доступность и статус подключённых каналов.',
+    leadEn: 'Properties, bookings and calendars in the company workspace. Check availability and the status of connected channels.',
     items: [
-      { icon: RefreshCw, titleRu: 'Канал-менеджер Airbnb, Booking, VRBO, Expedia', titleEn: 'Channel manager: Airbnb, Booking, VRBO, Expedia', descRu: 'Двусторонняя синхронизация листингов и календарей с 4 OTA, баннер конфликтов и health-дашборд каналов.', descEn: 'Two-way sync of listings and calendars with 4 OTAs, conflict banner and channel health dashboard.' },
-      { icon: CalendarRange, titleRu: 'iCal-синхронизация любых внешних календарей', titleEn: 'iCal sync for any external calendar', descRu: 'Импорт чужих iCal-ссылок и экспорт своих — занятость подтягивается из всех источников автоматически.', descEn: 'Import external iCal links and export your own — availability flows in from every source automatically.' },
-      { icon: Sparkles, titleRu: 'AI-ценообразование с рекомендациями по датам', titleEn: 'AI pricing with date-by-date suggestions', descRu: 'ИИ анализирует сезон и спрос, предлагает цену на каждую ночь — менеджер принимает или отклоняет одним кликом.', descEn: 'AI reads the season and demand, suggests a price per night — the manager accepts or dismisses in one click.' },
+      { icon: RefreshCw, titleRu: 'Календарь и внешние каналы', titleEn: 'Calendar and external channels', descRu: 'Проверяйте подключённые календари, ошибки и состояние синхронизации. Доступность подключения нужно подтвердить для конкретного канала.', descEn: 'Review connected calendars, errors and sync status. Connection availability must be confirmed for each channel.' },
+      { icon: CalendarRange, titleRu: 'Внешние iCal-календари', titleEn: 'External iCal calendars', descRu: 'Настройте доступные ссылки импорта и экспорта; проверяйте время и результат последней синхронизации.', descEn: 'Configure available import and export links; check the time and outcome of the latest sync.' },
+      { icon: Sparkles, titleRu: 'Тарифы и условия размещения', titleEn: 'Rates and stay terms', descRu: 'Просматривайте и настраивайте тарифы. Рекомендации и интеграции зависят от доступных настроек компании.', descEn: 'Review and configure rates. Recommendations and integrations depend on the company settings available.' },
       { icon: Calendar, titleRu: 'Единый календарь всего портфеля', titleEn: 'Portfolio-wide unified calendar', descRu: 'Timeline-вид по всем объектам сразу: заезды, выезды, уборки и задачи в одной картине.', descEn: 'Timeline view across all properties: check-ins, check-outs, cleanings and tasks in a single picture.' },
       { icon: List, titleRu: 'Все бронирования в одном списке', titleEn: 'All bookings in one list', descRu: 'Фильтры по статусам confirmed / pending / checked-in / completed, bulk-действия и детальная карточка брони.', descEn: 'Filters by confirmed / pending / checked-in / completed, bulk actions and a detailed booking sheet.' },
-      { icon: Building2, titleRu: 'Онбординг объекта с импортом из Airbnb', titleEn: 'Onboarding wizard with Airbnb import', descRu: 'Мастер заводит новый объект пошагово и подтягивает название, фото, описание и цены прямо из листинга OTA.', descEn: 'Wizard onboards a new property step-by-step and pulls title, photos, description and prices from the OTA listing.' },
+      { icon: Building2, titleRu: 'Подготовка объекта к публикации', titleEn: 'Prepare a property for publication', descRu: 'Подготовьте название, фотографии, описание и условия. Проверьте сведения перед публикацией.', descEn: 'Prepare the title, photographs, description and terms. Review the details before publication.' },
     ],
   },
   {
@@ -68,15 +69,15 @@ const modules: ModuleSpec[] = [
     badge: 'Finance',
     titleRu: 'Finance — P&L, выплаты и сверка',
     titleEn: 'Finance — P&L, payouts & reconciliation',
-    leadRu: 'Каждая копейка по каждому объекту. Прозрачные отчёты владельцам и автоматическая сверка с леджером.',
-    leadEn: 'Every penny per property. Transparent owner statements and automatic ledger reconciliation.',
+    leadRu: 'Просмотр записанных операций, отчётов и расхождений для сверки по доступным объектам.',
+    leadEn: 'Review recorded operations, reports and reconciliation differences for the properties you can access.',
     items: [
       { icon: BarChart3, titleRu: 'P&L по каждому объекту', titleEn: 'P&L per property', descRu: 'Доходы и расходы по объекту за период: разбивка по категориям, графики, сравнение месяц-к-месяцу.', descEn: 'Income and expenses per property per period: category breakdown, charts, month-over-month comparison.' },
       { icon: Wallet, titleRu: 'Выплаты собственникам с полным расчётом', titleEn: 'Owner payouts with full breakdown', descRu: 'Валовая выручка минус комиссия УК, расходы, WHT и VAT — готовый расчёт net payout под перевод.', descEn: 'Gross revenue minus MC commission, expenses, WHT and VAT — net payout calculated and ready to transfer.' },
       { icon: AlertTriangle, titleRu: 'Дебиторка (AR Aging) с ведёрной разбивкой', titleEn: 'AR Aging with bucket breakdown', descRu: 'Кто и сколько должен по срокам 0–30 / 31–60 / 61–90 / 90+ дней — должники видны сразу.', descEn: 'Who owes what across 0–30 / 31–60 / 61–90 / 90+ day buckets — debtors surface instantly.' },
       { icon: Shield, titleRu: 'Сверка заказов с леджером', titleEn: 'Order-to-ledger reconciliation', descRu: 'Автоматически сравнивает подтверждённые заказы с записями в ledger_entries и подсвечивает расхождения.', descEn: 'Automatically compares confirmed orders against ledger entries and flags any discrepancy.' },
       { icon: Receipt, titleRu: 'Налоговый центр и экспорт отчётов', titleEn: 'Tax center & report exports', descRu: 'Документы по WHT и VAT в одном месте, выгрузка отчётов в Excel для бухгалтера и налоговой.', descEn: 'WHT and VAT docs in one place, Excel exports for accountants and tax filings.' },
-      { icon: Percent, titleRu: 'Комиссии маркетплейса с авторасчётом', titleEn: 'Marketplace commissions, auto-calculated', descRu: 'Платформенная комиссия и выплата вендору считаются автоматически и попадают в леджер на каждом заказе.', descEn: 'Platform fee and vendor payout are calculated automatically and recorded in the ledger on every order.' },
+      { icon: Percent, titleRu: 'Комиссии и условия маркетплейса', titleEn: 'Marketplace fees and terms', descRu: 'Состав комиссий и доступные операции зависят от согласованных условий и настроек компании.', descEn: 'Fees and available operations depend on agreed terms and company settings.' },
     ],
   },
   {
@@ -100,35 +101,12 @@ const modules: ModuleSpec[] = [
 
 
 
-const tiers = [
-  {
-    id: 'starter',
-    nameEn: 'Starter',
-    nameRu: 'Стартовый',
-    priceUsd: 125,
-    slots: 5,
-    featuresEn: ['Up to 5 properties', 'Task management', 'Basic financials', 'Calendar sync', 'Email support'],
-    featuresRu: ['До 5 объектов', 'Управление задачами', 'Базовые финансы', 'Синхронизация календаря', 'Поддержка по email'],
-  },
-  {
-    id: 'professional',
-    nameEn: 'Professional',
-    nameRu: 'Профессиональный',
-    priceUsd: 375,
-    slots: 15,
-    popular: true,
-    featuresEn: ['Up to 15 properties', 'Full CRM + pipeline', 'Owner reports (auto PDF)', 'Guest welcome automation', 'WhatsApp notifications', 'Marketplace commissions', 'Priority support'],
-    featuresRu: ['До 15 объектов', 'Полный CRM + воронка', 'Отчёты владельцам (авто PDF)', 'Welcome-автоматизация', 'WhatsApp уведомления', 'Комиссии маркетплейса', 'Приоритетная поддержка'],
-  },
-  {
-    id: 'enterprise',
-    nameEn: 'Enterprise',
-    nameRu: 'Корпоративный',
-    priceUsd: 1250,
-    slots: 50,
-    featuresEn: ['Up to 50 properties', 'Everything in Professional', 'Multi-team management', 'Custom branding', 'API access', 'Dedicated account manager', 'SLA guarantee'],
-    featuresRu: ['До 50 объектов', 'Всё из Профессионального', 'Мульти-команды', 'Ваш брендинг', 'Доступ к API', 'Выделенный менеджер', 'Гарантия SLA'],
-  },
+// Public setup paths, not a billing-plan catalogue. Active commercial terms
+// remain in the governed company subscription and agreed rollout scope.
+const rolloutOptions = [
+  { id: 'setup', titleRu: 'Подключить компанию', titleEn: 'Set up your company', descriptionRu: 'Подготовьте профиль компании и сведения об объектах для подключения.', descriptionEn: 'Prepare your company profile and property details for setup.', path: '/auth?redirect=/mc/onboarding' },
+  { id: 'workspace', titleRu: 'Продолжить работу', titleEn: 'Continue your work', descriptionRu: 'Откройте рабочий кабинет. Нужны вход и подтверждённый доступ к компании.', descriptionEn: 'Open the workspace. Sign-in and confirmed company access are required.', path: APP_ROUTES.MC },
+  { id: 'scope', titleRu: 'Обсудить задачи', titleEn: 'Discuss your requirements', descriptionRu: 'Согласуйте состав инструментов, подключения, стоимость и порядок запуска с командой.', descriptionEn: 'Agree the tools, integrations, pricing and rollout steps with the team.', path: APP_ROUTES.CONTACT },
 ];
 
 // Cross-module qualities — НЕ дублируют PMS/CRM/Finance/Ops deep-dive выше
@@ -168,21 +146,24 @@ const ForManagementCompanies: React.FC = () => {
               </Badge>
               <h1 className="text-h1 md:text-display font-display mb-6">
                 {isRu
-                  ? <>Управляйте объектами.<br />Автоматизируйте отчёты.<br /><span className="text-primary">Масштабируйтесь.</span></>
-                  : <>Manage Properties.<br />Automate Reports.<br /><span className="text-primary">Scale.</span></>}
+                  ? <>Управляйте объектами.<br />Координируйте команду.<br /><span className="text-primary">Работайте в одном кабинете.</span></>
+                  : <>Manage Properties.<br />Coordinate Your Team.<br /><span className="text-primary">Work in One Workspace.</span></>}
               </h1>
               <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto mb-8">
                 {isRu
-                  ? 'myUNO — платформа, которую мы создали для своей управляющей компании. Теперь она доступна вам. Проверена на реальных объектах.'
-                  : 'myUNO is the platform we built for our own management company. Now available for yours. Battle-tested on real properties.'}
+                  ? 'Рабочее пространство для объектов, гостей, команды и отчётов. Доступные инструменты и подключения зависят от подтверждённых прав и настроек компании.'
+                  : 'A workspace for properties, guests, teams and reports. Available tools and integrations depend on confirmed permissions and company settings.'}
               </p>
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
-                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
+                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding')} className={MARKETING_ACTION_BUTTON}>
                   <Zap className="w-5 h-5" />
-                  {isRu ? 'Попробовать бесплатно' : 'Start Free Trial'}
+                  {isRu ? 'Подключить компанию' : 'Set up your company'}
+                </Button>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.MC)}>
+                  {isRu ? 'Войти в кабинет компании' : 'Open company workspace'}
                 </Button>
                 <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-                  {isRu ? 'Посмотреть тарифы' : 'View Pricing'}
+                  {isRu ? 'Условия подключения' : 'Rollout terms'}
                 </Button>
               </div>
             </motion.div>
@@ -214,8 +195,8 @@ const ForManagementCompanies: React.FC = () => {
             </h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
               {isRu
-                ? 'Четыре модуля, каждый собран на реальной работе нашей УК. Ниже — конкретные функции, не лозунги.'
-                : 'Four modules, each built on the real work of our own MC. Below — concrete features, not slogans.'}
+                ? 'Ниже — основные области работы компании. Состав инструментов и подключений согласуется при запуске и зависит от ваших прав.'
+                : 'Explore the main areas of company work. Tools and integrations are agreed during rollout and depend on your permissions.'}
             </p>
 
             {/* Sticky module nav */}
@@ -314,7 +295,7 @@ const ForManagementCompanies: React.FC = () => {
         <section className="py-20 bg-muted/30">
           <LandingContainer variant="marketing">
             <h2 className="text-h2 font-display text-center mb-12">
-              {isRu ? 'Начните за 15 минут' : 'Get Started in 15 Minutes'}
+              {isRu ? 'Как начать работу' : 'How to get started'}
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {[
@@ -338,44 +319,20 @@ const ForManagementCompanies: React.FC = () => {
         <section id="pricing" className="py-20">
           <LandingContainer variant="marketing">
             <h2 className="text-h2 font-display text-center mb-4">
-              {isRu ? 'Прозрачные тарифы' : 'Transparent Pricing'}
+              {isRu ? 'Условия подключения' : 'Rollout terms'}
             </h2>
             <p className="text-center text-muted-foreground mb-12">
-              {isRu ? '14 дней бесплатно. Без привязки карты.' : '14-day free trial. No credit card required.'}
+              {isRu ? 'Стоимость, состав инструментов, подключения и сроки согласуются для вашей компании. Подтверждённые условия подписки доступны в рабочем кабинете.' : 'Pricing, tools, integrations and timing are agreed for your company. Confirmed subscription terms are available in the workspace.'}
             </p>
             <div className="grid md:grid-cols-3 gap-6">
-              {tiers.map((tier) => (
-                <Card key={tier.id} className={`relative ${tier.popular ? 'border-primary shadow-lg ring-2 ring-primary/20' : ''}`}>
-                  {tier.popular && (
-                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      {isRu ? 'Популярный' : 'Most Popular'}
-                    </Badge>
-                  )}
-                  <CardContent className="p-6 pt-8">
-                    <h3 className="text-xl font-bold mb-1">{isRu ? tier.nameRu : tier.nameEn}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {isRu ? `До ${tier.slots} объектов` : `Up to ${tier.slots} properties`}
-                    </p>
-                    <div className="flex items-baseline gap-1 mb-6">
-                      <span className="text-4xl font-bold">${tier.priceUsd}</span>
-                      <span className="text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
-                    </div>
-                    <Button
-                      className={`w-full mb-6 ${MARKETING_ACTION_BUTTON}`}
-                      variant={tier.popular ? 'default' : 'outline'}
-                      onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true&tier=' + tier.id)}
-                    >
-                      {isRu ? 'Начать бесплатно' : 'Start Free Trial'}
-                      <ArrowRight className="w-4 h-4" />
+              {rolloutOptions.map(option => (
+                <Card key={option.id}>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold mb-3">{isRu ? option.titleRu : option.titleEn}</h3>
+                    <p className="text-sm text-muted-foreground mb-6">{isRu ? option.descriptionRu : option.descriptionEn}</p>
+                    <Button className={`w-full ${MARKETING_ACTION_BUTTON}`} variant="outline" onClick={() => navigate(option.path)}>
+                      {isRu ? 'Продолжить' : 'Continue'}<ArrowRight className="w-4 h-4" />
                     </Button>
-                    <ul className="space-y-2">
-                      {(isRu ? tier.featuresRu : tier.featuresEn).map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
                   </CardContent>
                 </Card>
               ))}
@@ -395,9 +352,9 @@ const ForManagementCompanies: React.FC = () => {
                 : 'We use myUNO every day ourselves. Join the growing community of Phuket property managers.'}
             </p>
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
+              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding')} className={MARKETING_ACTION_BUTTON}>
                 <Zap className="w-5 h-5" />
-                {isRu ? 'Начать 14-дневный триал' : 'Start 14-Day Trial'}
+                {isRu ? 'Начать подключение' : 'Start company setup'}
               </Button>
               <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => window.open(getWhatsAppUrl("Hi, I'm interested in myUNO for my management company"), '_blank')}>
                 <MessageSquare className="w-5 h-5 mr-2" />

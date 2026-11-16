@@ -58,6 +58,24 @@ describe('canonical services hub', () => {
     expect(screen.getByRole('button', { name: 'AC Cleaning' })).toBeVisible();
   });
 
+  it('puts legal, health and family categories before the provider-only empty layer', () => {
+    mount('/discover/services?ref=first-step');
+    const menu = screen.getByTestId('service-discovery-menu');
+    for (const id of ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']) {
+      const category = CATEGORIES.find(item => item.id === id)!;
+      expect(within(menu).getByRole('button', { name: category.labelEn })).toBeVisible();
+    }
+    const providerFallback = screen.getByRole('button', { name: 'Fixture concierge fallback' });
+    expect(menu.compareDocumentPosition(providerFallback) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const legal = CATEGORIES.find(item => item.id === 'cat-business-legal')!;
+    fireEvent.click(within(menu).getByRole('button', { name: legal.labelEn }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-business-legal');
+    expect(screen.getByTestId('location')).toHaveTextContent('ref=first-step');
+    for (const link of within(screen.getByTestId('service-catalogue-results')).getAllByRole('link')) {
+      expect(legal.services.map(service => service.path)).toContain(link.getAttribute('href'));
+    }
+  });
+
   it('offers equal views and real specialised routes without duplicate services', () => {
     mount();
     expect(screen.getByRole('tab', { name: 'By category' })).toHaveAttribute('aria-selected', 'true');

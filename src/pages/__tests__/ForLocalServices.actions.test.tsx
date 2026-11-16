@@ -32,11 +32,27 @@ it.each(['ru', 'en'])('lets the %s provider CTA row wrap without losing any dest
  const row = buttons[0].parentElement!;
  expect(row).toHaveClass('flex', 'flex-col', 'sm:flex-row', 'sm:flex-wrap');
  expect(row).not.toHaveClass('sm:flex-nowrap', 'overflow-hidden');
- for (const [index, path] of [APP_ROUTES.VENDOR_JOIN, APP_ROUTES.FOR_BUSINESS, APP_ROUTES.BECOME_PARTNER].entries()) {
+ for (const [index, path] of [APP_ROUTES.VENDOR_JOIN, APP_ROUTES.VENDOR, APP_ROUTES.FOR_BUSINESS].entries()) {
   expect(buttons[index]).toHaveAccessibleName();
   fireEvent.click(buttons[index]);
   expect(fixture.navigate).toHaveBeenLastCalledWith(path);
  }
+});
+
+it.each(['ru', 'en'])('keeps the %s corporate partnership option below the provider journey', language => {
+ fixture.language = language;
+ render(<ForLocalServices />);
+ const corporate = screen.getByRole('button', { name: language === 'ru' ? 'Корпоративное партнёрство' : 'Corporate partnership' });
+ expect(screen.getByRole('heading', { level: 1 }).parentElement).not.toContainElement(corporate);
+ fireEvent.click(corporate);
+ expect(fixture.navigate).toHaveBeenLastCalledWith(APP_ROUTES.BECOME_PARTNER);
+});
+
+it.each(['ru', 'en'])('opens the existing %s company workspace through its mounted guarded destination', language => {
+ fixture.language = language;
+ render(<ForManagementCompanies />);
+ fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Войти в кабинет компании' : 'Open company workspace' }));
+ expect(fixture.navigate).toHaveBeenLastCalledWith(APP_ROUTES.MC);
 });
 
 it.each(['ru', 'en'])('allows the full %s developer CTA label to wrap and preserves its action', language => {
@@ -69,4 +85,13 @@ it.each([ForLocalServices, ForDevelopers, ForManagementCompanies])('keeps every 
   expect(action).toHaveClass('max-w-full', 'whitespace-normal', 'h-auto');
   expect(action).not.toHaveClass('whitespace-nowrap', 'h-12');
  }
+});
+
+it.each(['ru', 'en'])('keeps %s company setup separate from an unverified trial or plan purchase', language => {
+ fixture.language = language;
+ const { container } = render(<ForManagementCompanies />);
+ expect(container.textContent).not.toMatch(/\$\s*\d|14.?day|14.днев|бесплатн|Free Trial|two.way|4 OTA/i);
+ expect(screen.getAllByText(language === 'ru' ? 'Условия подключения' : 'Rollout terms')).toHaveLength(2);
+ fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Подключить компанию' : 'Set up your company' }));
+ expect(fixture.navigate).toHaveBeenLastCalledWith('/auth?redirect=/mc/onboarding');
 });

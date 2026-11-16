@@ -18,9 +18,9 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { numRu: '$25/мес', numEn: '$25/mo', labelEn: 'PMS per property', labelRu: 'PMS за объект' },
-  { numRu: '10-15%', numEn: '10-15%', labelEn: 'Management fee', labelRu: 'Комиссия PM' },
-  { numRu: '24/7', numEn: '24/7', labelEn: 'Guest support', labelRu: 'Поддержка гостей' },
+  { numRu: 'Объекты', numEn: 'Properties', labelEn: 'Confirmed workspace access', labelRu: 'Подтверждённый доступ' },
+  { numRu: 'Задачи', numEn: 'Tasks', labelEn: 'Daily management', labelRu: 'Ежедневное управление' },
+  { numRu: 'Условия', numEn: 'Terms', labelEn: 'Agreed for your property', labelRu: 'Согласуются для объекта' },
 ];
 
 export default function ManageSurfaceLandingPage() {
@@ -75,9 +75,9 @@ export default function ManageSurfaceLandingPage() {
 
         <div className="px-4 py-10 text-center bg-muted/30">
           <p className="text-sm text-muted-foreground mb-2">{t ? 'Полное управление' : 'Full management'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">10–15%</p>
+          <p className="text-3xl font-bold font-display text-foreground tabular-nums">{t ? 'Индивидуальные условия' : 'Individual terms'}</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Канал-менеджер, гости, уборка, отчёты. Договор RU+EN, ежемесячный P&L.' : 'Channel manager, guests, cleaning, reports. Contract EN+RU, monthly P&L.'}
+            {t ? 'Обсудите задачи по вашему объекту. Состав услуг, стоимость и сроки согласуются отдельно; доступ к кабинету не означает заключения договора управления.' : 'Discuss what your property needs. Service scope, pricing and timing are agreed separately; workspace access does not establish a management agreement.'}
           </p>
         </div>
       </LandingLayout>

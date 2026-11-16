@@ -9,18 +9,18 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Car, labelEn: 'Airport transfer', labelRu: 'Трансфер из аэропорта', descEn: 'Sedan ฿800, minivan ฿1,200, fixed price', descRu: 'Седан ฿800, минивэн ฿1 200 — фикс', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive' },
-  { icon: Wifi, labelEn: 'eSIM in 5 min', labelRu: 'eSIM за 5 минут', descEn: '4G island-wide, RU/EN support', descRu: '4G по острову, поддержка RU/EN', path: '/sim', color: 'accent-cyan' },
+  { icon: Car, labelEn: 'Airport transfer', labelRu: 'Трансфер из аэропорта', descEn: 'Choose a route and request the current terms', descRu: 'Выберите маршрут и уточните актуальные условия', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive' },
+  { icon: Wifi, labelEn: 'SIM and connectivity', labelRu: 'SIM и связь', descEn: 'Explore connection options for your trip', descRu: 'Изучите варианты связи для поездки', path: '/sim', color: 'accent-cyan' },
   { icon: Landmark, labelEn: 'Cash & exchange', labelRu: 'Наличные и обмен', descEn: 'SuperRich map, ATM fees', descRu: 'Карта SuperRich, комиссии ATM', path: '/exchange', color: 'cluster-invest' },
-  { icon: Hotel, labelEn: 'First-week stay', labelRu: 'Жильё на первую неделю', descEn: 'Verified condos & hotels, no scams', descRu: 'Проверенные кондо и отели', path: `${APP_ROUTES.PROPERTY_BROWSE}?tenancy=short`, color: 'primary' },
+  { icon: Hotel, labelEn: 'First-week stay', labelRu: 'Жильё на первую неделю', descEn: 'Published rental offers for your trip', descRu: 'Опубликованные предложения аренды для поездки', path: `${APP_ROUTES.PROPERTY_BROWSE}?tenancy=short`, color: 'primary' },
   { icon: MapPin, labelEn: 'Area guide', labelRu: 'Гид по районам', descEn: 'Patong, Kamala, Surin, Laguna, Rawai', descRu: 'Патонг, Камала, Сурин, Лагуна, Раваи', path: '/guide/areas', color: 'accent-purple' },
   { icon: Compass, labelEn: 'First tour', labelRu: 'Первая экскурсия', descEn: 'Phi Phi, Phang Nga, James Bond', descRu: 'Пхи-Пхи, Пханг-Нга, Джеймс Бонд', path: '/tours', color: 'accent-amber' },
 ];
 
 const STATS = [
-  { numRu: '72 ч', numEn: '72 hrs', labelEn: 'First days plan', labelRu: 'План первых дней' },
-  { numRu: '฿800', numEn: '฿800', labelEn: 'Transfer fixed', labelRu: 'Фикс трансфер' },
-  { numRu: '24/7', numEn: '24/7', labelEn: 'RU concierge', labelRu: 'Консьерж RU' },
+  { numRu: 'План', numEn: 'Plan', labelEn: 'Your first steps', labelRu: 'Первые шаги на острове' },
+  { numRu: 'Маршрут', numEn: 'Route', labelEn: 'Arrival and accommodation', labelRu: 'Прибытие и жильё' },
+  { numRu: 'Связь', numEn: 'Support', labelEn: 'Discuss what you need', labelRu: 'Обсудите ваши задачи' },
 ];
 
 export default function ArriveSurfaceLandingPage() {
@@ -39,7 +39,7 @@ export default function ArriveSurfaceLandingPage() {
         title={t ? 'Прибытие на Пхукет' : 'Arrive in Phuket'}
         subtitle={t ? 'Первые 72 часа без стресса: трансфер, связь, деньги, заселение, ориентация' : 'First 72 hours without stress: transfer, connectivity, money, check-in, orientation'}
         gradient="from-cluster-arrive via-primary to-accent"
-        heroCta={{ label: t ? 'Открыть чек-лист' : 'Open checklist', onClick: () => navigate('/guide/areas') }}
+        heroCta={{ label: t ? 'Посмотреть районы' : 'Explore the area guide', onClick: () => navigate('/guide/areas') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Связаться с консьержем' : 'Talk to concierge'}
       >
@@ -74,10 +74,10 @@ export default function ArriveSurfaceLandingPage() {
         </div>
 
         <div className="px-4 py-10 text-center bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">{t ? 'Пакет «Мягкая посадка»' : 'Soft-landing pack'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">฿3,500 — ฿9,500</p>
+          <p className="text-sm text-muted-foreground mb-2">{t ? 'Помощь с прибытием' : 'Arrival support'}</p>
+          <p className="text-3xl font-bold font-display text-foreground tabular-nums">{t ? 'Индивидуальные условия' : 'Individual terms'}</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Встреча, SIM, обмен, заселение, тур по району. Договор RU+EN.' : 'Meet & greet, SIM, exchange, check-in, neighbourhood tour. Contract EN+RU.'}
+            {t ? 'Укажите маршрут, даты и необходимые услуги. Стоимость, состав помощи и сроки подтверждаются отдельно.' : 'Tell us your route, dates and the services you need. Pricing, scope and timing are confirmed separately.'}
           </p>
         </div>
       </LandingLayout>

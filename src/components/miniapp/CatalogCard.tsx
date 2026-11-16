@@ -12,6 +12,7 @@
  */
 
 import React, { memo } from 'react';
+import { Link } from 'react-router-dom';
 import { Star, MapPin, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,9 @@ export interface CatalogCardProps {
   image?: string;
   title: string;
   onClick?: () => void;
+  /** Native destination takes precedence over legacy click navigation. */
+  href?: string;
+  navigationState?: unknown;
   aspectRatio?: '4:3' | '3:4' | '1:1';
   badges?: CatalogBadge[];
   statusBadge?: CatalogBadge;
@@ -45,6 +49,8 @@ export interface CatalogCardProps {
   meta?: CatalogMeta[];
   location?: string;
   price?: number;
+  /** Complete caller-owned display, including any unit; suppresses legacy affixes. */
+  priceLabel?: string;
   pricePrefix?: string;
   priceSuffix?: string;
   subtitle?: string;
@@ -69,6 +75,8 @@ export const CatalogCard = memo(function CatalogCard({
   image,
   title,
   onClick,
+  href,
+  navigationState,
   aspectRatio = '4:3',
   badges,
   statusBadge,
@@ -78,6 +86,7 @@ export const CatalogCard = memo(function CatalogCard({
   meta,
   location,
   price,
+  priceLabel,
   pricePrefix,
   priceSuffix,
   subtitle,
@@ -88,11 +97,9 @@ export const CatalogCard = memo(function CatalogCard({
   const { language } = useLanguage();
   const dims = ASPECT_DIMENSIONS[aspectRatio];
 
-  return (
-    <div
-      className={cn("cursor-pointer group", className)}
-      onClick={onClick}
-    >
+  const cardClassName = cn('group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', (href || onClick) && 'cursor-pointer', className);
+  const content = <>
+
       {/* Image */}
       <div className={cn("relative rounded-none overflow-hidden mb-2", ASPECT_MAP[aspectRatio])}>
         <OptimizedImage
@@ -202,14 +209,24 @@ export const CatalogCard = memo(function CatalogCard({
         )}
 
         {/* Price */}
-        {price !== undefined && (
+        {(priceLabel !== undefined || price !== undefined) && (
           <p className="text-sm font-semibold text-foreground">
-            {pricePrefix && <span className="text-xs font-normal text-muted-foreground mr-0.5">{pricePrefix}</span>}
-            {formatPrice(price)}
-            {priceSuffix && <span className="text-xs font-normal text-muted-foreground ml-0.5">{priceSuffix}</span>}
+            {priceLabel !== undefined ? priceLabel : <>
+              {pricePrefix && <span className="text-xs font-normal text-muted-foreground mr-0.5">{pricePrefix}</span>}
+              {price !== undefined && formatPrice(price)}
+              {priceSuffix && <span className="text-xs font-normal text-muted-foreground ml-0.5">{priceSuffix}</span>}
+            </>}
           </p>
         )}
       </div>
-    </div>
-  );
+    </>;
+  if (href) return <Link to={href} state={navigationState} aria-label={title} className={cardClassName}>{content}</Link>;
+  return <div className={cardClassName} onClick={onClick} role={onClick ? 'button' : undefined}
+    aria-label={onClick ? title : undefined} tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? event => {
+      if (event.target === event.currentTarget && !event.repeat && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        onClick();
+      }
+    } : undefined}>{content}</div>;
 });

@@ -29,3 +29,8 @@ describe('buyer goal catalogue intent', () => {
     expect(readPropertySearchQuery(destination.searchParams).mode).toBe('buy');
   });
 });
+
+it('offers distinct existing resale and newbuild markets before the full sale catalogue', () => {
+  expect(GOAL_ENTRIES.buy.primary.slice(0, 2).map(link => link.path)).toEqual([APP_ROUTES.RESALE, APP_ROUTES.OFFPLAN]);
+  expect(GOAL_ENTRIES.buy.primary.find(link => link.path === APP_ROUTES.RESALE)?.ru).toBe('Вторичная недвижимость');
+});

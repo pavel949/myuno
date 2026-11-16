@@ -4,7 +4,7 @@ import '@/styles/public-commerce.css';
  * Nested routes via Outlet. Catalog + tabs live on /property/browse.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { propertySearchHref, readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
 import {
@@ -34,6 +34,7 @@ interface TabConfig {
   id: string;
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   icon: React.ElementType;
   path: string;
   authOnly?: boolean;
@@ -42,11 +43,12 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { id: 'catalogue', labelEn: 'All homes', labelRu: 'Все объекты', icon: Building2, path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=all` },
+  { id: 'catalogue', labelEn: 'All homes', labelRu: 'Все объекты', labelTh: 'ที่พักทั้งหมด', icon: Building2, path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=all` },
   {
     id: 'rent_short',
     labelEn: 'Nightly',
     labelRu: 'Посуточно',
+    labelTh: 'รายคืน',
     icon: CalendarClock,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`,
   },
@@ -54,6 +56,7 @@ const TABS: TabConfig[] = [
     id: 'rent_medium',
     labelEn: 'Monthly',
     labelRu: 'На месяц',
+    labelTh: 'รายเดือน',
     icon: CalendarRange,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`,
   },
@@ -61,6 +64,7 @@ const TABS: TabConfig[] = [
     id: 'rent_long',
     labelEn: 'Yearly',
     labelRu: 'Долгосрочно',
+    labelTh: 'ระยะยาว',
     icon: CalendarRange,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`,
   },
@@ -68,6 +72,7 @@ const TABS: TabConfig[] = [
     id: 'buy',
     labelEn: 'Buy',
     labelRu: 'Купить',
+    labelTh: 'ซื้อ',
     icon: ShoppingCart,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=buy`,
   },
@@ -75,6 +80,7 @@ const TABS: TabConfig[] = [
     id: 'newbuild',
     labelEn: 'New',
     labelRu: 'Новостройки',
+    labelTh: 'โครงการใหม่',
     icon: Building2,
     path: APP_ROUTES.OFFPLAN,
   },
@@ -82,6 +88,7 @@ const TABS: TabConfig[] = [
     id: 'resale',
     labelEn: 'Resale',
     labelRu: 'Вторичка',
+    labelTh: 'มือสอง',
     icon: ArrowRightLeft,
     path: APP_ROUTES.RESALE,
   },
@@ -89,6 +96,7 @@ const TABS: TabConfig[] = [
     id: 'quick_sale',
     labelEn: 'Quick Sale',
     labelRu: 'Срочно',
+    labelTh: 'ขายด่วน',
     icon: Zap,
     path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`,
     personaGated: ['investor', 'business'],
@@ -97,6 +105,7 @@ const TABS: TabConfig[] = [
     id: 'commercial',
     labelEn: 'Commercial',
     labelRu: 'Коммерция',
+    labelTh: 'เชิงพาณิชย์',
     icon: Briefcase,
     path: APP_ROUTES.COMMERCIAL,
     personaGated: ['business', 'investor'],
@@ -105,6 +114,7 @@ const TABS: TabConfig[] = [
     id: 'hotels',
     labelEn: 'Hotels',
     labelRu: 'Отели',
+    labelTh: 'โรงแรม',
     icon: Hotel,
     path: APP_ROUTES.HOTELS,
     personaGated: ['business', 'investor'],
@@ -113,6 +123,7 @@ const TABS: TabConfig[] = [
     id: 'land',
     labelEn: 'Land',
     labelRu: 'Земля',
+    labelTh: 'ที่ดิน',
     icon: Trees,
     path: APP_ROUTES.LAND,
     personaGated: ['business', 'investor'],
@@ -121,6 +132,7 @@ const TABS: TabConfig[] = [
     id: 'my',
     labelEn: 'My',
     labelRu: 'Мои',
+    labelTh: 'ของฉัน',
     icon: User,
     path: '/property/my',
     authOnly: true,
@@ -215,10 +227,22 @@ export function PropertyHubTabs() {
   const { personas } = useUserPersonas();
   const isRu = language === 'ru';
   const activeTab = getActiveTab(location.pathname, location.search);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const activeTabRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const tabs = tabsRef.current;
+    const active = activeTabRef.current;
+    if (!tabs || !active) return;
+    const frame = tabs.getBoundingClientRect();
+    const item = active.getBoundingClientRect();
+    // Reveal only the horizontal menu position; never move restored page scroll.
+    if (item.left < frame.left) tabs.scrollLeft += item.left - frame.left - 8;
+    else if (item.right > frame.right) tabs.scrollLeft += item.right - frame.right + 8;
+  }, [activeTab, location.pathname]);
 
   const isDetailPage =
     /^\/property\/[a-f0-9-]{36}/.test(location.pathname) ||
-    /^\/property\/(offplan|developers|invest|commercial|land)\/[a-f0-9-]/.test(location.pathname) ||
+    /^\/property\/(offplan|resale|developers|invest|commercial|land)\/[a-f0-9-]/.test(location.pathname) ||
     /^\/property\/project\//.test(location.pathname) ||
     /^\/property\/deposit-success/.test(location.pathname);
 
@@ -231,7 +255,7 @@ export function PropertyHubTabs() {
   );
 
   return (
-    <div className="property-hub-tabs flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2 bg-background border-b border-border/50 snap-x snap-mandatory">
+    <div ref={tabsRef} className="property-hub-tabs flex gap-1.5 overflow-x-auto scrollbar-hide px-3 py-2 bg-background border-b border-border/50 snap-x snap-mandatory" role="group" aria-label={isRu ? 'Разделы недвижимости' : language === 'th' ? 'หมวดหมู่อสังหาริมทรัพย์' : 'Property sections'}>
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -240,6 +264,8 @@ export function PropertyHubTabs() {
           <button
             key={tab.id}
             type="button"
+            ref={isActive ? activeTabRef : undefined}
+            aria-pressed={isActive}
             onClick={() => {
               if (tab.path.startsWith(`${APP_ROUTES.PROPERTY_BROWSE}?`)) {
                 const target = new URLSearchParams(tab.path.split('?')[1]);
@@ -259,7 +285,7 @@ export function PropertyHubTabs() {
             )}
           >
             <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="truncate">{isRu ? tab.labelRu : tab.labelEn}</span>
+            <span className="truncate">{isRu ? tab.labelRu : language === 'th' ? tab.labelTh ?? tab.labelEn : tab.labelEn}</span>
             {isPro && (
               <span
                 className={cn(

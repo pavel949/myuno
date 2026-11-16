@@ -60,6 +60,12 @@ export const GUEST_TOP_NAV: NavItem[] = [
   { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
 ];
 
+/** Desktop has a dedicated Experiences destination; mobile groups it under Services. */
+export function getActiveGuestTopNavItem(pathname: string): NavItem | null {
+  const direct = GUEST_TOP_NAV.find(item => pathname === item.path || pathname.startsWith(`${item.path}/`));
+  return direct ?? GUEST_TOP_NAV.find(item => isBottomBarItemActive(item, pathname)) ?? null;
+}
+
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */
 export const PRIMARY_NAV = NAV_BY_ROLE;
 

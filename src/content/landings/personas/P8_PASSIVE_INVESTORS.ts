@@ -15,13 +15,13 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     en: 'Transparent Phuket property investment',
   },
   subtitle: {
-    ru: 'ClearView™ рейтинг застройщика, реальный yield из PM-данных, налоговая структура — на одном экране. Без брокерских уловок и завышенных прогнозов.',
-    en: 'ClearView™ developer rating, real yield from PM data, tax structure, on one screen. No broker tricks or inflated forecasts.',
+    ru: 'Изучите опубликованные проекты, доступные оценки и документы. Условия, расходы и риски нужно проверить для конкретного предложения.',
+    en: 'Explore published projects, available assessments and documents. Check the terms, costs and risks of each offer.',
   },
   pains: [
     {
-      ru: 'Брокеры показывают 8% «гарантированной» доходности — реальная 4–6%.',
-      en: 'Brokers promise “guaranteed” 8% yield, reality is 4-6%.',
+      ru: 'Вы хотите проверить допущения в прогнозе дохода и связанные с ними риски.',
+      en: 'You want to review the assumptions and risks behind an income forecast.',
     },
     {
       ru: 'Не понятно, какой застройщик действительно достроит, а какой нет.',
@@ -76,15 +76,15 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       q: { ru: 'Какая реальная доходность кондо на Пхукете?', en: 'What’s the real yield of a Phuket condo?' },
       a: {
-        ru: 'STR (Airbnb-стиль) на 1BR в премиум-локации — 5–7% net. LTR (12 мес) — 3–5%. Цифры из PM Platform за 12+ мес, не из обещаний застройщика.',
-        en: 'STR (Airbnb-style) for 1BR in a prime location, 5-7% net. LTR (12 mo), 3-5%. Figures from PM Platform with 12+ mo of data, not developer promises.',
+        ru: 'Доходность зависит от объекта, загрузки, расходов и условий управления. Используйте проверяемые данные конкретного предложения; прогноз не гарантирует результат.',
+        en: 'Returns depend on the property, occupancy, costs and management terms. Use verifiable data for the specific offer; a forecast does not guarantee results.',
       },
     },
     {
       q: { ru: 'Что такое ClearView™ Full Report?', en: 'What is the ClearView™ Full Report?' },
       a: {
-        ru: '30+ страниц анализа застройщика по 8 категориям: финансы, юр-статус земли, история сдач, эскроу, локация, продукт, управление, exit. Стоимость ฿4,900, готовность 5 рабочих дней.',
-        en: '30+ pages of developer analysis across 8 categories: finance, land legal status, delivery history, escrow, location, product, management, exit. Cost ฿4,900, ready in 5 working days.',
+        ru: 'Уточните состав анализа, доступные исходные сведения, стоимость и срок подготовки конкретного отчёта. Заказ отчёта не заменяет юридическую проверку сделки.',
+        en: 'Confirm the analysis scope, available source information, cost and timing for the specific report. Ordering a report does not replace legal transaction review.',
       },
     },
     {
@@ -97,15 +97,15 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       q: { ru: 'Как защищены деньги до сдачи объекта?', en: 'How is money protected before completion?' },
       a: {
-        ru: 'Эскроу-счёт банка-партнёра. Возврат при срыве сроков застройщиком — по тайскому Condominium Act. Платежи привязаны к строительным вехам.',
-        en: 'Partner bank escrow. Refundable on developer delay per the Thai Condominium Act. Payments tied to construction milestones.',
+        ru: 'Условия оплаты, получатель, возможное эскроу и основания возврата зависят от договора. Проверьте документы и согласуйте механизм защиты средств с квалифицированным юристом до оплаты.',
+        en: 'Payment terms, recipient, any escrow and refund conditions depend on the contract. Review the documents and agree fund-protection arrangements with a qualified lawyer before paying.',
       },
     },
     {
       q: { ru: 'Какая комиссия myUNO для инвестора?', en: 'What is myUNO’s commission for the investor?' },
       a: {
-        ru: 'Инвестор не платит комиссию — она от застройщика (5–10% off-plan, 3–5% resale). Доплата только за ClearView Full Report (฿4,900) и Premium Tools (฿990/мес).',
-        en: 'The investor pays no commission, it comes from the developer (5-10% off-plan, 3-5% resale). Extra fees only for ClearView Full Report (฿4,900) and Premium Tools (฿990/mo).',
+        ru: 'Комиссии, стоимость отчётов и плательщик зависят от услуги и сделки. Подтвердите актуальные условия до заказа сопровождения или внесения денег.',
+        en: 'Fees, report costs and who pays depend on the service and transaction. Confirm current terms before ordering advice or paying.',
       },
     },
     {
@@ -131,8 +131,8 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
       en: 'Phuket property investment: ClearView™ rating, myUNO',
     },
     metaDescription: {
-      ru: 'Прозрачные инвестиции в кондо и виллы Пхукета. ClearView™ рейтинг застройщика, реальный yield из PM-данных, remote-buyer flow.',
-      en: 'Transparent Phuket condo and villa investing. ClearView™ developer rating, real PM-based yield, remote-buyer flow.',
+      ru: 'Кондо и виллы Пхукета: опубликованные проекты, доступные оценки и проверка документов. Условия и риски обсуждаются для конкретного предложения.',
+      en: 'Phuket condos and villas: published projects, available assessments and document review. Discuss the terms and risks of each offer.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/passive-investors',

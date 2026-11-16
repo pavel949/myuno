@@ -17,6 +17,7 @@ interface UnifiedHeaderProps {
   badge?: ReactNode;
   showBack?: boolean;
   fallbackPath?: string;
+  onBack?: () => void;
   searchPlaceholder?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
@@ -35,6 +36,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   badge,
   showBack = true,
   fallbackPath = '/',
+  onBack,
   searchPlaceholder = 'Search...',
   searchValue,
   onSearchChange,
@@ -57,7 +59,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-2">
           {showBack && (
-            <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />
+            <BackButton fallbackPath={fallbackPath} onClick={onBack} variant="ghost" size="sm" />
           )}
           
           <div className="flex-1 min-w-0">

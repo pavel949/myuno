@@ -46,11 +46,11 @@ it.each(['ForManagementCompanies', 'ForLocalServices'])('%s owns one explicit fr
   expect(text).toContain("const isRu = language === 'ru'");
 });
 
-it('retains MC pricing, trial queries and section destinations', () => {
+it('retains guarded company setup and section destinations without unverified billing promises', () => {
   const text = source('ForManagementCompanies');
-  for (const value of [125, 375, 1250]) expect(text).toContain(`priceUsd: ${value}`);
-  expect(text).toContain('/auth?redirect=/mc/onboarding&trial=true');
-  expect(text).toContain("'/auth?redirect=/mc/onboarding&trial=true&tier=' + tier.id");
+  expect(text).not.toMatch(/priceUsd:|trial=true|tier=|14.day free trial/);
+  expect(text).toContain('/auth?redirect=/mc/onboarding');
+  expect(text).toContain('APP_ROUTES.MC');
   expect(text).toContain('id="pricing"');
   expect(text).toContain('id={`module-${m.id}`}');
   expect(text).toContain('href={`#module-${m.id}`}');

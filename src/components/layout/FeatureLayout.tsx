@@ -60,6 +60,7 @@ export interface MiniAppLayoutProps {
   title: string;
   subtitle?: string;
   fallbackPath?: string;
+  onBack?: () => void;
   headerActions?: ReactNode;
   heroIcon?: LucideIcon;
   heroTitle?: string;
@@ -135,6 +136,7 @@ function MiniappMode({
   title,
   subtitle,
   fallbackPath = '/',
+  onBack,
   headerActions,
   heroIcon,
   heroTitle,
@@ -360,6 +362,7 @@ function MiniappMode({
           subtitle={subtitle}
           showBack
           fallbackPath={fallbackPath}
+          onBack={onBack}
           searchPlaceholder={searchPlaceholder}
           searchValue={showSearch ? searchValue : undefined}
           onSearchChange={showSearch && onSearchChange ? onSearchChange : undefined}

@@ -5,7 +5,6 @@
  * data source never crashes the hub.
  */
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useFeaturedProperties } from '@/hooks/useProperties';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
 import { useResaleProperties } from '@/hooks/useResaleProperties';
@@ -61,7 +60,6 @@ export function OffplanFeaturedRow({ t }: { t: TFn }) {
 }
 
 export function ResaleFeaturedRow({ t }: { t: TFn }) {
-  const navigate = useNavigate();
   const { data = [], isLoading } = useResaleProperties();
   const items = data.slice(0, HUB_LIMIT);
 
@@ -82,7 +80,6 @@ export function ResaleFeaturedRow({ t }: { t: TFn }) {
         <ResalePropertyCard
           key={property.id}
           property={property}
-          onClick={() => navigate(APP_ROUTES.RESALE_DETAIL(property.id))}
         />
       ))}
     </FeaturedRow>

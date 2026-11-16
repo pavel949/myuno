@@ -26,7 +26,7 @@ export const P22_FREELANCERS: PersonaLanding = {
   ],
   faq: [
     { q: { ru: 'Нужно ли быть юр.лицом?', en: 'Do I need a registered company?' }, a: { ru: 'Нет — фрилансеры работают как self-employed, нужен только work permit или соответствующая виза.', en: 'No, freelancers work as self-employed; only work permit or matching visa is required.' } },
-    { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Регистрация бесплатна. Платформа берёт стандартную комиссию с выполненных заказов — актуальная ставка на /vendor/billing.', en: 'Sign-up is free. The platform charges its standard commission on completed orders, current rate on /vendor/billing.' } },
+    { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Условия размещения, комиссии и расчётов нужно подтвердить для вашей услуги до начала работы.', en: 'Confirm listing, fee and settlement terms for your service before work begins.' } },
   ],
   primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application', th: 'เริ่มสมัครเป็นผู้ให้บริการ' }, href: '/vendor/onboarding' },
   secondaryCta: { label: { ru: 'Открыть объявления', en: 'Browse listings' }, href: '/classifieds' },

@@ -29,7 +29,7 @@ export const P03_LONG_STAY_TOURIST: PersonaLanding = {
     { slug: 'monthly-rental', label: { ru: 'Аренда по месяцам', en: 'Monthly rental' }, oneLiner: { ru: 'Кондо и виллы 30/60/90 дней с защитой депозита.', en: 'Condos and villas 30/60/90 days, deposit-protected.' }, href: '/property?intent=rent-month' },
     { slug: 'sim-start', label: { ru: 'Тайская SIM', en: 'Thai SIM' }, oneLiner: { ru: 'AIS / TrueMove от ฿299, 30 дней.', en: 'AIS / TrueMove from ฿299, 30 days.' }, href: '/sim' },
     { slug: 'travel-insurance', label: { ru: 'Страховка на месяцы', en: 'Multi-month insurance' }, oneLiner: { ru: 'От ฿4 500/мес, с эвакуацией.', en: 'From ฿4,500/month, with evacuation.' }, href: '/insurance' },
-    { slug: 'exchange', label: { ru: 'Выгодный обмен', en: 'FX exchange' }, oneLiner: { ru: 'Курс лучше банковского, без скрытых комиссий.', en: 'Better than bank rate, no hidden fees.' }, href: '/exchange' },
+    { slug: 'exchange', label: { ru: 'Выгодный обмен', en: 'FX exchange' }, oneLiner: { ru: 'Уточните актуальный курс, комиссии и условия обмена.', en: 'Check the current rate, fees and exchange terms.' }, href: '/exchange' },
     { slug: 'area-guide', label: { ru: 'Гид по районам', en: 'Area guide' }, oneLiner: { ru: 'Бангтао, Раваи, Чалонг — что подходит вам.', en: 'Bang Tao, Rawai, Chalong — what fits you.' }, href: '/area' },
   ],
   faq: [

@@ -1,7 +1,7 @@
 /**
  * @file PersonaDirectoryPage.tsx
  * @route /for
- * @description Hub directory of all 26 live persona landings, grouped by intent.
+ * @description Hub directory of published persona landings, grouped by intent.
  *
  * Visitors arriving from search, ads, or onboarding "I am ..." choices land here
  * to find the page tailored for them. Every card → `/for/:slug`, themed via
@@ -38,19 +38,25 @@ const GROUPS: Group[] = [
     id: 'travel',
     titleRu: 'Гости и путешественники',
     titleEn: 'Guests & travellers',
-    slugs: ['tourists', 'eu-guests', 'cn-investors', 'mn-investors', 'snowbirds', 'medical', 'weddings', 'athletes', 'students'],
+    slugs: ['tourists', 'eu-guests', 'long-stay', 'snowbirds', 'medical', 'weddings', 'athletes', 'students'],
   },
   {
     id: 'settle',
     titleRu: 'Жить и обустроиться',
     titleEn: 'Live & settle in',
-    slugs: ['ru-expats', 'digital-nomads', 'families', 'retirees', 'pet-owners', 'creatives'],
+    slugs: ['ru-expats', 'digital-nomads', 'families', 'relocator-family', 'relocator-solo', 'returnee', 'employee-expat', 'retirees', 'pet-owners', 'creatives'],
   },
   {
     id: 'invest',
     titleRu: 'Инвестировать',
     titleEn: 'Invest',
-    slugs: ['passive-investors', 'hnw', 'operators', 'bn-business'],
+    slugs: ['cn-investors', 'mn-investors', 'passive-investors', 'hnw', 'operators', 'bn-business'],
+  },
+  {
+    id: 'owners',
+    titleRu: 'Собственники недвижимости',
+    titleEn: 'Property owners',
+    slugs: ['property-owner'],
   },
   {
     id: 'lifestyle',
@@ -88,8 +94,8 @@ export default function PersonaDirectoryPage() {
     ? 'Подбор по аудитории — myUNO'
     : 'Find your page, myUNO';
   const metaDescription = isRu
-    ? '26 страниц для разных жителей и гостей Пхукета: туристы, инвесторы, семьи, номады, halal, vegan, питомцы и другие.'
-    : '26 tailored pages for Phuket residents and guests: tourists, investors, families, nomads, halal, vegan, pets and more.';
+    ? `${liveBySlug.size} страниц для жителей и гостей Пхукета: туристы, инвесторы, семьи, собственники и партнёры.`
+    : `${liveBySlug.size} tailored pages for Phuket residents and guests: tourists, investors, families, owners and partners.`;
 
   return (
     <AppLayout>
@@ -117,8 +123,8 @@ export default function PersonaDirectoryPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-base text-muted-foreground">
             {t(
-              '26 страниц с пользой и услугами под конкретную аудиторию — выберите свою или ту, что описывает вашу ситуацию ближе всего.',
-              '26 tailored pages with services for specific audiences, pick yours or the one that fits you best.',
+              `${liveBySlug.size} страниц для разных задач — выберите свою роль или ситуацию.`,
+              `${liveBySlug.size} pages for different needs — choose your role or situation.`,
             )}
           </p>
         </LandingContainer>

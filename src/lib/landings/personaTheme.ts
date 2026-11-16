@@ -20,26 +20,26 @@ export interface PersonaTheme {
   colorAccent: string;
   /** Tagline shown above H1 in the hero. */
   tagline: { ru: string; en: string };
-  /** Trust strip: 3 short proof points. */
+  /** Three short process or orientation points; factual proof needs a verified source. */
   proof: Array<{ ru: string; en: string }>;
 }
 
 const PROOF_DEFAULT = [
-  { ru: '4.9★ из 1 200+ отзывов', en: '4.9★ across 1,200+ reviews' },
-  { ru: '24/7 поддержка RU/EN', en: '24/7 RU/EN support' },
-  { ru: 'Прозрачные цены, без комиссий', en: 'Transparent pricing, no hidden fees' },
+  { ru: 'Начните с вашей задачи', en: 'Start with your goal' },
+  { ru: 'Проверьте условия до подтверждения', en: 'Review terms before confirming' },
+  { ru: 'Обсудите следующий шаг с командой', en: 'Discuss the next step with the team' },
 ];
 
 export const PERSONA_THEME: Record<string, PersonaTheme> = {
   tourists:           { icon: Plane,         color: 'cluster-arrive',  colorAccent: 'accent-cyan',   tagline: { ru: 'Для туристов', en: 'For tourists' },                proof: PROOF_DEFAULT },
   snowbirds:          { icon: Sun,           color: 'accent-amber',    colorAccent: 'accent-coral',  tagline: { ru: 'Для зимовщиков', en: 'For snowbirds' },             proof: PROOF_DEFAULT },
   'ru-expats':        { icon: Home,          color: 'cluster-live',    colorAccent: 'accent-purple', tagline: { ru: 'Для русскоязычных экспатов', en: 'For RU-speaking expats' }, proof: PROOF_DEFAULT },
-  'passive-investors':{ icon: TrendingUp,    color: 'cluster-invest',  colorAccent: 'accent-cyan',   tagline: { ru: 'Для инвесторов', en: 'For investors' },             proof: [{ ru: 'ClearView™ AAA–CCC', en: 'ClearView™ AAA–CCC' }, { ru: 'Yield 5–8% в год', en: '5–8% annual yield' }, { ru: '300+ проектов в базе', en: '300+ projects tracked' }] },
+  'passive-investors':{ icon: TrendingUp,    color: 'cluster-invest',  colorAccent: 'accent-cyan',   tagline: { ru: 'Для инвесторов', en: 'For investors' },             proof: [{ ru: 'Изучите документы', en: 'Review the documents' }, { ru: 'Сравните предложения', en: 'Compare the offers' }, { ru: 'Проверьте допущения и риски', en: 'Check assumptions and risks' }] },
   hnw:                { icon: Crown,         color: 'accent-amber',    colorAccent: 'cluster-invest',tagline: { ru: 'HNW · UHNW', en: 'HNW · UHNW' },                    proof: [{ ru: 'Off-market шорт-листы', en: 'Off-market shortlists' }, { ru: 'Private banking партнёры', en: 'Private banking partners' }, { ru: 'NDA по умолчанию', en: 'NDA by default' }] },
   operators:          { icon: Briefcase,     color: 'cluster-manage',  colorAccent: 'cluster-invest',tagline: { ru: 'Owner-Operators', en: 'Owner-Operators' },          proof: PROOF_DEFAULT },
   'mn-investors':     { icon: Coins,         color: 'accent-amber',    colorAccent: 'cluster-invest',tagline: { ru: 'Для инвесторов из Монголии', en: 'For Mongolian investors' }, proof: PROOF_DEFAULT },
   'pet-owners':       { icon: PawPrint,      color: 'accent-coral',    colorAccent: 'cluster-live',  tagline: { ru: 'С питомцем', en: 'With pets' },                     proof: PROOF_DEFAULT },
-  'developer-partner':{ icon: Building2,     color: 'cluster-build',   colorAccent: 'accent-purple', tagline: { ru: 'Застройщикам', en: 'For developers' },              proof: [{ ru: '500+ верифицированных лидов/мес', en: '500+ verified leads/month' }, { ru: 'ClearView™ сертификация', en: 'ClearView™ certification' }, { ru: 'CRM для девелоперов', en: 'Developer CRM' }] },
+  'developer-partner':{ icon: Building2,     color: 'cluster-build',   colorAccent: 'accent-purple', tagline: { ru: 'Застройщикам', en: 'For developers' },              proof: [{ ru: 'Подготовьте материалы проекта', en: 'Prepare project materials' }, { ru: 'Подайте заявку', en: 'Submit an application' }, { ru: 'Дождитесь проверки', en: 'Await review' }] },
   'digital-nomads':   { icon: Laptop,        color: 'success',         colorAccent: 'accent-cyan',   tagline: { ru: 'Для номадов', en: 'For nomads' },                   proof: PROOF_DEFAULT },
   families:           { icon: Baby,          color: 'accent-purple',   colorAccent: 'accent-coral',  tagline: { ru: 'Для семей с детьми', en: 'For families' },          proof: PROOF_DEFAULT },
   medical:            { icon: Stethoscope,   color: 'destructive',     colorAccent: 'accent-cyan',   tagline: { ru: 'Медицинский туризм', en: 'Medical tourism' },       proof: PROOF_DEFAULT },

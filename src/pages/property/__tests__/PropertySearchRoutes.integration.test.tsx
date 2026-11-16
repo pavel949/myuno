@@ -506,3 +506,13 @@ describe('one residential results surface', () => {
   });
 
 });
+
+it('explains both purchase markets on the actual homepage Buy destination, keeping rental intent separate', () => {
+  const view = mount('/property/search?mode=buy&district=layan');
+  expect(screen.getByRole('navigation', { name: 'Property market' })).toBeVisible();
+  expect(screen.getByRole('link', { name: /Resale & assignments/ })).toHaveAttribute('href', '/property/resale');
+  expect(screen.getByRole('link', { name: /New projects/ })).toHaveAttribute('href', '/property/offplan');
+  view.unmount();
+  mount('/property/search?mode=rent');
+  expect(screen.queryByRole('navigation', { name: 'Property market' })).not.toBeInTheDocument();
+});
