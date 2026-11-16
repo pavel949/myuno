@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+/** Source usage inventory, explicitly not visual, role, route or runtime acceptance. */
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import ts from 'typescript';
+import { pathToFileURL } from 'node:url';
+const names = new Set(['PageShell','PageContainer','PageHeader','PageSection','SectionHeader','UnifiedSectionHeader','SectionTitle','SectionCard','Button','Card','Input','Textarea','SelectTrigger','Table','Tabs','Dialog','Sheet','Drawer','DropdownMenu','EmptyState','LoadingState','StatusPill']);
+export function scanPrimitiveImports(file, text) {
+ const ast=ts.createSourceFile(file,text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),bindings=new Map(),usage=new Map();
+ for(const node of ast.statements){if(!ts.isImportDeclaration(node)||!ts.isStringLiteral(node.moduleSpecifier))continue;const source=node.moduleSpecifier.text;if(!source.startsWith('@/components/'))continue;const imports=node.importClause?.namedBindings;if(!imports||!ts.isNamedImports(imports))continue;for(const item of imports.elements){const name=(item.propertyName??item.name).text;if(names.has(name))bindings.set(item.name.text,{name,source});}}
+ function visit(node){if(ts.isJsxOpeningElement(node)||ts.isJsxSelfClosingElement(node)){const binding=bindings.get(node.tagName.getText(ast));if(binding){const key=binding.name+'|'+binding.source;const row=usage.get(key)??{...binding,instances:0,lines:[]};row.instances++;row.lines.push(ast.getLineAndCharacterOfPosition(node.getStart()).line+1);usage.set(key,row);}}ts.forEachChild(node,visit);}visit(ast);
+ return [...usage.values()].sort((a,b)=>a.name.localeCompare(b.name));
+}
+function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?e.name==='__tests__'?[]:walk(path.join(dir,e.name)):e.name.endsWith('.tsx')&&!/\.(test|spec|stories)\.tsx$/.test(e.name)?[path.join(dir,e.name)]:[]);}
+export function buildAdoptionRegister(root) {
+ const routeRegister=JSON.parse(fs.readFileSync(path.join(root,'docs/design-system/route-surface-register.json'),'utf8'));
+ const routeModules=new Map();for(const route of routeRegister.routes){for(const ref of [...route.templateRefs,...(route.conditionalTemplateRefs??[])]){const mod=routeRegister.catalogs.templates[ref]?.module;if(!mod)continue;const key=mod.replace(/\.(tsx?|jsx?)$/,'');const values=routeModules.get(key)??[];values.push({id:route.id,path:route.path,actor:route.actor,kind:route.kind});routeModules.set(key,values);}}
+ const consumers=[];for(const absolute of walk(path.join(root,'src'))){const file=path.relative(root,absolute).replaceAll('\\','/'),text=fs.readFileSync(absolute,'utf8'),primitives=scanPrimitiveImports(file,text);if(!primitives.length)continue;consumers.push({file,sha256:crypto.createHash('sha256').update(text).digest('hex'),directRouteDeclarations:routeModules.get(file.replace(/\.tsx$/,''))??[],runtime:'NOTTESTED',visual:'NOTTESTED',primitiveImports:primitives});}
+ const families={};for(const row of consumers)for(const p of row.primitiveImports){const family=families[p.name]??{directConsumerFiles:0,sourceInstances:0};family.directConsumerFiles++;family.sourceInstances+=p.instances;families[p.name]=family;}
+ return{schemaVersion:1,status:'SOURCE_ONLY_NOTTESTED',scope:'pavel949/myuno, active-route declarations plus explicit source JSX consumers',routeSummary:routeRegister.summary,templateCatalogEntries:Object.keys(routeRegister.catalogs.templates).length,limitations:['Route declarations are not unique screens','Direct named JSX imports only; namespace/barrel indirection and programmatic construction can be missed','Direct route module links do not establish authorization, execution or transitive component adoption','All per-consumer visual/runtime states remain NOTTESTED; component-fixture evidence is maintained separately','Dense tables, calendars, maps and unavailable actions require domain-specific review'],families,consumers};
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){const root=process.cwd(),target=path.join(root,'docs/design-system/primitive-adoption-register.json'),result=buildAdoptionRegister(root);const rendered=JSON.stringify(result,null,2)+'\n';if(process.argv.includes('--check')){if(!fs.existsSync(target)||fs.readFileSync(target,'utf8')!==rendered){console.error('Primitive adoption register is stale. Regenerate with node scripts/design-system-adoption-register.mjs');process.exitCode=1;}}else fs.writeFileSync(target,rendered);console.log(JSON.stringify({file:path.relative(root,target),consumerFiles:result.consumers.length,families:Object.keys(result.families).length,status:result.status}));}

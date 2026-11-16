@@ -21,6 +21,8 @@ interface PageShellProps {
   children: ReactNode;
   width?: PageWidth;
   className?: string;
+  /** Own vertical section gaps, including compact theme scaling; preserves child identity. */
+  stack?: 'default' | 'compact';
   /** Remove the default bottom-nav clearance (use when page renders its own footer/CTA bar) */
   noBottomPad?: boolean;
 }
@@ -37,6 +39,7 @@ export function PageShell({
   children,
   width = 'default',
   className,
+  stack,
   noBottomPad = false,
 }: PageShellProps) {
   return (
@@ -49,6 +52,8 @@ export function PageShell({
         // bottom-nav clearance on mobile
         !noBottomPad && 'ds-page-with-navigation',
         widthClass[width],
+        stack && 'ds-section-stack',
+        stack === 'compact' && 'ds-section-stack--compact',
         'min-w-0 overflow-x-hidden',
         className,
       )}

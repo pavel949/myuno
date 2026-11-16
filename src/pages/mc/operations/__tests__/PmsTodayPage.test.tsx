@@ -35,6 +35,16 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
       expect(screen.getByTestId('route-boundary')).toHaveTextContent(path);
     }
   });
+  it('uses the shared page header and retains the named operational navigation', () => {
+    mount();
+    const header = screen.getByRole('heading', { level: 1, name: language === 'ru' ? 'Сегодня' : 'Today' }).closest('header')!;
+    expect(header).toHaveClass('ds-section');
+    expect(within(header).getByText(/ · (Phuket|Пхукет)$/)).toBeVisible();
+    const navigation = within(header).getByRole('navigation', { name: language === 'ru' ? 'Навигация по операциям' : 'Operational navigation' });
+    expect(within(navigation).getAllByRole('link')).toHaveLength(2);
+    fireEvent.click(within(navigation).getByRole('button', { name: language === 'ru' ? 'Обновить' : 'Refresh' }));
+    expect(mocks.refetch).toHaveBeenCalledOnce();
+  });
   it('loading exposes no booking/request actions', () => {
     mocks.scenario = 'loading'; mount();
     expect(screen.getByRole('status', { name: language === 'ru' ? 'Загрузка сведений на сегодня' : 'Loading today’s data' })).toBeInTheDocument();

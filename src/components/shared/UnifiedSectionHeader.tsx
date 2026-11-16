@@ -1,11 +1,9 @@
-import React, { memo, forwardRef, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, LucideIcon } from 'lucide-react';
+import React, { memo, forwardRef, type ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ds/SectionHeader';
 import { cn } from '@/lib/utils';
 import { resolveIcon } from '@/lib/iconMap';
-
 interface UnifiedSectionHeaderProps {
   icon?: LucideIcon;
   iconEmoji?: string;
@@ -19,80 +17,15 @@ interface UnifiedSectionHeaderProps {
   className?: string;
   children?: ReactNode;
 }
-
+/** Compatibility adapter: routing remains a link; imperative actions remain buttons. */
 export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSectionHeaderProps>(function UnifiedSectionHeader({
-  icon: Icon,
-  iconEmoji,
-  iconImage,
-  iconColor = 'text-primary',
-  title,
-  count,
-  viewAllPath,
-  viewAllLabel = 'All',
-  onViewAll,
-  className,
-  children,
+  icon: Icon, iconEmoji, iconImage, iconColor = 'text-primary', title, count, viewAllPath,
+  viewAllLabel = 'All', onViewAll, className, children,
 }, ref) {
-  const navigate = useNavigate();
-
-  const handleViewAll = () => {
-    if (onViewAll) {
-      onViewAll();
-    } else if (viewAllPath) {
-      navigate(viewAllPath);
-    }
-  };
-
-  const showViewAll = viewAllPath || onViewAll;
-
-  return (
-    <div ref={ref} className={cn("flex items-center justify-between mb-4", className)}>
-      <div className="flex items-center gap-2 min-w-0">
-        {/* Icon variants */}
-        {iconImage ? (
-          <img 
-            src={iconImage} 
-            alt="" 
-            className="w-10 h-10 rounded-none object-cover shrink-0"
-          />
-        ) : iconEmoji ? (
-          (() => {
-            const ResolvedIcon = resolveIcon(iconEmoji);
-            return (
-              <div className="w-10 h-10 rounded-none bg-muted/50 flex items-center justify-center shrink-0">
-                <ResolvedIcon className="w-5 h-5 text-primary" />
-              </div>
-            );
-          })()
-        ) : Icon ? (
-          <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
-            <Icon className={cn("w-5 h-5", iconColor)} />
-          </div>
-        ) : null}
-        
-        <div className="min-w-0">
-          <h2 className="text-lg font-bold truncate">{title}</h2>
-          {children}
-        </div>
-        
-        {count !== undefined && count > 0 && (
-          <Badge variant="secondary" className="text-xs shrink-0">
-            {count}
-          </Badge>
-        )}
-      </div>
-      
-      {showViewAll && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-primary gap-1 shrink-0"
-          onClick={handleViewAll}
-        >
-          {viewAllLabel}
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      )}
-    </div>
-  );
+  const ResolvedIcon = iconEmoji ? resolveIcon(iconEmoji) : Icon;
+  const leading = iconImage ? <img src={iconImage} alt="" className="w-10 h-10 rounded-none object-cover shrink-0" /> : ResolvedIcon ? <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center shrink-0"><ResolvedIcon className={cn('ds-section-leading-icon', iconColor)} aria-hidden="true" /></div> : undefined;
+  const action = onViewAll ? { label: viewAllLabel, onClick: onViewAll } : viewAllPath ? { label: viewAllLabel, to: viewAllPath } : undefined;
+  return <SectionHeader ref={ref} title={title} leading={leading} size="lg" density="workspace" action={action}
+    badge={count !== undefined && count > 0 ? <Badge variant="secondary" className="text-xs shrink-0">{count}</Badge> : undefined}
+    className={cn('ds-section-header-with-content', className)}>{children}</SectionHeader>;
 }));

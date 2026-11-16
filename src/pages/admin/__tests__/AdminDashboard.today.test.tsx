@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import AdminDashboard from '../AdminDashboard';
@@ -46,6 +46,19 @@ describe('platform Today workspace', () => {
     expect(screen.getByRole('link', { name: /Partner applications/ })).toHaveAttribute('href', '/admin/partner-applications?status=pending');
     expect(screen.queryByText('No matching work queues')).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Manual payment review/ })).not.toBeInTheDocument();
+  });
+  it('uses the shared page header while retaining subtitle, refresh and live freshness', () => {
+    mount();
+    const header = screen.getByRole('heading', { level: 1, name: 'Today' }).closest('header')!;
+    expect(header).toHaveClass('ds-section');
+    expect(within(header).getByText('Platform overview · Phuket time')).toBeVisible();
+    expect(within(header).getByRole('button', { name: 'Refresh' })).toBeEnabled();
+    expect(within(header).getByRole('status')).toHaveAttribute('data-testid', 'dashboard-freshness');
+  });
+  it('retains disabled refresh while source reads are in flight', () => {
+    mocks.stats.mockReturnValue({ data: stats(), isLoading: false, isFetching: true });
+    mount();
+    expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled();
   });
   it('keeps unavailable source and stale freshness explicit without discarding other queues', () => {
     const data = stats(); data.openTickets = null; data.sourceErrors.openTickets = 'unavailable'; data.sourceUpdatedAt.pendingOrders = Date.now() - 120000;
