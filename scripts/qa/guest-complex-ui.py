@@ -78,8 +78,8 @@ async def main():
                         await expect(page.get_by_role('button',name='Воспроизвести видео' if ru else 'Play video', exact=True)).to_have_count(0)
                     else:
                         unit = page.get_by_role('link',name='Апартаменты с видом на сад' if ru else 'Garden apartment',exact=True)
-                        # The keyboard-operable card and its title expose the same name.
-                        await expect(unit).to_have_count(2)
+                        # The current card exposes one named title anchor; no duplicate container link.
+                        await expect(unit).to_have_count(1)
                         title_link = unit.and_(page.locator('a'))
                         await expect(title_link).to_have_count(1)
                         await expect(title_link).to_have_attribute('href', '/property/dual-unit?mode=buy')
