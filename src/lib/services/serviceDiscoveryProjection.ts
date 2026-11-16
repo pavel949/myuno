@@ -40,10 +40,16 @@ export function serviceDiscoverySituations(categories: CategoryEntry[], situatio
 export function serviceDiscoveryMenu(categories: CategoryEntry[]) {
   const available = serviceDiscoveryCategories(categories);
   const home = available.find(category => isHomeServiceCategoryId(category.id));
-  const primary = [home, ...['cat-transport', 'cat-tourism'].map(id => available.find(category => category.id === id))]
+  // Keep the full returned public category map visible at the first step. Only the
+  // specialist emergency directory is progressively disclosed; legal/health/
+  // family services must not require discovering an "all categories" control.
+  const order = ['cat-transport', 'cat-business-legal', 'cat-health-wellness', 'cat-family-kids',
+    'cat-pet-services', 'cat-food-delivery', 'cat-tourism', 'cat-leisure', 'cat-finance'];
+  const rank = (id: string) => { const index = order.indexOf(id); return index < 0 ? order.length : index; };
+  const primary = [home, ...available.filter(category => category !== home && category.id !== 'cat-emergency')
+    .sort((a, b) => rank(a.id) - rank(b.id))]
     .filter((category): category is CategoryEntry => Boolean(category));
-  const more = available.filter(category => !primary.some(item => item.id === category.id))
-    .sort((a, b) => Number(a.id === 'cat-emergency') - Number(b.id === 'cat-emergency'));
+  const more = available.filter(category => category.id === 'cat-emergency');
   const yacht = available.flatMap(category => category.services).find(service => service.id === 'yacht');
   return { primary, more, yacht };
 }

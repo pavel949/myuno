@@ -96,3 +96,15 @@ it('returns to the complete global search query and category after a reload', ()
 it.each(['/search/../../admin', '/search/private', '/search%0a'])('rejects non-canonical global search origin %s', href => {
   expect(readPublicJourneyOrigin({ publicJourneyOrigin: { href, key: 'x' } })).toBeUndefined();
 });
+
+
+describe('experience catalogue return', () => {
+  it('preserves type, category, search, sorting and anchor without admitting private return routes', () => {
+    const catalogue = { pathname: '/experiences', search: '?type=tour&category=islands&q=sea&sort=price_asc', hash: '#offers', key: 'experience-list' };
+    const detail = { pathname: '/experiences/synthetic', search: '', hash: '', key: 'experience-detail', state: publicJourneyState(catalogue) };
+    expect(publicJourneyReturn(detail, '/experiences')).toEqual({ href: catalogue.pathname + catalogue.search + catalogue.hash, replace: true, state: undefined });
+  });
+  it.each(['/admin', '/vendor', '/experiences/../../admin', '/experiences/%2e%2e/admin', '//outside.invalid', '/experiences/%5c%5coutside.invalid'])('rejects unsafe experience return %s', href => {
+    expect(publicJourneyReturn({ pathname: '/experiences/synthetic', search: '', hash: '', key: 'detail', state: { publicJourneyOrigin: { href, key: 'source' } } }, '/experiences')).toEqual({ href: '/experiences', replace: true, state: undefined });
+  });
+});

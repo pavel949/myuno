@@ -41,20 +41,20 @@ const META: Record<SurfaceSlug, { titleRu: string; titleEn: string; descRu: stri
   invest: {
     titleRu: 'Инвестиции в Пхукет — недвижимость, бизнес, capital',
     titleEn: 'Invest in Phuket — real estate, business, capital',
-    descRu: 'Off-plan и готовая недвижимость, ClearView-рейтинг, due diligence, capital-сделки $2M+. Прозрачная доходность 6–9% годовых.',
-    descEn: 'Off-plan and resale property, ClearView ratings, due diligence, $2M+ capital deals. Transparent 6–9% net yield.',
+    descRu: 'Опубликованные проекты и готовая недвижимость, доступные оценки и проверка документов. Условия и риски обсуждаются по конкретному предложению.',
+    descEn: 'Published projects and resale property, available assessments and document review. Discuss the terms and risks of each opportunity.',
   },
   legal: {
     titleRu: 'Юридические услуги на Пхукете — виза, компания, споры',
     titleEn: 'Legal services in Phuket — visa, company, disputes',
-    descRu: 'Виза и иммиграция, открытие тайской компании, семейное право, налоги, страховые споры. Юристы RU+EN, фиксированные цены.',
-    descEn: 'Visa and immigration, Thai company setup, family law, tax, insurance disputes. EN+RU lawyers, fixed pricing.',
+    descRu: 'Виза и иммиграция, компания, семейное право, налоги и споры. Обсудите необходимые документы и условия помощи по вашему вопросу.',
+    descEn: 'Visa and immigration, company, family law, tax and disputes. Discuss the documents and support terms for your question.',
   },
   build: {
     titleRu: 'Строительство виллы на Пхукете — земля, подрядчик, сдача',
     titleEn: 'Build a villa in Phuket — land, contractor, handover',
-    descRu: 'Подбор земли, титул, архитектор, подрядчик, надзор, сдача и управление. Прозрачный цикл с эскроу по этапам.',
-    descEn: 'Land plot, title, architect, contractor, supervision, handover and management. Transparent cycle with milestone escrow.',
+    descRu: 'Земля, документы, проект, подрядчик и приёмка. Согласуйте задачи, необходимые проверки и условия каждого этапа.',
+    descEn: 'Land, documents, design, contractor and handover. Agree the scope, required checks and terms for each stage.',
   },
 };
 

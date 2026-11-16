@@ -1,0 +1,132 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import ResaleIndex from '../ResaleIndex';
+import ResaleDetail from '../ResaleDetail';
+
+const state = vi.hoisted(() => ({
+  language: 'en', failed: false, detailFailed: false, loading: false,
+  filters: {} as Record<string, unknown>, retry: vi.fn(),
+  properties: [] as Record<string, unknown>[],
+}));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
+vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (amount: number) => `THB ${amount}` }) }));
+vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'THB' } }) }));
+vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
+vi.mock('@/components/leads/UniversalLeadForm', () => ({ UniversalLeadForm: () => null }));
+vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: () => null }));
+vi.mock('@/hooks/useResaleProperties', () => ({
+  useResaleProperties: (filters: Record<string, unknown>) => {
+    state.filters = filters;
+    return { data: state.properties, isError: state.failed, isLoading: state.loading, refetch: state.retry };
+  },
+  useResaleProperty: (id: string) => ({ data: state.properties.find(item => item.id === id), isError: state.detailFailed, isLoading: false, refetch: state.retry }),
+}));
+
+function Trace() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  return <><output data-testid="location">{location.pathname + location.search + location.hash}</output><button onClick={() => navigate(-1)}>History back</button></>;
+}
+function mount(path = '/property/resale') {
+  return render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property/resale" element={<ResaleIndex />} /><Route path="/property/resale/:id" element={<ResaleDetail />} /></Routes><Trace /></MemoryRouter>);
+}
+function choose(label: string, value: string | RegExp) {
+  fireEvent.keyDown(screen.getByRole('combobox', { name: label }), { key: 'Enter' });
+  fireEvent.click(screen.getByRole('option', { name: value }));
+}
+const location = () => new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+
+beforeEach(() => {
+  state.language = 'en'; state.failed = false; state.detailFailed = false; state.loading = false; state.retry.mockClear();
+  state.properties = [{ id: 'unit', title: 'Garden resale', title_ru: 'Вторичная квартира', asking_price: 6000000, currency: 'THB', zone: 'Rawai', property_type: 'condo', media: [], title_type: 'freehold', condition: 'good' }];
+  Element.prototype.hasPointerCapture = vi.fn(() => false); Element.prototype.setPointerCapture = vi.fn(); Element.prototype.releasePointerCapture = vi.fn(); Element.prototype.scrollIntoView = vi.fn();
+});
+afterEach(cleanup);
+
+describe('resale catalogue journey', () => {
+  it('hydrates shared area/type/tab/budget without replacing bookmark context', () => {
+    mount('/property/resale?zone=Rawai&property_type=villa&tab=assignment&budget=2&source=bookmark#results');
+    expect(state.filters).toMatchObject({ zone: 'Rawai', property_type: 'villa', tab: 'assignment', min_price: 5000000, max_price: 15000000 });
+    expect(screen.getByRole('button', { name: 'Assignments' })).toHaveAttribute('aria-pressed', 'true');
+    expect(location().searchParams.get('source')).toBe('bookmark');
+    expect(location().hash).toBe('#results');
+  });
+  it('changes type and budget through real controls, preserves history and clears only owned criteria', () => {
+    mount('/property/resale?zone=Rawai&source=bookmark#results');
+    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    choose('Property Type', 'Villa');
+    choose('Budget in THB', /5,000,000–15,000,000/);
+    expect(state.filters).toMatchObject({ zone: 'Rawai', property_type: 'villa', min_price: 5000000, max_price: 15000000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Show results' }));
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(location().searchParams.has('budget')).toBe(false);
+    expect(state.filters.property_type).toBe('villa');
+    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(Object.fromEntries(location().searchParams)).toEqual({ source: 'bookmark' });
+    expect(location().hash).toBe('#results');
+  });
+  it('exposes a native named card link and returns from the actual detail without losing filters', () => {
+    const path='/property/resale?zone=Rawai&property_type=condo&tab=ready&budget=2&source=bookmark#results';
+    mount(path);
+    const card = screen.getByRole('link', { name: 'Garden resale' });
+    expect(card).toHaveAttribute('href', '/property/resale/unit');
+    card.focus(); expect(card).toHaveFocus();
+    fireEvent.click(card);
+    expect(screen.getByRole('heading', { name: 'Garden resale' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+    expect(screen.getByTestId('location')).toHaveTextContent(path);
+    expect(state.filters).toMatchObject({ zone: 'Rawai', property_type: 'condo', tab: 'ready', min_price: 5000000 });
+  });
+  it('does not treat a different currency as the same THB budget', () => {
+    state.properties.push({ ...state.properties[0], id: 'foreign', title: 'USD resale', currency: 'USD' });
+    mount('/property/resale?budget=2');
+    expect(screen.getByRole('link', { name: 'Garden resale' })).toBeVisible();
+    expect(screen.queryByRole('link', { name: 'USD resale' })).not.toBeInTheDocument();
+  });
+  it.each([['en','Try again'],['ru','Повторить'],['th','ลองอีกครั้ง']])('distinguishes a failed read from empty results and retries in %s', (language, retry) => {
+    state.language = language; state.failed = true;
+    mount();
+    expect(screen.getByRole('alert')).toBeVisible();
+    expect(screen.queryByText(/Found:|Найдено:|พบ:|No properties match/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: retry })); expect(state.retry).toHaveBeenCalledTimes(1);
+  });
+  it('retains a safe catalogue return from a failed detail read', () => {
+    state.detailFailed = true;
+    mount('/property/resale/unit');
+    expect(screen.getByRole('alert')).toBeVisible();
+    expect(screen.queryByText('Property not found')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' })); expect(state.retry).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
+    expect(location().pathname).toBe('/property/resale');
+  });
+});
+
+it('shows stored USD consistently in the actual card/detail rather than relabelling it THB', () => {
+  state.properties[0].currency = 'USD';
+  mount();
+  expect(screen.getByText('USD 6,000,000.00')).toBeVisible();
+  fireEvent.click(screen.getByRole('link', { name: 'Garden resale' }));
+  expect(screen.getAllByText('USD 6,000,000.00').length).toBeGreaterThan(0);
+  expect(screen.queryByText('THB 6000000')).not.toBeInTheDocument();
+});
+
+it('shows a request label rather than a zero asking price in the actual card/detail', () => {
+  state.properties[0].asking_price = 0;
+  mount();
+  expect(screen.getByText('Price on request')).toBeVisible();
+  fireEvent.click(screen.getByRole('link', { name: 'Garden resale' }));
+  expect(screen.getAllByText('Price on request').length).toBeGreaterThan(0);
+  expect(screen.queryByText('THB 0')).not.toBeInTheDocument();
+});
+
+it('keeps cards and detail usable with an explicit fallback when their photograph fails', () => {
+  mount();
+  fireEvent.error(screen.getByAltText('Garden resale'));
+  expect(screen.getByRole('img', { name: 'Photo unavailable' })).toBeVisible();
+  fireEvent.click(screen.getByRole('link', { name: 'Garden resale' }));
+  fireEvent.error(screen.getByAltText('Garden resale'));
+  expect(screen.getByRole('img', { name: 'Photo unavailable' })).toBeVisible();
+  expect(screen.getByRole('heading', { name: 'Garden resale' })).toBeVisible();
+});

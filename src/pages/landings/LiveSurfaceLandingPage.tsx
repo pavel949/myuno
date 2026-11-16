@@ -9,19 +9,19 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Condos & villas 1-12 months', descRu: 'Кондо и виллы 1–12 месяцев', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary', external: false },
+  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Explore published long-stay offers', descRu: 'Опубликованные предложения долгосрочной аренды', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary', external: false },
   { icon: Landmark, labelEn: 'Thai bank account', labelRu: 'Тайский счёт', descEn: 'Bangkok Bank, Kasikorn, SCB', descRu: 'Bangkok Bank, Kasikorn, SCB', path: APP_ROUTES.BANKING, color: 'cluster-invest', external: false },
-  { icon: GraduationCap, labelEn: 'Schools & kindergartens', labelRu: 'Школы и сады', descEn: '15+ international schools', descRu: '15+ международных школ', path: APP_ROUTES.SCHOOL_FINDER, color: 'accent-amber', external: false },
-  { icon: Stethoscope, labelEn: 'Medical & insurance', labelRu: 'Медицина и страховка', descEn: 'Bangkok Hospital cashless', descRu: 'Bangkok Hospital cashless', path: APP_ROUTES.MEDICAL, color: 'destructive', external: false },
+  { icon: GraduationCap, labelEn: 'Schools & kindergartens', labelRu: 'Школы и сады', descEn: 'Explore schools and admission information', descRu: 'Школы и информация о поступлении', path: APP_ROUTES.SCHOOL_FINDER, color: 'accent-amber', external: false },
+  { icon: Stethoscope, labelEn: 'Medical & insurance', labelRu: 'Медицина и страховка', descEn: 'Explore clinics and care options', descRu: 'Клиники и варианты медицинской помощи', path: APP_ROUTES.MEDICAL, color: 'destructive', external: false },
   { icon: Car, labelEn: 'Transport & licence', labelRu: 'Транспорт и права', descEn: 'Lease, buy, Thai licence', descRu: 'Аренда, покупка, тайские права', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive', external: false },
-  { icon: Wifi, labelEn: 'Home internet', labelRu: 'Домашний интернет', descEn: '500 Mbps fibre from ฿790/mo', descRu: '500 Mbps fiber от ฿790/мес', path: APP_ROUTES.DELIVERY, color: 'accent-cyan', external: true },
-  { icon: ShoppingBag, labelEn: 'Furniture & delivery', labelRu: 'Мебель и доставка', descEn: 'IKEA, Index, local makers', descRu: 'IKEA, Index, локальные мастера', path: APP_ROUTES.DELIVERY, color: 'accent-purple', external: false },
+  { icon: Wifi, labelEn: 'Home internet', labelRu: 'Домашний интернет', descEn: 'Discuss connection options with a coordinator', descRu: 'Обсудите подключение с координатором', path: APP_ROUTES.DELIVERY, color: 'accent-cyan', external: true },
+  { icon: ShoppingBag, labelEn: 'Furniture & delivery', labelRu: 'Мебель и доставка', descEn: 'Ask about selection and delivery', descRu: 'Помощь с подбором и доставкой', path: APP_ROUTES.DELIVERY, color: 'accent-purple', external: false },
 ];
 
 const STATS = [
-  { numRu: '฿35-80K', numEn: '฿35-80K', labelEn: 'Long-stay rent/mo', labelRu: 'Аренда/мес' },
-  { numRu: '฿1,200/мес', numEn: '$1,200/mo', labelEn: 'Family cost-of-living', labelRu: 'Семейный бюджет' },
-  { numRu: '15+', numEn: '15+', labelEn: 'Int. schools', labelRu: 'Межд. школ' },
+  { numRu: 'Жильё', numEn: 'Homes', labelEn: 'Published rental offers', labelRu: 'Опубликованные предложения' },
+  { numRu: 'План', numEn: 'Plan', labelEn: 'Your relocation needs', labelRu: 'Ваши задачи при переезде' },
+  { numRu: 'Связь', numEn: 'Support', labelEn: 'Discuss the next step', labelRu: 'Обсудите следующий шаг' },
 ];
 
 export default function LiveSurfaceLandingPage() {
@@ -80,10 +80,10 @@ export default function LiveSurfaceLandingPage() {
         </div>
 
         <div className="px-4 py-10 text-center bg-muted/30">
-          <p className="text-sm text-muted-foreground mb-2">{t ? 'Полный пакет переезда' : 'Full relocation pack'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">฿15,000 — ฿50,000</p>
+          <p className="text-sm text-muted-foreground mb-2">{t ? 'Помощь с переездом' : 'Relocation support'}</p>
+          <p className="text-3xl font-bold font-display text-foreground tabular-nums">{t ? 'Индивидуальные условия' : 'Individual terms'}</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Координатор, виза, банк, школа, страховка — под ключ. Договор RU+EN.' : 'Coordinator, visa, bank, school, insurance, turnkey. Contract in EN+RU.'}
+            {t ? 'Расскажите о ваших задачах. Состав услуг, стоимость и сроки согласуются отдельно перед началом работы.' : 'Tell us what you need. Service scope, pricing and timing are agreed separately before work begins.'}
           </p>
         </div>
       </LandingLayout>

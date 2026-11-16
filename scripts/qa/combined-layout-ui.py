@@ -2,6 +2,7 @@
 import asyncio
 import json
 import os
+import re
 from pathlib import Path
 import sys
 from urllib.parse import parse_qs, urlparse
@@ -104,7 +105,7 @@ async def check_destinations(page, surface, row, completed):
     await page.evaluate('() => { window.fixtureOpened = []; window.open = (...args) => { window.fixtureOpened.push(args); return null; }; }')
     output = page.get_by_test_id('location')
     if surface == 'local-services':
-        expected = ['/vendor/join', '/for-business', '/become-partner', '/list-with-us']
+        expected = ['/vendor/join', '/vendor', '/for-business', '/list-with-us', '/become-partner']
     elif surface == 'developers':
         # Shared audience composition uses semantic links, not legacy CTA buttons.
         # Keep every current canonical destination and exercise the real Link handlers.
@@ -124,19 +125,18 @@ async def check_destinations(page, surface, row, completed):
             await expect(output).to_have_text(destination)
         return expected
     else:
-        expected = ['/auth?redirect=/mc/onboarding&trial=true',
-                    '/auth?redirect=/mc/onboarding&trial=true&tier=starter',
-                    '/auth?redirect=/mc/onboarding&trial=true&tier=professional',
-                    '/auth?redirect=/mc/onboarding&trial=true&tier=enterprise',
-                    '/auth?redirect=/mc/onboarding&trial=true']
+        expected = ['/auth?redirect=/mc/onboarding', '/mc',
+                    '/auth?redirect=/mc/onboarding', '/mc', '/contact',
+                    '/auth?redirect=/mc/onboarding']
     buttons = page.locator('section button')
     assert await buttons.count() == len(expected) + (2 if surface == 'management-companies' else 0)
-    indices = [0, 2, 3, 4, 5] if surface == 'management-companies' else range(len(expected))
+    indices = [0, 1, 3, 4, 5, 6] if surface == 'management-companies' else range(len(expected))
     for index, destination in zip(indices, expected):
         await buttons.nth(index).click()
         await expect(output).to_have_text(destination)
     if surface == 'management-companies':
-        await buttons.nth(1).click()
+        await buttons.nth(2).click()
+        assert not re.search(r'\$\s*\d|14.?day|14.днев|Free Trial|бесплатн', await page.locator('#pricing').inner_text(), re.I), 'unverified company pricing or trial promise'
         # Observe the result of the actual CTA handler's smooth scroll. Do not
         # scroll the page from the harness, and do not accept an in-flight frame.
         try:

@@ -59,6 +59,26 @@ export function formatPriceStatic(
   return symbolAfter ? `${formatted} ${def.symbol}` : `${def.symbol}${formatted}`;
 }
 
+/** Display a recorded amount without inventing its currency or silently converting it. */
+export function formatRecordedPrice(
+  amount: number | null | undefined,
+  currencyCode: string | null | undefined,
+  opts: {
+    unknownLabel: string;
+    locale?: string;
+    /** Explicitly recorded zero may be meaningful for a service, not a default property price. */
+    allowZero?: boolean;
+    /** Existing THB-base conversion is allowed only after its source is verified here. */
+    formatTHB?: (amount: number) => string;
+  },
+): string {
+  const code = currencyCode?.trim().toUpperCase();
+  if (amount == null || !Number.isFinite(amount) || (opts.allowZero ? amount < 0 : amount <= 0) ||
+      !code || !Object.prototype.hasOwnProperty.call(CURRENCIES, code)) return opts.unknownLabel;
+  if (code === 'THB' && opts.formatTHB) return opts.formatTHB(amount);
+  return `${code} ${formatPriceStatic(amount, code, { noSymbol: true, locale: opts.locale })}`;
+}
+
 /**
  * React hook — city-aware price formatting.
  * Pulls target currency from current city; conversion via static rates table

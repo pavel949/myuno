@@ -10,6 +10,21 @@ vi.mock('@/components/market/MiniCart', () => ({ MiniCart: () => null }));
 vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => null }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); locale.language = 'ru'; });
+it.each([
+ ['/experiences', 'Впечатления'],
+ ['/experiences/synthetic-tour', 'Впечатления'],
+ ['/transport/transfer', 'Услуги'],
+ ['/property/search?mode=buy', 'Жильё'],
+])('identifies one destination in desktop and mobile menus for %s', (path, label) => {
+ render(<MemoryRouter initialEntries={[path]}><ConsumerHeader /></MemoryRouter>);
+ const desktop = screen.getByRole('navigation', { name: 'Основные разделы' });
+ expect(desktop.querySelectorAll('a[aria-current="page"]')).toHaveLength(1);
+ expect(within(desktop).getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+ fireEvent.click(screen.getByRole('button', { name: 'Открыть меню' }));
+ const mobile = screen.getByRole('dialog');
+ expect(mobile.querySelectorAll('a[aria-current="page"]')).toHaveLength(1);
+ expect(within(mobile).getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+});
 it('provides a named modal menu with direct destinations, sign-in and Escape handling', async () => {
  render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
  const trigger = screen.getByRole('button', { name: 'Открыть меню' });

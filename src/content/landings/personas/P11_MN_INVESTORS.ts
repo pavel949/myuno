@@ -15,8 +15,8 @@ export const P11_MN_INVESTORS: PersonaLanding = {
     en: 'Phuket diversification for Mongolian families',
   },
   subtitle: {
-    ru: 'Юань-зона, USD-выручка через STR, foreign quota подтверждён. Многосторонние сделки с участием 3–5 членов семьи — поддерживаем как стандарт.',
-    en: 'Yuan-zone exposure, USD income via STR, verified foreign quota. Multi-stakeholder deals with 3–5 family members — supported as standard.',
+    ru: 'Обсудите задачи семьи, опубликованные предложения и необходимые проверки. Валюта, условия сделки и возможность владения подтверждаются по конкретному объекту.',
+    en: 'Discuss your family’s needs, published offers and required checks. Confirm currency, transaction terms and ownership eligibility for the specific property.',
   },
   pains: [
     { ru: 'Капитал в MNT/CNY теряет покупательную способность — нужна USD-диверсификация.', en: 'MNT/CNY capital loses purchasing power — you need USD diversification.' },
@@ -27,7 +27,7 @@ export const P11_MN_INVESTORS: PersonaLanding = {
   services: [
     { slug: 'fet-guide', label: { ru: 'FET для третьих стран', en: 'FET for third countries' }, oneLiner: { ru: 'Перевод из MNT/CNY в THB через банк-партнёр.', en: 'MNT/CNY to THB via partner bank.' }, href: '/knowledge/pillars/fet-process', availability: 'entity-unverified' },
     { slug: 'multi-stakeholder', label: { ru: 'Multi-stakeholder deal thread', en: 'Multi-stakeholder deal thread' }, oneLiner: { ru: 'Общий workspace для 3–5 членов семьи: документы, голосование, история.', en: 'Shared workspace for 3–5 family members: documents, voting, history.' }, href: '/property/mandate' },
-    { slug: 'str-investment', label: { ru: 'STR-объекты с USD выручкой', en: 'STR properties with USD income' }, oneLiner: { ru: 'Кондо в Бангтао/Сурине под Airbnb — yield 6–8%.', en: 'Bangtao/Surin condos for Airbnb — 6–8% yield.' }, href: '/property/offplan?preset=str' },
+    { slug: 'str-investment', label: { ru: 'Объекты для аренды', en: 'Rental property opportunities' }, oneLiner: { ru: 'Опубликованные объекты; оценка дохода требует данных по конкретному предложению.', en: 'Published properties; income assessment requires data for the specific offer.' }, href: '/property/offplan?preset=str' },
     { slug: 'tax-mn-th', label: { ru: 'Налоговая структура MN ↔ TH', en: 'MN ↔ TH tax structure' }, oneLiner: { ru: 'Сравнение СОИДН и оптимальной структуры владения.', en: 'DTA comparison and optimal ownership structure.' }, href: '/legal/tax' },
   ],
   faq: [

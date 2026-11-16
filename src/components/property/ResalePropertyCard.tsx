@@ -7,15 +7,17 @@
  * marketplace card would require union-typing two unrelated shapes, so this stays a
  * domain card alongside commercial/hotel/land variants.
  */
-import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRightLeft, MapPin, Maximize2, BedDouble, TrendingUp } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowRightLeft, MapPin, Maximize2, BedDouble, TrendingUp, ImageOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import type { ResaleProperty } from '@/hooks/useResaleProperties';
 import { surfaceFromResale } from '@/lib/real-estate/listingViewModel';
 import { cn } from '@/lib/utils';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { formatRecordedPrice } from '@/lib/format/price';
 
 interface ResalePropertyCardProps {
   property: ResaleProperty;
@@ -37,43 +39,50 @@ const TITLE_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
 };
 
 export function ResalePropertyCard({ property, onClick, className }: ResalePropertyCardProps) {
-  const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
   const surface = useMemo(() => surfaceFromResale(property), [property]);
   const title = isRu ? surface.titleRu : surface.titleEn;
+  const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
+  const recordedPrice = (amount: number | null | undefined) => formatRecordedPrice(amount, property.currency, { unknownLabel: priceOnRequest, formatTHB: formatPrice });
   const premiumPercent = property.original_purchase_price && property.original_purchase_price > 0
     ? Math.round(((property.asking_price - property.original_purchase_price) / property.original_purchase_price) * 100)
     : null;
 
   const coverUrl = surface.coverImageUrl || '/placeholder.svg';
-
-  const handleClick = () => {
-    if (onClick) onClick();
-    else navigate(surface.href);
-  };
+  const [failedImage, setFailedImage] = useState<string | null>(null);
 
   return (
-    <div
+    <Link
+      to={surface.href}
+      state={publicJourneyState(location)}
+      aria-label={title}
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
-      onClick={handleClick}
+      onClick={onClick ? event => {
+        if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+          event.preventDefault();
+          onClick();
+        }
+      } : undefined}
       className={cn(
-        "bg-card rounded-none border border-border/50 overflow-hidden cursor-pointer",
+        "block bg-card rounded-none border border-border/50 overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         "hover:shadow-md transition-shadow",
         className
       )}
     >
       {/* Image */}
       <div className="relative aspect-[16/10] bg-muted">
-        <img
+        {failedImage === coverUrl ? <div role="img" aria-label={isRu ? 'Фото недоступно' : language === 'th' ? 'ไม่มีรูปภาพ' : 'Photo unavailable'} className="absolute inset-0 flex items-center justify-center text-muted-foreground"><ImageOff className="size-10" aria-hidden="true" /></div> : <img
           src={coverUrl}
           alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
-        />
+          onErrorCapture={() => setFailedImage(coverUrl)}
+        />}
 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex gap-1.5 flex-wrap">
@@ -100,7 +109,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        <h3 className="font-semibold text-foreground line-clamp-1">{title}</h3>
+        <h3 className="font-semibold text-foreground line-clamp-2">{title}</h3>
 
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="w-3 h-3" />
@@ -124,11 +133,11 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         {/* Price */}
         <div className="flex items-baseline gap-2">
           <span className="text-lg font-bold text-foreground">
-            {formatPrice(property.asking_price)}
+            {recordedPrice(property.asking_price)}
           </span>
           {property.is_assignment && property.original_purchase_price && premiumPercent !== null && (
             <span className="text-xs text-muted-foreground line-through">
-              {formatPrice(property.original_purchase_price)}
+              {recordedPrice(property.original_purchase_price)}
             </span>
           )}
           {premiumPercent !== null && premiumPercent > 0 && (
@@ -143,7 +152,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {property.current_rental_income && (
               <span>
-                {isRu ? 'Доход:' : 'Income:'} {formatPrice(property.current_rental_income)}/{isRu ? 'мес' : 'mo'}
+                {isRu ? 'Доход:' : 'Income:'} {recordedPrice(property.current_rental_income)}/{isRu ? 'мес' : 'mo'}
               </span>
             )}
             {property.estimated_roi && (
@@ -171,6 +180,6 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

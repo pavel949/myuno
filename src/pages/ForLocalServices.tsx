@@ -107,11 +107,11 @@ export default function ForLocalServices() {
                   {isRu ? 'Стать партнёром' : 'Become a partner'}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.VENDOR)}>
+                  {isRu ? 'Войти в кабинет поставщика' : 'Open provider workspace'}
+                </Button>
                 <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.FOR_BUSINESS)}>
                   {isRu ? 'Услуги для вашего бизнеса' : 'Services for your business'}
-                </Button>
-                <Button size="lg" variant="ghost" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
-                  {isRu ? 'Корпоративное партнёрство' : 'Corporate partnership'}
                 </Button>
               </div>
             </motion.div>
@@ -146,10 +146,13 @@ export default function ForLocalServices() {
           <Button variant="secondary" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
             {isRu ? 'Разместить объект или услугу' : 'List a property or service'}
           </Button>
+          <Button variant="ghost" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
+            {isRu ? 'Корпоративное партнёрство' : 'Corporate partnership'}
+          </Button>
           <p className="text-xs text-muted-foreground">
             {isRu
-              ? 'Уже есть аккаунт — войдите и откройте панель вендора из профиля.'
-              : 'Already have an account — sign in and open the vendor panel from your profile.'}
+              ? 'Кабинет поставщика доступен после входа и подтверждения прав. Заявка партнёра не открывает доступ автоматически.'
+              : 'The provider workspace requires sign-in and confirmed permissions. A partner application does not grant access automatically.'}
           </p>
         </LandingContainer>
         </section>

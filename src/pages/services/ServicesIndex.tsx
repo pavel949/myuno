@@ -151,7 +151,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
-    {showOffers && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {ready && explicitHomeIntent && homeResolution.status === 'unavailable' && <p role="status" className="text-sm text-muted-foreground">{homeResolution.reason === 'ambiguous'
       ? t('Доступно несколько разделов домашних услуг. Выберите нужный раздел в списке категорий.', 'Several home categories are available. Choose one in the category list.', 'มีหมวดหมู่บริการสำหรับบ้านหลายรายการ โปรดเลือกจากรายการหมวดหมู่')
       : t('Выбранный раздел домашних услуг недоступен. Выберите другой раздел или сбросьте фильтры.', 'The selected home category is unavailable. Choose another category or reset the filters.', 'หมวดหมู่บริการสำหรับบ้านที่เลือกไม่พร้อมใช้งาน โปรดเลือกหมวดหมู่อื่นหรือรีเซ็ตตัวกรอง')}</p>}
@@ -159,8 +158,10 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
       {filters.view === 'categories' ? <>
         <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-discovery-menu">
-          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="service-category-card h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left" onClick={() => update('category', item.id)}>
-            <item.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span className="min-w-0"><span className="block font-medium">{label(item)}</span><span id={`service-menu-${item.id}`} className="mt-1 block text-xs font-normal text-muted-foreground">{item.services.slice(0, 2).map(label).join(' · ')}</span></span>
+          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} type="button" data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="service-category-card h-auto min-h-28 flex-col items-start justify-start gap-3 whitespace-normal p-4 text-left" onClick={() => update('category', item.id)}>
+            <span className="flex w-full items-center justify-between gap-2"><item.icon className="size-5 shrink-0 text-primary" aria-hidden="true" /><ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></span>
+            <span className="block w-full min-w-0 font-display text-base font-medium leading-snug">{label(item)}</span>
+            <span id={`service-menu-${item.id}`} className="block text-xs font-normal leading-relaxed text-muted-foreground">{item.services.slice(0, 2).map(label).join(' · ') || t('Выберите бытовую задачу', 'Choose a home task', 'เลือกงานสำหรับบ้าน')}</span>
           </Button>)}
           {menu.yacht && <Button asChild variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left"><Link to={menu.yacht.path} state={{ returnTo }} aria-label={label(menu.yacht)}><menu.yacht.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span><span className="block font-medium">{label(menu.yacht)}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{t('Открыть раздел', 'Open service', 'เปิดบริการ')}</span></span><ArrowRight className="ml-auto size-4 shrink-0" aria-hidden="true" /></Link></Button>}
         </div>
@@ -170,6 +171,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
       </>}
     </section>}
+    {showOffers && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
       <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">

@@ -7,7 +7,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
-import { GUEST_TOP_NAV, isBottomBarItemActive } from '@/lib/nav/navigationModel';
+import { GUEST_TOP_NAV, getActiveGuestTopNavItem } from '@/lib/nav/navigationModel';
 import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { MiniCart } from '@/components/market/MiniCart';
@@ -46,10 +46,11 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   const { pathname, search, hash } = useLocation();
   const frame = publicContentFrame(pathname);
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
+  const activeDestination = getActiveGuestTopNavItem(pathname);
   const links = GUEST_TOP_NAV.map(item => ({
     to: item.path,
     label: pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh }),
-    active: isBottomBarItemActive(item, pathname),
+    active: activeDestination?.path === item.path,
   }));
   const partnerLinks = [
     { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Compass, Waves, Star, Shield, Clock, MapPin, Users, Calendar,
   Check, X, AlertTriangle, Info, ExternalLink, Truck
@@ -16,20 +16,31 @@ import { CrossSellSection, RelatedServicesSection } from '@/components/crosssell
 import { getContextualCrossSell } from '@/lib/crossSellConfig';
 import { SEOHead, createTouristAttractionSchema } from '@/components/seo';
 import { cn } from '@/lib/utils';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { formatRecordedPrice } from '@/lib/format/price';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const { experience, isLoading, error } = useExperience(id);
+  const location = useLocation();
+  const returnToCatalogue = () => {
+    const target = publicJourneyReturn(location, '/experiences');
+    if ('delta' in target) navigate(target.delta);
+    else navigate(target.href, { replace: target.replace, state: target.state });
+  };
+  const { experience, isLoading, error, refetch } = useExperience(id);
   const { data: pricingOptions = [] } = useExperiencePricing(id);
   const [activeImage, setActiveImage] = useState(0);
   const isRu = language === 'ru';
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const priceLabel = (amount: number | null | undefined, currency: string | undefined) => formatRecordedPrice(amount, currency, { unknownLabel: t('Цена по запросу', 'Price on request', 'สอบถามราคา'), locale: language, allowZero: true });
 
   if (isLoading) {
     return (
-      <MiniAppLayout title="" fallbackPath="/experiences" showHero={false} showFilter={false} showCategories={false}>
+      <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
         <div className="space-y-4 animate-pulse">
           <div className="h-64 bg-muted rounded-none" />
           <div className="h-8 bg-muted rounded-none w-3/4" />
@@ -39,15 +50,25 @@ export default function ExperienceDetail() {
     );
   }
 
-  if (error || !experience) {
+  if (error) {
+    return <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
+      <div role="alert" className="space-y-4 border border-border p-6">
+        <h2 className="font-display text-h3">{t('Не удалось загрузить предложение', 'The experience could not be loaded', 'ไม่สามารถโหลดประสบการณ์ได้')}</h2>
+        <p className="text-muted-foreground">{t('Попробуйте ещё раз или вернитесь к выбранным предложениям.', 'Try again or return to your selected offers.', 'ลองอีกครั้งหรือกลับไปยังข้อเสนอที่เลือก')}</p>
+        <div className="flex flex-wrap gap-3"><Button onClick={() => refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button><Button variant="outline" onClick={returnToCatalogue}>{t('Назад к списку', 'Back to list', 'กลับไปที่รายการ')}</Button></div>
+      </div>
+    </MiniAppLayout>;
+  }
+
+  if (!experience) {
     return (
-      <MiniAppLayout title="" fallbackPath="/experiences" showHero={false} showFilter={false} showCategories={false}>
+      <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
         <div className="text-center py-12">
           <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h3 className="font-semibold text-lg mb-2">
             {isRu ? 'Не найдено' : 'Not Found'}
           </h3>
-          <Button onClick={() => navigate('/experiences')} variant="outline">
+          <Button onClick={returnToCatalogue} variant="outline">
             {isRu ? 'Назад к списку' : 'Back to list'}
           </Button>
         </div>
@@ -66,7 +87,7 @@ export default function ExperienceDetail() {
   return (
     <MiniAppLayout
       title={expTitle}
-      fallbackPath="/experiences"
+      fallbackPath="/experiences" onBack={returnToCatalogue}
       showHero={false}
       showFilter={false}
       showCategories={false}
@@ -80,7 +101,7 @@ export default function ExperienceDetail() {
           name: expTitle || '',
           description: expDesc.slice(0, 300),
           price: experience.price || undefined,
-          currency: 'THB',
+          currency: experience.currency || undefined,
           image: experience.cover_image || undefined,
           url: `https://www.myuno.app/experiences/${id}`,
           rating: experience.rating || undefined,
@@ -217,7 +238,7 @@ export default function ExperienceDetail() {
                       )}
                     </div>
                     <p className="text-lg font-bold text-primary">
-                      ฿{opt.price_thb.toLocaleString()}
+                      {priceLabel(opt.price_thb, 'THB')}
                     </p>
                   </div>
                 ))}
@@ -227,7 +248,7 @@ export default function ExperienceDetail() {
                 <div>
                   <p className="text-sm text-muted-foreground">{isRu ? 'Цена от' : 'From'}</p>
                   <p className="text-3xl font-bold text-primary">
-                    ฿{experience.price?.toLocaleString()}
+                    {priceLabel(experience.price, experience.currency)}
                   </p>
                 </div>
               </div>
@@ -453,7 +474,7 @@ export default function ExperienceDetail() {
             {isRu ? 'Цена от' : 'From'}
           </p>
           <p className="text-xl font-bold text-primary">
-            ฿{(pricingOptions.length > 0 ? pricingOptions[0].price_thb : experience.price)?.toLocaleString()}
+            {pricingOptions.length > 0 ? priceLabel(pricingOptions[0].price_thb, 'THB') : priceLabel(experience.price, experience.currency)}
           </p>
         </div>
         <Button 

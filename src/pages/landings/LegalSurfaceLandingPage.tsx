@@ -10,7 +10,7 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
   { icon: Stamp, labelEn: 'Visa & immigration', labelRu: 'Виза и иммиграция', descEn: 'DTV, LTR, Education, Retirement, Elite', descRu: 'DTV, LTR, Education, Retirement, Elite', path: APP_ROUTES.VISA_IMMIGRATION, color: 'primary' },
-  { icon: FileText, labelEn: 'Lawyer consultation', labelRu: 'Юридическая консультация', descEn: '฿2,000 / 60 min, RU+EN lawyer', descRu: '฿2 000 / 60 мин, юрист RU+EN', path: APP_ROUTES.LEGAL, color: 'cluster-invest' },
+  { icon: FileText, labelEn: 'Lawyer consultation', labelRu: 'Юридическая консультация', descEn: 'Discuss your question and the consultation terms', descRu: 'Обсудите ваш вопрос и условия консультации', path: APP_ROUTES.LEGAL, color: 'cluster-invest' },
   { icon: Building2, labelEn: 'Thai company setup', labelRu: 'Открытие тайской компании', descEn: 'Co Ltd, BOI, work permit', descRu: 'Co Ltd, BOI, work permit', path: `${APP_ROUTES.LEGAL}?topic=company`, color: 'accent-purple' },
   { icon: Heart, labelEn: 'Family law', labelRu: 'Семейное право', descEn: 'Marriage, divorce, child custody', descRu: 'Брак, развод, опека', path: `${APP_ROUTES.LEGAL}?topic=family`, color: 'destructive' },
   { icon: ShieldAlert, labelEn: 'Disputes & insurance', labelRu: 'Споры и страхование', descEn: 'Accident, contract breach, refunds', descRu: 'ДТП, нарушение договора, возвраты', path: `${APP_ROUTES.LEGAL}?topic=disputes`, color: 'accent-amber' },
@@ -18,9 +18,9 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { numRu: '฿2,000', numEn: '฿2,000', labelEn: 'Consultation 60 min', labelRu: 'Консультация 60 мин' },
-  { numRu: 'RU+EN', numEn: 'EN+RU', labelEn: 'Lawyer languages', labelRu: 'Языки юриста' },
-  { numRu: '48 ч', numEn: '48 hrs', labelEn: 'First answer', labelRu: 'Первый ответ' },
+  { numRu: 'Задача', numEn: 'Your need', labelEn: 'Describe your situation', labelRu: 'Опишите ситуацию' },
+  { numRu: 'Документы', numEn: 'Documents', labelEn: 'Prepare the relevant details', labelRu: 'Подготовьте сведения' },
+  { numRu: 'Условия', numEn: 'Terms', labelEn: 'Confirmed before work starts', labelRu: 'Согласуются до начала работы' },
 ];
 
 export default function LegalSurfaceLandingPage() {
@@ -37,7 +37,7 @@ export default function LegalSurfaceLandingPage() {
       <LandingLayout
         icon={Scale}
         title={t ? 'Юридическая помощь' : 'Legal help'}
-        subtitle={t ? 'Виза, компания, семья, споры и налоги — юристы RU+EN с фиксированной ценой и SLA на ответ' : 'Visa, company, family, disputes and tax, EN+RU lawyers with fixed price and answer SLA'}
+        subtitle={t ? 'Виза, компания, семья, споры и налоги — выберите тему и обсудите необходимые документы и условия помощи.' : 'Visa, company, family, disputes and tax — choose a topic and discuss the documents and support you need.'}
         gradient="from-cluster-legal via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать визу' : 'Match a visa', onClick: () => navigate(APP_ROUTES.VISA_QUIZ) }}
         whatsappUrl={whatsappUrl}
@@ -75,9 +75,9 @@ export default function LegalSurfaceLandingPage() {
 
         <div className="px-4 py-10 text-center bg-muted/30">
           <p className="text-sm text-muted-foreground mb-2">{t ? 'Первая консультация' : 'First consultation'}</p>
-          <p className="text-3xl font-bold font-display text-foreground tabular-nums">฿2,000</p>
+          <p className="text-3xl font-bold font-display text-foreground tabular-nums">{t ? 'Индивидуальные условия' : 'Individual terms'}</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? '60 минут с юристом RU+EN. Договор RU+EN. Оплата картой или переводом.' : '60 minutes with an EN+RU lawyer. Contract EN+RU. Card or bank transfer.'}
+            {t ? 'Формат, стоимость, сроки и язык консультации нужно подтвердить для вашего вопроса до начала работы.' : 'Confirm the format, price, timing and consultation language for your question before work begins.'}
           </p>
         </div>
       </LandingLayout>

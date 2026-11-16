@@ -18,6 +18,7 @@ import type { PersonaLanding } from '@/lib/landings/types';
 import { P21_PROVIDERS } from '@/content/landings/personas/P21_PROVIDERS';
 import { P22_FREELANCERS } from '@/content/landings/personas/P22_FREELANCERS';
 import { P23_SMB } from '@/content/landings/personas/P23_SMB';
+import { P23_PROPERTY_OWNER } from '@/content/landings/personas/P23_PROPERTY_OWNER';
 
 const locale = vi.hoisted(() => ({ language: 'ru' }));
 beforeEach(() => { locale.language = 'ru'; });
@@ -31,6 +32,9 @@ vi.mock('@/components/layout/AppLayout', () => ({
   AppLayout: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="app-layout">{children}</div>
   ),
+}));
+vi.mock('@/components/landings/LandingLeadForm', () => ({
+  LandingLeadForm: () => <form aria-label="Synthetic inquiry boundary" />,
 }));
 vi.mock('@/pages/NotFound', () => ({
   default: () => <div data-testid="not-found">404</div>,
@@ -156,4 +160,36 @@ describe('PersonaLandingPage — B.4 routing', () => {
     expect(ctas.length).toBeGreaterThanOrEqual(1);
     expect(ctas[0].getAttribute('href')).toMatch(/^\/start(\?|$)/);
   });
+});
+
+it.each(['ru', 'en'])('renders the actual %s owner persona with individually agreed terms and its unchanged onboarding route', language => {
+  locale.language = language;
+  MOCK_LANDINGS = [P23_PROPERTY_OWNER];
+  const { container } = renderAt('/for/property-owner');
+  expect(screen.getByRole('heading', { level: 1, name: language === 'ru' ? P23_PROPERTY_OWNER.h1.ru : P23_PROPERTY_OWNER.h1.en })).toBeVisible();
+  const label = language === 'ru' ? 'Подготовить объект' : 'Prepare your property';
+  const actions = screen.getAllByRole('link', { name: new RegExp(label) });
+  expect(actions.length).toBeGreaterThan(0);
+  for (const action of actions) expect(action).toHaveAttribute('href', '/owner/onboarding?persona=property-owner');
+  expect(container.textContent).not.toMatch(/\$25|15%|First month free|Первый месяц бесплатно|4\.9|1,200|1 200|24\/7|12 minutes|12 минут|Investor Due Diligence|7,500/);
+  expect(JSON.stringify(P23_PROPERTY_OWNER)).not.toMatch(/\$25|15%|First month free|Первый месяц бесплатно/);
+  expect(P23_PROPERTY_OWNER.slug).toBe('property-owner');
+  expect(P23_PROPERTY_OWNER.primaryCta.href).toBe('/owner/onboarding');
+});
+
+it.each(['medical', 'weddings', 'athletes', 'halal', 'lgbtq', 'accessibility'])('shows an inquiry entry for %s without inventing a response deadline', slug => {
+  locale.language = 'en';
+  MOCK_LANDINGS = [{ ...liveLanding, slug }];
+  const { container } = renderAt('/for/' + slug);
+  expect(screen.getByRole('heading', { name: 'Leave a request' })).toBeVisible();
+  expect(screen.getByRole('form', { name: 'Synthetic inquiry boundary' })).toBeInTheDocument();
+  expect(container.textContent).not.toContain('reply within 24 hours');
+});
+
+it.each([['ru', 'Оставьте заявку'], ['th', 'ส่งคำขอ']])('localizes the %s inquiry heading without a response promise', (language, label) => {
+  locale.language = language;
+  MOCK_LANDINGS = [{ ...liveLanding, slug: 'medical' }];
+  const { container } = renderAt('/for/medical');
+  expect(screen.getByRole('heading', { name: label })).toBeVisible();
+  expect(container.textContent).not.toMatch(/ответим за 24|reply within 24/);
 });

@@ -22,3 +22,12 @@ describe('property catalogue frame ownership', () => {
     expect(screen.getByTestId('layout-boundary')).toHaveAttribute('data-automatic-container', 'true');
   });
 });
+
+it('keeps resale context selected and does not show unrelated tabs on its UUID detail', () => {
+  const view = render(<MemoryRouter initialEntries={['/property/resale']}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Resale route boundary</p>} /></Route></Routes></MemoryRouter>);
+  expect(screen.getByRole('button', { name: 'Resale', pressed: true })).toBeVisible();
+  expect(screen.getAllByRole('button', { pressed: true })).toHaveLength(1);
+  view.unmount();
+  render(<MemoryRouter initialEntries={['/property/resale/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Resale detail boundary</p>} /></Route></Routes></MemoryRouter>);
+  expect(screen.queryByRole('group', { name: 'Property sections' })).not.toBeInTheDocument();
+});

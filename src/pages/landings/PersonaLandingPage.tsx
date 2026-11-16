@@ -82,8 +82,10 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   // persona (with show-all fallback when no specific apps match).
   const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
 
-  // § 10 — ready-made service bundle for this persona (if any).
-  const bundle = useMemo(() => getBundleForPersona(landing.personaCode), [landing.personaCode]);
+  // P23 keeps its existing canonical identity, but its owner-management entry
+  // is not an investor due-diligence journey. Suppress only that irrelevant
+  // presentation recommendation; do not alter bundle pricing or segmentation.
+  const bundle = useMemo(() => landing.slug === 'property-owner' ? undefined : getBundleForPersona(landing.personaCode), [landing.slug, landing.personaCode]);
 
   return (
     <AppLayout>
@@ -372,7 +374,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <section className="mt-8">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-foreground">
-                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request — reply within 24 hours'}
+                  {t({ ru: 'Оставьте заявку', en: 'Leave a request', th: 'ส่งคำขอ' })}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isRu
@@ -404,9 +406,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             {isRu ? 'Готовы начать?' : 'Ready to start?'}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isRu
-              ? 'Ответ дежурного — за 12 минут, без обязательств.'
-              : 'Reply within 12 minutes, no commitment.'}
+            {t({ ru: 'Оставьте заявку и укажите, с чем нужна помощь.', en: 'Leave a request and tell us what you need.', th: 'ส่งคำขอและบอกสิ่งที่คุณต้องการ' })}
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Button asChild size="lg">

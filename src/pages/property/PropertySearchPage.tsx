@@ -6,7 +6,7 @@ import '@/styles/public-commerce.css';
  */
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
-import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -40,6 +40,7 @@ import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailabi
 import '@/styles/property-search.css';
 import '@/styles/premium-public.css';
 import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
+import { GOAL_ENTRIES } from '@/lib/nav/goalEntries';
 
 const FILTER_TITLES_TH: Record<string, string> = {'priceLevel': 'ระดับราคา', 'bedrooms': 'ห้องนอน', 'areaAtLeast': 'พื้นที่', 'instantBooking': 'การจอง', 'viewType': 'วิว', 'furnishingLevel': 'เฟอร์นิเจอร์', 'poolType': 'สระว่ายน้ำ', 'parkingType': 'ที่จอดรถ', 'ownershipForm': 'กรรมสิทธิ์', 'amenities': 'สิ่งอำนวยความสะดวก', 'highlights': 'จุดเด่น'};
 const FEATURE_LABELS_TH: Record<string, string> = {'beachfront': 'ติดชายหาด', 'walk_to_beach': 'เดินไปชายหาดได้', 'sea_view': 'วิวทะเล', 'private_pool': 'สระว่ายน้ำส่วนตัว', 'pool': 'สระว่ายน้ำ', 'washer': 'เครื่องซักผ้า', 'pet_friendly': 'อนุญาตให้นำสัตว์เลี้ยงเข้าพัก', 'kid_friendly': 'เหมาะสำหรับเด็ก', 'parking': 'ที่จอดรถ', 'wifi': 'WiFi', 'luxury': 'หรูหรา', 'air_conditioning': 'เครื่องปรับอากาศ', 'gym': 'ห้องออกกำลังกาย', 'jacuzzi': 'อ่างจากุซซี่'};
@@ -306,6 +307,12 @@ export default function PropertySearchPage() {
               }}>{mode === 'all' ? text('Все объекты', 'All homes', 'ที่พักทั้งหมด') : mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
+          {!catalogueAll && propertyMode === 'buy' && <nav aria-label={text('Рынок недвижимости', 'Property market', 'ตลาดอสังหาริมทรัพย์')} className="grid gap-2 sm:grid-cols-2">
+            {GOAL_ENTRIES.buy.primary.slice(0, 2).map(market => <Link key={market.path} to={market.path} className="min-h-11 border border-border bg-card px-4 py-3 text-body-sm font-medium text-foreground hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <span className="block">{pickLang(language, { ru: market.ru, en: market.en, th: market.th })}</span>
+              <span className="mt-1 block text-xs font-normal text-muted-foreground">{pickLang(language, { ru: market.descRu, en: market.descEn, th: market.descTh })}</span>
+            </Link>)}
+          </nav>}
           <details ref={criteriaRef} className="premium-search-criteria">
             <summary><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">

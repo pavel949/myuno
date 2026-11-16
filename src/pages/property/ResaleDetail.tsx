@@ -2,10 +2,10 @@
  * ResaleDetail — detail page for a secondary market property
  */
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   MapPin, BedDouble, Bath, Maximize2, Calendar, ArrowRightLeft,
-  TrendingUp, Shield, ChevronLeft, Share2, Phone
+  TrendingUp, Shield, ChevronLeft, Share2, Phone, ImageOff
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
@@ -16,24 +16,31 @@ import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
 import { useResaleProperty } from '@/hooks/useResaleProperties';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
+import { formatRecordedPrice } from '@/lib/format/price';
 
 export default function ResaleDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
 
-  const { data: property, isLoading } = useResaleProperty(id);
+  const { data: property, isLoading, isError, refetch } = useResaleProperty(id);
+  const returnToResults = () => {
+    const target = publicJourneyReturn(location, APP_ROUTES.RESALE);
+    if ('delta' in target) navigate(target.delta);
+    else navigate(target.href, { replace: target.replace, state: target.state });
+  };
 
   if (isLoading) {
     return (
@@ -46,21 +53,33 @@ export default function ResaleDetail() {
     );
   }
 
+  if (isError) {
+    return <div className="space-y-4 p-6" role="alert">
+      <BackButton fallbackPath={APP_ROUTES.RESALE} onClick={returnToResults} />
+      <p>{isRu ? 'Не удалось загрузить объект. Попробуйте ещё раз.' : language === 'th' ? 'ไม่สามารถโหลดอสังหาริมทรัพย์ได้ โปรดลองอีกครั้ง' : 'The property could not be loaded. Try again.'}</p>
+      <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : language === 'th' ? 'ลองอีกครั้ง' : 'Try again'}</Button>
+    </div>;
+  }
+
   if (!property) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">{isRu ? 'Объект не найден' : 'Property not found'}</p>
+        <div className="space-y-4"><BackButton fallbackPath={APP_ROUTES.RESALE} onClick={returnToResults} /><p className="text-muted-foreground">{isRu ? 'Объект не найден' : language === 'th' ? 'ไม่พบอสังหาริมทรัพย์' : 'Property not found'}</p></div>
       </div>
     );
   }
 
   const title = (isRu && property.title_ru) ? property.title_ru : property.title;
+  const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
+  const recordedPrice = (amount: number | null | undefined) => formatRecordedPrice(amount, property.currency, { unknownLabel: priceOnRequest, formatTHB: formatPrice });
+  const askingPriceLabel = recordedPrice(property.asking_price);
   const description = (isRu && property.description_ru) ? property.description_ru : property.description;
   const images = property.media?.length
     ? property.media.map((m: any) => m.url || m)
     : property.cover_image
       ? [property.cover_image]
       : ['/placeholder.svg'];
+  const currentImage = typeof images[currentImageIdx] === 'string' ? images[currentImageIdx] as string : '/placeholder.svg';
 
   const premiumPercent = property.original_purchase_price && property.original_purchase_price > 0
     ? Math.round(((property.asking_price - property.original_purchase_price) / property.original_purchase_price) * 100)
@@ -74,15 +93,15 @@ export default function ResaleDetail() {
 
   const seoTitle = `${title}${property.zone ? ` · ${property.zone}` : ''}${property.is_assignment ? ` · ${isRu ? 'Переуступка' : 'Assignment'}` : ''}`;
   const seoDescription = isRu
-    ? `${title} в ${property.zone || 'Пхукет'}. Цена ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
-    : `${title} in ${property.zone || 'Phuket'}. Asking ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
+    ? `${title} в ${property.zone || 'Пхукет'}. ${askingPriceLabel}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
+    : `${title} in ${property.zone || 'Phuket'}. ${askingPriceLabel}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
   const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
   const jsonLd = createRealEstateListingSchema({
     name: title,
     description: seoDescription,
-    price: property.asking_price ?? undefined,
-    currency: ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
+    price: askingPriceLabel !== priceOnRequest ? property.asking_price : undefined,
+    currency: askingPriceLabel !== priceOnRequest ? property.currency.trim().toUpperCase() : undefined,
     image: seoImage as string,
     url: canonicalUrl,
     bedrooms: property.bedrooms ?? undefined,
@@ -103,13 +122,14 @@ export default function ResaleDetail() {
       />
       {/* Gallery */}
       <div className="relative aspect-[16/10] bg-muted">
-        <img
-          src={images[currentImageIdx] as string}
+        {failedImage === currentImage ? <div role="img" aria-label={isRu ? 'Фото недоступно' : language === 'th' ? 'ไม่มีรูปภาพ' : 'Photo unavailable'} className="absolute inset-0 flex items-center justify-center text-muted-foreground"><ImageOff className="size-10" aria-hidden="true" /></div> : <img
+          src={currentImage}
           alt={title}
           className="w-full h-full object-cover"
-        />
+          onErrorCapture={() => setFailedImage(currentImage)}
+        />}
         <div className="absolute top-3 left-3">
-          <BackButton fallbackPath="/property/resale" />
+          <BackButton fallbackPath={APP_ROUTES.RESALE} onClick={returnToResults} />
         </div>
         {images.length > 1 && (
           <div className="absolute bottom-3 right-3 bg-background/80 px-2 py-1 rounded-none text-xs">
@@ -138,7 +158,7 @@ export default function ResaleDetail() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <MetricCard
             label={isRu ? 'Цена' : 'Price'}
-            value={formatPrice(property.asking_price)}
+            value={askingPriceLabel}
             highlight
           />
           {property.area_sqm && (
@@ -171,11 +191,11 @@ export default function ResaleDetail() {
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
                 <span className="text-muted-foreground">{isRu ? 'Покупка' : 'Original'}:</span>
-                <span className="ml-1 font-medium">{formatPrice(property.original_purchase_price)}</span>
+                <span className="ml-1 font-medium">{recordedPrice(property.original_purchase_price)}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">{isRu ? 'Сейчас' : 'Asking'}:</span>
-                <span className="ml-1 font-medium">{formatPrice(property.asking_price)}</span>
+                <span className="ml-1 font-medium">{askingPriceLabel}</span>
               </div>
               {premiumPercent !== null && (
                 <div>
@@ -215,7 +235,7 @@ export default function ResaleDetail() {
               {isRu ? 'Текущий доход от аренды' : 'Current Rental Income'}
             </h3>
             <p className="text-lg font-bold text-primary">
-              {formatPrice(property.current_rental_income)}<span className="text-sm font-normal text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
+              {recordedPrice(property.current_rental_income)}<span className="text-sm font-normal text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
             </p>
           </div>
         )}
@@ -233,7 +253,7 @@ export default function ResaleDetail() {
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t border-border p-4 flex gap-2 z-30">
         <div className="flex-1">
           <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-          <p className="text-lg font-bold text-foreground">{formatPrice(property.asking_price)}</p>
+          <p className="text-lg font-bold text-foreground">{askingPriceLabel}</p>
         </div>
         <Button onClick={() => setShowLeadForm(true)} className="px-6">
           <Phone className="w-4 h-4 mr-1" />

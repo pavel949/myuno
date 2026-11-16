@@ -15,15 +15,25 @@ describe('canonical service projections and URL state', () => {
       for (const row of filtered) expect(rows.find(item => item.service.id === row.service.id)?.service.path).toBe(row.service.path);
     }
   });
-  it('projects the compact menu from active canonical records, keeping yacht identity', () => {
+  it('exposes the full active category map at the first step, keeping yacht identity', () => {
     const menu = serviceDiscoveryMenu(CATEGORIES);
-    expect(menu.primary.map(item => item.id)).toEqual(['cat-home-services', 'cat-transport', 'cat-tourism']);
+    expect(menu.primary.slice(0, 3).map(item => item.id)).toEqual(['cat-home-services', 'cat-transport', 'cat-business-legal']);
+    expect(new Set(menu.primary.map(item => item.id))).toEqual(new Set(categories.filter(item => item.id !== 'cat-emergency').map(item => item.id)));
+    expect(menu.more.map(item => item.id)).toEqual(['cat-emergency']);
     expect(menu.yacht).toBe(CATEGORIES.flatMap(item => item.services).find(item => item.id === 'yacht'));
     expect(menu.yacht?.path).toBe('/yachts');
     const limited = serviceDiscoveryMenu(CATEGORIES.filter(item => item.id !== 'cat-tourism'));
     expect(limited.yacht).toBeUndefined();
     expect(limited.primary.some(item => item.id === 'cat-tourism')).toBe(false);
     expect(serviceDiscoveryMenu(CATEGORIES.map(item => ({ ...item, status: 'soon' })))).toEqual({ primary: [], more: [], yacht: undefined });
+  });
+  it('never invents missing first-level categories or hides newly returned public categories', () => {
+    const source = CATEGORIES.filter(item => ['cat-home-services', 'cat-transport'].includes(item.id));
+    const limited = serviceDiscoveryMenu(source);
+    expect(limited.primary.map(item => item.id)).toEqual(['cat-home-services', 'cat-transport']);
+    expect(limited.primary.some(item => item.id === 'cat-business-legal')).toBe(false);
+    const future = { ...source[1], id: 'future-public-category' as CategoryEntry['id'] };
+    expect(serviceDiscoveryMenu([...source, future]).primary.map(item => item.id)).toContain(future.id);
   });
   it('promotes the already-declared legacy home alias while preserving its returned ID', () => {
     const home = CATEGORIES.find(item => item.id === 'cat-home-services')!;

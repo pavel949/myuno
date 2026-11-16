@@ -11,7 +11,7 @@ export const P21_PROVIDERS: PersonaLanding = {
   slug: 'providers',
   status: 'live',
   h1: { ru: 'Локальные подрядчики на myUNO', en: 'Local providers on myUNO' },
-  subtitle: { ru: 'Получайте заказы от УК, владельцев и гостей. Без комиссии за вход, оплата на счёт компании, прозрачный рейтинг.', en: 'Get orders from MCs, owners and guests. No entry fee, payouts to your company account, transparent rating.' },
+  subtitle: { ru: 'Представьте свои услуги управляющим компаниям, собственникам и гостям. Условия сотрудничества и расчётов нужно согласовать до начала работы.', en: 'Introduce your services to management companies, owners and guests. Agree collaboration and settlement terms before work begins.' },
   pains: [
     { ru: 'Поток заказов нестабилен, всё держится на сарафане.', en: 'Order flow is unstable, everything depends on word of mouth.' },
     { ru: 'Платформы берут комиссию 25–30%, оставляя крошки.', en: 'Platforms charge 25-30% commission, leaving crumbs.' },
@@ -21,18 +21,18 @@ export const P21_PROVIDERS: PersonaLanding = {
   services: [
     { slug: 'vendor-onboarding', label: { ru: 'Заявка поставщика', en: 'Provider application', th: 'ใบสมัครผู้ให้บริการ' }, oneLiner: { ru: 'Укажите сведения о себе или компании и своих услугах.', en: 'Provide your individual or company details and services.', th: 'ระบุข้อมูลส่วนตัวหรือบริษัทและบริการของคุณ' }, href: '/vendor/onboarding' },
     { slug: 'unified-inbox', label: { ru: 'Единый чат с клиентами', en: 'Unified guest inbox' }, oneLiner: { ru: 'WhatsApp + in-app, авто-перевод RU/EN/TH.', en: 'WhatsApp + in-app, auto-translate RU/EN/TH.' }, href: '/vendor/messages' },
-    { slug: 'commission', label: { ru: 'Прозрачная комиссия', en: 'Transparent commission' }, oneLiner: { ru: 'Единая ставка по вертикали, payout каждые 7 дней.', en: 'Flat per-vertical rate, payout every 7 days.' }, href: '/vendor/billing', availability: 'unavailable' },
+    { slug: 'commission', label: { ru: 'Прозрачная комиссия', en: 'Transparent commission' }, oneLiner: { ru: 'Обсудите комиссию, получателя и порядок расчётов.', en: 'Discuss fees, the recipient and settlement terms.' }, href: '/vendor/billing', availability: 'unavailable' },
     { slug: 'rating', label: { ru: 'Прозрачный рейтинг', en: 'Transparent rating' }, oneLiner: { ru: 'Отзывы только от подтверждённых клиентов.', en: 'Reviews only from verified customers.' }, href: '/vendor' },
   ],
   faq: [
-    { q: { ru: 'Какая комиссия?', en: 'What’s the commission?' }, a: { ru: 'Единая ставка по вашей вертикали (актуальный список — /vendor/billing). Никаких подписок и скрытых платежей.', en: 'Single per-vertical rate (live list at /vendor/billing). No subscriptions, no hidden fees.' } },
-    { q: { ru: 'Когда приходят выплаты?', en: 'When do I get paid?' }, a: { ru: 'Каждые 7 дней на счёт компании или Wise.', en: 'Every 7 days to your company account or Wise.' } },
+    { q: { ru: 'Какая комиссия?', en: 'What’s the commission?' }, a: { ru: 'Подтвердите условия размещения, комиссии и доступные инструменты для вашей услуги. Заявка поставщика не означает согласования тарифов.', en: 'Confirm listing terms, fees and available tools for your service. A provider application does not establish agreed pricing.' } },
+    { q: { ru: 'Когда приходят выплаты?', en: 'When do I get paid?' }, a: { ru: 'Получатель, способ и сроки расчётов согласуются для вашей услуги. Проверьте подтверждённые условия перед выполнением заказа.', en: 'The recipient, method and settlement timing are agreed for your service. Review confirmed terms before fulfilling an order.' } },
   ],
   primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application', th: 'เริ่มสมัครเป็นผู้ให้บริการ' }, href: '/vendor/onboarding' },
   secondaryCta: { label: { ru: 'Узнать о тарифах', en: 'See pricing' }, href: '/pricing' },
   seo: {
-    metaTitle: { ru: 'Стать поставщиком myUNO: прозрачная комиссия, payout 7 дней', en: 'Become a myUNO provider: transparent commission, 7-day payout' },
-    metaDescription: { ru: 'Подключитесь к myUNO как локальный подрядчик: прозрачная комиссия, единый чат, рейтинг и payout каждые 7 дней.', en: 'Join myUNO as a local provider: transparent commission, unified chat, rating and 7-day payout.' },
+    metaTitle: { ru: 'Стать поставщиком myUNO: заявка и условия сотрудничества', en: 'Become a myUNO provider: application and collaboration terms' },
+    metaDescription: { ru: 'Представьте услуги и обсудите размещение, права доступа и условия сотрудничества как локальный поставщик myUNO.', en: 'Introduce your services and discuss listing, access and collaboration terms as a local myUNO provider.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/providers',
     hreflangAlternates: [
