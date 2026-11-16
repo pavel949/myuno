@@ -65,7 +65,9 @@ async def main():
                     await expect(menu).to_be_visible()
                     menu_metrics = await geometry(menu)
                     assert len(menu_metrics['columns'].split()) == (4 if width >= 1440 else 2), menu_metrics
-                    await expect(menu.locator('[data-category-id]')).to_have_count(3)
+                    await expect(menu.locator('[data-category-id]')).to_have_count(11)
+                    for category_id in ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']:
+                        await expect(menu.locator(f'[data-category-id={category_id}]')).to_be_visible()
                     await expect(menu.locator('a[href="/yachts"]')).to_have_count(1)
                     await expect(menu.locator('[data-category-id=cat-home-services]')).to_be_visible()
                     await expect(menu.locator('[data-category-id=cat-tourism]')).to_be_visible()
