@@ -24,7 +24,7 @@ async def main():
     await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/discover')
     links=page.locator('.premium-plan-links a');await expect(links).to_have_count(4)
     guest_hrefs=await links.evaluate_all('els=>els.map(e=>e.getAttribute("href"))')
-    assert guest_hrefs==['/property/search?mode=rent&tenancy=short','/property/search?mode=rent&tenancy=medium','/property/search?mode=rent&tenancy=long','/property/search?mode=buy'],guest_hrefs
+    assert guest_hrefs==['/property/search?mode=rent&tenancy=short','/property/search?mode=rent&tenancy=medium','/property/search?mode=rent&tenancy=long','/discover/buy'],guest_hrefs
     for link in await links.all():assert (await link.bounding_box())['height']>=44
     await page.screenshot(path=str(OUT/f'{prefix}-home-entry.png'))
     selected='management' if width==1440 else 'rent';other='rent' if selected=='management' else 'management'

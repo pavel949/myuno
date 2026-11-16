@@ -122,11 +122,18 @@ async def main():
                     await expect(page.get_by_test_id('location')).to_have_text('/discover')
                     choices=page.locator('.premium-plan-links a')
                     await expect(choices).to_have_count(4)
-                    for index,query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
+                    destinations = [
+                        '/property/search?mode=rent&tenancy=short',
+                        '/property/search?mode=rent&tenancy=medium',
+                        '/property/search?mode=rent&tenancy=long',
+                        '/discover/buy',
+                    ]
+                    for index,destination in enumerate(destinations):
+                        await expect(choices.nth(index)).to_have_attribute('href', destination)
                         await choices.nth(index).focus()
                         await expect(choices.nth(index)).to_be_focused()
                         await choices.nth(index).press('Enter')
-                        await expect(page.get_by_test_id('location')).to_have_text('/property/search?'+query)
+                        await expect(page.get_by_test_id('location')).to_have_text(destination)
                         await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(page.locator('.premium-project-grid article')).to_have_count(3)
                     # Exercise actual card CTAs and verify the committed public destination.
