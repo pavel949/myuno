@@ -647,7 +647,7 @@ html:not([lang]) {
   --public-offer-width: 25rem;
   --public-gutter-base: 1rem;
   --public-gutter: calc(var(--public-gutter-base) * var(--layout-inset-scale));
-  --public-section-gap: 2.5rem;
+  --public-section-gap: calc(2.5rem * var(--section-space-scale));
   --public-detail-gap: 2rem;
   --public-card-gap: 1.25rem;
   --public-display-size: 2.25rem;
@@ -665,7 +665,7 @@ html:not([lang]) {
 @media(min-width:768px) { :root { --public-editorial-display-size: 3rem; } }
 @media(min-width:1024px) { :root {
   --public-gutter-base: clamp(2rem,calc(6.667vw - 3rem),5rem);
-  --public-section-gap: 5rem;
+  --public-section-gap: calc(5rem * var(--section-space-scale));
   --public-detail-gap: 3rem;
   --public-card-gap: 2rem;
   --public-display-size: 4rem;
