@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import '@/styles/premium-public.css';
 import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import '@/styles/property-journey.css';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 interface PropertyDetailGalleryProps { images: string[]; alt: string; onOpenLightbox: (startIndex: number) => void }
 /** One large photograph and two supporting photographs; mobile uses one image at a time. */
@@ -19,6 +21,9 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
       </button>)}
       <span className="premium-gallery-count">{available.length} {isRu ? 'фото' : 'photos'}</span>
     </div>
+    {available.length > 1 && <div className="property-editorial-thumbnails" aria-label={pickLang(language, {ru:'Выбор фотографии',en:'Choose a photo',th:'เลือกรูปภาพ'})}>
+      {available.map((image,index) => <button key={image.src} type="button" onClick={() => setActive(index)} aria-pressed={current===index} aria-label={pickLang(language,{ru:`Показать фото ${image.index+1}`,en:`Show photo ${image.index+1}`,th:`แสดงรูปที่ ${image.index+1}`})}><img src={image.src} alt="" width="96" height="72" loading="lazy" /></button>)}
+    </div>}
     <div className="premium-gallery-thumbs">
       {available.length > 1 && <><button type="button" aria-label={isRu ? 'Предыдущее фото' : 'Previous photo'} onClick={() => setActive(Math.max(0, current - 1))} disabled={current === 0}><ChevronLeft aria-hidden="true" /></button><span aria-live="polite">{current + 1} / {available.length}</span><button type="button" aria-label={isRu ? 'Следующее фото' : 'Next photo'} onClick={() => setActive(Math.min(available.length - 1, current + 1))} disabled={current === available.length - 1}><ChevronRight aria-hidden="true" /></button></>}
       <button type="button" onClick={() => onOpenLightbox(available[current].index)}>{isRu ? 'Все фото' : 'All photos'}</button>

@@ -355,3 +355,7 @@
 @media(max-width:640px){.home-gallery .home-rail-viewport{padding-top:2px;padding-bottom:10px}.home-guide-copy{padding:14px}}
 
 .home-gallery .ds-section-action{text-decoration:underline;text-underline-offset:6px}.home-gallery .home-gallery-heading{gap:calc(var(--section-heading-gap) * var(--section-space-scale))}
+
+.cinematic-home .home-listing>a{display:block;height:auto}
+.cinematic-home .home-listing{display:flex;flex-direction:column}
+.cinematic-home .home-listing .property-offer-links{padding-top:var(--section-heading-gap)}

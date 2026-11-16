@@ -1,6 +1,7 @@
 import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalRateSummary';
 import '@/styles/public-commerce.css';
 import '@/styles/premium-public.css';
+import { PropertyJourneyNav, PropertyAreaGuide } from '@/components/property/PropertyJourney';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
@@ -322,6 +323,7 @@ export default function PropertyDetail() {
           </AlertDescription>
         </Alert>}
 
+        <PropertyJourneyNav property={propertyExt} mode={isSaleListing ? 'buy' : 'rent'} />
         {/* Property identity and secondary actions */}
         <div className="premium-property-identity flex flex-wrap items-start gap-4 py-5 md:py-7">
           <button type="button" className="premium-return home-text-link" onClick={returnToResults}><ChevronLeft className="h-4 w-4" aria-hidden="true" />{isRu ? 'К результатам' : 'Back to results'}</button>
@@ -438,6 +440,7 @@ export default function PropertyDetail() {
         <div>
           <div className="premium-detail-grid">
             <article className="premium-property-content min-w-0">
+              {propertyDesc && <section className="property-detail-intro"><h2>{isRu ? 'Дом для вашего ритма' : 'A home for your rhythm'}</h2><p>{propertyDesc}</p></section>}
 
               {!isSaleListing && pricing.hasOffer && <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />}
 
@@ -720,12 +723,7 @@ export default function PropertyDetail() {
               />
 
               <Separator />
-              {propertyAreaHref(property.district) && (
-                <Link to={propertyAreaHref(property.district)!} state={publicJourneyState(location)} className="inline-flex min-h-11 items-center gap-2 text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring">
-                  <MapPin className="h-4 w-4" aria-hidden />
-                  {isRu ? `О районе ${property.district}` : `Explore ${property.district}`}
-                </Link>
-              )}
+              <PropertyAreaGuide property={propertyExt} />
               <PropertyLocationMap
                 lat={property.lat}
                 lng={property.lng}
