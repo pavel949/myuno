@@ -39,7 +39,10 @@ async def main():
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (lang,width,'initial overflow')
                 await expect(page.get_by_role('link',name={'ru':'Мои заявки','en':'My requests','th':'คำขอของฉัน'}[lang])).to_have_attribute('href','/bookings')
                 await expect(page.locator('[data-testid=service-discovery-menu] a[href="/yachts"]')).to_be_visible()
-                await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id]')).to_have_count(3)
+                # All eleven active main categories are first-level portal entries.
+                await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id]')).to_have_count(11)
+                for category_id in ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']:
+                    await expect(page.locator(f'[data-testid=service-discovery-menu] [data-category-id={category_id}]')).to_be_visible()
                 await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id=cat-home-services]')).to_be_visible()
                 await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id=cat-tourism]')).to_be_visible()
                 await expect(page.get_by_test_id('service-catalogue-results')).to_have_count(0)
