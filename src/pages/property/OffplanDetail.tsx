@@ -1,3 +1,6 @@
+import { useLocation as useJourneyLocation, useNavigate as useJourneyNavigate } from 'react-router-dom';
+import { publicJourneyReturn, publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
@@ -84,6 +87,9 @@ const STATUS_CONFIG: Record<ProjectStatus, {
 
 export default function OffplanDetail() {
   const { id } = useParams<{ id: string }>();
+  const journeyLocation = useJourneyLocation();
+  const journeyNavigate = useJourneyNavigate();
+  const returnToCatalogue = () => { const plan = publicJourneyReturn(journeyLocation, '/property/offplan'); if ('delta' in plan) journeyNavigate(plan.delta); else journeyNavigate(plan.href, { replace: plan.replace, state: plan.state }); };
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -102,7 +108,7 @@ export default function OffplanDetail() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4"><BackButton fallbackPath="/property/offplan" onClick={returnToCatalogue} />
         <Skeleton className="aspect-[16/9] rounded-none" />
         <Skeleton className="h-8 w-3/4" />
         <Skeleton className="h-6 w-1/2" />
@@ -111,7 +117,7 @@ export default function OffplanDetail() {
     );
   }
 
-  if (isError) return <div role="alert" className="p-6 space-y-4"><p>{pickLang(language, { ru: 'Не удалось загрузить проект.', en: 'Unable to load project.', th: 'โหลดโครงการไม่สำเร็จ' })}</p><Button onClick={() => void refetch()}>{pickLang(language, { ru: 'Попробовать ещё раз', en: 'Try again', th: 'ลองอีกครั้ง' })}</Button></div>;
+  if (isError) return <div className="p-6 space-y-4"><BackButton fallbackPath="/property/offplan" onClick={returnToCatalogue} /><QueryRecovery onRetry={refetch} /></div>;
 
   if (!project) {
     return (
@@ -120,7 +126,7 @@ export default function OffplanDetail() {
         <p className="text-muted-foreground">
           {pickLang(language, {"ru": "Проект не найден", "en": "Project not found", "th": "ไม่พบโครงการ"})}
         </p>
-        <Button variant="link" onClick={() => navigate('/property/offplan')}>
+        <Button variant="link" onClick={returnToCatalogue}>
           {pickLang(language, {"ru": "Вернуться к списку", "en": "Back to list", "th": "กลับไปยังรายการ"})}
         </Button>
       </div>
@@ -188,7 +194,7 @@ export default function OffplanDetail() {
 
         {/* Top actions */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <BackButton fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
+          <BackButton onClick={returnToCatalogue} fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
 
         </div>
 
@@ -403,7 +409,7 @@ export default function OffplanDetail() {
                 <Button
                   variant="outline"
                   className="w-full gap-2"
-                  onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(developer.id))}
+                  onClick={() => navigate(APP_ROUTES.DEVELOPER_DETAIL(developer.id), { state: publicJourneyState(journeyLocation) })}
                 >
                   {pickLang(language, {"ru": "Все проекты застройщика", "en": "All Developer Projects", "th": "ดูโครงการทั้งหมดของผู้พัฒนา"})}
                   <ExternalLink className="w-4 h-4" />

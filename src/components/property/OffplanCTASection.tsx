@@ -95,10 +95,10 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <Button
             onClick={() => navigate('/property/offplan')}
-            className="flex-1 gap-2"
+            className="min-h-11 h-auto min-w-0 whitespace-normal py-3 gap-2 [&>svg]:shrink-0"
           >
             <Building2 className="w-4 h-4" />
             {isRu ? 'Смотреть новостройки' : 'View New Developments'}
@@ -106,7 +106,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
           <Button
             variant="outline"
             onClick={() => setShowLeadForm(true)}
-            className="flex-1 gap-2"
+            className="min-h-11 h-auto min-w-0 whitespace-normal py-3 gap-2 [&>svg]:shrink-0"
           >
             <MessageCircle className="w-4 h-4" />
             {isRu ? 'Помочь подобрать' : 'Help Me Choose'}

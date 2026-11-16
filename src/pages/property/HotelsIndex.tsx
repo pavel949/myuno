@@ -1,3 +1,5 @@
+import { publicAssetFilterIssue, publicAssetNumber, clearPublicAssetFilters } from '@/lib/real-estate/publicAssetFilters';
+import { PublicAssetFilterNotice } from '@/components/property/commercial/PublicAssetFilterNotice';
 /**
  * HotelsIndex — dedicated landing for operational hotel listings.
  * Tabs: Buy / Lease / Management opportunities.
@@ -18,7 +20,7 @@ import { HotelPropertyCard } from '@/components/property/commercial/HotelPropert
 import { HotelHeroBanner } from '@/components/property/commercial/HotelHeroBanner';
 import { HotelManagementLeadSheet } from '@/components/property/commercial/HotelManagementLeadSheet';
 import { HotelFiltersSheet, type HotelFiltersValue } from '@/components/property/commercial/HotelFilters';
-import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
 const MODES: { id: HotelMode; labelEn: string; labelRu: string }[] = [
@@ -33,7 +35,9 @@ export default function HotelsIndex() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [hmaOpen, setHmaOpen] = useState(false);
 
-  const mode = (searchParams.get('mode') as HotelMode) || 'buy';
+  const filterIssue = publicAssetFilterIssue(searchParams, 'hotel');
+  const resetPublicFilters = () => setSearchParams(clearPublicAssetFilters(searchParams));
+  const mode: HotelMode = ['lease', 'management'].includes(searchParams.get('mode') || '') ? searchParams.get('mode') as HotelMode : 'buy';
 
   const filterValues: HotelFiltersValue = {
     minKeys: searchParams.get('minKeys') ?? undefined,
@@ -44,11 +48,11 @@ export default function HotelsIndex() {
     minOccupancy: searchParams.get('minOcc') ?? undefined,
   };
 
-  const { data, isLoading, error } = useHotelProperties({
+  const { data, isLoading, error, refetch } = useHotelProperties({
     mode,
-    minKeys: filterValues.minKeys ? Number(filterValues.minKeys) : undefined,
-    maxKeys: filterValues.maxKeys ? Number(filterValues.maxKeys) : undefined,
-    minStars: filterValues.minStars ? Number(filterValues.minStars) : undefined,
+    minKeys: publicAssetNumber(searchParams, 'minKeys'),
+    maxKeys: publicAssetNumber(searchParams, 'maxKeys'),
+    minStars: publicAssetNumber(searchParams, 'minStars'),
     licenseType: filterValues.licenseType,
     managementStatus: filterValues.managementStatus,
     minOccupancy: filterValues.minOccupancy ? Number(filterValues.minOccupancy) : undefined,
@@ -93,14 +97,14 @@ export default function HotelsIndex() {
         }
         description={
           isRu
-            ? 'Готовый отельный бизнес: покупка, долгосрочная аренда здания, передача в управление бренду. ADR, RevPAR, occupancy.'
-            : 'Turnkey hotel businesses: acquisition, long-term lease, hand-over to brand operators. ADR, RevPAR, occupancy.'
+            ? 'Готовый отельный бизнес: покупка, долгосрочная аренда здания, передача в управление бренду. Условия и операционные показатели уточняются по запросу.'
+            : 'Turnkey hotel businesses: acquisition, long-term lease, hand-over to brand operators. Confirm terms and operating figures on request.'
         }
       />
 
       <div className={ECOSYSTEM_PAGE_CONTAINER}>
         <div className="px-4 pt-3 pb-2">
-          <BackButton />
+          <BackButton fallbackPath="/property" />
         </div>
 
         <div className="px-4 pb-3">
@@ -118,18 +122,17 @@ export default function HotelsIndex() {
         </div>
 
         <div className="px-4 space-y-4">
-          <PersonaGatePrompt />
 
           {/* Hero with 4 use-cases */}
           <HotelHeroBanner onOpenHmaForm={() => setHmaOpen(true)} />
 
           {/* Mode tabs */}
-          <div className="inline-flex p-1 rounded-full bg-muted">
+          <div className="inline-flex p-1 rounded-full bg-muted" role="group" aria-label={isRu ? 'Тип предложения' : 'Offer type'}>
             {MODES.map((m) => (
               <button
                 key={m.id}
                 type="button"
-                onClick={() => setMode(m.id)}
+                onClick={() => setMode(m.id)} aria-pressed={mode === m.id}
                 className={cn(
                   'px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
                   mode === m.id
@@ -156,8 +159,14 @@ export default function HotelsIndex() {
             <HotelFiltersSheet value={filterValues} onChange={updateFilters} />
           </div>
 
+          {filterIssue && <PublicAssetFilterNotice issue={filterIssue} onReset={resetPublicFilters} />}
+          {!filterIssue && mode === 'management' && <div className="space-y-3 border border-border p-5">
+            <h2 className="text-lg font-semibold">{isRu ? 'Возможности для операторов — по запросу' : 'Operator opportunities — by enquiry'}</h2>
+            <p className="text-sm text-muted-foreground">{isRu ? 'Обсудите объект и условия управления со специалистом. Публичный каталог не подтверждает наличие такого предложения.' : 'Discuss the property and management terms with a specialist. The public catalogue does not confirm an operator offer.'}</p>
+            <Button onClick={() => setHmaOpen(true)}>{isRu ? 'Обсудить объект' : 'Discuss a property'}</Button>
+          </div>}
           {/* Grid */}
-          {isLoading && (
+          {!filterIssue && mode !== 'management' && isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="aspect-[16/10] rounded-none" />
@@ -165,13 +174,9 @@ export default function HotelsIndex() {
             </div>
           )}
 
-          {!isLoading && error && (
-            <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
-              {isRu ? 'Не удалось загрузить отели' : 'Failed to load hotels'}
-            </div>
-          )}
+          {!filterIssue && mode !== 'management' && !isLoading && error && <QueryRecovery onRetry={refetch} />}
 
-          {!isLoading && !error && items.length === 0 && (
+          {!filterIssue && mode !== 'management' && !isLoading && !error && items.length === 0 && (
             <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Building2 className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
@@ -188,7 +193,7 @@ export default function HotelsIndex() {
             </div>
           )}
 
-          {!isLoading && !error && items.length > 0 && (
+          {!filterIssue && mode !== 'management' && !isLoading && !error && items.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((p) => (
                 <HotelPropertyCard key={p.id} property={p} />

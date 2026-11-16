@@ -59,3 +59,10 @@ describe('public catalogue pagination', () => {
   });
 
 });
+
+it('does not request the whole market before a company identity is available', async () => {
+ fixture.adapter = createSyntheticPropertyCatalog(); const client = new QueryClient({defaultOptions:{queries:{retry:false}}});
+ const wrapper=({children}:{children:React.ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>;
+ const view=renderHook(({enabled})=>usePropertiesInfinite({managementCompanyId:enabled?'synthetic-company':undefined},{enabled}),{initialProps:{enabled:false},wrapper});
+ await act(async()=>{await Promise.resolve();}); expect(fixture.adapter.calls).toHaveLength(0); view.unmount();client.clear();
+});

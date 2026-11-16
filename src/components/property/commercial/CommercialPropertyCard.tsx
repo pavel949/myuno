@@ -1,3 +1,7 @@
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useLocation } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { commercialRecordedPrice } from '@/lib/real-estate/commercialPricePresentation';
 /**
  * Card surface for commercial RE listings — purpose-built for offices, warehouses,
  * retail/F&B, hotels. Differs from residential card by surfacing yield, NOI,
@@ -23,6 +27,7 @@ interface Props {
 
 export function CommercialPropertyCard({ property, className }: Props) {
   const { language } = useLanguage();
+  const journey = publicJourneyState(useLocation());
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
 
@@ -32,17 +37,11 @@ export function CommercialPropertyCard({ property, className }: Props) {
   const cover = property.cover_image || property.images?.[0] || null;
   const titleDeed = getTitleDeedLabel(property.title_deed_type ?? null, isRu);
 
-  const priceMain =
-    isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
-      : property.sale_price
-      ? formatPrice(property.sale_price)
-      : property.price
-      ? formatPrice(property.price)
-      : null;
+  const priceMain = commercialRecordedPrice(property, language);
 
   return (
     <Link
+      state={journey}
       to={APP_ROUTES.COMMERCIAL_DETAIL(property.id)}
       className={cn(
         'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
@@ -52,10 +51,10 @@ export function CommercialPropertyCard({ property, className }: Props) {
       {/* Cover */}
       <div className="relative aspect-[16/10] bg-muted overflow-hidden">
         {cover ? (
-          <img
+          <OptimizedImage
             src={cover}
             alt={title}
-            loading="lazy"
+            aspectRatio="auto"
             className="w-full h-full object-cover transition-transform duration-300"
           />
         ) : (

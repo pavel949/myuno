@@ -50,7 +50,7 @@ export const SORT_OPTIONS: Option<OffplanSortKey>[] = [
 /** Projects without a known starting price are excluded when a budget is chosen (unknown is not a match). */
 export function filterByBudget(projects: OffplanProject[], budget: string): OffplanProject[] {
   const range = BUDGET_RANGES[budget];
-  if (!range) return projects;
+  if (!range) return budget ? [] : projects;
   return projects.filter((p) => typeof p.priceFrom === 'number' && p.priceFrom > 0
     && p.priceFrom >= range[0] && p.priceFrom < range[1]);
 }

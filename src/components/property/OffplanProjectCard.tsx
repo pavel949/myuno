@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
@@ -69,6 +71,7 @@ export function OffplanProjectCard({
   const project = publicNewbuildPresentation(sourceProject);
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const journey = publicJourneyState(useLocation());
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -121,7 +124,7 @@ export function OffplanProjectCard({
     >
       {/* Photo and title link to the same canonical project; actions remain siblings. */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <Link to={surface.href} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
+        <Link state={journey} to={surface.href} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
         {project.coverImage ? (
           <img
             src={project.coverImage}
@@ -211,7 +214,7 @@ export function OffplanProjectCard({
       <div className="p-4 space-y-3">
         {/* Title */}
         <h3 className="font-display font-normal text-xl leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-          <Link to={surface.href}>{name}</Link>
+          <Link state={journey} to={surface.href}>{name}</Link>
         </h3>
 
         {/* Location + Developer */}
@@ -224,6 +227,7 @@ export function OffplanProjectCard({
           )}
 
           <DeveloperBadge
+            navigationState={journey}
             developerId={project.developerId}
             showLink={project.developerProfileAvailable === true}
             developerName={project.developerName}

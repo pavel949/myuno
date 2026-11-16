@@ -452,8 +452,9 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
 }
 
 // Fetch properties with pagination for infinite scroll
-export function usePropertiesInfinite(filters: PropertyFilters = {}) {
+export function usePropertiesInfinite(filters: PropertyFilters = {}, options: { enabled?: boolean } = {}) {
   return useInfiniteQuery({
+    enabled: options.enabled ?? true,
     queryKey: ['properties-infinite', filters],
     staleTime: 5 * 60 * 1000,   // 5 min — avoid refetch on every visit
     gcTime: 10 * 60 * 1000,     // 10 min cache

@@ -1,3 +1,7 @@
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useLocation } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
+import { commercialRecordedPrice } from '@/lib/real-estate/commercialPricePresentation';
 /**
  * HotelPropertyCard — purpose-built card for operational hotel listings.
  *
@@ -18,7 +22,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import {
   getCommercialTypeLabel,
   getHotelLicenseLabel,
@@ -54,8 +57,8 @@ function StarPips({ value }: { value: number }) {
 
 export function HotelPropertyCard({ property, className }: Props) {
   const { language } = useLanguage();
+  const journey = publicJourneyState(useLocation());
   const { user } = useAuth();
-  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const isAuthed = !!user;
 
@@ -79,18 +82,11 @@ export function HotelPropertyCard({ property, className }: Props) {
     ? 'bg-primary/95 text-white hover:bg-primary'
     : 'bg-accent/95 text-white hover:bg-accent';
 
-  const priceMain = isSeekingOperator
-    ? null
-    : isRent && property.monthly_rent_thb
-    ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
-    : property.sale_price
-    ? formatPrice(property.sale_price)
-    : property.price
-    ? formatPrice(property.price)
-    : null;
+  const priceMain = isSeekingOperator ? null : commercialRecordedPrice(property, language);
 
   return (
     <Link
+      state={journey}
       to={APP_ROUTES.HOTEL_DETAIL(property.id)}
       className={cn(
         'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
@@ -100,10 +96,10 @@ export function HotelPropertyCard({ property, className }: Props) {
       {/* Cover */}
       <div className="relative aspect-[16/10] bg-muted overflow-hidden">
         {cover ? (
-          <img
+          <OptimizedImage
             src={cover}
             alt={title}
-            loading="lazy"
+            aspectRatio="auto"
             className="w-full h-full object-cover transition-transform duration-300"
           />
         ) : (

@@ -1,3 +1,4 @@
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 /**
  * ManagementCompaniesIndex — public directory of management companies.
  * Route: /property/companies. Lists active companies, each linking to its
@@ -14,7 +15,7 @@ import { cn } from '@/lib/utils';
 export default function ManagementCompaniesIndex() {
   const { t, language } = useLanguage();
   const isRu = language === 'ru';
-  const { data = [], isLoading } = useManagementCompanies();
+  const { data = [], isLoading, isError, refetch } = useManagementCompanies();
 
   return (
     <>
@@ -38,7 +39,7 @@ export default function ManagementCompaniesIndex() {
               <div key={i} className="h-[88px] animate-pulse rounded-none bg-muted" />
             ))}
           </div>
-        ) : data.length === 0 ? (
+        ) : isError ? <QueryRecovery onRetry={refetch} /> : data.length === 0 ? (
           <div className="rounded-none border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             {t('mcDirectory.empty')}
           </div>

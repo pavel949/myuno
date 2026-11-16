@@ -1,3 +1,4 @@
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 /**
  * ManagementCompanyProfile — Public page for a management company
  * Route: /company/:slug
@@ -25,12 +26,12 @@ export default function ManagementCompanyProfile() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: company, isLoading } = useManagementCompanyBySlug(slug);
+  const { data: company, isLoading, isError, refetch } = useManagementCompanyBySlug(slug);
 
   // Fetch properties managed by this company
-  const { data: propData, isLoading: propsLoading } = usePropertiesInfinite({
+  const { data: propData, isLoading: propsLoading, isError: propsError, refetch: retryProperties } = usePropertiesInfinite({
     managementCompanyId: company?.id,
-  });
+  }, { enabled: !!company?.id });
 
   const properties = propData?.pages.flatMap(p => p.properties) || [];
 
@@ -46,6 +47,8 @@ export default function ManagementCompanyProfile() {
       </AppLayout>
     );
   }
+
+  if (isError) return <AppLayout showHeader={false} showBottomNav><div className="p-4"><QueryRecovery onRetry={refetch} /></div></AppLayout>;
 
   if (!company) {
     return (
@@ -223,7 +226,7 @@ export default function ManagementCompanyProfile() {
             <div className="flex justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
-          ) : properties.length > 0 ? (
+          ) : propsError ? <QueryRecovery onRetry={retryProperties} /> : properties.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {properties.map(property => (
                 <PropertyListingCard key={property.id} property={property} />

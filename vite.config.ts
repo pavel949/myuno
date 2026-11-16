@@ -134,16 +134,16 @@ export default defineConfig(({ mode, command }) => {
           categories: ['lifestyle', 'travel', 'productivity'],
           prefer_related_applications: false,
           icons: [
-            { src: '/icons/icon-72x72.png',      sizes: '72x72',   type: 'image/png', purpose: 'any' },
-            { src: '/icons/icon-120x120.png',    sizes: '120x120', type: 'image/png', purpose: 'any' },
-            { src: '/icons/icon-152x152.png',    sizes: '152x152', type: 'image/png', purpose: 'any' },
-            { src: '/icons/icon-180x180.png',    sizes: '180x180', type: 'image/png', purpose: 'any' },
-            { src: '/icons/icon-192x192.png',    sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: '/icons/icon-512x512.png',    sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-72.png',      sizes: '72x72',   type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-120.png',    sizes: '120x120', type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-152.png',    sizes: '152x152', type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-180.png',    sizes: '180x180', type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-192.png',    sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/icons/myuno-v2-512.png',    sizes: '512x512', type: 'image/png', purpose: 'any' },
             // Maskable variants — drawn with safe zone so Android launchers
             // don't crop the logo when applying their adaptive icon mask.
-            { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-            { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+            { src: '/icons/myuno-maskable-v2-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: '/icons/myuno-maskable-v2-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
           // Screenshots trigger Chrome's richer install UI (looks like Play Store)
           screenshots: [
@@ -168,19 +168,19 @@ export default defineConfig(({ mode, command }) => {
               name: 'Property Search',
               short_name: 'Property',
               url: '/property',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
+              icons: [{ src: '/icons/myuno-v2-192.png', sizes: '192x192' }],
             },
             {
               name: 'Newbuilds',
               short_name: 'Newbuilds',
               url: '/newbuilds',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
+              icons: [{ src: '/icons/myuno-v2-192.png', sizes: '192x192' }],
             },
             {
               name: 'Discover',
               short_name: 'Discover',
               url: '/discover',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
+              icons: [{ src: '/icons/myuno-v2-192.png', sizes: '192x192' }],
             },
           ],
         },
