@@ -21,7 +21,7 @@ const virtual={
  '@/components/seo/SEOHead':`export const SEOHead=()=>null;`,
  '@/components/leads/UniversalLeadForm':`export const UniversalLeadForm=()=>null;`,
  '@/components/ui/responsive-modal':`export const ResponsiveModal=()=>null;`,
- '@/pages/services/ServicesIndex':`export default function Services(){throw Error('Services outside resale fixture')}`, 
+ '@/pages/services/ServicesIndex':`export default function Services(){throw Error('Services outside resale fixture')}`,
  '@/hooks/useResaleProperties':`import{useState}from'react';const rows=[${JSON.stringify(row)},{...${JSON.stringify(row)},id:'foreign',title:'Synthetic USD villa',currency:'USD'}];export const useResaleProperties=filters=>{const[failed,setFailed]=useState(new URLSearchParams(location.search).has('failure'));window.fixtureFilters=filters;return{data:rows.filter(r=>(!filters.zone||r.zone===filters.zone)&&(!filters.property_type||r.property_type===filters.property_type)&&(!filters.min_price||r.asking_price>=filters.min_price)&&(!filters.max_price||r.asking_price<=filters.max_price)),isLoading:false,isError:failed,refetch:()=>{window.fixtureRetries=(window.fixtureRetries||0)+1;setFailed(false)}}};export const useResaleProperty=id=>({data:rows.find(r=>r.id===id),isLoading:false,isError:false});`,
  '@/integrations/supabase/client':`export const supabase=new Proxy({},{get(){throw Error('Production backend forbidden in resale fixture')}});`,
 };
