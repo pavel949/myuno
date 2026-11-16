@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { COMPANY_CONTACTS } from '@/lib/config/contacts';
-import { ChevronLeft, Loader2, Star, ArrowRight } from 'lucide-react';
+import { ChevronLeft, Loader2, ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -252,12 +252,16 @@ export default function AirportTransferBooking() {
   // ── Validation (single source of truth, evaluated per step) ─────────────
   const canProceedStep0 = !!(formData.direction && formData.terminal && formData.destinationAddress);
   const canProceedStep1 = !!formData.vehicleType;
+  const phoneDigits = (formData.phone || '').replace(/\D/g, '');
   const canProceedStep2 = !!(
-    formData.flightNumber &&
+    formData.flightNumber.trim() &&
     formData.arrivalDate &&
     formData.arrivalTime &&
-    formData.name &&
-    formData.phone
+    formData.name.trim() &&
+    phoneDigits.length >= 8 && phoneDigits.length <= 15 &&
+    (!formData.email || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim())) &&
+    Number(formData.passengers) >= 1 && Number(formData.passengers) <= (selectedVehicle?.max_passengers || 8) &&
+    Number(formData.luggage) >= 0 && Number(formData.luggage) <= 10
   );
   const canProceed = step === 0 ? canProceedStep0
     : step === 1 ? canProceedStep1
@@ -265,7 +269,7 @@ export default function AirportTransferBooking() {
     : true;
   const canSubmit = canProceedStep0 && canProceedStep1 && canProceedStep2;
 
-  const handleNext = () => { if (step < transferSteps.length - 1) setStep(step + 1); };
+  const handleNext = () => { if (canProceed && step < transferSteps.length - 1) setStep(step + 1); };
   const handleBack = () => { if (step > 0) setStep(step - 1); };
 
   const handleSubmit = async () => {
@@ -541,10 +545,7 @@ export default function AirportTransferBooking() {
             </h1>
             <p className="text-xs text-muted-foreground">Phuket (HKT)</p>
           </div>
-          <div className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 rounded-full">
-            <Star className="w-3.5 h-3.5 text-primary fill-primary" />
-            <span className="text-xs font-semibold text-primary">4.9</span>
-          </div>
+          
         </div>
 
         <BookingStepProgress steps={transferSteps} currentStep={step} className="py-2" />
@@ -609,7 +610,7 @@ export default function AirportTransferBooking() {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
       >
         <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex-1 min-w-0">
               {formData.destinationAddress ? (
                 <p className="text-xs text-muted-foreground truncate">
@@ -621,7 +622,7 @@ export default function AirportTransferBooking() {
                   {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
                 </p>
               )}
-              <p className="text-lg font-bold">฿{totalPrice.toLocaleString()}</p>
+              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{formData.vehicleType ? `฿${totalPrice.toLocaleString()}` : (language === "ru" ? "Выберите автомобиль" : "Select a vehicle")}</p>
             </div>
             {selectedVehicleLabel && (
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">

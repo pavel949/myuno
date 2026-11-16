@@ -38,7 +38,7 @@
  .premium-property .public-commerce-title{font-size:var(--type-h1-size)}
  .premium-property .property-detail-intro p{font-size:var(--type-body-size);line-height:1.8}
  .property-area-guide{border-radius:var(--radius);padding:24px 20px}
- 
+
  .premium-area>section{margin-bottom:32px}
 }
 @media(prefers-reduced-motion:reduce){.property-premium-listing{transition:none}}

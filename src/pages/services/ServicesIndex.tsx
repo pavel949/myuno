@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
+import { MarketplaceDiscoveryHero } from '@/components/services/MarketplaceDiscoveryHero';
 import { ServiceFunctionCard } from '@/components/services';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -108,21 +109,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
     searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter={false} showEcosystemHint={false}>
     {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
+    {overview && <MarketplaceDiscoveryHero kind="services" />}
     <section aria-label={t('Подбор услуг', 'Find services', 'ค้นหาบริการ')} className="space-y-4">
-      {situations.length > 0 && <div className="service-marketplace-intro">
-        <div className="service-marketplace-intro-copy">
-          <p className="service-marketplace-eyebrow">{t('Marketplace myUNO', 'myUNO marketplace', 'มาร์เก็ตเพลส myUNO')}</p>
-          <h2>{t('Что нужно решить сегодня?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
-          <p>{t('Начните с задачи — мы покажем подходящие услуги и следующий шаг.', 'Start with the task. We’ll show relevant services and the next safe step.', 'เริ่มจากสิ่งที่ต้องการ เราจะแสดงบริการที่เกี่ยวข้องและขั้นตอนถัดไป')}</p>
-        </div>
-        <div className="service-quick-grid" aria-label={t('Популярные задачи', 'Popular tasks', 'งานยอดนิยม')}>
-          {situations.slice(0, 6).map(item => <Button key={item.code} variant="outline" className="service-quick-card" onClick={() => update('situation', item.code)}>
-            <span className="service-quick-card-icon"><Wrench className="size-4" aria-hidden="true" /></span>
-            <span>{pickLang(language, { ru: item.titleRu, en: item.titleEn })}</span>
-            <ArrowRight className="service-quick-card-arrow" aria-hidden="true" />
-          </Button>)}
-        </div>
-      </div>}
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList className="h-auto min-h-11" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>

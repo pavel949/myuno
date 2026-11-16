@@ -20,7 +20,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       /* Below DialogContent (z-[131]) so content stays interactive when overlay is rendered after content in the portal (DOM order). */
-      "fixed inset-0 z-[130] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-[130] bg-foreground/65 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}

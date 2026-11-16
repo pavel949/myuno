@@ -9,6 +9,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, BadgeCheck, Scale, ShieldCheck, MapPin } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
+import { PlatformJourneyLinks } from '@/components/landing/PlatformJourneyLinks';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -47,6 +48,7 @@ export default function PropertyLanding() {
       />
       <div className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'py-8 pb-24 space-y-10')}>
         <HubHero t={t} isRu={isRu} />
+        <PlatformJourneyLinks journey="property" />
         <SeekerLane t={t} />
         <RentFeaturedRow t={t} />
         <OffplanFeaturedRow t={t} />
