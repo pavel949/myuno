@@ -141,7 +141,7 @@ export default function Search() {
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
                   {isRu ? 'Популярные категории' : 'Popular Categories'}
                 </h3>
-                <AnimatedGrid className="grid grid-cols-2 gap-3" staggerDelay={0.06}>
+                <AnimatedGrid className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 min-[420px]:gap-3" staggerDelay={0.06}>
                   {popularCategories.slice(0, 6).map(type => {
                     const config = searchTypeConfig[type];
                     if (!config) return null;
@@ -150,15 +150,15 @@ export default function Search() {
                       <AnimatedCard key={type}>
                         <button
                           onClick={() => setSelectedType(type)}
-                          className="w-full flex items-center gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
+                          className="w-full min-h-14 flex items-center gap-2 p-2.5 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           <div className={cn(
-                            "w-10 h-10 rounded-none flex items-center justify-center bg-gradient-to-br",
+                            "w-8 h-8 shrink-0 rounded-none flex items-center justify-center bg-gradient-to-br",
                             config.color
                           )}>
-                            <Icon className="w-5 h-5 text-white" />
+                            <Icon className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
                           </div>
-                          <span className="font-medium">{config.label[language]}</span>
+                          <span className="min-w-0 text-left text-sm font-medium leading-tight break-words-ru">{config.label[language]}</span>
                         </button>
                       </AnimatedCard>
                     );

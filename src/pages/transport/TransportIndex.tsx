@@ -155,16 +155,16 @@ export default function TransportIndex() {
 
       {/* Results bar */}
       <div ref={resultsRef} className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-3")}>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground whitespace-nowrap">
               {isRu ? `Найдено: ${filtered.length}` : `${filtered.length} results`}
             </p>
             <Button
               variant="outline"
               size="sm"
               className={cn(
-                "text-xs gap-1.5 h-8",
+                "text-xs gap-1.5 min-h-11 whitespace-nowrap",
                 activeFilterCount > 0 && "border-primary text-primary"
               )}
               onClick={() => setFiltersOpen(!filtersOpen)}
@@ -180,7 +180,7 @@ export default function TransportIndex() {
           </div>
 
           <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-            <SelectTrigger className="w-auto gap-1.5 h-8 text-xs border-border/50 bg-background">
+            <SelectTrigger className="w-auto shrink-0 gap-1.5 min-h-11 whitespace-nowrap text-xs border-border/50 bg-background" aria-label={isRu ? 'Сортировка' : 'Sort by'}>
               <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>

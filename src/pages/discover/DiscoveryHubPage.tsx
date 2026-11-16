@@ -32,7 +32,7 @@ export default function DiscoveryHubPage() {
         title={t({ en: 'Find your next step in Phuket', ru: 'Найдите следующий шаг на Пхукете', th: 'ค้นหาสิ่งที่คุณต้องการในภูเก็ต' })}
         description={t({ en: 'Choose a clear path for a home, property purchase, relocation or local service.', ru: 'Выберите понятный путь: жильё, покупка недвижимости, переезд или услуга.', th: 'เลือกเส้นทางที่ชัดเจนสำหรับที่พัก การซื้ออสังหาริมทรัพย์ การย้ายถิ่น หรือบริการท้องถิ่น' })}
       />
-      <main className="mx-auto w-full max-w-[var(--layout-width-journey)] px-[var(--layout-gutter)] py-8 sm:py-12" aria-labelledby="discovery-hub-title">
+      <section className="mx-auto w-full max-w-[var(--layout-width-journey)] px-[var(--layout-gutter)] py-8 sm:py-12" aria-labelledby="discovery-hub-title">
         <header className="mb-8 max-w-[var(--layout-width-article)] sm:mb-10">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">myUNO · Discovery</p>
           <h1 id="discovery-hub-title" className="text-4xl font-semibold tracking-tight text-foreground sm:text-6xl">
@@ -94,7 +94,7 @@ export default function DiscoveryHubPage() {
             <ArrowRight size={18} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </Link>
         </section>
-      </main>
+      </section>
     </AppLayout>
   );
 }

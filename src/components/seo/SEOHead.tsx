@@ -14,11 +14,11 @@ interface SEOHeadProps {
 
 const defaultMeta = {
   en: {
-    title: 'myUNO — Phuket Super-App for Foreigners',
-    description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
+    title: 'myUNO — your home and life in Phuket',
+    description: 'myUNO — homes, property and everyday services in Phuket: rentals, purchases, local services and human support in one place.',
   },
   ru: {
-    title: 'myUNO — Phuket Super-App for Foreigners',
+    title: 'myUNO — ваш дом и жизнь на Пхукете',
     description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
   },
 };

@@ -113,10 +113,13 @@ export function TransportFilterSidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-[320px] bg-background border-l border-border shadow-2xl transition-transform duration-300 overflow-y-auto",
+          "fixed top-0 right-0 z-50 h-full w-[320px] max-w-full bg-background border-l border-border shadow-2xl transition-[transform,visibility] duration-300 overflow-y-auto",
           "lg:static lg:z-auto lg:shadow-none lg:border-l-0 lg:border-r lg:border-border/50 lg:rounded-none lg:h-auto lg:w-[280px] lg:shrink-0",
-          open ? "translate-x-0" : "translate-x-full lg:translate-x-0 lg:hidden"
+          // Closed on mobile: `invisible` takes the off-canvas controls out of
+          // the tab order and the accessibility tree, not just out of sight.
+          open ? "translate-x-0 visible" : "translate-x-full invisible lg:translate-x-0 lg:hidden"
         )}
+        aria-label={isRu ? 'Фильтры' : 'Filters'}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b border-border/50 px-4 py-3 flex items-center justify-between">
@@ -131,12 +134,12 @@ export function TransportFilterSidebar({
           </div>
           <div className="flex items-center gap-2">
             {activeCount > 0 && (
-              <button onClick={reset} className="text-xs text-primary hover:underline">
+              <button type="button" onClick={reset} className="min-h-11 px-2 text-xs text-primary hover:underline">
                 {isRu ? 'Сбросить' : 'Reset'}
               </button>
             )}
-            <button onClick={onClose} className="lg:hidden p-1 rounded-none hover:bg-muted">
-              <X className="w-4 h-4" />
+            <button type="button" onClick={onClose} aria-label={isRu ? 'Закрыть фильтры' : 'Close filters'} className="lg:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-none hover:bg-muted">
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -162,9 +165,9 @@ export function TransportFilterSidebar({
 
           {/* Transmission */}
           <FilterSection title={isRu ? 'Трансмиссия' : 'Transmission'}>
-            <div className="space-y-2">
+            <div>
               {TRANSMISSIONS.map(t => (
-                <label key={t.id} className="flex items-center gap-2.5 cursor-pointer">
+                <label key={t.id} className="flex min-h-11 items-center gap-2.5 cursor-pointer">
                   <Checkbox
                     checked={filters.transmissions.includes(t.id)}
                     onCheckedChange={() => update({ transmissions: toggleInArray(filters.transmissions, t.id) })}
@@ -177,9 +180,9 @@ export function TransportFilterSidebar({
 
           {/* Fuel Type */}
           <FilterSection title={isRu ? 'Тип топлива' : 'Fuel type'}>
-            <div className="space-y-2">
+            <div>
               {FUEL_TYPES.map(f => (
-                <label key={f.id} className="flex items-center gap-2.5 cursor-pointer">
+                <label key={f.id} className="flex min-h-11 items-center gap-2.5 cursor-pointer">
                   <Checkbox
                     checked={filters.fuelTypes.includes(f.id)}
                     onCheckedChange={() => update({ fuelTypes: toggleInArray(filters.fuelTypes, f.id) })}
@@ -215,7 +218,7 @@ export function TransportFilterSidebar({
             <FilterSection title={isRu ? 'Марка' : 'Brand'}>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {brands.map(brand => (
-                  <label key={brand} className="flex items-center gap-2.5 cursor-pointer">
+                  <label key={brand} className="flex min-h-11 items-center gap-2.5 cursor-pointer">
                     <Checkbox
                       checked={filters.brands.includes(brand)}
                       onCheckedChange={() => update({ brands: toggleInArray(filters.brands, brand) })}
@@ -229,15 +232,15 @@ export function TransportFilterSidebar({
 
           {/* Toggles */}
           <FilterSection title={isRu ? 'Опции' : 'Options'}>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2.5 cursor-pointer">
+            <div>
+              <label className="flex min-h-11 items-center gap-2.5 cursor-pointer">
                 <Checkbox
                   checked={filters.deliveryOnly}
                   onCheckedChange={(v) => update({ deliveryOnly: !!v })}
                 />
                 <span className="text-sm">{isRu ? 'С доставкой' : 'Delivery available'}</span>
               </label>
-              <label className="flex items-center gap-2.5 cursor-pointer">
+              <label className="flex min-h-11 items-center gap-2.5 cursor-pointer">
                 <Checkbox
                   checked={filters.withDriverOnly}
                   onCheckedChange={(v) => update({ withDriverOnly: !!v })}

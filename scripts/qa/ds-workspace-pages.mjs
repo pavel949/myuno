@@ -12,7 +12,7 @@ const virtual={
 '@/hooks/useMcOnboarding':`export const computeProgress=()=>0;export const useMcOnboarding=()=>({data:null});`,
 '@/contexts/DashboardFilterContext':`export const DashboardFilterProvider=({children})=>children;`,
 '@/hooks/useUserContext':`export const useUserContext=()=>({activeOrg:{id:'synthetic-org',name:'Synthetic provider'},vendorOrgs:[{org:{id:'synthetic-org'}}],isLoading:false});`,
-'@/hooks/useVendor':`export const useVendorProfile=()=>({profile:{id:'synthetic-profile',rating:0}});`,
+'@/hooks/useVendor':`export const useVendorProfile=()=>({profile:{id:'synthetic-profile',rating:0}});export const useVendorServices=()=>({services:[],isLoading:false});`,
 '@/hooks/useOrders':`export const useVendorOrders=()=>({orders:[{id:'synthetic-order',order_number:'SYNTHETIC-CANCELLED',status:'cancelled',created_at:'2026-10-24T12:00:00Z',total_amount:2500}],isLoading:false,stats:{totalRevenue:7500,pendingCount:0,confirmedCount:0,completedCount:0},updateStatus:()=>{window.fixtureWrites++;throw Error('Write forbidden')}});`,
 '@/hooks/useUiSignOut':`export const useUiSignOut=()=>async()=>{window.fixtureWrites++;throw Error('Sign-out forbidden')};`,
 '@/integrations/supabase/client':`export const supabase={from:table=>{if(table!=='notifications')throw Error('Unexpected table '+table);const q={select:()=>q,eq:()=>q,then:f=>Promise.resolve({count:0,error:null}).then(f)};return q;}};`,

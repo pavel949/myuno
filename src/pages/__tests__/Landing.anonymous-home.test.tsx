@@ -60,6 +60,7 @@ it.each([
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
  expect(screen.getByRole('button', { name: 'Unified home search' })).toBeVisible();
+ expect(screen.getAllByRole('main')).toHaveLength(1);
  expect(screen.getByText('Published new developments')).toBeVisible();
  expect(screen.getByText('Published housing')).toBeVisible();
  expect(screen.queryByRole('heading', { name: 'Layantara Villas' })).toBeNull();
@@ -82,6 +83,6 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
  const css = readFileSync(`${process.cwd()}/src/styles/cinematic-home.css`, 'utf8');
  const tokens = readFileSync(`${process.cwd()}/src/styles/tokens.css`, 'utf8');
  expect(css).toContain('padding-bottom:calc(28px + var(--bottom-nav-h, 0px))');
- expect(tokens).toMatch(/--bottom-nav-h:\s*calc\(64px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+ expect(tokens).toMatch(/--bottom-nav-h:\s*calc\(64px \+ 1px \+ env\(safe-area-inset-bottom, 0px\)\)/);
  expect(tokens).toMatch(/@media \(min-width: 768px\)[\s\S]*--bottom-nav-h:\s*0px/);
 });

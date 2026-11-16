@@ -86,19 +86,21 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 pb-3">
+          <div className="p-3 pb-1 sm:p-4 sm:pb-3">
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary/10 shrink-0">
-                <Cookie className="w-4 h-4 text-primary" />
+              <div className="hidden p-2 rounded-full bg-primary/10 shrink-0 sm:block">
+                <Cookie className="w-4 h-4 text-primary" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm">
                   {t('Мы используем cookie', 'We use cookies', "เราใช้คุกกี้")}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  {t('Мы используем cookie для улучшения работы сервиса. Вы можете настроить предпочтения.', 'We use cookies to improve our service. You can customize your preferences.', "เราใช้คุกกี้เพื่อปรับปรุงบริการของเรา คุณสามารถปรับแต่งการตั้งค่าได้")}
+                  {t('Они нужны для работы сервиса и помогают его улучшать. Выбор можно настроить.', 'They keep the service working and help us improve it. You can adjust your choice.', "คุกกี้ช่วยให้บริการทำงานและพัฒนาได้ดีขึ้น คุณปรับการตั้งค่าได้")}
                   {' '}
-                  <Link to="/cookies" className="inline-flex min-h-11 items-center text-primary hover:underline">
+                  {/* Inline text link: exempt from the 44px target rule (WCAG 2.5.8);
+                      a 44px inline box here stretched the paragraph's last line. */}
+                  <Link to="/cookies" className="text-primary underline underline-offset-2">
                     {t('Подробнее', 'Learn more', "อ่านเพิ่มเติม")}
                   </Link>
                 </p>
@@ -149,7 +151,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
           </AnimatePresence>
 
           {/* Actions */}
-          <div className="p-4 pt-2 flex gap-2">
+          <div className="p-3 pt-1 flex gap-2 sm:p-4 sm:pt-2">
             <Button
               variant="ghost"
               size="sm"
