@@ -93,7 +93,7 @@ async def main():
                     active = page.locator('.consumer-nav a[aria-current="page"]')
                     await expect(active).to_have_count(1)
                     await expect(active).to_have_attribute('href', '/experiences')
-                    await expect(page.locator('.consumer-nav a[href="/discover/services"]')).not_to_have_attribute('aria-current')
+                    await expect(page.locator('.consumer-nav a[href="/discover/services"][aria-current]')).to_have_count(0)
                     if width == 390:
                         await page.get_by_role('button', name=c['menu'], exact=True).click()
                         dialog = page.get_by_role('dialog', name='myUNO', exact=True)
