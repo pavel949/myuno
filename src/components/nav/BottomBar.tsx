@@ -120,7 +120,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           <span
             className={cn(
               'myuno-bottom-nav-label px-0.5 text-center',
-              mobileLabelRu && 'whitespace-nowrap',
+              language === 'ru' && mobileLabelRu && 'whitespace-nowrap',
               active ? 'font-semibold' : 'font-medium',
             )}
           >

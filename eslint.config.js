@@ -159,7 +159,7 @@ const CANONICAL_SYNONYM_RULES = [
 export default tseslint.config(
   // Vite owns this bundled artifact and regenerates it during build/dev.
   // Its authored inputs in src/lib/mcp/** remain covered by every rule.
-  { ignores: ["dist", "supabase/functions/mcp/index.ts"] },
+  { ignores: ["dist", "artifacts/**", "supabase/functions/mcp/index.ts"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

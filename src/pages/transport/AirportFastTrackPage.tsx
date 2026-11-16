@@ -253,7 +253,7 @@ export default function AirportFastTrackPage() {
       navigate(`/auth?redirect=${encodeURIComponent(APP_ROUTES.FAST_TRACK)}`);
       return;
     }
-    if (!selectedService) return;
+    if (!selectedService || !validateStep("review") || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -295,7 +295,7 @@ export default function AirportFastTrackPage() {
         },
       });
 
-      if (error) throw error;
+      if (error || data?.error || data?.success === false) throw error || new Error(data?.error || "Booking was not accepted");
 
       toast(isRu ? 'Бронирование создано!' : 'Booking created!', {
         description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
@@ -356,7 +356,7 @@ export default function AirportFastTrackPage() {
         </div>
 
         {/* Hero — myUNO branded */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background px-4 py-6">
+        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background px-4 py-4">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center">
               <Shield className="w-6 h-6 text-primary" />
@@ -442,7 +442,7 @@ export default function AirportFastTrackPage() {
             {/* Flight info */}
             <div className="space-y-3">
               <Label>{isRu ? 'Информация о рейсе' : 'Flight Information'}</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Input
                     placeholder={isRu ? 'Номер рейса' : 'Flight number'}
@@ -458,7 +458,7 @@ export default function AirportFastTrackPage() {
                   onChange={e => setAirline(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Input
                     type="date"
@@ -509,25 +509,25 @@ export default function AirportFastTrackPage() {
                       type="button"
                       onClick={() => setSelectedServiceId(service.id)}
                       className={cn(
-                        "w-full p-4 rounded-none border-2 text-left transition-all",
+                        "w-full min-w-0 p-4 rounded-none border-2 text-left transition-all",
                         isSelected
                           ? "border-primary bg-primary/5 shadow-sm"
                           : "border-border hover:border-primary/30"
                       )}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-start justify-between gap-3 mb-2 min-w-0">
+                        <div className="flex items-start gap-2 min-w-0 flex-1">
                           <div className={cn(
                             "w-8 h-8 rounded-none flex items-center justify-center shrink-0",
                             isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                           )}>
                             {getTierIcon(service)}
                           </div>
-                          <h3 className="font-semibold text-sm leading-tight">
+                          <h3 className="font-semibold text-sm leading-snug min-w-0 break-words">
                             {isRu ? service.name_ru : service.name_en}
                           </h3>
                         </div>
-                        <PriceDisplay price={service.base_price} size="sm" sourceCurrency="THB" />
+                        <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums">฿{Number(service.base_price).toLocaleString("en-US")}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">
                         {isRu ? service.description_ru : service.description_en}
@@ -607,7 +607,7 @@ export default function AirportFastTrackPage() {
                       <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-none">
                         {isRu ? 'ВЫГОДА' : 'SAVE'}
                       </div>
-                      <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-start justify-between gap-3 mb-2 min-w-0">
                         <h3 className="font-semibold text-sm leading-tight pr-12">
                           {isRu ? bundle.name_ru : bundle.name_en}
                         </h3>
@@ -662,7 +662,7 @@ export default function AirportFastTrackPage() {
                     {i === 0 && <Badge variant="secondary" className="ml-2 text-[10px]">{isRu ? 'Основной' : 'Primary'}</Badge>}
                   </h3>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs">{isRu ? 'Имя (лат.)' : 'First name (Latin)'}</Label>
                     <Input
@@ -693,7 +693,7 @@ export default function AirportFastTrackPage() {
                   />
                   {errors[`passenger_${i}_passportNumber`] && <p className="text-xs text-destructive mt-0.5">{errors[`passenger_${i}_passportNumber`]}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs">{isRu ? 'Гражданство' : 'Nationality'}</Label>
                     <Input
@@ -821,11 +821,11 @@ export default function AirportFastTrackPage() {
       </div>
 
       {/* Bottom bar — always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
-            <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" />
+            {selectedService ? <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" /> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
           </div>
           {step === 'review' ? (
             <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting}>

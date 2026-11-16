@@ -39,7 +39,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
           value={formData.flightNumber}
           onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
           placeholder={language === 'ru' ? 'например, TG 925' : 'e.g. TG 925'}
-          className="h-11"
+          className="h-11 min-w-0"
         />
         <p className="text-[11px] text-muted-foreground">
           {language === 'ru'
@@ -50,7 +50,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
 
 
       {/* Date / Time */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Calendar className="w-4 h-4" />
@@ -60,7 +60,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
             type="date"
             value={formData.arrivalDate}
             onChange={(e) => setFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
-            min={new Date().toISOString().split('T')[0]}
+            min={new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
             className="h-11"
           />
         </div>
@@ -79,7 +79,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
       </div>
 
       {/* Pax / Luggage */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Users className="w-4 h-4" />
@@ -122,7 +122,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
           placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
           className="h-11"
         />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Input
             type="tel"
             value={formData.phone}

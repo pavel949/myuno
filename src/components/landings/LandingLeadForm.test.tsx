@@ -41,3 +41,13 @@ it('preserves canonical project context and purchase intent in an isolated inqui
  expect(await screen.findByText('Request saved')).toBeVisible();
  expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({ vertical_id: 'properties', request_type: 'property_purchase', vertical_metadata: { project_id: 'synthetic-project' } }));
 });
+
+it('keeps existing entity context when the owner journey adds its intent', async () => {
+ fixture.submit.mockResolvedValue({id:'synthetic-owner-receipt'});
+ render(<LandingLeadForm variant="universal" entryPoint="synthetic-owner" contextMetadata={{property_id:'synthetic-property'}} requestContext={{intent:'management',label:{ru:'Управление',en:'Management',th:'จัดการ'}}} />);
+ fireEvent.change(screen.getByLabelText(/Name/),{target:{value:'Synthetic owner'}});
+ fireEvent.change(screen.getByLabelText(/Phone/),{target:{value:'+66000000000'}});
+ fireEvent.click(screen.getByRole('button',{name:'Submit request'}));
+ expect(await screen.findByText('Request saved')).toBeVisible();
+ expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({vertical_metadata:{property_id:'synthetic-property',owner_intent:'management'}}));
+});

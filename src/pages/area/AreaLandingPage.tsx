@@ -1,3 +1,5 @@
+import { readPropertyJourneyReturn } from '@/lib/real-estate/propertyJourney';
+import '@/styles/property-journey.css';
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import '@/styles/premium-public.css';
@@ -112,6 +114,7 @@ const AreaLandingPage = () => {
   const journeyOrigin = readPublicJourneyOrigin(location.state);
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const returnProperty = readPropertyJourneyReturn(location.state);
   const [housingMode, setHousingMode] = useState<'rent' | 'buy' | 'projects'>('rent');
 
   const landing = slug ? findAreaLandingBySlug(slug) : undefined;
@@ -166,7 +169,7 @@ const AreaLandingPage = () => {
   const cons = isRu ? area.cons_ru : area.cons_en;
 
   const districtParam = encodeURIComponent(area.name_en);
-  const sourceCriteria = journeyOrigin ? new URL(journeyOrigin.href, 'https://myuno.app').search : location.search;
+  const sourceCriteria = journeyOrigin ? new URL(journeyOrigin.href, 'https://myuno.app').search : (returnProperty?.href.split('?')[1] || location.search);
   const rentCriteria = new URLSearchParams(propertyDetailHref('', 'rent', sourceCriteria).split('?')[1]);
   rentCriteria.set('district', area.name_en);
   const rentSearchHref = `/property/browse?${rentCriteria.toString()}`;
@@ -251,8 +254,8 @@ const AreaLandingPage = () => {
       </Helmet>
 
       <PageShell width="full" className="premium-area">
-        {journeyOrigin && (
-          <Button variant="ghost" className="mb-3 min-h-11" onClick={() => { const plan = publicJourneyReturn(location, rentSearchHref); if ('delta' in plan) navigate(plan.delta); else navigate(plan.href, { replace: plan.replace, state: plan.state }); }}>
+        {(journeyOrigin || returnProperty) && (
+          <Button variant="ghost" className="property-journey-return mb-3 min-h-11" onClick={() => { const plan = publicJourneyReturn(location, returnProperty?.href ?? rentSearchHref); if ('delta' in plan) navigate(plan.delta); else navigate(plan.href, { replace: plan.replace, state: plan.state }); }}>
             ← {isRu ? 'Вернуться к объекту' : 'Back to property'}
           </Button>
         )}

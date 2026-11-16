@@ -169,9 +169,9 @@ it('returns from the real property district link to the original filtered search
     <Route path="/area/bang-tao" element={<JourneyAreaEntry />} />
   </Routes></MemoryRouter>);
   fireEvent.click(screen.getByRole('button', { name: 'Open home' }));
-  fireEvent.click(screen.getByRole('link', { name: 'Explore Bang Tao' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Explore the area guide' }));
   fireEvent.click(screen.getByRole('button', { name: 'Return from area' }));
-  expect(screen.getByRole('link', { name: 'Explore Bang Tao' })).toHaveAttribute('href', '/area/bang-tao');
+  expect(screen.getByRole('link', { name: 'Explore the area guide' })).toHaveAttribute('href', '/area/bang-tao');
   fireEvent.click(screen.getByRole('button', { name: 'Back to results' }));
   expect(screen.getByTestId('journey-search')).toHaveTextContent(query);
 });

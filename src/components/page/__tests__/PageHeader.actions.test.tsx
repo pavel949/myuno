@@ -34,4 +34,10 @@ describe('PageHeader reachable actions', () => {
     expect(screen.getByRole('button',{name:'Архив'})).toBeInTheDocument();
     expect(screen.getByRole('link',{name:'Объекты'})).toHaveAttribute('href','/mc/properties');
   });
+  it('renders explicit page destinations as links while preserving imperative actions', () => {
+    state.mobile = true;
+    render(<MemoryRouter><PageHeader title="Объект" actions={[{label:'Услуги',to:'/discover/services?q=cleaning',mobileHidden:false},{label:'Обновить',onClick:vi.fn(),mobileHidden:false}]} /></MemoryRouter>);
+    expect(screen.getByRole('link',{name:'Услуги'})).toHaveAttribute('href','/discover/services?q=cleaning');
+    expect(screen.getByRole('button',{name:'Обновить'})).toHaveAttribute('type','button');
+  });
 });

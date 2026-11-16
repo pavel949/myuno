@@ -55,7 +55,7 @@ export function StepPayment({
       className="space-y-5"
     >
       {/* Summary card */}
-      <div className="p-3 rounded-none bg-muted/50 border border-border/50 space-y-2">
+      <div className="p-4 rounded-none bg-muted/50 border border-border/50 space-y-2">
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
@@ -71,7 +71,7 @@ export function StepPayment({
               {selectedDestinationDuration && ` · ~${selectedDestinationDuration} ${language === 'ru' ? 'мин' : 'min'}`}
             </p>
           </div>
-          <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
+          <p className="font-bold text-lg shrink-0 whitespace-nowrap tabular-nums">฿{totalPrice.toLocaleString()}</p>
         </div>
         {(nightSurcharge > 0 || basePrice !== totalPrice) && (
           <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
@@ -108,7 +108,7 @@ export function StepPayment({
             {language === 'ru' ? 'Fast Track — без очередей' : 'Fast Track — skip queues'}
           </p>
           <p className="text-xs text-muted-foreground">
-            {language === 'ru' ? 'от ฿2,500' : 'from ฿2,500'}
+            {language === 'ru' ? 'Посмотреть пакеты и актуальные цены' : 'View packages and current prices'}
           </p>
         </div>
         <ArrowRight className="w-4 h-4 text-primary shrink-0" />

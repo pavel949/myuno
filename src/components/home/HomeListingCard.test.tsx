@@ -12,7 +12,9 @@ it('keeps the home and its route after cover failure when its own gallery can lo
  fireEvent.error(container.querySelector('img')!);
  expect(container.querySelector('img')).toHaveAttribute('src', 'https://example.invalid/gallery.jpg');
  fireEvent.load(container.querySelector('img')!);
- expect(screen.getByRole('link')).toHaveAttribute('href', '/property/home?mode=rent');
+ const links = screen.getAllByRole('link', {name:'Stored home'});
+ expect(links).toHaveLength(2);
+ for (const link of links) expect(link).toHaveAttribute('href', '/property/home?mode=rent');
  expect(unavailable).not.toHaveBeenCalled();
 });
 it('excludes the home only after all unique stored candidates fail', () => {

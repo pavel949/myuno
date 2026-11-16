@@ -17,7 +17,7 @@ const output = path.resolve(process.argv[2]);
 const baseline = process.argv.includes('--baseline');
 const tokensPath = path.join(root, 'src/styles/tokens.css');
 const originalTokens = await readFile(tokensPath, 'utf8');
-const variants = baseline ? ['normal'] : ['normal', 'rebrand'];
+const variants = baseline ? ['normal'] : ['normal', 'compact', 'rebrand'];
 await mkdir(output, { recursive: true });
 const run = (args, env = {}) => new Promise((resolve, reject) => {
   const child = spawn(process.execPath, args, { cwd: root, env: { ...process.env, ...env }, stdio: 'inherit' });
@@ -27,13 +27,16 @@ const rebrand = originalTokens.replace(/--brand-hue:\s*213;/, '--brand-hue: 160;
   .replace(/--font-family-display:\s*'Source Serif 4';/, '--font-family-display: monospace;')
   .replace(/--font-family-body:\s*'Geist';/, '--font-family-body: serif;')
   .replace(/--layout-inset-scale:\s*1;/, '--layout-inset-scale: 1.5;')
+  .replace(/--section-space-scale:\s*1;/, '--section-space-scale: 1.75;')
   .replace(/--card-padding:\s*1rem;/, '--card-padding: 1.5rem;')
   .replace(/--layout-width-wide:\s*80rem;/, '--layout-width-wide: 72rem;');
 if (!baseline && rebrand === originalTokens) throw Error('Canonical rebrand tokens not found');
+const compact=originalTokens.replace(/--section-space-scale:\s*1;/, '--section-space-scale: 0.25;');
+if(!baseline&&compact===originalTokens)throw Error('Canonical spacing source not found');
 const cssByVariant = {};
 for (const variant of variants) {
   const source = await readFile(path.join(root, 'src/index.css'), 'utf8');
-  const css = await postcss([postcssImport({ load: async file => file === tokensPath && variant === 'rebrand' ? rebrand : readFile(file, 'utf8') }), tailwindcss(path.join(root, 'tailwind.config.ts')), autoprefixer()]).process(source, { from: path.join(root, 'src/index.css') });
+  const css = await postcss([postcssImport({ load: async file => file === tokensPath && variant === 'rebrand' ? rebrand : file === tokensPath && variant === 'compact' ? compact : readFile(file, 'utf8') }), tailwindcss(path.join(root, 'tailwind.config.ts')), autoprefixer()]).process(source, { from: path.join(root, 'src/index.css') });
   cssByVariant[variant] = css.css;
 }
 // Local CSS-only producer, never the SPA/auth/backend. The existing home builder
@@ -42,7 +45,7 @@ const cssServer = createServer((req, res) => {
   if (req.method !== 'GET') { res.writeHead(405); res.end(); return; }
   const file = req.url.split('?')[0];
   if (file === '/src/index.css') { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(cssByVariant.normal); }
-  else if (['/src/styles/cinematic-home.css','/src/styles/premium-public.css'].includes(file)) readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
+  else if (['/src/styles/cinematic-home.css','/src/styles/premium-public.css','/src/styles/homepage-refinement.css'].includes(file)) readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
   else { res.writeHead(404); res.end(); }
 });
 await new Promise(resolve => cssServer.listen(0, '127.0.0.1', resolve));
@@ -70,10 +73,10 @@ for (const role of ['public', 'pms', 'admin']) {
   const folder = path.join(output, role); await mkdir(folder, { recursive: true });
   await cp(path.join(output, 'probes.js'), path.join(folder, 'probes.js'));
   for (const variant of variants) {
-    const extra = role === 'public' ? (await Promise.all(['src/styles/cinematic-home.css','src/styles/premium-public.css'].map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
+    const extra = role === 'public' ? (await Promise.all(['src/styles/cinematic-home.css','src/styles/premium-public.css','src/styles/homepage-refinement.css'].map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
     await writeFile(path.join(folder, `${variant}.css`), cssByVariant[variant] + '\n' + extra);
   }
-  await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');
+  await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');
 }
 const changed = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(file => /^(src\/|tailwind.config|index.html)/.test(file));
 const sourceInputs = [...new Set([...changed, 'src/pages/Landing.tsx', 'src/pages/mc/operations/PmsTodayPage.tsx', 'src/pages/admin/AdminDashboard.tsx', 'src/contexts/ThemeContext.tsx', 'src/components/ui/button.tsx', 'src/components/ui/input.tsx', 'src/components/ui/status-pill.tsx'])];

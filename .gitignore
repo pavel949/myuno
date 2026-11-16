@@ -51,3 +51,6 @@ design-archive/
 
 # Private newbuild source registry belongs in operator configuration, never in Git/client builds.
 /data/offplan-sources/registry.json
+
+# Generated isolated browser evidence and bundled fixtures
+/artifacts/

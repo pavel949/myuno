@@ -40,7 +40,7 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(3)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(4)
@@ -51,17 +51,28 @@ async def main():
                         await expect(image).not_to_be_visible()
                         await expect(card.locator('.home-service-category-copy')).to_be_visible()
 
-                    # Each gallery stays one card high and within its own section.
+                    # Editorial guide/service grids and horizontal listing rails keep their distinct layouts.
+                    grid_sections=0;tested_controls=0
                     for index, rail in enumerate(await page.locator('.home-rail-viewport').all()):
                         # Earlier media checks naturally reveal later service cards. Establish the tested start through the public keyboard contract.
                         await rail.focus();await rail.press('Home')
                         await expect(rail).to_have_js_property('scrollLeft',0)
                         geometry = await rail.evaluate('(el)=>({width:el.clientWidth,scroll:el.scrollWidth,tops:[...el.children].map(c=>c.getBoundingClientRect().top)})')
-                        assert max(geometry['tops']) - min(geometry['tops']) < 2, geometry
-                        # Exercise every rail on representative mobile/desktop frames;
-                        # the location rail covers controls at every language and width.
-                        controls_case = index == 0 or lang == 'en' and width in [390, 1440]
-                        if controls_case and geometry['scroll'] > geometry['width']+2:
+                        layout=await rail.evaluate('(el)=>({grid:getComputedStyle(el).display,section:el.closest("section").className,short:!!el.closest(".home-rail--short"),columns:getComputedStyle(el).gridTemplateColumns.split(" ").length,boxes:[...el.children].map(c=>{const r=c.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom}})})')
+                        if layout['grid']=='grid':
+                            grid_sections+=1
+                            assert 'home-services' in layout['section'] or 'home-locations' in layout['section'] or width>=1024 and layout['short'],layout
+                            expected=(1 if width<768 else 2) if 'home-services' in layout['section'] else (2 if width<1024 else 4) if 'home-locations' in layout['section'] else 3
+                            assert layout['columns']==expected,layout
+                            assert geometry['scroll']<=geometry['width']+2,geometry
+                            for a,box in enumerate(layout['boxes']):
+                                for other in layout['boxes'][a+1:]:
+                                    assert box['right']<=other['x']+1 or other['right']<=box['x']+1 or box['bottom']<=other['y']+1 or other['bottom']<=box['y']+1,layout
+                        else:
+                            assert max(geometry['tops']) - min(geometry['tops']) < 2, geometry
+                        # Exercise controls on every actual overflowing rail, in every locale/width.
+                        if geometry['scroll'] > geometry['width']+2:
+                            tested_controls+=1
                             parent = rail.locator('..')
                             next_button = parent.locator('button').nth(1)
                             await expect(next_button).to_have_attribute('aria-disabled','false')
@@ -91,7 +102,7 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        for rail in [page.locator('.home-rail-viewport').first, page.locator('.home-services .home-rail-viewport')]:
+                        for rail in [page.locator('.home-properties .home-rail-viewport'), page.locator('.home-experiences .home-rail-viewport')]:
                             await rail.scroll_into_view_if_needed()
                             await rail.evaluate('(el)=>el.scrollLeft=0')
                             box = await rail.bounding_box()
@@ -106,9 +117,9 @@ async def main():
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
                     # One universal entry plus four native shortcuts; no intermediate sheet.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
-                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/search')
+                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/discover')
                     await page.locator('.home-search-entry-button').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/search')
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover')
                     choices=page.locator('.premium-plan-links a')
                     await expect(choices).to_have_count(4)
                     for index,query in enumerate(['mode=rent&tenancy=short','mode=rent&tenancy=medium','mode=rent&tenancy=long','mode=buy']):
@@ -143,7 +154,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':3,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':4,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
@@ -161,13 +172,13 @@ async def main():
             if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(3)
+                await expect(page.get_by_role('alert')).to_have_count(4)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
                 await expect(page.locator('.home-experiences,.home-populated-projects')).to_have_count(0)
-                await expect(page.locator('.home-services a.home-text-link')).to_be_visible()
+                await expect(page.locator('.home-services a.ds-section-action')).to_be_visible()
                 await expect(page.locator('.premium-newbuilds a.home-text-link')).to_be_visible()
                 await expect(page.locator('.home-area-guide-link')).to_have_count(4)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)

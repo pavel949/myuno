@@ -25,6 +25,8 @@ import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { TrustStrip } from './TrustStrip';
 import { StayRulesInline } from './StayRulesInline';
+import { PropertyOfferLinks } from './PropertyJourney';
+import { propertyArea } from '@/lib/real-estate/propertyJourney';
 
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 
@@ -92,6 +94,7 @@ function PropertyListingCardBase({
   }, [property.highlights, isRu]);
 
   // Format district using taxonomy for proper capitalization & localization
+  const guideArea = propertyArea(property.district);
   const districtDisplay = property.district
     ? getDistrictLabel(property.district, isRu ? 'ru' : 'en')
     : 'Phuket';
@@ -136,11 +139,14 @@ function PropertyListingCardBase({
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
       aria-selected={isSelected}
-      role={onSelect ? 'button' : 'link'}
+      // Not role="link": the card already contains the real title link, and a
+      // link nested in a link is announced twice. The group stays focusable so
+      // Enter/Space still opens the listing.
+      role={onSelect ? 'button' : 'group'}
       tabIndex={0}
       aria-label={title || districtDisplay}
       className={cn(
-        "group min-w-0 cursor-pointer transition-shadow",
+        "property-premium-listing group min-w-0 cursor-pointer transition-shadow",
         isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm",
         className,
       )}
@@ -217,7 +223,7 @@ function PropertyListingCardBase({
         </div>
 
         {title && title !== districtDisplay && (
-          <p className="text-sm leading-snug text-muted-foreground break-words">{districtDisplay}</p>
+          <p className="text-sm leading-snug text-muted-foreground break-words">{guideArea ? <Link to={`/area/${guideArea.slug}`} state={{ propertyJourney: { href: detailHref, title: title || districtDisplay } }} onClick={event => event.stopPropagation()} className="property-area-link">{districtDisplay}</Link> : districtDisplay}</p>
         )}
 
         {/* Row 2: Property type · bedrooms */}
@@ -289,6 +295,8 @@ function PropertyListingCardBase({
             </p>
           )}
         </div>
+
+        <div onClick={event => event.stopPropagation()}><PropertyOfferLinks property={property} mode={mode} search={location.search} /></div>
 
         {/* Trust signals — collapses if no data */}
         <TrustStrip

@@ -34,6 +34,8 @@ export default function Landing() {
   return (
     <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home">
       <SEOHead title={t({ ru: 'Ваш дом и жизнь на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
+      <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
+      <main id="home-main" tabIndex={-1} className="outline-none">
       <section className="home-hero" aria-labelledby="home-title">
         <img
           className="home-hero-image"
@@ -69,6 +71,7 @@ export default function Landing() {
       </section>
       <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t({ ru: 'Познакомимся с объектом и вашими ожиданиями. Если сможем управлять — предложим индивидуальные условия.', en: 'We review your property and expectations. If we can manage it, we propose individual terms.', th: 'ศึกษาทรัพย์สินและความคาดหวัง หากเรารับจัดการได้จะเสนอเงื่อนไขเฉพาะ' })}</p></div><div className="home-prompt-actions"><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="home-text-link" to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Для управляющих компаний', en: 'For management companies', th: 'สำหรับบริษัทจัดการ' })}<ArrowRight size={18} aria-hidden="true" /></Link></div></section>
+      </main>
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>

@@ -62,6 +62,10 @@ export interface LandingLeadFormProps {
   showTimelineField?: boolean;
   /** Default placeholder for the message textarea. */
   messagePlaceholder?: LangValues;
+  /** Optional owner-intake context stored in existing consultation metadata. */
+  requestContext?: { intent: string; label: LangValues };
+  /** Allows callers to keep their external intent controls bound to this receipt. */
+  onSubmitStateChange?: (state: 'idle' | 'pending' | 'saved') => void;
   /** Submit button label override. */
   submitLabel?: LangValues;
   /** Success copy override. */
@@ -97,6 +101,8 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
     messagePlaceholder,
     submitLabel,
     successText,
+    requestContext,
+    onSubmitStateChange,
   } = props;
 
   const { language } = useLanguage();
@@ -125,6 +131,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
     e.preventDefault();
     if (!canSubmit || pendingRef.current || submitted) return;
     pendingRef.current = true; setLocalPending(true); setSubmitError(false);
+    onSubmitStateChange?.('pending');
 
     try {
       if (variant === 'capital') {
@@ -145,19 +152,21 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
           request_type: universalRequestType ?? 'consultation',
           lead_source: leadSource,
           entry_point: entryPoint,
-          vertical_metadata: contextMetadata,
+          vertical_metadata: requestContext ? { ...contextMetadata, owner_intent: requestContext.intent } : contextMetadata,
           name,
           phone,
           email: email || undefined,
           notes:
-            [topic && `${topicField ? t(topicField.label) : t({ ru: 'Тема', en: 'Topic', th: 'หัวข้อ' })}: ${topic}`, message]
+            [requestContext && t(requestContext.label), topic && `${topicField ? t(topicField.label) : t({ ru: 'Тема', en: 'Topic', th: 'หัวข้อ' })}: ${topic}`, message]
               .filter(Boolean)
               .join('\n') || undefined,
         });
         if (!receipt || typeof receipt.id !== 'string' || !receipt.id.trim()) throw new Error('Unconfirmed request receipt');
       }
       setSubmitted(true);
+      onSubmitStateChange?.('saved');
     } catch {
+      onSubmitStateChange?.('idle');
       setSubmitError(true); // No retry is initiated after an ambiguous response.
     } finally { pendingRef.current = false; setLocalPending(false); }
   };
@@ -187,7 +196,8 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
+          <fieldset disabled={Boolean(requestContext) && isPending} className="min-w-0 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="lead-name">{t({ ru: 'Имя', en: 'Name', th: 'ชื่อ' })} *</Label>
@@ -312,6 +322,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
               en: 'By submitting you agree to our data-processing policy.', th: 'การส่งคำขอแสดงว่าคุณยอมรับนโยบายการประมวลผลข้อมูลของเรา',
             })}
           </p>
+          </fieldset>
         </form>
       </CardContent>
     </Card>

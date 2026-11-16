@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Building2, TrendingUp, LogIn, ArrowRight, Home, Eye } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -151,24 +151,25 @@ function AuthenticatedMySection() {
               <Card
                 key={d.id}
                 variant="interactive"
-                onClick={() => navigate(`/owner/transparency/${prop.id}`)}
               >
-                <CardContent className="flex items-center gap-4 p-4">
-                  {prop.cover_image ? (
-                    <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-none object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                      <Eye className="w-6 h-6 text-white" />
+                <Link to={`/owner/transparency/${prop.id}`} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+                  <CardContent className="flex items-center gap-4 p-4">
+                    {prop.cover_image ? (
+                      <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-none object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                        <Eye className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">
+                        {isRu ? (prop.title_ru || prop.title) : prop.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate">{prop.address}</p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground truncate">
-                      {isRu ? (prop.title_ru || prop.title) : prop.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate">{prop.address}</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                </CardContent>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  </CardContent>
+                </Link>
               </Card>
             );
           })}

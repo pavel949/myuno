@@ -327,10 +327,22 @@
   --page-padding-x:    var(--layout-gutter);       /* mobile */
   --section-gap:       1.5rem;
   --section-gap-tight: 1rem;
+  /* Shared UI rhythm. One scale changes existing section/header families together. */
+  --section-space-scale: 1;
+  --section-heading-gap: var(--section-gap-tight);
+  --section-content-gap: calc(var(--section-gap-tight) * .75);
+  --section-content-gap-public: var(--section-content-gap);
+  --section-title-gap: .375rem;
+  --section-action-gap: .375rem;
+  --section-control-gap: calc(var(--section-action-gap) * 2 / 3);
+  --section-action-icon-size: 1rem;
+
   --touch-target:      2.75rem;    /* 44px WCAG */
   --nav-icon-size:     1.25rem;
-  /* Shared mobile navigation: 64px content + device safe area. */
-  --bottom-nav-h:      calc(64px + env(safe-area-inset-bottom, 0px));
+  /* Shared mobile navigation: 64px content + its 1px top border + device safe
+     area. Must equal the bar's rendered height: floating controls and content
+     clearance are positioned from this value. */
+  --bottom-nav-h:      calc(64px + 1px + env(safe-area-inset-bottom, 0px));
   --floating-chat-size: 3rem;
   --floating-chat-gap: 1rem;
 
@@ -445,6 +457,9 @@
   --glow-via:   22 79% 47%;
   --glow-to:    213 73% 15%;
 }
+
+/* Named public density preserves the compact mobile rhythm from one source. */
+@media (max-width: 640px) { :root { --section-content-gap-public: calc(var(--section-content-gap) / 3); } }
 
 /* Responsive page padding — canon §7 */
 @media (min-width: 768px) {
@@ -632,7 +647,7 @@ html:not([lang]) {
   --public-offer-width: 25rem;
   --public-gutter-base: 1rem;
   --public-gutter: calc(var(--public-gutter-base) * var(--layout-inset-scale));
-  --public-section-gap: 2.5rem;
+  --public-section-gap: calc(2.5rem * var(--section-space-scale));
   --public-detail-gap: 2rem;
   --public-card-gap: 1.25rem;
   --public-display-size: 2.25rem;
@@ -650,7 +665,7 @@ html:not([lang]) {
 @media(min-width:768px) { :root { --public-editorial-display-size: 3rem; } }
 @media(min-width:1024px) { :root {
   --public-gutter-base: clamp(2rem,calc(6.667vw - 3rem),5rem);
-  --public-section-gap: 5rem;
+  --public-section-gap: calc(5rem * var(--section-space-scale));
   --public-detail-gap: 3rem;
   --public-card-gap: 2rem;
   --public-display-size: 4rem;

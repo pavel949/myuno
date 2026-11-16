@@ -159,7 +159,7 @@ jobs:
             sleep 1
           done
           timeout 360s node scripts/qa/public-wide-layout-ui.mjs
-          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
+          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows),"failures":[{k:row.get(k) for k in ("lang","width","surface","state","view","error")} for row in rows if row.get("outcome")!="PASS"][:5]}'
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload wide public surface evidence early
@@ -264,7 +264,7 @@ jobs:
           node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-isolated/results.json 60
           node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-shell-isolated/results.json 18
           printf 'public_wide_browser=%s\n' "$PUBLIC_WIDE_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
+          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows),"failures":[{k:row.get(k) for k in ("lang","width","surface","state","view","error")} for row in rows if row.get("outcome")!="PASS"][:5]}'
           test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$DASHBOARD_BROWSER" = success && test "$DASHBOARD_SHELL_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
 
   # Separate runners keep dependency setup and the full browser matrix inside

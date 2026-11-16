@@ -60,7 +60,7 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
           !noPadding && "px-4",
           "max-w-[1536px] mx-auto"
         )}
-        style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
       >
         {children}
       </div>

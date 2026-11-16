@@ -1,64 +1,50 @@
-import React from 'react';
+import React, { forwardRef, type ReactNode } from 'react';
+import { Link, type To } from 'react-router-dom';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LucideIcon, ChevronRight } from 'lucide-react';
 
-/**
- * DS2.0 SectionHeader — consistent section labeling pattern
- * Used across Home Hub, Category Pages, Dashboards.
- * 
- * Pattern: Icon container + Title/Subtitle + Optional action link
- */
+export type SectionAction = { label: string } & (
+  | { to: To; onClick?: () => void }
+  | { to?: undefined; onClick: () => void }
+);
+export type SectionDensity = 'public' | 'compact' | 'workspace';
 interface SectionHeaderProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   icon?: LucideIcon;
   iconClassName?: string;
-  action?: { label: string; onClick: () => void };
+  action?: SectionAction;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  density?: SectionDensity;
+  headingAs?: 'h2' | 'h3';
+  headingId?: string;
+  leading?: ReactNode;
+  badge?: ReactNode;
+  children?: ReactNode;
 }
-
 const sizeStyles = {
-  sm: { title: 'text-sm font-semibold', subtitle: 'text-[10px]', icon: 'w-4 h-4', box: 'p-1.5 rounded-none' },
-  md: { title: 'text-base font-bold', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2 rounded-none' },
-  lg: { title: 'text-lg font-bold tracking-[-0.01em]', subtitle: 'text-xs', icon: 'w-5 h-5', box: 'p-2.5 rounded-none' },
+  sm: { title: 'text-sm font-semibold', subtitle: 'text-caption', box: 'p-1.5 rounded-none' },
+  md: { title: 'text-base font-bold', subtitle: 'text-xs', box: 'p-2 rounded-none' },
+  lg: { title: 'text-lg font-bold tracking-tight', subtitle: 'text-sm', box: 'p-2.5 rounded-none' },
 };
-
-export function SectionHeader({
-  title,
-  subtitle,
-  icon: Icon,
-  iconClassName,
-  action,
-  className,
-  size = 'md',
-}: SectionHeaderProps) {
-  const s = sizeStyles[size];
-
-  return (
-    <div className={cn('flex items-center justify-between gap-3', className)}>
-      <div className="flex items-center gap-2.5 min-w-0">
-        {Icon && (
-          <div className={cn(s.box, 'bg-primary/10 flex-shrink-0')}>
-            <Icon className={cn(s.icon, 'text-primary', iconClassName)} />
-          </div>
-        )}
-        <div className="min-w-0">
-          <h2 className={cn(s.title, 'font-display text-foreground truncate')}>{title}</h2>
-          {subtitle && (
-            <p className={cn(s.subtitle, 'text-muted-foreground')}>{subtitle}</p>
-          )}
-        </div>
+/** Shared section presentation. Density is visual, never an authorization scope. */
+export const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(function SectionHeader({
+  title, subtitle, icon: Icon, iconClassName, action, className, size = 'md',
+  density = 'workspace', headingAs: Heading = 'h2', headingId, leading, badge, children,
+}, ref) {
+  const style = sizeStyles[size];
+  const actionClass = 'ds-section-action text-primary hover:text-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+  const actionContent = action && <><span>{action.label}</span><ChevronRight className="ds-section-action-icon" aria-hidden="true" /></>;
+  return <div ref={ref} className={cn('ds-section-heading', `ds-section-heading--${density}`, className)}>
+    <div className="ds-section-heading-content">
+      {leading ?? (Icon && <div className={cn(style.box, 'bg-primary/10 shrink-0')}><Icon className={cn('ds-section-leading-icon text-primary', iconClassName)} aria-hidden="true" /></div>)}
+      <div className="min-w-0"><div className="ds-section-title-row">{title !== '' && title != null && <Heading id={headingId} className={cn(style.title, 'font-display text-foreground break-words')}>{title}</Heading>}{badge}</div>
+        {subtitle && <p className={cn(style.subtitle, 'ds-section-subtitle text-muted-foreground')}>{subtitle}</p>}{children}
       </div>
-      {action && (
-        <button
-          onClick={action.onClick}
-          className="flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-hover transition-colors flex-shrink-0"
-        >
-          {action.label}
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      )}
     </div>
-  );
-}
+    {action && ('to' in action && action.to !== undefined
+      ? <Link to={action.to} onClick={action.onClick} className={actionClass}>{actionContent}</Link>
+      : <button type="button" onClick={action.onClick} className={actionClass}>{actionContent}</button>)}
+  </div>;
+});

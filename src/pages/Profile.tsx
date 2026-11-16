@@ -1,6 +1,7 @@
 import '@/styles/premium-account.css';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, Building2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -30,6 +31,14 @@ export default function Profile() {
   const { hasRole, isLoading: rolesLoading } = useUserContext();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const location = useLocation();
+
+  // /profile has no route guard: a signed-out visitor used to get a blank page.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      redirectToAuth(navigate, { replace: true, from: location.pathname + location.search + location.hash });
+    }
+  }, [authLoading, user, navigate, location.pathname, location.search, location.hash]);
 
   const isLoading = authLoading || rolesLoading;
 
@@ -42,7 +51,7 @@ export default function Profile() {
   }
 
   if (!user) {
-    // Redirect handled by route guards
+    // The effect above sends signed-out visitors to sign-in.
     return null;
   }
 
