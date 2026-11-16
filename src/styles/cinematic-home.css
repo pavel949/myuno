@@ -342,7 +342,7 @@
 .home-gallery .home-rail{margin-top:12px}
 .home-gallery .home-rail-controls{position:absolute;right:0;top:-56px;margin:0;gap:4px}
 .home-gallery .home-rail-controls button{width:var(--touch-target);height:var(--touch-target);border:0;background:transparent}
-.home-gallery .home-rail-controls svg,.home-gallery .home-text-link svg{width:16px;height:16px;flex-shrink:0}
+.home-rail-controls svg,.home-gallery .home-text-link svg{width:16px;height:16px;flex-shrink:0}
 .home-gallery .home-section-heading>.home-text-link{padding-right:calc(var(--touch-target) * 2 + var(--section-gap-tight));gap:8px}
 .home-area-cover{position:relative;aspect-ratio:16/9;overflow:hidden;background:hsl(var(--muted))}
 .home-area-cover img{width:100%;height:100%;object-fit:cover}

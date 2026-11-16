@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 import sys
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 from playwright.async_api import async_playwright, expect, TimeoutError as PlaywrightTimeoutError
 
 OUTPUT = Path(sys.argv[1])
@@ -162,7 +162,10 @@ async def check_destinations(page, surface, row, completed):
         (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
         await buttons.last.click()
         opened = await page.evaluate('window.fixtureOpened')
-        assert len(opened) == 1 and opened[0] == ['https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank'], opened
+        assert len(opened) == 1 and opened[0][1] == '_blank', opened
+        contact = urlparse(opened[0][0])
+        assert contact.scheme == 'https' and contact.netloc == 'wa.me' and contact.path == '/66954243332', opened
+        assert parse_qs(contact.query) == {'text': ["Hi, I'm interested in myUNO for my management company"]}, opened
         anchors = await page.locator('a[href^="#module-"]').evaluate_all('els=>els.map(e=>e.getAttribute("href"))')
         assert anchors, 'missing module anchors'
         for anchor in anchors:
@@ -225,7 +228,7 @@ async def check_owner_business(page, surface, row, completed):
             (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
         await actions.nth(1).click()
         await expect(page.get_by_test_id('location')).to_have_text('/my-property')
-        for index, destination in enumerate(['/owner/management-landing', '/mc/onboarding']):
+        for index, destination in enumerate(['/owner/management-landing', '/owner/onboarding']):
             link = page.locator('#paths article a').nth(index)
             await expect(link).to_have_attribute('href', destination)
             await link.click()

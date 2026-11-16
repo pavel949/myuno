@@ -78,8 +78,11 @@ async def main():
                         await expect(page.get_by_role('button',name='Воспроизвести видео' if ru else 'Play video', exact=True)).to_have_count(0)
                     else:
                         unit = page.get_by_role('link',name='Апартаменты с видом на сад' if ru else 'Garden apartment',exact=True)
-                        await expect(unit).to_have_count(1)
-                        await expect(unit).to_have_attribute('href', '/property/dual-unit?mode=buy')
+                        # The keyboard-operable card and its title expose the same name.
+                        await expect(unit).to_have_count(2)
+                        title_link = unit.and_(page.locator('a'))
+                        await expect(title_link).to_have_count(1)
+                        await expect(title_link).to_have_attribute('href', '/property/dual-unit?mode=buy')
                         company=page.locator('a[href="/company/fixture-operator"]')
                         await expect(company).to_have_count(1)
                         await expect(company).to_contain_text('Компания' if ru else 'Company')
@@ -89,8 +92,8 @@ async def main():
                         await expect(page.locator('video')).to_have_attribute('controls','')
                         assert await page.locator('video').get_attribute('autoplay') is None
                         await page.get_by_role('button',name='Аренда 1' if ru else 'Rent 1',exact=True).click()
-                        await expect(unit).to_have_attribute('href','/property/dual-unit?mode=rent')
-                        await unit.click()
+                        await expect(title_link).to_have_attribute('href','/property/dual-unit?mode=rent')
+                        await title_link.click()
                         await expect(page.get_by_test_id('unit-destination')).to_be_visible()
                         await expect(page.get_by_test_id('location')).to_have_text('/property/dual-unit?mode=rent')
                     assert not blocked, blocked

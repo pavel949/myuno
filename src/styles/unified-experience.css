@@ -78,7 +78,9 @@
 }
 
 .myuno-bottom-nav-label {
+  min-width: 0;
   max-width: 100%;
+  overflow-wrap: anywhere;
   font-size: var(--type-caption-size);
   line-height: 1.15;
 }
