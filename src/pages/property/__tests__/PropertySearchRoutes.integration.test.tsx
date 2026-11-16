@@ -459,6 +459,15 @@ describe('one residential results surface', () => {
     expect(screen.getByRole('searchbox', { name: 'Property name' })).toBeVisible();
     expect(screen.getByRole('button', { name: 'All homes' })).toHaveAttribute('aria-pressed', 'true');
   });
+  it('keeps the four property actions visible from the Homes entrance', () => {
+    mount('/property');
+    const journeys = within(screen.getByRole('navigation', { name: 'Choose your journey' }));
+    expect(journeys.getByRole('link', { name: /Rent a place/ })).toHaveAttribute('href', '/property/search?mode=rent');
+    expect(journeys.getByRole('link', { name: /Buy property/ })).toHaveAttribute('href', '/discover/buy');
+    expect(journeys.getByRole('link', { name: /Sell a property/ })).toHaveAttribute('href', '/property/sell');
+    expect(journeys.getByRole('link', { name: /Manage a property/ })).toHaveAttribute('href', '/for-owners');
+  });
+
   it('narrows all homes by text and clears back to the same catalogue while preserving bookmark context', () => {
     mount('/property?opaque=keep#results', { origin: 'tab-entry' });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Property name' }), { target: { value: 'Needle' } });

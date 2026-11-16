@@ -40,6 +40,7 @@ import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailabi
 import '@/styles/property-search.css';
 import '@/styles/premium-public.css';
 import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
+import { PlatformJourneyLinks } from '@/components/landing/PlatformJourneyLinks';
 import { GOAL_ENTRIES } from '@/lib/nav/goalEntries';
 
 const FILTER_TITLES_TH: Record<string, string> = {'priceLevel': 'ระดับราคา', 'bedrooms': 'ห้องนอน', 'areaAtLeast': 'พื้นที่', 'instantBooking': 'การจอง', 'viewType': 'วิว', 'furnishingLevel': 'เฟอร์นิเจอร์', 'poolType': 'สระว่ายน้ำ', 'parkingType': 'ที่จอดรถ', 'ownershipForm': 'กรรมสิทธิ์', 'amenities': 'สิ่งอำนวยความสะดวก', 'highlights': 'จุดเด่น'};
@@ -314,6 +315,7 @@ export default function PropertySearchPage() {
               <span className="mt-1 block text-xs font-normal text-muted-foreground">{pickLang(language, { ru: market.descRu, en: market.descEn, th: market.descTh })}</span>
             </Link>)}
           </nav>}
+          {catalogueAll && [...searchParamsUrl.keys()].every(key => ['mode', 'lang', 'source'].includes(key)) && <PlatformJourneyLinks journey="property" />}
           <details ref={criteriaRef} className="premium-search-criteria">
             <summary><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">

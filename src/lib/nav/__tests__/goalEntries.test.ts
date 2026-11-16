@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GOAL_ENTRIES, GOAL_ORDER } from '../goalEntries';
-import { propertySearchHref, readPropertySearchQuery } from '@/lib/propertySearchQuery';
+import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isKnownRoute } from '../routeRegistry';
 
@@ -17,16 +17,12 @@ describe('goalEntries — every link points at a registered route', () => {
 });
 
 describe('buyer goal catalogue intent', () => {
-  it('keeps the actual Homes for sale tile in buy mode through the browse redirect', () => {
-    const tile = GOAL_ENTRIES.buy.primary.find(link => link.en === 'Homes for sale');
+  it('opens the direct sale catalogue in buy mode', () => {
+    const tile = GOAL_ENTRIES.buy.primary.find(link => link.en === 'Direct sale listings');
     expect(tile).toBeDefined();
     const entry = new URL(tile!.path, 'https://myuno.app');
-    expect(entry.pathname).toBe(APP_ROUTES.PROPERTY_BROWSE);
-    // The mounted browse alias delegates to this same canonical URL helper.
-    const destination = new URL(propertySearchHref(entry.search), entry.origin);
-    expect(destination.pathname).toBe(APP_ROUTES.PROPERTY_SEARCH);
-    expect(destination.searchParams.get('mode')).toBe('buy');
-    expect(readPropertySearchQuery(destination.searchParams).mode).toBe('buy');
+    expect(entry.pathname).toBe(APP_ROUTES.PROPERTY_SEARCH);
+    expect(readPropertySearchQuery(entry.searchParams).mode).toBe('buy');
   });
 });
 

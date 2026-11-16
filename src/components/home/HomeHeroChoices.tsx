@@ -20,7 +20,7 @@ const choices: HeroChoice[] = [
   },
   {
     icon: Building2,
-    href: `${R.PROPERTY_SEARCH}?mode=buy`,
+    href: R.GOAL_BUY,
     label: { ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาริมทรัพย์' },
     description: { ru: 'Дома, квартиры, новые проекты', en: 'Homes, condos, new projects', th: 'บ้าน คอนโด โครงการใหม่' },
   },

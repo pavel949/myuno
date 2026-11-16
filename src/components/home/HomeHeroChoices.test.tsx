@@ -12,7 +12,7 @@ describe('HomeHeroChoices', () => {
     render(<MemoryRouter><HomeHeroChoices /></MemoryRouter>);
 
     expect(screen.getByRole('link', { name: /Rent a home/i })).toHaveAttribute('href', '/property/search?mode=rent');
-    expect(screen.getByRole('link', { name: /Buy property/i })).toHaveAttribute('href', '/property/search?mode=buy');
+    expect(screen.getByRole('link', { name: /Buy property/i })).toHaveAttribute('href', '/discover/buy');
     expect(screen.getByRole('link', { name: /Find a service/i })).toHaveAttribute('href', '/discover/services');
     expect(screen.getByRole('link', { name: /Not sure what you need/i })).toHaveAttribute('href', '/discover');
   });
