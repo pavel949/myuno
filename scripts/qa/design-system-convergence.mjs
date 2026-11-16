@@ -76,7 +76,7 @@ for (const role of ['public', 'pms', 'admin']) {
     const extra = role === 'public' ? (await Promise.all(['src/styles/cinematic-home.css','src/styles/premium-public.css','src/styles/homepage-refinement.css'].map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
     await writeFile(path.join(folder, `${variant}.css`), cssByVariant[variant] + '\n' + extra);
   }
-  await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');
+  await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');
 }
 const changed = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(file => /^(src\/|tailwind.config|index.html)/.test(file));
 const sourceInputs = [...new Set([...changed, 'src/pages/Landing.tsx', 'src/pages/mc/operations/PmsTodayPage.tsx', 'src/pages/admin/AdminDashboard.tsx', 'src/contexts/ThemeContext.tsx', 'src/components/ui/button.tsx', 'src/components/ui/input.tsx', 'src/components/ui/status-pill.tsx'])];

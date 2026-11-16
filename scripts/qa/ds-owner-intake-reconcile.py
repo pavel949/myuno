@@ -19,14 +19,18 @@ async def main():
     if u.netloc=='127.0.0.1:8922' and name in ['fixture.html','fixture.js','fixture.css'] and r.request.method=='GET':await r.fulfill(path=str(OUT/name),content_type='text/html' if name.endswith('.html') else 'text/css' if name.endswith('.css') else 'text/javascript')
     else:blocked.append({'origin':u.netloc,'method':r.request.method});await r.abort()
    await context.route('**/*',route);page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));c=COPY[lang];prefix=f'{lang}-{width}'
-   await page.goto(ORIGIN+'/fixture.html?lang='+lang,wait_until='networkidle');await page.get_by_role('button',name=c['trigger'],exact=False).click();dialog=page.get_by_role('dialog');await expect(dialog).to_be_visible();await dialog.evaluate('e=>Promise.all(e.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})))')
-   links=dialog.locator('.home-search-intents a');await expect(links).to_have_count(4 if VERSION=='before' else 6)
-   guest_hrefs=await dialog.locator('a[href^="/property/search"]').evaluate_all('els=>els.map(e=>e.getAttribute("href"))');assert guest_hrefs==['/property/search?mode=rent&tenancy=short','/property/search?mode=rent&tenancy=medium','/property/search?mode=rent&tenancy=long','/property/search?mode=buy'],guest_hrefs
-   await page.screenshot(path=str(OUT/f'{prefix}-chooser.png'))
+   await page.goto(ORIGIN+'/fixture.html?lang='+lang,wait_until='networkidle')
    if VERSION=='after':
-    for link in await links.all():await link.scroll_into_view_if_needed();assert (await link.bounding_box())['height']>=44
+    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/discover')
+    links=page.locator('.premium-plan-links a');await expect(links).to_have_count(4)
+    guest_hrefs=await links.evaluate_all('els=>els.map(e=>e.getAttribute("href"))')
+    assert guest_hrefs==['/property/search?mode=rent&tenancy=short','/property/search?mode=rent&tenancy=medium','/property/search?mode=rent&tenancy=long','/property/search?mode=buy'],guest_hrefs
+    for link in await links.all():assert (await link.bounding_box())['height']>=44
+    await page.screenshot(path=str(OUT/f'{prefix}-home-entry.png'))
     selected='management' if width==1440 else 'rent';other='rent' if selected=='management' else 'management'
-    await page.get_by_role('link',name=c[selected],exact=True).click();await expect(dialog).to_have_count(0)
+    # Direct actual owner route; no obsolete chooser or fabricated public entry.
+    await page.goto(ORIGIN+'/fixture.html?lang='+lang+'&route=/owner/management-landing?intent='+selected,wait_until='networkidle')
+    await expect(page.get_by_role('radio',name=c[selected],exact=True)).to_have_attribute('aria-checked','true')
     for label,value in [('name','Synthetic owner'),('phone','+66000000000'),('email','synthetic@example.invalid'),('message','Synthetic property; existing tenancy and individual expectations')]:await page.get_by_label(c[label],exact=False).fill(value)
     await page.get_by_role('radio',name=c[other],exact=True).click();await page.get_by_test_id('back').click();await expect(page.get_by_role('radio',name=c[selected],exact=True)).to_have_attribute('aria-checked','true');await expect(page.get_by_label(c['name'],exact=False)).to_have_value('Synthetic owner')
     await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(OUT/f'{prefix}-form.png'),full_page=True)
@@ -40,6 +44,7 @@ async def main():
     leads=await page.evaluate('window.fixtureLeads');assert len(leads)==2 and leads[0]==leads[1],leads;assert leads[1]['vertical_metadata']=={'owner_intent':selected} and leads[1]['request_type']=='full_management' and leads[1]['entry_point']=='/owner/management-landing?intent='+selected
     await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(OUT/f'{prefix}-receipt.png'),full_page=True)
    else:
+    await page.get_by_role('button',name=c['trigger'],exact=False).click()
     await page.keyboard.press('Escape');await page.get_by_test_id('opposite-query').click();await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(OUT/f'{prefix}-form.png'),full_page=True)
    await page.get_by_test_id('for-owners').click();await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(OUT/f'{prefix}-options.png'),full_page=True)
    if VERSION=='after':assert '70 / 30' not in await page.locator('body').inner_text()
