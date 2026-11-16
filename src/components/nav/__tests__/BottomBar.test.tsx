@@ -22,7 +22,8 @@ it.each([
  expect(booking).toHaveAttribute('href', '/bookings');
  expect(booking).toHaveAttribute('aria-current', 'page');
  expect(booking.querySelector('span')).toHaveTextContent(text);
- expect(booking.querySelector('span')).toHaveClass('whitespace-nowrap');
+ if (language === 'ru') expect(booking.querySelector('span')).toHaveClass('whitespace-nowrap');
+ else expect(booking.querySelector('span')).not.toHaveClass('whitespace-nowrap');
  expect(screen.getAllByRole('link')).toHaveLength(5);
 });
 

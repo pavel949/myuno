@@ -344,7 +344,7 @@
 .home-gallery .home-rail{margin-top:0}
 .home-gallery .home-rail-controls{position:absolute;right:0;top:calc(0px - var(--touch-target) - var(--section-effective-content-gap) * var(--section-space-scale));margin:0;gap:var(--section-control-gap)}
 .home-gallery .home-rail-controls button{width:var(--touch-target);height:var(--touch-target);border:0;background:transparent}
-.home-gallery .home-rail-controls svg,.home-gallery .home-text-link svg{width:var(--section-action-icon-size);height:var(--section-action-icon-size);flex-shrink:0}
+.home-rail-controls svg,.home-gallery .home-text-link svg{width:var(--section-action-icon-size);height:var(--section-action-icon-size);flex-shrink:0}
 .home-gallery .home-gallery-heading>.ds-section-action{padding-right:calc(var(--touch-target) * 2 + var(--section-gap-tight))}
 .home-area-cover{position:relative;aspect-ratio:16/9;overflow:hidden;background:hsl(var(--muted))}
 .home-area-cover img{width:100%;height:100%;object-fit:cover}

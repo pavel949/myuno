@@ -57,7 +57,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
     districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
     currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
     onChange={update} onClear={clear} />;
-  const fallback = onConcierge && <Button variant="outline" onClick={onConcierge}>{L('Подобрать услугу с консьержем', 'Find a service with concierge', 'ให้คอนเซียร์จช่วยหาบริการ')}</Button>;
+  const fallback = onConcierge && <Button variant="outline" className="h-auto min-h-11 max-w-full whitespace-normal text-center" onClick={onConcierge}>{L('Подобрать услугу с консьержем', 'Find a service with concierge', 'ให้คอนเซียร์จช่วยหาบริการ')}</Button>;
   const renderCards = (services: MarketplaceService[]) => <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     {services.map(service => <MarketplaceServiceCard key={service.id} service={service} returnTo={returnTo}
       availability={filters.date ? availability.data?.[service.id] : undefined}

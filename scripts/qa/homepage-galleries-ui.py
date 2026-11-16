@@ -143,7 +143,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':3,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'rails':4,'arrowsKeyboardFocus':True,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
