@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface OrderData {
   id: string;
@@ -109,6 +110,8 @@ export default function ServiceOrderSuccess() {
     </div>
   ) : null;
 
+  // The confirmation leads to the request that was just sent, not to a catalogue.
+  const submittedOrderId = order?.id ?? stateOrderId;
   const serviceLabel = order?.metadata?.provider_name || functionName;
   const whenStr = order?.start_at ? format(new Date(order.start_at), 'dd MMM yyyy, HH:mm') : '';
   const summaryRu = [serviceLabel && `Услуга: ${serviceLabel}`, whenStr && `Время: ${whenStr}`]
@@ -126,10 +129,10 @@ export default function ServiceOrderSuccess() {
       }}
       details={details}
       extras={<CrossSellRecommendations orderType="service" />}
-      primaryHref="/services"
-      primaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
-      secondaryHref="/bookings"
-      secondaryLabel={{ ru: 'Мои заказы', en: 'My orders' }}
+      primaryHref={submittedOrderId ? APP_ROUTES.ORDER_TRACKING(submittedOrderId) : `${APP_ROUTES.ME_REQUESTS}?source=order`}
+      primaryLabel={submittedOrderId ? { ru: 'Открыть заявку', en: 'View this request' } : { ru: 'Мои заявки', en: 'My requests' }}
+      secondaryHref="/services"
+      secondaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
       totalAmount={order?.total_amount}
       currency={order?.currency || undefined}
       whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}

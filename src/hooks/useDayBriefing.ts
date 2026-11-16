@@ -461,7 +461,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
               ? `Booking at ${b.time_slot}`
               : 'Booking',
             subtitle: b.booking_date,
-            href: `/account/bookings`,
+            href: '/bookings',
             meta: { daysUntil: days, status: b.status, amount: b.total_amount },
           });
         }

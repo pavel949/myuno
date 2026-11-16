@@ -9,7 +9,8 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
  */
 
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation as useRouterLocation, Link } from 'react-router-dom';
+import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 import {
   Building2,
   MapPin,
@@ -85,6 +86,14 @@ const STATUS_CONFIG: Record<ProjectStatus, {
 export default function OffplanDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
+  // Return to the catalogue the visitor came from, filters included; the bare
+  // catalogue is only the fallback for a direct visit.
+  const returnToCatalogue = () => {
+    const plan = publicJourneyReturn(routerLocation, APP_ROUTES.OFFPLAN);
+    if ('delta' in plan) navigate(plan.delta);
+    else navigate(plan.href, { replace: plan.replace, state: plan.state });
+  };
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
@@ -188,7 +197,7 @@ export default function OffplanDetail() {
 
         {/* Top actions */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <BackButton fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
+          <BackButton fallbackPath={APP_ROUTES.OFFPLAN} onClick={returnToCatalogue} variant="overlay" size="md" />
 
         </div>
 

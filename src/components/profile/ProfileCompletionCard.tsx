@@ -68,7 +68,7 @@ export function ProfileCompletionCard() {
       key: 'documents',
       label: t.items.documents,
       completed: false, // Would check user_documents table
-      path: '/profile/documents',
+      path: '/me/documents',
     },
     {
       key: 'emergency',

@@ -94,7 +94,8 @@ async function fetchRequests(userId: string): Promise<{ requests: MyRequest[]; f
         status,
         title: (r.goal as string) ?? 'Concierge request',
         createdAt: (r.created_at as string) ?? new Date().toISOString(),
-        detailPath: '/me/services',
+        // No per-session page exists; a link to the services catalogue here
+        // sent people away from their request, so the card is not a link.
       });
     }
   } catch { failedSources.push('concierge'); }
@@ -165,7 +166,6 @@ async function fetchRequests(userId: string): Promise<{ requests: MyRequest[]; f
         title: subj,
         subtitle: (r.topic as string) ?? undefined,
         createdAt: (r.created_at as string) ?? new Date().toISOString(),
-        detailPath: '/me/requests',
       });
     }
   } catch { failedSources.push('help'); }

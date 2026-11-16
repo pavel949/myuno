@@ -14,7 +14,6 @@ import {
   Clock, 
   CheckCircle, 
   XCircle, 
-  ChevronRight,
   AlertCircle,
   Eye
 } from 'lucide-react';
@@ -55,7 +54,7 @@ const MODERATION_TABLES: Array<{
   path: string;
   hasRejectionReason: boolean;
 }> = [
-  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/marketplace', hasRejectionReason: true },
+  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/products', hasRejectionReason: true },
   { table: 'yachts', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/yachts', hasRejectionReason: true },
   { table: 'tours', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/tours', hasRejectionReason: false },
   { table: 'salons', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/beauty', hasRejectionReason: true },
@@ -297,16 +296,13 @@ export function VendorModerationQueue({
           </div>
         ))}
         
+        {/* There is no aggregate moderation page; the old button led to a 404. */}
         {(pendingCount + rejectedCount) > limit && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-muted-foreground"
-            onClick={() => navigate('/vendor/moderation')}
-          >
-            {isRu ? 'Показать все' : 'View All'}
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
+          <p className="px-1 text-xs text-muted-foreground">
+            {isRu
+              ? `Показаны последние ${limit}. Остальные позиции — в разделах ваших услуг.`
+              : `Showing the latest ${limit}. The rest are in your service sections.`}
+          </p>
         )}
       </CardContent>
     </Card>

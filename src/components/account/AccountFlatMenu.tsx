@@ -43,7 +43,7 @@ const STANDARD_ITEMS: MenuItem[] = [
   { path: '/wallet', icon: CreditCard, labelKey: 'account.menu.wallet' },
   { path: '/profile/referral', icon: Gift, labelKey: 'account.menu.referral' },
   { path: '/notifications', icon: Bell, labelKey: 'account.menu.notifications' },
-  { path: '/profile/documents', icon: FileText, labelKey: 'account.menu.documents' },
+  { path: APP_ROUTES.ME_DOCUMENTS, icon: FileText, labelKey: 'account.menu.documents' },
   { path: '/profile/settings', icon: Settings, labelKey: 'account.menu.settings' },
   { path: '/support', icon: HelpCircle, labelKey: 'account.menu.support' },
 ];

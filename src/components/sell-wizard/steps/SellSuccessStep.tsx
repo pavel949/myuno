@@ -44,11 +44,11 @@ export function SellSuccessStep({ listingId }: SellSuccessStepProps) {
         
         <div className="space-y-3">
           <Button 
-            onClick={() => navigate('/profile/listings')} 
+            onClick={() => navigate(listingId ? `/classifieds/${listingId}` : '/classifieds')} 
             className="w-full"
             size="lg"
           >
-            {isRu ? 'Мои объявления' : 'My Listings'}
+            {listingId ? (isRu ? 'Открыть объявление' : 'View listing') : (isRu ? 'К объявлениям' : 'Browse listings')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
           

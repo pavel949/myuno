@@ -15,7 +15,7 @@ export function InvestorQuickActions() {
         <Search className="h-4 w-4 mr-2" />
         {isRu ? 'Смотреть проекты' : isTh ? 'ดูโปรเจกต์' : 'Browse Projects'}
       </Button>
-      <Button variant="outline" onClick={() => navigate('/account/orders')}>
+      <Button variant="outline" onClick={() => navigate('/me/requests')}>
         <FileText className="h-4 w-4 mr-2" />
         {isRu ? 'Мои заявки' : isTh ? 'ใบสมัครของฉัน' : 'My Applications'}
       </Button>

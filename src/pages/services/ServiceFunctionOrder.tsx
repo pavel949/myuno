@@ -1,3 +1,4 @@
+import { clearServiceRequestDraft, saveServiceRequestDraft, takeServiceRequestDraft } from '@/lib/services/serviceRequestDraft';
 import '@/styles/public-commerce.css';
 import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
@@ -72,6 +73,14 @@ import { toast } from 'sonner';
      contactMethod: 'whatsapp',
    });
    
+   // Restore what was typed before the sign-in redirect (see handleSubmit).
+   const draftFunctionId = fn?.id;
+   useEffect(() => {
+     if (!draftFunctionId) return;
+     const draft = takeServiceRequestDraft(draftFunctionId);
+     if (draft) setFormData(draft);
+   }, [draftFunctionId]);
+
    const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
    const [submissionError, setSubmissionError] = useState('');
@@ -115,7 +124,9 @@ import { toast } from 'sonner';
     if (!fn || !rawFn) return;
 
     if (!user) {
-      toast.error(isRu ? 'Войдите, чтобы оформить заказ' : 'Please sign in to place an order');
+      // Keep the typed form for this tab so sign-in does not wipe it.
+      saveServiceRequestDraft(fn.id, formData);
+      toast.info(isRu ? 'Войдите, чтобы отправить заявку. Введённые данные сохранятся.' : 'Sign in to send the request. What you entered will be kept.');
       navigate('/auth?redirect=' + encodeURIComponent(location.pathname + location.search));
       return;
     }
@@ -174,6 +185,7 @@ import { toast } from 'sonner';
       });
 
       if (result.success) {
+        clearServiceRequestDraft(fn.id);
         navigate('/services/order/success', {
           state: {
             functionName: fn.name,

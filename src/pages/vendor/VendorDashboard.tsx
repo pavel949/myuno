@@ -269,7 +269,7 @@ const VendorDashboard = () => {
           icon={Calendar} 
           iconColor="text-info" 
           loading={ordersLoading} 
-          href="/vendor/bookings" 
+          href="/vendor/orders" 
         />
         <VendorKPICard 
           title={isRu ? 'Завершено' : 'Completed'} 
@@ -348,7 +348,7 @@ const VendorDashboard = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/vendor/bookings/${order.id}`)}>
+                      <DropdownMenuItem onClick={() => navigate(`/vendor/orders?order=${encodeURIComponent(order.id)}`)}>
                         <Eye className="h-4 w-4 mr-2" />
                         {isRu ? 'Просмотр' : 'View'}
                       </DropdownMenuItem>

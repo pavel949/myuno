@@ -23,7 +23,7 @@ describe('InquiryConfirmation', () => {
   it('renders the EN heading', () => {
     renderComponent();
     expect(
-      screen.getByRole('heading', { level: 2, name: 'Viewing request received' }),
+      screen.getByRole('heading', { level: 2, name: 'Rental request sent' }),
     ).toBeInTheDocument();
   });
 
@@ -34,9 +34,9 @@ describe('InquiryConfirmation', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a "View booking" CTA button linked to the orderId', () => {
+  it('renders a "View request" CTA button linked to the orderId', () => {
     renderComponent('test-order-123');
-    const viewBookingBtn = screen.getByRole('button', { name: 'View booking' });
+    const viewBookingBtn = screen.getByRole('button', { name: 'View request' });
     expect(viewBookingBtn).toBeInTheDocument();
   });
 

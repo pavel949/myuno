@@ -188,7 +188,7 @@ const INVEST: NavTarget[] = [
   { id: 'nav-invest', titleRu: 'Инвестиции в недвижимость', titleEn: 'Real Estate Investments', path: '/invest',
     keywords: ['инвестиции', 'invest', 'investment', 'roi', 'доходность', 'yield'], cluster: 'invest',
     personas: ['investor'], weight: 7 },
-  { id: 'nav-clearview', titleRu: 'ClearView рейтинги off-plan', titleEn: 'ClearView Ratings', path: '/clearview',
+  { id: 'nav-clearview', titleRu: 'ClearView рейтинги off-plan', titleEn: 'ClearView Ratings', path: '/property/clearview',
     keywords: ['clearview', 'рейтинг', 'rating', 'off-plan rating', 'aaa', 'due diligence'], cluster: 'invest', weight: 6 },
   { id: 'nav-investor-deals', titleRu: 'Сделки и pipeline', titleEn: 'Deals & Pipeline', path: '/invest/deals',
     keywords: ['сделки', 'deals', 'pipeline', 'invest deals'], cluster: 'invest', personas: ['investor'], weight: 5 },

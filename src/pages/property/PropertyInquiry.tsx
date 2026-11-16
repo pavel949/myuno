@@ -361,7 +361,7 @@ export default function PropertyInquiry() {
 
   const editUrl = propertyDetailHref(id || '', 'rent', searchParams.toString());
 
-  // Show confirmation screen after a successful viewing request submission.
+  // Show confirmation screen after a successful rental request submission.
   if (submittedOrderId) {
     return <InquiryConfirmation orderId={submittedOrderId} />;
   }

@@ -6,7 +6,8 @@ import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPres
  */
 
 import React, { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import {
   Building2,
   MapPin,
@@ -68,6 +69,9 @@ export function OffplanProjectCard({
 }: OffplanProjectCardProps) {
   const project = publicNewbuildPresentation(sourceProject);
   const navigate = useNavigate();
+  // Carry the catalogue URL (with its filters) so the project page can return to it.
+  const routerLocation = useLocation();
+  const journeyState = publicJourneyState(routerLocation);
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
@@ -121,7 +125,7 @@ export function OffplanProjectCard({
     >
       {/* Photo and title link to the same canonical project; actions remain siblings. */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <Link to={surface.href} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
+        <Link to={surface.href} state={journeyState} tabIndex={-1} aria-hidden="true" className="absolute inset-0">
         {project.coverImage ? (
           <img
             src={project.coverImage}
@@ -211,7 +215,7 @@ export function OffplanProjectCard({
       <div className="p-4 space-y-3">
         {/* Title */}
         <h3 className="font-display font-normal text-xl leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-          <Link to={surface.href}>{name}</Link>
+          <Link to={surface.href} state={journeyState}>{name}</Link>
         </h3>
 
         {/* Location + Developer */}

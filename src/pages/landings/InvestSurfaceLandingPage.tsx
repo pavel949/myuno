@@ -10,7 +10,7 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
   { icon: Building, labelEn: 'Off-plan & new builds', labelRu: 'Off-plan и новостройки', descEn: 'Vetted developers, ClearView AAA-CCC', descRu: 'Проверенные девелоперы, ClearView AAA–CCC', path: '/newbuilds', color: 'primary' },
-  { icon: ShieldCheck, labelEn: 'ClearView rating', labelRu: 'Рейтинг ClearView', descEn: '8 criteria, independent score', descRu: '8 критериев, независимая оценка', path: '/clearview', color: 'cluster-invest' },
+  { icon: ShieldCheck, labelEn: 'ClearView rating', labelRu: 'Рейтинг ClearView', descEn: '8 criteria, independent score', descRu: '8 критериев, независимая оценка', path: '/property/clearview', color: 'cluster-invest' },
   { icon: FileSearch, labelEn: 'Due diligence', labelRu: 'Юридический due diligence', descEn: 'Title, EIA, developer track record', descRu: 'Титул, EIA, история девелопера', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
   { icon: Coins, labelEn: 'Capital deals', labelRu: 'Capital-сделки', descEn: 'Mandate-based, $2M+ tickets', descRu: 'Mandate-режим, чеки от $2M', path: APP_ROUTES.INVEST_DEALS_BOARD, color: 'accent-amber' },
   { icon: Briefcase, labelEn: 'Business investment', labelRu: 'Бизнес-инвестиции', descEn: 'F&B, hospitality, SaaS deals', descRu: 'F&B, hospitality, SaaS сделки', path: APP_ROUTES.INVEST_BUSINESS, color: 'cluster-arrive' },

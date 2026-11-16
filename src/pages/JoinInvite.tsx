@@ -393,8 +393,8 @@ export default function JoinInvite() {
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 py-6 text-[12px] text-muted-foreground sm:flex-row sm:items-center">
             <div><LegalCopyright /></div>
             <div className="flex gap-5">
-              <Link to="/legal/privacy" className="hover:text-foreground">{isRu ? 'Приватность' : 'Privacy'}</Link>
-              <Link to="/legal/terms" className="hover:text-foreground">{isRu ? 'Условия' : 'Terms'}</Link>
+              <Link to="/privacy" className="hover:text-foreground">{isRu ? 'Приватность' : 'Privacy'}</Link>
+              <Link to="/terms" className="hover:text-foreground">{isRu ? 'Условия' : 'Terms'}</Link>
               <Link to="/support" className="hover:text-foreground">{isRu ? 'Поддержка' : 'Support'}</Link>
             </div>
           </div>

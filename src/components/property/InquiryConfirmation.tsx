@@ -21,18 +21,18 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </div>
 
       <h2 className="text-2xl font-bold mb-2">
-        {isRu ? 'Запрос на просмотр отправлен' : 'Viewing request received'}
+        {isRu ? 'Заявка на аренду отправлена' : 'Rental request sent'}
       </h2>
 
       <p className="text-muted-foreground mb-8 max-w-sm">
         {isRu
-          ? 'Свяжемся с вами в WhatsApp в течение 24 часов, чтобы подтвердить время просмотра.'
-          : "We'll message you on WhatsApp within 24 hours to confirm your viewing time."}
+          ? 'Это ещё не подтверждённое бронирование. Мы проверим выбранные даты и свяжемся с вами в WhatsApp в течение 24 часов.'
+          : "This is not a confirmed booking yet. We'll check your dates and message you on WhatsApp within 24 hours."}
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <Button size="lg" onClick={() => navigate(APP_ROUTES.BOOKING_DETAIL(orderId))}>
-          {isRu ? 'Открыть бронирование' : 'View booking'}
+          {isRu ? 'Открыть заявку' : 'View request'}
         </Button>
         <Button variant="outline" size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY)}>
           {isRu ? 'Смотреть объекты' : 'Browse properties'}

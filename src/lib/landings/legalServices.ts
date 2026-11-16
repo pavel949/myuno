@@ -27,7 +27,7 @@ export const LEGAL_SERVICES: Record<LegalServiceId, LegalServiceConfig> = {
     },
     ctaPrimary: {
       label: { ru: 'Пройти квиз и получить план', en: 'Take the quiz and get your plan', th: 'ทำแบบสอบถามและรับแผนวีซ่า' },
-      href: '/legal/visa-quiz',
+      href: '/visa/quiz',
     },
     faq: [
       {
@@ -81,7 +81,7 @@ export const LEGAL_SERVICES: Record<LegalServiceId, LegalServiceConfig> = {
     },
     ctaPrimary: {
       label: { ru: 'Пройти налоговый квиз', en: 'Take the tax quiz', th: 'ทำแบบสอบถามด้านภาษี' },
-      href: '/legal/tax-nav',
+      href: '/tax',
     },
     faq: [
       {

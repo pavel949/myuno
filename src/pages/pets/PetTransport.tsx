@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Plane, 
   MapPin, 
@@ -27,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 
 const destinations = [
   { id: 'russia', label: 'Russia', labelRu: 'Россия', price: 25000 },
@@ -61,7 +61,6 @@ const includedServices = [
 ];
 
 export default function PetTransport() {
-  const navigate = useNavigate();
   const { language } = useLanguage();
   
   const [petType, setPetType] = useState('dog');
@@ -76,18 +75,10 @@ export default function PetTransport() {
   const basePrice = selectedDestination?.price || 0;
   const totalPrice = Math.round(basePrice * (selectedSize?.multiplier || 1));
 
-  const handleGetQuote = () => {
-    navigate('/pets/transport/quote', {
-      state: {
-        petType,
-        petSize,
-        destination,
-        travelDate,
-        originCity,
-        totalPrice,
-      }
-    });
-  };
+  // There is no quote page; an exact quote is a human-handled request, so it
+  // goes to the concierge form with the choices made here attached.
+  const [quoteOpen, setQuoteOpen] = useState(false);
+  const handleGetQuote = () => setQuoteOpen(true);
 
   return (
     <AppLayout>
@@ -296,6 +287,21 @@ export default function PetTransport() {
           </Button>
         </div>
       </div>
+      <ConciergeHelpSheet
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        topic="general"
+        initialSubject={language === 'ru' ? 'Перевозка питомца: точный расчёт' : 'Pet transport: exact quote'}
+        sourceData={{
+          source: 'pet_transport_quote',
+          petType,
+          petSize,
+          destination,
+          travelDate: travelDate ? format(travelDate, 'yyyy-MM-dd') : null,
+          originCity,
+          indicativePrice: totalPrice,
+        }}
+      />
     </AppLayout>
   );
 }
