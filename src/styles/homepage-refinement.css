@@ -259,12 +259,12 @@
 /* 2×2: the hero column is width-capped, so four columns leave ~170px cells
    that split RU labels ("недвижим|ость") at every desktop width. */
 .home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
-.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 4.75rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--brand-navy) / .42); color: hsl(var(--primary-foreground)); text-decoration: none; backdrop-filter: blur(8px); transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
-.home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-foreground) / .7); background: hsl(var(--brand-navy) / .68); transform: translateY(-2px); }
-.home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: 999px; background: hsl(var(--primary-foreground) / .14); }
+.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 4.75rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); text-decoration: none; transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
+.home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-foreground) / .7); background: hsl(var(--primary)); }
+.home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: var(--radius); background: hsl(var(--primary-foreground) / .14); }
 .home-refined .home-hero-choice-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: .2rem; }
 .home-refined .home-hero-choice-copy strong { hyphens: auto; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
-.home-refined .home-hero-choice-copy small { display: -webkit-box; overflow: hidden; color: hsl(var(--primary-foreground) / .78); font-size: var(--public-caption-size); line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.home-refined .home-hero-choice-copy small { display: block; color: hsl(var(--primary-foreground) / .78); font-size: var(--public-caption-size); line-height: 1.35; }
 .home-refined .home-hero-choice > svg { flex: 0 0 auto; margin-top: .125rem; }
 .home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
 .home-refined .home-hero-help:hover { color: hsl(var(--primary-foreground)); }

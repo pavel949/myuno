@@ -5,7 +5,8 @@ import { MemoryRouter, Routes, Route, useNavigate, useLocation } from 'react-rou
 import PropertyDetail from '../PropertyDetail';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
-const state = vi.hoisted(() => ({ language: 'en' as 'en' | 'ru' | 'th', result: {} as Record<string, unknown>, refetch: vi.fn(), reads: vi.fn(), property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { price_per_night: 2000, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
+const state = vi.hoisted(() => ({ language: 'en' as 'en' | 'ru' | 'th', result: {} as Record<string, unknown>, refetch: vi.fn(), reads: vi.fn(), property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, currency:'THB', sale_currency:'THB', property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { currency: 'THB', price_per_night: 2000, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
+vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanyById: () => ({data:null,isLoading:false,isError:false}) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: (id: string) => { state.reads(id); return { data: state.property, isLoading: false, isError: false, isFetching: false, refetch: state.refetch, ...state.result }; } }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -40,7 +41,7 @@ vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => nul
 beforeEach(() => { state.result = {}; state.language = 'en'; vi.clearAllMocks(); });
 afterEach(() => { cleanup(); localStorage.clear(); });
 function Boundary() { const navigate = useNavigate(); const location = useLocation(); return <><output data-testid="location">{location.pathname + location.search}</output><button onClick={() => navigate('/property/next?guests=2')}>Next property</button></>; }
-function Harness({entry='/property/unit?mode=rent&guests=3&checkIn=2099-12-01&checkOut=2099-12-04'}:{entry?:string}) { return <MemoryRouter initialEntries={[entry]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><CompareProvider><Boundary/><div className={ECOSYSTEM_PAGE_CONTAINER} data-testid="parent-frame"><Routes><Route path="/property/:id" element={<PropertyDetail/>}/><Route path="/property" element={<h1>Listings destination</h1>}/></Routes></div></CompareProvider></MemoryRouter>; }
+function Harness({entry='/property/unit?mode=rent&guests=3&checkIn=2099-12-01&checkOut=2099-12-04'}:{entry?:string}) { return <MemoryRouter initialEntries={[entry]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><CompareProvider><Boundary/><div className={ECOSYSTEM_PAGE_CONTAINER} data-testid="parent-frame"><Routes><Route path="/property/:id" element={<PropertyDetail/>}/><Route path="/property" element={<h1>Listings destination</h1>}/><Route path="/property/browse" element={<h1>Listings destination</h1>}/></Routes></div></CompareProvider></MemoryRouter>; }
 function mount() { return render(<Harness/>); }
 const copy = {
  en: { loading: 'Loading property…', error: 'Property could not be loaded', missing: 'Property not found', retry: 'Try again', back: 'Back to listings' },
@@ -59,13 +60,13 @@ describe.each(['en','ru','th'] as const)('property read states (%s)', language =
   expect(screen.getByRole('alert', { name: copy[language].error })).toBeVisible();
   expect(screen.queryByText('Internal read diagnostics')).not.toBeInTheDocument();
   expect(screen.queryByText(copy[language].missing)).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: copy[language].back })).toHaveAttribute('href','/property');
+  expect(screen.getByRole('button', { name: copy[language].back })).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: copy[language].retry })); expect(state.refetch).toHaveBeenCalledOnce();
  });
  it('uses the shared empty state for successful null and does not invent a retry error', () => {
   state.result = { data: null }; mount();
   expect(screen.getByRole('heading', { name: copy[language].missing })).toBeVisible(); expect(screen.queryByRole('alert')).not.toBeInTheDocument(); expect(screen.queryByRole('button', { name: copy[language].retry })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('link', { name: copy[language].back }));expect(screen.getByRole('heading', { name:'Listings destination' })).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: copy[language].back }));expect(screen.getByRole('heading', { name:'Listings destination' })).toBeVisible();
  });
 });
 it('keeps query context and transitions retry through loading to the existing success page', () => {

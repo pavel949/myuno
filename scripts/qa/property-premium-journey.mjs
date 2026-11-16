@@ -12,6 +12,7 @@ const language = "export const useLanguage=()=>({language:new URLSearchParams(wi
 const image = 'https://fixture.invalid/property.svg';
 const property = { id:'synthetic-unit', title_ru:'Тестовая вилла', title_en:'Synthetic villa', listing_type:'rent', listing_modes:['rent','sale'], tenancy_modes:['short','long'], property_type:'villa', district:'Bang Tao', created_at:'2026-10-26', updated_at:'2026-10-26', bedrooms:3, area_sqm:180, images:[image,image+'%20',image+'%20%20'], cover_image:image };
 const virtual = {
+ '@/lib/catalog/useCatalogFromDB': "export const useCatalogFromDB=()=>({categories:[],isLoading:false,error:null,isFromDB:false,refetch:()=>{}});",
  '@/integrations/supabase/client': "export const supabase=new Proxy({},{get(){throw Error('Production database access forbidden in public journey fixture')}});",
  '@/contexts/LanguageContext': language,
  '@/contexts/CurrencyContext': "export const useCurrency=()=>({formatPrice:value=>'฿'+value});",
@@ -34,7 +35,7 @@ const initial=new URLSearchParams(window.location.search).get('page')==='home'?'
 createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter initialEntries={[initial]}><Location/><Routes><Route path="/" element={<Home/>}/><Route path="/property/:id" element={<Detail/>}/><Route path="/area/:slug" element={<AreaLandingPage/>}/></Routes></MemoryRouter></HelmetProvider>);`;
 const bundle = await build({
  stdin:{contents:entry,resolveDir:root,loader:'tsx'},bundle:true,format:'esm',jsx:'automatic',outfile:path.join(output,'bundle.js'),
- define:{'process.env.NODE_ENV':'"production"','import.meta.env':'{}'},metafile:true,
+ define:{'process.env.NODE_ENV':'"production"','import.meta.env':'{}'},metafile:true,loader:{'.svg':'file','.png':'file','.webp':'file'},
  plugins:[{name:'synthetic-read-boundaries',setup(b){
   b.onResolve({filter:/.*/},args=>args.path in virtual?{path:args.path,namespace:'virtual-read'}:undefined);
   b.onLoad({filter:/.*/,namespace:'virtual-read'},args=>({contents:virtual[args.path],loader:'tsx',resolveDir:root}));

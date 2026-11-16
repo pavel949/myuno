@@ -152,11 +152,10 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
           request_type: universalRequestType ?? 'consultation',
           lead_source: leadSource,
           entry_point: entryPoint,
-          vertical_metadata: contextMetadata,
+          vertical_metadata: requestContext ? { ...contextMetadata, owner_intent: requestContext.intent } : contextMetadata,
           name,
           phone,
           email: email || undefined,
-          vertical_metadata: requestContext ? { owner_intent: requestContext.intent } : undefined,
           notes:
             [requestContext && t(requestContext.label), topic && `${topicField ? t(topicField.label) : t({ ru: 'Тема', en: 'Topic', th: 'หัวข้อ' })}: ${topic}`, message]
               .filter(Boolean)

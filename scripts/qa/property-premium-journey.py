@@ -5,6 +5,8 @@ import json
 import pathlib
 import sys
 import threading
+import os
+import shutil
 from playwright.sync_api import sync_playwright
 
 output = pathlib.Path(sys.argv[1]).resolve()
@@ -16,9 +18,9 @@ base = f"http://127.0.0.1:{server.server_port}"
 results = []
 try:
     with sync_playwright() as runtime:
-        browser = runtime.chromium.launch()
+        browser = runtime.chromium.launch(executable_path=None if os.environ.get("CI") else shutil.which("chromium"), args=["--no-sandbox"])
         try:
-            for lang in ("ru", "en"):
+            for lang in ("ru", "en", "th"):
                 for width in (320, 375, 390, 430, 1440):
                     page = browser.new_page(viewport={"width": width, "height": 1000})
                     errors = []
@@ -40,23 +42,23 @@ try:
                     def geometry():
                         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"overflow: {lang} {width}"
                     geometry()
-                    guide = "Открыть путеводитель" if lang == "ru" else "Explore the area guide"
+                    guide = {"ru":"Открыть путеводитель","en":"Explore the area guide","th":"เปิดคู่มือย่าน"}[lang]
                     page.get_by_role("link", name=guide).click()
                     page.locator(".property-journey-return").wait_for()
                     assert page.get_by_test_id("qa-location").text_content() == "/area/bang-tao"
                     geometry()
                     page.locator(".property-journey-return").click()
                     assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=rent&checkIn=2026-12-01&checkOut=2026-12-08&guests=3"
-                    thumb = "Показать фото 3" if lang == "ru" else "Show photo 3"
-                    photo = "Открыть фото 3" if lang == "ru" else "Open photo 3"
+                    thumb = {"ru":"Показать фото 3","en":"Show photo 3","th":"แสดงรูปที่ 3"}[lang]
+                    photo = {"ru":"Открыть фото 3","en":"Open photo 3","th":"เปิดรูปที่ 3"}[lang]
                     page.get_by_role("button", name=thumb).click()
                     page.get_by_role("button", name=photo).click()
                     assert page.get_by_test_id("qa-photo").text_content() == "2"
-                    long_stay = "Снять надолго" if lang == "ru" else "Long stay"
+                    long_stay = {"ru":"Снять надолго","en":"Long stay","th":"เช่าระยะยาว"}[lang]
                     assert "tenancy=long" in page.get_by_role("link", name=long_stay).get_attribute("href")
                     if width in (390, 1440):
                         page.screenshot(path=str(output / f"detail-{lang}-{width}.png"), full_page=True)
-                    buy = "Купить" if lang == "ru" else "Buy"
+                    buy = {"ru":"Купить","en":"Buy","th":"ซื้อ"}[lang]
                     page.get_by_role("link", name=buy, exact=True).click()
                     assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=buy"
                     page.goto(f"{base}/?lang={lang}&page=home")
@@ -75,5 +77,5 @@ finally:
     server.shutdown()
     server.server_close()
     (output / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=2))
-assert len(results) == 10, results
+assert len(results) == 15, results
 print(json.dumps({"cases": len(results), "outcome": "PASS"}))
