@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-11-16 · Functionality and latest design/UX rollout audit
+- [x] Confirm current source and fresh public version/entry-JS SHA parity at `be1224b5ed838bffebffddf12b127871adf41bad`; no deployment/publication performed.
+- [x] Fresh design gate: 3,945 retained findings, 0 new/structural; 205/206 targeted tests (obsolete Business top-menu assertion fails); 16 initial-render checks and 6/6 isolated intent scenarios. Evidence: `docs/qa/FUNCTIONALITY_DESIGN_ROLLOUT_2026_11_16.md`.
+- [x] Identify remaining mobile label, leaf-screen design, developer localization and selected-item/auth-context gaps; recommend scoped correction without redesign.
+- [ ] Hosted authenticated role and persisted operational acceptance BLOCKED by absent identified existing role sessions/contained write environment; no production mutations, notifications, settings or publishing.
+
 ## 2026-11-14 · Attached platform cleanup master prompt
 - [x] Inventory current shells/tokens/routes/query recovery/role surfaces and audit findings; preserve existing reviewed commits and working source.
 - [x] Correct confirmed pharmacy/developer/owner/vendor recovery, developer alias, Vercel reverse redirects and version-generation defects; retain authorization and domain writers.
