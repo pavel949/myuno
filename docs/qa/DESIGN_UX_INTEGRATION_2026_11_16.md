@@ -37,9 +37,13 @@ The #207 omissions are `src/hooks/usePropertyCare.ts`, `src/hooks/useServiceMark
 - Property/area/browser journey: 15/15 passing cases, RU/EN/TH at 320/375/390/430/1440px. Actual components with synthetic reads; no hosted backend. Checks actual area round trip, dates/guests, offer intent, photo selection, geometry and home entry.
 - Focused lead/property regressions: 31 passing assertions after merging the existing entity context and explicit synthetic THB currency fixture.
 - Initial affected-file run: 212 pass, 18 fail due to a missing management-company test boundary. The boundary was corrected; its 18 cases then passed. This failed run is not counted as final acceptance.
-- Typecheck passed before the final gallery-label-only correction; final exact-source verification is required.
-- Authored-source lint passed with 0 errors and 2,224 existing warnings before the final gallery-label-only correction. Final exact-source verification is required.
-- First complete isolated suite: 5,072 pass / 2 failures / 0 skipped across 446 files. The two failures expected the former area-link label and a single card anchor; both were corrected while retaining real history/route and image-recovery assertions, and their 40 focused tests passed. A final complete rerun, production build and broader browser gates remain in progress.
+- Final complete isolated suite: **5,074/5,074 passing, 446/446 files, 0 skipped**. The two former selector failures were corrected without removing history, route or image-recovery assertions.
+- Final runtime source TypeScript, production build and authored-source lint passed; lint reports 0 errors and 2,224 existing warnings.
+- Consumer services accessibility: **6/6** passing actual-component cases, EN/RU at 390/768/1440px.
+- The first full core browser matrix correctly failed 12 public compact cases (138/150 passed). A later premium stylesheet used a public spacing token that did not inherit the common density scale. Both responsive definitions now derive from `--section-space-scale`; scale 1 retains the existing default geometry. No assertion or baseline was weakened. Full corrected browser results are recorded below when complete.
+- Shared section/header/link/mobile-overflow contracts: **60/60** actual-component browser cases passed after the spacing correction. The production build also passed again after that CSS change.
+- Manual screenshot inspection found the isolated public fixture omitted `homepage-refinement.css`, although the application imports it. Both the source CSS server and final variant bundles now include the complete stylesheet chain and source receipt. The browser matrix now explicitly asserts the four hero goal cards have grid/flex layout, at least 44px height and no horizontal overflow. The interrupted incomplete-style matrix is not accepted as final evidence.
+- Source inventories describe adoption, not visual acceptance. Hosted mutation E2E remains intentionally skipped; isolated checks are used for this candidate.
 
 ## Boundaries and rollback
 
