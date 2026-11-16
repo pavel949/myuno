@@ -62,6 +62,7 @@ export const propertyHubRoutes = (
       element={<PropertySearchRedirect defaults={{ mode: 'buy', intent: 'quick_sale' }} />}
     />
     <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
+    <Route path="sell" element={<LazyPage><Pages.PropertySellLanding /></LazyPage>} />
     <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
     <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
     {/* Legacy map bookmarks use the canonical public catalogue and its URL-owned filters. */}

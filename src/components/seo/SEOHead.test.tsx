@@ -6,7 +6,11 @@ import { SEOHead } from './SEOHead';
 const locale = vi.hoisted(() => ({ language: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 afterEach(() => { locale.language = 'en'; cleanup(); document.head.innerHTML = ''; window.history.replaceState({}, '', '/'); });
-describe('route metadata replaces the static homepage fallback', () => {
+describe('route metadata replaces the static fallback', () => {
+  it('leaves URL metadata to the requested page', () => {
+    const shell = new DOMParser().parseFromString(readFileSync('index.html', 'utf8'), 'text/html');
+    expect(shell.head.querySelector('link[rel="canonical"], meta[property="og:url"], meta[name="twitter:url"]')).toBeNull();
+  });
   it.each(['/discover', '/property', '/newbuilds', '/legal'])('has one route canonical and description at %s', async path => {
     const shell = new DOMParser().parseFromString(readFileSync('index.html', 'utf8'), 'text/html');
     for (const node of shell.querySelectorAll('link[rel="canonical"], meta[name="description"]')) document.head.appendChild(document.importNode(node, true));

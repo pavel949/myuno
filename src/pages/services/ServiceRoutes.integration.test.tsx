@@ -37,6 +37,15 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.
 afterEach(cleanup);
 
 describe('integrated direct service route ownership', () => {
+  it('opens dedicated service journeys from the unfiltered public overview', async () => {
+    mount('/discover/services');
+    await act(async () => { await vi.dynamicImportSettled(); });
+    const transfer = await screen.findByRole('link', { name: /^Airport transfer/ });
+    expect(transfer).toHaveAttribute('href', '/transport/airport-transfer');
+    expect(screen.getByRole('link', { name: /^Airport Fast Track/ })).toHaveAttribute('href', '/transport/fast-track');
+    expect(screen.getByRole('link', { name: /^Flower delivery/ })).toHaveAttribute('href', '/flowers');
+  });
+
   it.each(['/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);

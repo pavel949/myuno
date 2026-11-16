@@ -30,7 +30,8 @@ export const homeCopy = {
   closing: { ru: 'Поможем сориентироваться', en: 'We’ll help you find your way', th: 'เราช่วยคุณเลือกได้' },
   contact: { ru: 'Связаться с командой', en: 'Talk to our team', th: 'ติดต่อทีมงาน' },
   urgent: { ru: 'Экстренная помощь и телефоны служб', en: 'Emergency help and useful numbers', th: 'ความช่วยเหลือฉุกเฉินและหมายเลขติดต่อ' },
-  business: { ru: 'Инвестиции и бизнес', en: 'Investment and business', th: 'การลงทุนและธุรกิจ' },
+  invest: { ru: 'Инвестиции', en: 'Investing', th: 'การลงทุน' },
+  business: { ru: 'Для бизнеса', en: 'For business', th: 'สำหรับธุรกิจ' },
   partners: { ru: 'Стать партнёром', en: 'Become a partner', th: 'ร่วมเป็นพาร์ทเนอร์' },
 } satisfies Record<string, LangValues>;
 

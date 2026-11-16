@@ -7,6 +7,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { getLegacyRedirect, APP_ROUTES } from "@/lib/config/routes";
+import { SEOHead } from '@/components/seo/SEOHead';
 import { logger } from "@/lib/logger";
 
 const NotFound = () => {
@@ -14,6 +15,7 @@ const NotFound = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const title = language === 'th' ? 'ไม่พบหน้านี้' : isRu ? 'Страница не найдена' : 'Page not found';
 
   useEffect(() => {
     const redirect = getLegacyRedirect(location.pathname);
@@ -26,6 +28,7 @@ const NotFound = () => {
 
   return (
     <AppLayout showFooter={false}>
+      <SEOHead title={title} noindex />
       <div className="premium-system flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
         {/* 404 — calm, not aggressive */}
         <div className="mb-8">
@@ -35,7 +38,7 @@ const NotFound = () => {
         </div>
 
         <h1 className="text-xl font-semibold text-foreground mb-2">
-          {language === 'th' ? 'ไม่พบหน้านี้' : isRu ? 'Страница не найдена' : 'Page not found'}
+          {title}
         </h1>
         <p className="text-sm text-muted-foreground max-w-sm mb-8">
           {language === 'th' ? 'หน้านี้อาจถูกย้ายหรือไม่พร้อมใช้งานชั่วคราว' : isRu

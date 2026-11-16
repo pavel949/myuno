@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarCheck, Compass, Headphones, ShieldCheck, Ship, Waves } from 'lucide-react';
+import { ArrowRight, CalendarCheck, Car, Compass, Flower2, Headphones, Plane, ShieldCheck, Ship, Waves } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -9,10 +9,14 @@ export function MarketplaceDiscoveryHero({ kind }: { kind: 'services' | 'experie
   const { language } = useLanguage();
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const isExperience = kind === 'experiences';
-  const journeys = [
+  const journeys = isExperience ? [
     { to: APP_ROUTES.EXPERIENCES + '?type=tour', icon: Compass, ru: 'Экскурсии', en: 'Tours & discoveries', th: 'ทัวร์และการสำรวจ', subRu: 'Острова, природа и культура', subEn: 'Islands, nature and culture', subTh: 'เกาะ ธรรมชาติ และวัฒนธรรม' },
     { to: APP_ROUTES.EXPERIENCES + '?type=activity', icon: Waves, ru: 'Активный отдых', en: 'Activities & adventures', th: 'กิจกรรมและการผจญภัย', subRu: 'Выберите подходящее занятие', subEn: 'Find an activity for your plans', subTh: 'ค้นหากิจกรรมที่เหมาะกับแผนของคุณ' },
     { to: APP_ROUTES.YACHTS, icon: Ship, ru: 'Яхты и морские прогулки', en: 'Yachts & sea trips', th: 'เรือยอชต์และทริปทะเล', subRu: 'Откройте отдельный каталог яхт', subEn: 'Explore the dedicated yacht catalogue', subTh: 'ดูรายการเรือยอชต์โดยเฉพาะ' },
+  ] : [
+    { to: APP_ROUTES.AIRPORT_TRANSFER, icon: Car, ru: 'Трансфер из аэропорта и в аэропорт', en: 'Airport transfer', th: 'รถรับส่งสนามบิน', subRu: 'Укажите маршрут и выберите автомобиль', subEn: 'Choose your route and vehicle', subTh: 'เลือกเส้นทางและรถยนต์' },
+    { to: APP_ROUTES.FAST_TRACK, icon: Plane, ru: 'Fast Track в аэропорту', en: 'Airport Fast Track', th: 'บริการช่องทางด่วนสนามบิน', subRu: 'Выберите прилёт или вылет и пакет услуг', subEn: 'Select arrival or departure and a service package', subTh: 'เลือกขาเข้าหรือขาออกและแพ็กเกจบริการ' },
+    { to: APP_ROUTES.FLOWERS, icon: Flower2, ru: 'Доставка цветов', en: 'Flower delivery', th: 'บริการส่งดอกไม้', subRu: 'Откройте каталог букетов', subEn: 'Browse the bouquet catalogue', subTh: 'ดูแคตตาล็อกช่อดอกไม้' },
   ];
   return <section className="space-y-4" aria-label={t('Подборка myUNO', 'myUNO discovery', 'ค้นหาบริการ myUNO')}>
     <div className="border border-border bg-card p-[var(--card-padding)] sm:p-6 lg:p-8">
@@ -29,11 +33,11 @@ export function MarketplaceDiscoveryHero({ kind }: { kind: 'services' | 'experie
         <span className="inline-flex items-center gap-2"><Headphones className="size-4 text-primary" />{t('Поддержка на Пхукете', 'Support in Phuket', 'บริการช่วยเหลือในภูเก็ต')}</span>
       </div>}
     </div>
-    {isExperience && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {journeys.map(item => <Link key={item.to} to={item.to} className="group flex min-h-32 flex-col justify-between border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <item.icon className="mb-3 size-6 text-primary" aria-hidden="true" /><span className="font-display text-lg font-medium text-foreground">{t(item.ru, item.en, item.th)}</span>
         <span className="mt-3 flex items-end justify-between gap-2 text-sm text-muted-foreground"><span>{t(item.subRu, item.subEn, item.subTh)}</span><ArrowRight className="size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden="true" /></span>
       </Link>)}
-    </div>}
+    </div>
   </section>;
 }

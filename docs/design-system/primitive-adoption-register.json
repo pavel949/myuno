@@ -6848,7 +6848,7 @@
     },
     {
       "file": "src/components/layout/routes/propertyHubRoutes.tsx",
-      "sha256": "1d0ad12edf1f2f972da3a8ff43a5742ef9159c17dd6b73dbd429c10ba12c2d61",
+      "sha256": "d4bff0811b8b407ad210b43e19e53d0f787549e5323585a5e295f61d6121c39d",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -19909,7 +19909,7 @@
     },
     {
       "file": "src/pages/NotFound.tsx",
-      "sha256": "b7ba2596ff612b07c1dce35794a23e5caea5c8db8afffda392a871cd952a1e82",
+      "sha256": "b15177cb959b765795ceed280b57a4b5c5a8644c69dd1c4a0236692921acd4d7",
       "directRouteDeclarations": [
         {
           "id": "7662e3eebea09b22",
@@ -19926,7 +19926,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            47
+            50
           ]
         }
       ]
@@ -39657,7 +39657,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "b4119c9f57fad4cbca498e47d66ffa51edd853ef0331fe1b793b73f7607d722b",
+      "sha256": "6feee341c5d2e983596f9d52bb9c4c3dc02c9624096b8856d7f4f1047deac4fb",
       "directRouteDeclarations": [
         {
           "id": "3d68906b3367f767",
@@ -39674,12 +39674,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            360,
-            372,
-            383,
-            452,
-            462,
-            469
+            362,
+            374,
+            385,
+            454,
+            464,
+            471
           ]
         }
       ]

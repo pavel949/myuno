@@ -77,11 +77,11 @@ export default function DiscoveryHubPage() {
 
         <section className="mt-8 grid gap-4 border-t border-border pt-8 sm:grid-cols-2" aria-labelledby="discovery-other-title">
           <h2 id="discovery-other-title" className="sr-only">{t({ en: 'Other paths', ru: 'Другие задачи', th: 'เส้นทางอื่น' })}</h2>
-          <Link to={R.SELL} className="group flex min-h-28 items-center gap-4 border border-dashed border-border p-5 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link to={R.PROPERTY_SELL} className="group flex min-h-28 items-center gap-4 border border-dashed border-border p-5 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <ListPlus size={22} className="shrink-0 text-primary" aria-hidden="true" />
             <span className="min-w-0 flex-1">
-              <span className="block font-semibold text-foreground">{t({ en: 'Sell or rent out a property', ru: 'Продать или сдать объект', th: 'ขายหรือปล่อยเช่าอสังหาริมทรัพย์' })}</span>
-              <span className="mt-1 block text-sm text-muted-foreground">{t({ en: 'List a property or ask the team for a plan.', ru: 'Разместите объект или получите план от команды.', th: 'ลงประกาศหรือขอคำแนะนำจากทีมงาน' })}</span>
+              <span className="block font-semibold text-foreground">{t({ en: 'Sell a property', ru: 'Продать объект', th: 'ขายอสังหาริมทรัพย์' })}</span>
+              <span className="mt-1 block text-sm text-muted-foreground">{t({ en: 'Tell the team about your property and plans.', ru: 'Расскажите команде об объекте и ваших планах.', th: 'แจ้งข้อมูลอสังหาริมทรัพย์และแผนของคุณแก่ทีมงาน' })}</span>
             </span>
             <ArrowRight size={18} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </Link>

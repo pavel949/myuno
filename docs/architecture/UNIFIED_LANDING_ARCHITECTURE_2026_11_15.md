@@ -5,13 +5,13 @@ One account, one design system, one navigation grammar and one request inbox. Mu
 
 ## Landing hierarchy
 - Global home `/`: unified intent search, four destinations (property, services, experiences, owner management), recent activity, account and requests.
-- Property hub `/property`: Rent, Buy, Sell, Manage. The new `PlatformJourneyLinks` is a shared DS2.1 entry and must not duplicate the existing Seeker/Capital/Pro lanes indefinitely.
-- Rent: `/property/browse?mode=rent&tenancy=short` and medium/long variants. Airbnb-like results require real calendar availability, date range, guest count, pricing breakdown and booking state. Never assert instant confirmation for request-only inventory.
-- Buy: `/discover/buy` and `/property/offplan`, `/property/resale`. Keep project and unit entities distinct. OFFPLAN integration via reviewed API/deep links only, never assume shared DB.
-- Sell: `/sell`: owner lead intake, asset data, upload, consent, CRM assignment and follow-up.
-- Services: `/services`: needs-based discovery, category/filter/provider offers, booking sheet.
+- Property entrance `/property` opens the unfiltered housing catalogue at `/property/search`. Rent, Buy, Sell and Manage are available above the unfiltered catalogue. Existing search URLs preserve their criteria.
+- Rent: `/property/search?mode=rent` with optional short, medium or long tenancy. Airbnb-like results require real calendar availability, date range, guest count, pricing breakdown and booking state. Never assert instant confirmation for request-only inventory.
+- Buy: `/discover/buy` leads with the separate `/property/resale` and `/property/offplan` catalogues. Direct listings remain available under `/property/search?mode=buy`. Keep project and unit entities distinct. OFFPLAN integration via reviewed API/deep links only, never assume shared DB.
+- Sell: `/property/sell` is a public property consultation form with sale intent in the existing intake. The marketplace item wizard remains at `/sell`.
+- Services: `/discover/services` offers dedicated airport transfer, Fast Track and flower routes alongside category discovery and published provider offers. The `/services` route remains available.
 - Experiences: `/experiences`: tour/activity/yacht discovery with shared marketplace design language and experience-specific availability.
-- Manage: `/owner/management-landing`: owner acquisition, PMS onboarding and secure owner workspace.
+- Manage: `/for-owners` offers a management enquiry at `/owner/management-landing` and separate owner onboarding and workspace actions.
 
 ## Persona composition
 Guest/tourist, resident/expat, buyer/investor, owner, agent, provider and staff/admin use the same identity; capabilities and navigation are permission-aware, not separate logins. A user may have multiple personas. Never infer authorization from editable user metadata.

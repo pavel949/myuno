@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import PropertySellLanding from '@/pages/property/PropertySellLanding';
 import { LandingLeadForm } from './LandingLeadForm';
 const fixture = vi.hoisted(() => ({ submit: vi.fn(), language: 'en' }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
@@ -50,4 +51,22 @@ it('keeps existing entity context when the owner journey adds its intent', async
  fireEvent.click(screen.getByRole('button',{name:'Submit request'}));
  expect(await screen.findByText('Request saved')).toBeVisible();
  expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({vertical_metadata:{property_id:'synthetic-property',owner_intent:'management'}}));
+});
+
+it('routes the public sale form to the existing property consultation workflow', async () => {
+ fixture.submit.mockResolvedValue({ id: 'synthetic-sale-receipt' });
+ render(<PropertySellLanding />);
+ expect(screen.getByRole('heading', { name: 'Sell property in Phuket' })).toBeVisible();
+ fireEvent.change(screen.getByLabelText(/Name/), { target: { value: 'Synthetic seller' } });
+ fireEvent.change(screen.getByLabelText(/Phone/), { target: { value: '+66000000000' } });
+ fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Synthetic apartment in Bang Tao' } });
+ fireEvent.click(screen.getByRole('button', { name: 'Send enquiry' }));
+ expect(await screen.findByText('Request saved')).toBeVisible();
+ expect(fixture.submit).toHaveBeenCalledWith(expect.objectContaining({
+   vertical_id: 'properties',
+   request_type: 'property_consultation',
+   entry_point: '/property/sell',
+   vertical_metadata: { owner_intent: 'sell_property' },
+   notes: 'Property sale\nSynthetic apartment in Bang Tao',
+ }));
 });
