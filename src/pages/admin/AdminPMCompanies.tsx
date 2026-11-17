@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -199,7 +200,7 @@ export default function AdminPMCompanies() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <PageShell width="workspace" className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -636,6 +637,6 @@ export default function AdminPMCompanies() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+    </PageShell>
   );
 }

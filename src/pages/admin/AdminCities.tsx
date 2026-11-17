@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -234,7 +235,7 @@ export default function AdminCities() {
 
   return (
     <>
-      <div className="container max-w-4xl mx-auto px-4 py-6 pb-24">
+      <PageShell width="default">
         <div className="mb-4"><BackButton fallbackPath={APP_ROUTES.ADMIN} variant="ghost" size="sm" /></div>
         
         <div className="flex items-center gap-3 mb-6">
@@ -583,7 +584,7 @@ export default function AdminCities() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      </div>
+      </PageShell>
     </>
   );
 }

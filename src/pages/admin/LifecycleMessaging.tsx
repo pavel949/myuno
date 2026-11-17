@@ -1,3 +1,5 @@
+import { PageHeader } from '@/components/page/PageHeader';
+import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -114,17 +116,16 @@ export default function LifecycleMessaging() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">{isRu ? 'Lifecycle Messaging' : 'Lifecycle Messaging'}</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {isRu ? 'Автоматические сообщения гостям на каждом этапе проживания' : 'Automated guest messages at every stage of their stay'}
-        </p>
-      </div>
+    <PageShell width="workspace" className="space-y-6">
+      <PageHeader
+        title={isRu ? 'Сообщения гостям' : 'Lifecycle Messaging'}
+        subtitle={isRu
+          ? 'Автоматические сообщения гостям на каждом этапе проживания'
+          : 'Automated guest messages at every stage of their stay'}
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold">{stats?.total || 0}</p>
@@ -299,6 +300,6 @@ export default function LifecycleMessaging() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </PageShell>
   );
 }

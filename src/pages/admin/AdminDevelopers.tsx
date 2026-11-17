@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * Admin Developers Management
  * CRUD for developers table (property developers/builders)
@@ -175,7 +176,7 @@ export default function AdminDevelopers() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <PageShell width="workspace" className="space-y-6">
       <PageHeader
         title={isRu ? 'Застройщики' : 'Developers'}
         subtitle={isRu ? 'Управление реестром застройщиков' : 'Manage developer registry'}
@@ -656,6 +657,6 @@ export default function AdminDevelopers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }

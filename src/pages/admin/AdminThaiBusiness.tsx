@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * AdminThaiBusiness — moderation queue for the Thai Business Layer.
  * Activate / block businesses (controls `is_active`, the B2C/landing gate).
@@ -25,7 +26,7 @@ export default function AdminThaiBusiness() {
   );
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+    <PageShell width="default">
       <h1 className="text-xl font-semibold text-foreground mb-4">{t('thai.admin.title')}</h1>
 
       <div className="flex gap-1 mb-5 border-b border-border">
@@ -102,6 +103,6 @@ export default function AdminThaiBusiness() {
       )}
         </>
       )}
-    </div>
+    </PageShell>
   );
 }

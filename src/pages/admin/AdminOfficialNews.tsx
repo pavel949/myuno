@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * AdminOfficialNews — мониторинг агрегатора официальных новостей.
  * Показывает по каждому источнику: количество записей, последний скрейп,
@@ -140,7 +141,7 @@ const AdminOfficialNews: React.FC = () => {
 
   return (
     <AppLayout showHeader={false} showFooter={false}>
-      <div className="max-w-4xl mx-auto px-4 pt-4 pb-24">
+      <PageShell width="default">
         <div className="flex items-center justify-between mb-4">
           <BackButton />
           <Button onClick={handleRun} disabled={running} size="sm">
@@ -269,7 +270,7 @@ const AdminOfficialNews: React.FC = () => {
             <ExternalLink className="w-3 h-3" />
           </a>
         </section>
-      </div>
+      </PageShell>
     </AppLayout>
   );
 };
