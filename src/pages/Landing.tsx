@@ -15,7 +15,7 @@ import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
-import hero from '@/assets/hero-phuket-desktop.webp';
+import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
@@ -38,7 +38,7 @@ export default function Landing() {
       <section className="home-hero" aria-labelledby="home-title">
         <img
           className="home-hero-image"
-          src={hero} alt="" loading="eager" width="1920" height="1080"
+          src={hero} alt="" loading="eager" width="1672" height="941"
         />
         <div className="home-hero-shade" aria-hidden="true" />
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />

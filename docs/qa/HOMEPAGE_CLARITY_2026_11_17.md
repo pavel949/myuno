@@ -44,3 +44,6 @@ The 320px CI screenshot and stylesheet cascade showed the newbuild override used
 
 ### Full six-project fixture and diagnostic renders
 Latest CI passed gutter geometry and reached a stale three-project assertion. The fixture returns six published synthetic projects and homepage intentionally previews six. Updated exact expected count to six. Reviewed remaining counts against fixtures. Added unvalidated 390px/1440px renders before assertions so a later interaction failure does not hide both requested layouts; these diagnostic images never count as matrix passes. All existing viewport, locale, touch, keyboard, overflow and route gates remain.
+
+### Brighter hero requested by owner
+Replaced the muted existing hero with newly generated editorial coastal mood art: bright turquoise sea, pale beach, palms, no identifiable property or offer. Asset is generated, not documentary evidence of a named Phuket beach. Decorative empty alt remains appropriate. Original generated PNG retained outside repository; compressed WebP1672×941 is201KB versus previous355KB. Desktop focal point preserves open water under copy and bright coast to right; mobile69% crop and localized scrim protect text readability. Actual responsive renders required before acceptance.

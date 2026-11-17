@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: db5c8eb9dac7ad259739e97b622d914c899b8270
+          ref: 9bb7e8f968077b6eac18c3462da624bd92090ad4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -73,15 +73,16 @@ jobs:
                 await ctx.close()
               await browser.close()
           asyncio.run(main())
-          (out/'RENDER-NOTICE.txt').write_text('Exact source db5c8eb9dac7ad259739e97b622d914c899b8270. Actual homepage components with synthetic public catalogue data. Diagnostic renders only, NOT a verification pass or deployment. No production reads/writes. Existing category photographs are editorial imagery.')
+          (out/'RENDER-NOTICE.txt').write_text('Exact source 9bb7e8f968077b6eac18c3462da624bd92090ad4. Actual homepage components with synthetic public catalogue data. Diagnostic renders only, NOT a verification pass or deployment. No production reads/writes. Existing category photographs are editorial imagery.')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: homepage-render-db5c8eb
+          name: homepage-render-9bb7e8f
           path: |
             /tmp/homepage-render/*.png
             /tmp/homepage-render/*receipt.json
             /tmp/homepage-render/RENDER-NOTICE.txt
             /tmp/homepage-vite.log
           retention-days: 7
+
