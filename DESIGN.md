@@ -43,7 +43,7 @@ Fonts switch by `html[lang]` per `tokens.css` lines 378–388. The variables (`-
 - **Display/Hero:** **Source Serif 4** (`html[lang="ru"]`: → Unbounded → Noto Serif → Georgia). Serif for civic gravity; Unbounded as Russian display fallback honors the Cyrillic audience without locking the doc to it.
 - **Body / UI:** **Geist** (`html[lang="ru"]`: → Golos Text → Noto Sans → system-ui). Geist for English; Golos Text remains the Russian-government typeface fallback for outstanding Cyrillic.
 - **Numerics / data / mono:** **IBM Plex Mono**. Always use `font-feature-settings: "tnum"` (tabular numerals) for all financial data, property metrics, coordinates.
-- **Thai script:** No dedicated face yet — falls through to Noto Sans / Noto Serif via system font stack on Thai-content components.
+- **Thai script:** **Noto Sans Thai**, loaded by the canonical font stylesheet. The Thai locale uses this supplied face for Thai glyphs while Latin headings/body retain Source Serif 4 / Geist. Body stacks also include it for embedded Thai content.
 
 **Loading:** Google Fonts via `index.html` (preconnect + print-then-all async). CSP allows `fonts.googleapis.com`, `fonts.gstatic.com`.
 

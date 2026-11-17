@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
 
@@ -195,7 +195,7 @@ export default function OwnerPortfolio() {
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <Card className="bg-gradient-to-br from-success/10 to-success/5">
+        <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="h-4 w-4 text-success" />
@@ -213,7 +213,7 @@ export default function OwnerPortfolio() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5">
+        <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <TrendingDown className="h-4 w-4 text-destructive" />
@@ -231,7 +231,7 @@ export default function OwnerPortfolio() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+        <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="h-4 w-4 text-primary" />
@@ -249,7 +249,7 @@ export default function OwnerPortfolio() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-info/10 to-info/5">
+        <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="h-4 w-4 text-info" />
@@ -313,12 +313,12 @@ export default function OwnerPortfolio() {
           ) : (
             <div className="space-y-3">
               {sortedMetrics.map((property) => (
-                <div
+                <Link
                   key={property.id}
-                  className="p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/mc/properties/${property.id}`)}
+                  className="block p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  to={`/mc/properties/${property.id}`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-start gap-3 sm:flex-row">
                     {property.coverImage ? (
                       <img 
                         src={property.coverImage} 
@@ -331,10 +331,10 @@ export default function OwnerPortfolio() {
                       </div>
                     )}
                     
-                    <div className="flex-1 min-w-0">
+                    <div className="w-full min-w-0 sm:flex-1">
                       <p className="font-medium text-sm truncate">{property.title}</p>
                       
-                      <div className="grid grid-cols-4 gap-2 mt-2 text-xs">
+                      <div className="grid grid-cols-2 gap-3 mt-2 text-xs sm:grid-cols-4">
                         <div>
                           <p className="text-muted-foreground">{isRu ? 'Доход' : 'Income'}</p>
                           <p className="font-medium text-success">{formatCurrency(property.income)}</p>
@@ -373,7 +373,7 @@ export default function OwnerPortfolio() {
                       </Badge>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

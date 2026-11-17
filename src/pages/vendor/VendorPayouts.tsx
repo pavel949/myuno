@@ -171,7 +171,7 @@ const VendorPayouts = () => {
   return (
     <div className="p-4 space-y-6">
       {/* Balance Card */}
-      <Card className="mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+      <Card className="mb-6 border-primary/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-full bg-primary/10">

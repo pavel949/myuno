@@ -3,9 +3,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { Property } from '@/hooks/useProperties';
 import { HomeListingCard } from './HomeListingCard';
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+const locale = vi.hoisted(() => ({ value: 'en' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: locale.value }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => String(n) }) }));
-afterEach(cleanup);
+afterEach(() => { cleanup(); locale.value = 'en'; });
 const home = { id: 'home', title_en: 'Stored home', title_ru: 'Жильё', cover_image: 'https://example.invalid/cover.jpg', images: ['https://example.invalid/cover.jpg', 'https://example.invalid/gallery.jpg', 'https://example.invalid/gallery.jpg'] } as Property;
 it('keeps the home and its route after cover failure when its own gallery can load', () => {
  const unavailable = vi.fn(); const { container } = render(<MemoryRouter><HomeListingCard property={home} onUnavailable={unavailable} /></MemoryRouter>);
@@ -37,3 +38,26 @@ it('excludes the home only after all unique stored candidates fail', () => {
   expect(screen.getByText('Pricing and terms on the listing')).toBeVisible();
   expect(screen.queryByLabelText('Rental rates')).toBeNull();
  });
+
+it('preserves equal stored tariffs and explicitly asks for confirmation without inventing amounts', () => {
+ render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000, listing_type: 'both' }} /></MemoryRouter>);
+ expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per night3000 per month');
+ expect(screen.getByText(/Different periods show the same amount/)).toBeVisible();
+ expect(screen.getByRole('link', { name: /View rental details/ })).toHaveAttribute('href', '/property/home?mode=rent');
+ expect(screen.queryByRole('link', { name: 'Buy' })).toBeNull();
+});
+it('does not warn about different legitimate stored tariff amounts', () => {
+ render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 60000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
+ expect(screen.getByLabelText('Rental rates')).toHaveTextContent('60000 per month');
+ expect(screen.queryByText(/Different periods show the same amount/)).toBeNull();
+});
+
+it.each([
+ ['ru', 'Одинаковые суммы за разные сроки'],
+ ['th', 'ค่าเช่าแต่ละระยะเวลาแสดงยอดเท่ากัน'],
+])('localizes the equal-period review note in %s', (language, message) => {
+ locale.value = language;
+ render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
+ expect(screen.getByText(new RegExp(message))).toBeVisible();
+ expect(screen.queryByText(/Different periods show/)).toBeNull();
+});

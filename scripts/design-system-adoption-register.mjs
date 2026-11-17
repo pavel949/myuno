@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import ts from 'typescript';
 import { pathToFileURL } from 'node:url';
+import { buildRouteRegister, normalizeRegister } from './design-system-audit.mjs';
 const names = new Set(['PageShell','PageContainer','PageHeader','PageSection','SectionHeader','UnifiedSectionHeader','SectionTitle','SectionCard','Button','Card','Input','Textarea','SelectTrigger','Table','Tabs','Dialog','Sheet','Drawer','DropdownMenu','EmptyState','LoadingState','StatusPill']);
 export function scanPrimitiveImports(file, text) {
  const ast=ts.createSourceFile(file,text,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),bindings=new Map(),usage=new Map();
@@ -13,8 +14,13 @@ export function scanPrimitiveImports(file, text) {
  return [...usage.values()].sort((a,b)=>a.name.localeCompare(b.name));
 }
 function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?e.name==='__tests__'?[]:walk(path.join(dir,e.name)):e.name.endsWith('.tsx')&&!/\.(test|spec|stories)\.tsx$/.test(e.name)?[path.join(dir,e.name)]:[]);}
+export function assertRouteRegisterFresh(root, stored) {
+ const current=normalizeRegister(buildRouteRegister(root));
+ if(JSON.stringify(current)!==JSON.stringify(stored))throw Error('Route surface register is stale. Run npm run design:routes, then node scripts/design-system-adoption-register.mjs');
+}
 export function buildAdoptionRegister(root) {
  const routeRegister=JSON.parse(fs.readFileSync(path.join(root,'docs/design-system/route-surface-register.json'),'utf8'));
+ assertRouteRegisterFresh(root,routeRegister);
  const routeModules=new Map();for(const route of routeRegister.routes){for(const ref of [...route.templateRefs,...(route.conditionalTemplateRefs??[])]){const mod=routeRegister.catalogs.templates[ref]?.module;if(!mod)continue;const key=mod.replace(/\.(tsx?|jsx?)$/,'');const values=routeModules.get(key)??[];values.push({id:route.id,path:route.path,actor:route.actor,kind:route.kind});routeModules.set(key,values);}}
  const consumers=[];for(const absolute of walk(path.join(root,'src'))){const file=path.relative(root,absolute).replaceAll('\\','/'),text=fs.readFileSync(absolute,'utf8'),primitives=scanPrimitiveImports(file,text);if(!primitives.length)continue;consumers.push({file,sha256:crypto.createHash('sha256').update(text).digest('hex'),directRouteDeclarations:routeModules.get(file.replace(/\.tsx$/,''))??[],runtime:'NOTTESTED',visual:'NOTTESTED',primitiveImports:primitives});}
  const families={};for(const row of consumers)for(const p of row.primitiveImports){const family=families[p.name]??{directConsumerFiles:0,sourceInstances:0};family.directConsumerFiles++;family.sourceInstances+=p.instances;families[p.name]=family;}
