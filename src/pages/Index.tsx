@@ -1,5 +1,5 @@
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
-import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import { HomeServiceGallery, HomeExperienceGallery } from '@/components/home/HomeCatalogGalleries';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
@@ -79,7 +79,7 @@ const IndexLegacy: React.FC = () => {
         {/* Recommendations follow the stable personal actions. */}
         <PersonalGrid limit={4} />
         <LifecycleSmartTip />
-        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeServiceGallery /></div>
+        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeExperienceGallery /><HomeServiceGallery /></div>
 
         {/* 5. Первый (главный для роли) кластер всегда виден */}
         {visibleClusters.slice(0, 1).map((cid) => (
