@@ -71,7 +71,7 @@ async def main():
                     for category_id in ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']:
                         await expect(menu.locator(f'[data-category-id={category_id}]')).to_be_visible()
                     await expect(menu.locator('[data-category-id=cat-home-services]')).to_be_visible()
-                    await menu.get_by_role('button',name='Все категории' if lang=='ru' else 'All categories',exact=True).click()
+                    await menu.get_by_role('button',name={'ru': 'Все категории', 'en': 'All categories', 'th': 'ทุกหมวดหมู่'}[lang],exact=True).click()
                     chooser=page.get_by_role('dialog')
                     await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(11)
                     await expect(chooser.locator('a[href="/yachts"]')).to_have_count(1)
@@ -87,7 +87,7 @@ async def main():
                     assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
                     await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
                     # Actual keyboard category filtering preserves URL context.
-                    await page.get_by_role('button',name='Категории и ситуации' if lang=='ru' else 'Categories and situations',exact=True).click()
+                    await page.get_by_role('button',name={'ru': 'Категории и ситуации', 'en': 'Categories and situations', 'th': 'หมวดหมู่และสถานการณ์'}[lang],exact=True).click()
                     category = page.get_by_role('combobox')
                     await category.press('Enter')
                     option = page.get_by_role('option', name='Транспортные услуги' if lang=='ru' else 'Transport', exact=True)
@@ -95,7 +95,7 @@ async def main():
                     await option.click()
                     await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=cat-transport')
                     await expect(category).to_be_focused()
-                    await page.get_by_role('button',name='Показать предложения' if lang=='ru' else 'Show offers',exact=True).click()
+                    await page.get_by_role('button',name={'ru': 'Показать предложения', 'en': 'Show offers', 'th': 'แสดงข้อเสนอ'}[lang],exact=True).click()
                     await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
                     await expect(grid.get_by_role('link')).to_have_count(4)
