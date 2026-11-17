@@ -38,3 +38,6 @@ Data-source verification of Canvas tariffs and editing database-authored listing
 ## CI visual follow-up
 
 Reviewed actual EN 320px failure screenshot from connected-system run 44003277595. The fixture still expected four rails/categories after adding the purchase rail and yacht category. Updated exact expectations to five rails, five categories, six category destinations; added newbuild touch-swipe and aligned property-heading gutter checks. Also corrected inherited CSS that hid category photographs and removed newbuild container gutters. Browser fixture serves only the two explicit repository category-photo paths and asserts that both images visibly load; other illustration visibility remains unchanged. Existing locale/viewport matrix, network denial, route, overflow and keyboard checks remain intact.
+
+### Gutter regression correction
+The 320px CI screenshot and stylesheet cascade showed the newbuild override used legacy home gutter (18px) while rental uses canonical public gutter (16px). Updated newbuild width/max-width to the exact public tokens. Kept the <=1px alignment assertion unchanged and enriched its failure diagnostics. No viewport/locale skipped.

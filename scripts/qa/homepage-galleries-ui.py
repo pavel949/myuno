@@ -44,7 +44,7 @@ async def main():
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     rental_heading = await page.locator('#home-stays-title').bounding_box()
                     purchase_heading = await page.locator('#home-newbuilds-title').bounding_box()
-                    assert abs(rental_heading['x'] - purchase_heading['x']) <= 1, 'Property section gutters must align'
+                    assert abs(rental_heading['x'] - purchase_heading['x']) <= 1, {'message': 'Property section gutters must align', 'rental': rental_heading, 'purchase': purchase_heading}
                     category_cards=page.locator('.home-service-category-card')
                     await expect(category_cards).to_have_count(5)
                     assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===6')
