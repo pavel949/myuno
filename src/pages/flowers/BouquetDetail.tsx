@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Zap, Package, Sparkles, Gift } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Shield, Zap, Package, Sparkles, Gift } from 'lucide-react';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -16,6 +16,7 @@ import { SIZE_NOTE_EN, SIZE_NOTE_RU } from '@/types/bouquet';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { publicBouquetDescription } from '@/lib/publicBouquetDescription';
 
 type SizeKey = 'S' | 'M' | 'L';
 
@@ -60,6 +61,7 @@ const BouquetDetail = () => {
 
   const { bouquet, isLoading } = useBouquet(id || '');
   const isRu = language === 'ru';
+  const publicDescription = publicBouquetDescription(isRu ? bouquet?.description_ru : bouquet?.description_en);
 
   const sizeVariants = useMemo<SizeVariant[]>(() => {
     if (bouquet?.size_variants?.length) {
@@ -83,7 +85,6 @@ const BouquetDetail = () => {
   // Psychology data
   const emotionalTag = (bouquet as any)?.emotional_trigger_tag;
   const socialProof = (bouquet as any)?.social_proof_badge;
-  const urgencyBadge = (bouquet as any)?.urgency_badge;
   const scarcityLevel = (bouquet as any)?.scarcity_level;
   const emotionalCopy = emotionalTag ? EMOTIONAL_COPY[emotionalTag] : null;
 
@@ -162,7 +163,7 @@ const BouquetDetail = () => {
     <AppLayout showBottomNav={false}>
       <Helmet>
         <title>{`${isRu ? bouquet.name_ru : bouquet.name_en} — ${isRu ? 'Доставка цветов' : 'Flower Delivery'} | myUNO`}</title>
-        <meta name="description" content={(isRu ? bouquet.description_ru : bouquet.description_en) || (isRu ? bouquet.name_ru : bouquet.name_en)} />
+        <meta name="description" content={publicDescription || (isRu ? bouquet.name_ru : bouquet.name_en)} />
       </Helmet>
       <div className="min-h-screen bg-background pb-28">
         {/* Header Image */}
@@ -331,12 +332,6 @@ const BouquetDetail = () => {
                 <p className="font-medium text-sm">{isRu ? 'Время требует подтверждения' : 'Time requires confirmation'}</p>
               </div>
             </div>
-            {urgencyBadge && (
-              <div className="col-span-2 flex items-center gap-2 p-3 rounded-none bg-muted/50 border">
-                <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                <p className="text-xs text-muted-foreground">{urgencyBadge}</p>
-              </div>
-            )}
           </div>
 
           {/* Description */}
@@ -344,7 +339,7 @@ const BouquetDetail = () => {
             <div>
               <h2 className="font-semibold mb-2">{isRu ? 'Описание' : 'Description'}</h2>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                {isRu ? bouquet.description_ru : bouquet.description_en}
+                {publicDescription || (isRu ? 'Описание и условия уточните у флориста.' : 'Ask the florist to confirm the description and terms.')}
               </p>
             </div>
           )}
