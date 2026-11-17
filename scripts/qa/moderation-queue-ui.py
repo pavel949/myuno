@@ -1,6 +1,7 @@
 """Synthetic moderation UI only. Never click approval, rejection, or publication."""
 import asyncio
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -378,10 +379,35 @@ async def exercise_dashboard_unknown(page, language, width):
     return {'case': 'dashboard-unknown', 'geometry': page_geometry, 'kpiTextGeometry': text_geometry, **await assert_isolated(page, 'dashboard')}
 
 
+async def exercise_review_page(page, language, width):
+    route = '/admin/review?queue=inactive&type=product&category=groceries'
+    url = 'http://localhost:8080/fixture?' + urlencode({'lang': language, 'route': route})
+    title = {'en': 'Content review', 'ru': 'Проверка предложений', 'th': 'ตรวจสอบเนื้อหา'}[language]
+    await page.goto(url, wait_until='networkidle')
+    heading = page.get_by_role('heading', name=title, level=1)
+    await expect(heading).to_be_visible()
+    await expect(page.get_by_test_id('moderation-row')).to_have_count(1)
+    await expect(page.get_by_test_id('moderation-row')).to_contain_text(LABELS[language]['coffee'])
+    await expect_committed_route(page, route, f'{language}-{width}-review-deep-link')
+    await assert_last_read(page, source='product', queue='inactive', category='groceries')
+    target_sizes = await page.get_by_role('tab').evaluate_all(
+        'tabs => tabs.map(tab => tab.getBoundingClientRect().height)')
+    assert all(height >= 44 for height in target_sizes), target_sizes
+    metrics = await screenshot(page, f'{language}-{width}-review-page', width)
+    counters = await assert_isolated(page)
+
+    await page.goto(url + '&role=uno_team', wait_until='networkidle')
+    await expect(heading).to_have_count(0)
+    await expect(page.get_by_test_id('moderation-row')).to_have_count(0)
+    assert await page.evaluate('window.fixtureReadCalls') == 0
+    return {'geometry': metrics, 'deniedTeamReads': 0, **counters}
+
+
 async def main():
     results = []
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True)
+        browser = await playwright.chromium.launch(
+            headless=True, executable_path=os.getenv('CHROMIUM_PATH'))
         try:
             for language in ['ru', 'en', 'th']:
                 for width in [375, 390, 430, 1280]:
@@ -407,9 +433,10 @@ async def main():
                         queue = await exercise_queue(page, language, width)
                         states = await exercise_states(page, language, width)
                         dashboard = await exercise_dashboard_unknown(page, language, width)
+                        review = await exercise_review_page(page, language, width)
                         assert not errors, errors
                         assert not any('supabase' in url or '/rest/' in url or '/functions/' in url for url in blocked), blocked
-                        results.append({'language': language, 'width': width, 'queue': queue, 'states': states, 'dashboard': dashboard, 'runtimeErrors': errors, 'blockedRequests': blocked})
+                        results.append({'language': language, 'width': width, 'queue': queue, 'states': states, 'dashboard': dashboard, 'review': review, 'runtimeErrors': errors, 'blockedRequests': blocked})
                     except Exception:
                         await page.screenshot(path=str(OUTPUT / f'{language}-{width}-failure.png'), full_page=True)
                         (OUTPUT / f'{language}-{width}-failure.json').write_text(json.dumps({

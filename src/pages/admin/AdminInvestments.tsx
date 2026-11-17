@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * Admin Investment Projects Management
  * Full CRUD for investment_projects table with MuUNO scoring editor
@@ -238,7 +239,7 @@ export default function AdminInvestments() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <PageShell width="workspace" className="space-y-6">
       <PageHeader
         title={isRu ? 'Инвестиционные проекты' : 'Investment Projects'}
         subtitle={isRu ? 'Управление проектами и скорингом myUNO' : 'Manage projects and myUNO scoring'}
@@ -892,6 +893,6 @@ export default function AdminInvestments() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }
