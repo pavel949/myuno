@@ -19254,7 +19254,7 @@
     },
     {
       "file": "src/components/yachts/YachtBookingQuickSelect.tsx",
-      "sha256": "283fa61800b7774348fa67f2d7dafc7634459acf61254add1117aa6553b467b2",
+      "sha256": "94116fc4cb521cad36fabe066ae784ad97a2ab8d3e9415e37ca9bcc5f5b22a9b",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -28221,7 +28221,7 @@
     },
     {
       "file": "src/pages/flowers/BouquetDetail.tsx",
-      "sha256": "a781f4080c8a796665a251dd06bfa42f784cdf8d008bab61e69db1e1e9065622",
+      "sha256": "1eb59e6149953b70247a98c80dec2e45fd6ca4da760b3a61acd4f6bf3f0fa072",
       "directRouteDeclarations": [
         {
           "id": "1690ba891b6e565a",
@@ -28242,12 +28242,12 @@
             178,
             182,
             185,
-            425,
-            435,
+            417,
+            427,
+            441,
+            445,
             449,
-            453,
-            457,
-            467
+            459
           ]
         }
       ]
@@ -28284,7 +28284,7 @@
     },
     {
       "file": "src/pages/flowers/FlowersIndex.tsx",
-      "sha256": "7212b6ff513dd084db29b6c672483a1b8c92f90fd1d9cffdddd675fd8bdae471",
+      "sha256": "86197ad312ca58cd4eb4553ba272857fba06bd552ffbc77f339f20d32b5e7e34",
       "directRouteDeclarations": [
         {
           "id": "270aae459a99c26f",
@@ -28301,7 +28301,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            215
+            206
           ]
         },
         {
@@ -28309,7 +28309,7 @@
           "source": "@/components/uno/EmptyState",
           "instances": 1,
           "lines": [
-            207
+            198
           ]
         }
       ]

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset, Shield } from 'lucide-react';
+import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset, Info } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -336,15 +336,17 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
           </div>
         )}
 
-        {/* Trust banner */}
-        <div className="flex items-center gap-3 p-3 bg-success/10 dark:bg-success/20 rounded-none border border-success/40 dark:border-success/40">
-          <Shield className="w-5 h-5 text-success dark:text-success flex-shrink-0" />
+        {/* Request guidance, not an unverified protection or insurance guarantee. */}
+        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-none border border-border">
+          <Info className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           <div>
-            <p className="text-xs font-medium text-success dark:text-success">
-              {language === 'ru' ? 'Защищено myUNO' : 'Protected by myUNO'}
+            <p className="text-xs font-medium">
+              {language === 'ru' ? 'Перед подтверждением' : 'Before confirmation'}
             </p>
-            <p className="text-[11px] text-success/70 dark:text-success/60">
-              {language === 'ru' ? 'Проверенный оператор • Экипаж • Страховка' : 'Verified operator • Crew • Insurance'}
+            <p className="text-xs text-muted-foreground">
+              {language === 'ru'
+                ? 'Уточните у оператора доступность, время отправления, состав экипажа и условия страховки. Выбор даты не подтверждает бронирование.'
+                : 'Confirm availability, departure time, crew and insurance terms with the operator. Selecting a date does not confirm a booking.'}
             </p>
           </div>
         </div>

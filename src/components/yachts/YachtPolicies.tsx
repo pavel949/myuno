@@ -32,7 +32,7 @@ export function YachtPolicies({
   const { language } = useLanguage();
   const t = language === 'ru';
 
-  const cancelLabel = POLICY_LABELS[cancellationPolicy || 'moderate'] || { en: cancellationPolicy || 'Contact operator', ru: cancellationPolicy || 'Уточняйте' };
+  const cancelLabel = POLICY_LABELS[cancellationPolicy || ''] || { en: cancellationPolicy || 'Contact operator', ru: cancellationPolicy || 'Уточняйте' };
   const fuelLabel = FUEL_LABELS[fuelPolicy || 'unknown'] || { en: fuelPolicy || 'Ask operator', ru: fuelPolicy || 'Уточняйте' };
 
   const insuranceLabel = insuranceIncluded === 'true' || insuranceIncluded === 'yes'
