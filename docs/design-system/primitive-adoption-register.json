@@ -12911,7 +12911,7 @@
     },
     {
       "file": "src/components/owner/property-wizard/steps/BasicInfoStep.tsx",
-      "sha256": "042d8ed1ef32bbdfe87f7d5a5f3a23f7d8c0edf87ef66bb936add75857a51fc7",
+      "sha256": "1d0d2598db529b59f9c2b9023336eda42ab36eda79ad9edd319bdb5202a3ba4e",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -12935,7 +12935,7 @@
             304,
             426,
             599,
-            672
+            673
           ]
         },
         {
@@ -12961,9 +12961,9 @@
             569,
             630,
             657,
-            750,
-            755,
-            761
+            751,
+            756,
+            762
           ]
         }
       ]
@@ -23917,7 +23917,7 @@
     },
     {
       "file": "src/pages/admin/AdminProperties.tsx",
-      "sha256": "aa307f966c7b1cc7bceef9b056fb3c8cf214512a148050326ebb253d763aedc6",
+      "sha256": "9cd4dd47ac7480e537e2717f4ae3542e418843bec4d56ee0bb71306a633b7f5d",
       "directRouteDeclarations": [
         {
           "id": "f3c5cc78812de1b7",
@@ -23934,16 +23934,16 @@
           "source": "@/components/ui/button",
           "instances": 10,
           "lines": [
-            464,
-            486,
-            498,
-            507,
-            515,
+            465,
+            487,
+            499,
+            508,
             516,
-            531,
-            543,
-            637,
-            640
+            517,
+            532,
+            544,
+            638,
+            641
           ]
         },
         {
@@ -23951,8 +23951,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            529,
-            534
+            530,
+            535
           ]
         },
         {
@@ -23960,7 +23960,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            628
+            629
           ]
         },
         {
@@ -23968,7 +23968,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            456
+            457
           ]
         },
         {
@@ -23976,8 +23976,8 @@
           "source": "@/components/uno/PageContainer",
           "instances": 2,
           "lines": [
-            421,
-            437
+            422,
+            438
           ]
         },
         {
@@ -23985,7 +23985,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            438
+            439
           ]
         },
         {
@@ -23993,7 +23993,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            579
+            580
           ]
         }
       ]
