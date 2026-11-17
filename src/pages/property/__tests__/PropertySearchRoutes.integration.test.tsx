@@ -45,7 +45,7 @@ function mount(entry: string, navigationState?: unknown) {
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
   const criteria = result.container.querySelector('.premium-search-criteria>summary');
-  if (criteria) fireEvent.click(criteria);
+  if (criteria && !criteria.parentElement?.hasAttribute('open')) fireEvent.click(criteria);
   const secondary = result.container.querySelector('.home-search-secondary>summary');
   if (secondary) fireEvent.click(secondary);
   return result;
@@ -54,6 +54,18 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = 
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('opens first-visit rental criteria with guests before submit, without inventing a guest filter', () => {
+    render(<MemoryRouter initialEntries={['/property/search?mode=rent&tenancy=short']}><PropertySearchPage /></MemoryRouter>);
+    expect(document.querySelector('.premium-search-criteria')).toHaveAttribute('open');
+    const guests = screen.getByRole('spinbutton', { name: 'Number of guests' });
+    expect(guests).toBeVisible();
+    expect(guests).toHaveValue(null);
+    expect(state.filters.minGuests).toBeUndefined();
+    const submit = screen.getByRole('button', { name: 'Find a home' });
+    expect(guests.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelector('.home-search-secondary')).toBeNull();
+  });
+
   it.each([
     ['en', 'Pool', 'Remove Pool', 'Price & amenities', 'Home preferences'],
     ['ru', 'Бассейн', 'Убрать Бассейн', 'Цена и удобства', 'Пожелания к жилью'],
