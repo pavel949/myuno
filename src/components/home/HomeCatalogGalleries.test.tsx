@@ -68,7 +68,8 @@ it('keeps successful empty catalogues distinct from errors and category requests
   expect(
     screen.getByRole('link', { name: /Kamala/ }),
   ).toBeVisible();
-  expect(document.querySelector('.home-experiences')).toBeNull();
+  expect(document.querySelector('.home-experiences')).not.toBeNull();
+  expect(document.querySelector('.home-experiences .home-catalog-card')).toBeNull();
   expect(document.querySelector('.home-services')).not.toBeNull();
   expect(screen.getByRole('link', { name: /All categories/ })).toBeVisible();
   expect(screen.queryByRole('alert')).toBeNull();
@@ -143,7 +144,8 @@ it('omits an experience when its stored photograph fails instead of displaying a
   fireEvent.error(image);
   expect(document.querySelector('.home-experiences img')).toBeNull();
   expect(screen.queryByRole('link', { name: /Catalog tour/ })).toBeNull();
-  expect(document.querySelector('.home-experiences')).toBeNull();
+  expect(document.querySelector('.home-experiences')).not.toBeNull();
+  expect(document.querySelector('.home-experiences .home-catalog-card')).toBeNull();
 });
 
 it('keeps verified guide routes independent of project records and photos', () => {
@@ -186,4 +188,14 @@ it('omits experiences without usable stored media and caps the preview at four',
   show();
   expect(document.querySelectorAll('.home-experiences article')).toHaveLength(4);
   expect(screen.queryByText('No media')).toBeNull(); expect(screen.queryByText('Tour 4')).toBeNull();
+});
+
+it.each(['empty', 'loading', 'error', 'fallback'])('keeps explicit flower/yacht catalogue navigation separate from %s supply states', mode => {
+  state.loading = mode === 'loading';
+  state.error = mode === 'error';
+  state.fromDB = mode !== 'fallback';
+  render(<MemoryRouter><HomeServiceGallery /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: 'Flower catalogue' })).toHaveAttribute('href', '/flowers');
+  expect(screen.getByRole('link', { name: 'Yacht catalogue' })).toHaveAttribute('href', '/yachts');
+  expect(document.querySelector('.home-service-category-card')).toBeNull();
 });

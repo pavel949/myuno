@@ -33,6 +33,8 @@ import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 interface PropertyListingCardProps {
   property: Property;
   mode?: 'rent' | 'buy';
+  /** Keep intent-specific search results focused; mixed catalogues retain all offers. */
+  focusedOffer?: boolean;
   isHovered?: boolean;
   onHover?: (id: string | null) => void;
   isSelected?: boolean;
@@ -60,6 +62,7 @@ const formatPriceLabel = (period: string, lang: string) => {
 function PropertyListingCardBase({
   property,
   mode = 'rent',
+  focusedOffer = false,
   isHovered = false,
   onHover,
   isSelected = false,
@@ -296,7 +299,7 @@ function PropertyListingCardBase({
           )}
         </div>
 
-        <div onClick={event => event.stopPropagation()}><PropertyOfferLinks property={property} mode={mode} search={location.search} /></div>
+        <div onClick={event => event.stopPropagation()}><PropertyOfferLinks property={property} mode={mode} search={location.search} focused={focusedOffer} /></div>
 
         {/* Trust signals — collapses if no data */}
         <TrustStrip

@@ -86,7 +86,7 @@ const BouquetDetail = () => {
   const urgencyBadge = (bouquet as any)?.urgency_badge;
   const scarcityLevel = (bouquet as any)?.scarcity_level;
   const emotionalCopy = emotionalTag ? EMOTIONAL_COPY[emotionalTag] : null;
-  const isBefore2PM = new Date().getHours() < 14;
+
 
   if (isLoading) {
     return (
@@ -320,26 +320,18 @@ const BouquetDetail = () => {
             <div className="flex items-center gap-2 p-3 rounded-none bg-secondary/50">
               <Shield className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">{isRu ? 'Гарантия' : 'Guarantee'}</p>
-                <p className="font-medium text-sm">{isRu ? 'Свежесть 5 дней' : '5-day freshness'}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Условия' : 'Terms'}</p>
+                <p className="font-medium text-sm">{isRu ? 'Уточните у флориста' : 'Confirm with the florist'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 rounded-none bg-secondary/50">
               <Truck className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Доставка' : 'Delivery'}</p>
-                <p className="font-medium text-sm">{isRu ? '1-3 часа' : '1-3 hours'}</p>
+                <p className="font-medium text-sm">{isRu ? 'Время требует подтверждения' : 'Time requires confirmation'}</p>
               </div>
             </div>
-            {isBefore2PM && (
-              <div className="col-span-2 flex items-center gap-2 p-3 rounded-none bg-primary/5 border border-primary/20">
-                <Clock className="w-5 h-5 text-primary flex-shrink-0" />
-                <p className="text-sm font-medium text-primary">
-                  {isRu ? 'Закажите до 14:00 — доставим сегодня!' : 'Order by 2 PM — same-day delivery!'}
-                </p>
-              </div>
-            )}
-            {urgencyBadge && !isBefore2PM && (
+            {urgencyBadge && (
               <div className="col-span-2 flex items-center gap-2 p-3 rounded-none bg-muted/50 border">
                 <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                 <p className="text-xs text-muted-foreground">{urgencyBadge}</p>

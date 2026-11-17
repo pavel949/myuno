@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import type { CategoryEntry, ServiceEntry } from '@/lib/catalog/taxonomy';
+const yachtArt = '/yachts/catamaran-53-1.webp';
 import { homeServiceCategories } from './homeServiceCategories';
 const leaf = (id: string, path: string, status: ServiceEntry['status'] = 'available') => ({ id, path, status, labelEn: id, labelRu: id }) as ServiceEntry;
 const category = (id: string, services: ServiceEntry[] = [], status?: ServiceEntry['status']) => ({ id, services, status, labelEn: id, labelRu: id }) as CategoryEntry;
@@ -10,9 +11,9 @@ it('selects each existing category destination once across parent and child leve
     category('cat-tourism', [leaf('yacht', '/yachts')]),
     category('cat-home-services', [leaf('services', '/services')]),
   ]);
-  expect(rows.map(row => row.path)).toEqual(['/flowers', '/transport/airport-transfer', '/transport', '/discover/services?category=cat-home-services']);
+  expect(rows.map(row => row.path)).toEqual(['/flowers', '/yachts', '/transport/airport-transfer', '/transport', '/discover/services?category=cat-home-services']);
   expect(rows.at(-1)?.labelEn).toBe('cat-home-services');
-  expect(new Set(rows.map(row => row.id)).size).toBe(4);
+  expect(new Set(rows.map(row => row.id)).size).toBe(5);
 });
 it('never manufactures categories when the live taxonomy is empty or partial', () => {
   expect(homeServiceCategories([])).toEqual([]);
@@ -54,4 +55,23 @@ it.each(['absent', 'soon'])('keeps independently active Fast Track when transfer
  expect(rows[0].path).toBe('/transport/fast-track');
  expect(rows[0].secondary).toBeUndefined();
  expect([rows[0].labelRu, rows[0].labelEn, ...Object.values(rows[0].benefit)].join(' ')).not.toMatch(/transfers|Трансфер|поездка/i);
+});
+
+
+it('uses the active canonical yacht category once, with an illustration and no invented inventory', () => {
+  const rows = homeServiceCategories([category('cat-tourism', [leaf('yacht', '/yachts'), leaf('yacht', '/yachts')])]);
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({ id: 'yacht', path: '/yachts', labelEn: 'yacht' });
+  expect(rows[0].image).toBe(yachtArt);
+  expect(rows[0]).not.toHaveProperty('price');
+  expect(rows[0]).not.toHaveProperty('availability');
+});
+
+it.each(['soon', 'pro'] as const)('does not promote a %s yacht parent or child', status => {
+  expect(homeServiceCategories([category('cat-tourism', [leaf('yacht', '/yachts')], status)])).toEqual([]);
+  expect(homeServiceCategories([category('cat-tourism', [leaf('yacht', '/yachts', status)])])).toEqual([]);
+});
+
+it.each(['/yacht', '/admin/yachts', '//example.invalid/yachts', '/yachts?available=true'])('does not replace the unverified yacht route %s with a catalogue claim', path => {
+  expect(homeServiceCategories([category('cat-tourism', [leaf('yacht', path)])])).toEqual([]);
 });
