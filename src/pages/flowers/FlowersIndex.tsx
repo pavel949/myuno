@@ -1,9 +1,10 @@
 /**
  * FlowersIndex — Unified catalog using MiniAppLayout + CatalogCard
  */
-import { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Flower2, ShoppingCart, Info } from 'lucide-react';
+import '@/styles/public-commerce.css';
+import { useMemo, useRef } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Flower2, Info } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -18,25 +19,46 @@ import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { MarketplaceRequestSteps } from '@/components/services/MarketplaceRequestSteps';
+import { FLOWER_FILTER_KEYS, readFlowerFilters, writeFlowerFilters } from '@/lib/discovery/flowerCatalogue';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { getItemsByType } = useCart();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [params, setParams] = useSearchParams();
+  const location = useLocation();
+  const pending = useRef({ key: location.key, params });
+  if (pending.current.key !== location.key) pending.current = { key: location.key, params };
+  const selectedCategory = params.get('category') || 'all';
+  const searchQuery = params.get('q') || '';
+  const filterValues = useMemo(() => readFlowerFilters(params), [params]);
+  const update = (key: string, value: string) => {
+    const next = new URLSearchParams(pending.current.params);
+    if (!value || value === 'all') next.delete(key); else next.set(key, value);
+    pending.current.params = next;
+    setParams(next, { replace: key === 'q' });
+  };
+  const setFilterValues = (values: FilterValues) => {
+    const next = writeFlowerFilters(pending.current.params, values);
+    pending.current.params = next;
+    setParams(next);
+  };
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const isRu = language === 'ru';
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
-  const { categoryRibbon, filterConfig, isLoading: filtersLoading } = useFlowerFilterOptions();
+  const { categoryRibbon, filterConfig: rawFilterConfig } = useFlowerFilterOptions();
+  // Expose only filters implemented against the catalogue, never inert size/delivery promises.
+  const filterConfig = useMemo(() => ({ ...rawFilterConfig, sections: rawFilterConfig.sections.filter(section => FLOWER_FILTER_KEYS.some(key => key === section.id)) }), [rawFilterConfig]);
   const categories = useMemo(() => categoryRibbon.map(opt => ({
     id: opt.id,
     labelEn: opt.labelEn,
     labelRu: opt.labelRu,
   })), [categoryRibbon]);
 
-  const { bouquets, isLoading } = useBouquets({
+  const { bouquets, isLoading, error, refetch } = useBouquets({
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     onlyActive: true,
   });
@@ -94,7 +116,8 @@ export default function FlowersIndex() {
     const priceRanges: Record<string, [number, number]> = {
       '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity],
     };
-    const [pMin, pMax] = priceLevel ? (priceRanges[priceLevel] || [0, Infinity]) : [0, Infinity];
+    if (priceLevel && !priceRanges[priceLevel]) return [];
+    const [pMin, pMax] = priceLevel ? priceRanges[priceLevel] : [0, Infinity];
 
     return searchedBouquets.filter(b => {
       if (priceLevel && (b.price < pMin || b.price >= pMax)) return false;
@@ -125,15 +148,18 @@ export default function FlowersIndex() {
     [structurallyFiltered, applyPersonaFilter],
   );
 
-  const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const current = prev[sectionId];
-      if (Array.isArray(current) && optionId) return { ...prev, [sectionId]: current.filter(v => v !== optionId) };
-      return { ...prev, [sectionId]: null };
-    });
-  }, []);
-
-  const handleClearAll = useCallback(() => setFilterValues({}), []);
+  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
+    const current = filterValues[sectionId];
+    setFilterValues({ ...filterValues, [sectionId]: Array.isArray(current) && optionId ? current.filter(v => v !== optionId) : null });
+  };
+  const handleClearAll = () => {
+    const next = writeFlowerFilters(pending.current.params, {});
+    next.delete('category');
+    next.delete('q');
+    pending.current.params = next;
+    setParams(next);
+  };
+  const hasFilters = activeFilterCount > 0 || selectedCategory !== 'all' || Boolean(searchQuery.trim());
 
   const flowersInCart = getItemsByType('flowers');
   const totalItems = flowersInCart.reduce((sum, item) => sum + item.quantity, 0);
@@ -142,17 +168,18 @@ export default function FlowersIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
-      subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
-      fallbackPath={APP_ROUTES.DISCOVER}
+      contentClassName="public-commerce"
+      title={t('Доставка цветов', 'Flower delivery', 'บริการส่งดอกไม้')}
+      subtitle={error ? t('Каталог временно недоступен', 'Catalogue temporarily unavailable', 'รายการไม่พร้อมใช้งานชั่วคราว') : isLoading ? t('Загружаем букеты…', 'Loading bouquets…', 'กำลังโหลดช่อดอกไม้…') : isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
+      fallbackPath={APP_ROUTES.GOAL_SERVICES}
       showSearch
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={value => update('q', value)}
       searchPlaceholder={isRu ? 'Поиск букетов, цветов, поводов…' : 'Search bouquets, flowers, occasions…'}
       showHero={false}
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
+      onCategoryChange={value => update('category', value)}
       filterConfig={filterConfig}
       filterValues={filterValues}
       onFilterChange={setFilterValues}
@@ -169,10 +196,13 @@ export default function FlowersIndex() {
         } />
       </Helmet>
 
-      <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground -mt-2 mb-4">
-        <Info className="w-3 h-3 shrink-0" />
-        {isRu ? 'Наличие, состав букета и время доставки требуют подтверждения.' : 'Availability, bouquet contents and delivery time require confirmation.'}
-      </p>
+      <section className="py-4" aria-label={t('О доставке цветов', 'About flower delivery', 'เกี่ยวกับบริการส่งดอกไม้')}>
+        <p className="text-xs font-semibold uppercase tracking-widest text-accent">myUNO · {t('Пхукет', 'Phuket', 'ภูเก็ต')}</p>
+        <h2 className="mt-2 font-display text-2xl sm:text-3xl">{t('Цветы для особенного момента', 'Flowers for a special moment', 'ดอกไม้สำหรับช่วงเวลาพิเศษ')}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t('Выберите букет по поводу, цветам и бюджету. Фотографии, состав и варианты размера — в карточке предложения.', 'Choose a bouquet by occasion, flowers and budget. Explore photos, composition and size options on its page.', 'เลือกช่อดอกไม้ตามโอกาส ชนิดและงบประมาณ ดูรูป ส่วนประกอบและขนาดในหน้าข้อเสนอ')}</p>
+        <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{t('myUNO согласует наличие, состав букета и время доставки. Они требуют подтверждения.', 'myUNO confirms availability, bouquet composition and delivery time before fulfilment.', 'myUNO จะยืนยันความพร้อม ส่วนประกอบและเวลาจัดส่งก่อนให้บริการ')}</p>
+      </section>
+      {hasFilters && <div className="flex flex-wrap items-center justify-between gap-3 border border-border p-4"><p className="text-sm">{t('Выбраны условия поиска', 'Search filters selected', 'เลือกตัวกรองการค้นหาแล้ว')}</p><Button variant="outline" onClick={handleClearAll}>{t('Сбросить всё', 'Clear all', 'ล้างทั้งหมด')}</Button></div>}
 
       {activeFilterCount > 0 && (
         <ActiveFilters
@@ -184,8 +214,8 @@ export default function FlowersIndex() {
         />
       )}
 
-      {isLoading || filtersLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      {error ? <div role="alert" className="space-y-3 border border-border p-6"><p>{t('Не удалось загрузить букеты. Попробуйте ещё раз.', 'Bouquets could not be loaded. Please try again.', 'โหลดช่อดอกไม้ไม่สำเร็จ โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div> : isLoading ? (
+        <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="space-y-2">
               <Skeleton className="aspect-[3/4] rounded-none" />
@@ -202,19 +232,20 @@ export default function FlowersIndex() {
             ? activeFilterCount > 0 ? 'Попробуйте изменить фильтры' : 'В этой категории пока нет букетов'
             : activeFilterCount > 0 ? 'Try adjusting your filters' : 'No bouquets in this category yet'
           }
-          action={activeFilterCount > 0 ? (
+          action={hasFilters ? (
             <Button variant="outline" onClick={handleClearAll}>
               {isRu ? 'Сбросить фильтры' : 'Reset filters'}
             </Button>
           ) : undefined}
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {filteredBouquets.map(bouquet => (
-            <CatalogCard key={bouquet.id} {...mapBouquetToCatalogCard(bouquet, language, navigate)} />
+            <CatalogCard className="public-commerce-catalog-card" key={bouquet.id} {...mapBouquetToCatalogCard(bouquet, language, navigate)} onClick={undefined} href={`/flowers/bouquet/${bouquet.id}`} />
           ))}
         </div>
       )}
+      <MarketplaceRequestSteps />
     </MiniAppLayout>
   );
 }

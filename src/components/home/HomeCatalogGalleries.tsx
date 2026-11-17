@@ -8,9 +8,9 @@ import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { homeAreaCover } from './homeAreaCovers';
 import { HomeGallery } from './HomeGallery';
-import { HorizontalRail } from './HorizontalRail';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { homeServiceCategories } from './homeServiceCategories';
+import { HomeDiscoveryPaths } from './HomeDiscoveryPaths';
 
 export function CatalogState({
   loading,
@@ -104,7 +104,8 @@ export function HomeExperienceGallery() {
   const [failedMedia, setFailedMedia] = useState<Set<string>>(() => new Set());
   const t = (value: LangValues) => pickLang(language, value);
   const { experiences, isLoading, error, refetch } = useExperiences({
-    limit: 8,
+    // Sample beyond the first rail; keep the publication boundary unchanged.
+    limit: 24,
     publishedOnly: true,
   });
   // Curated preview needs stored usable media; no invented image substitutes.
@@ -117,77 +118,32 @@ export function HomeExperienceGallery() {
     en: 'More of the island',
     th: 'สัมผัสประสบการณ์บนเกาะ',
   });
-  // Keep a clear route to experiences even when the photo preview is empty.
-  return (
-    <section
-      className="home-catalog home-experiences home-container"
-      aria-labelledby="home-experiences-title"
-    >
-      <div className="home-section-heading">
-        <div>
-          <h2 id="home-experiences-title">{title}</h2>
-          <p className="home-section-lead">
-            {t({
-              ru: 'Идеи для прогулок и отдыха на острове.',
-              en: 'Explore activities around the island.',
-              th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ',
-            })}
-          </p>
-        </div>
-        <Link className="home-text-link" to={R.EXPERIENCES}>
-          {t({
-            ru: 'Все впечатления',
-            en: 'All experiences',
-            th: 'ประสบการณ์ทั้งหมด',
-          })}
-          <ArrowRight size={18} aria-hidden="true" />
+  const state = isLoading || error || !preview.length ? (
+    <>
+      <CatalogState loading={isLoading} error={Boolean(error)} retry={refetch}
+        empty={{ ru: 'Нет фотографий для этой подборки. Выберите формат отдыха в каталоге.', en: 'No photo preview to show. Choose an activity in the catalogue.', th: 'ยังไม่มีภาพตัวอย่าง เลือกกิจกรรมในรายการ' }} />
+      {!isLoading && !error && <HomeDiscoveryPaths kind="experiences" />}
+    </>
+  ) : undefined;
+  return <HomeGallery id="home-experiences-title" className="home-catalog home-experiences" title={title}
+    description={t({ ru: 'Идеи для прогулок и отдыха на острове.', en: 'Explore activities around the island.', th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ' })}
+    href={R.EXPERIENCES} linkLabel={t({ ru: 'Все впечатления', en: 'All experiences', th: 'ประสบการณ์ทั้งหมด' })} state={state}>
+    {preview.map(({ item, image }) => (
+      <article className="home-catalog-card" key={item.id}>
+        <Link to={R.EXPERIENCE_DETAIL(item.id)}>
+          <CatalogPhoto image={image}
+            alt={(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}
+            onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))} />
+          <div className="home-catalog-copy">
+            <Compass size={18} aria-hidden="true" />
+            <h3>{(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}</h3>
+            {item.location_name && <p>{item.location_name}</p>}
+            <span>{t({ ru: 'Посмотреть программу', en: 'Explore the experience', th: 'ดูรายละเอียด' })}<ArrowRight size={16} aria-hidden="true" /></span>
+          </div>
         </Link>
-      </div>
-      {isLoading || error || !preview.length ? (
-        <CatalogState
-          loading={isLoading}
-          error={Boolean(error)}
-          retry={refetch}
-          empty={{
-            ru: 'Пока нет подборки с фотографиями. Посмотрите каталог впечатлений.',
-            en: 'No photo preview yet. Explore the experiences catalogue.',
-            th: 'ยังไม่มีภาพตัวอย่าง ดูรายการประสบการณ์ทั้งหมด',
-          }}
-        />
-      ) : (
-        <HorizontalRail label={title}>
-          {preview.map(({ item, image }) => (
-            <article className="home-catalog-card" key={item.id}>
-              <Link to={R.EXPERIENCE_DETAIL(item.id)}>
-                <CatalogPhoto
-                  image={image}
-                  alt={(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}
-                  onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))}
-                />
-                <div className="home-catalog-copy">
-                  <Compass size={18} aria-hidden="true" />
-                  <h3>
-                    {(language === 'ru' ? item.title_ru : item.title_en) ||
-                      item.title_en ||
-                      item.title_ru}
-                  </h3>
-                  {item.location_name && <p>{item.location_name}</p>}
-                  <span>
-                    {t({
-                      ru: 'Посмотреть программу',
-                      en: 'Explore the experience',
-                      th: 'ดูรายละเอียด',
-                    })}
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
-            </article>
-          ))}
-        </HorizontalRail>
-      )}
-    </section>
-  );
+      </article>
+    ))}
+  </HomeGallery>;
 }
 
 function ServiceCategoryArt({ image, alt }: { image: string; alt: string }) {

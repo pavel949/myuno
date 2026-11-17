@@ -4,13 +4,14 @@
  * Single source of truth for all vertical grid cards.
  */
 
-import { Star, Users, Clock, Zap, Flame, Shield, CalendarDays } from 'lucide-react';
+import { Star, Users, Clock, Zap, Shield, CalendarDays } from 'lucide-react';
 import type { CatalogCardProps, CatalogBadge, CatalogMeta } from '@/components/miniapp/CatalogCard';
 import type { Yacht } from '@/hooks/useYachts';
 import type { Experience } from '@/hooks/useExperiences';
 import { formatDuration } from '@/hooks/useExperiences';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { getLocalizedField } from '@/hooks/useLocalizedField';
+import { formatRecordedPrice } from '@/lib/format/price';
 import { cleaningServicePrice } from '@/lib/services/servicePresentation';
 
 // ─── Local input shapes for catalog adapters ─────────────
@@ -120,7 +121,7 @@ export function mapYachtToCatalogCard(
 
   // Get lowest price
   const prices = [yacht.price_half_day, yacht.price_sunset, yacht.price_full_day, yacht.price_overnight]
-    .filter((p): p is number => !!p && p > 0);
+    .filter((p): p is number => typeof p === 'number' && Number.isFinite(p) && p > 0);
   const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
   const priceSuffix = minPrice === yacht.price_half_day ? (isRu ? '/полдня' : '/half day')
     : minPrice === yacht.price_sunset ? (isRu ? '/закат' : '/sunset')
@@ -148,8 +149,7 @@ export function mapYachtToCatalogCard(
     reviewCount: yacht.review_count || undefined,
     meta,
     location: isRu ? (yacht.location_ru || yacht.location_name || undefined) : (yacht.location_name || undefined),
-    price: minPrice,
-    priceSuffix,
+    priceLabel: formatRecordedPrice(minPrice, yacht.currency, { unknownLabel: isRu ? 'Цена по запросу' : 'Price on request', locale: language }) + (minPrice !== undefined ? ` ${priceSuffix}` : ''),
   };
 }
 
@@ -211,30 +211,19 @@ export function mapBouquetToCatalogCard(
     : bouquet.price;
 
   const badges: CatalogBadge[] = [];
-  if (bouquet.is_popular) badges.push({ text: isRu ? 'Хит' : 'Popular', icon: Flame, className: 'bg-primary text-primary-foreground' });
+  // Editorial flags are not verified inventory or order statistics. Do not present urgency/social proof.
   if (bouquet.box_type && bouquet.box_type !== 'wrap') {
     const boxLabel = bouquet.box_type === 'velvet_box' ? (isRu ? '🎁 Бархатная' : '🎁 Velvet')
       : bouquet.box_type === 'luxury_box' ? (isRu ? '👑 Люкс' : '👑 Luxury')
       : bouquet.box_type;
     badges.push({ text: boxLabel, className: 'bg-secondary text-secondary-foreground' });
   }
-  if (bouquet.scarcity_level === 'high') {
-    badges.push({ text: isRu ? 'Мало' : 'Limited', className: 'bg-destructive text-destructive-foreground' });
-  }
-
-  const socialProof = bouquet.social_proof_badge
-    ? (isRu
-      ? (bouquet.social_proof_badge === 'Most ordered this week' ? 'Самый заказываемый' : bouquet.social_proof_badge === 'Customer favorite' ? 'Любимец покупателей' : bouquet.social_proof_badge)
-      : bouquet.social_proof_badge)
-    : undefined;
-
   return {
     image: bouquet.image || PLACEHOLDER_IMAGES.flower,
     title: name,
     onClick: () => navigate(`/flowers/bouquet/${bouquet.id}`),
     aspectRatio: '3:4',
     badges,
-    socialProof,
     price: displayPrice,
     pricePrefix: hasVariants ? (isRu ? 'от' : 'from') : undefined,
     subtitle: shortDesc,

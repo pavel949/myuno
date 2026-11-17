@@ -129,7 +129,6 @@ export default function ExperiencesIndex() {
       <p className="min-w-0 text-sm">{selectedCategory !== 'all' ? (language === 'ru' ? categories.find(c => c.slug === selectedCategory)?.name_ru : categories.find(c => c.slug === selectedCategory)?.name_en) || selectedCategory : t('Выбраны условия поиска', 'Search filters selected', 'เลือกตัวกรองการค้นหาแล้ว')}</p>
       <Button variant="outline" onClick={clear}><X className="size-4" aria-hidden="true" />{t('Сбросить фильтры', 'Clear filters', 'ล้างตัวกรอง')}</Button>
     </div>}
-    {overview && <VerticalContextBanner verticalId="experience" />}
     {priceSortUnavailable && <p role="status" className="border border-border bg-muted/30 p-4 text-sm text-muted-foreground">{t('Цены указаны в разных или неуточнённых валютах. Выберите тему с одной валютой или используйте сортировку по рейтингу.', 'Prices use different or unspecified currencies. Choose a category with one currency or sort by rating.', 'ราคามีหลายสกุลเงินหรือยังไม่ระบุ เลือกหมวดหมู่ที่ใช้สกุลเงินเดียวหรือเรียงตามคะแนน')}</p>}
     <section aria-labelledby="experience-results-title" className="space-y-4">
       <h2 id="experience-results-title" className="font-display text-h3">{viewType === 'tour' ? t('Экскурсии', 'Tours', 'ทัวร์') : viewType === 'activity' ? t('Активный отдых', 'Activities', 'กิจกรรม') : t('Предложения', 'Offers', 'ข้อเสนอ')}</h2>
@@ -145,6 +144,7 @@ export default function ExperiencesIndex() {
           return <CatalogCard className="public-commerce-catalog-card" key={exp.id} {...card} onClick={undefined} href={`/experiences/${exp.id}`} navigationState={catalogueNavigationState} price={sourceCurrency === 'THB' && knownPrice !== null ? knownPrice : undefined} priceLabel={priceLabel && knownPrice !== null && card.priceSuffix ? `${priceLabel} ${card.priceSuffix}` : priceLabel} priceSuffix={knownPrice !== null ? card.priceSuffix : undefined} />;
         })}</div>}
     </section>
+    {overview && <VerticalContextBanner verticalId="experience" />}
     <div className="mt-6"><PropertyTourPromo /></div><VerticalInsightPanel verticalId="experience" /><CrossSellSection currentVertical="experiences" className="mt-8" />
   </MiniAppLayout>;
 }
