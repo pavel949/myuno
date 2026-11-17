@@ -6,9 +6,9 @@ import { resolveIcon } from '@/lib/iconMap';
 import type { BaseStepProps } from './types';
 
 const stepVariants = {
-  enter: { opacity: 0, x: 40 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 interface VehicleType {
@@ -26,9 +26,10 @@ interface VehicleType {
 interface StepVehicleProps extends BaseStepProps {
   vehicleTypes: VehicleType[];
   routeBasePrice: number;
+  showPrice: boolean;
 }
 
-export function StepVehicle({ formData, setFormData, language, vehicleTypes, routeBasePrice }: StepVehicleProps) {
+export function StepVehicle({ formData, setFormData, language, vehicleTypes, routeBasePrice, showPrice }: StepVehicleProps) {
   return (
     <motion.div
       key="step-vehicle"
@@ -55,6 +56,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
             <button
               key={vehicle.id}
               type="button"
+              aria-pressed={isSelected}
               onClick={() => setFormData(prev => ({ ...prev, vehicleType: vehicle.id }))}
               className={cn(
                 'w-full flex items-center gap-3 p-4 rounded-none border-2 transition-all text-left',
@@ -92,9 +94,9 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
                   {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : 'min'}` : ''}
                 </p>
               </div>
-              <div className="text-right shrink-0">
+              {showPrice && Number.isFinite(price) && price > 0 && <div className="text-right shrink-0">
                 <p className="font-bold text-base text-foreground">฿{price.toLocaleString()}</p>
-              </div>
+              </div>}
               {isSelected && <Check className="w-5 h-5 text-primary shrink-0" />}
             </button>
           );

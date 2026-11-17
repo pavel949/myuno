@@ -45,6 +45,7 @@ export interface AddressMeta {
 }
 
 interface AddressAutocompleteProps {
+  id?: string;
   value: string;
   onChange: (value: string, meta?: AddressMeta) => void;
   placeholder?: string;
@@ -59,7 +60,7 @@ const PHUKET_BIAS = {
   },
 };
 
-export function AddressAutocomplete({ value, onChange, placeholder, className }: AddressAutocompleteProps) {
+export function AddressAutocomplete({ id, value, onChange, placeholder, className }: AddressAutocompleteProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: projects } = usePropertyProjects();
@@ -379,6 +380,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           )}
           <Input
+            id={id}
             value={value}
             onChange={handleInputChange}
             onFocus={handleFocus}
