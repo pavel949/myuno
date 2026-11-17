@@ -58,9 +58,26 @@ async def main():
                 row['header'] = header
                 # Bounds of visible rendered primary controls. The pre-existing
                 # mobile amenities strip intentionally scrolls horizontally.
-                bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
+                bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')&&!e.closest('nav.overflow-x-auto')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
                 assert not bad, {'controlBounds': bad}
                 if surface == 'services':
+                    # Intentionally clipped category rail is not document overflow.
+                    # Prove each native link can be revealed by keyboard focus,
+                    # while the rail itself remains inside the viewport.
+                    rail = page.locator('nav.overflow-x-auto')
+                    await expect(rail).to_have_count(1)
+                    bounds = await rail.bounding_box()
+                    assert bounds and bounds['x'] >= -1 and bounds['x'] + bounds['width'] <= width + 1, bounds
+                    links = rail.get_by_role('link')
+                    await expect(links).to_have_count(3)
+                    for index in range(3):
+                        link = links.nth(index)
+                        await link.focus()
+                        await expect(link).to_be_focused()
+                        box = await link.bounding_box()
+                        assert box and box['x'] >= -1 and box['x'] + box['width'] <= width + 1, box
+                        assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'rail focus document overflow'
+                    await rail.evaluate('(element)=>element.scrollLeft=0')
                     menu = page.get_by_test_id('service-discovery-menu')
                     await expect(menu).to_be_visible()
                     menu_metrics = await geometry(menu)
@@ -112,6 +129,8 @@ async def main():
                     # Full search remains operable with no dates; no calendar
                     # availability proof is claimed by this layout fixture.
                     criteria=page.locator('.premium-search-criteria')
+                    await expect(criteria).not_to_have_attribute('open','')
+                    await criteria.locator('summary').press('Enter')
                     await expect(criteria).to_have_attribute('open','')
                     search = page.locator('.home-search')
                     await expect(search.locator('button[type=submit]')).to_be_visible()

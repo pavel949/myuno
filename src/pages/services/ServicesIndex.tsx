@@ -148,6 +148,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         <Button variant="ghost" size="sm" className="min-h-11" onClick={clear}>{t('Сбросить всё', 'Reset all', 'รีเซ็ตทั้งหมด')}</Button>
       </div>}
     </section>
+    {showOffers && Boolean(offers.data?.length) && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
@@ -171,7 +172,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
       </>}
     </section>}
-    {showOffers && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
+    {showOffers && !offers.data?.length && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
       <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">

@@ -90,3 +90,12 @@
   .property-discovery[data-property-mode=rent] .property-discovery-editor .home-search.home-search--catalogue>.home-search-bedrooms{grid-column:2;grid-row:4}
   .property-discovery[data-property-mode=rent] .property-discovery-editor .home-search.home-search--catalogue>.home-search-submit{grid-column:3 / 5;grid-row:4}
 }
+
+/* Results-first entry: a single keyboard-operable search summary, not a second
+   editor. Long selected areas/preferences wrap without hiding the action. */
+.property-discovery .property-discovery-search-summary{border:1px solid hsl(var(--border));gap:16px}
+.property-discovery .property-discovery-search-summary>span:first-child{overflow-wrap:anywhere}
+.property-discovery .property-discovery-search-summary>span:last-child{display:flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));text-decoration:none;text-align:center}
+.property-discovery .property-discovery-search-summary:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.property-discovery .property-discovery-search-summary::-webkit-details-marker{display:none}
+@media(max-width:430px){.property-discovery .property-discovery-search-summary{padding:12px;gap:12px}.property-discovery .property-discovery-search-summary>span:last-child{flex-shrink:0;white-space:nowrap}}

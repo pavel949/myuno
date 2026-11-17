@@ -13,9 +13,9 @@ OUT = Path(sys.argv[1]).resolve()
 ROOT = Path.cwd()
 ORIGIN = 'http://127.0.0.1:8936'
 COPY = {
-    'en': {'title': 'Experiences', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_heading': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
-    'ru': {'title': 'Впечатления', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_heading': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все темы', 'menu': 'Открыть меню', 'services': 'Услуги'},
-    'th': {'title': 'ประสบการณ์', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_heading': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'หมวดหมู่ทั้งหมด', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
+    'en': {'title': 'Experiences', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_menu': 'Experience categories', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
+    'ru': {'title': 'Впечатления', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_menu': 'Темы впечатлений', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все темы', 'menu': 'Открыть меню', 'services': 'Услуги'},
+    'th': {'title': 'ประสบการณ์', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_menu': 'หมวดหมู่ประสบการณ์', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'หมวดหมู่ทั้งหมด', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
 }
 
 
@@ -101,13 +101,30 @@ async def main():
                         await expect(dialog.locator('a[aria-current="page"]')).to_have_attribute('href', '/experiences')
                         await page.keyboard.press('Escape')
                         await expect(dialog).not_to_be_visible()
-                    menu = page.locator('[aria-labelledby="experience-category-title"]')
-                    await expect(menu.get_by_role('button')).to_have_count(8)
-                    await menu.locator('summary').click()
+                    menu = page.get_by_role('region', name=c['category_menu'], exact=True)
+                    # The compact rail exposes every returned category directly,
+                    # including the ninth previously behind the eight-item disclosure.
                     await expect(menu.get_by_role('button')).to_have_count(9)
-                    await menu.locator('summary').click()
+                    ninth = menu.get_by_role('button').nth(8)
+                    await ninth.focus()
+                    await expect(ninth).to_be_focused()
+                    await ninth.press('Enter')
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
+                    assert await page.evaluate('window.fixtureReadOptions.category') == 'wellness'
+                    await expect(cards()).to_have_count(0)
+                    await expect(page.get_by_text(c['empty'], exact=True)).to_be_visible()
+                    await page.get_by_test_id('history-back').click()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.get_by_role('button')).to_have_count(9)
+                    await expect(cards()).to_have_count(4)
+                    await page.get_by_test_id('history-forward').click()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
+                    await expect(cards()).to_have_count(0)
+                    await page.get_by_test_id('history-back').click()
+                    await expect(menu).to_be_visible()
                     await screenshot('01-overview')
-                    row['checks'].append('Actual public header has one active destination; real category menu expands natively')
+                    row['checks'].append('Actual public header has one active destination; all nine compact categories remain accessible, including keyboard selection beyond the old eight-item limit and Back/Forward')
 
                     await menu.get_by_role('button').filter(has_text=c['island']).click()
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
@@ -127,7 +144,8 @@ async def main():
                     await expect(cards()).to_have_count(1)
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await page.get_by_test_id('history-back').click()
-                    await expect(page.get_by_role('heading', name=c['category_heading'], exact=True)).to_be_visible()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.get_by_role('button')).to_have_count(9)
                     row['checks'].append('Category result, native card Enter/destination/public journey state and real router history preserve filters')
 
                     await page.locator('a[href="/experiences?type=tour"]').click()
@@ -189,7 +207,8 @@ async def main():
                     await expect(cards()).to_have_count(4)
                     await page.get_by_role('button', name=c['retry_category'], exact=True).click()
                     await expect(page.get_by_role('alert')).to_have_count(0)
-                    await expect(page.get_by_role('heading', name=c['category_heading'], exact=True)).to_be_visible()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.get_by_role('button')).to_have_count(9)
                     assert await page.evaluate('window.fixtureCategoryRetries') == 1
                     row['checks'].append('Unknown filters, genuine empty, read failure/loading and category failure remain distinct and retryable')
                     await geometry()
