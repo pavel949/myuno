@@ -38,3 +38,5 @@ Reconciled the three transport conflicts against the #234 acceptance head `8d0cd
 - Both isolated fixtures run: 12 responsive/recovery flows from #235 and 48 RU/EN booking review cases from #234. They use synthetic writes only. Radix resolution follows the repository shared alias contract.
 
 Full hosted acceptance and backend notification/idempotency guarantees remain separate gates for any future recovery of #236; this compatibility commit does not reopen or merge it.
+
+Recovery verification: 5,400 local tests passed in 470 files, including isolated PostgreSQL; TypeScript and production build passed; lint had zero errors. Both network-denying browser fixtures passed on the reconciled source (12 + 48 cases). These are local/synthetic results. A future reopened PR still requires hosted checks on its then-current head and no backend activation is implied.
