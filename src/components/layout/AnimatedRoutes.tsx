@@ -813,7 +813,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Sprint 1 — high-conversion segment/B2B landings (must precede `/for/:persona`). */}
         <Route path="/for/second-home" element={<LazyPage><Pages.SecondHomeLandingPage /></LazyPage>} />
         <Route path="/for/investor" element={<LazyPage><Pages.InvestorLandingPage /></LazyPage>} />
-        <Route path="/for/agent" element={<LazyPage><Pages.AgentLandingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.FOR_AGENTS} element={<LazyPage><Pages.AgentLandingPage /></LazyPage>} />
         {/* Sprint 2 — Surface marketing landings (Live + Build) under existing /for/* namespace. */}
         <Route path="/for/arrive" element={<LazyPage><Pages.ArriveSurfaceLandingPage /></LazyPage>} />
         <Route path="/for/live" element={<LazyPage><Pages.LiveSurfaceLandingPage /></LazyPage>} />

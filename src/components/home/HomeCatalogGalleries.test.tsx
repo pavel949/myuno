@@ -13,6 +13,7 @@ const state = vi.hoisted(() => ({
   retry: vi.fn(),
   projects: [] as object[],
   experiences: [] as object[],
+  offers: [] as object[],
   categories: [] as object[],
   fromDB: true,
 }));
@@ -38,6 +39,7 @@ vi.mock('@/hooks/useExperiences', () => ({
     };
   },
 }));
+vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.offers, isError: false }) }));
 vi.mock('@/lib/catalog/useCatalogFromDB', () => ({
   useCatalogFromDB: () => ({ categories: state.categories, isFromDB: state.fromDB,
     isLoading: state.loading, error: state.error ? new Error('Fixture error') : null, refetch: state.retry }),
@@ -49,6 +51,7 @@ beforeEach(() => {
     error: false,
     projects: [],
     experiences: [],
+    offers: [],
     categories: [],
     fromDB: true,
   });
@@ -198,4 +201,18 @@ it.each(['empty', 'loading', 'error', 'fallback'])('keeps explicit flower/yacht 
   expect(screen.getByRole('link', { name: 'Flower catalogue' })).toHaveAttribute('href', '/flowers');
   expect(screen.getByRole('link', { name: 'Yacht catalogue' })).toHaveAttribute('href', '/yachts');
   expect(document.querySelector('.home-service-category-card')).toBeNull();
+});
+
+
+it('shows photographed services from the public marketplace and opens the matching search', () => {
+  state.offers = [
+    { id: 'offer-1', name_en: 'Fixture Thai massage', images: ['https://example.invalid/massage.webp'], provider: { name: 'Fixture spa' } },
+    { id: 'offer-2', name_en: 'Fixture without media', images: [], provider: { name: 'Fixture spa' } },
+  ];
+  show();
+  expect(screen.getByRole('link', { name: /Fixture Thai massage/ })).toHaveAttribute(
+    'href', '/discover/services?q=Fixture%20Thai%20massage',
+  );
+  expect(screen.queryByText('Fixture without media')).toBeNull();
+  expect(screen.queryByRole('link', { name: 'All categories' })).toBeNull();
 });

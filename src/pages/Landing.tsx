@@ -54,8 +54,8 @@ export default function Landing() {
       <HomeHousingPreview />
       <HomeNewbuildsPreview />
       <div className="home-life-group">
-        <HomeExperienceGallery />
         <HomeServiceGallery />
+        <HomeExperienceGallery />
       </div>
       <HomeLocationGallery />
       <section className="home-partners-group" aria-labelledby="home-partners-title">

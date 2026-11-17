@@ -89,7 +89,7 @@ export default function ForLocalServices() {
             >
               <Badge variant="secondary" className="mb-4 gap-1">
                 <Wrench className="w-3.5 h-3.5" />
-                {isRu ? 'Для поставщиков услуг' : 'For service providers'}
+                {isRu ? 'Для поставщиков услуг и впечатлений' : 'For service and experience providers'}
               </Badge>
               <h1 className="text-h1 md:text-display font-display mb-4">
                 {isRu

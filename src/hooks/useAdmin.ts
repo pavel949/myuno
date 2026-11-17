@@ -81,7 +81,7 @@ export function useAdminProviders(options?: ProviderQueryOptions) {
       name: providerData.name ?? '',
       ...providerData,
       is_active: providerData.is_active ?? true,
-      is_verified: true,
+      is_verified: providerData.is_verified ?? true,
       approval_status: 'approved',
       created_by_uno_team: true,
       rating: 0,

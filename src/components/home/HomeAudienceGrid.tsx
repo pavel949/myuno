@@ -37,7 +37,7 @@ const audiences: AudienceCard[] = [
   {
     icon: Sparkles,
     href: R.FOR_LOCAL_SERVICE_PROVIDERS,
-    title: { ru: 'Предлагаю услуги', en: 'I provide local services', th: 'ให้บริการท้องถิ่น' },
+    title: { ru: 'Предлагаю услуги или впечатления', en: 'I offer services or experiences', th: 'ให้บริการหรือจัดกิจกรรม' },
     description: { ru: 'Получайте заявки от гостей, собственников и управляющих компаний.', en: 'Receive relevant requests from guests, owners, and property managers.', th: 'รับคำขอจากแขก เจ้าของ และผู้จัดการอสังหาริมทรัพย์' },
     action: { ru: 'Стать партнёром', en: 'Become a partner', th: 'ร่วมเป็นพาร์ทเนอร์' },
   },

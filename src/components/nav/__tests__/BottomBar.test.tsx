@@ -12,30 +12,30 @@ afterEach(cleanup);
 beforeEach(() => { locale.language = 'en'; });
 
 it.each([
- ['ru', 'Бронирования', 'Брони'],
- ['en', 'Bookings', 'Bookings'],
- ['th', 'การจอง', 'การจอง'],
-])('keeps the %s booking destination and full accessible name with compact mobile text', (language, name, text) => {
+ ['ru', 'Заявки'],
+ ['en', 'Requests'],
+ ['th', 'คำขอ'],
+])('keeps the %s requests destination and accessible name', (language, name) => {
  locale.language = language;
- render(<MemoryRouter initialEntries={['/bookings']}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
- const booking = screen.getByRole('link', { name });
- expect(booking).toHaveAttribute('href', '/bookings');
- expect(booking).toHaveAttribute('aria-current', 'page');
- expect(booking.querySelector('span')).toHaveTextContent(text);
- if (language === 'ru') expect(booking.querySelector('span')).toHaveClass('whitespace-nowrap');
- else expect(booking.querySelector('span')).not.toHaveClass('whitespace-nowrap');
+ render(<MemoryRouter initialEntries={['/bookings']}><BottomBar role="guest" /></MemoryRouter>);
+ const requests = screen.getByRole('link', { name });
+ expect(requests).toHaveAttribute('href', '/me/requests');
+ expect(requests).toHaveAttribute('aria-current', 'page');
+ expect(requests.querySelector('span')).toHaveTextContent(name);
  expect(screen.getAllByRole('link')).toHaveLength(5);
 });
 
 it.each([
- ['/property/search', 'Homes'],
- ['/property/example', 'Homes'],
- ['/transport/transfer', 'Services'],
- ['/discover/services', 'Services'],
- ['/trip-planner', 'Services'],
- ['/bookings', 'Bookings'],
- ['/me/requests', 'Bookings'],
- ['/my-stay', 'Bookings'],
+ ['/property/search', 'Search'],
+ ['/property/example', 'Search'],
+ ['/transport/transfer', 'Search'],
+ ['/discover/services', 'Search'],
+ ['/trip-planner', 'Search'],
+ ['/bookings', 'Requests'],
+ ['/me/requests', 'Requests'],
+ ['/my-stay', 'Requests'],
+ ['/favorites', 'Favorites'],
+ ['/search', 'Search'],
  ['/profile', 'Profile'],
  ['/', 'Home'],
 ])('announces the same active tab it highlights on %s', (path, label) => {

@@ -241,27 +241,39 @@ export default function AdminProviders() {
   }, [authLoading, adminLoading, user, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.business_category) {
+    const name = formData.name.trim();
+    const responseTime = formData.response_time_minutes === '' ? null : Number(formData.response_time_minutes);
+    if (!name || !formData.business_category) {
       toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+      return;
+    }
+
+    if (responseTime !== null && (!Number.isSafeInteger(responseTime) || responseTime < 0)) {
+      toast.error(isRussian ? 'Укажите целое время отклика от 0 минут' : 'Enter a whole response time of 0 minutes or more');
+      return;
+    }
+    const email = formData.email.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error(isRussian ? 'Укажите корректный email' : 'Enter a valid email address');
       return;
     }
 
     setIsSubmitting(true);
     try {
       const providerData = {
-        name: formData.name,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
+        name,
+        description_en: formData.description_en.trim() || null,
+        description_ru: formData.description_ru.trim() || null,
         business_category: formData.business_category,
-        phone: formData.phone || undefined,
-        email: formData.email || undefined,
-        website: formData.website || undefined,
-        address: formData.address || undefined,
+        phone: formData.phone.trim() || null,
+        email: email || null,
+        website: formData.website.trim() || null,
+        address: formData.address.trim() || null,
         is_active: formData.is_active,
         is_verified: formData.is_verified,
         // New fields
         provider_type: formData.provider_type,
-        response_time_minutes: formData.response_time_minutes ? parseInt(formData.response_time_minutes) : null,
+        response_time_minutes: responseTime,
         has_insurance: formData.has_insurance,
         has_guarantee: formData.has_guarantee,
         service_domains: formData.service_domains,
@@ -590,8 +602,9 @@ export default function AdminProviders() {
               )}
 
               <div className="space-y-2">
-                <Label>{isRussian ? 'Название *' : 'Name *'}</Label>
+                <Label htmlFor="provider-name">{isRussian ? 'Название *' : 'Name *'}</Label>
                 <Input
+                  id="provider-name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Thai Massage & Spa"
@@ -611,8 +624,9 @@ export default function AdminProviders() {
               </div>
 
               <div className="space-y-2">
-                <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                <Label htmlFor="provider-description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
                 <Textarea
+                  id="provider-description_en"
                   value={formData.description_en}
                   onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                   rows={2}
@@ -620,8 +634,9 @@ export default function AdminProviders() {
               </div>
 
               <div className="space-y-2">
-                <Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                <Label htmlFor="provider-description_ru">{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
                 <Textarea
+                  id="provider-description_ru"
                   value={formData.description_ru}
                   onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
                   rows={2}
@@ -630,17 +645,19 @@ export default function AdminProviders() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
+                  <Label htmlFor="provider-phone">{isRussian ? 'Телефон' : 'Phone'}</Label>
                   <Input
+                    id="provider-phone"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="+66..."
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label htmlFor="provider-email">Email</Label>
                   <Input
                     type="email"
+                    id="provider-email"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
@@ -649,15 +666,17 @@ export default function AdminProviders() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
+                  <Label htmlFor="provider-address">{isRussian ? 'Адрес' : 'Address'}</Label>
                   <Input
+                    id="provider-address"
                     value={formData.address}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Сайт' : 'Website'}</Label>
+                  <Label htmlFor="provider-website">{isRussian ? 'Сайт' : 'Website'}</Label>
                   <Input
+                    id="provider-website"
                     value={formData.website}
                     onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
                     placeholder="https://..."
@@ -737,32 +756,36 @@ export default function AdminProviders() {
                 </Label>
                 
                 <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Активен' : 'Active'}</Label>
+                  <Label htmlFor="provider-is_active">{isRussian ? 'Активен' : 'Active'}</Label>
                   <Switch
+                    id="provider-is_active"
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Верифицирован' : 'Verified'}</Label>
+                  <Label htmlFor="provider-is_verified">{isRussian ? 'Верифицирован' : 'Verified'}</Label>
                   <Switch
+                    id="provider-is_verified"
                     checked={formData.is_verified}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_verified: checked }))}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Есть страховка' : 'Has Insurance'}</Label>
+                  <Label htmlFor="provider-has_insurance">{isRussian ? 'Есть страховка' : 'Has Insurance'}</Label>
                   <Switch
+                    id="provider-has_insurance"
                     checked={formData.has_insurance}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, has_insurance: checked }))}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{isRussian ? 'Гарантия на работы' : 'Work Guarantee'}</Label>
+                  <Label htmlFor="provider-has_guarantee">{isRussian ? 'Гарантия на работы' : 'Work Guarantee'}</Label>
                   <Switch
+                    id="provider-has_guarantee"
                     checked={formData.has_guarantee}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, has_guarantee: checked }))}
                   />

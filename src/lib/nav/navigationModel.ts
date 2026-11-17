@@ -54,16 +54,18 @@ export type { NavRoleKey, NavItem };
 
 /** Public header: keep the desktop menu task-focused; partner paths live in a separate menu. */
 export const GUEST_TOP_NAV: NavItem[] = [
-  { path: APP_ROUTES.PROPERTY, icon: Building2, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.EXPERIENCES, icon: Compass, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
+  { path: APP_ROUTES.PROPERTY, icon: Building2, labelEn: 'Real estate', labelRu: 'Недвижимость', labelTh: 'อสังหาริมทรัพย์' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
-  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { path: APP_ROUTES.EXPERIENCES, icon: Compass, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
 ];
 
-/** Desktop has a dedicated Experiences destination; mobile groups it under Services. */
 export function getActiveGuestTopNavItem(pathname: string): NavItem | null {
   const direct = GUEST_TOP_NAV.find(item => pathname === item.path || pathname.startsWith(`${item.path}/`));
-  return direct ?? GUEST_TOP_NAV.find(item => isBottomBarItemActive(item, pathname)) ?? null;
+  if (direct) return direct;
+  if (pathname === APP_ROUTES.YACHTS || pathname.startsWith(`${APP_ROUTES.YACHTS}/`)) {
+    return GUEST_TOP_NAV.find(item => item.path === APP_ROUTES.EXPERIENCES) ?? null;
+  }
+  return GUEST_TOP_NAV.find(item => isBottomBarItemActive(item, pathname)) ?? null;
 }
 
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */
@@ -75,7 +77,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 // Each role gets exactly 5 slots. The slot composition encodes
 // product-level "what matters most" for that role:
 //
-//  guest      → Home · Homes · Bookings · Services · Profile
+//  guest      → Home · Search · Favorites · Requests · Profile
 //                  (consumer browsing + monetization entry points)
 //  investor   → Home · Invest · Discover · Property · Me
 //                  (capital workflow first, browse second)
@@ -137,6 +139,7 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/market':      ['/market'],
   '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
+  '/experiences': ['/experiences', '/yachts'],
   '/my-property': [
     '/my-property',
     '/my-property/statements',
@@ -160,7 +163,10 @@ export function isBottomBarItemActive(item: NavItem, pathname: string): boolean 
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
-  const aliases = PATH_ALIASES[item.path];
+  if (item.path === APP_ROUTES.SEARCH && pathname === APP_ROUTES.DISCOVER) return true;
+  const aliases = item.path === APP_ROUTES.SEARCH
+    ? [APP_ROUTES.SEARCH, ...PATH_ALIASES[APP_ROUTES.PROPERTY], ...PATH_ALIASES[APP_ROUTES.GOAL_SERVICES]]
+    : item.path === APP_ROUTES.ME_REQUESTS ? PATH_ALIASES[APP_ROUTES.BOOKINGS] : PATH_ALIASES[item.path];
   if (aliases) {
     return aliases.some(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),

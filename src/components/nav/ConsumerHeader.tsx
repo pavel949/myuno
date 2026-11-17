@@ -54,8 +54,9 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   }));
   const partnerLinks = [
     { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') },
+    { to: R.FOR_AGENTS, label: t('Агентам', 'For agents', 'สำหรับตัวแทน') },
     { to: R.FOR_MANAGEMENT_COMPANIES, label: t('Управляющим компаниям', 'For management companies', 'สำหรับบริษัทจัดการ') },
-    { to: R.FOR_LOCAL_SERVICE_PROVIDERS, label: t('Поставщикам услуг', 'For service providers', 'สำหรับผู้ให้บริการ') },
+    { to: R.FOR_LOCAL_SERVICE_PROVIDERS, label: t('Поставщикам услуг и впечатлений', 'For service and experience providers', 'สำหรับผู้ให้บริการและผู้จัดกิจกรรม') },
     { to: R.FOR_REAL_ESTATE_DEVELOPERS, label: t('Застройщикам', 'For developers', 'สำหรับผู้พัฒนา') },
     { to: R.FOR_BUSINESS, label: t('Для бизнеса', 'For business', 'สำหรับธุรกิจ') },
   ];
@@ -68,7 +69,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
             {links.map(l => <Link key={l.to} to={l.to} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
           </nav>
           <details className="consumer-partner-menu">
-            <summary aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
+            <summary aria-current={partnerActive ? 'page' : undefined}>{t('Для партнёров', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
             <div className="consumer-partner-menu-panel">
               {partnerLinks.map(link => <Link key={link.to} to={link.to}>{link.label}</Link>)}
             </div>
@@ -78,7 +79,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
           <div className="consumer-secondary-utilities"><GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} /></div>
           {headerActions}
           {!overlay && <div className="consumer-secondary-utilities"><MiniCart /></div>}
-          {user ? <UserAvatarMenu consumerNavigation={[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }]} consumerSearch={onSearch} /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
+          {user ? <UserAvatarMenu consumerNavigation={[...links, ...partnerLinks, { to: R.BOOKINGS, label: t('Бронирования', 'Bookings', 'การจอง') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }]} consumerSearch={onSearch} /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
           {!user && <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild><button type="button" className="consumer-menu" aria-label={t('Открыть меню', 'Open menu', 'เปิดเมนู')}><Menu aria-hidden="true" /></button></SheetTrigger>
             <SheetContent closeLabel={t('Закрыть меню', 'Close menu', 'ปิดเมนู')} className={`w-[min(100vw,24rem)] overflow-y-auto${overlay ? '' : ' consumer-header-menu'}`}>

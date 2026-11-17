@@ -4,11 +4,11 @@ import { ArrowRight, Compass, ImageOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
+import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { homeAreaCover } from './homeAreaCovers';
 import { HomeGallery } from './HomeGallery';
-import { HorizontalRail } from './HorizontalRail';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { homeServiceCategories } from './homeServiceCategories';
 
@@ -112,81 +112,59 @@ export function HomeExperienceGallery() {
     const image = [item.cover_image, ...(item.images ?? [])].map(complexMediaUrl).find(image => image && !failedMedia.has(image));
     return image ? [{ item, image }] : [];
   }).slice(0, 4);
-  const title = t({
-    ru: 'За пределами дома',
-    en: 'More of the island',
-    th: 'สัมผัสประสบการณ์บนเกาะ',
-  });
-  // Keep a clear route to experiences even when the photo preview is empty.
+  const title = t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' });
+  const state = isLoading || error || !preview.length ? (
+    <CatalogState
+      loading={isLoading}
+      error={Boolean(error)}
+      retry={refetch}
+      empty={{
+        ru: 'Пока нет подборки с фотографиями. Посмотрите каталог впечатлений.',
+        en: 'No photo preview yet. Explore the experiences catalogue.',
+        th: 'ยังไม่มีภาพตัวอย่าง ดูรายการประสบการณ์ทั้งหมด',
+      }}
+    />
+  ) : undefined;
+
   return (
-    <section
-      className="home-catalog home-experiences home-container"
-      aria-labelledby="home-experiences-title"
+    <HomeGallery
+      id="home-experiences-title"
+      className="home-catalog home-experiences"
+      title={title}
+      description={t({ ru: 'Идеи для прогулок и отдыха на острове.', en: 'Explore activities around the island.', th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ' })}
+      href={R.EXPERIENCES}
+      linkLabel={t({ ru: 'Все впечатления', en: 'All experiences', th: 'ประสบการณ์ทั้งหมด' })}
+      state={state}
     >
-      <div className="home-section-heading">
-        <div>
-          <h2 id="home-experiences-title">{title}</h2>
-          <p className="home-section-lead">
-            {t({
-              ru: 'Идеи для прогулок и отдыха на острове.',
-              en: 'Explore activities around the island.',
-              th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ',
-            })}
-          </p>
-        </div>
-        <Link className="home-text-link" to={R.EXPERIENCES}>
-          {t({
-            ru: 'Все впечатления',
-            en: 'All experiences',
-            th: 'ประสบการณ์ทั้งหมด',
-          })}
-          <ArrowRight size={18} aria-hidden="true" />
-        </Link>
-      </div>
-      {isLoading || error || !preview.length ? (
-        <CatalogState
-          loading={isLoading}
-          error={Boolean(error)}
-          retry={refetch}
-          empty={{
-            ru: 'Пока нет подборки с фотографиями. Посмотрите каталог впечатлений.',
-            en: 'No photo preview yet. Explore the experiences catalogue.',
-            th: 'ยังไม่มีภาพตัวอย่าง ดูรายการประสบการณ์ทั้งหมด',
-          }}
-        />
-      ) : (
-        <HorizontalRail label={title}>
-          {preview.map(({ item, image }) => (
-            <article className="home-catalog-card" key={item.id}>
-              <Link to={R.EXPERIENCE_DETAIL(item.id)}>
-                <CatalogPhoto
-                  image={image}
-                  alt={(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}
-                  onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))}
-                />
-                <div className="home-catalog-copy">
-                  <Compass size={18} aria-hidden="true" />
-                  <h3>
-                    {(language === 'ru' ? item.title_ru : item.title_en) ||
-                      item.title_en ||
-                      item.title_ru}
-                  </h3>
-                  {item.location_name && <p>{item.location_name}</p>}
-                  <span>
-                    {t({
-                      ru: 'Посмотреть программу',
-                      en: 'Explore the experience',
-                      th: 'ดูรายละเอียด',
-                    })}
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
-            </article>
-          ))}
-        </HorizontalRail>
-      )}
-    </section>
+      {preview.map(({ item, image }) => (
+        <article className="home-catalog-card" key={item.id}>
+          <Link to={R.EXPERIENCE_DETAIL(item.id)}>
+            <CatalogPhoto
+              image={image}
+              alt={(language === 'ru' ? item.title_ru : item.title_en) || item.title_en || item.title_ru}
+              onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))}
+            />
+            <div className="home-catalog-copy">
+              <Compass size={18} aria-hidden="true" />
+              <h3>
+                {(language === 'ru' ? item.title_ru : item.title_en) ||
+                  item.title_en ||
+                  item.title_ru}
+              </h3>
+              {item.location_name && <p>{item.location_name}</p>}
+              <span>
+                {t({
+                  ru: 'Посмотреть программу',
+                  en: 'Explore the experience',
+                  th: 'ดูรายละเอียด',
+                })}
+                <ArrowRight size={16} aria-hidden="true" />
+              </span>
+            </div>
+          </Link>
+        </article>
+      ))}
+    </HomeGallery>
   );
 }
 
@@ -201,11 +179,42 @@ export function HomeServiceGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const catalog = useCatalogFromDB();
+  const { data: services, isError: offersError } = useMarketplaceServices();
+  const [failedMedia, setFailedMedia] = useState<Set<string>>(() => new Set());
+  const offers = offersError ? [] : (services ?? []).flatMap(service => {
+    const name = (language === 'ru' ? service.name_ru || service.name_en : service.name_en).trim();
+    const photo = (service.images ?? []).map(complexMediaUrl).find(image => image && !failedMedia.has(image));
+    return name && photo && service.provider ? [{ service, name, photo }] : [];
+  }).slice(0, 6);
+
   // The shared catalog's static fallback is useful for app navigation, but is
   // not evidence of a live category. Keep loading/error/empty explicit here.
   const categories = catalog.isFromDB ? homeServiceCategories(catalog.categories) : [];
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
+
+  if (offers.length > 0) return (
+    <HomeGallery
+      id="home-services-title"
+      className="home-services"
+      title={title}
+      href={R.GOAL_SERVICES}
+      linkLabel={t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
+    >
+      {offers.map(({ service, name, photo }) => (
+        <article className="home-catalog-card" key={service.id}>
+          <Link to={`${R.GOAL_SERVICES}?q=${encodeURIComponent(name)}`}>
+            <CatalogPhoto image={photo} alt="" onUnavailable={failed => setFailedMedia(previous => new Set(previous).add(failed))} />
+            <div className="home-catalog-copy">
+              <h3>{name}</h3>
+              {service.provider?.name && <p>{service.provider.name}</p>}
+              <span>{t({ ru: 'Посмотреть услугу', en: 'View service', th: 'ดูบริการ' })}<ArrowRight size={16} aria-hidden="true" /></span>
+            </div>
+          </Link>
+        </article>
+      ))}
+    </HomeGallery>
+  );
 
   return <><HomeGallery id="home-services-title" className="home-services" title={title}
     description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}

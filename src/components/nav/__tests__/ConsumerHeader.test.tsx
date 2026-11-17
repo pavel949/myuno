@@ -13,8 +13,9 @@ afterEach(() => { cleanup(); locale.language = 'ru'; });
 it.each([
  ['/experiences', 'Впечатления'],
  ['/experiences/synthetic-tour', 'Впечатления'],
+ ['/yachts', 'Впечатления'],
  ['/transport/transfer', 'Услуги'],
- ['/property/search?mode=buy', 'Жильё'],
+ ['/property/search?mode=buy', 'Недвижимость'],
 ])('identifies one destination in desktop and mobile menus for %s', (path, label) => {
  render(<MemoryRouter initialEntries={[path]}><ConsumerHeader /></MemoryRouter>);
  const desktop = screen.getByRole('navigation', { name: 'Основные разделы' });
@@ -44,7 +45,7 @@ it('preserves the current page, filters and anchor in both sign-in links', () =>
  fireEvent.click(screen.getByRole('button', { name: 'Открыть меню' }));
  const dialog = screen.getByRole('dialog', { name: 'myUNO' });
  expect(within(dialog).getByRole('link', { name: 'Войти' })).toHaveAttribute('href', `/auth?redirect=${encodeURIComponent(from)}`);
- expect(within(dialog).getByRole('link', { name: 'Жильё' })).toHaveAttribute('aria-current', 'page');
+ expect(within(dialog).getByRole('link', { name: 'Недвижимость' })).toHaveAttribute('aria-current', 'page');
  expect(within(dialog).getByRole('link', { name: 'Услуги' })).not.toHaveAttribute('aria-current');
 });
 

@@ -77,6 +77,7 @@ export const APP_ROUTES = {
 
   // ── B2B landing pages (public marketing) ──
   FOR_OWNERS: '/for-owners',
+  FOR_AGENTS: '/for/agent',
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',

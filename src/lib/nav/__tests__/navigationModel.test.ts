@@ -70,9 +70,9 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.guest.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.HOME,
-      APP_ROUTES.PROPERTY,
-      APP_ROUTES.BOOKINGS,
-      APP_ROUTES.GOAL_SERVICES,
+      APP_ROUTES.SEARCH,
+      APP_ROUTES.FAVORITES,
+      APP_ROUTES.ME_REQUESTS,
       APP_ROUTES.ACCOUNT,
     ]);
   });
@@ -176,7 +176,7 @@ describe('isBottomBarRoute — membership check', () => {
   it('returns true for routes that belong to the role bar', () => {
     expect(isBottomBarRoute('owner', APP_ROUTES.MC_FINANCE)).toBe(true);
     expect(isBottomBarRoute('vendor', APP_ROUTES.VENDOR_PAYOUTS)).toBe(true);
-    expect(isBottomBarRoute('guest', APP_ROUTES.BOOKINGS)).toBe(true);
+    expect(isBottomBarRoute('guest', APP_ROUTES.ME_REQUESTS)).toBe(true);
   });
 
   it('returns false for routes that are not in the role bar', () => {
@@ -225,8 +225,8 @@ describe('isBottomBarItemActive — exact-match items', () => {
 });
 
 describe('isBottomBarItemActive — prefix items', () => {
-  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /bookings
-  const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
+  const market = BOTTOM_BAR_BY_ROLE.guest[3]; // /me/requests
+  const property = BOTTOM_BAR_BY_ROLE.guest[1]; // /search
   const ownerProps = BOTTOM_BAR_BY_ROLE.owner[1]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
@@ -266,10 +266,10 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(getActiveBottomBarItem('owner', '/totally/unknown')).toBeNull();
   });
 
-  it('guest on /discover/stay highlights Stay', () => {
+  it('guest on /discover/stay highlights Search', () => {
     const item = getActiveBottomBarItem('guest', '/discover/stay');
-    expect(item?.path).toBe('/property');
-    expect(item?.labelEn).toBe('Homes');
+    expect(item?.path).toBe('/search');
+    expect(item?.labelEn).toBe('Search');
   });
 
   it('guest on / highlights Home (exact)', () => {
@@ -308,16 +308,16 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
 
 describe('consumer journey ownership', () => {
   it.each([
-    ['/property/search', '/property'],
-    ['/property/browse', '/property'],
-    ['/discover/buy', '/property'],
-    ['/trip-planner', '/discover/services'],
-    ['/transport/airport-transfer', '/discover/services'],
-    ['/experiences', '/discover/services'],
-    ['/bookings', '/bookings'],
-    ['/me/bookings', '/bookings'],
-    ['/me/requests', '/bookings'],
-    ['/me/services', '/discover/services'],
+    ['/property/search', '/search'],
+    ['/property/browse', '/search'],
+    ['/discover/buy', '/search'],
+    ['/trip-planner', '/search'],
+    ['/transport/airport-transfer', '/search'],
+    ['/experiences', '/search'],
+    ['/bookings', '/me/requests'],
+    ['/me/bookings', '/me/requests'],
+    ['/me/requests', '/me/requests'],
+    ['/me/services', '/search'],
   ])('%s has one active consumer destination', (path, destination) => {
     expect(getActiveBottomBarItem('guest', path)?.path).toBe(destination);
     expect(BOTTOM_BAR_BY_ROLE.guest.filter(item => isBottomBarItemActive(item, path))).toHaveLength(1);
@@ -331,9 +331,8 @@ describe('public business entry', () => {
   it('keeps the business destination out of the consumer top menu and bottom tabs', () => {
     expect(GUEST_TOP_NAV.map(item => item.path)).toEqual([
       APP_ROUTES.PROPERTY,
-      APP_ROUTES.EXPERIENCES,
       APP_ROUTES.GOAL_SERVICES,
-      APP_ROUTES.BOOKINGS,
+      APP_ROUTES.EXPERIENCES,
     ]);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);

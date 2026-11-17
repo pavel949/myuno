@@ -31,8 +31,8 @@
   background: hsl(220 14% 12%);
   border-radius: 38px;
   padding: 9px;
-  box-shadow: 0 20px 40px -16px rgba(10, 34, 64, 0.22),
-              0 0 0 1px rgba(10, 34, 64, 0.08);
+  box-shadow: 0 20px 40px -16px hsl(var(--brand-navy) / 0.22),
+              0 0 0 1px hsl(var(--brand-navy) / 0.08);
   aspect-ratio: 9 / 19.5;
   max-width: 360px;
   width: 100%;
@@ -157,9 +157,9 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 22% 78%, rgba(255, 255, 255, 0.05) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.05) 0 1px, transparent 2px),
-    radial-gradient(circle at 45% 88%, rgba(255, 255, 255, 0.05) 0 1px, transparent 2px);
+    radial-gradient(circle at 22% 78%, hsl(var(--surface-white) / 0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 80%, hsl(var(--surface-white) / 0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 88%, hsl(var(--surface-white) / 0.05) 0 1px, transparent 2px);
   z-index: 1;
 }
 
@@ -178,8 +178,8 @@
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  box-shadow: 0 6px 14px -3px rgba(0, 0, 0, 0.35),
-              0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 14px -3px hsl(var(--ink) / 0.35),
+              0 0 0 0.5px hsl(var(--ink) / 0.04);
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -294,16 +294,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 3px rgba(10, 34, 64, 0.55),
-              0 0 24px rgba(217, 107, 26, 0.4);
+  box-shadow: 0 0 0 3px hsl(var(--brand-navy) / 0.55),
+              0 0 24px hsl(var(--brand-orange) / 0.4);
   animation: onb-corepulse 6s ease-in-out infinite;
 }
 .onb-core-mark svg { width: 28px; height: 28px; }
 @keyframes onb-spin { to { transform: rotate(360deg); } }
 @keyframes onb-corepulse {
-  0%, 30%   { box-shadow: 0 0 0 3px rgba(10, 34, 64, 0.55), 0 0 24px rgba(217, 107, 26, 0.4); transform: scale(1); }
+  0%, 30%   { box-shadow: 0 0 0 3px hsl(var(--brand-navy) / 0.55), 0 0 24px hsl(var(--brand-orange) / 0.4); transform: scale(1); }
   45%, 55%  { box-shadow: 0 0 0 3px rgba(217, 107, 26, 0.7),  0 0 36px rgba(217, 107, 26, 0.7); transform: scale(1.12); }
-  70%, 100% { box-shadow: 0 0 0 3px rgba(10, 34, 64, 0.55), 0 0 24px rgba(217, 107, 26, 0.4); transform: scale(1); }
+  70%, 100% { box-shadow: 0 0 0 3px hsl(var(--brand-navy) / 0.55), 0 0 24px hsl(var(--brand-orange) / 0.4); transform: scale(1); }
 }
 
 /* Ordered slot frames — appear at the end of the cycle */

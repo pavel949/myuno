@@ -164,6 +164,7 @@ function getActiveTab(pathname: string, search: string): string {
     if (!readPropertySearchQuery(params).hasIntent) return 'catalogue';
     if (params.get('mode') === 'buy') return 'buy';
     if (params.get('tenancy') === 'long') return 'rent_long';
+    if (params.get('tenancy') === 'medium') return 'rent_medium';
     return 'rent_short';
   }
 
