@@ -41,6 +41,14 @@ describe('connected property discovery', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Купить' }));
     expect(screen.getByTestId('location').textContent).toBe('/property/unit-1?mode=buy');
   });
+  it.each(['rent', 'buy'] as const)('focuses %s catalogue actions without hiding offers elsewhere', mode => {
+    const view = render(<MemoryRouter><PropertyOfferLinks property={home} mode={mode} focused search="?checkIn=2026-12-01&checkOut=2026-12-08&guests=3" /></MemoryRouter>);
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: mode === 'rent' ? 'Арендовать' : 'Купить' })).toHaveAttribute('href', expect.stringContaining(`mode=${mode}`));
+    view.unmount();
+    render(<MemoryRouter><PropertyOfferLinks property={home} mode={mode} /></MemoryRouter>);
+    expect(screen.getAllByRole('link')).toHaveLength(2);
+  });
   it('does not send unknown districts to a guessed area URL', () => {
     render(<MemoryRouter><PropertyAreaGuide property={{ ...home, district: 'Unknown' }} /></MemoryRouter>);
     expect(screen.queryByRole('link')).toBeNull();
