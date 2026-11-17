@@ -122,6 +122,17 @@ describe('contained admin property editor', () => {
     }
   });
 
+  it('preserves fractional square metres when saving unrelated property metadata', async () => {
+    mocks.properties = [{ ...mocks.properties[0], area_sqm: 113.82 }];
+    mocks.update.mockResolvedValue({ error: null });
+    renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.change(within(editor).getByLabelText('Fixture title'), { target: { value: 'Metadata only' } });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(mocks.update.mock.calls[0][1].area_sqm).toBe(113.82);
+  });
+
   it('changes nightly rent and clears sale price without retyping the monthly amount, currencies or dual modes', async () => {
     mocks.properties = [{ ...mocks.properties[0], price: 90000, price_period: 'month', currency: 'THB', price_per_night: 3000, price_per_month: null, price_per_year: null, sale_price: 200000, sale_currency: 'EUR', listing_modes: ['rent', 'sale'], listing_type: 'rent', is_for_sale: true }];
     mocks.update.mockResolvedValue({ error: null }); renderEditor();
