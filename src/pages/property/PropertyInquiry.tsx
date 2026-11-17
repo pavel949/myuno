@@ -118,8 +118,10 @@ export default function PropertyInquiry() {
   const checkOutParam = searchParams.get('checkOut');
   const guestsParam = searchParams.get('guests');
 
-  const checkIn = checkInParam ? parseISO(checkInParam) : null;
-  const checkOut = checkOutParam ? parseISO(checkOutParam) : null;
+  // Keep date identity stable across form/loading renders. The date-price
+  // effect must restart only when the URL dates (or explicit retry) change.
+  const checkIn = useMemo(() => checkInParam ? parseISO(checkInParam) : null, [checkInParam]);
+  const checkOut = useMemo(() => checkOutParam ? parseISO(checkOutParam) : null, [checkOutParam]);
   const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
 
   const hasDates = checkIn && checkOut;
