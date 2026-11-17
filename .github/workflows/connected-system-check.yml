@@ -298,6 +298,11 @@ jobs:
             dirname "$binary" >> "$GITHUB_PATH"
             break
           done
+      - name: Transfer and Fast Track admission and privacy UI
+        run: node scripts/qa/transport-booking-safety.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+          TRANSPORT_SAFETY_OUTPUT: /tmp/browser/transport-safety
       - name: Network-denying PMS browser fixtures
         timeout-minutes: 30
         id: browser
