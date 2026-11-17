@@ -153,10 +153,18 @@ async def main():
                         await expect(page.get_by_test_id('location')).to_have_text(destination)
                         await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(6)
+                    # The rail controls must never intercept the catalogue header action.
+                    catalogue = page.locator('.home-properties .home-gallery-heading a')
+                    await catalogue.evaluate("el => el.scrollIntoView({block:'center',inline:'nearest'})")
+                    hit = await catalogue.evaluate("el => { const r=el.getBoundingClientRect(); const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return hit === el || el.contains(hit); }")
+                    assert hit, 'Rental catalogue link is covered by rail controls'
+                    await catalogue.click()
+                    await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent')
+                    await expect(page.locator('.home-listing .home-listing-facts,.home-listing .home-listing-pricing')).to_have_count(0)
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
                                              ('.premium-newbuilds .home-rail article a', '/property/offplan/'),
-                                             ('.home-listing a', '/property/home-')]:
+                                             ('.home-listing a', '/property/search?mode=rent&focus=home-')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href

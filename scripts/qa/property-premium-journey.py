@@ -62,11 +62,11 @@ try:
                     page.get_by_role("link", name=buy, exact=True).click()
                     assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=buy"
                     page.goto(f"{base}/?lang={lang}&page=home")
-                    page.locator(".home-listing h3 a").wait_for()
+                    page.locator(".home-listing > a").wait_for()
                     geometry()
                     assert page.locator(".home-listing a a").count() == 0, "nested card anchors"
-                    page.locator(".home-listing h3 a").click()
-                    assert page.get_by_test_id("qa-location").text_content() == "/property/synthetic-unit?mode=rent"
+                    page.locator(".home-listing > a").click()
+                    assert page.get_by_test_id("qa-location").text_content().startswith("/property/search?mode=rent&focus=synthetic-unit&q=")
                     assert not errors, errors
                     assert not forbidden, forbidden
                     results.append({"language": lang, "width": width, "outcome": "PASS", "checks": ["geometry", "actual area round trip", "gallery", "offer intent", "home card", "no production network"]})
