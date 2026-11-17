@@ -130,6 +130,8 @@ export interface MiniAppLayoutProps {
   mapIconChar?: string;
   /** Initial view when toggle is enabled. Default: 'list'. */
   defaultMapView?: 'list' | 'map';
+  /** One reversible map/list action for compact marketplace headers. */
+  compactMapToggle?: boolean;
 }
 
 function MiniappMode({
@@ -187,6 +189,7 @@ function MiniappMode({
   onMapMarkerSelect,
   mapIconChar,
   defaultMapView = 'list',
+  compactMapToggle = false,
   isLoading = false,
   isError = false,
   onRetry,
@@ -241,7 +244,10 @@ function MiniappMode({
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
 
-    if (mapToggleEnabled) {
+    if (mapToggleEnabled && compactMapToggle) {
+      actions.push(<Button key="compact-map" type="button" variant="ghost" size="icon" className="size-11 shrink-0" onClick={() => setView(view === 'list' ? 'map' : 'list')} aria-label={view === 'list' ? (language === 'ru' ? 'Карта' : language === 'th' ? 'แผนที่' : 'Map') : (language === 'ru' ? 'Список' : language === 'th' ? 'รายการ' : 'List')}>{view === 'list' ? <MapPin className="size-4" /> : <LayoutGrid className="size-4" />}</Button>);
+    }
+    if (mapToggleEnabled && !compactMapToggle) {
       actions.push(
         <div key="view-toggle" className="flex items-center bg-muted shrink-0">
           <Button

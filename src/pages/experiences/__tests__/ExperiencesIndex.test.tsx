@@ -1,3 +1,4 @@
+// URL/reader contract tests render filter contents inline; real sheet behavior is covered separately.
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
@@ -15,6 +16,7 @@ const offers = [
  { id: 'dive', title_en: 'Underwater activity', title_ru: 'Погружение', category: 'diving', experience_type: 'activity', price: 400, rating: 5 },
  { id: 'unknown', title_en: 'Request-priced tour', title_ru: 'Экскурсия по запросу', category: 'islands', experience_type: 'tour', price: null, rating: 0 },
 ];
+vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useExperiences', () => ({
  useExperiences: (options: { type?: string; category?: string; search?: string }) => {
@@ -24,7 +26,7 @@ vi.mock('@/hooks/useExperiences', () => ({
 }));
 vi.mock('@/hooks/useExperienceCategories', () => ({ useExperienceCategories: () => ({ data: categories, isError: state.categoryError, refetch: state.categoryRetry }) }));
 vi.mock('@/components/miniapp', () => ({
- MiniAppLayout: ({ title, subtitle, searchPlaceholder, searchValue, onSearchChange, stickySubHeader, children }: { title: string; subtitle: string; searchPlaceholder: string; searchValue: string; onSearchChange: (v: string) => void; stickySubHeader: ReactNode; children: ReactNode }) => <main><h1>{title}</h1><p>{subtitle}</p><input aria-label={searchPlaceholder} value={searchValue} onChange={event => onSearchChange(event.target.value)} />{stickySubHeader}{children}</main>,
+ MiniAppLayout: ({ title, subtitle, searchPlaceholder, searchValue, onSearchChange, filterButton, stickySubHeader, children }: { title: string; subtitle: string; searchPlaceholder: string; searchValue: string; onSearchChange: (v: string) => void; filterButton: ReactNode; stickySubHeader: ReactNode; children: ReactNode }) => <main><h1>{title}</h1><p>{subtitle}</p><input aria-label={searchPlaceholder} value={searchValue} onChange={event => onSearchChange(event.target.value)} />{filterButton}{stickySubHeader}{children}</main>,
  CatalogCard: ({ title, onClick, href, navigationState, priceLabel }: { title: string; onClick?: () => void; href?: string; navigationState?: unknown; priceLabel?: string }) => href ? <Link data-testid="offer" to={href} state={navigationState}>{title}{priceLabel && <span>{priceLabel}</span>}</Link> : <button data-testid="offer" onClick={onClick}>{title}</button>,
 }));
 vi.mock('@/hooks/useExperiencePricing', () => ({ useExperiencePricing: () => ({ data: [] }) }));
@@ -42,14 +44,11 @@ function mount(url = '/experiences') { return render(<MemoryRouter initialEntrie
 beforeEach(() => { state.language = 'en'; state.currency = 'THB'; state.mixedCurrency = false; state.error = false; state.loading = false; state.categoryError = false; state.useActualDetail = false; state.detailError = false; state.detailLoading = false; state.detailRetry.mockClear(); state.retry.mockClear(); state.categoryRetry.mockClear(); state.read.mockClear(); });
 afterEach(cleanup);
 describe('public experience catalogue journey', () => {
- it('navigates the hero tour link in the mounted catalogue and browser Back restores all offers', () => {
+ it('shows one category entry and a native yacht catalogue link before real offers', () => {
   mount(); expect(screen.getAllByTestId('offer')).toHaveLength(3);
-  fireEvent.click(screen.getByRole('link', { name: /Tours & discoveries/ }));
-  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?type=tour');
-  expect(screen.getByRole('button', { name: 'Tours' })).toHaveAttribute('aria-pressed', 'true');
-  expect(screen.queryByRole('link', { name: 'Underwater activity' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'History back' }));
-  expect(screen.getAllByTestId('offer')).toHaveLength(3);
+  expect(screen.getAllByRole('button', { name: 'Islands' })).toHaveLength(1);
+  expect(screen.getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
+  expect(screen.queryByText('Experiences worth remembering')).toBeNull();
  });
  it('updates the actual reader and selected controls after a same-page category link', () => {
   mount('/experiences?type=tour'); fireEvent.click(screen.getByRole('link', { name: 'Native activity link' }));

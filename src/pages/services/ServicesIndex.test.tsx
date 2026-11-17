@@ -1,3 +1,4 @@
+// URL/reader contract tests render filter contents inline; real sheet behavior is covered separately.
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
@@ -16,8 +17,9 @@ vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => {
   if (state.homeShape === 'empty') categories = [{ ...legacy, services: [] }];
   return { categories, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() };
 } }));
+vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
+vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue, filterButton }: { filterButton: ReactNode; children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{filterButton}{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
 vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: ({ onConcierge }: { onConcierge: () => void }) => <button onClick={onConcierge}>Fixture concierge fallback</button> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: ({ sourceData }: { sourceData: Record<string, unknown> }) => <output data-testid="concierge-context">{JSON.stringify(sourceData)}</output> }));
@@ -83,8 +85,10 @@ describe('canonical services hub', () => {
     const menu = screen.getByTestId('service-discovery-menu');
     expect(within(menu).getByRole('button', { name: 'Home services' })).toBeVisible();
     expect(within(menu).getByRole('button', { name: 'Transport' })).toBeVisible();
-    expect(within(menu).getByRole('button', { name: 'Tourism & Activities' })).toBeVisible();
-    expect(within(menu).getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
+    fireEvent.click(screen.getByRole('button', { name: 'All categories' }));
+    expect(screen.getByRole('button', { name: 'Tourism & Activities' })).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByTestId('service-catalogue-results')).toBeNull();
     expect(menu.querySelector('[data-category-id="cat-emergency"]')).toBeNull();
     fireEvent.click(within(menu).getByRole('button', { name: 'Transport' }));
@@ -208,7 +212,7 @@ describe('canonical services hub', () => {
   });
   it('preserves query, opaque state and URL context during category Back/Forward and reset', () => {
     mount('/discover/services?ref=trip');
-    fireEvent.click(screen.getByRole('button', { name: 'Tourism & Activities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'All categories' })); fireEvent.click(screen.getByRole('button', { name: 'Tourism & Activities' }));
     expect(screen.getByTestId('location').textContent).toContain('category=cat-tourism');
     fireEvent.click(screen.getByText('Back fixture'));
     expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
