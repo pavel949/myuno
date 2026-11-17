@@ -321,6 +321,16 @@ jobs:
           timeout 180s python3 scripts/qa/admin-tools-ui.py /tmp/browser/admin-tools-isolated
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Isolated airport request browser scenarios
+        id: airport_request_browser
+        timeout-minutes: 5
+        continue-on-error: true
+        env:
+          AIRPORT_QA_OUTPUT: /tmp/browser/airport-request-ui
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: |
+          export CHROMIUM_PATH="$(python3 -c 'from playwright.sync_api import sync_playwright; p = sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          node scripts/qa/airport-request-ui.mjs
       - name: Upload browser validation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -334,9 +344,10 @@ jobs:
         if: always()
         env:
           BROWSER: ${{ steps.browser.outcome }}
+          AIRPORT_REQUEST: ${{ steps.airport_request_browser.outcome }}
         run: |
-          printf 'browser=%s\n' "$BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
-          test "$BROWSER" = success
+          printf 'browser=%s airport_requests=%s\n' "$BROWSER" "$AIRPORT_REQUEST" | tee -a "$GITHUB_STEP_SUMMARY"
+          test "$BROWSER" = success && test "$AIRPORT_REQUEST" = success
 
   # Preserve the required check name and fail closed on either job, including
   # skipped/cancelled outcomes. A green source job alone cannot authorize merge.

@@ -13,9 +13,9 @@ const terminals = [
 ];
 
 const stepVariants = {
-  enter: { opacity: 0, x: 40 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 interface Destination {
@@ -70,6 +70,7 @@ export function StepRoute({
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
+            aria-pressed={formData.direction === 'from-airport'}
             onClick={() => handleDirectionChange('from-airport')}
             className={cn(
               'p-3.5 rounded-none border-2 transition-all text-left relative',
@@ -92,6 +93,7 @@ export function StepRoute({
           </button>
           <button
             type="button"
+            aria-pressed={formData.direction === 'to-airport'}
             onClick={() => handleDirectionChange('to-airport')}
             className={cn(
               'p-3.5 rounded-none border-2 transition-all text-left relative',
@@ -125,6 +127,7 @@ export function StepRoute({
             <button
               key={terminal.id}
               type="button"
+              aria-pressed={formData.terminal === terminal.id}
               onClick={() => setFormData(prev => ({ ...prev, terminal: terminal.id }))}
               className={cn(
                 'p-3.5 rounded-none border-2 transition-all text-center relative',
@@ -164,7 +167,7 @@ export function StepRoute({
 
       {/* Address */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <Label htmlFor="transfer-destinationAddress" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           {formData.direction === 'from-airport'
             ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
@@ -184,11 +187,16 @@ export function StepRoute({
                   <button
                     key={dest.id}
                     type="button"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      selectedDestinationId: dest.id,
-                      destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
-                    }))}
+                    aria-pressed={formData.selectedDestinationId === dest.id}
+                    onClick={() => {
+                      onDestinationCoords(null);
+                      onPickupCoords(null);
+                      setFormData(prev => ({
+                        ...prev,
+                        selectedDestinationId: dest.id,
+                        destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
+                      }));
+                    }}
                     className={cn(
                       'p-4 min-h-[64px] rounded-none border-2 transition-all text-left relative',
                       formData.selectedDestinationId === dest.id
@@ -224,6 +232,7 @@ export function StepRoute({
 
         <div className="flex gap-2">
           <AddressAutocomplete
+            id="transfer-destinationAddress"
             value={formData.destinationAddress}
             onChange={(val, meta) => {
               setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }));
@@ -234,6 +243,7 @@ export function StepRoute({
                 }
               } else {
                 onDestinationCoords(null);
+                onPickupCoords(null);
               }
             }}
             placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
