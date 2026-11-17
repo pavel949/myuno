@@ -17,7 +17,7 @@ The candidate private outbox stores only source/request pointer, notification ki
 ## Incomplete by design; activation gates
 
 - The candidate persists an event only. No email/WhatsApp is sent, and `outbox_queued` is not provider acceptance/delivery.
-- No worker permissions exist. A separately reviewed worker must revalidate current approved recipient configuration and persisted object, render safely, use the existing durable email queue/idempotency key, record outcomes, and retry only failed channels. Removing a destination must suppress an unprocessed event, not send to historical recipients.
+- The candidate explicitly revokes table access and admission execution from `service_role`, including ambient default grants; no worker role is admitted. Actual role inheritance and deployed default ACLs still require live verification. A separately reviewed worker must revalidate current approved recipient configuration and persisted object, render safely, use the existing durable email queue/idempotency key, record outcomes, and retry only failed channels. Removing a destination must suppress an unprocessed event, not send to historical recipients.
 - Do not rerun a booking/payment writer or the transfer notification handler to retry an event.
 - Current frontend request insertion and this candidate RPC are NOT automatically one transaction. To cover browser close and guest flows, integrate admission into a reviewed canonical server writer/trigger transaction, preserving its authorization and idempotency. No such integration is claimed here.
 - Live schema, applied policies, ownership invariants, sender settings and queue runtime remain unverified. Existing database schemas may differ from the intentionally minimal test fixture.
@@ -29,7 +29,7 @@ The candidate private outbox stores only source/request pointer, notification ki
 
 `src/lib/__tests__/propertyInquiryAdmission.postgres.test.ts` starts a Unix-socket-only isolated PostgreSQL cluster with synthetic roles, records and settings, then executes the candidate SQL. It never accepts a hosted DB URL or credentials. CI fails if PostgreSQL is absent; local environments without PostgreSQL explicitly skip rather than simulate transactional proof.
 
-Tests cover creator admission, non-owner/anonymous/missing-object denial, persisted owner/status recheck even on retry, serial/concurrent dedupe, independent/normalized destinations, malformed config before partial inserts, encoded JSON settings compatibility, transactional rollback, and denial of direct private-queue reads/anon RPC execution.
+Tests cover creator admission, non-owner/anonymous/missing-object denial, persisted owner/status recheck even on retry, serial/concurrent dedupe, independent/normalized destinations, malformed config before partial inserts, encoded JSON settings compatibility, transactional rollback, denial of direct private-queue reads/anon RPC execution, revocation under deliberately broad service-role default grants, denied direct INSERT/UPDATE/DELETE, and concurrent status/config mutation blocking followed by fail-closed admission.
 
 Existing `.github/workflows/verify.yml` runs all unit/isolated PostgreSQL tests and provides PostgreSQL tooling; no new dependency or workflow installation is introduced. CI outcome must be checked before stating database tests passed.
 

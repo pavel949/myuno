@@ -15,7 +15,7 @@ CREATE TABLE private.admin_intake_dispatch (
   UNIQUE (source, request_id, notification_kind, channel, destination)
 );
 ALTER TABLE private.admin_intake_dispatch ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON private.admin_intake_dispatch FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON private.admin_intake_dispatch FROM PUBLIC, anon, authenticated, service_role;
 -- No worker/read/write grant: production activation requires separate review.
 
 CREATE FUNCTION public.admit_property_inquiry_admin_notification(p_request_id uuid)
@@ -64,6 +64,6 @@ BEGIN
   RETURN jsonb_build_object('request_id',p_request_id,'outbox_queued',true,'new_events',inserted_count);
 END;
 $$;
-REVOKE ALL ON FUNCTION public.admit_property_inquiry_admin_notification(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.admit_property_inquiry_admin_notification(uuid) FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION public.admit_property_inquiry_admin_notification(uuid) TO authenticated;
 COMMIT;

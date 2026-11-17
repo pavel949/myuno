@@ -44,7 +44,9 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
     run('pg_ctl', ['-D', join(directory, 'data'), '-l', join(directory, 'pg.log'), '-o', `-k ${directory} -p 55461 -c listen_addresses=''${libPath ? ` -c dynamic_library_path=${libPath}` : ''}`, '-w', 'start']);
     started = true;
     sql = postgres({ host: directory, port: 55461, database: 'postgres', username: owner, password: '', max: 4, onnotice: () => {} });
-    await sql.unsafe(`CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN;
+    await sql.unsafe(`CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS;
+      ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO service_role;
+      ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO service_role;
       CREATE SCHEMA auth;
       CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
       CREATE TABLE public.property_inquiries(id uuid PRIMARY KEY,user_id uuid,status text);
@@ -112,6 +114,44 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       throw new Error('synthetic transaction failure');
     })).rejects.toThrow('synthetic transaction failure');
     expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+  });
+  it('removes ambient service-role default grants from candidate table and admission function', async () => {
+    const [acl] = await sql`SELECT has_table_privilege('service_role','private.admin_intake_dispatch','SELECT') AS can_read,
+      has_table_privilege('service_role','private.admin_intake_dispatch','INSERT') AS can_insert,
+      has_function_privilege('service_role','public.admit_property_inquiry_admin_notification(uuid)','EXECUTE') AS can_execute`;
+    expect(acl).toEqual({can_read:false,can_insert:false,can_execute:false});
+  });
+  it.each(['status','settings'])('waits for concurrent %s mutation and uses committed authorization/config', async target => {
+    let unlock!: () => void; let locked!: () => void;
+    const held = new Promise<void>(resolve => { locked = resolve; });
+    const release = new Promise<void>(resolve => { unlock = resolve; });
+    const writer = sql.begin(async tx => {
+      if (target === 'status') await tx`UPDATE public.property_inquiries SET status='closed' WHERE id=${requestId}`;
+      else await tx`UPDATE public.system_settings SET value='null'::jsonb WHERE key='admin_emails'`;
+      locked(); await release;
+    });
+    await held;
+    const pending = admit().then(() => ({code:'unexpected_success'}), error => ({code:error.code}));
+    let sawLock = false;
+    try {
+      for (let i=0;i<100;i++) {
+        const [row] = await sql`SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%admit_property_inquiry_admin_notification%'`;
+        if (row.n > 0) { sawLock = true; break; }
+        await new Promise(resolve => setTimeout(resolve,10));
+      }
+    } finally { unlock(); }
+    await writer;
+    expect(sawLock).toBe(true);
+    expect(await pending).toEqual({code:target === 'status' ? '42501' : '22023'});
+    expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+  });
+  it.each(['INSERT','UPDATE','DELETE'])('denies direct authenticated queue %s', async verb => {
+    const statements: Record<string,string> = {
+      INSERT: `INSERT INTO private.admin_intake_dispatch(source,request_id,notification_kind,channel,destination) VALUES('property_inquiries','${requestId}','new_request','email','attacker@example.test')`,
+      UPDATE: `UPDATE private.admin_intake_dispatch SET destination='attacker@example.test'`,
+      DELETE: 'DELETE FROM private.admin_intake_dispatch',
+    };
+    await expect(sql.begin(async tx => { await tx.unsafe('SET LOCAL ROLE authenticated'); await tx.unsafe(statements[verb]); })).rejects.toMatchObject({code:'42501'});
   });
   it('denies anon function execution and authenticated direct private queue reads', async () => {
     await expect(sql.begin(async tx => { await tx.unsafe('SET LOCAL ROLE anon'); await tx`SELECT public.admit_property_inquiry_admin_notification(${requestId}::uuid)`; })).rejects.toMatchObject({code:'42501'});
