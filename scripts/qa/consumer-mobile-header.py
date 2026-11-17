@@ -44,6 +44,18 @@ async def main():
       await expect(surface.get_by_role('menuitem',name={'ru':'Настройки','en':'Settings','th':'การตั้งค่า'}[lang],exact=True)).to_be_visible();await expect(surface.get_by_text({'ru':'Кабинет собственника','en':'Owner portal','th':'พอร์ทัลเจ้าของ'}[lang],exact=True)).to_be_visible()
      else:
       prefs=surface.get_by_test_id('global-preferences-controls');await expect(prefs).to_be_visible();assert await prefs.locator('button').count()==3
+      holiday=surface.locator('a[href="/property/search?mode=rent&tenancy=short"]');await expect(holiday).to_be_visible()
+      await expect(surface.locator('a[href="/property/search?mode=buy"]')).to_be_visible()
+      partners=surface.locator('details.consumer-task-partners');await expect(partners).not_to_have_attribute('open','')
+      await partners.locator('summary').focus();await page.keyboard.press('Enter');await expect(partners).to_have_attribute('open','')
+      assert await partners.locator('a').count()==5
+      await expect(partners.locator('a[href="/for-owners"]')).to_be_visible()
+      await page.keyboard.press('Enter');await expect(partners).not_to_have_attribute('open','')
+      close=surface.get_by_role('button',name={'ru':'Закрыть меню','en':'Close menu','th':'ปิดเมนู'}[lang],exact=True)
+      body=surface.locator('.consumer-task-menu-body');await body.evaluate('(e)=>e.scrollTop=e.scrollHeight')
+      closeBox=await close.bounding_box();assert closeBox and closeBox['y']>=0 and closeBox['y']+closeBox['height']<=900,closeBox
+      await body.evaluate('(e)=>e.scrollTop=0')
+
       sign=surface.get_by_role('link',name={'ru':'Войти','en':'Sign in','th':'เข้าสู่ระบบ'}[lang],exact=True);href=await sign.get_attribute('href');assert 'redirect=' in href and '%23offers' in href,href
      await page.wait_for_function('(e)=>getComputedStyle(e).opacity===\"1\" && !e.getAnimations().some(a=>a.playState===\"running\")',arg=await surface.element_handle());await page.screenshot(path=str(OUT/f'{prefix}-open.png'))
      if auth=='no' and width==390:

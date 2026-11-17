@@ -29,3 +29,27 @@ it('keeps guest preferences, cart, owner path and exact sign-in return inside th
  expect(within(menu).getByRole('link',{name:'For owners'})).toHaveAttribute('href','/for-owners');
  expect(within(menu).getByRole('link',{name:'Sign in'})).toHaveAttribute('href','/auth?redirect=%2Fbookings%3Ftab%3Dservices%23orders');
 });
+
+it('puts tasks before preferences and groups partner paths without dropping them', () => {
+ render(<MemoryRouter><ConsumerHeader onSearch={vi.fn()} /></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+ const menu = screen.getByRole('dialog', {name:'myUNO'});
+ expect(within(menu).getByRole('link', {name:'For a holiday'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=short');
+ expect(within(menu).getByRole('link', {name:'For a longer stay'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=long');
+ expect(within(menu).getByRole('link', {name:'For a few months'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=medium');
+ expect(within(menu).getByRole('link', {name:'Buy a home'})).toHaveAttribute('href','/property/search?mode=buy');
+ const nav = within(menu).getByRole('navigation');
+ expect(nav.compareDocumentPosition(within(menu).getByTestId('preferences')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+ const partners = menu.querySelector('details')!;
+ expect(partners).not.toHaveAttribute('open');
+ expect(partners.querySelectorAll('a')).toHaveLength(5);
+ expect(within(menu).queryByText('Main destinations')).not.toBeInTheDocument();
+});
+it('closes the sheet before invoking the existing search', () => {
+ const search=vi.fn();
+ render(<MemoryRouter><ConsumerHeader onSearch={search} /></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button', {name:'Open menu'}));
+ fireEvent.click(screen.getByRole('button', {name:'Search myUNO'}));
+ expect(search).toHaveBeenCalledTimes(1);
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
