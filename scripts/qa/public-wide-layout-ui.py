@@ -112,18 +112,24 @@ async def main():
                     # Full search remains operable with no dates; no calendar
                     # availability proof is claimed by this layout fixture.
                     criteria=page.locator('.premium-search-criteria')
-                    await expect(criteria).not_to_have_attribute('open','')
-                    await criteria.locator(':scope > summary').click()
+                    await expect(criteria).to_have_attribute('open','')
                     search = page.locator('.home-search')
                     await expect(search.locator('button[type=submit]')).to_be_visible()
                     if width >= 1280:
                         submit = await search.locator('button[type=submit]').bounding_box()
-                        controls = await search.locator('.home-search-type,.home-search-location,.home-search-dates,.home-search-bedrooms').evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom}})')
+                        mode = await page.locator('.property-discovery').get_attribute('data-property-mode')
+                        selector = '.home-search-type,.home-search-bedrooms' if mode == 'rent' else '.home-search-type,.home-search-location,.home-search-bedrooms'
+                        controls = await search.locator(selector).evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom}})')
                         # Labels may make a field taller; controls share the
                         # bottom baseline of one real criteria row.
                         mode = await page.locator('.property-discovery').get_attribute('data-property-mode')
                         assert mode in ['all', 'rent', 'buy'], mode
-                        expected_fields = 4 if mode == 'rent' else 3
+                        expected_fields = 2 if mode == 'rent' else 3
+                        if mode == 'rent':
+                            primary = await search.locator('.home-search-location,.home-search-dates,.home-search-guests-inline').evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom}})')
+                            assert len(primary) == 3 and all(abs(box['bottom']-primary[0]['bottom']) <= 2 for box in primary), primary
+                            assert primary[0]['right'] <= primary[1]['left'] and primary[1]['right'] <= primary[2]['left'], primary
+                            assert primary[0]['bottom'] <= submit['y'], {'primary': primary, 'submit': submit}
                         assert submit and len(controls) == expected_fields and all(abs(box['bottom']-submit['y']-submit['height']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
                     if state == 'error':
                         await expect(page.get_by_role('alert').filter(has_text='could not be loaded')).to_be_visible()
