@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 /**
  * VendorLanding — pre-onboarding page for supplier outreach.
  * Explains conditions, benefits, verification levels, and leads to the wizard.
@@ -131,7 +132,7 @@ export default function VendorLanding() {
               <Rocket className="h-3.5 w-3.5" strokeWidth={1.75} />
               {isRu ? 'Бесплатная регистрация' : 'Free registration'}
             </Badge>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            <h1 className="landing-catalog-title text-3xl md:text-4xl font-bold tracking-tight mb-3">
               {isRu ? 'Продавайте услуги' : 'Sell your services'}
               <br />
               <span className="text-primary">

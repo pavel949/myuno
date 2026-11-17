@@ -16,6 +16,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
 import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
@@ -63,6 +64,13 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
 
   const HeroIcon = cluster.icon;
   const isWorkspace = cluster.audience === 'workspace';
+  const isLive = clusterId === 'live';
+  const liveTitle = pickLang(language, { ru: 'Жизнь на Пхукете', en: 'Living in Phuket', th: 'การใช้ชีวิตในภูเก็ต' });
+  const liveSubtitle = pickLang(language, {
+    ru: 'Выберите, с чем нужна помощь: дом, семья, здоровье или повседневные дела.',
+    en: 'Find help with your home, family, health, and everyday needs.',
+    th: 'ค้นหาความช่วยเหลือเรื่องบ้าน ครอบครัว สุขภาพ และชีวิตประจำวัน',
+  });
 
   return (
     <AppLayout>
@@ -70,8 +78,8 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
         <CalmClusterHero
           clusterId={clusterId}
           icon={HeroIcon}
-          title={isRu ? cluster.labelRu : cluster.labelEn}
-          subtitle={isRu ? cluster.valueRu : cluster.valueEn}
+          title={isLive ? liveTitle : isRu ? cluster.labelRu : cluster.labelEn}
+          subtitle={isLive ? liveSubtitle : isRu ? cluster.valueRu : cluster.valueEn}
           fallbackPath="/"
         />
 
@@ -82,6 +90,17 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
             serviceLabelEn="All services"
           />
         </div>
+
+        {isLive && (
+          <div className="flex flex-wrap gap-3 px-4 pb-6">
+            <Button asChild><Link to={APP_ROUTES.GOAL_SERVICES}>
+              {pickLang(language, { ru: 'Открыть маркетплейс услуг', en: 'Browse the services marketplace', th: 'เปิดตลาดบริการ' })}
+            </Link></Button>
+            <Button variant="outline" asChild><Link to={APP_ROUTES.GOAL_LIVE}>
+              {pickLang(language, { ru: 'Помощь с переездом', en: 'Moving to Phuket', th: 'ความช่วยเหลือในการย้ายถิ่น' })}
+            </Link></Button>
+          </div>
+        )}
 
         {isWorkspace && (
           <WorkspaceClusterBanner clusterId={clusterId} />

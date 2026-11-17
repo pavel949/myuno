@@ -38,7 +38,6 @@ export default function InvestSurfaceLandingPage() {
         icon={TrendingUp}
         title={t ? 'Инвестиции на Пхукете' : 'Invest in Phuket'}
         subtitle={t ? 'Изучите опубликованные проекты и сведения о них, затем обсудите условия и необходимые проверки.' : 'Explore published projects and their details, then discuss terms and the checks you need.'}
-        gradient="from-cluster-invest via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать объект' : 'Match a deal', onClick: () => navigate(APP_ROUTES.INVEST_QUIZ) }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Поговорить с advisor' : 'Talk to an advisor'}

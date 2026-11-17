@@ -1,3 +1,4 @@
+import { LandingEditorialPhoto } from '@/components/landings/LandingEditorialPhoto';
 import '@/styles/landing-editorial.css';
 /**
  * FeatureLayout — mode-driven framing for mini-app catalogs, landing/promo pages,
@@ -5,7 +6,7 @@ import '@/styles/landing-editorial.css';
  *
  * Modes:
  * - `miniapp` — sticky UnifiedHeader, optional hero, filters, ecosystem container (legacy `MiniAppLayout`)
- * - `landing` — gradient hero + optional WhatsApp CTA (legacy `LandingLayout`)
+ * - `landing` — editorial hero + optional WhatsApp CTA (legacy `LandingLayout`)
  */
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { LucideIcon, ShoppingCart, MapIcon, SlidersHorizontal, MessageCircle, LayoutGrid, MapPin, AlertCircle } from 'lucide-react';
@@ -175,7 +176,7 @@ function MiniappMode({
   children,
   showBottomNav = true,
   contentClassName,
-  editorialHeader = false,
+  editorialHeader = true,
   pageWidth = 'default',
   quickActions,
   stickySubHeader,
@@ -543,8 +544,6 @@ export interface LandingLayoutProps {
   icon: LucideIcon;
   title: string;
   subtitle: string;
-  /** e.g. "from-primary via-primary to-primary" */
-  gradient: string;
   fallbackPath?: string;
   heroCta?: { label: string; onClick: () => void };
   whatsappUrl?: string;
@@ -557,7 +556,6 @@ function LandingMode({
   icon: Icon,
   title,
   subtitle,
-  gradient,
   fallbackPath = '/',
   heroCta,
   whatsappUrl,
@@ -568,25 +566,25 @@ function LandingMode({
   return (
     <AppLayout>
       <div className={cn('pb-24', className)}>
-        <div className={cn('relative bg-gradient-to-br p-6 pt-16 pb-12', gradient)}>
-          <BackButton fallbackPath={fallbackPath} variant="overlay" className="absolute top-4 left-4" />
-          <div className="text-white text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-white/20 rounded-none flex items-center justify-center mx-auto mb-4">
-              <Icon className="w-8 h-8" />
+        <section className="landing-editorial-section" aria-labelledby="feature-landing-title">
+          <div className={cn(PUBLIC_CONTENT_LAYOUT.marketing, 'space-y-4')}>
+            <BackButton fallbackPath={fallbackPath} />
+            <div className="landing-editorial">
+              <div className="landing-editorial-copy landing-editorial-rule">
+                <Icon className="mb-4 size-7 text-primary" aria-hidden="true" />
+                <h1 id="feature-landing-title">{title}</h1>
+                <p className="mt-4 text-body-lg text-muted-foreground">{subtitle}</p>
+                {heroCta && (
+                  <Button onClick={heroCta.onClick} className="mt-6 h-auto min-h-11 whitespace-normal text-start">
+                    <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+                    {heroCta.label}
+                  </Button>
+                )}
+              </div>
+              <LandingEditorialPhoto />
             </div>
-            <h1 className="text-3xl font-bold font-display mb-2">{title}</h1>
-            <p className="text-white/80 text-sm mb-6">{subtitle}</p>
-            {heroCta && (
-              <Button
-                onClick={heroCta.onClick}
-                className="bg-white text-foreground hover:bg-white/90 font-semibold gap-2"
-              >
-                <MessageCircle className="w-4 h-4" />
-                {heroCta.label}
-              </Button>
-            )}
           </div>
-        </div>
+        </section>
 
         {children}
 

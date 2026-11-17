@@ -1,8 +1,11 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Sunset, Home, GraduationCap, Stethoscope, Landmark, Wifi, ShoppingBag, Car, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
+import { Button } from '@/components/ui/button';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import { SEOHead } from '@/components/seo';
 import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -16,12 +19,6 @@ const SERVICES = [
   { icon: Car, labelEn: 'Transport & licence', labelRu: 'Транспорт и права', descEn: 'Lease, buy, Thai licence', descRu: 'Аренда, покупка, тайские права', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive', external: false },
   { icon: Wifi, labelEn: 'Home internet', labelRu: 'Домашний интернет', descEn: 'Discuss connection options with a coordinator', descRu: 'Обсудите подключение с координатором', path: APP_ROUTES.DELIVERY, color: 'accent-cyan', external: true },
   { icon: ShoppingBag, labelEn: 'Furniture & delivery', labelRu: 'Мебель и доставка', descEn: 'Ask about selection and delivery', descRu: 'Помощь с подбором и доставкой', path: APP_ROUTES.DELIVERY, color: 'accent-purple', external: false },
-];
-
-const STATS = [
-  { numRu: 'Жильё', numEn: 'Homes', labelEn: 'Published rental offers', labelRu: 'Опубликованные предложения' },
-  { numRu: 'План', numEn: 'Plan', labelEn: 'Your relocation needs', labelRu: 'Ваши задачи при переезде' },
-  { numRu: 'Связь', numEn: 'Support', labelEn: 'Discuss the next step', labelRu: 'Обсудите следующий шаг' },
 ];
 
 export default function LiveSurfaceLandingPage() {
@@ -39,18 +36,17 @@ export default function LiveSurfaceLandingPage() {
         icon={Sunset}
         title={t ? 'Жизнь на Пхукете' : 'Live in Phuket'}
         subtitle={t ? 'Дом, школа, банк, страховка, права — всё, что нужно для долгой жизни на острове' : 'Home, school, bank, insurance, licence, everything you need for the long haul'}
-        gradient="from-primary via-cluster-arrive to-accent"
         heroCta={{ label: t ? 'Спланировать переезд' : 'Plan my move', onClick: () => navigate(APP_ROUTES.RELOCATE) }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Обсудить с координатором' : 'Talk to a coordinator'}
       >
-        <div className="px-4 py-8 grid grid-cols-3 gap-3 max-w-lg mx-auto">
-          {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <p className="text-base font-bold font-display text-foreground tabular-nums">{t ? s.numRu : s.numEn}</p>
-              <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{t ? s.labelRu : s.labelEn}</p>
-            </div>
-          ))}
+        <div className={`${PUBLIC_CONTENT_LAYOUT.marketing} pt-8`}>
+          <Button asChild variant="outline">
+            <Link to={APP_ROUTES.LIVE_CLUSTER}>
+              {pickLang(language, { ru: 'Услуги для жизни на Пхукете', en: 'Services for everyday life in Phuket', th: 'บริการสำหรับชีวิตประจำวันในภูเก็ต' })}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
 
         <div className="px-4 py-6 max-w-lg mx-auto space-y-3">

@@ -48,6 +48,13 @@ describe.each(['en', 'ru'] as const)('%s scenario landing journeys', language =>
   expect(container.textContent).not.toContain(language === 'ru' ? 'WorldCheck для российских паспортов' : 'WorldCheck applied for Russian passport holders');
  });
 
+ it('links the Live introduction to the everyday services section', () => {
+  fixture.language = language;
+  render(<MemoryRouter><LiveSurfaceLandingPage /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: language === 'ru' ? 'Услуги для жизни на Пхукете' : 'Services for everyday life in Phuket' }))
+   .toHaveAttribute('href', '/live');
+ });
+
  it('does not repeat a fixed investment yield in metadata or structured data', () => {
   const seo = buildSurfaceSeo('invest', language);
   expect(JSON.stringify(seo)).not.toMatch(/6[–-]9%|\$2M/);

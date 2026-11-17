@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 /**
  * CalmClusterHero — neutral, gov-style hero for cluster landing pages.
  *
@@ -62,7 +63,7 @@ export function CalmClusterHero({
             <Icon className={cn('h-[22px] w-[22px]', ACCENT_TEXT[clusterId])} />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-h2 font-normal tracking-tight text-foreground leading-[1.1] sm:text-h1">
+            <h1 className="landing-catalog-title font-display text-h2 font-normal tracking-tight text-foreground leading-[1.1] sm:text-h1">
               {title}
             </h1>
             {subtitle && (

@@ -39,7 +39,6 @@ export default function SecondHomeLandingPage() {
         icon={Sun}
         title={t ? 'Второй дом на Пхукете' : 'Second home in Phuket'}
         subtitle={t ? 'Найти, оформить, управлять — пока вы наслаждаетесь зимой без снега' : 'Find it, own it, manage it, while you enjoy winters without snow'}
-        gradient="from-primary via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать дом' : 'Find My Home', onClick: () => navigate(APP_ROUTES.PROPERTY_BROWSE + '?mode=buy') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Обсудить с менеджером' : 'Talk to an advisor'}

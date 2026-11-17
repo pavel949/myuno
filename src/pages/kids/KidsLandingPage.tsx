@@ -24,7 +24,6 @@ export default function KidsLandingPage() {
       icon={Baby}
       title={t ? 'Пхукет для детей' : 'Phuket for Kids'}
       subtitle={t ? 'Школы, врачи, активности — всё для семьи на острове' : 'Schools, doctors, activities — everything for families on the island'}
-      gradient="from-accent via-accent to-accent"
     >
       <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
         {CATEGORIES.map((cat, i) => {

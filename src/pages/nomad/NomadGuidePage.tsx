@@ -34,7 +34,6 @@ export default function NomadGuidePage() {
         icon={Laptop}
         title={t ? 'Гид для номадов' : 'Digital Nomad Guide'}
         subtitle={t ? 'Работай удалённо с Пхукета — всё для комфортной жизни' : 'Work remotely from Phuket — everything for a comfortable life'}
-        gradient="from-success via-success to-primary"
       >
         <div className="px-4 pt-2 max-w-lg mx-auto">
           <Button asChild variant="secondary" className="w-full gap-2 rounded-none mb-3">

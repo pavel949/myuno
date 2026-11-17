@@ -183,7 +183,6 @@ export default function RelocateLandingPage() {
       icon={Globe}
       title={t ? 'Переезд на Пхукет' : 'Relocate to Phuket'}
       subtitle={t ? 'Полное сопровождение переезда — от визы до школы для детей' : 'Full relocation support — from visa to school for your kids'}
-      gradient="from-primary via-primary to-primary"
       heroCta={{ label: t ? 'Бесплатная консультация' : 'Free Consultation', onClick: () => window.open(whatsappUrl, '_blank') }}
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}

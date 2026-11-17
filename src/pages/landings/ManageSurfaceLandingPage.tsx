@@ -38,7 +38,6 @@ export default function ManageSurfaceLandingPage() {
         icon={Building2}
         title={t ? 'Управление недвижимостью' : 'Manage your property'}
         subtitle={t ? 'PMS, channel manager, гости, уборка и отчёты — один продукт вместо пяти подрядчиков' : 'PMS, channel manager, guests, cleaning and reports, one product instead of five vendors'}
-        gradient="from-cluster-manage via-primary to-accent"
         heroCta={{ label: t ? 'Завести объект' : 'Add a property', onClick: () => navigate('/owner/onboarding') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Поговорить с MC' : 'Talk to MC team'}

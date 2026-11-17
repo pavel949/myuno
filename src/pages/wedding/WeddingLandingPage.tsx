@@ -27,7 +27,6 @@ export default function WeddingLandingPage() {
       icon={Heart}
       title={t ? 'Свадьба на Пхукете' : 'Wedding in Phuket'}
       subtitle={t ? 'Организуем свадьбу вашей мечты — от площадки до последнего лепестка' : 'We organize your dream wedding — from venue to the last petal'}
-      gradient="from-accent via-accent to-accent"
       heroCta={{ label: t ? 'Обсудить свадьбу' : 'Discuss Your Wedding', onClick: () => window.open(whatsappUrl, '_blank') }}
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Получить предложение' : 'Get a Quote'}

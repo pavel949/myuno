@@ -38,7 +38,6 @@ export default function ArriveSurfaceLandingPage() {
         icon={Plane}
         title={t ? 'Прибытие на Пхукет' : 'Arrive in Phuket'}
         subtitle={t ? 'Первые 72 часа без стресса: трансфер, связь, деньги, заселение, ориентация' : 'First 72 hours without stress: transfer, connectivity, money, check-in, orientation'}
-        gradient="from-cluster-arrive via-primary to-accent"
         heroCta={{ label: t ? 'Посмотреть районы' : 'Explore the area guide', onClick: () => navigate('/guide/areas') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Связаться с консьержем' : 'Talk to concierge'}

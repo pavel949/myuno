@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { LandingActionLink } from '@/components/landings/LandingActionLink';
 /**
  * @file ClusterLandingPage.tsx
@@ -113,7 +114,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
               {t(theme.tagline)}
             </span>
           </div>
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
+          <h1 className="landing-catalog-title text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
             {t(landing.h1)}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">

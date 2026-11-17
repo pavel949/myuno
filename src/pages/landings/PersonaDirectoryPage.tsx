@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 /**
  * @file PersonaDirectoryPage.tsx
  * @route /for
@@ -118,7 +119,7 @@ export default function PersonaDirectoryPage() {
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {t('myUNO · Подбор по аудитории', 'myUNO · By audience')}
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h1 className="landing-catalog-title text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t('Какая страница ваша?', 'Which page is yours?')}
           </h1>
           <p className="mt-3 max-w-2xl text-base text-muted-foreground">

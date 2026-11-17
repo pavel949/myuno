@@ -39,7 +39,6 @@ export default function InvestorLandingPage() {
         icon={TrendingUp}
         title={t ? 'Инвесторы — Пхукет' : 'Investors, Phuket'}
         subtitle={t ? 'Капитальный консалтинг от $2M. Только проверенные проекты, прозрачная экономика, честные рейтинги.' : 'Capital advisory from $2M. Vetted projects only, transparent economics, honest ratings.'}
-        gradient="from-primary via-cluster-invest to-accent"
         heroCta={{ label: t ? 'Получить портфель' : 'Request portfolio', onClick: () => window.open(whatsappUrl, '_blank') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Связаться с advisor' : 'Talk to an advisor'}

@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { useMemo } from 'react';
 import { useParams, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -56,7 +57,7 @@ export default function LegalServiceLanding() {
         <section className="px-4 pt-10 pb-10 max-w-3xl mx-auto text-center">
           <Badge variant="outline" className="mb-4 tracking-wider text-xs">{hero.eyebrow}</Badge>
           <div className="text-5xl mb-3" aria-hidden>{cfg.emoji}</div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-3 text-foreground">{hero.title}</h1>
+          <h1 className="landing-catalog-title text-3xl md:text-4xl font-display font-bold mb-3 text-foreground">{hero.title}</h1>
           <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed">{hero.subtitle}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button size="lg" onClick={() => navigate(cfg.ctaPrimary.href)} className="gap-2">

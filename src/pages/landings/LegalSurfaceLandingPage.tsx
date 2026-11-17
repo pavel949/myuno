@@ -38,7 +38,6 @@ export default function LegalSurfaceLandingPage() {
         icon={Scale}
         title={t ? 'Юридическая помощь' : 'Legal help'}
         subtitle={t ? 'Виза, компания, семья, споры и налоги — выберите тему и обсудите необходимые документы и условия помощи.' : 'Visa, company, family, disputes and tax — choose a topic and discuss the documents and support you need.'}
-        gradient="from-cluster-legal via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать визу' : 'Match a visa', onClick: () => navigate(APP_ROUTES.VISA_QUIZ) }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Связаться с юристом' : 'Contact a lawyer'}

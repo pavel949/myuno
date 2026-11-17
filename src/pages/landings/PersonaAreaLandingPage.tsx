@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 /**
  * @file PersonaAreaLandingPage.tsx
  * @description Wave 4 — long-tail SEO `/for/:persona/in/:area`.
@@ -125,7 +126,7 @@ const PersonaAreaLandingPage = () => {
               {t(theme.tagline)} · {isRu ? a.name_ru : a.name_en}
             </span>
           </div>
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
+          <h1 className="landing-catalog-title text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
             {t(persona.h1)} {isRu ? 'в' : 'in'} {isRu ? a.name_ru : a.name_en}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">

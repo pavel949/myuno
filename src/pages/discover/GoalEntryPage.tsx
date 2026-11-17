@@ -6,6 +6,8 @@
  */
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { LandingEditorialPhoto } from '@/components/landings/LandingEditorialPhoto';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -59,7 +61,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   return (
     <AppLayout title={title} usePageContainer={false}>
       <SEOHead title={seoTitle} description={t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })} />
-      <div className="mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12">
+      <div className={cn(PUBLIC_CONTENT_LAYOUT.marketing, "journey-page py-8 sm:py-12")}>
         {goal === 'buy' && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
           {(['stay', 'buy'] as const).map((id) => {
             const g = GOAL_ENTRIES[id];
@@ -80,12 +82,14 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
           })}
         </nav>}
 
-        <header className="mb-8">
-          <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">myUNO · Phuket</p>
-          <h1 className="font-serif text-4xl font-normal tracking-tight text-foreground sm:text-6xl">{title}</h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            {t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })}
-          </p>
+        <header className="landing-editorial mb-8">
+          <div className="landing-editorial-copy landing-editorial-rule">
+            <h1>{title}</h1>
+            <p className="mt-4 text-body-lg text-muted-foreground">
+              {t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })}
+            </p>
+          </div>
+          <LandingEditorialPhoto subject={goal === 'buy' ? 'property' : 'destination'} />
         </header>
 
         <section className={cn('grid gap-3', goal === 'buy' ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>

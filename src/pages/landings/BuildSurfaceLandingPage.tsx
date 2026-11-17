@@ -38,7 +38,6 @@ export default function BuildSurfaceLandingPage() {
         icon={HardHat}
         title={t ? 'Построить виллу на Пхукете' : 'Build a villa in Phuket'}
         subtitle={t ? 'Земля, документы, проект и приёмка — определите задачи и согласуйте специалистов и условия для каждого этапа.' : 'Land, documents, design and handover — define your needs and agree specialists and terms for each stage.'}
-        gradient="from-primary via-accent to-cluster-manage"
         heroCta={{ label: t ? 'Обсудить проект' : 'Discuss my project', onClick: () => window.open(whatsappUrl, '_blank') }}
         whatsappUrl={whatsappUrl}
         whatsappLabel={t ? 'Связаться с advisor' : 'Talk to an advisor'}

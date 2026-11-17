@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -198,7 +199,7 @@ export default function InvestmentHubLanding() {
                 <TrendingUp className="h-5 w-5 text-cluster-invest" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg font-semibold text-foreground leading-tight">
+                <h1 className="landing-catalog-title text-lg font-semibold text-foreground leading-tight">
                   {isRu ? 'Инвестиции в Таиланде' : 'Investments in Thailand'}
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">

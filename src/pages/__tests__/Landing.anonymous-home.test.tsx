@@ -62,6 +62,7 @@ it.each([
  expect(screen.queryByRole('button', { name: 'Unified home search' })).toBeNull();
  expect(screen.queryByText('Search shortcuts')).toBeNull();
  expect(screen.getAllByRole('main')).toHaveLength(1);
+ expect(within(screen.getByRole('main')).getAllByRole('link').filter(link => link.getAttribute('href') === '/live')).toHaveLength(1);
  expect(screen.getByText('Published new developments')).toBeVisible();
  expect(screen.getByText('Published housing')).toBeVisible();
  expect(screen.queryByRole('heading', { name: 'Layantara Villas' })).toBeNull();

@@ -15,7 +15,7 @@ import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
-import hero from '@/assets/hero-phuket-coast-editorial.webp';
+import { landingCoastPhoto } from '@/components/landings/LandingEditorialPhoto';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
@@ -38,7 +38,7 @@ export default function Landing() {
       <section className="home-hero" aria-labelledby="home-title">
         <img
           className="home-hero-image"
-          src={hero} alt="" loading="eager" width="1672" height="941"
+          src={landingCoastPhoto} alt="" loading="eager" width="1672" height="941"
         />
         <div className="home-hero-shade" aria-hidden="true" />
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
@@ -57,6 +57,16 @@ export default function Landing() {
         <HomeServiceGallery />
         <HomeExperienceGallery />
       </div>
+      <section className="home-closing home-container" aria-labelledby="home-live-title">
+        <div>
+          <h2 id="home-live-title">{t({ ru: 'Жизнь на Пхукете', en: 'Life in Phuket', th: 'ชีวิตในภูเก็ต' })}</h2>
+          <p>{t({ ru: 'Переезд, документы, здоровье и повседневные дела на острове.', en: 'Relocation, paperwork, healthcare and everyday needs on the island.', th: 'การย้ายถิ่น เอกสาร สุขภาพ และเรื่องประจำวันบนเกาะ' })}</p>
+        </div>
+        <Link className="home-text-link" to={R.LIVE_CLUSTER}>
+          {t({ ru: 'Открыть LiveOS', en: 'Explore LiveOS', th: 'เปิด LiveOS' })}
+          <ArrowRight size={18} aria-hidden="true" />
+        </Link>
+      </section>
       <HomeLocationGallery />
       <section className="home-partners-group" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
