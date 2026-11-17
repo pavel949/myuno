@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 interface InquiryConfirmationProps {
@@ -25,9 +26,11 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </h2>
 
       <p className="text-muted-foreground mb-8 max-w-sm">
-        {isRu
-          ? 'Свяжемся с вами в WhatsApp в течение 24 часов, чтобы подтвердить время просмотра.'
-          : "We'll message you on WhatsApp within 24 hours to confirm your viewing time."}
+        {pickLang(language, {
+          ru: 'Команда myUNO свяжется с вами, чтобы согласовать время просмотра.',
+          en: 'The myUNO team will contact you to arrange your viewing time.',
+          th: 'ทีม myUNO จะติดต่อคุณเพื่อนัดหมายเวลาเข้าชม',
+        })}
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">

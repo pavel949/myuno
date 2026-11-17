@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import PropertyInquiry from '../PropertyInquiry';
 
-const mocks = vi.hoisted(() => ({ rpc: vi.fn(), createOrder: vi.fn(), reads: 0 }));
+const mocks = vi.hoisted(() => ({ rpc: vi.fn(), createOrder: vi.fn(), reads: 0, language: 'en' }));
 const property = { id: 'unit', title_en: 'Synthetic home', listing_type: 'rent', listing_modes: ['rent'], tenancy_modes: ['short'], price_per_night: 1000, currency: 'THB', rentalTerms: { price_per_night: 1000, currency: 'THB', included_services: [], extra_services: [] } };
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: mocks.rpc } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => {
@@ -12,7 +12,7 @@ vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => {
   if (++mocks.reads > 80) throw new Error('Inquiry pricing render loop');
   return { data: property, isLoading: false, isError: false };
 } }));
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => `THB ${n}` }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'THB' } }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
@@ -38,7 +38,7 @@ function deferred() {
   const promise = new Promise<Parameters<typeof resolve>[0]>(r => { resolve = r; });
   return { promise, resolve };
 }
-beforeEach(() => { vi.clearAllMocks(); mocks.reads = 0; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.reads = 0; mocks.language = 'en'; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
 afterEach(() => { cleanup(); localStorage.clear(); });
 const loading = 'Checking the price for your selected dates…';
 
@@ -86,5 +86,33 @@ describe('inquiry date-price lifecycle', () => {
     render(<Harness dates={false}/>);
     expect(screen.getByRole('heading', { name: 'Select your dates' })).toBeVisible();
     expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe('myUNO inquiry operator copy', () => {
+  it.each([
+    ['ru', 'Сообщение команде myUNO (необязательно)', 'Уточните условия у команды myUNO', 'Запрос не подтверждает бронирование.'],
+    ['en', 'Message to the myUNO team (optional)', 'Check the terms with the myUNO team', 'This request does not confirm a booking.'],
+    ['th', 'ข้อความถึงทีม myUNO (ไม่บังคับ)', 'สอบถามเงื่อนไขกับทีม myUNO', 'คำขอนี้ยังไม่ใช่การยืนยันการจอง'],
+  ])('identifies myUNO and preserves request-only meaning in %s', async (language, label, cancellation, disclaimer) => {
+    mocks.language = language;
+    render(<Harness/>);
+    await waitFor(() => expect(screen.getByLabelText(label)).toBeVisible());
+    expect(screen.getByText(cancellation)).toBeVisible();
+    expect(screen.getByText(disclaimer, { exact: false })).toBeVisible();
+    expect(document.body.textContent).not.toMatch(/хозяин|хозяину|host|24 hours|24 часов|24h|30 min|30 минут/i);
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['ru', 'Команда myUNO свяжется с вами, чтобы согласовать время просмотра.'],
+    ['en', 'The myUNO team will contact you to arrange your viewing time.'],
+    ['th', 'ทีม myUNO จะติดต่อคุณเพื่อนัดหมายเวลาเข้าชม'],
+  ])('confirms a viewing request without a response deadline in %s', async (language, message) => {
+    mocks.language = language;
+    const { InquiryConfirmation } = await vi.importActual<typeof import('@/components/property/InquiryConfirmation')>('@/components/property/InquiryConfirmation');
+    render(<MemoryRouter><InquiryConfirmation orderId="synthetic-order"/></MemoryRouter>);
+    expect(screen.getByText(message)).toBeVisible();
+    expect(document.body.textContent).not.toMatch(/24|30|host|хозя/i);
   });
 });

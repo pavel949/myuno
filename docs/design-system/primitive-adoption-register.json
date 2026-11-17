@@ -15126,7 +15126,7 @@
     },
     {
       "file": "src/components/property/InquiryConfirmation.tsx",
-      "sha256": "87ab8ae0a5b7c9c30a3075914ed040f9c9dccfd9c4acfb1fea23c471bff65c35",
+      "sha256": "92368b60bc5ad9ea753e64755f4fb52eef62e52bf092e2c61990e5c892d68cfa",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -15136,8 +15136,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            34,
-            37
+            37,
+            40
           ]
         }
       ]
@@ -39549,7 +39549,7 @@
     },
     {
       "file": "src/pages/property/PropertyInquiry.tsx",
-      "sha256": "32f93e6aa4d9c43e5e98ce64f2e74159425ce28fb1ed4ee072f7266cd3f043c6",
+      "sha256": "08e151d37f65fa878625d50e9294dcd3d1532c98b40f7c6779f81e016d288a4e",
       "directRouteDeclarations": [
         {
           "id": "9c5694cfb18afc81",
@@ -39571,8 +39571,8 @@
             469,
             485,
             508,
-            779,
-            855
+            781,
+            857
           ]
         },
         {
@@ -39580,9 +39580,9 @@
           "source": "@/components/ui/input",
           "instances": 3,
           "lines": [
-            657,
-            672,
-            683
+            659,
+            674,
+            685
           ]
         },
         {
@@ -39590,7 +39590,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            699
+            701
           ]
         }
       ]
