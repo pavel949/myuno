@@ -1,0 +1,55 @@
+name: Focused security regressions
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-regressions-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  airport-catalogue-read-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+      E28_JIT_PROFILE: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify scoped catalogue errors and retries without write capabilities
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: |
+          mkdir -p /tmp/airport-catalogue-security
+          npx --no-install vitest run src/hooks/__tests__/useAirportServices.security.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=/tmp/airport-catalogue-security/results.json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync('/tmp/airport-catalogue-security/results.json', 'utf8'));
+          const valid = report.success === true && Number.isInteger(report.numTotalTests) && report.numTotalTests > 0
+            && report.numPassedTests === report.numTotalTests && report.numFailedTests === 0
+            && report.numPendingTests === 0 && (report.numTodoTests ?? 0) === 0;
+          if (!valid) throw new Error('Security regression evidence is missing, failed or skipped');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            'Airport catalogue client read contract: ' + report.numPassedTests + ' passed; no skipped cases. Server RLS is not certified by this synthetic fixture.\n');
+          NODE
+      - name: Retain scoped security evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: airport-catalogue-security-evidence
+          path: /tmp/airport-catalogue-security/results.json
+          if-no-files-found: warn
+          retention-days: 14

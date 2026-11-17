@@ -40,3 +40,9 @@ Reconciled the three transport conflicts against the #234 acceptance head `8d0cd
 Full hosted acceptance and backend notification/idempotency guarantees remain separate gates for any future recovery of #236; this compatibility commit does not reopen or merge it.
 
 Recovery verification: 5,400 local tests passed in 470 files, including isolated PostgreSQL; TypeScript and production build passed; lint had zero errors. Both network-denying browser fixtures passed on the reconciled source (12 + 48 cases). These are local/synthetic results. A future reopened PR still requires hosted checks on its then-current head and no backend activation is implied.
+
+## Airport catalogue client read security regression
+
+`src/hooks/__tests__/useAirportServices.security.test.tsx` executes the actual hook with a synthetic Supabase SDK boundary. It verifies that an error/retry retains the active airport and explicit supplier filters, a rejected supplier read never falls back to an unscoped catalogue, and default or newly selected airport reads use the same boundary. Unexpected tables, database writes, RPCs, Edge invocations and storage access fail the fixture. Retry state must clear the earlier error while loading and expose a new rejection rather than an apparent successful empty catalogue.
+
+Run `npx vitest run src/hooks/__tests__/useAirportServices.security.test.tsx --maxWorkers=1`. The normal full unit/PostgreSQL CI gate includes this file. The read-only `.github/workflows/security.yml` gate also runs it separately and retains a JSON result, rejecting empty, failed or skipped evidence. This is focused client read-contract evidence; it does not establish production RLS, authenticated role admission, in-flight request cancellation, notification delivery or durable booking idempotency. It changes no permissions and exercises no working database.
