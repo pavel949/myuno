@@ -34,6 +34,9 @@ export function MarketplaceDiscoveryHero({ kind }: { kind: 'services' | 'experie
     <nav aria-label={t('Направления', 'Explore categories', 'สำรวจหมวดหมู่')}
       className={isExperience ? 'flex flex-wrap gap-2' : 'flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible'}>
       {journeys.map((item, index) => <Link key={item.to} to={item.to}
+        onFocus={event => {
+          if (!isExperience) event.currentTarget.scrollIntoView?.({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        }}
         className={isExperience
           ? 'group inline-flex min-h-11 items-center gap-2 border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
           : 'group flex w-[78%] shrink-0 flex-col overflow-hidden border border-border bg-card transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto'}>

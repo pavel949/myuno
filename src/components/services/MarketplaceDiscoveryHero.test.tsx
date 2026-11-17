@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MarketplaceDiscoveryHero } from './MarketplaceDiscoveryHero';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
@@ -12,6 +12,14 @@ describe('compact marketplace discovery', () => {
     expect(screen.getByRole('link', { name: 'Activities & adventures' })).toHaveAttribute('href', '/experiences?type=activity');
     expect(screen.getByRole('link', { name: 'Yachts & sea trips' })).toHaveAttribute('href', '/yachts');
     expect(screen.getByText(/myUNO will confirm/)).toBeInTheDocument();
+  });
+  it('reveals the whole service tile on keyboard focus', () => {
+    render(<MemoryRouter><MarketplaceDiscoveryHero kind="services" /></MemoryRouter>);
+    const link = screen.getByRole('link', { name: 'Airport Fast Track' });
+    const reveal = vi.fn();
+    link.scrollIntoView = reveal;
+    fireEvent.focus(link);
+    expect(reveal).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
   });
   it('uses decorative category imagery, without presenting it as live offers or availability', () => {
     const { container } = render(<MemoryRouter><MarketplaceDiscoveryHero kind="services" /></MemoryRouter>);
