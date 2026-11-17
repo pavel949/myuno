@@ -1,3 +1,4 @@
+import { parsePropertyArea } from '@/lib/propertyFormNormalizers';
 import { propertyCommercialInitial, propertyCommercialPayload, propertyCommercialValues } from '@/lib/propertyCommercialFields';
 import { PublishedPropertyRevisionQueue } from '@/components/admin/PublishedPropertyRevisionQueue';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -297,15 +298,15 @@ export default function AdminProperties() {
         ...commercial,
         bedrooms: data.bedrooms ?? 1,
         bathrooms: data.bathrooms ?? 1,
-        area_sqm: data.area_sqm ? parseInt(String(data.area_sqm)) : undefined,
+        area_sqm: parsePropertyArea(data.area_sqm),
         max_guests: data.max_guests || 2,
         min_stay_nights: data.min_stay_nights || 1,
         address: data.address || undefined,
         district: data.district || undefined,
         lat: data.lat,
         lng: data.lng,
-        cover_image: data.cover_image || undefined,
-        images: data.images?.length ? data.images : undefined,
+        cover_image: data.cover_image === undefined ? undefined : data.cover_image || null,
+        images: data.images,
         amenities: data.amenities?.length ? data.amenities : undefined,
         highlights: data.highlights?.length ? data.highlights : undefined,
         instant_booking: data.instant_booking,

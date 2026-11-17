@@ -55,3 +55,11 @@ export function normalizeFurnishingLevel(value: unknown): string {
 
   return FURNISHING_LEVEL_ALIAS_MAP[normalized] || normalized;
 }
+
+/** Preserve decimal square metres; blank means unknown, never zero by coercion. */
+export function parsePropertyArea(value: string | number | null | undefined): number | undefined {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return undefined;
+  const area = Number(value);
+  if (!Number.isFinite(area) || area < 0) throw new Error('Invalid property area');
+  return area;
+}
