@@ -281,7 +281,7 @@ const isRu = language === 'ru';
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className={className}>
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card className="border-primary/20">
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors pb-3">
             <div className="flex items-center justify-between">

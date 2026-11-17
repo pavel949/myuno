@@ -138,7 +138,6 @@ const ForManagementCompanies: React.FC = () => {
         <LandingChrome isRu={isRu} variant="marketing" />
         {/* Hero */}
         <section className="relative overflow-hidden py-20 md:py-24">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
           <LandingContainer variant="marketing" className="relative text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge variant="secondary" className="mb-6 text-sm px-4 py-1">
@@ -260,7 +259,6 @@ const ForManagementCompanies: React.FC = () => {
                 </motion.div>
               ))}
             </div>
-
           </LandingContainer>
         </section>
 

@@ -3,17 +3,17 @@
   "status": "SOURCE_ONLY_NOTTESTED",
   "scope": "pavel949/myuno, active-route declarations plus explicit source JSX consumers",
   "routeSummary": {
-    "declarations": 714,
+    "declarations": 715,
     "directRedirects": 90,
     "kindCounts": {
       "conditional-entry": 4,
       "redirect": 90,
-      "rendered-template": 577,
+      "rendered-template": 578,
       "redirect-adapter": 39,
       "layout": 4
     }
   },
-  "templateCatalogEntries": 584,
+  "templateCatalogEntries": 585,
   "limitations": [
     "Route declarations are not unique screens",
     "Direct named JSX imports only; namespace/barrel indirection and programmatic construction can be missed",
@@ -2385,7 +2385,7 @@
     },
     {
       "file": "src/components/admin/lifeos/LifeOSAIPanel.tsx",
-      "sha256": "34c17450dfc6e89af5dcc927ae7bef68974a6ba6b7c95885df164a9d92e37cd8",
+      "sha256": "f18b35a16d292e2eebccf9aa23dd681b644be3a698f3a677f2244c1ecc682b78",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2772,7 +2772,7 @@
     },
     {
       "file": "src/components/admin/marketing/ABVariantEditorModal.tsx",
-      "sha256": "5a9b65572e5b87d4ab659d0b90f040bfc628dfab9990176e7a007724c15d4a74",
+      "sha256": "93db01379882ae77c5fc196faa19e9a9fab6f9b35f22a8feacda735e0cdaad32",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -18290,7 +18290,7 @@
     },
     {
       "file": "src/components/vendor/PayoutMethodsSection.tsx",
-      "sha256": "ce3612d9bd196110efd25e72b61f1a9698004e109984aa0b9f7ad5f8e91480c7",
+      "sha256": "66a98b2178001343537ba19acfa2e1b4b9661a99e04ac5dfa7f557055973d522",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -19707,7 +19707,7 @@
     },
     {
       "file": "src/pages/ForLocalServices.tsx",
-      "sha256": "39cd9bba2744759e9615a501684aa11f9e2947b1c5264e4e1df2c56e99c85b48",
+      "sha256": "c05fea49f906fb5d009309320505654f18f8e7a7d8f724ab1b1027fbadd4650d",
       "directRouteDeclarations": [
         {
           "id": "645dc9bc22da0cb0",
@@ -19724,11 +19724,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            106,
-            110,
-            113,
-            146,
-            149
+            105,
+            109,
+            112,
+            143,
+            146
           ]
         },
         {
@@ -19736,14 +19736,14 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            130
+            128
           ]
         }
       ]
     },
     {
       "file": "src/pages/ForManagementCompanies.tsx",
-      "sha256": "b4278a66ffe731fd2e8f600cb38266601cf607a73a9a26136bc695c6c9e75a2a",
+      "sha256": "44a04989010ef2cb6befe9c46e1e2d8aa958faa685f900bce6b0586e4c2f8c94",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -19753,12 +19753,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            158,
-            162,
-            165,
-            333,
-            355,
-            359
+            157,
+            161,
+            164,
+            331,
+            353,
+            357
           ]
         },
         {
@@ -19766,9 +19766,9 @@
           "source": "@/components/ui/card",
           "instances": 3,
           "lines": [
-            247,
-            281,
-            329
+            246,
+            279,
+            327
           ]
         }
       ]
@@ -34332,7 +34332,7 @@
     },
     {
       "file": "src/pages/owner/FinanceOverview.tsx",
-      "sha256": "fa67d5d9cc610984a602456aacb1a18ebf822d22a574c29e36254c7ecf844b52",
+      "sha256": "169742405ab972e05632f5f47d7595e346f71039bff7c9d167767e3ed664f68c",
       "directRouteDeclarations": [
         {
           "id": "314cc5c9d35c6487",
@@ -34349,8 +34349,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            134,
-            142
+            131,
+            139
           ]
         },
         {
@@ -34359,11 +34359,11 @@
           "instances": 6,
           "lines": [
             78,
-            97,
-            114,
-            154,
-            196,
-            210
+            96,
+            112,
+            151,
+            193,
+            207
           ]
         },
         {
@@ -36223,7 +36223,7 @@
     },
     {
       "file": "src/pages/owner/OwnerPortfolio.tsx",
-      "sha256": "b08c780a2aa6949c75728c2b880a1a24786044144b024e04e55d00283dae29e0",
+      "sha256": "5cb53234089a9c1f638e9ffc961209480bc16df9e24ae02406900390187128d7",
       "directRouteDeclarations": [
         {
           "id": "636c0c2ab80db0a3",
@@ -38934,13 +38934,13 @@
       "sha256": "848500bc338b5be77dc783f6c746097386523ab59a149df51c12411524ef0f37",
       "directRouteDeclarations": [
         {
-          "id": "c2e17b16f0d4c018",
+          "id": "eba68b57c0d72f00",
           "path": "/property/commercial/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "37ad7aaf21d9092a",
+          "id": "9e926c10e69681b5",
           "path": "/property/hotels/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -38965,13 +38965,13 @@
       "sha256": "56e914a0717b4e4812a83f3faf6e8f95b4543bf54d903f3a8091db9ef06c2f7f",
       "directRouteDeclarations": [
         {
-          "id": "a2312b98753250b9",
+          "id": "2c2c7c37c2d25e2a",
           "path": "/property/commercial",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "14f4b9cc216a489a",
+          "id": "6e916b71a6d5e7f7",
           "path": "/property/commercial/browse",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -38995,7 +38995,7 @@
       "sha256": "43fbce2b9c797ca261b7703c929426f4f04826ed7e30917bf7033c8b3ee9c2a6",
       "directRouteDeclarations": [
         {
-          "id": "760be5e2e6696e59",
+          "id": "58f8999667e6873a",
           "path": "/property/developers/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39021,7 +39021,7 @@
       "sha256": "cd4b4241331059aaa35adaadb45490c91ec43b102b840d2e5993090ea3d96665",
       "directRouteDeclarations": [
         {
-          "id": "37147ce04274cb98",
+          "id": "74bf7672e9efc233",
           "path": "/property/developers",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39046,7 +39046,7 @@
       "sha256": "69f2d450793bb9d8bc9094dfeb3cb677431e2d0a7741ba9b97da420737020c47",
       "directRouteDeclarations": [
         {
-          "id": "c12f730ce107a7e3",
+          "id": "d664a697e6f2dd38",
           "path": "/property/complex/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39077,7 +39077,7 @@
       "sha256": "b1fc7c6db0e62db80606b401123658993fffe3fe171e479110b46e5ef747649b",
       "directRouteDeclarations": [
         {
-          "id": "f6f3225d7781b3d4",
+          "id": "801ab34040b0d03d",
           "path": "/property/hotels",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39102,7 +39102,7 @@
       "sha256": "29fc2265ba659be3ea19ef5322807988dec3b8015a01053a64baa80d8608f3ab",
       "directRouteDeclarations": [
         {
-          "id": "ceb933725b912021",
+          "id": "428c65eebd0c9a54",
           "path": "/property/land/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39126,13 +39126,13 @@
       "sha256": "395f07438fa3e2592aa4bcd5a622923d6a5a7566e977a6b9d595e8fd8d3fbdf6",
       "directRouteDeclarations": [
         {
-          "id": "2a8ce660c56f3662",
+          "id": "8d0c2214ec5ce5d0",
           "path": "/property/land",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "2943b4113441190a",
+          "id": "390d81a17dda341d",
           "path": "/property/land/browse",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39208,7 +39208,7 @@
       "sha256": "d4cc023c113959a00cf5fc0f8eb068bec245ae02e82ca6df06c66407b2843c5f",
       "directRouteDeclarations": [
         {
-          "id": "ca0c1945b35a6602",
+          "id": "474b7df1749bcff8",
           "path": "/property/booking/manual-payment/:orderId",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39248,7 +39248,7 @@
       "sha256": "4303db48d96e334fd9fe509dddd130310381d75a179053607b5807608ca67a9b",
       "directRouteDeclarations": [
         {
-          "id": "31f1716176fa049f",
+          "id": "6c6dc660c9c51b60",
           "path": "/property/offplan/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39283,7 +39283,7 @@
       "sha256": "e4f7020c92c3d9d575f54af248c3c5bd8bb4425db8ecf9a5354bf75f10446030",
       "directRouteDeclarations": [
         {
-          "id": "f23c35daefe556b6",
+          "id": "3ee8073f4ca83d7e",
           "path": "/property/offplan",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39342,7 +39342,7 @@
       "sha256": "e0212bdfce442bac059755fc83a6c11be9ed80db27fb795a6a751201052558be",
       "directRouteDeclarations": [
         {
-          "id": "46dbf4117a9698cd",
+          "id": "c379784df1a2fab1",
           "path": "/property/consultation",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39445,7 +39445,7 @@
       "sha256": "668a3490b39bf92fccb57524b03fbbd91ff8e0143a7b3a3e70a10ccbdcad8b79",
       "directRouteDeclarations": [
         {
-          "id": "4502b164ab95bc9d",
+          "id": "530e611690377b48",
           "path": "/property/deposit-success",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39479,7 +39479,7 @@
       "sha256": "02f476301cfe845fe0307c2466111ed3daeae793248f272c6286e8664b1bb3a8",
       "directRouteDeclarations": [
         {
-          "id": "6e53c8c2b483d922",
+          "id": "4a05d749be048078",
           "path": "/property/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39552,7 +39552,7 @@
       "sha256": "0329d019ca14e75da87c1dd4aa9654584407ba396c5afc7ba2e0989ba8018601",
       "directRouteDeclarations": [
         {
-          "id": "ca22b31f1f4c6ce6",
+          "id": "9c5694cfb18afc81",
           "path": "/property/:id/inquiry",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39627,7 +39627,7 @@
       "sha256": "5551836e601e82601a32a36adaa22295ec9e0ee8ba8f3d06fe6945f8207711f7",
       "directRouteDeclarations": [
         {
-          "id": "0a886aa699161830",
+          "id": "f3711dc42552e66d",
           "path": "/property/my",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39714,7 +39714,7 @@
       "sha256": "3489814e91851e5f3daf5924a61a6fa5454e4d656836010154bcefb42ab42fe7",
       "directRouteDeclarations": [
         {
-          "id": "21dab234cee59d3c",
+          "id": "1f8cf389f9e52315",
           "path": "/property/resale/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39739,7 +39739,7 @@
       "sha256": "24a5989cffcafcb2683eb8d37eb809bbc86dab318bbdc08be547132bd12ecf75",
       "directRouteDeclarations": [
         {
-          "id": "004d69c686cc4a5b",
+          "id": "5b703a0f4345b0de",
           "path": "/property/resale",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -42445,7 +42445,7 @@
     },
     {
       "file": "src/pages/vendor/VendorLanding.tsx",
-      "sha256": "d4c7535d4624b587acdb51fc930916d89a78316c046b915a8b283c06c4fdea6b",
+      "sha256": "ce3b53567977ce524195ac74481d5c9232a8439c29a80a88cde2671cc9a69884",
       "directRouteDeclarations": [
         {
           "id": "3951714b956db8cf",
@@ -42462,10 +42462,10 @@
           "source": "@/components/ui/button",
           "instances": 4,
           "lines": [
-            148,
-            152,
-            287,
-            291
+            147,
+            151,
+            286,
+            290
           ]
         },
         {
@@ -42473,10 +42473,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            175,
-            226,
-            256,
-            276
+            174,
+            225,
+            255,
+            275
           ]
         }
       ]
@@ -42712,7 +42712,7 @@
     },
     {
       "file": "src/pages/vendor/VendorPayouts.tsx",
-      "sha256": "70bea68083fd36095bf560310f54fda008bf764e5bf9a770524d2f1f752a25d3",
+      "sha256": "954076eeb1cfad1ba60d7263e5ac2555fa0ee223ed1f93a53b540720432ac7b5",
       "directRouteDeclarations": [
         {
           "id": "66702fc03f3d9dcf",

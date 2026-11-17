@@ -221,14 +221,17 @@
   --operator-sidebar-border: calc(var(--brand-hue) - 2) 28% 32%;
   --operator-sidebar-ring: 40 25% 85%;
 
-  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap";
+  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap";
   --font-family-display: 'Source Serif 4';
   --font-family-body: 'Geist';
   --font-family-mono: 'IBM Plex Mono';
-  --font-heading-ru: var(--font-family-display), 'Unbounded', 'Noto Serif', Georgia, serif;
-  --font-body-ru:    var(--font-family-body), 'Golos Text', 'Noto Sans', system-ui, sans-serif;
-  --font-heading-en: var(--font-family-display), 'Noto Serif', Georgia, serif;
-  --font-body-en:    var(--font-family-body), 'Noto Sans', system-ui, -apple-system, sans-serif;
+  --font-family-th: 'Noto Sans Thai';
+  --font-heading-ru: var(--font-family-display), var(--font-family-th), 'Unbounded', 'Noto Serif', Georgia, serif;
+  --font-body-ru:    var(--font-family-body), 'Golos Text', var(--font-family-th), 'Noto Sans', system-ui, sans-serif;
+  --font-heading-en: var(--font-family-display), var(--font-family-th), 'Noto Serif', Georgia, serif;
+  --font-body-en:    var(--font-family-body), var(--font-family-th), 'Noto Sans', system-ui, -apple-system, sans-serif;
+  --font-heading-th: var(--font-family-display), var(--font-family-th), serif;
+  --font-body-th: var(--font-family-body), var(--font-family-th), system-ui, sans-serif;
   --font-mono:       var(--font-family-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
   /* Active defaults — overridden per <html lang> below for legacy locale-aware callers.
@@ -487,12 +490,17 @@
 
 /* ═══════════════════════════════════════════════════════════
    LANGUAGE-SCOPED FONT FAMILIES
-   <html lang="ru"> → Unbounded + Golos Text
-   default          → Noto Serif + Noto Sans
+   RU / EN → Source Serif 4 + Geist (locale fallbacks retained)
+   TH → same Latin families + supplied Noto Sans Thai glyphs
    ═══════════════════════════════════════════════════════════ */
 html[lang='ru'] {
   --font-display: var(--font-heading-ru);
   --font-body: var(--font-body-ru);
+}
+
+html[lang='th'] {
+  --font-display: var(--font-heading-th);
+  --font-body: var(--font-body-th);
 }
 
 html[lang='en'],
