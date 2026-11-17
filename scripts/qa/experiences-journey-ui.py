@@ -252,7 +252,7 @@ async def main():
               'scope': 'Actual catalogue, shared category grid/sheets, public header, MiniAppLayout/FeatureLayout and native controls; synthetic reads/shell; detail is a named boundary, not detail acceptance.'}
     (OUT / 'results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'cases': len(rows), 'passed': result['passed'], 'failed': result['failed']}))
-    if len(rows) != 6 or failed:
+    if len(rows) != 12 or failed:
         raise SystemExit(1)
 
 
