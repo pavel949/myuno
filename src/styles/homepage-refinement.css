@@ -27,9 +27,9 @@
   margin-top: 1.25rem;
   text-wrap: pretty;
 }
-/* Preserve the inspected existing image; local scrim supports its light left side. */
+/* Generated destination mood art, not a property photograph. Keep the sunlit coast clear beside readable copy. */
 .home-refined .home-hero-shade {
-  background: linear-gradient(90deg, hsl(var(--brand-navy) / .72), hsl(var(--brand-navy) / .38) 48%, hsl(var(--brand-navy) / .06) 83%), linear-gradient(180deg, hsl(var(--brand-navy) / .3), transparent 35%);
+  background: linear-gradient(90deg, hsl(var(--brand-navy) / .66), hsl(var(--brand-navy) / .32) 48%, hsl(var(--brand-navy) / .02) 83%), linear-gradient(180deg, hsl(var(--brand-navy) / .22), transparent 35%);
 }
 .home-refined .home-search-wrap { margin-top: calc(-1 * var(--home-search-overlap)) !important; }
 .home-refined .home-search-entry { max-width: none; }
@@ -318,3 +318,9 @@
 /* Editorial category photographs deliberately override the inherited text-only service treatment. */
 .home-refined .home-service-category-card--photo .home-service-category-art { display: flex; }
 .home-refined .premium-newbuilds.home-container { width: calc(100% - var(--public-gutter) * 2); max-width: var(--public-width-wide); }
+
+.home-refined .home-hero-image { object-position: center 52%; }
+@media (max-width: 640px) {
+  .home-refined .home-hero-image { object-position: 69% center; }
+  .home-refined .home-hero-shade { background: linear-gradient(180deg, hsl(var(--brand-navy) / .62), hsl(var(--brand-navy) / .52) 33%, hsl(var(--brand-navy) / .18) 57%, hsl(var(--brand-navy) / .62)); }
+}
