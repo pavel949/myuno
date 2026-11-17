@@ -199,3 +199,29 @@ it.each(['empty', 'loading', 'error', 'fallback'])('keeps explicit flower/yacht 
   expect(screen.getByRole('link', { name: 'Yacht catalogue' })).toHaveAttribute('href', '/yachts');
   expect(document.querySelector('.home-service-category-card')).toBeNull();
 });
+
+
+it('uses the shared gallery and offers concrete routes only for a confirmed empty preview', () => {
+  show();
+  expect(document.querySelector('.home-experiences.home-gallery')).not.toBeNull();
+  expect(screen.getByRole('link', { name: 'Tours' })).toHaveAttribute('href', '/experiences?type=tour');
+  expect(screen.getByRole('link', { name: 'Activities' })).toHaveAttribute('href', '/experiences?type=activity');
+});
+
+it.each(['loading', 'error'])('does not substitute empty-preview paths for %s', mode => {
+  state.loading = mode === 'loading';
+  state.error = mode === 'error';
+  show();
+  expect(screen.queryByRole('link', { name: 'Tours' })).toBeNull();
+  expect(screen.getByRole('link', { name: 'All experiences' })).toBeVisible();
+});
+
+it('selects a usable experience beyond the original eight candidates without inventing media', () => {
+  state.experiences = [
+    ...Array.from({ length: 8 }, (_, i) => ({ id: `no-photo-${i}`, title_en: `No photo ${i}`, images: [] })),
+    { id: 'later-photo', title_en: 'Later published experience', cover_image: 'https://example.invalid/later.jpg' },
+  ];
+  show();
+  expect(screen.getByRole('link', { name: /Later published experience/ })).toHaveAttribute('href', '/experiences/later-photo');
+  expect(screen.queryByRole('link', { name: 'Tours' })).toBeNull();
+});
