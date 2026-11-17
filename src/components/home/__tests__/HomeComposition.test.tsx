@@ -11,7 +11,7 @@ vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ personas: 
 vi.mock('@/hooks/useLifeOS', () => ({ useLifeOSRole: () => 'resident' }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
 vi.mock('../HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => <section>Housing discovery</section>, HomeNewbuildsPreview: () => <section>New developments</section> }));
-vi.mock('../HomeCatalogGalleries', () => ({ HomeServiceGallery: () => <section>Services discovery</section> }));
+vi.mock('../HomeCatalogGalleries', () => ({ HomeServiceGallery: () => <section>Services discovery</section>, HomeExperienceGallery: () => <section>Experiences discovery</section> }));
 vi.mock('../HeroGreeting', () => ({ HeroGreeting: () => <div data-part="identity">Identity</div> }));
 vi.mock('../WorkspaceHomeBanner', () => ({ WorkspaceHomeBanner: () => <div data-part="workspace">Verified workspace</div> }));
 vi.mock('../PersonalHomeActions', () => ({ PersonalHomeActions: () => <div data-part="personal">Personal actions</div> }));
@@ -38,6 +38,7 @@ describe('same compact priorities in both home variants', () => {
     const order = [...container.querySelectorAll('[data-part]')].map(node => node.getAttribute('data-part'));
     expect(order.slice(0, 7)).toEqual(['identity', 'workspace', 'personal', 'pending', 'signals', 'preferences', 'recommendations']);
     expect(screen.getAllByText('Verified workspace')).toHaveLength(1);
+    expect(screen.getAllByText('Experiences discovery')).toHaveLength(1);
     expect(screen.queryByText(/шляп|приоритеты по роли|Лицензировано|SEC Thailand/)).not.toBeInTheDocument();
     if (flag && admin) expect(order.indexOf('weather')).toBeGreaterThan(order.indexOf('recommendations'));
     else expect(screen.queryByText('Weather')).not.toBeInTheDocument();
