@@ -96,6 +96,8 @@ One primary Space/property unless approved otherwise; cross-space membership exp
 
 **Services Marketplace:** `Services → Category → Provider/Offering → Availability → Price → REQUEST|BOOK|BOOK+PAY → Confirmation → My Services`. Existing/partial verticals include transport, vehicles, tours, yachts, flowers, beauty/spa, cleaning, fitness, restaurants/events. Code/route existence ≠ readiness. Verify real providers, approved offerings, safe fields, price, availability, commerce mode, mapping, fulfilment, settlement where applicable, and admin editing. No fake fallback catalogue.
 
+**Customer intake policy (owner direction, 17 Nov 2026):** myUNO is the customer-facing service contact. All customer enquiries go to the myUNO admin intake and its explicitly configured admin destinations, regardless of the underlying supplier. Do not automatically forward customer details or connect customers directly to suppliers. Supplier relationships and canonical records remain intact; any later fulfilment handoff requires a separately authorized scope. Source containment patches are not proof of production rollout or end-to-end delivery.
+
 **Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil. Concierge may maintain a case/orchestration record for conversation, requirements, coordination and resolution, but that record must not become a competing booking, payment, inventory or service-order authority. When a structured service is selected, return the transaction to the canonical Marketplace/service workflow.
 
 **PMS:** Today, Calendar, Bookings, Properties, Workspace, Stay Detail, Housekeeping, Maintenance, Rates, Inventory, Finance, Owners, Staff.

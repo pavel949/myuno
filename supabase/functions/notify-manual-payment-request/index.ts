@@ -1,4 +1,4 @@
-// Notifies admins, host, and creates in-app notification when a guest submits
+// Notifies myUNO admins and creates an admin in-app notification when a guest submits
 // a manual RUB payment request. Mirrors notify-admin-order patterns:
 // Resend email + UltraMsg WhatsApp + supabase.from('notifications').insert.
 //
@@ -22,8 +22,7 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
   const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
   const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
   if (!ultraMsgInstance || !ultraMsgToken) {
-    console.info('[WA] UltraMsg not configured, message would be sent to', toPhone);
-    console.info(message);
+    console.info('[WA] UltraMsg not configured');
     return;
   }
   try {
@@ -36,8 +35,8 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
         body: message,
       }),
     });
-    const out = await r.json();
-    console.info('[WA] sent to', toPhone, out);
+    await r.json();
+    console.info('[WA] Provider request completed:', { http_ok: r.ok });
   } catch (err) {
     console.error('[WA] error:', err);
   }
@@ -97,21 +96,7 @@ Deno.serve(async (req) => {
     const adminEmails = await getAdminEmails();
     const adminWhatsApp = await getAdminWhatsApp();
 
-    // ── Owner / manager contacts ──
-    const ownerId = (req_ as any).properties?.owner_id as string | null;
-    let managerEmail: string | null = orderMeta.manager_email || null;
-    let managerPhone: string | null = orderMeta.manager_phone || null;
-    if (ownerId) {
-      const { data: ownerProfile } = await sb
-        .from('profiles')
-        .select('email, phone')
-        .eq('user_id', ownerId)
-        .maybeSingle();
-      if (ownerProfile) {
-        managerEmail = managerEmail || (ownerProfile as any).email || null;
-        managerPhone = managerPhone || (ownerProfile as any).phone || null;
-      }
-    }
+    // Customer details stay with myUNO. Supplier/owner fulfilment handoff is separate.
 
     // ── WhatsApp message ──
     const waMsg = `🇷🇺 *RUB PAYMENT REQUEST* #${orderNumber}
@@ -129,9 +114,7 @@ Deno.serve(async (req) => {
 
     // Fire-and-forget — don't block on WhatsApp
     sendWhatsApp(waMsg, adminWhatsApp).catch((e) => console.error('admin wa', e));
-    if (managerPhone && managerPhone.replace(/[^0-9]/g, '') !== adminWhatsApp.replace(/[^0-9]/g, '')) {
-      sendWhatsApp(waMsg, managerPhone).catch((e) => console.error('manager wa', e));
-    }
+
 
     // ── Email ──
     const resendKey = Deno.env.get('RESEND_API_KEY');
@@ -177,7 +160,6 @@ Deno.serve(async (req) => {
 </body></html>`;
 
         const recipients = [...adminEmails];
-        if (managerEmail && !recipients.includes(managerEmail)) recipients.push(managerEmail);
 
         await resend.emails.send({
           from: 'myUNO <noreply@notify.myuno.app>',
