@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * Admin page: documents vault for a specific project.
  * Route: /admin/newbuilds/projects/:id/documents
@@ -25,7 +26,7 @@ export default function AdminProjectDocuments() {
   if (!id) return null;
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-4">
+    <PageShell width="default" className="space-y-4">
       <div className="flex items-center gap-2">
         <Link to="/admin/newbuilds"><Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-1" /> Console</Button></Link>
       </div>
@@ -35,6 +36,6 @@ export default function AdminProjectDocuments() {
       </div>
       <DriveImportPanel projectId={id} />
       <ProjectDocumentsVault projectId={id} />
-    </div>
+    </PageShell>
   );
 }
