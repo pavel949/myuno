@@ -19,22 +19,39 @@ async def main():
     async with async_playwright() as p:
         system = '/usr/bin/chromium'
         browser = await p.chromium.launch(executable_path=None if os.environ.get('CI') else system if Path(system).exists() else None, args=['--no-sandbox'])
+        blocked = []
+        async def route(r):
+            parsed = urlparse(r.request.url)
+            name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
+            file = OUTPUT/name
+            if name in ('catalog/flowers/pink-garden-roses.webp', 'yachts/catamaran-53-1.webp') or name.startswith('fonts/'): file = Path.cwd()/'public'/name
+            types = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2'}
+            if parsed.netloc == 'localhost:8080' and file.is_file():
+                await r.fulfill(path=str(file), content_type=types.get(file.suffix,'application/octet-stream'))
+            else:
+                blocked.append(r.request.url)
+                await r.abort()
+        # Capture both delivery sizes before interaction assertions. These are
+        # explicitly unvalidated diagnostics, never substitutes for a green matrix.
+        for preview_lang in LANGUAGES:
+            for preview_width in [390, 1440]:
+                preview_context = await browser.new_context(viewport={'width': preview_width, 'height': 900}, reduced_motion='reduce', service_workers='block')
+                await preview_context.route('**/*', route)
+                preview_page = await preview_context.new_page()
+                await preview_page.goto(f'http://localhost:8080/fixture?lang={preview_lang}', wait_until='domcontentloaded')
+                await preview_page.evaluate('document.fonts.ready')
+                for photo in await preview_page.locator('img').all():
+                    if await photo.is_visible():
+                        await photo.scroll_into_view_if_needed()
+                await preview_page.locator('.home-rail-viewport').evaluate_all('(rows)=>rows.forEach(row=>row.scrollLeft=0)')
+                await preview_page.evaluate('window.scrollTo(0,0)')
+                await preview_page.screenshot(path=str(OUTPUT/f'unvalidated-{preview_lang}-{preview_width}-homepage.png'), full_page=True)
+                await preview_context.close()
         for lang in LANGUAGES:
             for width in WIDTHS:
                 case_started=time.monotonic()
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, has_touch=width < 768, reduced_motion='reduce', service_workers='block')
                 blocked, errors = [], []
-                async def route(r):
-                    parsed = urlparse(r.request.url)
-                    name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
-                    file = OUTPUT/name
-                    if name in ('catalog/flowers/pink-garden-roses.webp', 'yachts/catamaran-53-1.webp') or name.startswith('fonts/'): file = Path.cwd()/'public'/name
-                    types = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2'}
-                    if parsed.netloc == 'localhost:8080' and file.is_file():
-                        await r.fulfill(path=str(file), content_type=types.get(file.suffix,'application/octet-stream'))
-                    else:
-                        blocked.append(r.request.url)
-                        await r.abort()
                 await context.route('**/*', route)
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
@@ -135,7 +152,7 @@ async def main():
                         await choices.nth(index).press('Enter')
                         await expect(page.get_by_test_id('location')).to_have_text(destination)
                         await expect(page.get_by_role('dialog')).to_have_count(0)
-                    await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(3)
+                    await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(6)
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
                                              ('.premium-newbuilds .home-rail article a', '/property/offplan/'),

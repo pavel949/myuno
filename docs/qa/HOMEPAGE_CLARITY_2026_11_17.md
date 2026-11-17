@@ -41,3 +41,6 @@ Reviewed actual EN 320px failure screenshot from connected-system run 4400327759
 
 ### Gutter regression correction
 The 320px CI screenshot and stylesheet cascade showed the newbuild override used legacy home gutter (18px) while rental uses canonical public gutter (16px). Updated newbuild width/max-width to the exact public tokens. Kept the <=1px alignment assertion unchanged and enriched its failure diagnostics. No viewport/locale skipped.
+
+### Full six-project fixture and diagnostic renders
+Latest CI passed gutter geometry and reached a stale three-project assertion. The fixture returns six published synthetic projects and homepage intentionally previews six. Updated exact expected count to six. Reviewed remaining counts against fixtures. Added unvalidated 390px/1440px renders before assertions so a later interaction failure does not hide both requested layouts; these diagnostic images never count as matrix passes. All existing viewport, locale, touch, keyboard, overflow and route gates remain.
