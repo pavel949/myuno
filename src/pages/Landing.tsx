@@ -11,7 +11,6 @@ import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
-import { HomeSearchEntry, HomePlanLinks } from '@/components/home/HomeSearchEntry';
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
@@ -45,32 +44,29 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
-          <p>{t({ ru: 'Найдите жильё, купите недвижимость или решите задачу на Пхукете — с понятным следующим шагом и поддержкой команды.', en: 'Find a home, buy property, or solve an everyday task in Phuket — with a clear next step and human support.', th: 'หาที่พัก ซื้ออสังหาริมทรัพย์ หรือจัดการเรื่องต่าง ๆ ในภูเก็ต พร้อมขั้นตอนถัดไปที่ชัดเจนและทีมงานช่วยเหลือ' })}</p>
+          <p>{t({ ru: 'Жильё, услуги и впечатления на Пхукете. Поможем выбрать и организовать.', en: 'Homes, services and experiences in Phuket. Find your next stay, plan your day, or get a helping hand.', th: 'ที่พัก บริการ และประสบการณ์ในภูเก็ต พร้อมทีมงานช่วยคุณเลือกและจัดการ' })}</p>
           <HomeHeroChoices />
           <div className="home-hero-actions">
             <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
-      <div className="home-search-wrap home-container"><HomeSearchEntry /></div>
-      <HomePlanLinks />
       <HomeHousingPreview />
-      <HomeNewbuildsPreview />
       <div className="home-life-group">
         <HomeExperienceGallery />
         <HomeServiceGallery />
-        <HomeLocationGallery />
       </div>
+      <HomeNewbuildsPreview />
+      <HomeLocationGallery />
       <section className="home-partners-group" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
-          <p className="home-group-eyebrow">{t({ ru: 'Для профессионалов', en: 'For professionals', th: 'สำหรับมืออาชีพ' })}</p>
+          <p className="home-group-eyebrow">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</p>
           <h2 id="home-partners-title">{t({ ru: 'Развивайте недвижимость и сервисы вместе с myUNO', en: 'Grow your property and services with myUNO', th: 'เติบโตไปกับ myUNO' })}</h2>
         </div>
         <HomeAudienceGrid />
         <HomeTrustBar />
       </section>
       <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
-      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t({ ru: 'Познакомимся с объектом и вашими ожиданиями. Если сможем управлять — предложим индивидуальные условия.', en: 'We review your property and expectations. If we can manage it, we propose individual terms.', th: 'ศึกษาทรัพย์สินและความคาดหวัง หากเรารับจัดการได้จะเสนอเงื่อนไขเฉพาะ' })}</p></div><div className="home-prompt-actions"><Link className="home-text-link" to={R.OWNER_MANAGEMENT_LANDING}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link><Link className="home-text-link" to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Для управляющих компаний', en: 'For management companies', th: 'สำหรับบริษัทจัดการ' })}<ArrowRight size={18} aria-hidden="true" /></Link></div></section>
       </main>
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>

@@ -117,8 +117,7 @@ export function HomeExperienceGallery() {
     en: 'More of the island',
     th: 'สัมผัสประสบการณ์บนเกาะ',
   });
-  // Successful empty supply is omitted; a failed read remains retryable.
-  if (!isLoading && !error && !preview.length) return null;
+  // Keep a clear route to experiences even when the photo preview is empty.
   return (
     <section
       className="home-catalog home-experiences home-container"
@@ -144,15 +143,15 @@ export function HomeExperienceGallery() {
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </div>
-      {isLoading || error || !experiences.length ? (
+      {isLoading || error || !preview.length ? (
         <CatalogState
           loading={isLoading}
           error={Boolean(error)}
           retry={refetch}
           empty={{
-            ru: 'Опубликованных впечатлений пока нет. Загляните позже.',
-            en: 'No published experiences yet. Check back later.',
-            th: 'ยังไม่มีประสบการณ์ที่เผยแพร่ โปรดกลับมาดูอีกครั้ง',
+            ru: 'Пока нет подборки с фотографиями. Посмотрите каталог впечатлений.',
+            en: 'No photo preview yet. Explore the experiences catalogue.',
+            th: 'ยังไม่มีภาพตัวอย่าง ดูรายการประสบการณ์ทั้งหมด',
           }}
         />
       ) : (

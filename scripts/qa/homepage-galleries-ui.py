@@ -115,19 +115,12 @@ async def main():
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                             await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
-                    # One universal entry plus four native shortcuts; no intermediate sheet.
+                    # One task choice layer; no repeated search-shaped routing block.
                     await expect(page.locator('.home-hero input')).to_have_count(0)
-                    await expect(page.locator('.home-search-entry-button')).to_have_attribute('href','/discover')
-                    await page.locator('.home-search-entry-button').click()
-                    await expect(page.get_by_test_id('location')).to_have_text('/discover')
-                    choices=page.locator('.premium-plan-links a')
+                    await expect(page.locator('.home-search-entry-button,.premium-plan-links')).to_have_count(0)
+                    choices=page.locator('.home-hero-choice')
                     await expect(choices).to_have_count(4)
-                    destinations = [
-                        '/property/search?mode=rent&tenancy=short',
-                        '/property/search?mode=rent&tenancy=medium',
-                        '/property/search?mode=rent&tenancy=long',
-                        '/discover/buy',
-                    ]
+                    destinations = ['/property/search?mode=rent', '/discover/buy', '/experiences', '/discover/services']
                     for index,destination in enumerate(destinations):
                         await expect(choices.nth(index)).to_have_attribute('href', destination)
                         await choices.nth(index).focus()
@@ -150,7 +143,7 @@ async def main():
                                              ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
                                              ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
                                              ('.home-service-category-card a[href="/discover/services?category=cat-home-services"]', '/discover/services?category=cat-home-services'),
-                                             ('.home-owner-prompt a', '/owner/management-landing')]:
+                                             ('.home-audience-card[href="/for-owners"]', '/for-owners')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
@@ -184,7 +177,8 @@ async def main():
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
-                await expect(page.locator('.home-experiences,.home-populated-projects')).to_have_count(0)
+                await expect(page.locator('.home-experiences')).to_have_count(1)
+                await expect(page.locator('.home-experiences .home-catalog-card')).to_have_count(0)
                 await expect(page.locator('.home-services a.ds-section-action')).to_be_visible()
                 await expect(page.locator('.premium-newbuilds a.home-text-link')).to_be_visible()
                 await expect(page.locator('.home-area-guide-link')).to_have_count(4)

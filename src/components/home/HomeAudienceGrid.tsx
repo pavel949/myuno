@@ -14,13 +14,6 @@ type AudienceCard = {
 
 const audiences: AudienceCard[] = [
   {
-    icon: Home,
-    href: R.DISCOVER,
-    title: { ru: 'Ищу жильё или услугу', en: 'I need a home or service', th: 'กำลังมองหาที่พักหรือบริการ' },
-    description: { ru: 'Аренда, покупка, районы острова и помощь с повседневными задачами.', en: 'Rent, buy, explore areas, or get help with everyday needs.', th: 'เช่า ซื้อ สำรวจย่าน หรือขอความช่วยเหลือในชีวิตประจำวัน' },
-    action: { ru: 'Начать поиск', en: 'Start exploring', th: 'เริ่มสำรวจ' },
-  },
-  {
     icon: Building2,
     href: R.FOR_OWNERS,
     title: { ru: 'У меня есть недвижимость', en: 'I own property', th: 'มีอสังหาริมทรัพย์' },
@@ -62,13 +55,7 @@ export function HomeAudienceGrid() {
   const t = (value: LangValues) => pickLang(language, value);
 
   return (
-    <section className="home-audience home-container" aria-labelledby="home-audience-title">
-      <div className="home-section-heading">
-        <div>
-          <h2 id="home-audience-title">{t({ ru: 'Что вы хотите сделать?', en: 'What would you like to do?', th: 'คุณต้องการทำอะไร?' })}</h2>
-          <p className="home-section-lead">{t({ ru: 'Начните с вашей задачи — myUNO подскажет следующий шаг.', en: 'Start with your task and myUNO will guide you to the next step.', th: 'เริ่มจากสิ่งที่คุณต้องการ แล้ว myUNO จะช่วยแนะนำขั้นตอนต่อไป' })}</p>
-        </div>
-      </div>
+    <section className="home-audience home-container" aria-label={t({ ru: 'Решения для собственников и партнёров', en: 'Solutions for owners and partners', th: 'บริการสำหรับเจ้าของและพาร์ทเนอร์' })}>
       <div className="home-audience-grid">
         {audiences.map(({ icon: Icon, href, title, description, action }) => (
           <Link key={href} to={href} className="home-audience-card">

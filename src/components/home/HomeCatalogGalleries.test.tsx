@@ -68,7 +68,8 @@ it('keeps successful empty catalogues distinct from errors and category requests
   expect(
     screen.getByRole('link', { name: /Kamala/ }),
   ).toBeVisible();
-  expect(document.querySelector('.home-experiences')).toBeNull();
+  expect(document.querySelector('.home-experiences')).not.toBeNull();
+  expect(document.querySelector('.home-experiences .home-catalog-card')).toBeNull();
   expect(document.querySelector('.home-services')).not.toBeNull();
   expect(screen.getByRole('link', { name: /All categories/ })).toBeVisible();
   expect(screen.queryByRole('alert')).toBeNull();
@@ -143,7 +144,8 @@ it('omits an experience when its stored photograph fails instead of displaying a
   fireEvent.error(image);
   expect(document.querySelector('.home-experiences img')).toBeNull();
   expect(screen.queryByRole('link', { name: /Catalog tour/ })).toBeNull();
-  expect(document.querySelector('.home-experiences')).toBeNull();
+  expect(document.querySelector('.home-experiences')).not.toBeNull();
+  expect(document.querySelector('.home-experiences .home-catalog-card')).toBeNull();
 });
 
 it('keeps verified guide routes independent of project records and photos', () => {
