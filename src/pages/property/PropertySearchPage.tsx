@@ -57,7 +57,7 @@ export default function PropertySearchPage() {
   const isRu = language === 'ru';
   const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
-  const criteriaRef = useRef<HTMLDetailsElement>(null);
+  const [criteriaOpen, setCriteriaOpen] = useState(true);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
   useEffect(() => {
@@ -272,7 +272,7 @@ export default function PropertySearchPage() {
 
   const submitSearch = (params: URLSearchParams) => {
     navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
-    if (criteriaRef.current) criteriaRef.current.open = false;
+    setCriteriaOpen(false);
     setFocusResults(true);
   };
   const summaryTypes = searchParams.propertyTypes.map(id => {
@@ -316,10 +316,10 @@ export default function PropertySearchPage() {
             </Link>)}
           </nav>}
           {catalogueAll && [...searchParamsUrl.keys()].every(key => ['mode', 'lang', 'source'].includes(key)) && <PlatformJourneyLinks journey="property" />}
-          <details ref={criteriaRef} className="premium-search-criteria">
+          <details open={criteriaOpen} onToggle={event => setCriteriaOpen(event.currentTarget.open)} className="premium-search-criteria">
             <summary><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">
-              <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue initialParams={searchParamsUrl} onSearch={submitSearch} />
+              <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue showGuestsInline initialParams={searchParamsUrl} onSearch={submitSearch} />
             </div>
           </details>
           <div className="flex min-w-0 items-center gap-2">
@@ -434,6 +434,7 @@ export default function PropertySearchPage() {
                     {catalogueAll && (sortKey === 'price_asc' || sortKey === 'price_desc') && <p className="mb-2 text-body-sm text-muted-foreground">{propertyPriceSortGroupLabel(property, language)}</p>}
                     <PropertyListingCard
                       property={property}
+                      focusedOffer={!catalogueAll}
                       mode={catalogueAll ? propertyDetailMode(property) : propertyMode}
                       isHovered={hoveredProperty === property.id}
                       onHover={setHoveredProperty}

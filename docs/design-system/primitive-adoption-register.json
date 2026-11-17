@@ -43,8 +43,8 @@
       "sourceInstances": 312
     },
     "PageHeader": {
-      "directConsumerFiles": 133,
-      "sourceInstances": 170
+      "directConsumerFiles": 136,
+      "sourceInstances": 173
     },
     "Tabs": {
       "directConsumerFiles": 131,
@@ -95,8 +95,8 @@
       "sourceInstances": 44
     },
     "PageShell": {
-      "directConsumerFiles": 15,
-      "sourceInstances": 21
+      "directConsumerFiles": 38,
+      "sourceInstances": 44
     },
     "UnifiedSectionHeader": {
       "directConsumerFiles": 7,
@@ -3806,7 +3806,7 @@
     },
     {
       "file": "src/components/admin/operations/OperationsModerationTab.tsx",
-      "sha256": "4560664d66ee157c698427dab468e93d7d618a1d964bdbd567652b054d85e097",
+      "sha256": "e1ec68e0f7c15e5dc10b353658e73dab15ebe2300e521a43826aada8c9efc0ad",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6117,7 +6117,7 @@
     },
     {
       "file": "src/components/home/HomeDiscoverySearch.tsx",
-      "sha256": "2a67cbf0ccf80a2ff2bd61f5c43103110a63cd43af9e938d72ada01d430880de",
+      "sha256": "a7651068931abd9d6cae5943f49c3ec39dea6602f60ee9f6e8b59f9248ce94e3",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6127,8 +6127,8 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            93,
-            105,
+            84,
+            106,
             118
           ]
         }
@@ -15126,7 +15126,7 @@
     },
     {
       "file": "src/components/property/InquiryConfirmation.tsx",
-      "sha256": "87ab8ae0a5b7c9c30a3075914ed040f9c9dccfd9c4acfb1fea23c471bff65c35",
+      "sha256": "92368b60bc5ad9ea753e64755f4fb52eef62e52bf092e2c61990e5c892d68cfa",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -15136,8 +15136,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            34,
-            37
+            37,
+            40
           ]
         }
       ]
@@ -19254,7 +19254,7 @@
     },
     {
       "file": "src/components/yachts/YachtBookingQuickSelect.tsx",
-      "sha256": "283fa61800b7774348fa67f2d7dafc7634459acf61254add1117aa6553b467b2",
+      "sha256": "94116fc4cb521cad36fabe066ae784ad97a2ab8d3e9415e37ca9bcc5f5b22a9b",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -20668,7 +20668,7 @@
     },
     {
       "file": "src/pages/admin/AdminAIAgentEditor.tsx",
-      "sha256": "3a19104d7c657ae698ca396cee0db072fb1c44651fe6b61b46ed5216c431835a",
+      "sha256": "484faa55c61f178c7445f6ee480218c39e8e278d0cc56103a48a9fd8a381eb2b",
       "directRouteDeclarations": [
         {
           "id": "36ec0b982e0e6a0a",
@@ -20685,11 +20685,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            184,
-            413,
-            475,
-            483,
-            531
+            185,
+            414,
+            476,
+            484,
+            532
           ]
         },
         {
@@ -20697,15 +20697,15 @@
           "source": "@/components/ui/card",
           "instances": 9,
           "lines": [
-            208,
-            217,
-            226,
-            235,
-            273,
-            339,
-            429,
-            451,
-            500
+            209,
+            218,
+            227,
+            236,
+            274,
+            340,
+            430,
+            452,
+            501
           ]
         },
         {
@@ -20713,10 +20713,18 @@
           "source": "@/components/ui/input",
           "instances": 4,
           "lines": [
-            283,
-            305,
-            313,
-            393
+            284,
+            306,
+            314,
+            394
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            181
           ]
         },
         {
@@ -20724,9 +20732,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            291,
-            349,
-            363
+            292,
+            350,
+            364
           ]
         },
         {
@@ -20734,7 +20742,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            250
+            251
           ]
         },
         {
@@ -20742,17 +20750,17 @@
           "source": "@/components/ui/textarea",
           "instances": 4,
           "lines": [
-            321,
-            330,
-            441,
-            463
+            322,
+            331,
+            442,
+            464
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminAIAgents.tsx",
-      "sha256": "15c2d8c582109643af8b27415b081d9ed9d972a5003ea9463d1c6d09501eb61d",
+      "sha256": "5399f5365e4751e9938906dbee83aea2b0f48dfe4cba468afd96c3fca36f9548",
       "directRouteDeclarations": [
         {
           "id": "ef01adb71a75ba9e",
@@ -20769,9 +20777,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            147,
-            316,
-            438
+            148,
+            317,
+            439
           ]
         },
         {
@@ -20779,9 +20787,9 @@
           "source": "@/components/ui/card",
           "instances": 3,
           "lines": [
-            128,
-            351,
-            426
+            129,
+            352,
+            427
           ]
         },
         {
@@ -20789,7 +20797,15 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            145
+            146
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            304
           ]
         },
         {
@@ -20797,14 +20813,14 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            326
+            327
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminAIKnowledge.tsx",
-      "sha256": "9155866826d1e8cba7d3e11395a30a9d4fb7b5c65fa27dba15e90415f083fbb0",
+      "sha256": "51e8d1193409ed736aea0e4080dc42dd8558852536d3750f63dfa36cc4165d11",
       "directRouteDeclarations": [
         {
           "id": "827f948eb150b7d8",
@@ -20821,9 +20837,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            234,
-            286,
-            322
+            235,
+            287,
+            323
           ]
         },
         {
@@ -20831,10 +20847,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            172,
-            242,
-            309,
-            332
+            173,
+            243,
+            310,
+            333
           ]
         },
         {
@@ -20842,11 +20858,19 @@
           "source": "@/components/ui/input",
           "instances": 5,
           "lines": [
-            183,
-            187,
-            191,
-            209,
-            316
+            184,
+            188,
+            192,
+            210,
+            317
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            154
           ]
         },
         {
@@ -20854,7 +20878,7 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            252
+            253
           ]
         },
         {
@@ -20862,7 +20886,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            164
+            165
           ]
         },
         {
@@ -20870,14 +20894,14 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            222
+            223
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminAIOps.tsx",
-      "sha256": "784fc5cd194c6928436c99332f90b6bddd66b84d517ce7e5aadc194ea1c39f0c",
+      "sha256": "82b5b1be247c23dac504c66285481c5a2435e7066a4e5be5410da3ffc16949c8",
       "directRouteDeclarations": [
         {
           "id": "56d86f9f532dbe28",
@@ -20894,11 +20918,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            211,
-            366,
-            400,
-            432,
-            468
+            212,
+            367,
+            401,
+            433,
+            469
           ]
         },
         {
@@ -20906,17 +20930,25 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            224,
-            231,
-            240,
-            249,
-            258,
-            288,
-            359,
-            393,
-            438,
-            487,
-            497
+            225,
+            232,
+            241,
+            250,
+            259,
+            289,
+            360,
+            394,
+            439,
+            488,
+            498
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            200
           ]
         },
         {
@@ -20924,9 +20956,9 @@
           "source": "@/components/ui/table",
           "instances": 3,
           "lines": [
-            293,
-            443,
-            499
+            294,
+            444,
+            500
           ]
         },
         {
@@ -20934,7 +20966,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            266
+            267
           ]
         }
       ]
@@ -21142,7 +21174,7 @@
     },
     {
       "file": "src/pages/admin/AdminApiKeys.tsx",
-      "sha256": "ec200cb6a4c50fd4256460105cb40c8eeaaa364ae772d8ef195ef46281e36398",
+      "sha256": "baa4eb085003d2b082f4c56ed91507e6417e27336388a15c4acaa669df4cc622",
       "directRouteDeclarations": [
         {
           "id": "b369491750071816",
@@ -21159,20 +21191,20 @@
           "source": "@/components/ui/button",
           "instances": 14,
           "lines": [
-            185,
-            252,
-            255,
-            259,
-            323,
-            327,
-            349,
-            377,
-            387,
-            413,
-            426,
-            436,
-            496,
-            499
+            186,
+            253,
+            256,
+            260,
+            324,
+            328,
+            350,
+            378,
+            388,
+            414,
+            427,
+            437,
+            497,
+            500
           ]
         },
         {
@@ -21180,9 +21212,9 @@
           "source": "@/components/ui/card",
           "instances": 3,
           "lines": [
-            233,
-            304,
-            346
+            234,
+            305,
+            347
           ]
         },
         {
@@ -21190,7 +21222,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            462
+            463
           ]
         },
         {
@@ -21198,11 +21230,19 @@
           "source": "@/components/ui/input",
           "instances": 5,
           "lines": [
-            370,
-            420,
-            470,
-            479,
-            488
+            371,
+            421,
+            471,
+            480,
+            489
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            178
           ]
         },
         {
@@ -21210,7 +21250,7 @@
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            179
+            180
           ]
         },
         {
@@ -21218,7 +21258,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            211
+            212
           ]
         }
       ]
@@ -21283,7 +21323,7 @@
     },
     {
       "file": "src/pages/admin/AdminCRM.tsx",
-      "sha256": "f57f64f9bfdd7af7dcd563e521d664203af9ae1adc4855c0f9d11fefb05a7cd0",
+      "sha256": "658c30436da29cbb309f1bf80b31a2074cdb1b8ee43c37ac2c51a6b5446cbc8c",
       "directRouteDeclarations": [
         {
           "id": "01c9c301f2b1b53a",
@@ -21296,11 +21336,27 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
+          "name": "PageHeader",
+          "source": "@/components/page/PageHeader",
+          "instances": 1,
+          "lines": [
+            24
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            23
+          ]
+        },
+        {
           "name": "Tabs",
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            33
+            30
           ]
         }
       ]
@@ -21726,7 +21782,7 @@
     },
     {
       "file": "src/pages/admin/AdminDevelopers.tsx",
-      "sha256": "1518f7191cb98533b55fe8be17a3ca395ed3754efc78064e2141512bc8d3bd6a",
+      "sha256": "e68426baadb0f90792dd383d2ed6793cbc17cc44b7fdbf2a734406714001a5eb",
       "directRouteDeclarations": [
         {
           "id": "3bc95514306401ef",
@@ -21743,11 +21799,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            182,
-            186,
-            358,
-            610,
-            617
+            185,
+            189,
+            363,
+            615,
+            622
           ]
         },
         {
@@ -21755,13 +21811,13 @@
           "source": "@/components/ui/card",
           "instances": 7,
           "lines": [
-            201,
-            216,
-            231,
-            246,
-            282,
-            296,
-            560
+            204,
+            219,
+            234,
+            249,
+            287,
+            301,
+            565
           ]
         },
         {
@@ -21769,15 +21825,15 @@
           "source": "@/components/ui/input",
           "instances": 9,
           "lines": [
-            266,
-            439,
-            448,
-            497,
-            509,
-            523,
-            533,
-            542,
-            551
+            269,
+            444,
+            453,
+            502,
+            514,
+            528,
+            538,
+            547,
+            556
           ]
         },
         {
@@ -21785,7 +21841,15 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            177
+            180
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            179
           ]
         },
         {
@@ -21793,7 +21857,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            397
+            402
           ]
         },
         {
@@ -21801,14 +21865,14 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            409
+            414
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminDisputes.tsx",
-      "sha256": "e9f8e2fbdb05d6693073fdf2ad6473d9426efd921430f1ddb0478ba5ddf8cf3a",
+      "sha256": "a3cb5c698ad8f05d800274ab7541e957bad8126d0079c20a5cdac1c1b357659f",
       "directRouteDeclarations": [
         {
           "id": "7bbc11c9553e00ba",
@@ -21825,11 +21889,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            68,
-            102,
-            105,
-            148,
-            151
+            69,
+            103,
+            106,
+            149,
+            152
           ]
         },
         {
@@ -21837,7 +21901,15 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            121
+            122
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            61
           ]
         },
         {
@@ -21845,7 +21917,7 @@
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            62
+            63
           ]
         },
         {
@@ -21853,7 +21925,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            73
+            74
           ]
         },
         {
@@ -21861,8 +21933,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            134,
-            140
+            135,
+            141
           ]
         }
       ]
@@ -22532,7 +22604,7 @@
     },
     {
       "file": "src/pages/admin/AdminInvestments.tsx",
-      "sha256": "5c0ca25cf337a28d4a893f60325c41d6b2ee95d136b9fc77257868c2c8cf1d6a",
+      "sha256": "da516e0ba7c37727851d165b10c196624e3f26178e8a6297d355048bbe7583f7",
       "directRouteDeclarations": [
         {
           "id": "e2df44ae632232da",
@@ -22549,11 +22621,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            246,
-            458,
-            466,
-            850,
-            857
+            247,
+            459,
+            467,
+            851,
+            858
           ]
         },
         {
@@ -22561,13 +22633,13 @@
           "source": "@/components/ui/card",
           "instances": 7,
           "lines": [
-            255,
-            270,
-            285,
-            300,
-            368,
-            380,
-            752
+            256,
+            271,
+            286,
+            301,
+            369,
+            381,
+            753
           ]
         },
         {
@@ -22575,20 +22647,28 @@
           "source": "@/components/ui/input",
           "instances": 9,
           "lines": [
-            323,
-            612,
-            677,
-            689,
-            699,
-            711,
-            721,
-            732,
-            741
+            324,
+            613,
+            678,
+            690,
+            700,
+            712,
+            722,
+            733,
+            742
           ]
         },
         {
           "name": "PageHeader",
           "source": "@/components/uno/PageHeader",
+          "instances": 1,
+          "lines": [
+            243
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
             242
@@ -22599,14 +22679,14 @@
           "source": "@/components/ui/select",
           "instances": 8,
           "lines": [
-            332,
-            346,
-            536,
-            555,
-            576,
-            595,
-            663,
-            779
+            333,
+            347,
+            537,
+            556,
+            577,
+            596,
+            664,
+            780
           ]
         },
         {
@@ -22614,7 +22694,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            488
+            489
           ]
         },
         {
@@ -22622,7 +22702,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            500
+            501
           ]
         }
       ]
@@ -22822,7 +22902,7 @@
     },
     {
       "file": "src/pages/admin/AdminLifeOS.tsx",
-      "sha256": "d37fd1722d0de6fd3016cf5144d55e9609860059f53d97d99effb3c45f1f525a",
+      "sha256": "d1fcda54d2a437908ac7585a1924c5ddea674da1dc6f09a24a649278161fc02f",
       "directRouteDeclarations": [
         {
           "id": "5e6577d45fc12924",
@@ -22835,18 +22915,26 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            86
+          ]
+        },
+        {
           "name": "Tabs",
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            107
+            108
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminLocationKnowledge.tsx",
-      "sha256": "65eab9708adade5d76dded415130b97c5a68cd06b9fd4744ec04c69dd7aa6e0a",
+      "sha256": "89d5fb4b79858b661d07a5447720731f1828aebf41ece2d134c4247082e4a68d",
       "directRouteDeclarations": [
         {
           "id": "ee792f387f76e7b9",
@@ -22863,13 +22951,13 @@
           "source": "@/components/ui/button",
           "instances": 7,
           "lines": [
-            317,
-            349,
-            394,
-            460,
-            468,
-            648,
-            651
+            318,
+            350,
+            395,
+            461,
+            469,
+            649,
+            652
           ]
         },
         {
@@ -22877,12 +22965,12 @@
           "source": "@/components/ui/card",
           "instances": 6,
           "lines": [
-            356,
-            362,
-            368,
-            374,
-            390,
-            412
+            357,
+            363,
+            369,
+            375,
+            391,
+            413
           ]
         },
         {
@@ -22890,7 +22978,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            491
+            492
           ]
         },
         {
@@ -22898,12 +22986,20 @@
           "source": "@/components/ui/input",
           "instances": 6,
           "lines": [
-            341,
-            547,
-            555,
-            566,
-            577,
-            585
+            342,
+            548,
+            556,
+            567,
+            578,
+            586
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            305
           ]
         },
         {
@@ -22911,9 +23007,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            326,
-            511,
-            529
+            327,
+            512,
+            530
           ]
         },
         {
@@ -22921,10 +23017,10 @@
           "source": "@/components/ui/textarea",
           "instances": 4,
           "lines": [
-            597,
-            606,
-            618,
-            629
+            598,
+            607,
+            619,
+            630
           ]
         }
       ]
@@ -22997,7 +23093,7 @@
     },
     {
       "file": "src/pages/admin/AdminMCDashboard.tsx",
-      "sha256": "84f115097c020141a895b7177f2cb12a1aa89dc40749c43b08ca659ad4388dea",
+      "sha256": "61813e763bfc84775ed8328356907c8d3bd122cf560c3e8529cbb82dd3d03f8b",
       "directRouteDeclarations": [
         {
           "id": "8d96a32610dcbca9",
@@ -23014,7 +23110,15 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            205
+            206
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            166
           ]
         },
         {
@@ -23022,7 +23126,7 @@
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            167
+            168
           ]
         },
         {
@@ -23030,7 +23134,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            231
+            232
           ]
         },
         {
@@ -23038,8 +23142,8 @@
           "source": "@/components/ui/tabs",
           "instances": 2,
           "lines": [
-            175,
-            194
+            176,
+            195
           ]
         }
       ]
@@ -23174,7 +23278,7 @@
     },
     {
       "file": "src/pages/admin/AdminNewbuilds.tsx",
-      "sha256": "175c6ff5edcdd6326eaddb17cdf02c031021f474b63178f72adf87ab62ba4824",
+      "sha256": "136f8b69486e734ce8df0301f8566f3c8775b050f9c22eeba590cf8ead17db93",
       "directRouteDeclarations": [
         {
           "id": "b581590ef06396d2",
@@ -23191,22 +23295,22 @@
           "source": "@/components/ui/button",
           "instances": 16,
           "lines": [
-            153,
             154,
             155,
-            255,
-            258,
-            261,
-            274,
-            277,
-            371,
-            374,
-            377,
-            451,
+            156,
+            256,
+            259,
+            262,
+            275,
+            278,
+            372,
+            375,
+            378,
             452,
-            487,
-            506,
-            510
+            453,
+            488,
+            507,
+            511
           ]
         },
         {
@@ -23214,22 +23318,30 @@
           "source": "@/components/ui/input",
           "instances": 16,
           "lines": [
-            180,
-            389,
-            393,
-            397,
-            401,
-            416,
-            431,
-            435,
-            439,
-            468,
-            481,
-            518,
-            522,
-            526,
-            530,
-            534
+            181,
+            390,
+            394,
+            398,
+            402,
+            417,
+            432,
+            436,
+            440,
+            469,
+            482,
+            519,
+            523,
+            527,
+            531,
+            535
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            147
           ]
         },
         {
@@ -23237,9 +23349,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            183,
-            406,
-            421
+            184,
+            407,
+            422
           ]
         },
         {
@@ -23247,7 +23359,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            168
+            169
           ]
         }
       ]
@@ -23308,7 +23420,7 @@
     },
     {
       "file": "src/pages/admin/AdminOperations.tsx",
-      "sha256": "adb1d39132eb319d5dce0c069c5cd7a9c9c36f85a0bf0a105cd819deeadd6c9d",
+      "sha256": "6f6ed93ba02b4f70c43d03e4962e51f9e0ab838122a24c6514bd91e5f432c64a",
       "directRouteDeclarations": [
         {
           "id": "3a149afaf0247437",
@@ -23325,8 +23437,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            137,
-            156
+            132,
+            152
           ]
         },
         {
@@ -23334,7 +23446,15 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            149
+            145
+          ]
+        },
+        {
+          "name": "PageHeader",
+          "source": "@/components/page/PageHeader",
+          "instances": 1,
+          "lines": [
+            128
           ]
         },
         {
@@ -23342,7 +23462,7 @@
           "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
-            126
+            127
           ]
         },
         {
@@ -23350,14 +23470,14 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            173
+            169
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminPMCompanies.tsx",
-      "sha256": "3abbe4f1df681eec312f13eccacf2703c9755e0d010891a1641832a2cd63eb79",
+      "sha256": "63c8a7449941f34361569b84a4236549038431902dfe3880e7184d7d0384000e",
       "directRouteDeclarations": [
         {
           "id": "5fe0c835a767c6c7",
@@ -23374,14 +23494,14 @@
           "source": "@/components/ui/button",
           "instances": 8,
           "lines": [
-            213,
-            272,
-            524,
-            527,
-            544,
-            547,
-            570,
-            578
+            214,
+            273,
+            525,
+            528,
+            545,
+            548,
+            571,
+            579
           ]
         },
         {
@@ -23389,8 +23509,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            232,
-            246
+            233,
+            247
           ]
         },
         {
@@ -23398,8 +23518,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            339,
-            535
+            340,
+            536
           ]
         },
         {
@@ -23407,7 +23527,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            270
+            271
           ]
         },
         {
@@ -23415,15 +23535,23 @@
           "source": "@/components/ui/input",
           "instances": 9,
           "lines": [
-            222,
-            371,
-            382,
-            390,
-            401,
-            408,
-            418,
-            474,
-            482
+            223,
+            372,
+            383,
+            391,
+            402,
+            409,
+            419,
+            475,
+            483
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            203
           ]
         },
         {
@@ -23431,7 +23559,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            555
+            556
           ]
         }
       ]
@@ -23625,7 +23753,7 @@
     },
     {
       "file": "src/pages/admin/AdminProjectDocuments.tsx",
-      "sha256": "01ec21261e6f3301d8383f231ee8e8b8c2bbdd069a4cf089698e4f68a97936b7",
+      "sha256": "0776c5e9913f2bc23dd1dbeba445f2526743b5e1c14f734d147e1c0684572409",
       "directRouteDeclarations": [
         {
           "id": "ad241664b9cad991",
@@ -23642,7 +23770,15 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            30
+            31
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            29
           ]
         }
       ]
@@ -23856,7 +23992,7 @@
     },
     {
       "file": "src/pages/admin/AdminProviderDetail.tsx",
-      "sha256": "86b812a045e4299fda73e8ff19dedff39168fec412f12d0fbd5324a52af3a9c7",
+      "sha256": "5b9e2f79b1a6655fbff2814a2be91c8b64761a137be30d57555a7eeecc7f10d5",
       "directRouteDeclarations": [
         {
           "id": "da2c96170bc38603",
@@ -23873,7 +24009,15 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            49
+            50
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            64
           ]
         },
         {
@@ -23881,7 +24025,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            68
+            69
           ]
         }
       ]
@@ -24129,7 +24273,7 @@
     },
     {
       "file": "src/pages/admin/AdminRelocationArticles.tsx",
-      "sha256": "466432ba9ba589f1dc0edef0e69f1a321648f2b8ac8083b10d2320f63bf9c567",
+      "sha256": "74a76b019bdd9503f055c6972efd5f41946ed0b67f18f7f8df2f0f438b6e78d3",
       "directRouteDeclarations": [
         {
           "id": "1ba65316045d6144",
@@ -24146,9 +24290,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            68,
-            147,
-            150
+            69,
+            148,
+            151
           ]
         },
         {
@@ -24156,7 +24300,15 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            82
+            83
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            61
           ]
         },
         {
@@ -24164,7 +24316,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            89
+            90
           ]
         },
         {
@@ -24172,7 +24324,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            73
+            74
           ]
         }
       ]
@@ -24337,7 +24489,7 @@
     },
     {
       "file": "src/pages/admin/AdminReview.tsx",
-      "sha256": "79d053bb93b25ffe273f76a1948a46c3eca2591bc10d233e9c4aa68a8b5f720b",
+      "sha256": "9d63e42e046f3de79edadfa20ddd5ce9e488e279f398e13fb9a22908c20a04ac",
       "directRouteDeclarations": [
         {
           "id": "7c181e676ede1323",
@@ -24350,11 +24502,19 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
-          "name": "PageShell",
-          "source": "@/components/page/PageShell",
+          "name": "PageHeader",
+          "source": "@/components/page",
           "instances": 1,
           "lines": [
-            8
+            10
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page",
+          "instances": 1,
+          "lines": [
+            9
           ]
         }
       ]
@@ -24562,7 +24722,7 @@
     },
     {
       "file": "src/pages/admin/AdminSystemSettings.tsx",
-      "sha256": "98dc90d394eb8d49f8f466e2a6c8a056a8f837d67194ad29cac648d66510031e",
+      "sha256": "30f2d3b5ee9108522f869d4af78f722d187e3111fcabbb09572744ccfa793a69",
       "directRouteDeclarations": [
         {
           "id": "9c8bbbd0a2edcc13",
@@ -24575,11 +24735,19 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            42
+          ]
+        },
+        {
           "name": "SectionHeader",
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            42
+            43
           ]
         },
         {
@@ -24587,7 +24755,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            68
+            69
           ]
         }
       ]
@@ -24642,7 +24810,7 @@
     },
     {
       "file": "src/pages/admin/AdminThaiBusiness.tsx",
-      "sha256": "5b39c2cc9dcda0f3ceeb926ea6aaadb7e769d0a92d41c459310284a944caf57d",
+      "sha256": "823957c5ea1559dee1592125aaeab6cd3ecb712ee3af118586ee887932bfff67",
       "directRouteDeclarations": [
         {
           "id": "cafc668320c85cb8",
@@ -24659,8 +24827,16 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            89,
-            93
+            90,
+            94
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            29
           ]
         }
       ]
@@ -24943,7 +25119,7 @@
     },
     {
       "file": "src/pages/admin/AdminTranslations.tsx",
-      "sha256": "f808e43a5b648575465c14e9f2aec100f8ce15e3a8e9133f2fe510117b3409c2",
+      "sha256": "2f1fa9ef75f5d0f3038d693fdabe9993df9f7e1939692a5b510040fd02ad6e6d",
       "directRouteDeclarations": [
         {
           "id": "9b7fb670e34a28bb",
@@ -24960,8 +25136,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            98,
-            112
+            99,
+            113
           ]
         },
         {
@@ -24969,18 +25145,26 @@
           "source": "@/components/ui/card",
           "instances": 5,
           "lines": [
-            52,
-            61,
-            69,
-            79,
-            90
+            53,
+            62,
+            70,
+            80,
+            91
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            26
           ]
         }
       ]
     },
     {
       "file": "src/pages/admin/AdminTrash.tsx",
-      "sha256": "f9431deb856609f66332861616b11c651dfd1976466292774fe05e2c5703de9d",
+      "sha256": "e1d1a2955b05f5aa93ce155972ad2d05bce222a6fb370c4560d800b581382d95",
       "directRouteDeclarations": [
         {
           "id": "30ac38cf32fe7c53",
@@ -24997,13 +25181,21 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            117,
-            123
+            118,
+            124
           ]
         },
         {
           "name": "PageHeader",
           "source": "@/components/uno/PageHeader",
+          "instances": 1,
+          "lines": [
+            76
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
             75
@@ -25014,7 +25206,7 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            92
+            93
           ]
         }
       ]
@@ -25158,7 +25350,7 @@
     },
     {
       "file": "src/pages/admin/AdminUsersAccess.tsx",
-      "sha256": "ae22ab3599eea10581b5edc6f012187b364773fc622e333b464126094973da78",
+      "sha256": "dbf9a70783e520fd559cbf7d50dc69f4729b2756e64bd5621829fbb393ac1e2d",
       "directRouteDeclarations": [
         {
           "id": "44332b35204511d5",
@@ -25171,11 +25363,19 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            15
+          ]
+        },
+        {
           "name": "SectionHeader",
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            15
+            16
           ]
         },
         {
@@ -25183,7 +25383,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            22
+            23
           ]
         }
       ]
@@ -25478,7 +25678,7 @@
     },
     {
       "file": "src/pages/admin/ExperienceCategoriesPage.tsx",
-      "sha256": "bd45c7e441fcfa4a69484fdf1cd91e24db784499c6cc9d00e3bc0badebdb6b29",
+      "sha256": "8edc920ee5fe36f64996ad2162cdfbd4fc2c4a930faad90aa766a84a8a6012dd",
       "directRouteDeclarations": [
         {
           "id": "cbc3b32a37d823a3",
@@ -25495,13 +25695,13 @@
           "source": "@/components/ui/button",
           "instances": 7,
           "lines": [
-            114,
-            175,
-            183,
-            291,
-            294,
-            315,
-            318
+            115,
+            176,
+            184,
+            292,
+            295,
+            316,
+            319
           ]
         },
         {
@@ -25509,7 +25709,7 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            120
+            121
           ]
         },
         {
@@ -25517,8 +25717,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            203,
-            303
+            204,
+            304
           ]
         },
         {
@@ -25526,11 +25726,19 @@
           "source": "@/components/ui/input",
           "instances": 5,
           "lines": [
-            218,
-            227,
-            238,
-            247,
-            273
+            219,
+            228,
+            239,
+            248,
+            274
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            105
           ]
         },
         {
@@ -25538,7 +25746,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            261
+            262
           ]
         },
         {
@@ -25546,7 +25754,7 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            132
+            133
           ]
         }
       ]
@@ -28221,7 +28429,7 @@
     },
     {
       "file": "src/pages/flowers/BouquetDetail.tsx",
-      "sha256": "a781f4080c8a796665a251dd06bfa42f784cdf8d008bab61e69db1e1e9065622",
+      "sha256": "60c6842cdd7790b46d6561b452b77b540eaa85a386c6f796c4648ee705f55d49",
       "directRouteDeclarations": [
         {
           "id": "1690ba891b6e565a",
@@ -28238,16 +28446,16 @@
           "source": "@/components/ui/button",
           "instances": 10,
           "lines": [
-            110,
-            178,
-            182,
-            185,
-            425,
-            435,
-            449,
-            453,
-            457,
-            467
+            111,
+            179,
+            183,
+            186,
+            412,
+            422,
+            436,
+            440,
+            444,
+            454
           ]
         }
       ]
@@ -28284,7 +28492,7 @@
     },
     {
       "file": "src/pages/flowers/FlowersIndex.tsx",
-      "sha256": "7212b6ff513dd084db29b6c672483a1b8c92f90fd1d9cffdddd675fd8bdae471",
+      "sha256": "86197ad312ca58cd4eb4553ba272857fba06bd552ffbc77f339f20d32b5e7e34",
       "directRouteDeclarations": [
         {
           "id": "270aae459a99c26f",
@@ -28301,7 +28509,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            215
+            206
           ]
         },
         {
@@ -28309,7 +28517,7 @@
           "source": "@/components/uno/EmptyState",
           "instances": 1,
           "lines": [
-            207
+            198
           ]
         }
       ]
@@ -39549,7 +39757,7 @@
     },
     {
       "file": "src/pages/property/PropertyInquiry.tsx",
-      "sha256": "0329d019ca14e75da87c1dd4aa9654584407ba396c5afc7ba2e0989ba8018601",
+      "sha256": "08e151d37f65fa878625d50e9294dcd3d1532c98b40f7c6779f81e016d288a4e",
       "directRouteDeclarations": [
         {
           "id": "9c5694cfb18afc81",
@@ -39566,13 +39774,13 @@
           "source": "@/components/ui/button",
           "instances": 7,
           "lines": [
-            370,
-            386,
-            467,
-            483,
-            506,
-            777,
-            853
+            372,
+            388,
+            469,
+            485,
+            508,
+            781,
+            857
           ]
         },
         {
@@ -39580,9 +39788,9 @@
           "source": "@/components/ui/input",
           "instances": 3,
           "lines": [
-            655,
-            670,
-            681
+            659,
+            674,
+            685
           ]
         },
         {
@@ -39590,7 +39798,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            697
+            701
           ]
         }
       ]
@@ -39657,7 +39865,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "6feee341c5d2e983596f9d52bb9c4c3dc02c9624096b8856d7f4f1047deac4fb",
+      "sha256": "330e1a05d120c6e2fd738871953a1f09a170755a3cabd2eb2744de24a2fb89ba",
       "directRouteDeclarations": [
         {
           "id": "3d68906b3367f767",
@@ -39677,9 +39885,9 @@
             362,
             374,
             385,
-            454,
-            464,
-            471
+            455,
+            465,
+            472
           ]
         }
       ]

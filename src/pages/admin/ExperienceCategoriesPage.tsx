@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminExperienceCategories, ExperienceCategory, ExperienceCategoryInsert } from '@/hooks/useExperienceCategories';
@@ -101,7 +102,7 @@ export default function ExperienceCategoriesPage() {
   const isSaving = isCreating || isUpdating;
 
   return (
-    <div className="container max-w-6xl py-6 space-y-6">
+    <PageShell width="wide" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">
@@ -326,6 +327,6 @@ export default function ExperienceCategoriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

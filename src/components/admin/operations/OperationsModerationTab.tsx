@@ -5,7 +5,7 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -116,17 +116,17 @@ export function OperationsModerationTab() {
     : item.type === 'listing' ? label(["Open category catalog", "Открыть каталог категории", "เปิดแคตตาล็อกหมวดหมู่"]) : label(["Open catalog", "Открыть каталог", "เปิดแคตตาล็อก"]);
 
   return (
-    <Card className="min-w-0 overflow-hidden border-border/70 shadow-sm">
+    <Card className="min-w-0">
       <ModerationDetailDialog selection={detail} onClose={()=>{setDetail(null);void refetch();}} onReturnFocus={()=>reviewButton.current?.focus()} />
-      <CardHeader className="border-b border-border/70 bg-muted/20 pb-5 pt-6">
-        <CardTitle className="flex items-center gap-3 font-display text-xl sm:text-2xl"><ShieldCheck className="h-5 w-5 shrink-0" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</CardTitle>
-        <p className="text-sm text-muted-foreground">{label([
+      <CardHeader className="border-b bg-muted/20">
+        <h2 className="flex items-center gap-3 font-display text-h3"><ShieldCheck className="h-5 w-5 shrink-0" aria-hidden="true" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</h2>
+        <CardDescription>{label([
           'Pending approval: listings and properties. Inactive services and products are shown separately.',
           'Ожидают одобрения: листинги и недвижимость. Неактивные услуги и товары показаны отдельно.',
           'รออนุมัติ: รายการและที่พัก บริการและสินค้าที่ไม่ใช้งานแสดงแยกต่างหาก',
-        ])}</p>
+        ])}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5 min-w-0 pt-5">
+      <CardContent className="ds-section-stack ds-section-stack--compact min-w-0 pt-[var(--card-padding)]">
         <Tabs value={activeTab} onValueChange={value => setFilters({ queue: value, q: '', type: 'all', category: 'all' })}>
           <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted/50 p-1 lg:grid-cols-4">
             <TabsTrigger value="pending" className="min-h-11 whitespace-normal">{label(["Pending review", "На проверке", "รอตรวจสอบ"])}</TabsTrigger>
@@ -176,9 +176,9 @@ export function OperationsModerationTab() {
                   const destination = moderationReviewDestination(item, location.pathname + location.search);
                   const date = item.created_at ? new Date(item.created_at) : null;
                   const approval = item.approval_status === 'pending' ? label(["Pending", "Ожидает", "รออนุมัติ"]) : item.approval_status === 'approved' ? label(["Approved", "Одобрено", "อนุมัติแล้ว"]) : item.approval_status === 'rejected' ? label(["Rejected", "Отклонено", "ไม่อนุมัติ"]) : item.approval_status === 'draft' ? label(['Draft', 'Черновик', 'ฉบับร่าง']) : item.approval_status || label(["Unknown", "Неизвестно", "ไม่ทราบ"]);
-                  return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-primary/30 sm:p-5">
+                  return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 space-y-3 border bg-card p-[var(--card-padding)]">
                     <div className="flex flex-wrap items-center gap-2"><Badge variant="outline">{label(typeLabels[item.type])}</Badge>{categoryOf(item) && <span className="text-xs text-muted-foreground break-words">{categoryLabel(categoryOf(item))}</span>}</div>
-                    <h3 className="font-display text-lg font-semibold leading-snug break-words [overflow-wrap:anywhere]">{name}</h3>
+                    <h3 className="font-display text-h4 [overflow-wrap:anywhere]">{name}</h3>
                     <dl className="grid gap-x-6 gap-y-3 border-t border-border/60 pt-3 text-sm sm:grid-cols-3">
                       <div className="min-w-0"><dt className="mb-1 text-xs text-muted-foreground">{label(["Provider", "Провайдер", "ผู้ให้บริการ"])}</dt><dd className="break-words">{item.provider_name || label(["Not available", "Нет данных", "ไม่มีข้อมูล"])}</dd></div>
                       <div><dt className="mb-1 text-xs text-muted-foreground">{label(["Created", "Создано", "วันที่สร้าง"])}</dt><dd>{date && !Number.isNaN(date.getTime()) ? format(date, 'dd.MM.yyyy') : label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</dd></div>

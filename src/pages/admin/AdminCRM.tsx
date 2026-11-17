@@ -1,3 +1,5 @@
+import { PageHeader } from '@/components/page/PageHeader';
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,39 +20,34 @@ export default function AdminCRM() {
   const [vendorView, setVendorView] = useState<'pipeline' | 'table' | 'stats'>('pipeline');
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold">{isRu ? 'CRM — Привлечение' : 'CRM — Acquisition Hub'}</h1>
-          <p className="text-muted-foreground text-sm">
-            {isRu ? 'Единый центр привлечения вендоров, пользователей и собственников' : 'Unified hub for vendor, user & owner acquisition'}
-          </p>
-        </div>
-        {/* Admin ↔ MC context: switch into the house MC (or any company you belong to). */}
-        <CompanySwitcher />
-      </div>
+    <PageShell width="workspace" className="space-y-4">
+      <PageHeader
+        title={isRu ? 'CRM — Привлечение' : 'CRM — Acquisition Hub'}
+        subtitle={isRu ? 'Единый центр привлечения вендоров, пользователей и собственников' : 'Unified hub for vendor, user & owner acquisition'}
+        actions={<CompanySwitcher />}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
-          <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-background">
+          <TabsTrigger value="dashboard" className="min-h-11 flex-none gap-2">
             <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Обзор' : 'Dashboard'}</span>
+            <span>{isRu ? 'Обзор' : 'Dashboard'}</span>
           </TabsTrigger>
-          <TabsTrigger value="vendors" className="gap-2 data-[state=active]:bg-background">
+          <TabsTrigger value="vendors" className="min-h-11 flex-none gap-2">
             <Target className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Вендоры' : 'Vendors'}</span>
+            <span>{isRu ? 'Вендоры' : 'Vendors'}</span>
           </TabsTrigger>
-          <TabsTrigger value="owners" className="gap-2 data-[state=active]:bg-background">
+          <TabsTrigger value="owners" className="min-h-11 flex-none gap-2">
             <Building2 className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Собственники' : 'Owners'}</span>
+            <span>{isRu ? 'Собственники' : 'Owners'}</span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="gap-2 data-[state=active]:bg-background">
+          <TabsTrigger value="activity" className="min-h-11 flex-none gap-2">
             <Activity className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Активность' : 'Activity'}</span>
+            <span>{isRu ? 'Активность' : 'Activity'}</span>
           </TabsTrigger>
-          <TabsTrigger value="outreach" className="gap-2 data-[state=active]:bg-background">
+          <TabsTrigger value="outreach" className="min-h-11 flex-none gap-2">
             <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">{isRu ? 'Аутрич' : 'Outreach'}</span>
+            <span>{isRu ? 'Аутрич' : 'Outreach'}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -89,6 +86,6 @@ export default function AdminCRM() {
           <VendorOutreachPanel />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

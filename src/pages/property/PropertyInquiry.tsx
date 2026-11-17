@@ -118,8 +118,10 @@ export default function PropertyInquiry() {
   const checkOutParam = searchParams.get('checkOut');
   const guestsParam = searchParams.get('guests');
 
-  const checkIn = checkInParam ? parseISO(checkInParam) : null;
-  const checkOut = checkOutParam ? parseISO(checkOutParam) : null;
+  // Keep date identity stable across form/loading renders. The date-price
+  // effect must restart only when the URL dates (or explicit retry) change.
+  const checkIn = useMemo(() => checkInParam ? parseISO(checkInParam) : null, [checkInParam]);
+  const checkOut = useMemo(() => checkOutParam ? parseISO(checkOutParam) : null, [checkOutParam]);
   const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
 
   const hasDates = checkIn && checkOut;
@@ -611,9 +613,11 @@ export default function PropertyInquiry() {
             {!isInstantBooking && (
               <div className="p-3 rounded-none bg-muted/50 border">
                 <p className="text-sm text-muted-foreground">
-                  {isRu
-                    ? 'Оплата не списывается сейчас. Хозяин рассмотрит ваш запрос в течение 24 часов.'
-                    : "You won't be charged yet. The host will review your request within 24 hours."}
+                  {t({
+                    ru: 'Оплата не списывается сейчас. Команда myUNO проверит доступность и условия и свяжется с вами. Запрос не подтверждает бронирование.',
+                    en: "You won't be charged yet. The myUNO team will check availability and terms and contact you. This request does not confirm a booking.",
+                    th: 'ยังไม่มีการเรียกเก็บเงิน ทีม myUNO จะตรวจสอบห้องว่างและเงื่อนไขแล้วติดต่อคุณ คำขอนี้ยังไม่ใช่การยืนยันการจอง',
+                  })}
                 </p>
               </div>
             )}
@@ -693,7 +697,7 @@ export default function PropertyInquiry() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="message">{isRu ? 'Сообщение хозяину (опционально)' : 'Message to host (optional)'}</Label>
+                <Label htmlFor="message">{t({ ru: 'Сообщение команде myUNO (необязательно)', en: 'Message to the myUNO team (optional)', th: 'ข้อความถึงทีม myUNO (ไม่บังคับ)' })}</Label>
                 <Textarea
                   id="message"
                   value={formData.message}
@@ -717,7 +721,7 @@ export default function PropertyInquiry() {
             <p className="text-sm text-muted-foreground">
               {rentalTerms?.cancellation_policy
                 ? propertyCancellationDescription(rentalTerms.cancellation_policy, isRu ? 'ru' : 'en')
-                : (isRu ? 'Уточняйте у хозяина' : 'Check with the host')}
+                : t({ ru: 'Уточните условия у команды myUNO', en: 'Check the terms with the myUNO team', th: 'สอบถามเงื่อนไขกับทีม myUNO' })}
             </p>
           </section>
 
@@ -1032,9 +1036,11 @@ export default function PropertyInquiry() {
                     if (draftKey) {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
-                    toast.success(isRu
-                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
-                      : "Request sent! We'll WhatsApp you within 24 hours.");
+                    toast.success(t({
+                      ru: 'Запрос отправлен. Команда myUNO свяжется с вами для уточнения деталей.',
+                      en: 'Request sent. The myUNO team will contact you to discuss the details.',
+                      th: 'ส่งคำขอแล้ว ทีม myUNO จะติดต่อคุณเพื่อสอบถามรายละเอียด',
+                    }));
                     setSubmittedOrderId(result.order_id);
                   } else {
                     // Bug #3 fix: surface failures from createOrder so the user
@@ -1068,11 +1074,13 @@ export default function PropertyInquiry() {
                 ? (paymentMethod === 'card'
                     ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
                     : paymentMethod === 'rub_manual'
-                      ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
-                      : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
-                : (isRu
-                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
-                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
+                      ? t({ ru: 'Команда myUNO свяжется с вами по вопросу оплаты', en: 'The myUNO team will contact you about payment', th: 'ทีม myUNO จะติดต่อคุณเกี่ยวกับการชำระเงิน' })
+                      : t({ ru: 'Команда myUNO свяжется с вами', en: 'The myUNO team will contact you', th: 'ทีม myUNO จะติดต่อคุณ' }))
+                : t({
+                    ru: 'Оплата не списывается. Команда myUNO свяжется с вами для уточнения доступности и условий. Бронирование ещё не подтверждено.',
+                    en: "You won't be charged. The myUNO team will contact you about availability and terms. Your booking is not confirmed yet.",
+                    th: 'ยังไม่มีการเรียกเก็บเงิน ทีม myUNO จะติดต่อคุณเกี่ยวกับห้องว่างและเงื่อนไข การจองของคุณยังไม่ได้รับการยืนยัน',
+                  })}
             </p>
           </div>
         )}

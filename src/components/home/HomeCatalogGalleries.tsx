@@ -117,8 +117,7 @@ export function HomeExperienceGallery() {
     en: 'More of the island',
     th: 'สัมผัสประสบการณ์บนเกาะ',
   });
-  // Successful empty supply is omitted; a failed read remains retryable.
-  if (!isLoading && !error && !preview.length) return null;
+  // Keep a clear route to experiences even when the photo preview is empty.
   return (
     <section
       className="home-catalog home-experiences home-container"
@@ -144,15 +143,15 @@ export function HomeExperienceGallery() {
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </div>
-      {isLoading || error || !experiences.length ? (
+      {isLoading || error || !preview.length ? (
         <CatalogState
           loading={isLoading}
           error={Boolean(error)}
           retry={refetch}
           empty={{
-            ru: 'Опубликованных впечатлений пока нет. Загляните позже.',
-            en: 'No published experiences yet. Check back later.',
-            th: 'ยังไม่มีประสบการณ์ที่เผยแพร่ โปรดกลับมาดูอีกครั้ง',
+            ru: 'Пока нет подборки с фотографиями. Посмотрите каталог впечатлений.',
+            en: 'No photo preview yet. Explore the experiences catalogue.',
+            th: 'ยังไม่มีภาพตัวอย่าง ดูรายการประสบการณ์ทั้งหมด',
           }}
         />
       ) : (
@@ -208,19 +207,24 @@ export function HomeServiceGallery() {
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
 
-  return <HomeGallery id="home-services-title" className="home-services" title={title}
+  return <><HomeGallery id="home-services-title" className="home-services" title={title}
     description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}
     href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все категории', en: 'All categories', th: 'ทุกหมวดหมู่' })}
     state={!catalog.isLoading && !catalog.error && !categories.length ? <p className="home-catalog-state">{t({ ru: 'Подборка появится после публикации категорий. Полный каталог доступен по ссылке.', en: 'The preview will appear when categories are published. Explore the full catalogue using the link.', th: 'ตัวอย่างจะแสดงเมื่อเผยแพร่หมวดหมู่ ดูรายการทั้งหมดได้จากลิงก์' })}</p> : catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
-      {categories.map(category => <article className="home-service-category-card" key={category.id}>
+      {categories.map(category => <article className={`home-service-category-card${category.path === R.FLOWERS || category.path === R.YACHTS ? ' home-service-category-card--photo' : ''}`} key={category.id}>
         <Link to={category.path}>
           <ServiceCategoryArt image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
-          <div className="home-service-category-copy"><h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
+          <div className="home-service-category-copy">{(category.path === R.FLOWERS || category.path === R.YACHTS) && <p className="home-category-photo-note">{t({ ru: 'Фото для вдохновения. Предложения — в каталоге.', en: 'Inspiration photo. Explore current offers in the catalogue.', th: 'ภาพเพื่อเป็นแรงบันดาลใจ ดูข้อเสนอในหมวดหมู่' })}</p>}<h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
             <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>
         </Link>
         {category.secondary && <Link className="home-service-secondary" to={category.secondary.path}>{pickLang(language, category.secondary.label)}<ArrowRight size={16} aria-hidden="true" /></Link>}
       </article>)}
-  </HomeGallery>;
+  </HomeGallery>
+    <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Каталоги цветов и яхт', en: 'Flower and yacht catalogues', th: 'หมวดหมู่ดอกไม้และเรือยอชต์' })}>
+      <Link className="home-text-link" to={R.FLOWERS}>{t({ ru: 'Каталог цветов', en: 'Flower catalogue', th: 'หมวดหมู่ดอกไม้' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+      <Link className="home-text-link" to={R.YACHTS}>{t({ ru: 'Каталог яхт', en: 'Yacht catalogue', th: 'หมวดหมู่เรือยอชต์' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+    </nav>
+  </>;
 }

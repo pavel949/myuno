@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 /**
  * LifeOS Admin Control Center
  * Per LIFE OS Contract: Orchestration layer, not replacement
@@ -82,7 +83,7 @@ export default function AdminLifeOS() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <PageShell width="workspace" className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -150,6 +151,6 @@ export default function AdminLifeOS() {
           <LifeOSAIPanel />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

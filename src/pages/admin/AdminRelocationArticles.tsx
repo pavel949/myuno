@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -57,7 +58,7 @@ export default function AdminRelocationArticles() {
   const openEdit = (a: AdminRelocationArticleRow) => { setEditing(a); setEditorOpen(true); };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-4 max-w-6xl">
+    <PageShell width="wide" className="space-y-4">
       <Helmet><title>Relocation Articles · Admin</title></Helmet>
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -197,6 +198,6 @@ export default function AdminRelocationArticles() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }

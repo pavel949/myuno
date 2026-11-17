@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,7 +72,7 @@ export default function AdminTrash() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageShell width="workspace" className="space-y-6">
       <PageHeader
         title={isRussian ? 'Корзина' : 'Trash'}
         showBack
@@ -161,6 +162,6 @@ export default function AdminTrash() {
           ? 'Объекты в корзине автоматически удаляются через 30 дней.'
           : 'Items in trash are automatically deleted after 30 days.'}
       </p>
-    </div>
+    </PageShell>
   );
 }

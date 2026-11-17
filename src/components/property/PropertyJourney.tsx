@@ -10,14 +10,14 @@ import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 
 type JourneyProperty = Property & { tenancy_modes?: string[] | null };
 
-export function PropertyOfferLinks({ property, mode, search = '' }: { property: JourneyProperty; mode?: 'rent' | 'buy'; search?: string }) {
+export function PropertyOfferLinks({ property, mode, search = '', focused = false }: { property: JourneyProperty; mode?: 'rent' | 'buy'; search?: string; focused?: boolean }) {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const offers = propertyOffers(property);
   return <nav className="property-offer-links" aria-label={t({ ru: 'Предложения по объекту', en: 'Property offers', th: 'ข้อเสนอของที่พัก' })}>
-    {offers.rent && <Link to={propertyOfferHref(property.id, 'rent', search)} aria-current={mode === 'rent' ? 'page' : undefined}>{t({ ru: 'Арендовать', en: 'Rent', th: 'เช่า' })}</Link>}
-    {offers.buy && <Link to={propertyOfferHref(property.id, 'buy', search)} aria-current={mode === 'buy' ? 'page' : undefined}>{t({ ru: 'Купить', en: 'Buy', th: 'ซื้อ' })}</Link>}
-    {offers.long && <Link to={propertyOfferHref(property.id, 'rent', search, 'long')}>{t({ ru: 'Снять надолго', en: 'Long stay', th: 'เช่าระยะยาว' })}</Link>}
+    {offers.rent && (!focused || mode !== 'buy') && <Link to={propertyOfferHref(property.id, 'rent', search)} aria-current={mode === 'rent' ? 'page' : undefined}>{t({ ru: 'Арендовать', en: 'Rent', th: 'เช่า' })}</Link>}
+    {offers.buy && (!focused || mode !== 'rent') && <Link to={propertyOfferHref(property.id, 'buy', search)} aria-current={mode === 'buy' ? 'page' : undefined}>{t({ ru: 'Купить', en: 'Buy', th: 'ซื้อ' })}</Link>}
+    {offers.long && !focused && <Link to={propertyOfferHref(property.id, 'rent', search, 'long')}>{t({ ru: 'Снять надолго', en: 'Long stay', th: 'เช่าระยะยาว' })}</Link>}
   </nav>;
 }
 

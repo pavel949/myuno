@@ -15,7 +15,7 @@ vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet
 vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button>, HomePlanLinks: () => <nav>Search shortcuts</nav> }));
 vi.mock('@/components/home/HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => <section>Published housing</section>, HomeNewbuildsPreview: () => <section>Published new developments</section> }));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => <section aria-label="Project gallery">Populated public projects</section> }));
-vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
+vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => <section>Published experiences</section>, HomeServiceGallery: () => <section>Service categories</section> }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
 vi.mock('@/hooks/usePrefetch', () => ({ usePrefetchRoute: () => ({ prefetchRoute: vi.fn() }) }));
@@ -59,7 +59,8 @@ it.each([
  show();
  expect(screen.getByTestId('cinematic-home')).toBeVisible();
  expect(screen.getByText('Existing public header')).toBeVisible();
- expect(screen.getByRole('button', { name: 'Unified home search' })).toBeVisible();
+ expect(screen.queryByRole('button', { name: 'Unified home search' })).toBeNull();
+ expect(screen.queryByText('Search shortcuts')).toBeNull();
  expect(screen.getAllByRole('main')).toHaveLength(1);
  expect(screen.getByText('Published new developments')).toBeVisible();
  expect(screen.getByText('Published housing')).toBeVisible();
@@ -85,4 +86,15 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
  expect(css).toContain('padding-bottom:calc(28px + var(--bottom-nav-h, 0px))');
  expect(tokens).toMatch(/--bottom-nav-h:\s*calc\(64px \+ 1px \+ env\(safe-area-inset-bottom, 0px\)\)/);
  expect(tokens).toMatch(/@media \(min-width: 768px\)[\s\S]*--bottom-nav-h:\s*0px/);
+});
+
+it('uses one choice layer, groups property before island services and keeps consumer out of partner block', () => {
+ show();
+ const main = screen.getByRole('main');
+ expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Service categories'));
+ expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
+ const partners = screen.getByRole('region', { name: 'Grow your property and services with myUNO' });
+ expect(within(partners).queryByText('I need a home or service')).toBeNull();
+ expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/for-owners');
+ expect(document.querySelector('.home-owner-prompt')).toBeNull();
 });

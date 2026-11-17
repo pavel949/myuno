@@ -3,7 +3,7 @@
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower2, ShoppingCart, Shield, Clock } from 'lucide-react';
+import { Flower2, ShoppingCart, Info } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
@@ -138,7 +138,7 @@ export default function FlowersIndex() {
   const flowersInCart = getItemsByType('flowers');
   const totalItems = flowersInCart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const isBefore2PM = new Date().getHours() < 14;
+
 
   return (
     <MiniAppLayout
@@ -164,24 +164,15 @@ export default function FlowersIndex() {
       <Helmet>
         <title>{isRu ? 'Доставка цветов на Пхукете | myUNO' : 'Flower Delivery in Phuket | myUNO'}</title>
         <meta name="description" content={isRu
-          ? 'Доставка свежих букетов на Пхукете за 1-3 часа. Розы, пионы, орхидеи.'
-          : 'Fresh flower delivery in Phuket within 1-3 hours. Roses, peonies, orchids.'
+          ? 'Букеты и цветы на Пхукете. Выберите композицию и уточните наличие и доставку при оформлении.'
+          : 'Bouquets and flowers in Phuket. Choose an arrangement and confirm availability and delivery when ordering.'
         } />
       </Helmet>
 
-      {/* Trust bar */}
-      <div className="flex items-center justify-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap -mt-2 mb-4">
-        <span className="flex items-center gap-1 shrink-0">
-          <Shield className="w-3 h-3 text-primary shrink-0" />
-          {isRu ? 'Гарантия свежести 5 дней' : '5-day freshness guarantee'}
-        </span>
-        {isBefore2PM && (
-          <span className="flex items-center gap-1 shrink-0">
-            <Clock className="w-3 h-3 text-primary shrink-0" />
-            {isRu ? 'Доставка сегодня — заказ до 14:00' : 'Same-day delivery — order before 2 PM'}
-          </span>
-        )}
-      </div>
+      <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground -mt-2 mb-4">
+        <Info className="w-3 h-3 shrink-0" />
+        {isRu ? 'Наличие, состав букета и время доставки требуют подтверждения.' : 'Availability, bouquet contents and delivery time require confirmation.'}
+      </p>
 
       {activeFilterCount > 0 && (
         <ActiveFilters

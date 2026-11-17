@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -196,7 +197,7 @@ export default function AdminAIOps() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-[1536px] mx-auto">
+    <PageShell width="workspace" className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -537,6 +538,6 @@ export default function AdminAIOps() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

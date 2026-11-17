@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -150,7 +151,7 @@ export default function AdminAIKnowledge() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
+    <PageShell width="wide" className="space-y-6">
       <div className="flex items-center gap-3">
         <Brain className="h-7 w-7 text-primary" />
         <div>
@@ -347,6 +348,6 @@ export default function AdminAIKnowledge() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }
