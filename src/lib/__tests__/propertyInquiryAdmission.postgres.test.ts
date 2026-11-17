@@ -7,6 +7,11 @@ import postgres from 'postgres';
 import { applyTransactionScript } from '../../test/applyTransactionScript';
 
 const candidate = readFileSync('docs/launch/property-inquiry-admission.candidate.sql', 'utf8');
+const triggerCandidate = readFileSync('docs/launch/property-inquiry-transactional-trigger.candidate.sql', 'utf8');
+const originalInquirySource = readFileSync('supabase/migrations/20260109000415_e52a8107-6f4f-4312-bbe7-56263e1191fc.sql', 'utf8');
+// Execute the actual creator INSERT/SELECT/UPDATE policy definitions, not permissive mocks.
+const creatorPolicies = originalInquirySource.slice(originalInquirySource.indexOf('CREATE POLICY "Users can create their own inquiries"'), originalInquirySource.indexOf('CREATE POLICY "Providers can view inquiries for their properties"'));
+
 const lookup = spawnSync('which', ['postgres'], { encoding: 'utf8' });
 const pgAvailable = lookup.status === 0 && lookup.stdout.trim().length > 0;
 if (process.env.CI && !pgAvailable) throw new Error('CI must supply local PostgreSQL for property inquiry admission pilot tests');
@@ -55,8 +60,11 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       ALTER TABLE public.property_inquiries ENABLE ROW LEVEL SECURITY;
       ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;`);
     await applyTransactionScript(sql, candidate);
+    await sql.unsafe(creatorPolicies);
+    await sql.unsafe('GRANT USAGE ON SCHEMA auth TO authenticated; GRANT SELECT,INSERT,UPDATE ON public.property_inquiries TO authenticated');
   }, 60000);
   beforeEach(async () => {
+    await sql.unsafe('DROP TRIGGER IF EXISTS admit_inserted_property_inquiry ON public.property_inquiries; DROP FUNCTION IF EXISTS private.admit_inserted_property_inquiry()');
     await sql.unsafe('TRUNCATE private.admin_intake_dispatch,public.property_inquiries,public.system_settings');
     await sql`INSERT INTO public.property_inquiries VALUES(${requestId},${actor},'pending')`;
     await sql`INSERT INTO public.system_settings VALUES('admin_emails','["admin@example.test"]'::jsonb)`;
@@ -152,6 +160,61 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       DELETE: 'DELETE FROM private.admin_intake_dispatch',
     };
     await expect(sql.begin(async tx => { await tx.unsafe('SET LOCAL ROLE authenticated'); await tx.unsafe(statements[verb]); })).rejects.toMatchObject({code:'42501'});
+  });
+  describe('transactional integration with the existing creator INSERT path', () => {
+    const insertedId = '00000000-0000-4000-8000-000000000004';
+    async function insertAs(who = actor, rowOwner = actor, status: string | null = 'pending') {
+      return sql.begin(async tx => {
+        await tx.unsafe('SET LOCAL ROLE authenticated');
+        await tx`SELECT set_config('request.jwt.claim.sub',${who},true)`;
+        return tx`INSERT INTO public.property_inquiries(id,user_id,status) VALUES(${insertedId},${rowOwner},${status}) RETURNING id`;
+      });
+    }
+    beforeEach(async () => { await applyTransactionScript(sql,triggerCandidate); });
+    it('a single legacy INSERT persists the exact request and one event without any second frontend call', async () => {
+      expect(await insertAs()).toEqual([{id:insertedId}]);
+      expect(await sql`SELECT request_id FROM private.admin_intake_dispatch`).toEqual([{request_id:insertedId}]);
+      expect((await admit(actor,insertedId))[0].result.new_events).toBe(0);
+    });
+    it('does not weaken the original owner INSERT RLS', async () => {
+      await expect(insertAs(other,actor)).rejects.toMatchObject({code:'42501'});
+      expect(await sql`SELECT id FROM public.property_inquiries WHERE id=${insertedId}`).toHaveLength(0);
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
+    it('recipient-config rejection rolls back the inquiry INSERT and all events together', async () => {
+      await sql`UPDATE public.system_settings SET value='[]'::jsonb`;
+      await expect(insertAs()).rejects.toMatchObject({code:'22023'});
+      expect(await sql`SELECT id FROM public.property_inquiries WHERE id=${insertedId}`).toHaveLength(0);
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
+    it('outer transaction failure rolls back inquiry and trigger-created admission', async () => {
+      await expect(sql.begin(async tx => {
+        await tx.unsafe('SET LOCAL ROLE authenticated');
+        await tx`SELECT set_config('request.jwt.claim.sub',${actor},true)`;
+        await tx`INSERT INTO public.property_inquiries(id,user_id,status) VALUES(${insertedId},${actor},'pending')`;
+        throw new Error('synthetic writer rollback');
+      })).rejects.toThrow('synthetic writer rollback');
+      expect(await sql`SELECT id FROM public.property_inquiries WHERE id=${insertedId}`).toHaveLength(0);
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
+    it.each(['responded','cancelled',null])('leaves legacy non-pending insert %s unchanged and does not invent a pending request', async status => {
+      await insertAs(actor,actor,status);
+      expect(await sql`SELECT status FROM public.property_inquiries WHERE id=${insertedId}`).toEqual([{status}]);
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
+    it('does not replay old requests or status updates', async () => {
+      await sql.begin(async tx => {
+        await tx.unsafe('SET LOCAL ROLE authenticated');
+        await tx`SELECT set_config('request.jwt.claim.sub',${actor},true)`;
+        await tx`UPDATE public.property_inquiries SET status='pending' WHERE id=${requestId}`;
+      });
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
+    it('leaves no-actor operational imports untouched and explicitly outside the creator pilot', async () => {
+      await sql`INSERT INTO public.property_inquiries VALUES(${insertedId},${actor},'pending')`;
+      expect(await sql`SELECT id FROM public.property_inquiries WHERE id=${insertedId}`).toHaveLength(1);
+      expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
+    });
   });
   it('denies anon function execution and authenticated direct private queue reads', async () => {
     await expect(sql.begin(async tx => { await tx.unsafe('SET LOCAL ROLE anon'); await tx`SELECT public.admit_property_inquiry_admin_notification(${requestId}::uuid)`; })).rejects.toMatchObject({code:'42501'});
