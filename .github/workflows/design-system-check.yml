@@ -27,6 +27,10 @@ jobs:
           npm ci
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
+      - name: Yacht and flower native discovery journeys desktop and mobile
+        run: node scripts/qa/yachts-flowers-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Guard authored theme sources
         run: |
           npm run design:check

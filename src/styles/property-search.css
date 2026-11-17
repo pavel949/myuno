@@ -98,4 +98,4 @@
 .property-discovery .property-discovery-search-summary>span:last-child{display:flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));text-decoration:none;text-align:center}
 .property-discovery .property-discovery-search-summary:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
 .property-discovery .property-discovery-search-summary::-webkit-details-marker{display:none}
-@media(max-width:430px){.property-discovery .property-discovery-search-summary{padding:12px;gap:12px}.property-discovery .property-discovery-search-summary>span:last-child{flex-shrink:1;min-width:0;white-space:normal}}
+@media(max-width:430px){.property-discovery .property-discovery-search-summary{padding:12px;gap:12px}.property-discovery .property-discovery-search-summary>span:last-child{flex-shrink:0;white-space:nowrap}}
