@@ -22,3 +22,18 @@ Rollback the frontend commit through a reviewed forward revert; retain admission
 - Generated route and primitive inventories are regenerated, not treated as runtime acceptance.
 
 Compatibility and final check results are recorded below before merge.
+
+## Compatibility snapshot — 2026-11-17
+
+Integrated current `main` `d9bb2b9eb94f7a7c48cebb720ed8974fba287d2f` (home discovery PR #231) with no conflicts and regenerated both source inventories. On that combined source, 75 focused transport/home tests passed (7 files), including 42 transport tests. The browser fixture passed all 48 cases. Local production build and TypeScript completed; final PR checks are required for the merge head.
+
+`git merge-tree --write-tree` against these open PR heads returned clean results (no textual conflicts):
+
+| PR | Compared head |
+| --- | --- |
+| #222 | `162ccadba0f59543ac21269cf385da94cd14f49a` |
+| #230 | `b3fa2042f2f18bd6e0c16c531a759ec4f794a06c` |
+| #232 | `d4601b9fa736ada1e28d7ca6a998f37ef5442fa3` |
+| #233 | `12996d2da328793d9ea5cea10ec9451bd3b43eee` |
+
+Those PRs are not merged or activated by this change. Generated source inventories must be regenerated after any future integration; a clean textual merge alone does not prove their freshness. Recheck current main and the compared heads before merging because this snapshot cannot certify future commits.
