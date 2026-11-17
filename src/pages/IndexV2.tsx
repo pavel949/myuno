@@ -1,5 +1,5 @@
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
-import { HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import { HomeServiceGallery, HomeExperienceGallery } from '@/components/home/HomeCatalogGalleries';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 /** Personalized Home uses the same compact personal entry points as legacy Home. */
@@ -52,7 +52,7 @@ const IndexV2: React.FC = () => {
         <HomePreferencesEntry onOpen={() => setRoleSheetOpen(true)} />
         <PersonalGrid limit={4} />
         <ClusterGridCards personas={activePersonas} />
-        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeServiceGallery /></div>
+        <div className="premium-personal-discovery"><HomeHousingPreview /><HomeNewbuildsPreview /><HomeExperienceGallery /><HomeServiceGallery /></div>
         <NowInPhuket />
 
         {/* All-apps door */}
