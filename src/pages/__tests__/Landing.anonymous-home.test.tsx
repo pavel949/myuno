@@ -88,11 +88,11 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
  expect(tokens).toMatch(/@media \(min-width: 768px\)[\s\S]*--bottom-nav-h:\s*0px/);
 });
 
-it('uses one choice layer, prioritizes island services and keeps consumer out of partner block', () => {
+it('uses one choice layer, groups property before island services and keeps consumer out of partner block', () => {
  show();
  const main = screen.getByRole('main');
- expect(main.textContent!.indexOf('Service categories')).toBeLessThan(main.textContent!.indexOf('Published new developments'));
- expect(main.textContent!.indexOf('Published experiences')).toBeLessThan(main.textContent!.indexOf('Published new developments'));
+ expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Service categories'));
+ expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
  const partners = screen.getByRole('region', { name: 'Grow your property and services with myUNO' });
  expect(within(partners).queryByText('I need a home or service')).toBeNull();
  expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/for-owners');

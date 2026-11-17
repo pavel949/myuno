@@ -189,3 +189,13 @@ it('omits experiences without usable stored media and caps the preview at four',
   expect(document.querySelectorAll('.home-experiences article')).toHaveLength(4);
   expect(screen.queryByText('No media')).toBeNull(); expect(screen.queryByText('Tour 4')).toBeNull();
 });
+
+it.each(['empty', 'loading', 'error', 'fallback'])('keeps explicit flower/yacht catalogue navigation separate from %s supply states', mode => {
+  state.loading = mode === 'loading';
+  state.error = mode === 'error';
+  state.fromDB = mode !== 'fallback';
+  render(<MemoryRouter><HomeServiceGallery /></MemoryRouter>);
+  expect(screen.getByRole('link', { name: 'Flower catalogue' })).toHaveAttribute('href', '/flowers');
+  expect(screen.getByRole('link', { name: 'Yacht catalogue' })).toHaveAttribute('href', '/yachts');
+  expect(document.querySelector('.home-service-category-card')).toBeNull();
+});

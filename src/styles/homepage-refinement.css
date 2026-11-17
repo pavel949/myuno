@@ -305,3 +305,12 @@
 .home-refined .home-audience-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1023px) { .home-refined .home-audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 519px) { .home-refined .home-audience-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* The same card/rail contract for rental and purchase discovery. */
+.home-refined .premium-newbuilds .home-rail-viewport > article > a { display: block; color: inherit; }
+.home-refined .premium-newbuilds .premium-project-photo { aspect-ratio: 4 / 3; }
+
+.home-refined .home-category-navigation { display: flex; flex-wrap: wrap; gap: var(--public-card-gap); padding-block: 1rem; }
+
+.home-refined .home-service-category-card--photo .home-service-category-art img { object-fit: cover; padding: 0; }
+.home-refined .home-category-photo-note { color: hsl(var(--muted-foreground)); font-size: var(--public-label-size); }

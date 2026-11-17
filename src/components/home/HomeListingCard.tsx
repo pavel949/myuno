@@ -9,7 +9,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
-import { showcaseImages, homeShowcasePrice } from './homeShowcase';
+import { showcaseImages, homeShowcasePrice, homeRatesNeedReview } from './homeShowcase';
 
 /** A quiet editorial card; no generated ratings, inferred types or availability badges. */
 export function HomeListingCard({ property, onUnavailable }: { property: Property; onUnavailable?: (id: string) => void }) {
@@ -24,7 +24,7 @@ export function HomeListingCard({ property, onUnavailable }: { property: Propert
   const multipleRates = property.currency?.trim().toUpperCase() === 'THB' && rateOptions.rates.length > 1;
   // Equal amounts for different periods are a review signal, not proof of a wrong price.
   // Preserve recorded tariffs; never invent a replacement or change quoting authority.
-  const needsRateReview = multipleRates && new Set(rateOptions.rates.map(rate => rate.amount)).size < rateOptions.rates.length;
+  const needsRateReview = homeRatesNeedReview(property);
   const quote = homeShowcasePrice(property);
   const area = propertyArea(property.district);
   const href = propertyDetailHref(property.id, 'rent');

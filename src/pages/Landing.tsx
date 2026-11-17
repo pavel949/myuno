@@ -52,11 +52,11 @@ export default function Landing() {
         </div>
       </section>
       <HomeHousingPreview />
+      <HomeNewbuildsPreview />
       <div className="home-life-group">
         <HomeExperienceGallery />
         <HomeServiceGallery />
       </div>
-      <HomeNewbuildsPreview />
       <HomeLocationGallery />
       <section className="home-partners-group" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">

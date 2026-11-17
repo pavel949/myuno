@@ -26,3 +26,11 @@ Scope: public anonymous homepage only; no tokens, shared navigation primitives, 
 Actual responsive visual review (375/390/430 + desktop), full build/typecheck/CI on the exact candidate, and current-main overlap reconciliation before integration. Other active platform design work is separate. This is a draft, not a deployment.
 
 Data-source verification of Canvas tariffs and editing database-authored listing titles remain outstanding. Shared `/search` taxonomy/field accessibility is deliberately outside this narrowly coordinated homepage change.
+
+## Owner follow-up: category breadth and consistent galleries
+
+- Group rentals and purchase/newbuild discovery together before experiences/services.
+- Newbuilds use the same HomeGallery/HorizontalRail contract as rentals, up to six actual records, native touch/keyboard scrolling, no autoplay, visible catalogue link. Three or fewer records remain a desktop grid; mobile shows a next-card peek.
+- Prefer named/photo-backed homes with explicit unambiguous recorded THB tariffs in the homepage preview. Stable ranking only: retain all other eligible homes as fallback, never suppress a named development or alter stored rates.
+- Add a yacht category from active live taxonomy, alongside flowers; always keep clearly labelled catalogue navigation available even when supply preview is empty. Flowers and yachts reuse existing repository photos as explicitly labelled inspiration/category imagery, not bookable offers. Visually inspected both files; the flower file name says roses but depicts a lily, so no rose/product identity is asserted. Original upstream licensing is not independently established.
+- Previous production build retry reached chunk rendering but was killed (exit 137); browser launch remains blocked by this environment. CI and screenshot review remain release gates.

@@ -128,10 +128,10 @@ async def main():
                         await choices.nth(index).press('Enter')
                         await expect(page.get_by_test_id('location')).to_have_text(destination)
                         await expect(page.get_by_role('dialog')).to_have_count(0)
-                    await expect(page.locator('.premium-project-grid article')).to_have_count(3)
+                    await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(3)
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
-                                             ('.premium-project-grid a', '/property/offplan/'),
+                                             ('.premium-newbuilds .home-rail article a', '/property/offplan/'),
                                              ('.home-listing a', '/property/home-')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
@@ -180,7 +180,7 @@ async def main():
                 await expect(page.locator('.home-experiences')).to_have_count(1)
                 await expect(page.locator('.home-experiences .home-catalog-card')).to_have_count(0)
                 await expect(page.locator('.home-services a.ds-section-action')).to_be_visible()
-                await expect(page.locator('.premium-newbuilds a.home-text-link')).to_be_visible()
+                await expect(page.locator('.premium-newbuilds a.ds-section-action')).to_be_visible()
                 await expect(page.locator('.home-area-guide-link')).to_have_count(4)
             await page.screenshot(path=str(OUTPUT/f'en-390-{state}.png'),full_page=True)
             results.append({'language':'en','state':state,'width':390,'pageOverflow':False})
