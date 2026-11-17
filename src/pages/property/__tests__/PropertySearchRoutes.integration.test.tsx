@@ -54,9 +54,13 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = 
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
-  it('opens first-visit rental criteria with guests before submit, without inventing a guest filter', () => {
+  it('starts with a compact summary and opens the existing editor without inventing a guest filter', () => {
     render(<MemoryRouter initialEntries={['/property/search?mode=rent&tenancy=short']}><PropertySearchPage /></MemoryRouter>);
-    expect(document.querySelector('.premium-search-criteria')).toHaveAttribute('open');
+    const criteria = document.querySelector('.premium-search-criteria')!;
+    expect(criteria).not.toHaveAttribute('open');
+    expect(screen.getByText('Change search')).toBeVisible();
+    fireEvent.click(criteria.querySelector('summary')!);
+    expect(criteria).toHaveAttribute('open');
     const guests = screen.getByRole('spinbutton', { name: 'Number of guests' });
     expect(guests).toBeVisible();
     expect(guests).toHaveValue(null);
@@ -64,6 +68,21 @@ describe('one residential results surface', () => {
     const submit = screen.getByRole('button', { name: 'Find a home' });
     expect(guests.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelector('.home-search-secondary')).toBeNull();
+  });
+
+  it.each([
+    ['mode=rent&tenancy=short', 'Holiday homes in Phuket'],
+    ['mode=rent&tenancy=medium', 'Monthly stays in Phuket'],
+    ['mode=rent&tenancy=long', 'Long-term homes in Phuket'],
+    ['mode=buy', 'Buy a home in Phuket'],
+    ['mode=all', 'Homes in Phuket'],
+  ])('shows category context and real query results before expanding %s', (query, title) => {
+    state.properties = [{ id: 'synthetic-entry-home', listing_type: 'rent', monthly_rent: 1000 }];
+    render(<MemoryRouter initialEntries={[`/property/search?${query}`]}><PropertySearchPage /></MemoryRouter>);
+    expect(screen.getByRole('heading', { level: 1, name: title })).toBeVisible();
+    expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
+    expect(screen.getByTestId('synthetic-property-card')).toBeVisible();
+    expect(screen.getByRole('form', { hidden: true })).toBeInTheDocument();
   });
 
   it.each([
@@ -202,8 +221,8 @@ describe('one residential results surface', () => {
     expect(screen.getByRole('combobox', { name: 'Bedrooms' })).toHaveTextContent('Any');
   });
   it.each([
-    ['th', 'ค้นหาที่พักในภูเก็ต', 'เช่า', 'ซื้อ', 'ราคาและสิ่งอำนวยความสะดวก', 'เรียงลำดับที่พัก', 'ตัวกรอง', 'ใช้ตัวกรอง', 'สระว่ายน้ำส่วนตัว'],
-    ['ru', 'Найдите ваш дом на Пхукете', 'Аренда', 'Покупка', 'Цена и удобства', 'Сортировка', 'Фильтры', 'Применить', 'Свой бассейн'],
+    ['th', 'บ้านพักตากอากาศในภูเก็ต', 'เช่า', 'ซื้อ', 'ราคาและสิ่งอำนวยความสะดวก', 'เรียงลำดับที่พัก', 'ตัวกรอง', 'ใช้ตัวกรอง', 'สระว่ายน้ำส่วนตัว'],
+    ['ru', 'Жильё для отдыха на Пхукете', 'Аренда', 'Покупка', 'Цена и удобства', 'Сортировка', 'Фильтры', 'Применить', 'Свой бассейн'],
   ])('renders search and filter controls in %s without changing the query', (language, heading, rent, buy, filters, sort, sheet, apply, pool) => {
     state.language = language;
     mount('/property/search?mode=rent&q=Title');
