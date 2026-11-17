@@ -146,7 +146,7 @@ function HeroPreview({
   return (
     <div
       className={cn(
-        "rounded-none bg-gradient-to-br from-primary/10 to-accent/10 border flex flex-col items-center justify-center text-center p-6",
+        "rounded-none border flex flex-col items-center justify-center text-center p-6",
         device === 'mobile' ? 'w-[240px] h-[380px]' : 'w-full h-[200px]'
       )}
     >

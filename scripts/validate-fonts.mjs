@@ -49,6 +49,7 @@ const CANONICAL_FAMILIES = new Set([
   'IBM Plex Mono',
   'Noto Serif',
   'Noto Sans',
+  'Noto Sans Thai',
   // Numerics
   'JetBrains Mono',
   // Luxury exception (allowed only on /newbuilds paths)

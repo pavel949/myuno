@@ -81,7 +81,6 @@ export default function ForLocalServices() {
       <div className="min-h-screen bg-background">
         <LandingChrome isRu={isRu} variant="marketing" />
         <section className="relative overflow-hidden py-16 md:py-24">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
           <LandingContainer variant="marketing" className="relative text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -117,7 +116,6 @@ export default function ForLocalServices() {
             </motion.div>
           </LandingContainer>
         </section>
-
         <section>
         <LandingContainer variant="marketing" className="pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {benefits.map((b, i) => (
@@ -140,7 +138,6 @@ export default function ForLocalServices() {
           ))}
         </LandingContainer>
         </section>
-
         <section>
         <LandingContainer variant="marketing" className="pb-20 text-center space-y-4">
           <Button variant="secondary" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>

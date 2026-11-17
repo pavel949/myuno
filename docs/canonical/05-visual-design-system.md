@@ -160,24 +160,11 @@ Nine steps. Всё серое и чёрное в интерфейсе — отс
 
 ### 3.2 · Подключение шрифтов
 
-Google Fonts URL (единый, в `index.html`):
-```
-https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap
-```
+Единый URL загрузки задаётся в `--font-stylesheet-url` внутри `src/styles/tokens.css`. Vite генерирует ссылки `index.html` и критические first-paint значения из того же источника.
 
-CSS font-family fallback stacks (см. `src/styles/tokens.css` для актуальных значений):
-```css
---font-display:    'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
---font-body:       'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
---font-mono:       'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
---font-serif:      'Cormorant Garamond', 'Source Serif 4', Georgia, serif; /* luxury only */
+Основные семейства: Source Serif 4 (заголовки), Geist (интерфейс), IBM Plex Mono (числа). Для тайских глифов поставляется **Noto Sans Thai** из того же stylesheet. Латинские символы сохраняют основные семейства; тайская локаль использует `--font-heading-th` / `--font-body-th`. RU/EN body и heading stacks включают тот же Thai fallback для смешанного текста. Системные семейства остаются запасными при недоступности webfont.
 
-/* Legacy aliases — для обратной совместимости со старыми каллерами */
---font-heading-ru: 'Source Serif 4', 'Unbounded', 'Noto Serif', Georgia, serif;
---font-body-ru:    'Geist', 'Golos Text', 'Noto Sans', system-ui, sans-serif;
---font-heading-en: 'Source Serif 4', 'Noto Serif', Georgia, serif;
---font-body-en:    'Geist', 'Noto Sans', system-ui, -apple-system, sans-serif;
-```
+Locale aliases и точные fallback stacks поддерживаются в `tokens.css`; не создавать копию реестра шрифтов в компонентах или документации.
 
 ### 3.3 · Типографическая шкала
 

@@ -62,13 +62,13 @@ function PayoutMethodCard({ method, onSetDefault, onDelete }: PayoutMethodCardPr
     )}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-none bg-gradient-to-br from-primary to-primary flex items-center justify-center">
+          <div className="w-12 h-12 rounded-none bg-primary flex items-center justify-center">
             {method.type === 'bank_account' ? (
-              <span className="text-xs font-bold text-white">
+              <span className="text-xs font-bold text-primary-foreground">
                 {bankLogos[bankCode] || 'BANK'}
               </span>
             ) : (
-              <CreditCard className="w-6 h-6 text-white" />
+              <CreditCard className="w-6 h-6 text-primary-foreground" />
             )}
           </div>
           <div>
