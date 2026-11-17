@@ -226,10 +226,10 @@
   --font-family-body: 'Geist';
   --font-family-mono: 'IBM Plex Mono';
   --font-family-th: 'Noto Sans Thai';
-  --font-heading-ru: var(--font-family-display), var(--font-family-th), 'Unbounded', 'Noto Serif', Georgia, serif;
-  --font-body-ru:    var(--font-family-body), 'Golos Text', var(--font-family-th), 'Noto Sans', system-ui, sans-serif;
-  --font-heading-en: var(--font-family-display), var(--font-family-th), 'Noto Serif', Georgia, serif;
-  --font-body-en:    var(--font-family-body), var(--font-family-th), 'Noto Sans', system-ui, -apple-system, sans-serif;
+  --font-heading-ru: var(--font-family-display), 'Unbounded', 'Noto Serif', Georgia, var(--font-family-th), serif;
+  --font-body-ru:    var(--font-family-body), 'Golos Text', 'Noto Sans', var(--font-family-th), system-ui, sans-serif;
+  --font-heading-en: var(--font-family-display), 'Noto Serif', Georgia, var(--font-family-th), serif;
+  --font-body-en:    var(--font-family-body), 'Noto Sans', var(--font-family-th), system-ui, -apple-system, sans-serif;
   --font-heading-th: var(--font-family-display), var(--font-family-th), serif;
   --font-body-th: var(--font-family-body), var(--font-family-th), system-ui, sans-serif;
   --font-mono:       var(--font-family-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;

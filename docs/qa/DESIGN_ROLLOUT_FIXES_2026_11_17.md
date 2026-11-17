@@ -8,7 +8,7 @@ Base: `0e599eaf467eed60d49f7f86e417f93bf364c345` (myuno React/Vite). This addres
 - Use the canonical foreground on the solid payment-method icon so the surface respects theme inversion.
 - Replace unsupported vendor marketing promises (escrow, guaranteed payments, Friday payouts, fixed review/onboarding time, zero-commission trial and unverified tier entitlements) with the existing application/review/terms path. No payment, payout, commission, role or publication logic changes.
 - Repair narrow owner-portfolio metric columns on mobile, and make the existing property destination a native keyboard-operable link.
-- Supply Noto Sans Thai through the single canonical font stylesheet and locale stacks, including first-paint bootstrap dependencies. Primary Latin fonts remain Source Serif 4/Geist/IBM Plex Mono.
+- Supply Noto Sans Thai through the single canonical font stylesheet and locale stacks, including first-paint bootstrap dependencies. Primary Latin fonts remain Source Serif 4/Geist/IBM Plex Mono. RU/EN retain their existing Latin fallback order before the Thai fallback, preserving typography when external fonts are unavailable.
 - Refresh the 715-declaration source route register and primitive inventory. Adoption checks now reject stale route inventory instead of approving a component inventory derived from it. These inventories explicitly remain SOURCE_ONLY_NOTTESTED; route declarations are not unique screens.
 
 ## Verification
