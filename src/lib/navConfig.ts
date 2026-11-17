@@ -11,7 +11,7 @@ import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
-  Briefcase, BedDouble, Wrench, Search, Heart,
+  Briefcase, Search, Heart,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
