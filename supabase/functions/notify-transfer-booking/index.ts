@@ -1,9 +1,10 @@
 // Trilingual transfer booking notifier (RU/EN/TH)
-// Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
+// Recipients: configured myUNO admins, customer receipt. No supplier fan-out.
 // Email delivery via Lovable Emails (send-transactional-email) with built-in retry queue + suppression.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { transferAdminTargets, transferEmailOutcome, transferWhatsAppOutcome, transferAdminHandoff, type TransferEmailOutcome, type TransferWhatsAppOutcome } from './intake-routing.ts';
 import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
 
 async function sendEmail(
@@ -11,14 +12,15 @@ async function sendEmail(
   recipientEmail: string,
   idempotencyKey: string,
   templateData: Record<string, unknown>,
-): Promise<void> {
+): Promise<TransferEmailOutcome> {
   try {
-    const { error } = await sb().functions.invoke('send-transactional-email', {
+    const { data, error } = await sb().functions.invoke('send-transactional-email', {
       body: { templateName, recipientEmail, idempotencyKey, templateData },
     });
-    if (error) console.error('[email]', templateName, '->', recipientEmail, error);
+    return transferEmailOutcome(data, error);
   } catch (e) {
-    console.error('[email] invoke failed', templateName, e);
+    console.error('[email] enqueue failed');
+    return 'failed';
   }
 }
 
@@ -81,23 +83,24 @@ async function translate(text: string, targetLang: Lang): Promise<string> {
   }
 }
 
-async function sendWhatsApp(to: string, body: string): Promise<void> {
+async function sendWhatsApp(to: string, body: string): Promise<TransferWhatsAppOutcome> {
   const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
   const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
   if (!ultraMsgInstance || !ultraMsgToken) {
-    console.info('[WA] no UltraMSG config, skipping ->', to);
-    return;
+    return 'not_configured';
   }
   try {
     const res = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      signal: AbortSignal.timeout(10_000),
       body: new URLSearchParams({ token: ultraMsgToken, to: `+${to.replace(/[^0-9]/g, '')}`, body }),
     });
     const json = await res.json();
-    console.info('[WA] sent to', to, JSON.stringify(json).slice(0, 200));
+    return transferWhatsAppOutcome(res.ok, json);
   } catch (e) {
-    console.error('[WA] error', e);
+    console.error('[WA] Provider request failed');
+    return 'failed';
   }
 }
 
@@ -150,32 +153,32 @@ async function generateConfirmToken(orderId: string): Promise<string> {
 // Customer "received" email — localized
 const CUSTOMER_RECEIVED = {
   ru: {
-    subject: (n: string) => `Заявка #${n} принята — ждём подтверждения оператора`,
+    subject: (n: string) => `Заявка #${n} принята — ждём подтверждения myUNO`,
     title: 'Спасибо! Заявка на трансфер принята',
     orderLabel: 'Номер заявки',
     routeLabel: 'Маршрут',
     dateLabel: 'Дата',
-    operatorLine: (name: string) => `Оператор <b>${name}</b> свяжется с вами в течение ~30 минут для подтверждения.`,
+    operatorLine: (name: string) => `Команда <b>${name}</b> проверит заявку и свяжется с вами. Бронирование ещё не подтверждено.`,
     amountLabel: 'Сумма',
     locale: 'ru-RU',
   },
   en: {
-    subject: (n: string) => `Booking #${n} received — awaiting operator confirmation`,
+    subject: (n: string) => `Booking #${n} received — awaiting myUNO confirmation`,
     title: 'Thank you! Your transfer request has been received',
     orderLabel: 'Booking number',
     routeLabel: 'Route',
     dateLabel: 'Date',
-    operatorLine: (name: string) => `Operator <b>${name}</b> will contact you within ~30 minutes to confirm.`,
+    operatorLine: (name: string) => `The <b>${name}</b> team will review your request and contact you. Your booking is not confirmed yet.`,
     amountLabel: 'Total',
     locale: 'en-GB',
   },
   th: {
-    subject: (n: string) => `รับคำขอ #${n} แล้ว — รอการยืนยันจากเจ้าหน้าที่`,
+    subject: (n: string) => `รับคำขอ #${n} แล้ว — รอการยืนยันจาก myUNO`,
     title: 'ขอบคุณ! เราได้รับคำขอจองรถรับส่งของคุณแล้ว',
     orderLabel: 'หมายเลขการจอง',
     routeLabel: 'เส้นทาง',
     dateLabel: 'วันที่',
-    operatorLine: (name: string) => `เจ้าหน้าที่ <b>${name}</b> จะติดต่อคุณภายในประมาณ 30 นาทีเพื่อยืนยัน`,
+    operatorLine: (name: string) => `ทีม <b>${name}</b> จะตรวจสอบคำขอและติดต่อคุณ การจองยังไม่ได้รับการยืนยัน`,
     amountLabel: 'ยอดรวม',
     locale: 'th-TH',
   },
@@ -232,7 +235,6 @@ Deno.serve(async (req) => {
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle();
-    const opWa = op?.phone_whatsapp || '';
     const operatorMissing = !op;
     if (operatorMissing) {
       console.error('[Transfer] CRITICAL: no active operator found for order', p.order_number);
@@ -282,22 +284,6 @@ Deno.serve(async (req) => {
       ? (typeof secondaryWaRow.value === 'string' ? secondaryWaRow.value : JSON.parse(JSON.stringify(secondaryWaRow.value)))
       : null;
 
-    // Extra operator email recipients (e.g. Klod ops mailbox). Stored in
-    // system_settings.transfer_operator_emails as a jsonb array of strings.
-    // Defaults include sskk253722@gmail.com so notifications never silently drop.
-    const { data: opEmailsRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_operator_emails').maybeSingle();
-    let extraOperatorEmails: string[] = ['sskk253722@gmail.com'];
-    try {
-      const v = opEmailsRow?.value;
-      const parsed = typeof v === 'string' ? JSON.parse(v) : v;
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        extraOperatorEmails = parsed.filter((e: unknown) => typeof e === 'string' && e.includes('@'));
-        if (!extraOperatorEmails.includes('sskk253722@gmail.com')) {
-          extraOperatorEmails.push('sskk253722@gmail.com');
-        }
-      }
-    } catch { /* fall back to default */ }
-
     const baseUrl = Deno.env.get('PUBLIC_APP_URL') || 'https://myuno.app';
     const token = await generateConfirmToken(p.order_id);
     const confirmUrl = `${baseUrl}/operate/transfers/confirm?id=${p.order_id}&t=${token}`;
@@ -310,10 +296,9 @@ Deno.serve(async (req) => {
       ? `🚨 *NO ACTIVE OPERATOR* — admin must assign manually\n\n`
       : '';
 
-    // Send WhatsApp: operator Klod (if any), admin primary, admin secondary
-    const waTargets = [opWa, adminWA, secondaryWA].filter(Boolean) as string[];
-    const uniqueWA = Array.from(new Set(waTargets.map(w => w.replace(/[^0-9]/g, ''))));
-    await Promise.all(uniqueWA.map(num => sendWhatsApp(num, alertPrefix + opMessage)));
+    // Do not add operator contacts: myUNO owns the customer conversation.
+    const targets = transferAdminTargets(adminEmails, adminWA, secondaryWA);
+    const whatsappOutcomes = await Promise.all(targets.whatsapp.map(num => sendWhatsApp(num, alertPrefix + opMessage)));
 
     // Emails — via Lovable Emails (queue, retries, suppression, unsubscribe handled centrally)
     const dateEn = fmtDate(p.scheduled_at, 'en-GB');
@@ -345,21 +330,13 @@ Deno.serve(async (req) => {
       operatorMissing,
     };
 
-    // Operator
-    if (op?.email) {
-      await sendEmail('transfer-operator-new', op.email, `transfer-op-${p.order_id}`, operatorTemplateData);
+    // Preserve the existing durable admin email queue and idempotency keys.
+    const emailOutcomes: TransferEmailOutcome[] = [];
+    for (const adminEmail of targets.emails) {
+      emailOutcomes.push(await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData));
     }
-    // Admin — always
-    for (const adminEmail of adminEmails) {
-      await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData);
-    }
-    // Extra operator inbox(es) — Klod ops, sskk253722@gmail.com etc.
-    const dedupExtra = extraOperatorEmails.filter(
-      (e) => e !== op?.email && !adminEmails.includes(e),
-    );
-    for (const extraEmail of dedupExtra) {
-      await sendEmail('transfer-operator-new', extraEmail, `transfer-opx-${p.order_id}-${extraEmail}`, operatorTemplateData);
-    }
+    const handoff = transferAdminHandoff(emailOutcomes, whatsappOutcomes);
+    if (!handoff.anyAccepted) console.error('[Transfer] No admin notification accepted');
 
     // Customer "received" — localized
     if (p.customer_email) {
@@ -374,7 +351,7 @@ Deno.serve(async (req) => {
         routeValue: `${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}`,
         dateLabel: c.dateLabel,
         dateValue: localDate,
-        operatorLine: c.operatorLine(op?.name || 'Klod').replace(/<\/?b>/g, ''),
+        operatorLine: c.operatorLine('myUNO').replace(/<\/?b>/g, ''),
         amountLabel: c.amountLabel,
         amountValue: `฿${p.total_amount.toLocaleString()}`,
       });
@@ -388,12 +365,14 @@ Deno.serve(async (req) => {
       metadata: {
         order_id: p.order_id,
         order_number: p.order_number,
-        recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
-        status: operatorMissing ? 'partial' : 'sent',
+        recipients: { admin_wa: targets.whatsapp, admin_emails: targets.emails, customer_email: p.customer_email, customer_language: customerLang },
+        status: handoff.status,
+        supplier_dispatch: 'suppressed_myuno_managed_intake',
+        admin_channels: { email: emailOutcomes, whatsapp: whatsappOutcomes },
       },
     }).catch((e) => console.error('[log]', e));
 
-    return new Response(JSON.stringify({ success: true, operator: op?.name || null, operator_missing: operatorMissing, customer_language: customerLang }), {
+    return new Response(JSON.stringify({ success: handoff.anyAccepted, admin_handoff: handoff.status, supplier_dispatch: 'suppressed_myuno_managed_intake', customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
