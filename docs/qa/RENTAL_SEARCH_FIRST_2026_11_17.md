@@ -18,3 +18,11 @@ Scope: make category search criteria immediately usable; keep selected rent/buy 
 - git diff --check passed.
 - Browser visual acceptance at 375/390/430 and desktop, RU/EN: NOT VERIFIED here. Required before release.
 - Full typecheck result recorded in PR/checks, not inferred from targeted tests.
+
+## CI follow-up
+
+- Synced with main bb1edfb (homepage and design rollout fixes).
+- First CI failure diagnosed from job logs: generated adoption register stale; browser fixtures still expected collapsed first-visit criteria and a secondary guest disclosure.
+- Regenerated the source-only adoption register. Updated browser fixtures to require visible dates/guests on entry, preserve submit-collapse/focus/history checks, and assert the new desktop primary-row geometry rather than skipping layout checks.
+- Design audit passes; all 36 source guard tests pass. Python acceptance scripts compile.
+- Local browser retry, including permitted escalation, blocked by Chromium `socket() failed: Operation not permitted`. CI remains the browser acceptance authority; no local visual pass claimed.

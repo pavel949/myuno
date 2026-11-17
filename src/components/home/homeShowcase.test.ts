@@ -17,3 +17,14 @@ it('preserves explicit tariffs independently from tenancy duration', () => {
   expect(homeShowcasePrice(property('unknown', { price: 1000 }))).toBeNull();
   expect(homeShowcasePrice(property('usd', { currency: 'USD', price_period: 'month', price: 1000 }))).toBeNull();
 });
+
+it('prefers clear recorded tariffs without excluding or mutating other homes', () => {
+  const equal = property('equal', { currency: 'THB', price_per_night: 3000, price: 3000, price_period: 'month' });
+  const clear = property('clear', { currency: 'THB', price_per_night: 2000, price: 40000, price_period: 'month' });
+  const next = property('next', { currency: 'THB', price_per_night: 1500, price_period: 'night' });
+  const unknown = property('unknown');
+  const input = [equal, unknown, clear, next];
+  expect(selectHomeShowcase(input, 4).map(p => p.id)).toEqual(['clear', 'next', 'equal', 'unknown']);
+  expect(input.map(p => p.id)).toEqual(['equal', 'unknown', 'clear', 'next']);
+  expect(selectHomeShowcase([equal], 3)).toEqual([equal]);
+});

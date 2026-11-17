@@ -23,6 +23,15 @@ describe('canonical first-paint bootstrap', () => {
     expect(fontHref).toContain('https://fonts.googleapis.com/css2?family=Geist');
     expect(css).not.toContain('--cat-emergency');
   });
+  it('supplies Thai glyphs through the same stylesheet and first-paint locale tokens', () => {
+    const { css, fontHref } = generateThemeBootstrap(tokens);
+    expect(new URL(fontHref).searchParams.getAll('family')).toContain('Noto Sans Thai:wght@300;400;500;600;700');
+    const ast = postcss.parse(css);
+    const thai = ast.nodes.find(node => node.type === 'rule' && node.selector === "html[lang='th']");
+    expect(thai?.toString()).toContain('--font-body: var(--font-body-th)');
+    expect(css).toContain("--font-family-th: 'Noto Sans Thai'");
+    expect(css).toContain('var(--font-family-th)');
+  });
   it('a single canonical brand/font edit changes bootstrap without another theme object', () => {
     const changed = tokens.replace(/(--brand-hue:\s*)[^;]+/, '$1189')
       .replace(/(--font-family-body:\s*)[^;]+/, "$1'Synthetic Body', system-ui");

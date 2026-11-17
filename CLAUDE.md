@@ -245,7 +245,9 @@
 - Numerics / data / mono: **IBM Plex Mono** with `font-feature-settings: "tnum"`
 - Locale fallback (RU): Unbounded → Golos Text → Noto Serif / Noto Sans
 - Locale fallback (EN): Noto Serif → Noto Sans → Georgia / system-ui
-- ⛔ NOT used anywhere in code: Syne, DM Sans, Playfair Display, JetBrains Mono, Cormorant Garamond — older docs may still reference these; they are stale.
+- Thai glyphs: **Noto Sans Thai**, supplied by the canonical font stylesheet; Latin text retains Source Serif 4 / Geist.
+- Legacy fallback: JetBrains Mono may remain after IBM Plex Mono in the canonical stack. Cormorant Garamond is allowed only in the existing `/newbuilds/` luxury exception.
+- ⛔ Forbidden font families: Syne, DM Sans, Playfair Display.
 
 **Other rules:**
 - **Components:** shadcn/ui + Radix UI. Mobile = Sheet (bottom), not Dialog

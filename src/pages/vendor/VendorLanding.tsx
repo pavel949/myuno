@@ -48,64 +48,64 @@ export default function VendorLanding() {
     },
     {
       icon: Shield,
-      title: isRu ? 'Escrow-защита' : 'Escrow Protection',
-      desc: isRu ? 'Гарантированная оплата за каждый заказ' : 'Guaranteed payment for every order',
+      title: isRu ? 'Понятные условия' : 'Clear terms',
+      desc: isRu ? 'Условия оплаты и расчётов согласуются для выбранной услуги' : 'Payment and settlement terms are agreed for the selected service',
     },
     {
       icon: Zap,
-      title: isRu ? 'Заказы без маркетинга' : 'Orders Without Marketing',
-      desc: isRu ? 'Мы приводим клиентов — вы оказываете услугу' : 'We bring clients — you deliver the service',
+      title: isRu ? 'Заявки с платформы' : 'Platform enquiries',
+      desc: isRu ? 'Отвечайте на запросы клиентов по опубликованным услугам' : 'Respond to customer enquiries about published services',
     },
     {
       icon: Globe,
       title: isRu ? 'Мультиязычность' : 'Multilingual',
-      desc: isRu ? 'Ваш профиль виден на RU, EN и TH' : 'Your profile is visible in RU, EN & TH',
+      desc: isRu ? 'Подготовьте описание услуги для нужных языков' : 'Prepare your service description in the languages you need',
     },
   ];
 
   const howItWorks = [
-    { step: '1', label: isRu ? 'Регистрация — 2 мин' : 'Register — 2 min', desc: isRu ? 'Имя, категория, телефон' : 'Name, category, phone' },
+    { step: '1', label: isRu ? 'Регистрация' : 'Registration', desc: isRu ? 'Имя, категория, телефон' : 'Name, category, phone' },
     { step: '2', label: isRu ? 'Первый листинг' : 'First listing', desc: isRu ? 'Добавьте услугу и цену' : 'Add a service & price' },
-    { step: '3', label: isRu ? 'Модерация' : 'Moderation', desc: isRu ? 'Проверим за 24 часа' : 'Reviewed within 24h' },
+    { step: '3', label: isRu ? 'Модерация' : 'Moderation', desc: isRu ? 'Проверка данных перед публикацией' : 'Details are reviewed before publication' },
     { step: '4', label: isRu ? 'Получайте заказы' : 'Get orders', desc: isRu ? 'Клиенты находят вас на платформе' : 'Clients find you on the platform' },
   ];
 
   const verificationLevels = [
     {
       icon: BadgeCheck,
-      level: 'Basic',
-      levelRu: 'Базовый',
+      level: 'Profile',
+      levelRu: 'Профиль',
       color: 'text-muted-foreground',
       bg: 'bg-muted/50',
       border: 'border-muted',
-      desc: isRu ? 'Сразу после регистрации' : 'Right after registration',
+      desc: isRu ? 'Данные компании и контакты' : 'Company and contact details',
       perks: isRu 
-        ? ['Профиль на платформе', 'Получение заказов']
-        : ['Platform profile', 'Receive orders'],
+        ? ['Описание компании', 'Контакты для связи']
+        : ['Company description', 'Contact details'],
     },
     {
       icon: Shield,
-      level: 'Verified',
-      levelRu: 'Проверенный',
+      level: 'Review',
+      levelRu: 'Проверка',
       color: 'text-primary',
       bg: 'bg-primary/5',
       border: 'border-primary/30',
       desc: isRu ? 'Документы + лицензия' : 'Documents + license',
       perks: isRu 
-        ? ['Значок «Проверено»', 'Приоритет в поиске', 'Защита G-Trust']
-        : ['Verified badge', 'Search priority', 'G-Trust protection'],
+        ? ['Документы компании', 'Условия оказания услуг']
+        : ['Company documents', 'Service terms'],
     },
     {
       icon: Crown,
-      level: 'Premium',
-      levelRu: 'Премиум',
+      level: 'Services',
+      levelRu: 'Услуги',
       color: 'text-accent',
       bg: 'bg-accent/5',
       border: 'border-accent/40',
-      desc: isRu ? 'Рейтинг 4.5+ и 50+ заказов' : 'Rating 4.5+ & 50+ orders',
+      desc: isRu ? 'Описание, цена и порядок подтверждения' : 'Description, price and confirmation process',
       perks: isRu 
-        ? ['Топ выдачи', 'Сниженная комиссия', 'Персональный менеджер']
-        : ['Top ranking', 'Reduced commission', 'Personal manager'],
+        ? ['Категория услуги', 'Согласованные условия']
+        : ['Service category', 'Agreed terms'],
     },
   ];
 
@@ -121,7 +121,6 @@ export default function VendorLanding() {
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
         <div className="relative max-w-2xl mx-auto px-4 pt-12 pb-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -141,12 +140,12 @@ export default function VendorLanding() {
             </h1>
             <p className="text-muted-foreground text-base md:text-lg max-w-md mx-auto mb-6">
               {isRu 
-                ? 'myUNO — маркетплейс для иностранных жителей и гостей Пхукета (EN/RU/TH). Зарегистрируйтесь за 2 минуты и начните получать заказы.'
-                : 'myUNO is a marketplace for international residents and visitors of Phuket (EN/RU/TH). Register in 2 minutes and start receiving orders.'}
+                ? 'myUNO — маркетплейс для иностранных жителей и гостей Пхукета (EN/RU/TH). Подготовьте профиль и услуги для проверки перед публикацией.'
+                : 'myUNO is a marketplace for international residents and visitors of Phuket (EN/RU/TH). Prepare your profile and services for review before publication.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" onClick={handleStart} className="h-12 text-base font-semibold px-8">
-                {isRu ? 'Начать за 2 минуты' : 'Start in 2 minutes'}
+                {isRu ? 'Подать заявку' : 'Apply to join'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Button size="lg" variant="outline" asChild className="h-12 text-base">
@@ -214,12 +213,12 @@ export default function VendorLanding() {
       {/* Verification Levels */}
       <section className="max-w-2xl mx-auto px-4 py-8">
         <h2 className="text-xl font-bold text-center mb-2">
-          {isRu ? 'Уровни верификации' : 'Verification Levels'}
+          {isRu ? 'Подготовка к публикации' : 'Prepare for publication'}
         </h2>
         <p className="text-sm text-muted-foreground text-center mb-6">
           {isRu 
-            ? 'Чем выше уровень — тем больше заказов и ниже комиссия'
-            : 'Higher level = more orders & lower commission'}
+            ? 'Подготовьте данные компании и услуги. Доступные возможности зависят от проверки и согласованных условий.'
+            : 'Prepare company and service details. Available capabilities depend on review and agreed terms.'}
         </p>
         <div className="space-y-3">
           {verificationLevels.map((lvl, i) => (
@@ -257,10 +256,10 @@ export default function VendorLanding() {
           <CardContent className="p-5 space-y-3">
             {([
               { Icon: Wallet, text: isRu ? 'Комиссия обсуждается индивидуально и фиксируется в договоре' : 'Commission is discussed individually and fixed in the contract' },
-              { Icon: Clock, text: isRu ? 'Выплаты каждую пятницу на ваш счёт' : 'Payouts every Friday to your account' },
-              { Icon: Lock, text: isRu ? 'Escrow: деньги защищены до завершения услуги' : 'Escrow: money is protected until service completion' },
+              { Icon: Clock, text: isRu ? 'Порядок и сроки расчётов согласуются при подключении' : 'Settlement process and timing are agreed during onboarding' },
+              { Icon: Lock, text: isRu ? 'Способ оплаты зависит от услуги и подтверждённых условий заказа' : 'Payment method depends on the service and confirmed order terms' },
               { Icon: BarChart3, text: isRu ? 'Прозрачная аналитика: заказы, выручка, рейтинг в реальном времени' : 'Transparent analytics: orders, revenue, rating in real time' },
-              { Icon: Gift, text: isRu ? 'Регистрация бесплатна. 0% комиссии в первый месяц' : 'Registration is free. 0% commission in the first month' },
+              { Icon: Gift, text: isRu ? 'Условия подключения и комиссии фиксируются до начала работы' : 'Onboarding terms and commission are agreed before work begins' },
             ] as { Icon: LucideIcon; text: string }[]).map(({ Icon, text }, i) => (
               <div key={i} className="flex items-start gap-3">
                 <Icon className="h-5 w-5 shrink-0 text-primary mt-0.5" strokeWidth={1.75} />
@@ -273,15 +272,15 @@ export default function VendorLanding() {
 
       {/* Final CTA */}
       <section className="max-w-2xl mx-auto px-4 py-10 text-center">
-        <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
+        <Card className="border-primary/20">
           <CardContent className="p-6">
             <h2 className="text-xl font-bold mb-2">
               {isRu ? 'Готовы начать?' : 'Ready to start?'}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               {isRu 
-                ? 'Регистрация займёт 2 минуты. Первый месяц — без комиссии.'
-                : 'Registration takes 2 minutes. First month — no commission.'}
+                ? 'Подготовьте данные компании и услуг. Обсудим условия подключения.'
+                : 'Prepare company and service details. We will discuss onboarding terms.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" onClick={handleStart} className="h-12 text-base font-semibold px-8">
