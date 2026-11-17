@@ -289,7 +289,9 @@ async def main():
                     await search.fill('zz-no-home-match')
                     await expect(page.get_by_text({'ru':'Услуги не найдены','en':'No services found','th':'ไม่พบบริการ'}[lang],exact=True)).to_be_visible()
                     await page.get_by_role('button',name={'ru':'Сбросить поиск и фильтры','en':'Clear search and filters','th':'ล้างการค้นหาและตัวกรอง'}[lang],exact=True).click()
+                    await open_catalog_filters(page,lang)
                     await page.get_by_role('tab').nth(1).click()
+                    await close_catalog_filters(page,lang)
                     await expect(home).to_be_visible()
                     before_back=page.url
                     await page.go_back()
