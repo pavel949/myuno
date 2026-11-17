@@ -302,15 +302,19 @@ async def main():
                         await choice.focus()
                         await bounds(choice)
                         await choice.press('Enter')
+                        await expect(choice).to_have_attribute('aria-pressed','true')
+                        await expect(page.get_by_test_id('location')).to_contain_text('project=project-'+str(index))
                         assert (await query())['project']==['project-'+str(index)]
                         assert await page.evaluate('window.fixtureFilters.projectId')=='project-'+str(index)
-                        await expect(choice).to_have_attribute('aria-pressed','true')
                     await page.get_by_role('button',name='QA back',exact=True).click()
+                    await expect(rail.locator('button').nth(4)).to_have_attribute('aria-pressed','true')
                     assert (await query())['project']==['project-4']
                     await page.get_by_role('button',name='QA forward',exact=True).click()
+                    await expect(rail.locator('button').nth(5)).to_have_attribute('aria-pressed','true')
                     assert (await query())['project']==['project-5']
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-project-selection.png'),full_page=True)
                     await page.get_by_role('button',name='Все комплексы' if ru else 'All communities',exact=True).click()
+                    await expect(page.get_by_role('button',name='Все комплексы' if ru else 'All communities',exact=True)).to_have_attribute('aria-pressed','true')
                     project_reset = await query()
                     assert 'project' not in project_reset
                     assert project_reset['guests']==['3'] and project_reset['sort']==['price_asc']
