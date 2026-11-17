@@ -657,6 +657,7 @@ function BasicInfoStepInner({
               <Input
                 type="number"
                 min={0}
+                step="any"
                 value={formData.area_sqm}
                 onChange={(e) => updateFormData({ area_sqm: e.target.value })}
                 placeholder="m²"
