@@ -37,3 +37,9 @@ Integrated current `main` `d9bb2b9eb94f7a7c48cebb720ed8974fba287d2f` (home disco
 | #233 | `12996d2da328793d9ea5cea10ec9451bd3b43eee` |
 
 Those PRs are not merged or activated by this change. Generated source inventories must be regenerated after any future integration; a clean textual merge alone does not prove their freshness. Recheck current main and the compared heads before merging because this snapshot cannot certify future commits.
+
+### Later transport candidate #236
+
+The deferred #236 head `9886de4cbadbe3114d09c6e8c9fbd5df08e874f0` also changes transport forms. Unlike the earlier discovery candidates, a merge-tree check reports conflicts in `StepVehicle.tsx`, `AirportFastTrackPage.tsx` and `AirportTransferBooking.tsx`. It changes additional validation, configurable cutoff behavior and card-checkout retry state. Do not replay that branch over this fix or resolve it by choosing an entire side. It remains closed/deferred under #237 and is not included in this bounded frontend acceptance. Its eventual recovery must preserve this PR's configured-fare admission, fresh submission checks, restored vehicle and passport masking and verify the expanded request/retry contract separately.
+
+A local combined tree of this PR and #233 passed 83 focused tests (9 files) after inventory regeneration. This is compatibility evidence only; it does not activate or accept #233's remaining browser gates.
