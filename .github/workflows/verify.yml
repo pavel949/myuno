@@ -43,6 +43,11 @@ jobs:
             break
           done
 
+      - name: Property inquiry admission pilot (isolated PostgreSQL)
+        run: npm test -- src/lib/__tests__/propertyInquiryAdmission.postgres.test.ts --maxWorkers=1
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+
       - name: Typecheck
         run: npm run typecheck
         env:

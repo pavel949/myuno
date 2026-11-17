@@ -28,7 +28,7 @@ DECLARE
   request_owner uuid;
   request_status text;
   destinations jsonb;
-  destination text;
+  v_destination text;
   inserted_count integer := 0;
   inserted_row integer;
 BEGIN
@@ -54,9 +54,9 @@ BEGIN
         OR btrim(item #>> '{}') !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$') THEN
     RAISE EXCEPTION 'Admin recipients unavailable' USING ERRCODE = '22023';
   END IF;
-  FOR destination IN SELECT DISTINCT lower(btrim(value)) FROM jsonb_array_elements_text(destinations) LOOP
+  FOR v_destination IN SELECT DISTINCT lower(btrim(value)) FROM jsonb_array_elements_text(destinations) LOOP
     INSERT INTO private.admin_intake_dispatch(source,request_id,notification_kind,channel,destination)
-      VALUES('property_inquiries',p_request_id,'new_request','email',destination)
+      VALUES('property_inquiries',p_request_id,'new_request','email',v_destination)
       ON CONFLICT (source,request_id,notification_kind,channel,destination) DO NOTHING;
     GET DIAGNOSTICS inserted_row = ROW_COUNT;
     inserted_count := inserted_count + inserted_row;
