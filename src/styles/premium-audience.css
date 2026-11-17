@@ -7,7 +7,7 @@
   padding-bottom: calc(var(--bottom-nav-h,0px) + var(--public-section-gap));
   color: hsl(var(--foreground));
 }
-.audience-hero { max-width: var(--public-width-reading); padding-block: var(--public-detail-gap); }
+.audience-hero { padding-block: var(--public-detail-gap); }
 .audience-eyebrow { color: hsl(var(--muted-foreground)); font-size: var(--public-label-size); margin-bottom: 1rem; }
 .premium-audience h1 { font: 400 var(--public-editorial-display-size)/1.12 var(--font-display); letter-spacing: -.015em; overflow-wrap: anywhere; }
 .audience-intro { margin-top: 1.5rem; font-size: var(--public-body-size); line-height: 1.65; color: hsl(var(--muted-foreground)); }

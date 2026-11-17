@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -34,7 +35,7 @@ export default function RentalLanding() {
 
       <div className="min-h-screen bg-background text-foreground">
         {/* ─── HERO ─── */}
-        <section className="relative overflow-hidden">
+        <section className="landing-catalog-copy relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-background to-background" />
 
           <div className="relative max-w-lg mx-auto px-5 pt-12 pb-8">

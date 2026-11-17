@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -28,7 +29,7 @@ export default function PropertySellLanding() {
     <section className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'space-y-6 py-8')} aria-labelledby="property-sell-title">
       <SEOHead title={title} description={description} />
       <header className="max-w-[var(--layout-width-form)] space-y-3">
-        <h1 id="property-sell-title" className="font-display text-h1">{title}</h1>
+        <h1 id="property-sell-title" className="landing-catalog-title font-display text-h1">{title}</h1>
         <p className="text-muted-foreground">{description}</p>
       </header>
       <div className="max-w-[var(--layout-width-form)]">

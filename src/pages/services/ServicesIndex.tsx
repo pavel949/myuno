@@ -28,7 +28,7 @@ import '@/styles/premium-services.css';
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
 function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
   return <div className="public-commerce public-commerce--services space-y-6">
-    <header className="space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
+    <header className="landing-catalog-copy space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
     <Input type="search" aria-label={searchPlaceholder} placeholder={searchPlaceholder} value={searchValue} onChange={event => onSearchChange?.(event.target.value)} />{children}
   </div>;
 }
@@ -103,7 +103,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
   const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
 
-  return <div className="premium-services"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+  return <div className="premium-services"><Layout pageWidth="catalogue" editorialHeader contentClassName="public-commerce public-commerce--services"
     title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')}
     subtitle={t('Найдите нужное — по ситуации или категории.', 'Find what you need by situation or category.', 'ค้นหาบริการตามสถานการณ์หรือหมวดหมู่')}
     fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}

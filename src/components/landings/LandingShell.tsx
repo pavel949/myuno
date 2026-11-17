@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SEOHead } from '@/components/seo';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
+import '@/styles/landing-editorial.css';
 
 export interface LandingBenefit {
   icon: React.ComponentType<{ className?: string }>;
@@ -52,7 +54,7 @@ export function LandingShell({
       <SEOHead title={t(seoTitle)} description={t(seoDescription)} />
 
       <header className="sticky top-0 z-30 border-b border-border/50 bg-background">
-        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
+        <div className={`${PUBLIC_CONTENT_LAYOUT.marketing} h-14 flex items-center justify-between gap-3`}>
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             {t({ ru: 'Назад', en: 'Back', th: 'กลับ' })}
@@ -61,18 +63,18 @@ export function LandingShell({
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:py-16">
+      <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} py-10 sm:py-16`}>
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14 items-start">
-          <div>
+          <div className="landing-editorial-copy">
             {eyebrow && (
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
+              <div className="mb-3 inline-flex items-center gap-2 landing-editorial-rule py-1 text-xs font-medium uppercase tracking-wide text-primary">
                 {t(eyebrow)}
               </div>
             )}
             <h1 className="text-3xl sm:text-5xl font-semibold leading-tight tracking-tight text-foreground">
               {t(title)}
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground">{t(subtitle)}</p>
+            <p className="mt-4 text-body-lg text-muted-foreground">{t(subtitle)}</p>
 
             {badges && badges.length > 0 && (
               <div className="mt-5 flex flex-wrap gap-2">
@@ -102,12 +104,12 @@ export function LandingShell({
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-20">{formSlot}</aside>
+          <aside className="min-w-0 border border-border bg-card p-4 sm:p-6 lg:sticky lg:top-20">{formSlot}</aside>
         </div>
       </section>
 
       {children && (
-        <section className="mx-auto max-w-6xl px-4 pb-16 space-y-10">{children}</section>
+        <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} pb-16 space-y-10`}>{children}</section>
       )}
     </div>
   );

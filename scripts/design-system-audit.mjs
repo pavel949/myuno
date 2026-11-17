@@ -38,7 +38,7 @@ const arbitraryTypePattern = /\btext-\[([^\]]+)\]/g;
 const arbitrarySpacingPattern = /\b(?:p|px|pl|pr|gap)-\[([^\]]+)\]/g;
 const literalLength = /(?:^|[^\w-])(?:\d*\.)?\d+(?:px|rem|em|ex|ch|cap|ic|lh|rlh|vw|vh|vi|vb|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh|cm|mm|q|in|pt|pc)\b/i;
 const geometryPattern = /\bmax-w-(?!full\b|none\b|screen\b|\[var\()[\w[\].:%()-]+|\bfont-\[(?!var\()[^\]]+\]/g;
-function walk(dir) { return fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]) : []; }
+function walk(dir) { return fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }).sort((a,b)=>a.name < b.name ? -1 : a.name > b.name ? 1 : 0).flatMap(e => e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]) : []; }
 export function sourceFiles(root) {
   // No source directory exclusions: tests, subbrands and specialized verticals remain visible.
   return [...walk(path.join(root, 'src')).filter(p => /\.(css|tsx?|jsx?)$/.test(p)), ...['index.html', 'tailwind.config.ts', 'tailwind.config.js'].map(p => path.join(root, p)).filter(p => fs.existsSync(p))].sort();
@@ -184,16 +184,17 @@ function evaluate(n,env={}) {
   return null;
 }
 export function buildRouteRegister(root) {
-  const config=fs.readFileSync(path.join(root,'src/lib/config/routes.ts'),'utf8'); const configAst=parse('routes.ts',config);const constants={};
+  const readSource = file => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  const config=readSource(path.join(root,'src/lib/config/routes.ts')); const configAst=parse('routes.ts',config);const constants={};
   function constantsVisit(n){if(ts.isVariableDeclaration(n)&&n.name.getText()==='APP_ROUTES'){let obj=n.initializer;while(ts.isAsExpression(obj))obj=obj.expression;for(const p of obj.properties)if(ts.isPropertyAssignment(p))constants[p.name.getText().replace(/['"]/g,'')]=evaluate(p.initializer,{APP_ROUTES:constants});}ts.forEachChild(n,constantsVisit);} constantsVisit(configAst);
-  const registry=fs.readFileSync(path.join(root,'src/components/layout/pageRegistry.ts'),'utf8');
+  const registry=readSource(path.join(root,'src/components/layout/pageRegistry.ts'));
   const modules=Object.fromEntries([...registry.matchAll(/export const (\w+) = lazy\(\(\) => import\('([^']+)'\)/g)].map(m=>[m[1],m[2].replace(/^@\//,'src/')+'.tsx']));
-  const qa=walk(path.join(root,'scripts/qa')).filter(p=>/\.(mjs|py|cjs)$/.test(p)).map(p=>({file:path.relative(root,p),text:fs.readFileSync(p,'utf8')}));
+  const qa=walk(path.join(root,'scripts/qa')).filter(p=>/\.(mjs|py|cjs)$/.test(p)).map(p=>({file:path.relative(root,p).replaceAll('\\','/'),text:readSource(p)}));
   const navFiles=['src/lib/navConfig.ts','src/lib/nav/goalEntries.ts','src/lib/nav/clusterCatalog.ts','src/lib/nav/navigationModel.ts'];
-  const nav=navFiles.map(file=>({file,text:fs.readFileSync(path.join(root,file),'utf8')}));
+  const nav=navFiles.map(file=>({file,text:readSource(path.join(root,file))}));
   function targets(node,ast){const out=[];function scan(n){if((ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))&&n.tagName.getText(ast)==='Navigate'){const to=n.attributes.properties.find(a=>a.name?.getText(ast)==='to');out.push({expression:to?.initializer?.getText(ast)||null,resolvedTarget:evaluate(to?.initializer,{APP_ROUTES:constants}),observation:'NOTTESTED'});}ts.forEachChild(n,scan);}scan(node);return out;}
   const declarations=[];
-  for(const file of routeFiles){const text=fs.readFileSync(path.join(root,file),'utf8');const ast=parse(file,text);const directImports={};
+  for(const file of routeFiles){const text=readSource(path.join(root,file));const ast=parse(file,text);const directImports={};
     for(const s of ast.statements)if(ts.isImportDeclaration(s)&&s.importClause?.name)directImports[s.importClause.name.text]=s.moduleSpecifier.text.replace(/^@\//,'src/');
     for(const match of text.matchAll(/const (\w+)\s*=\s*(?:React\.)?lazy\(\(\)\s*=>\s*import\(['"]([^'"]+)['"]/g))directImports[match[1]]=match[2].replace(/^@\//,'src/')+'.tsx';
     for(const statement of ast.statements)if(ts.isImportDeclaration(statement)&&statement.importClause?.namedBindings&&ts.isNamedImports(statement.importClause.namedBindings))for(const item of statement.importClause.namedBindings.elements)directImports[item.name.text]=statement.moduleSpecifier.text.replace(/^@\//,'src/');
@@ -227,7 +228,7 @@ export function buildRouteRegister(root) {
       ts.forEachChild(n,child=>visit(child,nextPath,nextElements));
     } visit(ast);
   }
-  return {schemaVersion:1,status:'SOURCE_ONLY_NOTTESTED',countMeaning:'Route JSX declarations; NOT screen count. Redirects, pathless parents, reused templates, mapped and conditional branches remain distinct source records.',sourceFiles:[...routeFiles,'src/components/layout/pageRegistry.ts','src/lib/config/routes.ts',...navFiles].map(file=>({file,sha256:hash(fs.readFileSync(path.join(root,file)))})),summary:{declarations:declarations.length,directRedirects:declarations.filter(r=>r.kind==='redirect').length,kindCounts:Object.fromEntries([...new Set(declarations.map(r=>r.kind))].map(k=>[k,declarations.filter(r=>r.kind===k).length]))},coverageKey:['actor','resolvedPathPattern','templates','coverage.states'],limitations:['No runtime routes or guards executed','No screenshot or typography evidence','PageRegistry imports can be reused; not unique screen count','Dynamic paths use explicit symbolic placeholders; inspect map expansion and conditional helperEvidence','Fixture references are reuse candidates only, not proof of page or shell coverage'],declarations};
+  return {schemaVersion:1,status:'SOURCE_ONLY_NOTTESTED',countMeaning:'Route JSX declarations; NOT screen count. Redirects, pathless parents, reused templates, mapped and conditional branches remain distinct source records.',sourceFiles:[...routeFiles,'src/components/layout/pageRegistry.ts','src/lib/config/routes.ts',...navFiles].map(file=>({file,sha256:hash(readSource(path.join(root,file)))})),summary:{declarations:declarations.length,directRedirects:declarations.filter(r=>r.kind==='redirect').length,kindCounts:Object.fromEntries([...new Set(declarations.map(r=>r.kind))].map(k=>[k,declarations.filter(r=>r.kind===k).length]))},coverageKey:['actor','resolvedPathPattern','templates','coverage.states'],limitations:['No runtime routes or guards executed','No screenshot or typography evidence','PageRegistry imports can be reused; not unique screen count','Dynamic paths use explicit symbolic placeholders; inspect map expansion and conditional helperEvidence','Fixture references are reuse candidates only, not proof of page or shell coverage'],declarations};
 }
 export function normalizeRegister(register) {
   const catalogs={templates:{},elements:{},layouts:{},helpers:{},navigation:{},fixtures:{}};

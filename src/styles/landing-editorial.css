@@ -1,0 +1,64 @@
+/* Shared editorial treatment for public introductions and request landings. */
+.landing-editorial {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: var(--public-detail-gap);
+}
+
+.landing-editorial-copy {
+  min-width: 0;
+  text-align: start;
+}
+
+.landing-editorial-copy h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--public-editorial-display-size);
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.landing-editorial-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center;
+}
+
+.landing-editorial-section {
+  border-block-end: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  padding-block: var(--public-section-gap);
+}
+
+.landing-editorial-rule {
+  border-inline-start: 2px solid hsl(var(--accent));
+  padding-inline-start: var(--public-gutter);
+}
+
+@media (min-width: 64rem) {
+  .landing-editorial {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+}
+
+.landing-catalog-header {
+  background: hsl(var(--card));
+  border-block-end: 1px solid hsl(var(--border));
+}
+
+:is(.landing-catalog-header, .landing-catalog-copy) h1,
+.landing-catalog-title {
+  font-family: var(--font-display);
+  font-size: var(--public-display-size);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}

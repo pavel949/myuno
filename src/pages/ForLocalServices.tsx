@@ -1,3 +1,4 @@
+import { LandingEditorialPhoto } from '@/components/landings/LandingEditorialPhoto';
 /**
  * Public landing — local service providers (vendors on myUNO marketplace).
  */
@@ -80,9 +81,9 @@ export default function ForLocalServices() {
 
       <div className="min-h-screen bg-background">
         <LandingChrome isRu={isRu} variant="marketing" />
-        <section className="relative overflow-hidden py-16 md:py-24">
-          <LandingContainer variant="marketing" className="relative text-center">
-            <motion.div
+        <section className="landing-editorial-section">
+          <LandingContainer variant="marketing" className="landing-editorial">
+            <motion.div className="landing-editorial-copy landing-editorial-rule"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
@@ -96,12 +97,12 @@ export default function ForLocalServices() {
                   ? 'Клиенты из супераппа — на ваш календарь'
                   : 'Super-app customers — on your calendar'}
               </h1>
-              <p className="text-muted-foreground text-body-lg max-w-prose mx-auto mb-8">
+              <p className="text-muted-foreground text-body-lg mb-8">
                 {isRu
                   ? 'Резиденты, туристы и консьерж маршрутизируют запросы в проверенных партнёров.'
                   : 'Residents, tourists, and concierge route requests to verified partners.'}
               </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-start">
                 <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.VENDOR_JOIN)}>
                   {isRu ? 'Стать партнёром' : 'Become a partner'}
                   <ArrowRight className="w-4 h-4" />
@@ -114,6 +115,7 @@ export default function ForLocalServices() {
                 </Button>
               </div>
             </motion.div>
+          <LandingEditorialPhoto subject="destination" />
           </LandingContainer>
         </section>
         <section>

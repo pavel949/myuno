@@ -98,7 +98,7 @@ export default function ExperiencesIndex() {
     setParams(next);
   };
   const title = t('Впечатления', 'Experiences', 'ประสบการณ์');
-  return <MiniAppLayout contentClassName="public-commerce public-commerce--experiences" title={title}
+  return <MiniAppLayout editorialHeader contentClassName="public-commerce public-commerce--experiences" title={title}
     subtitle={error ? t('Каталог временно недоступен', 'Catalogue temporarily unavailable', 'รายการไม่พร้อมใช้งานชั่วคราว')
       : isLoading ? t('Загружаем предложения…', 'Loading offers…', 'กำลังโหลดข้อเสนอ…')
       : invalidFilters ? t('Проверьте выбранные фильтры', 'Check the selected filters', 'ตรวจสอบตัวกรองที่เลือก')

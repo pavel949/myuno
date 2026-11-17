@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { SEOHead } from '@/components/seo/SEOHead';
@@ -79,7 +80,7 @@ export default function NewbuildsLanding() {
               <Building2 className="w-3.5 h-3.5" aria-hidden />
               PHUKET NEW BUILDS
             </div>
-            <h1 className="nb-display text-2xl md:text-4xl font-semibold text-foreground">
+            <h1 className="landing-catalog-title nb-display text-2xl md:text-4xl font-semibold text-foreground">
               Новостройки Пхукета
             </h1>
             <p className="text-sm md:text-base max-w-xl mx-auto text-muted-foreground">

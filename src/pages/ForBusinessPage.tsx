@@ -1,3 +1,4 @@
+import { LandingEditorialPhoto } from '@/components/landings/LandingEditorialPhoto';
 import '@/styles/premium-audience.css';
 /**
  * Public landing — myUNO for Local Business.
@@ -399,10 +400,10 @@ export default function ForBusinessPage() {
       <div className="min-h-screen bg-background">
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-10 md:py-16">
+        <section className="landing-editorial-section">
 
-          <div className={PUBLIC_CONTENT_LAYOUT.business}>
-          <div className="relative max-w-3xl mx-auto text-center">
+          <div className={`${PUBLIC_CONTENT_LAYOUT.business} landing-editorial`}>
+          <div className="landing-editorial-copy landing-editorial-rule">
             <motion.div
               initial={reducedMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -418,7 +419,7 @@ export default function ForBusinessPage() {
               <p className="text-muted-foreground text-base md:text-lg mb-8">
                 {t(UI.heroDesc)}
               </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-start">
                 <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={scrollToForm}>
                   {t(UI.ctaInquiry)}
                   <ArrowRight className="w-4 h-4" />
@@ -429,6 +430,7 @@ export default function ForBusinessPage() {
               </div>
             </motion.div>
           </div>
+          <LandingEditorialPhoto />
           </div>
         </section>
 

@@ -1,3 +1,4 @@
+import { LandingEditorialPhoto } from './LandingEditorialPhoto';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,16 +29,19 @@ export function AudienceLanding(props: AudienceLandingProps) {
   return <AppLayout usePageContainer={false}>
     <SEOHead title={label(props.eyebrow)} description={label(props.intro)} url={`https://www.myuno.app${props.path}`} />
     <div className="premium-audience">
-      <header className="audience-hero">
-        <p className="audience-eyebrow">{label(props.eyebrow)}</p>
-        <h1>{label(props.title)}</h1>
-        <p className="audience-intro">{label(props.intro)}</p>
-        <div className="audience-actions">
-          {props.primary.href.startsWith('#')
-            ? <a className="audience-primary" href={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></a>
-            : <Link className="audience-primary" to={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>}
-          <Link className="audience-secondary" to={props.secondary.href}>{label(props.secondary.title)}</Link>
+      <header className="audience-hero landing-editorial">
+        <div className="landing-editorial-copy landing-editorial-rule">
+          <p className="audience-eyebrow">{label(props.eyebrow)}</p>
+          <h1>{label(props.title)}</h1>
+          <p className="audience-intro">{label(props.intro)}</p>
+          <div className="audience-actions">
+            {props.primary.href.startsWith('#')
+              ? <a className="audience-primary" href={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></a>
+              : <Link className="audience-primary" to={props.primary.href}>{label(props.primary.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>}
+            <Link className="audience-secondary" to={props.secondary.href}>{label(props.secondary.title)}</Link>
+          </div>
         </div>
+        <LandingEditorialPhoto subject={props.path === '/for/agent' ? 'destination' : 'property'} />
       </header>
       <section id="paths" tabIndex={-1} aria-labelledby="audience-paths-title" className={`audience-section ${PUBLIC_CONTENT_ANCHOR}`}>
         <h2 id="audience-paths-title">{label(props.choicesTitle)}</h2>

@@ -1,3 +1,4 @@
+import { LandingEditorialPhoto } from '@/components/landings/LandingEditorialPhoto';
 import React from 'react';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { motion } from 'framer-motion';
@@ -137,9 +138,9 @@ const ForManagementCompanies: React.FC = () => {
       <div className="min-h-screen bg-background">
         <LandingChrome isRu={isRu} variant="marketing" />
         {/* Hero */}
-        <section className="relative overflow-hidden py-20 md:py-24">
-          <LandingContainer variant="marketing" className="relative text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        <section className="landing-editorial-section">
+          <LandingContainer variant="marketing" className="landing-editorial">
+            <motion.div className="landing-editorial-copy landing-editorial-rule" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge variant="secondary" className="mb-6 text-sm px-4 py-1">
                 {isRu ? '🏢 Для управляющих компаний Пхукета' : '🏢 For Phuket Property Managers'}
               </Badge>
@@ -148,12 +149,12 @@ const ForManagementCompanies: React.FC = () => {
                   ? <>Управляйте объектами.<br />Координируйте команду.<br /><span className="text-primary">Работайте в одном кабинете.</span></>
                   : <>Manage Properties.<br />Coordinate Your Team.<br /><span className="text-primary">Work in One Workspace.</span></>}
               </h1>
-              <p className="text-body-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              <p className="text-body-lg text-muted-foreground mb-8">
                 {isRu
                   ? 'Рабочее пространство для объектов, гостей, команды и отчётов. Доступные инструменты и подключения зависят от подтверждённых прав и настроек компании.'
                   : 'A workspace for properties, guests, teams and reports. Available tools and integrations depend on confirmed permissions and company settings.'}
               </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-start">
                 <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding')} className={MARKETING_ACTION_BUTTON}>
                   <Zap className="w-5 h-5" />
                   {isRu ? 'Подключить компанию' : 'Set up your company'}
@@ -166,6 +167,7 @@ const ForManagementCompanies: React.FC = () => {
                 </Button>
               </div>
             </motion.div>
+          <LandingEditorialPhoto subject="property" />
           </LandingContainer>
         </section>
 

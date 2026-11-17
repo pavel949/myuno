@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
+import '@/styles/landing-editorial.css';
 
 const CONTAINER = 'mx-auto w-full max-w-6xl px-5';
 
@@ -44,7 +45,8 @@ export function LandingHero({
   return (
     <div
       className={cn(
-        'relative mx-auto max-w-6xl px-5 pt-12 pb-16 sm:pt-20 sm:pb-24',
+        PUBLIC_CONTENT_LAYOUT.marketing,
+        'landing-editorial-copy relative pt-12 pb-16 sm:pt-20 sm:pb-24',
         className,
       )}
     >

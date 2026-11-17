@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 import { SEOHead } from '@/components/seo/SEOHead';
 import '@/styles/public-commerce.css';
 /**
@@ -294,7 +295,7 @@ export default function PropertySearchPage() {
     <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search premium-search property-discovery min-h-screen bg-background')}>
       <SEOHead title={text('Жильё на Пхукете', 'Homes in Phuket', 'ที่พักในภูเก็ต')} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
-          <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
+          <h1 className="property-discovery-title landing-catalog-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
           <p className="text-body-sm text-muted-foreground">{text('Все опубликованные объекты показаны ниже. Название и параметры только уточняют каталог.', 'Published homes are shown below. Use a name or criteria to narrow the catalogue.', 'ประกาศที่พักแสดงด้านล่าง ใช้ชื่อหรือเงื่อนไขเพื่อกรองรายการ')}</p>
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />

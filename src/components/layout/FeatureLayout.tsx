@@ -1,3 +1,4 @@
+import '@/styles/landing-editorial.css';
 /**
  * FeatureLayout — mode-driven framing for mini-app catalogs, landing/promo pages,
  * and other feature surfaces that sit on top of `AppLayout` (consumer chrome).
@@ -107,6 +108,7 @@ export interface MiniAppLayoutProps {
   children: ReactNode;
   showBottomNav?: boolean;
   contentClassName?: string;
+  editorialHeader?: boolean;
   pageWidth?: 'default' | 'catalogue';
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
@@ -173,6 +175,7 @@ function MiniappMode({
   children,
   showBottomNav = true,
   contentClassName,
+  editorialHeader = false,
   pageWidth = 'default',
   quickActions,
   stickySubHeader,
@@ -355,7 +358,7 @@ function MiniappMode({
         />
       )}
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
-      <div className="relative">
+      <div className={cn("relative", editorialHeader && "landing-catalog-header")}>
         <UnifiedHeader
           containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}
           title={title}
