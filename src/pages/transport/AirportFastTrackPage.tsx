@@ -140,7 +140,7 @@ export default function AirportFastTrackPage() {
       // 24h cutoff is correct regardless of the traveller's device timezone.
       const flightDT = new Date(`${flightDate}T${flightTime}:00+07:00`);
       const cutoff = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      return flightDT < cutoff;
+      return !Number.isFinite(flightDT.getTime()) || flightDT < cutoff;
     } catch { return false; }
   }, [flightDate, flightTime]);
 
@@ -785,7 +785,7 @@ export default function AirportFastTrackPage() {
                 </div>
                 {passengers.map((p, i) => (
                   <div key={i} className="text-xs text-muted-foreground pl-4">
-                    {p.firstName} {p.lastName} — {p.passportNumber}
+                    {p.firstName} {p.lastName} — {p.passportNumber.length > 4 ? `••••${p.passportNumber.slice(-4)}` : '••••'}
                   </div>
                 ))}
               </div>
