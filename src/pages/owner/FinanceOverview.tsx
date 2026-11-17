@@ -76,7 +76,6 @@ export default function FinanceOverview() {
         <div className="grid grid-cols-3 gap-3 mb-6">
           {/* Net Income */}
           <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/8 to-primary/3" />
             <CardContent className="p-3 relative">
               <div className="flex items-center gap-1 mb-1">
                 <Wallet className="h-3.5 w-3.5 text-primary" />
@@ -95,7 +94,6 @@ export default function FinanceOverview() {
 
           {/* This month income */}
           <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-success/8 to-success/3" />
             <CardContent className="p-3 relative">
               <div className="flex items-center gap-1 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-success" />
@@ -112,7 +110,6 @@ export default function FinanceOverview() {
 
           {/* This month expenses */}
           <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-destructive/8 to-destructive/3" />
             <CardContent className="p-3 relative">
               <div className="flex items-center gap-1 mb-1">
                 <TrendingDown className="h-3.5 w-3.5 text-destructive" />
