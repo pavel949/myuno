@@ -68,8 +68,8 @@ body:has([data-cookie-consent-banner]) [data-global-chat-launcher]{visibility:hi
 
 /* Task-first guest menu: stable close control, scroll only the destinations. */
 [role="dialog"].consumer-task-menu{display:flex;flex-direction:column;gap:0;overflow:hidden;padding:0}
-.consumer-task-menu-heading{flex:none;padding:20px 56px 16px 20px;border-bottom:1px solid hsl(var(--border))}
-.consumer-task-menu-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px 20px max(20px,env(safe-area-inset-bottom))}
+.consumer-task-menu-heading{flex:none;padding:20px max(56px,var(--consumer-page-gutter,24px)) 16px var(--consumer-page-gutter,24px);border-bottom:1px solid hsl(var(--border))}
+.consumer-task-menu-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px var(--consumer-page-gutter,24px) max(20px,env(safe-area-inset-bottom))}
 .consumer-task-search{width:100%;justify-content:flex-start;min-height:44px;margin-bottom:8px}
 .consumer-task-section{padding:16px 0;border-bottom:1px solid hsl(var(--border))}
 .consumer-task-section h2{margin:0 0 8px;font-size:var(--public-caption-size);font-weight:600;color:hsl(var(--muted-foreground))}
