@@ -27,11 +27,12 @@ describe('InquiryConfirmation', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the WhatsApp confirmation body copy', () => {
+  it('identifies myUNO without promising a response deadline or channel', () => {
     renderComponent();
     expect(
-      screen.getByText(/WhatsApp within 24 hours/i),
+      screen.getByText('The myUNO team will contact you to arrange your viewing time.'),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/WhatsApp|24 hours|30 min/i)).not.toBeInTheDocument();
   });
 
   it('renders a "View booking" CTA button linked to the orderId', () => {
