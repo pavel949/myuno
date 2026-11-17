@@ -78,6 +78,19 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           {(['short', 'medium', 'long'] as const).map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
         </div>
       )}
+      {showRefinements && <div className="home-search-location">
+        <div className="min-w-0 flex-1"><span className="home-field-label">{t({ ru: 'Район', en: 'Area', th: 'ย่าน' })}</span>
+          <Select value={district || '__all'} onValueChange={value => setDistrict(value === '__all' ? '' : value)} disabled={isLoading}>
+            <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите район', en: 'Choose an area', th: 'เลือกย่าน' })}><SelectValue /></SelectTrigger>
+            <SelectContent collisionPadding={12}>
+              <SelectItem className="min-h-11" value="__all">{isLoading ? t({ ru: 'Загрузка районов…', en: 'Loading areas…', th: 'กำลังโหลดย่าน…' }) : t({ ru: 'Весь Пхукет', en: 'All Phuket', th: 'ทั่วภูเก็ต' })}</SelectItem>
+              {district.includes(',') && <SelectItem value={district}>{t({ ru: 'Несколько районов', en: 'Multiple areas', th: 'หลายย่าน' })}</SelectItem>}
+              {district && !district.includes(',') && !districts.some(item => item.valueKey === district) && <SelectItem value={district}>{district}</SelectItem>}
+              {districts.map(d => <SelectItem className="min-h-11" key={d.id} value={d.valueKey}>{language === 'ru' ? d.labelRu : d.labelEn}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>}
       {mode === 'rent' && <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />}
       {showGuestsInline && mode === 'rent' && (
         <label className="home-search-guests home-search-guests-inline" htmlFor={guestsId}>
@@ -98,19 +111,6 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
             {propertyTypes.map(type => <SelectItem className="min-h-11" key={type.id} value={type.id}>{language === 'ru' ? type.labelRu : type.labelEn}</SelectItem>)}
           </SelectContent>
         </Select>
-      </div>
-      <div className="home-search-location">
-        <div className="min-w-0 flex-1"><span className="home-field-label">{t({ ru: 'Район', en: 'Area', th: 'ย่าน' })}</span>
-          <Select value={district || '__all'} onValueChange={value => setDistrict(value === '__all' ? '' : value)} disabled={isLoading}>
-            <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите район', en: 'Choose an area', th: 'เลือกย่าน' })}><SelectValue /></SelectTrigger>
-            <SelectContent collisionPadding={12}>
-              <SelectItem className="min-h-11" value="__all">{isLoading ? t({ ru: 'Загрузка районов…', en: 'Loading areas…', th: 'กำลังโหลดย่าน…' }) : t({ ru: 'Весь Пхукет', en: 'All Phuket', th: 'ทั่วภูเก็ต' })}</SelectItem>
-              {district.includes(',') && <SelectItem value={district}>{t({ ru: 'Несколько районов', en: 'Multiple areas', th: 'หลายย่าน' })}</SelectItem>}
-              {district && !district.includes(',') && !districts.some(item => item.valueKey === district) && <SelectItem value={district}>{district}</SelectItem>}
-              {districts.map(d => <SelectItem className="min-h-11" key={d.id} value={d.valueKey}>{language === 'ru' ? d.labelRu : d.labelEn}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
       <div className="home-search-bedrooms">
         <span className="home-field-label">{t({ ru: 'Спальни', en: 'Bedrooms', th: 'ห้องนอน' })}</span>
