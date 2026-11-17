@@ -23,7 +23,7 @@ const typeLabels: Record<ModerationType, [string, string, string]> = {
 };
 const categoryLabels: Record<string, [string, string, string]> = {
   yacht: ["Yachts", "Яхты", "เรือยอชต์"], restaurant: ["Restaurants", "Рестораны", "ร้านอาหาร"], clinic: ["Clinics", "Клиники", "คลินิก"],
-  vehicle: ["Vehicles", "Транспорт", "ยานพาหนะ"], experience: ["Experiences", "Экскурсии", "กิจกรรม"], education: ["Education", "Образование", "การศึกษา"],
+  vehicle: ["Vehicles", "Транспорт", "ยานพาหนะ"], experience: ["Experiences", "Впечатления", "กิจกรรม"], education: ["Education", "Образование", "การศึกษา"],
   pet_service: ["Pet services", "Уход за питомцами", "บริการสัตว์เลี้ยง"], cleaning: ["Cleaning", "Уборка", "ทำความสะอาด"], babysitter: ["Babysitters", "Няни", "พี่เลี้ยงเด็ก"],
   villa: ["Villas", "Виллы", "วิลล่า"], condo: ["Condominiums", "Кондоминиумы", "คอนโดมิเนียม"], apartment: ["Apartments", "Апартаменты", "อพาร์ตเมนต์"],
 };
@@ -116,19 +116,19 @@ export function OperationsModerationTab() {
     : item.type === 'listing' ? label(["Open category catalog", "Открыть каталог категории", "เปิดแคตตาล็อกหมวดหมู่"]) : label(["Open catalog", "Открыть каталог", "เปิดแคตตาล็อก"]);
 
   return (
-    <Card className="min-w-0">
+    <Card className="min-w-0 overflow-hidden border-border/70 shadow-sm">
       <ModerationDetailDialog selection={detail} onClose={()=>{setDetail(null);void refetch();}} onReturnFocus={()=>reviewButton.current?.focus()} />
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg"><ShieldCheck className="h-5 w-5 shrink-0" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</CardTitle>
+      <CardHeader className="border-b border-border/70 bg-muted/20 pb-5 pt-6">
+        <CardTitle className="flex items-center gap-3 font-display text-xl sm:text-2xl"><ShieldCheck className="h-5 w-5 shrink-0" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</CardTitle>
         <p className="text-sm text-muted-foreground">{label([
           'Pending approval: listings and properties. Inactive services and products are shown separately.',
           'Ожидают одобрения: листинги и недвижимость. Неактивные услуги и товары показаны отдельно.',
           'รออนุมัติ: รายการและที่พัก บริการและสินค้าที่ไม่ใช้งานแสดงแยกต่างหาก',
         ])}</p>
       </CardHeader>
-      <CardContent className="space-y-4 min-w-0">
+      <CardContent className="space-y-5 min-w-0 pt-5">
         <Tabs value={activeTab} onValueChange={value => setFilters({ queue: value, q: '', type: 'all', category: 'all' })}>
-          <TabsList className="grid h-auto w-full grid-cols-4">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted/50 p-1 lg:grid-cols-4">
             <TabsTrigger value="pending" className="min-h-11 whitespace-normal">{label(["Pending review", "На проверке", "รอตรวจสอบ"])}</TabsTrigger>
             <TabsTrigger value="draft" className="min-h-11 whitespace-normal">{label(["Drafts — not submitted", "Черновики — не поданы", "ฉบับร่าง — ยังไม่ส่ง"])}</TabsTrigger>
             <TabsTrigger value="inactive" className="min-h-11 whitespace-normal">{label(["Inactive catalog", "Неактивный каталог", "รายการที่ไม่ใช้งาน"])}</TabsTrigger>
@@ -137,7 +137,7 @@ export function OperationsModerationTab() {
           <TabsContent value="complexes"><ManagedComplexReviewQueue /></TabsContent>
           {['pending', 'inactive', 'draft'].map(tab => (
             <TabsContent value={tab} key={tab} className="space-y-4 min-w-0">
-              <div data-testid="moderation-summary" className="rounded-none border bg-muted/30 p-3 space-y-1">
+              <div data-testid="moderation-summary" className="border border-border/70 bg-muted/30 p-4 space-y-1">
                 <p className="font-medium"><span data-testid="moderation-count">{isLoading ? '…' : total ?? label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</span> {tab === 'draft' ? label(['drafts', 'черновики', 'ฉบับร่าง']) : tab === 'pending' ? label(["pending approval", "ожидают одобрения", "รายการรออนุมัติ"]) : label(["inactive catalog items", "неактивных записей каталога", "รายการแคตตาล็อกที่ไม่ใช้งาน"])}</p>
                 <p className="text-sm text-muted-foreground">{isLoading ? label(["Loading.", "Загрузка.", "กำลังโหลด."]) : label([
                   `Page ${page + 1}. Loaded ${loaded.length} of ${total ?? 'unknown'} for this source. Search and filters apply on the server.`,
@@ -176,15 +176,15 @@ export function OperationsModerationTab() {
                   const destination = moderationReviewDestination(item, location.pathname + location.search);
                   const date = item.created_at ? new Date(item.created_at) : null;
                   const approval = item.approval_status === 'pending' ? label(["Pending", "Ожидает", "รออนุมัติ"]) : item.approval_status === 'approved' ? label(["Approved", "Одобрено", "อนุมัติแล้ว"]) : item.approval_status === 'rejected' ? label(["Rejected", "Отклонено", "ไม่อนุมัติ"]) : item.approval_status === 'draft' ? label(['Draft', 'Черновик', 'ฉบับร่าง']) : item.approval_status || label(["Unknown", "Неизвестно", "ไม่ทราบ"]);
-                  return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 rounded-none border p-3 sm:p-4 space-y-3">
+                  return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-primary/30 sm:p-5">
                     <div className="flex flex-wrap items-center gap-2"><Badge variant="outline">{label(typeLabels[item.type])}</Badge>{categoryOf(item) && <span className="text-xs text-muted-foreground break-words">{categoryLabel(categoryOf(item))}</span>}</div>
-                    <h3 className="font-medium break-words [overflow-wrap:anywhere]">{name}</h3>
-                    <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="min-w-0"><dt className="text-xs text-muted-foreground">{label(["Provider", "Провайдер", "ผู้ให้บริการ"])}</dt><dd className="break-words">{item.provider_name || label(["Not available", "Нет данных", "ไม่มีข้อมูล"])}</dd></div>
-                      <div><dt className="text-xs text-muted-foreground">{label(["Created, not submitted", "Создано, не дата подачи", "วันที่สร้าง ไม่ใช่วันที่ส่งตรวจ"])}</dt><dd>{date && !Number.isNaN(date.getTime()) ? format(date, 'dd.MM.yyyy') : label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</dd></div>
-                      <div><dt className="text-xs text-muted-foreground">{label(["Approval status", "Статус проверки", "สถานะการอนุมัติ"])}</dt><dd>{approval}{tab === 'inactive' && ` · ${label(["Inactive", "Неактивно", "ไม่ใช้งาน"])}`}</dd></div>
+                    <h3 className="font-display text-lg font-semibold leading-snug break-words [overflow-wrap:anywhere]">{name}</h3>
+                    <dl className="grid gap-x-6 gap-y-3 border-t border-border/60 pt-3 text-sm sm:grid-cols-3">
+                      <div className="min-w-0"><dt className="mb-1 text-xs text-muted-foreground">{label(["Provider", "Провайдер", "ผู้ให้บริการ"])}</dt><dd className="break-words">{item.provider_name || label(["Not available", "Нет данных", "ไม่มีข้อมูล"])}</dd></div>
+                      <div><dt className="mb-1 text-xs text-muted-foreground">{label(["Created", "Создано", "วันที่สร้าง"])}</dt><dd>{date && !Number.isNaN(date.getTime()) ? format(date, 'dd.MM.yyyy') : label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</dd></div>
+                      <div><dt className="mb-1 text-xs text-muted-foreground">{label(["Approval status", "Статус проверки", "สถานะการอนุมัติ"])}</dt><dd className="font-medium text-foreground">{approval}{tab === 'inactive' && ` · ${label(["Inactive", "Неактивно", "ไม่ใช้งาน"])}`}</dd></div>
                     </dl>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
                       <Button variant="outline" className="min-h-11" onClick={event => {reviewButton.current=event.currentTarget;if(destination.review)navigate(destination.review);else if(item.type!=='property' && user)setDetail({id:item.id,type:item.type,actorId:user.id});}}><Eye className="h-4 w-4 mr-2" />{label(["Review", "Проверить", "ตรวจสอบ"])}</Button>
                       {destination.collection && <Button variant="outline" className="min-h-11 whitespace-normal h-auto py-2" onClick={() => navigate(destination.collection!)}>{collectionLabel(item)}</Button>}
                       <Button variant="ghost" className="min-h-11 text-success" aria-label={`${(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}: ${name}`} onClick={() => reviewAction(item, true)} disabled={mutation.isPending || isFetching || tab === 'draft'}><ThumbsUp className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}</Button>
