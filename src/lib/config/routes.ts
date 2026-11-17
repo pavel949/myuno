@@ -721,6 +721,19 @@ export function getLegacyRedirect(path: string): string | null {
   return LEGACY_REDIRECTS[path] || null;
 }
 
+/** Keep discovery criteria on aliases; explicit canonical defaults win. */
+export function canonicalRedirectHref(target: string, search = '', hash = ''): string {
+  if (!target.startsWith('/') || target.startsWith('//')) throw new Error('Redirect destination must be an application path');
+  const destination = new URL(target, 'https://myuno.invalid');
+  if (destination.origin !== 'https://myuno.invalid') throw new Error('Redirect destination must stay in the application');
+  const query = new URLSearchParams(search);
+  const canonicalKeys = new Set(destination.searchParams.keys());
+  for (const key of canonicalKeys) query.delete(key);
+  destination.searchParams.forEach((value, key) => query.append(key, value));
+  const serialized = query.toString();
+  return `${destination.pathname}${serialized ? `?${serialized}` : ''}${destination.hash || hash}`;
+}
+
 /** Full URL for password reset redirect. Use in resetPasswordForEmail. Allowlist in Supabase: Authentication → URL Configuration → Redirect URLs. */
 export function getPasswordResetRedirectUrl(): string {
   if (typeof window === 'undefined') return '';

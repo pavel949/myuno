@@ -191,7 +191,7 @@ export function buildRouteRegister(root) {
   const qa=walk(path.join(root,'scripts/qa')).filter(p=>/\.(mjs|py|cjs)$/.test(p)).map(p=>({file:path.relative(root,p),text:fs.readFileSync(p,'utf8')}));
   const navFiles=['src/lib/navConfig.ts','src/lib/nav/goalEntries.ts','src/lib/nav/clusterCatalog.ts','src/lib/nav/navigationModel.ts'];
   const nav=navFiles.map(file=>({file,text:fs.readFileSync(path.join(root,file),'utf8')}));
-  function targets(node,ast){const out=[];function scan(n){if((ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))&&n.tagName.getText(ast)==='Navigate'){const to=n.attributes.properties.find(a=>a.name?.getText(ast)==='to');out.push({expression:to?.initializer?.getText(ast)||null,resolvedTarget:evaluate(to?.initializer,{APP_ROUTES:constants}),observation:'NOTTESTED'});}ts.forEachChild(n,scan);}scan(node);return out;}
+  function targets(node,ast){const out=[];function scan(n){if((ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))&&['Navigate','CanonicalPublicRedirect'].includes(n.tagName.getText(ast))){const to=n.attributes.properties.find(a=>a.name?.getText(ast)==='to');out.push({expression:to?.initializer?.getText(ast)||null,resolvedTarget:evaluate(to?.initializer,{APP_ROUTES:constants}),observation:'NOTTESTED'});}ts.forEachChild(n,scan);}scan(node);return out;}
   const declarations=[];
   for(const file of routeFiles){const text=fs.readFileSync(path.join(root,file),'utf8');const ast=parse(file,text);const directImports={};
     for(const s of ast.statements)if(ts.isImportDeclaration(s)&&s.importClause?.name)directImports[s.importClause.name.text]=s.moduleSpecifier.text.replace(/^@\//,'src/');
