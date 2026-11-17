@@ -24,7 +24,7 @@ export function RentalProjectPicker({ projects, selectedId, onSelect, language }
         const image = complexMediaUrl(project.coverImage);
         return <button key={project.id} type="button" aria-pressed={selected}
           onClick={() => onSelect(selected ? null : project.id)}
-          onFocus={event => event.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' })}
+          onFocus={event => event.currentTarget.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' })}
           className={cn('rental-project-picker__card border bg-card text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary', selected ? 'border-primary ring-2 ring-primary' : 'border-border')}>
           <div className="rental-project-picker__image bg-muted flex items-center justify-center">
             {image ? <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" onError={event => { event.currentTarget.style.display = 'none'; }} /> : <Building2 aria-hidden="true" className="h-8 w-8 text-muted-foreground" />}
