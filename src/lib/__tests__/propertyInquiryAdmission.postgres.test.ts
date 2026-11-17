@@ -7,6 +7,7 @@ import postgres from 'postgres';
 import { applyTransactionScript } from '../../test/applyTransactionScript';
 
 const candidate = readFileSync('docs/launch/property-inquiry-admission.candidate.sql', 'utf8');
+const fenceCandidate = readFileSync('docs/launch/property-inquiry-enqueue-fence.candidate.sql','utf8');
 const workerCandidate = readFileSync('docs/launch/property-inquiry-worker.candidate.sql', 'utf8');
 const triggerCandidate = readFileSync('docs/launch/property-inquiry-transactional-trigger.candidate.sql', 'utf8');
 const originalInquirySource = readFileSync('supabase/migrations/20260109000415_e52a8107-6f4f-4312-bbe7-56263e1191fc.sql', 'utf8');
@@ -55,20 +56,29 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO service_role;
       CREATE SCHEMA auth;
       CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
-      CREATE TABLE public.property_inquiries(id uuid PRIMARY KEY,user_id uuid,status text);
+      CREATE TABLE public.property_inquiries(id uuid PRIMARY KEY,user_id uuid,status text,property_id uuid DEFAULT '00000000-0000-4000-8000-000000000005',name text DEFAULT 'Stored guest',email text,phone text,message text,check_in date,check_out date,guests integer);
       CREATE TABLE public.system_settings(key text PRIMARY KEY,value jsonb);
       REVOKE ALL ON public.property_inquiries,public.system_settings FROM PUBLIC,anon,authenticated;
       ALTER TABLE public.property_inquiries ENABLE ROW LEVEL SECURITY;
       ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;`);
     await applyTransactionScript(sql, candidate);
     await applyTransactionScript(sql, workerCandidate);
+    await sql.unsafe(`CREATE TABLE public.suppressed_emails(id uuid DEFAULT gen_random_uuid(),email text UNIQUE);
+      CREATE TABLE public.email_unsubscribe_tokens(email text UNIQUE,token text UNIQUE,used_at timestamptz);
+      CREATE TABLE public.email_send_log(message_id text,template_name text,recipient_email text,status text);
+      CREATE TABLE public.queue_fixture(id bigserial PRIMARY KEY,queue_name text,payload jsonb);
+      CREATE FUNCTION public.enqueue_email(queue_name text,payload jsonb) RETURNS bigint LANGUAGE plpgsql AS $$
+      DECLARE n bigint; BEGIN INSERT INTO public.queue_fixture(queue_name,payload) VALUES($1,$2) RETURNING id INTO n;
+      IF current_setting('test.fail_queue',true)='on' THEN RAISE EXCEPTION 'Synthetic queue failure after insert'; END IF;
+      RETURN n; END $$;`);
+    await applyTransactionScript(sql,fenceCandidate);
     await sql.unsafe(creatorPolicies);
     await sql.unsafe('GRANT USAGE ON SCHEMA auth TO authenticated; GRANT SELECT,INSERT,UPDATE ON public.property_inquiries TO authenticated');
   }, 60000);
   beforeEach(async () => {
     await sql.unsafe('DROP TRIGGER IF EXISTS admit_inserted_property_inquiry ON public.property_inquiries; DROP FUNCTION IF EXISTS private.admit_inserted_property_inquiry()');
-    await sql.unsafe('TRUNCATE private.admin_intake_dispatch,public.property_inquiries,public.system_settings');
-    await sql`INSERT INTO public.property_inquiries VALUES(${requestId},${actor},'pending')`;
+    await sql.unsafe('TRUNCATE private.admin_intake_dispatch,public.property_inquiries,public.system_settings,public.suppressed_emails,public.email_unsubscribe_tokens,public.email_send_log,public.queue_fixture');
+    await sql`INSERT INTO public.property_inquiries(id,user_id,status) VALUES(${requestId},${actor},'pending')`;
     await sql`INSERT INTO public.system_settings VALUES('admin_emails','["admin@example.test"]'::jsonb)`;
   });
   afterAll(async () => {
@@ -171,15 +181,15 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       const event=claims.flat()[0];
       expect(event.admitted_actor_id).toBe(actor);expect(event.state).toBe('processing');expect(event.attempts).toBe(1);
     });
-    it('queues once with matching lease and never claims queued work again', async () => {
+    it('finalizes suppression once with matching lease and never reclaims it', async () => {
       const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
-      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'queued') AS ok`)[0].ok).toBe(true);
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'suppressed') AS ok`)[0].ok).toBe(true);
       expect(await sql`SELECT * FROM private.claim_property_inquiry_email()`).toHaveLength(0);
       expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'failed') AS ok`)[0].ok).toBe(false);
     });
     it('does not let a forged claim token complete another worker event', async () => {
       const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
-      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${other},'queued') AS ok`)[0].ok).toBe(false);
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${other},'suppressed') AS ok`)[0].ok).toBe(false);
       expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('processing');
     });
     it('an expired/crashed claim becomes uncertain, not automatically resent', async () => {
@@ -187,7 +197,7 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       await sql`UPDATE private.admin_intake_dispatch SET lease_until=now()-interval '1 second' WHERE id=${e.id}`;
       expect(await sql`SELECT * FROM private.claim_property_inquiry_email()`).toHaveLength(0);
       expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('uncertain');
-      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'queued') AS ok`)[0].ok).toBe(false);
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'suppressed') AS ok`)[0].ok).toBe(false);
     });
     it('only proven pre-send failure retries after backoff, keeping stable event identity', async () => {
       const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
@@ -197,7 +207,7 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       const [retry]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
       expect(retry.id).toBe(e.id);expect(retry.claim_token).not.toBe(e.claim_token);expect(retry.attempts).toBe(2);
     });
-    it.each(['delivered','accepted','pending'])('worker cannot invent outcome %s', async outcome => {
+    it.each(['queued','delivered','accepted','pending'])('worker cannot invent outcome %s', async outcome => {
       const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
       await expect(sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},${outcome})`).rejects.toMatchObject({code:'22023'});
     });
@@ -206,6 +216,53 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
         has_function_privilege(${role},'private.complete_property_inquiry_email(uuid,uuid,text)','EXECUTE') AS complete`;
       expect(acl).toEqual({claim:false,complete:false});
     });
+  });
+  describe('transactionally fenced queue admission (local transactional queue adapter)', () => {
+    async function event() { await admit(); return (await sql`SELECT * FROM private.claim_property_inquiry_email()`)[0]; }
+    async function enqueue(e: {id:string;claim_token:string}) { return (await sql`SELECT private.enqueue_claimed_property_inquiry_email(${e.id},${e.claim_token}) AS result`)[0].result; }
+    it('atomically enqueues persisted content only to configured admin and finalizes queued', async () => {
+      const e=await event();await sql`UPDATE public.property_inquiries SET message='<script>bad</script>',phone='stored-phone' WHERE id=${requestId}`;
+      expect(await enqueue(e)).toEqual({outcome:'queued'});
+      const [q]=await sql`SELECT payload FROM public.queue_fixture`;
+      expect(q.payload.to).toBe('admin@example.test');expect(q.payload.text).toContain('stored-phone');
+      expect(q.payload.html).not.toContain('<script>');expect(q.payload.html).toContain('&lt;script&gt;');
+      expect(q.payload.idempotency_key).toBe('myuno-property-inquiry-email:'+e.id);
+      expect(q.payload.text).toContain('source=property_inquiries&request='+requestId);
+      expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('queued');
+      expect(await enqueue(e)).toMatchObject({outcome:'uncertain'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(1);
+    });
+    it('rejects a paused worker after lease expiry before enqueue', async () => {
+      const e=await event();await sql`UPDATE private.admin_intake_dispatch SET lease_until=now()-interval '1 second' WHERE id=${e.id}`;
+      expect(await enqueue(e)).toMatchObject({outcome:'uncertain'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it('rejects forged claim before any private payload admission', async () => {
+      const e=await event();expect(await enqueue({...e,claim_token:other})).toMatchObject({outcome:'uncertain'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it.each(['recipient','actor','status','suppression','used_token'])('rechecks canonical %s inside enqueue transaction', async change => {
+      const e=await event();
+      if(change==='recipient') await sql`UPDATE public.system_settings SET value='["replacement@example.test"]'::jsonb`;
+      if(change==='actor') await sql`UPDATE public.property_inquiries SET user_id=${other} WHERE id=${requestId}`;
+      if(change==='status') await sql`UPDATE public.property_inquiries SET status='cancelled' WHERE id=${requestId}`;
+      if(change==='suppression') await sql`INSERT INTO public.suppressed_emails(email) VALUES('admin@example.test')`;
+      if(change==='used_token') await sql`INSERT INTO public.email_unsubscribe_tokens VALUES('admin@example.test','synthetic-token',now())`;
+      expect(await enqueue(e)).toEqual({outcome:'suppressed'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it('queue failure rolls back token/log/queue writes before marking retry safe', async () => {
+      const e=await event();const [r]=await sql.begin(async tx=>{await tx`SELECT set_config('test.fail_queue','on',true)`;return tx`SELECT private.enqueue_claimed_property_inquiry_email(${e.id},${e.claim_token}) AS result`;});
+      expect(r.result).toEqual({outcome:'failed',retry_safe:true});
+      expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);expect(await sql`SELECT message_id FROM public.email_send_log`).toHaveLength(0);expect(await sql`SELECT token FROM public.email_unsubscribe_tokens`).toHaveLength(0);
+    });
+    it.each(['recipient','expiry'])('does not enqueue stale work while concurrent %s transaction blocks validation', async kind => {
+      const e=await event();let unlock!:()=>void;let ready!:()=>void;
+      const release=new Promise<void>(r=>{unlock=r;});const held=new Promise<void>(r=>{ready=r;});
+      const writer=sql.begin(async tx=>{await tx`UPDATE public.system_settings SET value=CASE WHEN ${kind}='recipient' THEN '["replacement@example.test"]'::jsonb ELSE value END WHERE key='admin_emails'`;ready();await release;});
+      await held;
+      if(kind==='expiry') await sql`UPDATE private.admin_intake_dispatch SET lease_until=clock_timestamp()+interval '150 milliseconds' WHERE id=${e.id}`;
+      const pending=enqueue(e);let sawLock=false;
+      try {for(let i=0;i<100;i++){const [r]=await sql`SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%enqueue_claimed_property_inquiry_email%'`;if(r.n>0){sawLock=true;break;}await new Promise(r=>setTimeout(r,10));}if(kind==='expiry')await sql`SELECT pg_sleep(0.2)`;} finally {unlock();}
+      await writer;expect(sawLock).toBe(true);expect(await pending).toMatchObject({outcome:kind==='expiry'?'uncertain':'suppressed'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it.each(['anon','authenticated','service_role'])('fenced enqueue is not executable by %s',async role=>{expect((await sql`SELECT has_function_privilege(${role},'private.enqueue_claimed_property_inquiry_email(uuid,uuid)','EXECUTE') AS ok`)[0].ok).toBe(false);});
   });
   describe('transactional integration with the existing creator INSERT path', () => {
     const insertedId = '00000000-0000-4000-8000-000000000004';
@@ -257,7 +314,7 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
     });
     it('leaves no-actor operational imports untouched and explicitly outside the creator pilot', async () => {
-      await sql`INSERT INTO public.property_inquiries VALUES(${insertedId},${actor},'pending')`;
+      await sql`INSERT INTO public.property_inquiries(id,user_id,status) VALUES(${insertedId},${actor},'pending')`;
       expect(await sql`SELECT id FROM public.property_inquiries WHERE id=${insertedId}`).toHaveLength(1);
       expect(await sql`SELECT id FROM private.admin_intake_dispatch`).toHaveLength(0);
     });

@@ -30,7 +30,7 @@ RETURNS boolean
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public AS $$
 DECLARE changed integer;
 BEGIN
-  IF p_outcome NOT IN ('queued','suppressed','failed','uncertain') OR p_outcome IS NULL THEN
+  IF p_outcome NOT IN ('suppressed','failed','uncertain') OR p_outcome IS NULL THEN
     RAISE EXCEPTION 'Invalid handoff outcome' USING ERRCODE='22023';
   END IF;
   UPDATE private.admin_intake_dispatch SET state=p_outcome,claim_token=NULL,lease_until=NULL,
