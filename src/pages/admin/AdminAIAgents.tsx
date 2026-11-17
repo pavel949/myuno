@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -300,7 +301,7 @@ export default function AdminAIAgents() {
   const inactiveAgents = filteredAgents.filter(a => !a.is_active);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <PageShell width="workspace" className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -484,6 +485,6 @@ export default function AdminAIAgents() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }

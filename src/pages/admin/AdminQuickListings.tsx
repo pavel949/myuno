@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -194,7 +195,7 @@ export default function AdminQuickListings() {
   if (authLoading || adminLoading) {
     return (
       <>
-        <div className="p-4 space-y-4">
+        <PageShell width="wide" className="space-y-4">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-10 w-full" />
           <div className="space-y-3">
@@ -202,7 +203,7 @@ export default function AdminQuickListings() {
               <Skeleton key={i} className="h-32 w-full" />
             ))}
           </div>
-        </div>
+        </PageShell>
       </>
     );
   }
@@ -211,13 +212,12 @@ export default function AdminQuickListings() {
 
   return (
     <>
-      <PageHeader 
-        title={language === 'ru' ? 'Быстрые заявки' : 'Quick Listings'}
-        showBack
-        fallbackPath="/admin"
-      />
-      
-      <div className="p-4 space-y-4">
+      <PageShell width="wide" className="space-y-4">
+        <PageHeader
+          title={language === 'ru' ? 'Быстрые заявки' : 'Quick Listings'}
+          showBack
+          fallbackPath="/admin"
+        />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="pending">
@@ -308,7 +308,7 @@ export default function AdminQuickListings() {
             ))}
           </div>
         )}
-      </div>
+      </PageShell>
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedListing && !showRejectDialog} onOpenChange={() => setSelectedListing(null)}>

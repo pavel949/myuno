@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -162,7 +163,7 @@ export default function AdminMCDashboard() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-5">
+    <PageShell width="workspace" className="space-y-5">
       {/* Header */}
       <SectionHeader
         title={isRu ? 'Управляющие компании' : 'Management Companies'}
@@ -239,7 +240,7 @@ export default function AdminMCDashboard() {
           <AdminMCSubscriptions />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }
 

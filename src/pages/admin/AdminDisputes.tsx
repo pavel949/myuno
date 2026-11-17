@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDisputes, useResolveDispute } from '@/hooks/useDisputes';
@@ -57,7 +58,7 @@ export default function AdminDisputes() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
+    <PageShell width="workspace" className="space-y-4">
       <div className="flex items-center justify-between">
         <SectionHeader
           title={isRu ? 'Споры' : 'Disputes'}
@@ -162,6 +163,6 @@ export default function AdminDisputes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

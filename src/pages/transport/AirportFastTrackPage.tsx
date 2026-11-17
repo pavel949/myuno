@@ -1,3 +1,4 @@
+import { flightCutoffViolated } from '@/lib/transport/flightCutoff';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -133,16 +134,7 @@ export default function AirportFastTrackPage() {
     return hour >= 0 && hour < 6;
   }, [flightTime]);
 
-  const cutoffViolated = useMemo(() => {
-    if (!flightDate || !flightTime) return false;
-    try {
-      // The flight time is Phuket local (ICT, UTC+7). Pin the offset so the
-      // 24h cutoff is correct regardless of the traveller's device timezone.
-      const flightDT = new Date(`${flightDate}T${flightTime}:00+07:00`);
-      const cutoff = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      return flightDT < cutoff;
-    } catch { return false; }
-  }, [flightDate, flightTime]);
+  const cutoffViolated = flightCutoffViolated(flightDate, flightTime);
 
   const pricing = useMemo(() => {
     if (!selectedService) return { base: 0, nightSurcharge: 0, addonsTotal: 0, total: 0 };
@@ -208,7 +200,7 @@ export default function AirportFastTrackPage() {
       if (flightNumber && !FLIGHT_REGEX.test(flightNumber)) newErrors.flightNumber = isRu ? 'Неверный формат рейса' : 'Invalid flight format (e.g. TG123)';
       if (!flightDate) newErrors.flightDate = isRu ? 'Укажите дату' : 'Date required';
       if (!flightTime) newErrors.flightTime = isRu ? 'Укажите время' : 'Time required';
-      if (cutoffViolated) newErrors.flightDate = isRu ? 'Бронирование за 24+ часа' : 'Must book 24+ hours ahead';
+      if (flightCutoffViolated(flightDate, flightTime)) newErrors.flightDate = isRu ? 'Бронирование за 24+ часа' : 'Must book 24+ hours ahead';
     }
 
     if (targetStep === 'review') {
@@ -785,7 +777,7 @@ export default function AirportFastTrackPage() {
                 </div>
                 {passengers.map((p, i) => (
                   <div key={i} className="text-xs text-muted-foreground pl-4">
-                    {p.firstName} {p.lastName} — {p.passportNumber}
+                    {p.firstName} {p.lastName} — {typeof p.passportNumber === 'string' && p.passportNumber.length > 4 ? `••••${p.passportNumber.slice(-4)}` : '••••'}
                   </div>
                 ))}
               </div>
@@ -822,6 +814,9 @@ export default function AirportFastTrackPage() {
 
       {/* Bottom bar — always visible */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
+        {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive mb-2">
+          {isRu ? 'Проверьте дату и время: бронирование возможно за 24+ часов до рейса.' : 'Check the flight date and time. Booking requires 24+ hours before flight.'}
+        </p>}
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>

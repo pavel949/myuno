@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +12,7 @@ export default function AdminUsersAccess() {
   const isRu = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
+    <PageShell width="workspace" className="space-y-4">
       <SectionHeader
         title={isRu ? 'Пользователи и доступ' : 'Users & Access'}
         subtitle={isRu ? 'Управление пользователями, ролями и правами' : 'Manage users, roles and permissions'}
@@ -38,6 +39,6 @@ export default function AdminUsersAccess() {
           <ControlRolesTab />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

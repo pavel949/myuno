@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/page/PageHeader';
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -123,27 +124,22 @@ export default function AdminOperations() {
   ];
 
   return (
-    <PageShell width="full" className="max-w-[1536px] space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold font-display">
-            {isRu ? 'Операции' : 'Operations'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={isRu ? 'Обновить' : 'Refresh'}
-          onClick={() => refetchOverview()}
-          className="text-muted-foreground"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </div>
+    <PageShell width="workspace">
+      <PageHeader
+        title={isRu ? 'Операции' : 'Operations'}
+        subtitle={isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
+        actions={
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={isRu ? 'Обновить' : 'Refresh'}
+            onClick={() => refetchOverview()}
+            className="text-muted-foreground"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        }
+      />
 
       {/* Quick Actions Bar */}
       <Card className="border-dashed">
