@@ -251,7 +251,10 @@ export default function AirportTransferBooking() {
 
   // ── Validation (single source of truth, evaluated per step) ─────────────
   const canProceedStep0 = !!(formData.direction && formData.terminal && formData.destinationAddress);
-  const canProceedStep1 = !!formData.vehicleType;
+  // Do not allow checkout until the selected vehicle has a valid configured rate.
+  // A missing rate must not silently become a confirmed THB 800 booking.
+  const hasConfiguredRate = routeBasePrice > 0 || (selectedVehicle?.base_price != null && selectedVehicle.base_price > 0);
+  const canProceedStep1 = !!formData.vehicleType && hasConfiguredRate;
   const phoneDigits = (formData.phone || '').replace(/\D/g, '');
   const canProceedStep2 = !!(
     formData.flightNumber.trim() &&
