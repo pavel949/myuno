@@ -2,17 +2,16 @@
    Editorial image selection remains separate from this composition layer. */
 .home-refined {
   --home-surface: color-mix(in srgb, hsl(var(--card)) 92%, hsl(var(--background)));
-  --home-search-overlap: 3rem;
+  --home-search-overlap: 0rem;
   --home-soft-border: color-mix(in srgb, hsl(var(--primary)) 12%, transparent);
 }
-/* The hero grows with its content. A fixed height clipped the goal cards and
-   the owner link under the overlapping search entry on desktop and tablet. */
+/* Content-driven hero keeps the four goal cards visible without a repeated search layer. */
 .home-refined .home-hero {
   height: auto;
-  min-height: clamp(31.25rem, 40vw, 35rem);
+  min-height: 0;
   padding-bottom: calc(var(--home-search-overlap) + 2rem);
 }
-.home-refined .home-hero-copy { padding-top: clamp(4rem, 6vw, 6rem); }
+.home-refined .home-hero-copy { padding-top: clamp(1.5rem, 3vw, 3rem); }
 .home-refined .home-hero-copy h1 {
   max-width: var(--public-width-hero);
   font-size: var(--public-editorial-display-size);
@@ -28,9 +27,9 @@
   margin-top: 1.25rem;
   text-wrap: pretty;
 }
-/* Preserve the inspected existing image; local scrim supports its light left side. */
+/* Generated destination mood art, not a property photograph. Keep the sunlit coast clear beside readable copy. */
 .home-refined .home-hero-shade {
-  background: linear-gradient(90deg, hsl(var(--brand-navy) / .72), hsl(var(--brand-navy) / .38) 48%, hsl(var(--brand-navy) / .06) 83%), linear-gradient(180deg, hsl(var(--brand-navy) / .3), transparent 35%);
+  background: linear-gradient(90deg, hsl(var(--brand-navy) / .66), hsl(var(--brand-navy) / .32) 48%, hsl(var(--brand-navy) / .02) 83%), linear-gradient(180deg, hsl(var(--brand-navy) / .22), transparent 35%);
 }
 .home-refined .home-search-wrap { margin-top: calc(-1 * var(--home-search-overlap)) !important; }
 .home-refined .home-search-entry { max-width: none; }
@@ -157,15 +156,15 @@
   :is(.home-refined,.premium-personal-discovery) .home-properties .home-section-heading > .home-text-link { padding-right: 0; }
 }
 @media(max-width:1023px) {
-  .home-refined .home-hero { min-height: 29rem; }
-  .home-refined .home-hero-copy { padding-top: 3.5rem; }
+  .home-refined .home-hero { min-height: 0; }
+  .home-refined .home-hero-copy { padding-top: 2rem; }
   .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); max-width: var(--public-width-hero); }
   .home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:767px) {
-  .home-refined { --home-search-overlap: 1.5rem; }
-  .home-refined .home-hero { height: auto; min-height: 23rem; padding-bottom: 4rem; }
-  .home-refined .home-hero-copy { padding-top: 2.5rem; }
+  .home-refined { --home-search-overlap: 0rem; }
+  .home-refined .home-hero { height: auto; min-height: 0; padding-bottom: 1.5rem; }
+  .home-refined .home-hero-copy { padding-top: 1.5rem; }
   .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); line-height: 1.12; letter-spacing: -.018em; }
   .home-refined .home-hero-copy p { font-size: var(--public-body-size); margin-top: 1rem; max-width: var(--public-width-summary); }
   .home-refined .home-search-entry-button { min-height: 5.5rem; padding: 1rem; gap: .75rem; }
@@ -195,7 +194,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: .75rem;
-  margin-top: 1.5rem;
+  margin-top: .25rem;
 }
 .home-refined .home-hero-primary,
 .home-refined .home-hero-secondary {
@@ -210,7 +209,7 @@
 }
 .home-refined .home-hero-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .home-refined .home-hero-primary:hover { background: hsl(var(--primary-hover)); }
-.home-refined .home-hero-secondary { border: 1px solid hsl(var(--primary-foreground) / .65); color: hsl(var(--primary-foreground)); }
+.home-refined .home-hero-secondary { border: 0; color: hsl(var(--primary-foreground)); padding: .25rem 0; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .25rem; justify-content: flex-start; }
 .home-refined .home-hero-secondary:hover { background: hsl(var(--primary-foreground) / .12); }
 .home-audience { padding-top: var(--public-section-gap); }
 .home-audience-grid {
@@ -264,11 +263,11 @@
 .home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: var(--radius); background: hsl(var(--primary-foreground) / .14); }
 .home-refined .home-hero-choice-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: .2rem; }
 .home-refined .home-hero-choice-copy strong { hyphens: auto; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
-.home-refined .home-hero-choice-copy small { display: block; color: hsl(var(--primary-foreground) / .78); font-size: var(--public-caption-size); line-height: 1.35; }
+.home-refined .home-hero-choice-copy small { display: block; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); line-height: 1.35; }
 .home-refined .home-hero-choice > svg { flex: 0 0 auto; margin-top: .125rem; }
 .home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
 .home-refined .home-hero-help:hover { color: hsl(var(--primary-foreground)); }
-.home-refined .home-hero-secondary { background: hsl(var(--brand-navy) / .2); }
+.home-refined .home-hero-secondary { background: transparent; }
 .home-life-group { display: grid; gap: 0; }
 .home-partners-group { margin-top: 3.5rem; padding-block: 3.5rem 1rem; background: var(--home-surface); }
 .home-group-heading { margin-bottom: 1.5rem; }
@@ -280,7 +279,6 @@
   .home-refined .home-hero-choice { min-height: 7rem; padding: .625rem .625rem; }
   .home-refined .home-hero-choice-icon { flex-basis: 2rem; width: 2rem; height: 2rem; }
   .home-refined .home-hero-help { justify-content: center; width: 100%; text-align: center; }
-  .home-refined .home-hero-actions { margin-top: .25rem; }
   .home-partners-group { margin-top: 2.5rem; padding-block: 2.5rem .5rem; }
   .home-group-heading h2 { font-size: var(--type-h3-size); }
 }
@@ -291,4 +289,38 @@
   .home-refined .home-hero-choice-grid { grid-template-columns: minmax(0, 1fr); gap: .375rem; }
   .home-refined .home-hero-choice { align-items: center; min-height: 3.75rem; padding: .5rem .75rem; }
   .home-refined .home-hero-choice > svg { margin-top: 0; }
+}
+
+/* Homepage-only hierarchy. Shared catalogue cards and workspaces keep their contracts. */
+.home-refined .home-listing { display: flex; flex-direction: column; }
+.home-refined .home-listing > a { height: auto; flex: none; }
+.home-refined .home-listing-copy { flex: 1; display: flex; flex-direction: column; }
+.home-refined .home-listing h3 { min-height: 2.6em; }
+.home-refined .home-listing-pricing { margin-top: auto; padding-top: 1rem; min-height: 5rem; }
+.home-refined .home-listing-pricing .home-listing-price { padding-top: 0; margin-top: 0; }
+.home-refined .home-listing-rate-note { margin-top: .5rem; color: hsl(var(--muted-foreground)); font-size: var(--public-caption-size); line-height: 1.5; }
+.home-refined .home-listing-action { margin-top: 1rem; }
+.home-refined .home-listing-area-link { margin-top: .75rem; }
+.home-refined .home-audience { padding-top: 0; }
+.home-refined .home-audience-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1023px) { .home-refined .home-audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 519px) { .home-refined .home-audience-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* The same card/rail contract for rental and purchase discovery. */
+.home-refined .premium-newbuilds .home-rail-viewport > article > a { display: block; color: inherit; }
+.home-refined .premium-newbuilds .premium-project-photo { aspect-ratio: 4 / 3; }
+
+.home-refined .home-category-navigation { display: flex; flex-wrap: wrap; gap: var(--public-card-gap); padding-block: 1rem; }
+
+.home-refined .home-service-category-card--photo .home-service-category-art img { object-fit: cover; padding: 0; }
+.home-refined .home-category-photo-note { color: hsl(var(--muted-foreground)); font-size: var(--public-label-size); }
+
+/* Editorial category photographs deliberately override the inherited text-only service treatment. */
+.home-refined .home-service-category-card--photo .home-service-category-art { display: flex; }
+.home-refined .premium-newbuilds.home-container { width: calc(100% - var(--public-gutter) * 2); max-width: var(--public-width-wide); }
+
+.home-refined .home-hero-image { object-position: center 52%; }
+@media (max-width: 640px) {
+  .home-refined .home-hero-image { object-position: 69% center; }
+  .home-refined .home-hero-shade { background: linear-gradient(180deg, hsl(var(--brand-navy) / .62), hsl(var(--brand-navy) / .52) 33%, hsl(var(--brand-navy) / .18) 57%, hsl(var(--brand-navy) / .62)); }
 }
