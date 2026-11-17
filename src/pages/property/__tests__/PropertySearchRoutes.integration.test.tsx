@@ -18,7 +18,7 @@ vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: state.failed, isFetchNextPageError: state.nextPageError, refetch: vi.fn(), hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
-vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
+vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ projects: [{ id: 'project-a', nameEn: 'Community A', nameRu: 'Комплекс A', propertyCount: 2 }, { id: 'project-b', nameEn: 'Community B', nameRu: 'Комплекс B', propertyCount: 1 }], districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
 vi.mock('@/hooks/useMapListSync', () => ({ useMapListSync: () => ({ selectedId: null, select: vi.fn() }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: { id: string } }) => <article data-testid="synthetic-property-card">{property.id}</article> }));
@@ -320,7 +320,7 @@ describe('one residential results surface', () => {
     fireEvent.change(screen.getByRole('spinbutton', { hidden: true }), { target: { value: '5' } });
     fireEvent.submit(screen.getByRole('form'));
     expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
-    expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 2, name: /Places found|Checked date matches/ })).toHaveFocus();
     expect(screen.getByText(/Guests: 5/)).toBeVisible();
     const back = screen.getByRole('button', { name: 'History back' });
     back.focus();
@@ -334,7 +334,7 @@ describe('one residential results surface', () => {
     expect(screen.getByRole('form')).toBeVisible();
     fireEvent.submit(screen.getByRole('form'));
     expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
-    expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 2, name: /Places found|Checked date matches/ })).toHaveFocus();
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
   it.each(['/property/browse', '/discover/stay', '/property/rent/medium-term'])('adapts %s with filters and hash intact', route => {
@@ -555,4 +555,27 @@ it('explains both purchase markets on the actual homepage Buy destination, keepi
   view.unmount();
   mount('/property/search?mode=rent');
   expect(screen.queryByRole('navigation', { name: 'Property market' })).not.toBeInTheDocument();
+});
+
+it('selects projects through canonical server filters while retaining dates, guests, sorting and history', () => {
+ mount('/property/search?mode=rent&tenancy=short&guests=4&sort=price_asc&checkIn=2027-02-01&checkOut=2027-02-08');
+ fireEvent.click(screen.getByRole('button', {name: 'Community A'}));
+ expect(state.filters.projectId).toBe('project-a');
+ expect(screen.getByTestId('location').textContent).toContain('guests=4');
+ expect(screen.getByTestId('location').textContent).toContain('sort=price_asc');
+ expect(screen.getByTestId('location').textContent).toContain('checkIn=2027-02-01');
+ fireEvent.click(screen.getByRole('button', {name: 'Community B'}));
+ expect(state.filters.projectId).toBe('project-b');
+ fireEvent.click(screen.getByRole('button', {name: 'History back'}));
+ expect(state.filters.projectId).toBe('project-a');
+ expect(screen.getByRole('button', {name: 'Community A'})).toHaveAttribute('aria-pressed','true');
+ fireEvent.click(screen.getByRole('button', {name: 'All communities'}));
+ expect(state.filters.projectId).toBeUndefined();
+});
+
+it('hydrates a bookmarked project and removes it on clear all', () => {
+ mount('/property/search?mode=rent&tenancy=short&project=project-a');
+ expect(state.filters.projectId).toBe('project-a');
+ fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+ expect(state.filters.projectId).toBeUndefined();
 });

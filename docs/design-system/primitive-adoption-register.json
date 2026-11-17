@@ -39900,7 +39900,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "931e6059b92cc46306706b0a099016f98568a2d3ad62e3cf9eedb8fc4c111107",
+      "sha256": "f2fe1111b63726359ecb8980f275dcf262dd1c53d792e07bfc4a0ba396e37e20",
       "directRouteDeclarations": [
         {
           "id": "3d68906b3367f767",
@@ -39917,12 +39917,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            373,
-            385,
+            384,
             396,
-            466,
-            476,
-            483
+            407,
+            477,
+            487,
+            494
           ]
         }
       ]

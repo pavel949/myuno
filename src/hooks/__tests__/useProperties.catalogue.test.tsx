@@ -66,3 +66,9 @@ it('does not request the whole market before a company identity is available', a
  const view=renderHook(({enabled})=>usePropertiesInfinite({managementCompanyId:enabled?'synthetic-company':undefined},{enabled}),{initialProps:{enabled:false},wrapper});
  await act(async()=>{await Promise.resolve();}); expect(fixture.adapter.calls).toHaveLength(0); view.unmount();client.clear();
 });
+
+it('applies exact project identity before pagination and retains it on subsequent pages', async () => {
+ const { result } = setup({ projectId: 'synthetic-project' });
+ await waitFor(() => expect(result.current.isSuccess).toBe(true));
+ expect(fixture.adapter!.calls[0].operations).toContainEqual(['eq', 'project_id', 'synthetic-project']);
+});
