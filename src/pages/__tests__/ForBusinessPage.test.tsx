@@ -40,7 +40,7 @@ describe('business entry routes', () => {
     expect(form).toHaveClass('max-w-2xl', 'scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)]');
     expect(form).not.toHaveClass('max-w-[1280px]');
     const hero = container.querySelector('section')!;
-    expect(hero.querySelector('.max-w-3xl')).not.toBeNull();
+    expect(hero.querySelector('.landing-editorial-copy h1')).not.toBeNull();
     for (const token of PUBLIC_CONTENT_LAYOUT.business.split(' ')) expect(hero.firstElementChild).toHaveClass(token);
     const actions = hero.querySelectorAll('button');
     expect(actions).toHaveLength(2);

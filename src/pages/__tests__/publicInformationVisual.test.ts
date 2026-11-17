@@ -11,14 +11,14 @@ it.each([
  expect(source(page)).toContain('usePageContainer={false}');
  expect(source(page)).toContain(`<PageContainer className="max-w-${width}">`);
 });
-it('Partners delegates one gutter and bounded hero width to the shared audience layout', () => {
+it('Partners delegates one gutter and shared editorial frame to the shared audience layout', () => {
  expect(source('info/PartnersPage')).toContain('<AudienceLanding');
  const shared = readFileSync(resolve(process.cwd(), 'src/components/landings/AudienceLanding.tsx'), 'utf8');
  const css = readFileSync(resolve(process.cwd(), 'src/styles/premium-audience.css'), 'utf8');
  expect(shared).toContain('usePageContainer={false}');
  expect(css).toContain('max-width: var(--public-width-wide)');
  expect(css).toContain('width: calc(100% - var(--public-gutter) * 2)');
- expect(css).toContain('.audience-hero { max-width: var(--public-width-reading)');
+ expect(css).toContain('.audience-hero { padding-block: var(--public-detail-gap)');
 });
 it('gives emergency numbers enough room on mobile without changing their actions', () => {
  expect(source('SOS')).toContain('grid grid-cols-2 sm:grid-cols-4 gap-3');
@@ -29,7 +29,7 @@ it('keeps support actions compact on desktop and removes competing panel colors'
  expect(source('Support')).not.toContain('from-primary/10 to-primary/5');
  expect(source('Support')).toContain('className="w-full sm:w-auto"');
 });
-it('uses the display family for owner hierarchy and a plain business hero', () => {
+it('uses the display family for owner hierarchy and an editorial business hero', () => {
  expect(source('ForOwners')).not.toContain('font-serif');
  const shared = readFileSync(resolve(process.cwd(), 'src/components/landings/AudienceLanding.tsx'), 'utf8');
  const css = readFileSync(resolve(process.cwd(), 'src/styles/premium-audience.css'), 'utf8');
@@ -37,7 +37,7 @@ it('uses the display family for owner hierarchy and a plain business hero', () =
  expect(shared).toContain('usePageContainer={false}');
  expect(css).toContain('max-width: var(--public-width-wide)');
  expect(css).toContain('width: calc(100% - var(--public-gutter) * 2)');
- expect(css).toContain('.audience-hero { max-width: var(--public-width-reading)');
+ expect(css).toContain('.audience-hero { padding-block: var(--public-detail-gap)');
  for (const heading of ['h1', 'h2', 'h3']) {
   expect(css).toMatch(new RegExp('\\.premium-audience ' + heading + ' \\{[^}]+var\\(--font-display\\)'));
  }

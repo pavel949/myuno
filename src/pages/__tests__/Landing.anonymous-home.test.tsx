@@ -50,9 +50,9 @@ const show = () => render(<MemoryRouter initialEntries={[APP_ROUTES.HOME]}><Rout
 beforeEach(() => { state.language = 'en'; state.user = null; state.isLoading = false; authenticatedIndex.mockClear(); });
 afterEach(cleanup);
 it.each([
- ['en', 'Main navigation', ['Home', 'Homes', 'Bookings', 'Services', 'Profile']],
- ['ru', 'Основная навигация', ['Главная', 'Жильё', 'Бронирования', 'Услуги', 'Профиль']],
- ['th', 'เมนูหลัก', ['หน้าแรก', 'ที่พัก', 'การจอง', 'บริการ', 'โปรไฟล์']],
+ ['en', 'Main navigation', ['Home', 'Search', 'Favorites', 'Requests', 'Profile']],
+ ['ru', 'Основная навигация', ['Главная', 'Поиск', 'Избранное', 'Заявки', 'Профиль']],
+ ['th', 'เมนูหลัก', ['หน้าแรก', 'ค้นหา', 'รายการโปรด', 'คำขอ', 'โปรไฟล์']],
 ] as const)('mounts the real anonymous landing and all five public tabs in %s', (language, name, labels) => {
  expect(mountedAtHome).toBe(true);
  state.language = language;
@@ -68,7 +68,7 @@ it.each([
  const bar = screen.getByRole('navigation', { name });
  const links = within(bar).getAllByRole('link');
  expect(links.map(link => link.getAttribute('aria-label'))).toEqual(labels);
- expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/property', '/bookings', '/discover/services', '/account']);
+ expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/search', '/favorites', '/me/requests', '/account']);
  expect(links[0]).toHaveAttribute('aria-current', 'page');
  expect(bar).toHaveClass('md:hidden', 'fixed', 'bottom-0');
  expect(bar).toHaveStyle({ paddingBottom: 'env(safe-area-inset-bottom, 0px)' });

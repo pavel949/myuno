@@ -141,6 +141,7 @@ const virtual = {
   '@/hooks/useProperties': `export const useProperties=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/hooks/useOffplanProjects': `export const useOffplanProjects=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/hooks/useExperiences': `export const useExperiences=()=>({experiences:[],isLoading:false,error:null,refetch:()=>{}});`,
+  '@/hooks/useServiceMarketplace': `export const useMarketplaceServices=()=>({data:[],isError:false});`,
   '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
   '@/contexts/CurrencyContext': `export const useCurrency=()=>({currency:'THB',formatPrice:n=>'THB '+n});`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main data-testid="fixture-home" className="min-h-screen bg-background text-foreground">{children}</main>;`,
