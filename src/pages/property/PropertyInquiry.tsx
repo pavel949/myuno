@@ -26,20 +26,19 @@ import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
+import { bookingModeCopy, resolveBookingMode } from '@/lib/property/bookingMode';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
 import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
-import { useOrders } from '@/hooks/useOrders';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
 import { propertyDetailPricing, propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import { propertyCancellationDescription } from '@/lib/propertyCancellationDescription';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { buildPropertyInquiryKey, shouldBlockPropertyInquirySubmission } from '@/lib/propertyInquiryGuards';
+import { shouldBlockPropertyInquirySubmission } from '@/lib/propertyInquiryGuards';
 
 
 export default function PropertyInquiry() {
@@ -56,7 +55,6 @@ export default function PropertyInquiry() {
   const { profile } = useProfile();
   const isRu = language === 'ru';
   const t = (values: { ru: string; en: string; th: string }) => pickLang(language, values);
-  const { createOrder } = useOrders();
 
   // Draft persistence — survives the AuthSheet round-trip (including OAuth
   // full-page redirects) so guests never lose contact info / message after
@@ -95,7 +93,8 @@ export default function PropertyInquiry() {
   const propertyExt = (property ?? null) as (typeof property & PropertyExt) | null;
   const rentalExt = (rentalTerms ?? null) as (typeof rentalTerms & RentalTermsExt) | null;
 
-  const isInstantBooking = !!(property?.instant_booking || rentalTerms?.instant_booking);
+  const bookingMode = resolveBookingMode(property?.instant_booking);
+  const isInstantBooking = bookingMode === 'instant';
 
   // 6-tracks guard: STR booking flow only supports short-stay listings.
   // If owner has switched the listing to medium/long-only or sale-only, redirect
@@ -159,7 +158,6 @@ export default function PropertyInquiry() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFieldErrors, setShowFieldErrors] = useState(false);
-  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
   // Default 'split' preserves the legacy behavior (charge prepay only).
@@ -352,19 +350,11 @@ export default function PropertyInquiry() {
   const datePricingBlocked = shouldBlockPropertyInquirySubmission(datePricesLoading, datePricesError);
   const nameError = showFieldErrors && !formData.name.trim();
   const phoneError = showFieldErrors && !formData.phone.trim();
-  const inquiryKey = useMemo(() => id && user?.id && checkIn && checkOut
-    ? buildPropertyInquiryKey({ userId: user.id, propertyId: id, checkIn: format(checkIn, 'yyyy-MM-dd'), checkOut: format(checkOut, 'yyyy-MM-dd'), guests })
-    : null, [id, user?.id, checkIn, checkOut, guests]);
   const isFormValid = supportsShortStay && formData.name.trim() && formData.phone.trim() && hasDates && validationErrors.length === 0 && !datePricingBlocked;
   const propertyTitle = isRu ? property?.title_ru : property?.title_en;
   const propertyImage = property?.cover_image || property?.images?.[0];
 
   const editUrl = propertyDetailHref(id || '', 'rent', searchParams.toString());
-
-  // Show confirmation screen after a successful viewing request submission.
-  if (submittedOrderId) {
-    return <InquiryConfirmation orderId={submittedOrderId} />;
-  }
 
   if (propertyLoading) return <div role="status" className="p-6">{isRu ? 'Загрузка объекта…' : 'Loading property…'}</div>;
   if (propertyError) return <div role="alert" className="p-6 space-y-4"><p>{isRu ? 'Не удалось загрузить объект' : 'Could not load this home'}</p><Button onClick={() => refetchProperty()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>;
@@ -795,12 +785,12 @@ export default function PropertyInquiry() {
             />
           )}
 
-          {/* ===== PAYMENT OPTIONS (instant booking only) ===== */}
-          {user && isFormValid && isInstantBooking && (
+          {/* ===== PAYMENT: charge (instant) or card hold (request) ===== */}
+          {user && isFormValid && (
             <section ref={paymentSectionRef}>
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold">{isRu ? 'Оплата' : 'Pay with'}</h2>
+                <h2 className="text-lg font-semibold">{isInstantBooking ? (isRu ? 'Оплата' : 'Pay with') : (isRu ? 'Блокировка на карте' : 'Card hold')}</h2>
               </div>
               <DepositPaymentOptions
                 ref={depositPaymentRef}
@@ -814,7 +804,8 @@ export default function PropertyInquiry() {
                 currency={listingCurrency}
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
-                payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
+                payInFull={isInstantBooking && !!rentalTerms?.allow_pay_later && payWhen === 'full'}
+                bookingMode={bookingMode}
                 cleaningFee={rentalTerms?.extra_cleaning_price || propertyExt?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
@@ -877,202 +868,40 @@ export default function PropertyInquiry() {
                 }
 
 
-                // === INSTANT BOOKING PATH ===
-                if (isInstantBooking) {
-                  // If payment options aren't visible yet, scroll into view first.
-                  if (!depositPaymentRef.current) {
-                    paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    return;
-                  }
-                  setIsSubmitting(true);
-                  try {
-                    await depositPaymentRef.current.submit();
-                  } finally {
-                    setIsSubmitting(false);
-                  }
+                // Both modes commit through the same server-priced checkout:
+                // instant charges the card, request places a hold with a
+                // fixed reply window. There is no unpaid, open-ended request.
+                if (!depositPaymentRef.current) {
+                  paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   return;
                 }
-
-                // === REQUEST BOOKING PATH ===
                 setIsSubmitting(true);
                 try {
-                  // 0. Atomic availability check — prevents race conditions
-                  // when multiple guests try to book the same dates simultaneously.
-                  const { data: isAvailable, error: availErr } = await supabase.rpc(
-                    'check_property_dates_available',
-                    {
-                      p_property_id: id!,
-                      p_check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      p_check_out: format(checkOut!, 'yyyy-MM-dd'),
-                    },
-                  );
-                  if (availErr) {
-                    console.error('[PropertyInquiry] availability check error:', availErr);
-                    toast.error(
-                      isRu
-                        ? 'Не удалось проверить доступность дат. Попробуйте ещё раз.'
-                        : 'Could not verify date availability. Please try again.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-                  if (isAvailable === false) {
-                    toast.error(
-                      isRu
-                        ? 'Эти даты только что были забронированы. Выберите другие.'
-                        : 'These dates were just booked. Please pick different dates.',
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 1. Reuse an existing matching order/inquiry on retry. This is a
-                  // client/server read guard only; it does not claim transaction semantics.
-                  const { data: existingOrders } = inquiryKey ? await supabase
-                    .from('orders')
-                    .select('id')
-                    .eq('customer_user_id', user!.id)
-                    .eq('order_type', 'property')
-                    .contains('metadata', { inquiry_key: inquiryKey })
-                    .limit(1) : { data: [] as Array<{ id: string }> };
-                  const existingOrderId = existingOrders?.[0]?.id;
-                  if (existingOrderId) {
-                    if (draftKey) { try { localStorage.removeItem(draftKey); } catch { /* ignore */ } }
-                    setSubmittedOrderId(existingOrderId);
-                    return;
-                  }
-
-                  const { data: existingInquiries } = await supabase
-                    .from('property_inquiries')
-                    .select('id')
-                    .eq('property_id', id!)
-                    .eq('user_id', user!.id)
-                    .eq('check_in', format(checkIn!, 'yyyy-MM-dd'))
-                    .eq('check_out', format(checkOut!, 'yyyy-MM-dd'))
-                    .eq('guests', guests)
-                    .eq('status', 'pending')
-                    .limit(1);
-
-                  // 2. Save to property_inquiries for owner dashboard visibility
-                  const { error: inquiryError } = existingInquiries?.length ? { error: null } : await supabase
-                    .from('property_inquiries')
-                    .insert({
-                      property_id: id!,
-                      user_id: user!.id,
-                      check_in: format(checkIn!, 'yyyy-MM-dd'),
-                      check_out: format(checkOut!, 'yyyy-MM-dd'),
-                      guests,
-                      name: formData.name,
-                      email: formData.email || null,
-                      phone: formData.phone || null,
-                      message: formData.message || null,
-                      status: 'pending',
-                    });
-                  if (inquiryError) {
-                    console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
-                    toast.error(
-                      isRu
-                        ? `Не удалось сохранить запрос: ${inquiryError.message}`
-                        : `Failed to save inquiry: ${inquiryError.message}`,
-                    );
-                    setIsSubmitting(false);
-                    return;
-                  }
-
-                  // 2. Create order for booking tracking
-                  const result = await createOrder({
-                    order_type: 'property',
-                    provider_org_id: propertyExt?.provider_id || undefined,
-                    start_at: checkIn!,
-                    end_at: checkOut!,
-                    total_amount: pricing.total,
-                    currency: listingCurrency,
-                    notes: formData.message || undefined,
-                    metadata: {
-                      property_id: id,
-                      property_title: propertyTitle,
-                      guests,
-                      nights,
-                      price_per_night: pricePerNight,
-                      // Bug #4 fix: this field is the *security* deposit
-                      // (refundable on checkout), NOT the prepayment.
-                      // Renaming it stops it being confused in finance reports.
-                      security_deposit_amount: rentalTerms?.deposit_amount || 0,
-                      discount_percent: pricing.lengthDiscountPercent,
-                      length_discount: pricing.lengthDiscount,
-                      early_bird_discount: pricing.earlyBirdDiscount,
-                      last_minute_discount: pricing.lastMinuteDiscount,
-                      seasonal_adjustment: pricing.seasonalAdjustment,
-                      prepay_amount: pricing.prepayAmount,
-                      prepay_percent: pricing.prepayPercent,
-                      booking_mode: 'request',
-                      ...(inquiryKey ? { inquiry_key: inquiryKey } : {}),
-                      ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
-                      ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
-                    },
-                    items: [{
-                      item_name: propertyTitle || 'Property booking',
-                      item_type: 'property_rental',
-                      qty: nights,
-                      unit_price: pricePerNight,
-                      amount: pricing.total,
-                      start_at: checkIn!,
-                      end_at: checkOut!,
-                      metadata: { source_id: id },
-                    }],
-                    participants: [{
-                      role: 'primary',
-                      name: formData.name,
-                      phone: formData.phone,
-                      email: formData.email || undefined,
-                    }],
-                    serviceName: propertyTitle || 'Property',
-                  });
-                  if (result.success && result.order_id) {
-                    if (draftKey) {
-                      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
-                    }
-                    toast.success(isRu
-                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
-                      : "Request sent! We'll WhatsApp you within 24 hours.");
-                    setSubmittedOrderId(result.order_id);
-                  } else {
-                    // Bug #3 fix: surface failures from createOrder so the user
-                    // is never left staring at a silent footer.
-                    toast.error(
-                      isRu
-                        ? 'Не удалось создать запрос на бронирование. Попробуйте ещё раз.'
-                        : 'Could not create the booking request. Please try again.',
-                    );
-                  }
-                } catch (err) {
-                  // Error toast is handled by useOrders
+                  await depositPaymentRef.current.submit();
                 } finally {
                   setIsSubmitting(false);
                 }
               }}
             >
               {isSubmitting && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
-              {isInstantBooking
-                ? (paymentMethod === 'card'
-                    ? (isRu
-                        ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
-                        : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
-                    : paymentMethod === 'rub_manual'
-                      ? (isRu ? 'Запросить оплату в рублях' : 'Request RUB payment')
-                      : (isRu ? 'Связаться с менеджером' : 'Contact manager'))
-                : (isRu ? 'Запросить бронирование' : 'Request to book')}
+              {!isInstantBooking
+                ? (isRu ? `Заблокировать ${formatPrice(pricing.prepayAmount)} и отправить запрос` : `Hold ${formatPrice(pricing.prepayAmount)} and send request`)
+                : paymentMethod === 'card'
+                  ? (isRu
+                      ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
+                      : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
+                  : paymentMethod === 'rub_manual'
+                    ? (isRu ? 'Запросить оплату в рублях' : 'Request RUB payment')
+                    : (isRu ? 'Связаться с менеджером' : 'Contact manager')}
             </Button>
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              {isInstantBooking
-                ? (paymentMethod === 'card'
-                    ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
-                    : paymentMethod === 'rub_manual'
-                      ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
-                      : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
-                : (isRu
-                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
-                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
+              {!isInstantBooking
+                ? bookingModeCopy('request', language).note
+                : paymentMethod === 'card'
+                  ? (isRu ? 'Платёж защищён Stripe' : 'Payment secured by Stripe')
+                  : paymentMethod === 'rub_manual'
+                    ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
+                    : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp')}
             </p>
           </div>
         )}

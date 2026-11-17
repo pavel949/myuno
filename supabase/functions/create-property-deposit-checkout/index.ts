@@ -1,5 +1,6 @@
 // Deno.serve used (native edge runtime)
-import { createStripeClient } from "../_shared/stripe.ts";
+import { createStripeClient, isStripeConfigured, stripeNotConfiguredResponse } from "../_shared/stripe.ts";
+import { resolveBookingMode, REQUEST_CHECKOUT_TTL_MINUTES, REQUEST_REPLY_WINDOW_MINUTES, type BookingMode } from "../_shared/property-request-hold.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
@@ -81,6 +82,12 @@ Deno.serve(async (req) => {
     );
     if (rateLimitResponse) return rateLimitResponse;
 
+    // Fail before any order or inventory hold exists when cards cannot be taken.
+    if (!isStripeConfigured()) {
+      logStep("ERROR: STRIPE_SECRET_KEY missing or invalid");
+      return stripeNotConfiguredResponse(corsHeaders);
+    }
+
     const body: PropertyDepositRequest = await req.json();
     let { property_id } = body;
     const {
@@ -111,6 +118,20 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
     compensationClient = supabaseAdmin;
+
+    // Booking mode is a stored listing fact, never a client choice: instant
+    // listings charge now; every other listing places a card hold and waits
+    // for a reply inside the fixed window.
+    const { data: modeRow, error: modeErr } = await supabaseAdmin
+      .from("properties").select("instant_booking").eq("id", property_id).maybeSingle();
+    if (modeErr || !modeRow) {
+      logStep("ERROR: Booking mode lookup failed", { error: modeErr?.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify booking terms" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: modeErr ? 500 : 404 }
+      );
+    }
+    const bookingMode: BookingMode = resolveBookingMode((modeRow as { instant_booking?: boolean | null }).instant_booking);
 
     // ── Resort / hotel: booking by room category + rate plan ───────────────
     const room_category_id = (body as { room_category_id?: string }).room_category_id;
@@ -297,6 +318,8 @@ Deno.serve(async (req) => {
         remaining_amount: total_amount - deposit_amount,
         cleaning_fee: cleaning_fee || 0,
         payment_status: 'pending_deposit',
+        booking_mode: bookingMode,
+        ...(bookingMode === 'request' ? { request_hold: { status: 'awaiting_card' } } : {}),
       },
       p_items: orderItems,
       p_participants: orderParticipants,
@@ -360,16 +383,6 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
-      );
-    }
-
-    // Initialize Stripe
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      logStep("ERROR: STRIPE_SECRET_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "Payment system not configured" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
 
@@ -447,10 +460,14 @@ Deno.serve(async (req) => {
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      payment_method_types: ["card", "promptpay"],
+      // A hold needs an authorisation, which only cards support.
+      payment_method_types: bookingMode === "request" ? ["card"] : ["card", "promptpay"],
+      ...(bookingMode === "request"
+        ? { expires_at: Math.floor(Date.now() / 1000) + REQUEST_CHECKOUT_TTL_MINUTES * 60 }
+        : {}),
       line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
+      success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}${bookingMode === "request" ? "&mode=request" : ""}`,
       cancel_url: `${origin}/property/${categoryMeta ? String(categoryMeta.parent_property_id) : property_id}/inquiry?canceled=true`,
       metadata: {
         type: "property_deposit",
@@ -469,17 +486,20 @@ Deno.serve(async (req) => {
         guest_email: guest_email || user.email || "",
         order_id: order.order_id,
         order_number: order.order_number || "",
+        booking_mode: bookingMode,
       },
       // Propagate linkage to the charge so refunds resolve the order (F08).
       payment_intent_data: {
-        metadata: { order_id: order.order_id, property_id, type: "property_deposit" },
+        metadata: { order_id: order.order_id, property_id, type: "property_deposit", booking_mode: bookingMode },
+        // Request mode authorises only; capture happens on acceptance.
+        ...(bookingMode === "request" ? { capture_method: "manual" as const } : {}),
       },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
     return new Response(
-      JSON.stringify({ url: session.url, sessionId: session.id, orderId: order.order_id, orderNumber: order.order_number }),
+      JSON.stringify({ url: session.url, sessionId: session.id, orderId: order.order_id, orderNumber: order.order_number, bookingMode, replyWindowMinutes: bookingMode === "request" ? REQUEST_REPLY_WINDOW_MINUTES : null }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
   } catch (error: unknown) {

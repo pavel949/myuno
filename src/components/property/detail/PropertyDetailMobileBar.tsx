@@ -13,6 +13,7 @@ import { PropertyQuestionButton } from '@/components/property/PropertyQuestionBu
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { bookingModeCopy, resolveBookingMode } from '@/lib/property/bookingMode';
 
 interface PropertyDetailMobileBarProps {
   propertyId: string;
@@ -144,7 +145,7 @@ export function PropertyDetailMobileBar({
               onClick={handleReserve}
             >
               <CalendarIcon className="w-4 h-4 shrink-0" />
-              {dateRange?.from && dateRange?.to ? (isRu ? 'Расчёт и заявка' : 'Cost & booking request') : (isRu ? 'Рассчитать стоимость' : 'Calculate stay cost')}
+              {dateRange?.from && dateRange?.to ? bookingModeCopy(resolveBookingMode(instantBooking), language).cta : (isRu ? 'Выбрать даты' : 'Choose dates')}
             </Button>
             </div>
           </>

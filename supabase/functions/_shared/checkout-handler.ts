@@ -7,7 +7,7 @@
  * Each vertical provides a CheckoutConfig that defines the vertical-specific logic.
  */
 
-import { createStripeClient, Stripe } from "./stripe.ts";
+import { createStripeClient, isStripeConfigured, stripeNotConfiguredResponse, Stripe } from "./stripe.ts";
 import { createClient, createServiceClient } from "./supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "./rate-limit.ts";
 import { getCorsHeaders, getAllowedOrigin } from "./cors.ts";
@@ -158,6 +158,12 @@ export function createCheckoutHandler(config: CheckoutConfig) {
       // 2. Rate Limit
       const rlResponse = await withRateLimit(req, config.endpoint, RATE_LIMITS.payment, CORS_HEADERS, user.id);
       if (rlResponse) return rlResponse;
+
+      // Fail before any order is written when card payments cannot start.
+      if (!isStripeConfigured()) {
+        console.error(`[${config.endpoint}] STRIPE_SECRET_KEY missing or invalid`);
+        return stripeNotConfiguredResponse(CORS_HEADERS);
+      }
 
       console.info(`[${config.endpoint}] User authenticated: ${user.id}`);
 

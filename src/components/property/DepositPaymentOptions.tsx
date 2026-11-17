@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
 import { readPropertyOrderHold } from '@/lib/propertyOrderHold';
+import { REQUEST_REPLY_WINDOW_MINUTES, type BookingMode } from '@/lib/property/bookingMode';
+import { readFunctionErrorCode } from '@/lib/functionError';
 
 interface DepositPaymentOptionsProps {
   propertyId: string;
@@ -42,6 +44,8 @@ interface DepositPaymentOptionsProps {
   prepayPercent?: number;
   /** When true, charge the full total immediately instead of just the deposit. */
   payInFull?: boolean;
+  /** Listing booking mode. Request mode places a card hold and offers the card only. */
+  bookingMode?: BookingMode;
   onSuccess?: () => void;
   /** Notifies parent (sticky footer) about which method is selected so it can label its CTA. */
   onMethodChange?: (method: PaymentMethodId) => void;
@@ -73,6 +77,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
       prepayAmount,
       prepayPercent,
       payInFull = false,
+      bookingMode = 'instant',
       onMethodChange,
     },
     ref,
@@ -82,7 +87,10 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
     const navigate = useNavigate();
     const isRu = language === 'ru';
     const [isProcessing, setIsProcessing] = useState(false);
-    const { method, setMethod } = useLastPaymentMethod('card');
+    const { method: storedMethod, setMethod } = useLastPaymentMethod('card');
+    const isRequest = bookingMode === 'request';
+    // A hold needs a card authorisation, so request mode has no other method.
+    const method: PaymentMethodId = isRequest ? 'card' : storedMethod;
     const { createOrder } = useOrders();
     const { amountRub, rate, source: rateSource } = useRubEstimate(totalAmount, currency);
 
@@ -152,7 +160,16 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          if (await readFunctionErrorCode(error) === 'stripe_not_configured') {
+            toast.error(
+              isRu ? 'Оплата картой сейчас недоступна' : 'Card payment is unavailable right now',
+              { description: isRu ? 'Бронь не создана и деньги не списаны. Напишите менеджеру, чтобы забронировать.' : 'No booking was created and nothing was charged. Message the manager to book.' },
+            );
+            return false;
+          }
+          throw error;
+        }
 
         if (data?.url) {
           window.location.href = data.url;
@@ -373,7 +390,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
         },
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [method, payInFull, totalAmount, chargeNow, propertyId, amountRub, rate],
+      [method, payInFull, totalAmount, chargeNow, propertyId, amountRub, rate, bookingMode],
     );
 
     return (
@@ -422,14 +439,20 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           <CardContent className="p-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-medium">
-                {payInFull
-                  ? (isRu ? 'К оплате сейчас (полная)' : 'Charged now (full)')
-                  : (isRu ? `Предоплата ${effectivePercent}%` : `${effectivePercent}% deposit`)}
+                {isRequest
+                  ? (isRu ? 'Блокировка на карте' : 'Hold on your card')
+                  : payInFull
+                    ? (isRu ? 'К оплате сейчас (полная)' : 'Charged now (full)')
+                    : (isRu ? `Предоплата ${effectivePercent}%` : `${effectivePercent}% deposit`)}
               </span>
               <span className="text-xl font-bold text-success">{formatPrice(chargeNow)}</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {payInFull
+              {isRequest
+                ? (isRu
+                    ? `Сумма блокируется, но не списывается. Ответ в течение ${REQUEST_REPLY_WINDOW_MINUTES} минут: при подтверждении она станет предоплатой, иначе блокировка снимается.`
+                    : `The amount is held, not charged. You get a reply within ${REQUEST_REPLY_WINDOW_MINUTES} minutes: if accepted it becomes your prepayment, otherwise the hold is released.`)
+                : payInFull
                 ? (isRu ? 'Списание полной суммы. Возврат по правилам отмены.' : 'Full amount charged now. Refunds per cancellation policy.')
                 : (isRu
                     ? 'Невозвратная предоплата для подтверждения бронирования'
@@ -453,7 +476,7 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           <h3 className="font-semibold text-sm">
             {isRu ? 'Способ оплаты' : 'Payment method'}
           </h3>
-          <PaymentMethodPicker value={method} onChange={setMethod} />
+          {!isRequest && <PaymentMethodPicker value={method} onChange={setMethod} />}
 
           {/* Inline contextual CTA per method (parent's sticky footer is the primary CTA, this is the
               fallback when the user scrolls all the way down). */}
@@ -464,7 +487,9 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
               disabled={isProcessing}
             >
               {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-              {isRu ? `Оплатить ${formatPrice(chargeNow)}` : `Pay ${formatPrice(chargeNow)}`}
+              {isRequest
+                ? (isRu ? `Заблокировать ${formatPrice(chargeNow)} и отправить запрос` : `Hold ${formatPrice(chargeNow)} and send request`)
+                : (isRu ? `Оплатить ${formatPrice(chargeNow)}` : `Pay ${formatPrice(chargeNow)}`)}
             </Button>
           )}
 

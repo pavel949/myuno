@@ -3,6 +3,7 @@ import { createStripeClient, Stripe } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { PAYABLE_ORDER_STATUSES, validateCheckoutPayment } from "../_shared/checkout-payment-guard.ts";
+import { recordRequestHold, sessionForCapturedRequest } from "./request-hold.ts";
 
 
 /**
@@ -87,9 +88,24 @@ Deno.serve(async (req) => {
     // =====================================================
     // HANDLE: checkout.session.completed
     // =====================================================
-    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
-      const session = event.data.object as Stripe.Checkout.Session;
+    // A captured request-to-book hold re-enters the same canonical confirmation
+    // path as a paid checkout: one writer for order confirmation.
+    const capturedRequestSession = event.type === "payment_intent.succeeded"
+      ? await sessionForCapturedRequest(stripe, event.data.object as Stripe.PaymentIntent)
+      : null;
+    if (capturedRequestSession || event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+      const session = capturedRequestSession ?? (event.data.object as Stripe.Checkout.Session);
       logStep("Processing checkout.session.completed", { sessionId: redactId(session.id) });
+
+      // Request-to-book: the card is authorised, not charged. Record the hold
+      // and start the reply window; nothing is confirmed here.
+      if (session.payment_status === 'unpaid' && session.metadata?.booking_mode === 'request' && session.metadata?.order_id) {
+        const outcome = await recordRequestHold(stripe, supabaseAdmin, session);
+        logStep("Request hold processed", { outcome });
+        return new Response(JSON.stringify({ received: true, request_hold: outcome }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+        });
+      }
 
       // Delayed methods complete checkout before money arrives. The async success
       // event will re-enter this handler after settlement.

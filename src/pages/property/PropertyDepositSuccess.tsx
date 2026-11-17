@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TripServicesGrid } from '@/components/property/TripServicesGrid';
+import { RequestHoldStatus } from '@/components/property/RequestHoldStatus';
 
 export default function PropertyDepositSuccess() {
   const navigate = useNavigate();
@@ -17,6 +18,26 @@ export default function PropertyDepositSuccess() {
   const orderId = searchParams.get('order_id');
   // Support legacy booking_id param as well
   const bookingId = orderId || searchParams.get('booking_id');
+
+  // Request-to-book: the card is on hold and nothing is confirmed yet. Show the
+  // live state from the order instead of a success screen.
+  if (searchParams.get('mode') === 'request' && orderId) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 p-6 min-h-[80vh]">
+        <RequestHoldStatus orderId={orderId} />
+        <div className="flex w-full max-w-sm flex-col gap-3">
+          <Button onClick={() => navigate(`/orders/${orderId}`)} className="w-full gap-2 min-h-11">
+            <ArrowRight className="w-4 h-4" />
+            {isRu ? 'Детали запроса' : 'Request details'}
+          </Button>
+          <Button variant="ghost" onClick={() => navigate('/property')} className="w-full gap-2 min-h-11">
+            <Home className="w-4 h-4" />
+            {isRu ? 'К списку недвижимости' : 'Browse Properties'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh]">

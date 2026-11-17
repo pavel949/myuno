@@ -11,6 +11,8 @@ const state = vi.hoisted(() => ({
   clipboard: vi.fn(),
   mutate: vi.fn(),
 }));
+// The reply actions own their own data access and are covered separately.
+vi.mock('@/components/property/RequestHoldReplyActions', () => ({ RequestHoldReplyActions: () => null }));
 vi.mock('@/contexts/LanguageContext', () => ({
   useLanguage: () => ({
     t: (key: string) => (state.language === 'ru' ? ru : en)[key] ?? key,

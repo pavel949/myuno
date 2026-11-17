@@ -20,10 +20,10 @@ describe('mobile property action contract', () => {
   it('opens dates for an undated short stay and preserves dated inquiry context', () => {
     const openDates = vi.fn();
     const view = render(<PropertyDetailMobileBar {...base} onOpenDatePicker={openDates} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Calculate stay cost' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose dates' }));
     expect(openDates).toHaveBeenCalledOnce();
     view.rerender(<PropertyDetailMobileBar {...base} onOpenDatePicker={openDates} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Cost & booking request' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Request to book' }));
     expect(openDates).toHaveBeenCalledTimes(2);
     expect(state.navigate).not.toHaveBeenCalled();
   });
@@ -31,8 +31,8 @@ describe('mobile property action contract', () => {
     const openDates = vi.fn();
     render(<PropertyDetailMobileBar {...base} isLongStayOnly onOpenDatePicker={openDates} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
     expect(screen.getByRole('button', { name: 'Request rental' })).toHaveAttribute('data-property-id', 'fixture-home');
-    expect(screen.queryByRole('button', { name: 'Cost & booking request' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Calculate stay cost' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Request to book' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Choose dates' })).toBeNull();
     expect(state.navigate).not.toHaveBeenCalled();
     expect(openDates).not.toHaveBeenCalled();
   });
@@ -46,5 +46,5 @@ it('shows an explicitly monthly long-stay label on the existing request action',
   render(<PropertyDetailMobileBar {...base} isLongStayOnly rentalPriceLabel="45000 / month" />);
   expect(screen.getByText('45000 / month')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Request rental' })).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Calculate stay cost' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Choose dates' })).toBeNull();
 });

@@ -23,6 +23,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { DateRange } from 'react-day-picker';
 import type { PropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+import { bookingModeCopy, resolveBookingMode } from '@/lib/property/bookingMode';
 
 
 interface PropertyBookingCardProps {
@@ -81,6 +82,7 @@ export function PropertyBookingCard({
   const guests = editedGuests?.propertyId === propertyId ? editedGuests.value : initialGuestContext?.guests ?? 1;
   const setDateRange = (value: DateRange | undefined) => { setEditedDates({ propertyId, value }); onGuestContextChange?.({ dateRange: value, guests }); };
   const setGuests = (value: number) => { setEditedGuests({ propertyId, value }); onGuestContextChange?.({ dateRange, guests: value }); };
+  const modeCopy = bookingModeCopy(resolveBookingMode(rentalTerms?.instant_booking), language);
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { isDesktop } = useBreakpoint();
@@ -236,10 +238,10 @@ export function PropertyBookingCard({
           ) : (
             <>
               <p className="text-base font-display font-semibold text-foreground">
-                {isRu ? 'Рассчитайте стоимость на ваши даты' : 'Calculate the cost for your dates'}
+                {isRu ? 'Выберите даты проживания' : 'Choose your stay dates'}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {isRu ? 'Выберите даты и количество гостей' : 'Select dates and number of guests'}
+                {isRu ? 'Покажем итоговую стоимость и условия брони' : 'You will see the total price and booking terms'}
               </p>
             </>
           )}
@@ -411,13 +413,11 @@ export function PropertyBookingCard({
           disabled={!availabilityReady || validationErrors.length > 0}
         >
           {!dateRange?.from || !dateRange?.to ? (
-            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
-          ) : (
-            isRu ? 'Запросить прямое бронирование' : 'Request direct booking'
-          )}
+            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Выбрать даты' : 'Choose dates'}</>
+          ) : modeCopy.cta}
         </Button>
         
-        <p className="text-xs text-muted-foreground">{isRu ? 'Расчёт не подтверждает бронь. На следующем шаге проверьте условия; вопрос менеджеру можно задать без оплаты.' : 'This estimate does not confirm a booking. Review the terms on the next step; asking the manager requires no payment.'}</p>
+        <p className="text-xs text-muted-foreground" data-testid="booking-mode-note">{modeCopy.note}</p>
 
         {!nights ? null : (
           <>

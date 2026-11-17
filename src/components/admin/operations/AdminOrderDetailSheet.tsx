@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { RequestHoldReplyActions } from '@/components/property/RequestHoldReplyActions';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -214,6 +215,8 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
               </Badge>
               <Badge variant="outline" className="capitalize">{order.order_type}</Badge>
             </div>
+
+            {order.order_type === 'property' && <RequestHoldReplyActions orderId={order.id} />}
 
             <Separator />
 
