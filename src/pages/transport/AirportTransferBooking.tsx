@@ -1,3 +1,4 @@
+import { configuredTransferBasePrice, configuredTransferTotal, transferFareLabel } from '@/lib/transport/transferFare';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -45,8 +46,8 @@ export default function AirportTransferBooking() {
   const { language } = useLanguage();
   const { user } = useAuth();
 
-  const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
-  const { destinations } = useTransportDestinations('airport_transfer');
+  const { vehicleTypes, isLoading: isLoadingVehicles, error: vehicleError } = useVehicleTypes('airport_transfer');
+  const { destinations, isLoading: isLoadingDestinations, error: destinationError } = useTransportDestinations('airport_transfer');
   const { createOrder, isCreating } = useOrders();
   const { profile } = useProfile();
   const { latitude, longitude, loading: geoLoading, getPosition, hasLocation, supported: geoSupported } = useGeolocation();
@@ -62,7 +63,9 @@ export default function AirportTransferBooking() {
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number; placeId?: string } | null>(null);
   const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [nightConfigReady, setNightConfigReady] = useState(false);
   const pendingSubmitRef = useRef(false);
+  const authCompletedRef = useRef(false);
 
   const [formData, setFormData] = useState<TransferFormData>({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
@@ -112,6 +115,7 @@ export default function AirportTransferBooking() {
       .limit(1)
       .maybeSingle()
       .then(({ data, error }) => {
+        setNightConfigReady(true);
         if (error) {
           logger.warn('[Transfer] night surcharge config fetch failed; using day rate', error);
           return;
@@ -161,7 +165,7 @@ export default function AirportTransferBooking() {
       const matched = vehicleParam
         ? vehicleTypes.find(v => v.name_en.toLowerCase().includes(vehicleParam.toLowerCase()))
         : undefined;
-      setFormData(prev => ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
+      setFormData(prev => prev.vehicleType ? prev : ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
     }
   }, [vehicleTypes, formData.vehicleType, vehicleParam]);
 
@@ -198,7 +202,7 @@ export default function AirportTransferBooking() {
   // When the user types a hotel name and selects a Google Places suggestion,
   // StepRoute clears `selectedDestinationId` (so the manual-address text wins)
   // and forwards `destinationCoords`. Without this effect the price falls back
-  // to the vehicle's default base_price (800 ฿). Here we find the nearest
+  // to the vehicle's configured base_price. Here we find the nearest
   // pricing zone within 12 km and pre-select it so the correct route rate
   // applies — toast notifies the customer so the change is not silent.
   const lastAutoMatchedCoordsRef = useRef<string | null>(null);
@@ -227,11 +231,9 @@ export default function AirportTransferBooking() {
   }, [destinationCoords, destinations, formData.selectedDestinationId, language]);
 
   // Pricing
-  const routeBasePrice = selectedDestination?.base_price || 0;
-  const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
-  const basePrice = routeBasePrice > 0
-    ? Math.round(routeBasePrice * vehicleMultiplier)
-    : (selectedVehicle?.base_price || 800);
+  const routeBasePrice = selectedDestination?.base_price ?? null;
+  const pricingReady = nightConfigReady && !isLoadingVehicles && !isLoadingDestinations && !vehicleError && !destinationError;
+  const basePrice = pricingReady ? configuredTransferBasePrice(routeBasePrice, selectedVehicle) : null;
 
   const isNightArrival = useMemo(() => {
     if (!formData.arrivalTime || !nightSurchargeCfg) return false;
@@ -245,13 +247,14 @@ export default function AirportTransferBooking() {
   const nightSurcharge = isNightArrival && nightSurchargeCfg
     ? (isVan ? nightSurchargeCfg.van : nightSurchargeCfg.sedan)
     : 0;
-  const totalPrice = basePrice + nightSurcharge;
-  const vendorPayout = Math.round(totalPrice / 1.35);
-  const platformFee = totalPrice - vendorPayout;
+  const totalPrice = configuredTransferTotal(basePrice, nightSurcharge);
+  const vendorPayout = totalPrice === null ? null : Math.round(totalPrice / 1.35);
+  const platformFee = totalPrice === null || vendorPayout === null ? null : totalPrice - vendorPayout;
 
   // ── Validation (single source of truth, evaluated per step) ─────────────
   const canProceedStep0 = !!(formData.direction && formData.terminal && formData.destinationAddress);
-  const canProceedStep1 = !!formData.vehicleType;
+  const hasConfiguredRate = totalPrice !== null;
+  const canProceedStep1 = !!selectedVehicle && hasConfiguredRate;
   const phoneDigits = (formData.phone || '').replace(/\D/g, '');
   const canProceedStep2 = !!(
     formData.flightNumber.trim() &&
@@ -273,12 +276,18 @@ export default function AirportTransferBooking() {
   const handleBack = () => { if (step > 0) setStep(step - 1); };
 
   const handleSubmit = async () => {
+    // Every entry point, including delayed auth-resume, must validate current reads.
+    if (!canSubmit || !selectedVehicle || basePrice === null || totalPrice === null || vendorPayout === null || platformFee === null || isCreating || isProcessingPayment) {
+      if (!hasConfiguredRate) toast.error(transferFareLabel(null, language));
+      return;
+    }
     if (!user) {
       // Guest reached payment — show inline auth gate instead of redirecting
       // (which would nuke all the form data they just typed). The draft stays
       // in sessionStorage; after sign-in/sign-up onAuthStateChange flips
       // `user`, the effect below auto-resumes handleSubmit.
       pendingSubmitRef.current = true;
+      authCompletedRef.current = false;
       setAuthGateOpen(true);
       return;
     }
@@ -496,13 +505,18 @@ export default function AirportTransferBooking() {
     }
   };
 
+  // The delayed callback reads the latest committed handler, not a pre-login fare snapshot.
+  const latestSubmit = useRef(handleSubmit);
+  useEffect(() => { latestSubmit.current = handleSubmit; });
+
   // Auto-resume submit once the user successfully signs in / signs up via the gate.
   // pendingSubmitRef guards against double-fire on session refresh.
   useEffect(() => {
     if (user && pendingSubmitRef.current && !authGateOpen) {
       pendingSubmitRef.current = false;
       // Small tick so any profile-prefill effect lands before submit.
-      setTimeout(() => { handleSubmit(); }, 50);
+      const timer = setTimeout(() => { void latestSubmit.current(); }, 50);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authGateOpen]);
@@ -577,6 +591,7 @@ export default function AirportTransferBooking() {
               language={language}
               vehicleTypes={vehicleTypes}
               routeBasePrice={routeBasePrice}
+              pricingReady={pricingReady}
             />
           )}
           {step === 2 && (
@@ -622,7 +637,7 @@ export default function AirportTransferBooking() {
                   {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
                 </p>
               )}
-              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{formData.vehicleType ? `฿${totalPrice.toLocaleString()}` : (language === "ru" ? "Выберите автомобиль" : "Select a vehicle")}</p>
+              <p className={totalPrice === null ? 'text-sm font-medium text-muted-foreground' : 'text-lg font-bold tabular-nums whitespace-nowrap'}>{formData.vehicleType ? transferFareLabel(totalPrice, language) : (language === "ru" ? "Выберите автомобиль" : "Select a vehicle")}</p>
             </div>
             {selectedVehicleLabel && (
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">
@@ -631,6 +646,9 @@ export default function AirportTransferBooking() {
             )}
           </div>
 
+          {formData.vehicleType && !hasConfiguredRate && <p role="status" className="text-sm text-muted-foreground mb-2">
+            {language === 'ru' ? 'Тариф пока не подтверждён. Выберите другой автомобиль или маршрут и проверьте стоимость.' : 'The fare is not confirmed. Choose another vehicle or route and check the price.'}
+          </p>}
           {!isLastStep ? (
             <Button
               type="button"
@@ -650,7 +668,7 @@ export default function AirportTransferBooking() {
             >
               {isCreating || isProcessingPayment
                 ? (language === 'ru' ? 'Обработка...' : 'Processing...')
-                : formData.paymentMethod === 'stripe'
+                : totalPrice === null ? transferFareLabel(null, language) : formData.paymentMethod === 'stripe'
                   ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
                   : formData.paymentMethod === 'cash'
                     ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
@@ -664,16 +682,17 @@ export default function AirportTransferBooking() {
         open={authGateOpen}
         onOpenChange={(open) => {
           setAuthGateOpen(open);
-          if (!open) pendingSubmitRef.current = false;
+          if (!open) {
+            if (!authCompletedRef.current) pendingSubmitRef.current = false;
+            authCompletedRef.current = false;
+          }
         }}
         language={language === 'ru' ? 'ru' : 'en'}
         defaultEmail={formData.email}
         defaultName={formData.name}
         defaultPhone={formData.phone}
-        onAuthenticated={() => { /* resume happens via useEffect when `user` flips */ }}
-        contextLine={language === 'ru'
-          ? `Трансфер · ฿${totalPrice.toLocaleString()}`
-          : `Transfer · ฿${totalPrice.toLocaleString()}`}
+        onAuthenticated={() => { authCompletedRef.current = true; }}
+        contextLine={`${language === 'ru' ? 'Трансфер' : 'Transfer'} · ${transferFareLabel(totalPrice, language)}`}
       />
     </AppLayout>
   );
