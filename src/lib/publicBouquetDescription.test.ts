@@ -6,6 +6,9 @@ describe('legacy bouquet description publication guard', () => {
   it.each([
     'Premium roses. Freshness up to 10 days.',
     'Розы. Свежесть до 10 дней.',
+    'Букет остаётся свежим до 10 дней.',
+    'Букет остается свежим до 10 дней.',
+    'Цветы остаются свежими до 10 дней.',
     'Flowers stay fresh for ten days',
     'Order by 2 PM for same-day delivery',
     'Доставка сегодня при заказе до 14:00',

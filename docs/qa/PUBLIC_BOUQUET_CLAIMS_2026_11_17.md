@@ -16,3 +16,6 @@ This lexical guard is targeted containment, NOT arbitrary-language claim verific
 
 ## Validation
 Focused regression tests cover full-field withholding, neutral RU/EN text, absent/malformed values, removal of urgency, and body/metadata wiring. No real booking, payment, provider message, production data update or deployment.
+
+## Singular Russian regression
+The reported phrase “свежим до 10 дней” was not matched by the original plural-only `свежими` pattern. Regression cases with both `остаётся` and `остается` failed before the narrow singular/plural correction and passed afterward. This remains lexical containment, not verification of arbitrary supplier claims.

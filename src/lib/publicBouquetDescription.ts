@@ -9,7 +9,7 @@ export function publicBouquetDescription(value: unknown): string | null {
   const normalized = value.normalize('NFKC').toLowerCase();
   // Deliberately conservative: even qualified/negative mentions stay withheld.
   // Check semantic topic stems rather than only a specific number of days.
-  if (/freshness|stay\s+fresh|lasts?\s+(?:up\s+to\s+)?\d|свежест|свежими|стоят\s+(?:до\s+)?\d|delivery|deliver(?:ed|s)?\b|достав/iu.test(normalized)) {
+  if (/freshness|stay\s+fresh|lasts?\s+(?:up\s+to\s+)?\d|свежест|свежим(?:и)?|стоят\s+(?:до\s+)?\d|delivery|deliver(?:ed|s)?\b|достав/iu.test(normalized)) {
     return null;
   }
   return value.trim();
