@@ -8235,7 +8235,7 @@
     },
     {
       "file": "src/components/nav/ConsumerHeader.tsx",
-      "sha256": "b1d0c831ddba74dd211bd9ee3fc7c7d0f5b7c697aa2701cdde0b39395ce59751",
+      "sha256": "971c39a0f337a0bc93dc173f0f89bedad389b404c86fd80aaacdfde4f9d6aaaa",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -8245,7 +8245,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            92
+            90
           ]
         },
         {
