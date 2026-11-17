@@ -218,7 +218,12 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
     });
   });
   describe('transactionally fenced queue admission (local transactional queue adapter)', () => {
-    async function event() { await admit(); return (await sql`SELECT * FROM private.claim_property_inquiry_email()`)[0]; }
+    async function event(): Promise<{id:string;claim_token:string}> {
+      await admit();
+      const row=(await sql`SELECT * FROM private.claim_property_inquiry_email()`)[0];
+      if(!row || typeof row.id!=='string' || typeof row.claim_token!=='string') throw new Error('Expected a valid persisted worker claim');
+      return {id:row.id,claim_token:row.claim_token};
+    }
     async function enqueue(e: {id:string;claim_token:string}) { return (await sql`SELECT private.enqueue_claimed_property_inquiry_email(${e.id},${e.claim_token}) AS result`)[0].result; }
     it('atomically enqueues persisted content only to configured admin and finalizes queued', async () => {
       const e=await event();await sql`UPDATE public.property_inquiries SET message='<script>bad</script>',phone='stored-phone' WHERE id=${requestId}`;
@@ -261,6 +266,26 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       const pending=enqueue(e);let sawLock=false;
       try {for(let i=0;i<100;i++){const [r]=await sql`SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%enqueue_claimed_property_inquiry_email%'`;if(r.n>0){sawLock=true;break;}await new Promise(r=>setTimeout(r,10));}if(kind==='expiry')await sql`SELECT pg_sleep(0.2)`;} finally {unlock();}
       await writer;expect(sawLock).toBe(true);expect(await pending).toMatchObject({outcome:kind==='expiry'?'uncertain':'suppressed'});expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it.each(['source','suppression'])('expired lease after blocked %s read reports durable uncertain, not false suppression',async target=>{
+      const e=await event();let unlock!:()=>void;let ready!:()=>void;
+      const release=new Promise<void>(r=>{unlock=r;});const held=new Promise<void>(r=>{ready=r;});
+      const writer=sql.begin(async tx=>{if(target==='source')await tx`UPDATE public.property_inquiries SET status='cancelled' WHERE id=${requestId}`;else await tx`INSERT INTO public.suppressed_emails(email) VALUES('admin@example.test')`;ready();await release;});
+      await held;await sql`UPDATE private.admin_intake_dispatch SET lease_until=clock_timestamp()+interval '150 milliseconds' WHERE id=${e.id}`;
+      const pending=enqueue(e);let sawLock=false;
+      try{for(let i=0;i<100;i++){const [r]=await sql`SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%enqueue_claimed_property_inquiry_email%'`;if(r.n>0){sawLock=true;break;}await new Promise(r=>setTimeout(r,10));}await sql`SELECT pg_sleep(0.2)`;}finally{unlock();}
+      await writer;expect(sawLock).toBe(true);expect(await pending).toEqual({outcome:'uncertain'});
+      expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('uncertain');expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+    });
+    it('bounds blocked suppression admission by function-local lock timeout without queue effects',async()=>{
+      const e=await event();let unlock!:()=>void;let ready!:()=>void;
+      const release=new Promise<void>(r=>{unlock=r;});const held=new Promise<void>(r=>{ready=r;});
+      const writer=sql.begin(async tx=>{await tx`INSERT INTO public.suppressed_emails(email) VALUES('other@example.test')`;ready();await release;});
+      await held;
+      try{expect(await enqueue(e)).toEqual({outcome:'failed',retry_safe:true});}finally{unlock();await writer;}
+      expect(await sql`SELECT id FROM public.queue_fixture`).toHaveLength(0);
+      const [config]=await sql`SELECT proconfig FROM pg_proc WHERE oid='private.enqueue_claimed_property_inquiry_email(uuid,uuid)'::regprocedure`;
+      expect(config.proconfig).toContain('lock_timeout=2s');
     });
     it.each(['anon','authenticated','service_role'])('fenced enqueue is not executable by %s',async role=>{expect((await sql`SELECT has_function_privilege(${role},'private.enqueue_claimed_property_inquiry_email(uuid,uuid)','EXECUTE') AS ok`)[0].ok).toBe(false);});
   });

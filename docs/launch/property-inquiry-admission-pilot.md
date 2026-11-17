@@ -71,3 +71,9 @@ The payload uses the sender identity/domain currently baked into the canonical t
 Additional CI tests use real PostgreSQL for locks, leases, transactions, current state/recipient changes and queue-failure rollback. `enqueue_email` is a deliberately local transactional queue adapter/stub in these tests, not the actual PGMQ extension or provider. Therefore tests prove the producer transaction/fencing contract, **not production PGMQ integration or delivery**. Test gates include paused worker past lease, config mutation during blocked enqueue, suppression/used token, stale actor/status, forged token, forbidden function execution and no duplicate admission.
 
 Still NO-GO for activation: independent review of this new internal fence, actual role/grant/adapter wiring, canonical queue/token/suppression schema compatibility, live sender and recipient configuration, PGMQ behavior, retention, and downstream delivery reconciliation remain required. No production migration/deploy, endpoint exposure, registration, credentials or message send is performed.
+
+### Follow-up review correction: durable suppression outcome and bounded locks
+
+Suppression branches now check the fenced completion result. If the lease expires while a source/config/suppression read blocks, the event becomes `uncertain` and the returned result agrees with that durable state; it no longer falsely reports suppression. Tests cover expired leases after blocked source and suppression reads.
+
+The internal fence also has a function-local two-second `lock_timeout`, restored by PostgreSQL when the function exits. A blocked suppression-table admission fails with no queue effect and uses the safe pre-enqueue retry path. This is not a global database setting change and does not bound all CPU/query/provider work. The eventual protected scheduler/adapter still needs an externally enforced statement/runtime deadline and a load review of the suppression SHARE lock before activation.

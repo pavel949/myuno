@@ -2,7 +2,7 @@
 -- Uses canonical suppression/token/log tables + enqueue_email. No public email endpoint.
 BEGIN;
 CREATE FUNCTION private.enqueue_claimed_property_inquiry_email(p_id uuid,p_claim_token uuid)
-RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public AS $$
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,public SET lock_timeout='2s' AS $$
 DECLARE
   event private.admin_intake_dispatch%ROWTYPE;
   inquiry public.property_inquiries%ROWTYPE;
@@ -23,8 +23,13 @@ BEGIN
     SELECT * INTO inquiry FROM public.property_inquiries WHERE id=event.request_id FOR SHARE;
     IF NOT FOUND OR inquiry.user_id IS DISTINCT FROM event.admitted_actor_id OR inquiry.status IS DISTINCT FROM 'pending'
       OR inquiry.property_id IS NULL THEN
-      PERFORM private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed');
-      RETURN jsonb_build_object('outcome','suppressed');
+      IF private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed') THEN
+        RETURN jsonb_build_object('outcome','suppressed');
+      END IF;
+      -- A blocking read may consume the lease. Report the durable outcome, not suppression.
+      UPDATE private.admin_intake_dispatch SET state='uncertain',claim_token=NULL,lease_until=NULL
+        WHERE id=event.id AND state='processing' AND claim_token=p_claim_token;
+      RETURN jsonb_build_object('outcome','uncertain');
     END IF;
     SELECT value INTO recipients FROM public.system_settings WHERE key='admin_emails' FOR SHARE;
     IF jsonb_typeof(recipients)='string' THEN recipients:=(recipients #>> '{}')::jsonb; END IF;
@@ -35,14 +40,24 @@ BEGIN
       RAISE EXCEPTION 'Recipient configuration unavailable';
     END IF;
     IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements_text(recipients) r WHERE lower(btrim(r))=event.destination) THEN
-      PERFORM private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed');
-      RETURN jsonb_build_object('outcome','suppressed');
+      IF private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed') THEN
+        RETURN jsonb_build_object('outcome','suppressed');
+      END IF;
+      -- A blocking read may consume the lease. Report the durable outcome, not suppression.
+      UPDATE private.admin_intake_dispatch SET state='uncertain',claim_token=NULL,lease_until=NULL
+        WHERE id=event.id AND state='processing' AND claim_token=p_claim_token;
+      RETURN jsonb_build_object('outcome','uncertain');
     END IF;
     -- Serialize suppression insertion through admission; never bypass canonical suppression.
     LOCK TABLE public.suppressed_emails IN SHARE MODE;
     IF EXISTS(SELECT 1 FROM public.suppressed_emails WHERE email=event.destination) THEN
-      PERFORM private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed');
-      RETURN jsonb_build_object('outcome','suppressed');
+      IF private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed') THEN
+        RETURN jsonb_build_object('outcome','suppressed');
+      END IF;
+      -- A blocking read may consume the lease. Report the durable outcome, not suppression.
+      UPDATE private.admin_intake_dispatch SET state='uncertain',claim_token=NULL,lease_until=NULL
+        WHERE id=event.id AND state='processing' AND claim_token=p_claim_token;
+      RETURN jsonb_build_object('outcome','uncertain');
     END IF;
     INSERT INTO public.email_unsubscribe_tokens(email,token)
       VALUES(event.destination,replace(gen_random_uuid()::text,'-','')||replace(gen_random_uuid()::text,'-',''))
@@ -50,8 +65,13 @@ BEGIN
     SELECT token,used_at INTO unsubscribe,token_used FROM public.email_unsubscribe_tokens WHERE email=event.destination FOR SHARE;
     IF unsubscribe IS NULL THEN RAISE EXCEPTION 'Unsubscribe token unavailable'; END IF;
     IF token_used IS NOT NULL THEN
-      PERFORM private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed');
-      RETURN jsonb_build_object('outcome','suppressed');
+      IF private.complete_property_inquiry_email(event.id,p_claim_token,'suppressed') THEN
+        RETURN jsonb_build_object('outcome','suppressed');
+      END IF;
+      -- A blocking read may consume the lease. Report the durable outcome, not suppression.
+      UPDATE private.admin_intake_dispatch SET state='uncertain',claim_token=NULL,lease_until=NULL
+        WHERE id=event.id AND state='processing' AND claim_token=p_claim_token;
+      RETURN jsonb_build_object('outcome','uncertain');
     END IF;
     link:='https://myuno.app/admin/inbox?source=property_inquiries&request='||inquiry.id::text;
     body_text:='New myUNO property enquiry. Not a confirmed booking or payment.'||E'\n'
