@@ -39906,7 +39906,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "330e1a05d120c6e2fd738871953a1f09a170755a3cabd2eb2744de24a2fb89ba",
+      "sha256": "bdc3fe81a34b0c79f71d798c99809aca2860f0449063fd458399413260130abb",
       "directRouteDeclarations": [
         {
           "id": "3d68906b3367f767",

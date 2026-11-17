@@ -54,9 +54,12 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = 
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
-  it('opens first-visit rental criteria with guests before submit, without inventing a guest filter', () => {
+  it('starts compact and opens the existing rental editor without inventing a guest filter', () => {
     render(<MemoryRouter initialEntries={['/property/search?mode=rent&tenancy=short']}><PropertySearchPage /></MemoryRouter>);
-    expect(document.querySelector('.premium-search-criteria')).toHaveAttribute('open');
+    const criteria = document.querySelector('.premium-search-criteria')!;
+    expect(criteria).not.toHaveAttribute('open');
+    fireEvent.click(criteria.querySelector('summary')!);
+    expect(criteria).toHaveAttribute('open');
     const guests = screen.getByRole('spinbutton', { name: 'Number of guests' });
     expect(guests).toBeVisible();
     expect(guests).toHaveValue(null);

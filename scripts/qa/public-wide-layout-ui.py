@@ -112,6 +112,8 @@ async def main():
                     # Full search remains operable with no dates; no calendar
                     # availability proof is claimed by this layout fixture.
                     criteria=page.locator('.premium-search-criteria')
+                    await expect(criteria).not_to_have_attribute('open','')
+                    await criteria.locator(':scope > summary').click()
                     await expect(criteria).to_have_attribute('open','')
                     search = page.locator('.home-search')
                     await expect(search.locator('button[type=submit]')).to_be_visible()

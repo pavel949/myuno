@@ -107,7 +107,9 @@ async def main():
                     initial = {'lang':lang,'mode':'rent','tenancy':'short','district':'layan','types':'villa',
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
-                    await expect(page.locator('.premium-search-criteria')).to_have_attribute('open','')
+                    await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
+                    await expect(page.locator('[data-testid=property-results-grid]')).to_be_visible()
+                    await open_editor()
                     await expect(page.get_by_role('button',name=date_label)).to_be_visible()
                     await expect(page.get_by_label(guests_label)).to_be_visible()
                     await expect(page.locator('.home-search-secondary')).to_have_count(0)
