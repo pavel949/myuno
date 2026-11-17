@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 // Real home search controls with synthetic hooks; deny all external browser requests.
 import { build } from 'esbuild';
 import postcss from 'postcss';
@@ -33,6 +34,7 @@ const virtual = {
   '@/integrations/supabase/client': `export const supabase={functions:{invoke:async(name,args)=>{window.fixtureInquiries.push({name,args});return{data:null,error:new Error('Synthetic unavailable')}}}};`,
 };
 const result = await build({
+ alias: radixOverlayAliases,
   // Bundle actual category imagery without external network access.
   loader: { ".webp": "dataurl", ".svg": "dataurl", ".png": "dataurl" },
   stdin: { contents: `import React from 'react';import {createRoot} from 'react-dom/client';import {QueryClient,QueryClientProvider} from '@tanstack/react-query';import {MemoryRouter,Routes,Route,useLocation,useNavigate} from 'react-router-dom';import ServicesIndex from '${root}/src/pages/services/ServicesIndex.tsx';import ServiceFunctionOrder from '${root}/src/pages/services/ServiceFunctionOrder.tsx';window.fixtureAttempts=[];window.fixtureInquiries=[];function Location(){const l=useLocation(),n=useNavigate();return <aside><output data-testid="location">{l.pathname+l.search}</output><button onClick={()=>n(-1)}>QA history back</button><button onClick={()=>n(1)}>QA history forward</button></aside>;}createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><MemoryRouter initialEntries={[new URLSearchParams(location.search).get('entry')||'/discover/services']}><Routes><Route path="/discover/services" element={<ServicesIndex embedded/>}/><Route path="/services/order/:functionId" element={<ServiceFunctionOrder/>}/><Route path="/auth" element={<p>Isolated auth destination</p>}/></Routes><Location/></MemoryRouter></QueryClientProvider>);`, loader: 'tsx', resolveDir: root },

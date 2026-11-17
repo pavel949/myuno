@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 894,
-      "sourceInstances": 2929
+      "directConsumerFiles": 896,
+      "sourceInstances": 2928
     },
     "Card": {
       "directConsumerFiles": 532,
@@ -63,8 +63,8 @@
       "sourceInstances": 457
     },
     "Sheet": {
-      "directConsumerFiles": 73,
-      "sourceInstances": 76
+      "directConsumerFiles": 75,
+      "sourceInstances": 78
     },
     "Table": {
       "directConsumerFiles": 33,
@@ -6678,7 +6678,7 @@
     },
     {
       "file": "src/components/layout/FeatureLayout.tsx",
-      "sha256": "b0a5e45ed098278b1ab2e90418391cda8177cfdc70dbd7bc42d5c9c579439ab7",
+      "sha256": "4b68f9cf1f046f1938d29fcad30cd378be0ecc72421f15d9182b82d33829a990",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6686,17 +6686,18 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 9,
+          "instances": 10,
           "lines": [
-            247,
-            258,
-            275,
-            290,
-            316,
-            466,
-            512,
-            577,
-            592
+            248,
+            253,
+            264,
+            281,
+            296,
+            322,
+            472,
+            518,
+            583,
+            598
           ]
         },
         {
@@ -6704,8 +6705,8 @@
           "source": "@/components/page/EmptyState",
           "instances": 2,
           "lines": [
-            508,
-            518
+            514,
+            524
           ]
         },
         {
@@ -6713,7 +6714,7 @@
           "source": "@/components/uno/LoadingSpinner",
           "instances": 1,
           "lines": [
-            516
+            522
           ]
         }
       ]
@@ -16863,6 +16864,57 @@
       ]
     },
     {
+      "file": "src/components/services/MarketplaceDiscoveryMenu.tsx",
+      "sha256": "69c6a422032a0cab95cb26aa80bcfe74b3fedfbc08c4597104e2a293663d6ef1",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            49
+          ]
+        },
+        {
+          "name": "Sheet",
+          "source": "@/components/ui/sheet",
+          "instances": 1,
+          "lines": [
+            48
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/services/MarketplaceFilterSheet.tsx",
+      "sha256": "3a448ed6705f7ab1a1481248c70fffb8a9bb775113f4b1c291a8df19547c15fc",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 2,
+          "lines": [
+            13,
+            20
+          ]
+        },
+        {
+          "name": "Sheet",
+          "source": "@/components/ui/sheet",
+          "instances": 1,
+          "lines": [
+            12
+          ]
+        }
+      ]
+    },
+    {
       "file": "src/components/services/MarketplaceFilters.tsx",
       "sha256": "392e7ff1cbf3cd7714985adc6815bb1888ca2b3f2b4e2c0a9734b841289158bc",
       "directRouteDeclarations": [],
@@ -16899,7 +16951,7 @@
     },
     {
       "file": "src/components/services/MarketplaceServiceGrid.tsx",
-      "sha256": "90cfba690d7e27103a5816d417b01e60138737a2577c5237af13c74e5b000468",
+      "sha256": "d45b4a4313530729c62f2391858b3e9645afb16d662158d3e004e417ae77ab40",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -16909,11 +16961,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            60,
-            87,
+            62,
             90,
-            94,
-            104
+            93,
+            97,
+            107
           ]
         }
       ]
@@ -28335,7 +28387,7 @@
     },
     {
       "file": "src/pages/experiences/ExperiencesIndex.tsx",
-      "sha256": "6d86bade7ff0e4ab35b0eb1e252a64d9c68db6a719720af9995538a31f27c4bc",
+      "sha256": "04d4cc3a5d2d50c03457c149cebc048a387e25eb457890e2945a0494174e3d6d",
       "directRouteDeclarations": [
         {
           "id": "adbdb71aca374db4",
@@ -28352,10 +28404,10 @@
           "source": "@/components/ui/button",
           "instances": 4,
           "lines": [
-            112,
-            126,
-            130,
-            135
+            123,
+            141,
+            145,
+            150
           ]
         },
         {
@@ -28363,8 +28415,8 @@
           "source": "@/components/uno/EmptyState",
           "instances": 2,
           "lines": [
-            136,
-            138
+            151,
+            153
           ]
         }
       ]
@@ -40488,7 +40540,7 @@
     },
     {
       "file": "src/pages/services/ServicesIndex.tsx",
-      "sha256": "257f731ef57f9be28a665d7bb99c7c749d3a205651d7dffd31e1d0219d3c69b1",
+      "sha256": "236be1f7e664f01bbd08594b8f1045ba45426f85c75540362b3c8be3645f80af",
       "directRouteDeclarations": [
         {
           "id": "1dd848f291dbc440",
@@ -40503,27 +40555,22 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 19,
+          "instances": 14,
           "lines": [
-            120,
-            146,
-            147,
-            148,
-            154,
-            162,
-            167,
-            169,
-            171,
-            172,
-            179,
-            180,
-            191,
-            193,
-            197,
-            202,
-            208,
-            210,
-            211
+            130,
+            164,
+            165,
+            166,
+            170,
+            186,
+            187,
+            198,
+            200,
+            204,
+            209,
+            215,
+            217,
+            218
           ]
         },
         {
@@ -40531,7 +40578,7 @@
           "source": "@/components/uno/EmptyState",
           "instances": 1,
           "lines": [
-            193
+            200
           ]
         },
         {
@@ -40539,7 +40586,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            32
+            39
           ]
         },
         {
@@ -40547,7 +40594,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            128
+            138
           ]
         },
         {
@@ -40555,7 +40602,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            114
+            124
           ]
         }
       ]

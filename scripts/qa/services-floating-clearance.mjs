@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 // Real home search controls with synthetic hooks; deny all external browser requests.
 import { build } from 'esbuild';
 import postcss from 'postcss';
@@ -40,6 +41,7 @@ const virtual = {
   '@/integrations/supabase/client': `export const supabase={functions:{invoke:async(name,args)=>{window.fixtureInquiries.push({name,args});return{data:null,error:new Error('Synthetic unavailable')}}}};`,
 };
 const result = await build({
+ alias: radixOverlayAliases,
   // Bundle actual category imagery without external network access.
   loader: { ".webp": "dataurl", ".svg": "dataurl", ".png": "dataurl" },
   stdin: { contents: `import React from 'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation,useNavigate}from'react-router-dom';import ServiceFunctionOrder from '${root}/src/pages/services/ServiceFunctionOrder.tsx';import ServicesIndex from '${root}/src/pages/services/ServicesIndex.tsx';import{UnifiedChatFAB}from'${root}/src/components/chat/UnifiedChatFAB.tsx';import{BottomBar}from'${root}/src/components/nav/BottomBar.tsx';const q=new URLSearchParams(location.search);document.documentElement.style.fontSize=q.get('enlarged')==='true'?'24px':'16px';window.fixtureAttempts=[];window.fixtureInquiries=[];function App(){const l=useLocation(),n=useNavigate(),request=l.pathname.startsWith('/services/order/');return <><button data-testid="leave-request" onClick={()=>n('/discover/services')}>Leave request</button><Routes><Route path="/services/order/:functionId" element={<ServiceFunctionOrder/>}/><Route path="/discover/services" element={<ServicesIndex embedded/>}/><Route path="/bookings" element={<main style={{minHeight:'150vh'}}>Synthetic Orders content; actual BottomBar and Chat component model only</main>}/></Routes>{!request&&<BottomBar role="guest"/>}<UnifiedChatFAB/></>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={[q.get('entry')||'/services/order/deep_cleaning']}><App/></MemoryRouter>);`, loader: 'tsx', resolveDir: root },

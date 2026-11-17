@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 // Real home search controls with synthetic hooks; deny all external browser requests.
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
@@ -37,6 +38,7 @@ const virtual = {
   '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database forbidden')}});`,
 };
 const result = await build({
+  alias: radixOverlayAliases,
   // Bundle actual category imagery without external network access.
   loader: { ".webp": "dataurl", ".svg": "dataurl", ".png": "dataurl" },
   stdin: { contents: `import React from 'react';import {createRoot} from 'react-dom/client';import {BrowserRouter,Routes,Route,useLocation} from 'react-router-dom';import ServicesIndex from '${root}/src/pages/services/ServicesIndex.tsx';import SituationDetailPage from '${root}/src/components/navigation/v3/SituationDetailPage.tsx';import ServiceFunctionOrder from '${root}/src/pages/services/ServiceFunctionOrder.tsx';import {BackButton} from '${root}/src/components/uno/BackButton.tsx';import {ScrollToTop} from '${root}/src/components/layout/ScrollToTop.tsx';import {serviceCatalogueReturnTo} from '${root}/src/lib/services/serviceNavigation.ts';function Detail(){const l=useLocation();return <BackButton fallbackPath={serviceCatalogueReturnTo(new URLSearchParams(l.search).get('returnTo'))}/>;}function Location(){const l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>;}window.fixtureLanguage=window.fixtureLanguage||new URLSearchParams(location.search).get('lang')||'ru';if(location.pathname==='/fixture')history.replaceState(null,'',new URLSearchParams(location.search).get('entry')||'/discover/services');createRoot(document.getElementById('root')).render(<BrowserRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><ScrollToTop/><Routes><Route path="/discover/services" element={<ServicesIndex/>}/><Route path="/discover/:code" element={<SituationDetailPage/>}/><Route path="/services/order/:functionId" element={<ServiceFunctionOrder/>}/><Route path="*" element={<Detail/>}/></Routes><Location/></BrowserRouter>);`, loader: 'tsx', resolveDir: root },

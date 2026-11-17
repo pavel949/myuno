@@ -37,13 +37,20 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); Element.prototype.
 afterEach(cleanup);
 
 describe('integrated direct service route ownership', () => {
-  it('opens dedicated service journeys from the unfiltered public overview', async () => {
+  it('opens dedicated journeys through categories and search without a duplicate highlight wall', async () => {
     mount('/discover/services');
     await act(async () => { await vi.dynamicImportSettled(); });
-    const transfer = await screen.findByRole('link', { name: /^Airport transfer/ });
-    expect(transfer).toHaveAttribute('href', '/transport/airport-transfer');
-    expect(screen.getByRole('link', { name: /^Airport Fast Track/ })).toHaveAttribute('href', '/transport/fast-track');
-    expect(screen.getByRole('link', { name: /^Flower delivery/ })).toHaveAttribute('href', '/flowers');
+    fireEvent.click(await screen.findByRole('button', { name: 'Transport' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-transport');
+    for (const path of ['/transport/airport-transfer', '/transport/fast-track']) {
+      const link = document.querySelector(`a[href="${path}"]`);
+      expect(link).toBeVisible();
+      expect(link).toHaveAccessibleName();
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Reset all' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search services' }), { target: { value: 'Flowers' } });
+    expect(document.querySelector('a[href="/flowers"]')).toBeVisible();
+    expect(screen.getByTestId('location')).toHaveTextContent('q=Flowers');
   });
 
   it.each(['/discover/services', '/services', '/me/services'])('preserves home request filters and return path at %s', async path => {

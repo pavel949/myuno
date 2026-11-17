@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 // Real public surfaces and cards. Only reads/closed peripheral tools are synthetic.
 import { build } from 'esbuild';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -47,6 +48,7 @@ const virtual = {
  '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database access forbidden')}});`,
 };
 const result = await build({
+ alias: radixOverlayAliases,
   // Bundle actual category imagery without external network access.
   loader: { ".webp": "dataurl", ".svg": "dataurl", ".png": "dataurl" },
  stdin:{contents:`import React from'react';import{createRoot}from'react-dom/client';import{QueryClient,QueryClientProvider}from'@tanstack/react-query';import{MemoryRouter,useLocation}from'react-router-dom';import{HelmetProvider}from'react-helmet-async';import{NavShell}from'${root}/src/components/nav/NavShell.tsx';import{CompareProvider}from'${root}/src/components/property/PropertyCompare.tsx';import Services from'${root}/src/pages/services/ServicesIndex.tsx';import Search from'${root}/src/pages/property/PropertySearchPage.tsx';import Business from'${root}/src/pages/ForBusinessPage.tsx';const params=new URLSearchParams(location.search),surface=params.get('surface')||'services',start=surface==='housing'?'/property/search':surface==='business'?'/for-business':'/discover/services';function App(){const l=useLocation();return <><NavShell role="guest"><div className="border-b px-4 py-2 text-xs">Synthetic layout fixture · no live data</div>{surface==='housing'?<CompareProvider><Search/></CompareProvider>:surface==='business'?<Business/>:<Services/>}</NavShell><output hidden data-testid="fixture-route">{l.pathname+l.search}</output></>}createRoot(document.getElementById('root')).render(<HelmetProvider><QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><MemoryRouter initialEntries={[start+(params.get('view')==='map'?'?view=map':'')]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><App/></MemoryRouter></QueryClientProvider></HelmetProvider>);`,loader:'tsx',resolveDir:root},
@@ -66,7 +68,7 @@ for(const actual of ['nav/ConsumerHeader.tsx','pages/services/ServicesIndex.tsx'
 if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|usePropertyFilterOptions|usePropertyQuickFilters|useServiceMarketplace|useSearchPropertyAvailability)\.ts$/.test(p)))throw Error('Production read module bundled');
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 if(process.argv.includes('--bundle-only'))process.exit(0);
-const css=await Promise.all(['/src/index.css?direct','/src/styles/consumer-system.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct','/src/styles/premium-public.css?direct'].map(async file=>{const response=await fetch('http://localhost:8080'+file);if(!response.ok)throw Error('CSS unavailable: '+file);return response.text();}));
+const css=await Promise.all(['/src/index.css?direct','/src/styles/consumer-system.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct','/src/styles/premium-public.css?direct'].map(async file=>{const response=await fetch((process.env.QA_VITE_ORIGIN || 'http://localhost:8080')+file);if(!response.ok)throw Error('CSS unavailable: '+file);return response.text();}));
 await writeFile(path.join(output,'fixture.css'),css.join('\n'));
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only'))process.exit(0);

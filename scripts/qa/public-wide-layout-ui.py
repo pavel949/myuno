@@ -61,34 +61,23 @@ async def main():
                 bad = await page.locator('button,a,input,select,textarea').evaluate_all("""els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('.property-discovery-features')&&!e.closest('nav.overflow-x-auto')).map(e=>{const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('placeholder')||'').trim().slice(0,100),left:r.left,right:r.right}}).filter(r=>r.left < -1||r.right>innerWidth+1)""")
                 assert not bad, {'controlBounds': bad}
                 if surface == 'services':
-                    # Intentionally clipped category rail is not document overflow.
-                    # Prove each native link can be revealed by keyboard focus,
-                    # while the rail itself remains inside the viewport.
-                    rail = page.locator('nav.overflow-x-auto')
-                    await expect(rail).to_have_count(1)
-                    bounds = await rail.bounding_box()
-                    assert bounds and bounds['x'] >= -1 and bounds['x'] + bounds['width'] <= width + 1, bounds
-                    links = rail.get_by_role('link')
-                    await expect(links).to_have_count(3)
-                    for index in range(3):
-                        link = links.nth(index)
-                        await link.focus()
-                        await expect(link).to_be_focused()
-                        box = await link.bounding_box()
-                        assert box and box['x'] >= -1 and box['x'] + box['width'] <= width + 1, box
-                        assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'rail focus document overflow'
-                    await rail.evaluate('(element)=>element.scrollLeft=0')
+                    # The shared portal has one category grid, with no duplicate highlight rail.
+                    await expect(page.locator('nav.overflow-x-auto')).to_have_count(0)
                     menu = page.get_by_test_id('service-discovery-menu')
                     await expect(menu).to_be_visible()
-                    menu_metrics = await geometry(menu)
-                    assert len(menu_metrics['columns'].split()) == (4 if width >= 1440 else 2), menu_metrics
-                    await expect(menu.locator('[data-category-id]')).to_have_count(11)
+                    menu_metrics = await geometry(menu.locator(':scope > div').last)
+                    assert len(menu_metrics['columns'].split()) == (3 if width >= 1024 else 2), menu_metrics
+                    await expect(menu.locator('[data-category-id]')).to_have_count(6)
                     for category_id in ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']:
                         await expect(menu.locator(f'[data-category-id={category_id}]')).to_be_visible()
-                    await expect(menu.locator('a[href="/yachts"]')).to_have_count(1)
                     await expect(menu.locator('[data-category-id=cat-home-services]')).to_be_visible()
-                    await expect(menu.locator('[data-category-id=cat-tourism]')).to_be_visible()
-                    await menu.locator('[data-category-id=cat-tourism]').press('Enter')
+                    await menu.get_by_role('button',name={'ru': 'Все категории', 'en': 'All categories', 'th': 'ทุกหมวดหมู่'}[lang],exact=True).click()
+                    chooser=page.get_by_role('dialog')
+                    await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(11)
+                    await expect(chooser.locator('a[href="/yachts"]')).to_have_count(1)
+                    await chooser.locator('[data-category-id=cat-tourism]').focus()
+                    await chooser.locator('[data-category-id=cat-tourism]').press('Enter')
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
                     grid = page.get_by_test_id('service-catalogue-results')
                     await expect(grid).to_be_visible()
                     metrics = await geometry(grid)
@@ -98,15 +87,18 @@ async def main():
                     assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
                     await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
                     # Actual keyboard category filtering preserves URL context.
+                    await page.get_by_role('button',name={'ru': 'Категории и ситуации', 'en': 'Categories and situations', 'th': 'หมวดหมู่และสถานการณ์'}[lang],exact=True).click()
                     category = page.get_by_role('combobox')
                     await category.press('Enter')
                     option = page.get_by_role('option', name='Транспортные услуги' if lang=='ru' else 'Transport', exact=True)
                     await expect(option).to_be_visible()
                     await option.click()
                     await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=cat-transport')
+                    await expect(category).to_be_focused()
+                    await page.get_by_role('button',name={'ru': 'Показать предложения', 'en': 'Show offers', 'th': 'แสดงข้อเสนอ'}[lang],exact=True).click()
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
                     await expect(grid.get_by_role('link')).to_have_count(4)
-                    await expect(category).to_be_focused()
                     row['menu'] = menu_metrics
                     row['grid'] = metrics
                 elif surface == 'housing':

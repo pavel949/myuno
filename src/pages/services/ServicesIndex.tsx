@@ -9,7 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
-import { MarketplaceDiscoveryHero } from '@/components/services/MarketplaceDiscoveryHero';
+import { MarketplaceDiscoveryMenu } from '@/components/services/MarketplaceDiscoveryMenu';
+import { MarketplaceFilterSheet } from '@/components/services/MarketplaceFilterSheet';
+import cleaningImage from '@/assets/solutions/cleaning.webp';
+import transferImage from '@/assets/solutions/transfer.webp';
+import legalImage from '@/assets/solutions/legal.webp';
+import healthImage from '@/assets/solutions/massage.webp';
+import familyImage from '@/assets/solutions/pediatr.webp';
+import foodImage from '@/assets/solutions/restaurant.webp';
 import { ServiceFunctionCard } from '@/components/services';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -21,14 +28,14 @@ import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
 import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
 import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
-import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID } from '@/design-system/ecosystemLayout';
+import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID, ECOSYSTEM_HEADER_TITLE } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 import '@/styles/premium-services.css';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
-function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
+function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, filterButton, children }: MiniAppLayoutProps) {
   return <div className="public-commerce public-commerce--services space-y-6">
-    <header className="space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
+    <header className="flex items-start justify-between gap-3"><div><h1 className={ECOSYSTEM_HEADER_TITLE}>{title}</h1><p className="text-muted-foreground">{subtitle}</p></div>{filterButton}</header>
     <Input type="search" aria-label={searchPlaceholder} placeholder={searchPlaceholder} value={searchValue} onChange={event => onSearchChange?.(event.target.value)} />{children}
   </div>;
 }
@@ -52,7 +59,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const [helpOpen, setHelpOpen] = useState(false);
   const [limit, setLimit] = useState(12);
   const [showAllRequests, setShowAllRequests] = useState(false);
-  const [showAllMenu, setShowAllMenu] = useState(false);
   const returnedCategories = catalog.isFromDB ? catalog.categories : [];
   const categories = serviceDiscoveryCategories(returnedCategories);
   const situations = serviceDiscoverySituations(categories, catalog.lifeSituations ?? []);
@@ -77,7 +83,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     pendingQuery.current.params = next;
     setLimit(12);
     setShowAllRequests(false);
-    setShowAllMenu(false);
     navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
   const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(pendingQuery.current.params, key, value, homeCategory), key === 'q');
@@ -103,24 +108,29 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
   const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
 
-  return <div className="premium-services"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
-    title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')}
-    subtitle={t('Найдите нужное — по ситуации или категории.', 'Find what you need by situation or category.', 'ค้นหาบริการตามสถานการณ์หรือหมวดหมู่')}
-    fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
-    searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter={false} showEcosystemHint={false}>
-    {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
-    {overview && <MarketplaceDiscoveryHero kind="services" />}
-    <section aria-label={t('Подбор услуг', 'Find services', 'ค้นหาบริการ')} className="space-y-4">
+  const focusResults = useRef(false);
+  useEffect(() => {
+    if (focusResults.current) {
+      (document.getElementById('home-categories-title') ?? document.getElementById('service-results-title') ?? document.getElementById('service-empty-results'))?.focus({ preventScroll: true });
+      focusResults.current = false;
+    }
+  }, [category, filters.situation]);
+  const categoryImage = (id: string) => isHomeServiceCategoryId(id) ? cleaningImage : ({
+    'cat-transport': transferImage, 'cat-business-legal': legalImage, 'cat-health-wellness': healthImage,
+    'cat-family-kids': familyImage, 'cat-food-delivery': foodImage,
+  } as Record<string, string>)[id];
+  const discoveryFilters = <MarketplaceFilterSheet title={t('Категории и ситуации', 'Categories and situations', 'หมวดหมู่และสถานการณ์')} activeCount={[Boolean(filters.category), Boolean(filters.situation)].filter(Boolean).length}>
+
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-          <TabsList className="h-auto min-h-11" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
-            <TabsTrigger className="min-h-11 whitespace-normal overflow-visible text-clip" value="situations">{t('По ситуации', 'By situation', 'ตามสถานการณ์')}</TabsTrigger>
-            <TabsTrigger className="min-h-11 whitespace-normal overflow-visible text-clip" value="categories">{t('По категориям', 'By category', 'ตามหมวดหมู่')}</TabsTrigger>
+          <TabsList className="h-auto min-h-12" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
+            <TabsTrigger className="min-h-12 whitespace-normal overflow-visible text-clip" value="situations">{t('По ситуации', 'By situation', 'ตามสถานการณ์')}</TabsTrigger>
+            <TabsTrigger className="min-h-12 whitespace-normal overflow-visible text-clip" value="categories">{t('По категориям', 'By category', 'ตามหมวดหมู่')}</TabsTrigger>
           </TabsList>
         <Button asChild variant="ghost" className="w-11 px-0 sm:w-auto sm:px-3"><Link to="/bookings" aria-label={t('Мои заявки', 'My requests', 'คำขอของฉัน')} title={t('Мои заявки', 'My requests', 'คำขอของฉัน')}><ClipboardList className="size-4 shrink-0 sm:mr-2" aria-hidden="true" /><span className="hidden sm:inline">{t('Мои заявки', 'My requests', 'คำขอของฉัน')}</span></Link></Button>
       </div>
       <TabsContent value={filters.view}>
-      {!overview && <>
+      <>
       <div className="grid items-end gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <p id="service-view-filter" className="text-sm font-medium">{filters.view === 'categories' ? t('Категория', 'Category', 'หมวดหมู่') : t('Ситуация', 'Situation', 'สถานการณ์')}</p>
@@ -139,49 +149,46 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
           </Select>
         </div>
       </div>
-      </>}
+      </>
       </TabsContent>
       </Tabs>
+  </MarketplaceFilterSheet>;
+  return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+    title={t('Услуги', 'Services', 'บริการ')}
+    subtitle={t('Выберите направление', 'Choose a category', 'เลือกหมวดหมู่')}
+    fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
+    searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter filterButton={discoveryFilters} showEcosystemHint={false}>
+    {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
+
       {filtered && <div className="flex flex-wrap items-center gap-2" aria-label={t('Применённые фильтры', 'Applied filters', 'ตัวกรองที่ใช้')}>
         {filters.situation && <Button aria-label={t('Убрать фильтр ситуации', 'Remove situation filter', 'ลบตัวกรองสถานการณ์')} variant="outline" size="sm" className="min-h-11" onClick={() => update('situation', '')}>{situations.find(item => item.code === filters.situation)?.[language === 'ru' ? 'titleRu' : 'titleEn'] ?? t('Неизвестная ситуация', 'Unknown situation', 'ไม่พบสถานการณ์')}<X className="ml-2 size-4" aria-hidden="true" /></Button>}
         {filters.category && <Button aria-label={t('Убрать фильтр категории', 'Remove category filter', 'ลบตัวกรองหมวดหมู่')} variant="outline" size="sm" className="min-h-11" onClick={() => update('category', '')}>{categoryLabel}<X className="ml-2 size-4" aria-hidden="true" /></Button>}
         <Button variant="ghost" size="sm" className="min-h-11" onClick={clear}>{t('Сбросить всё', 'Reset all', 'รีเซ็ตทั้งหมด')}</Button>
       </div>}
-    </section>
-    {showOffers && Boolean(offers.data?.length) && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}
     {ready && explicitHomeIntent && homeResolution.status === 'unavailable' && <p role="status" className="text-sm text-muted-foreground">{homeResolution.reason === 'ambiguous'
       ? t('Доступно несколько разделов домашних услуг. Выберите нужный раздел в списке категорий.', 'Several home categories are available. Choose one in the category list.', 'มีหมวดหมู่บริการสำหรับบ้านหลายรายการ โปรดเลือกจากรายการหมวดหมู่')
       : t('Выбранный раздел домашних услуг недоступен. Выберите другой раздел или сбросьте фильтры.', 'The selected home category is unavailable. Choose another category or reset the filters.', 'หมวดหมู่บริการสำหรับบ้านที่เลือกไม่พร้อมใช้งาน โปรดเลือกหมวดหมู่อื่นหรือรีเซ็ตตัวกรอง')}</p>}
-    {ready && !noResults && overview && <section aria-labelledby="service-menu-title" className="space-y-3">
-      <h2 id="service-menu-title" className="font-display text-h3">{filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}</h2>
-      {filters.view === 'categories' ? <>
-        <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-discovery-menu">
-          {[...menu.primary, ...(showAllMenu ? menu.more : [])].map(item => <Button key={item.id} type="button" data-category-id={item.id} aria-label={label(item)} aria-describedby={`service-menu-${item.id}`} variant="outline" className="service-category-card h-auto min-h-28 flex-col items-start justify-start gap-3 whitespace-normal p-4 text-left" onClick={() => update('category', item.id)}>
-            <span className="flex w-full items-center justify-between gap-2"><item.icon className="size-5 shrink-0 text-primary" aria-hidden="true" /><ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" /></span>
-            <span className="block w-full min-w-0 font-display text-base font-medium leading-snug">{label(item)}</span>
-            <span id={`service-menu-${item.id}`} className="block text-xs font-normal leading-relaxed text-muted-foreground">{item.services.slice(0, 2).map(label).join(' · ') || t('Выберите бытовую задачу', 'Choose a home task', 'เลือกงานสำหรับบ้าน')}</span>
-          </Button>)}
-          {menu.yacht && <Button asChild variant="outline" className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left"><Link to={menu.yacht.path} state={{ returnTo }} aria-label={label(menu.yacht)}><menu.yacht.icon className="mr-2 mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><span><span className="block font-medium">{label(menu.yacht)}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{t('Открыть раздел', 'Open service', 'เปิดบริการ')}</span></span><ArrowRight className="ml-auto size-4 shrink-0" aria-hidden="true" /></Link></Button>}
-        </div>
-        {menu.more.length > 0 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все категории', 'All categories', 'ทุกหมวดหมู่')}</Button>}
-      </> : <>
-        <div className={PUBLIC_DISCOVERY_MENU_GRID} data-testid="service-situation-menu">{situations.slice(0, showAllMenu ? situations.length : 8).map(item => <Button key={item.code} data-situation-code={item.code} variant="outline" className="h-auto min-h-11 justify-start whitespace-normal p-3 text-left" onClick={() => update('situation', item.code)}>{pickLang(language, { ru: item.titleRu, en: item.titleEn })}</Button>)}</div>
-        {situations.length > 8 && <Button variant="ghost" aria-expanded={showAllMenu} onClick={() => setShowAllMenu(value => !value)}>{showAllMenu ? t('Свернуть', 'Show fewer', 'แสดงน้อยลง') : t('Все ситуации', 'All situations', 'ทุกสถานการณ์')}</Button>}
-      </>}
-    </section>}
-    {showOffers && !offers.data?.length && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
+    {ready && !noResults && overview && <MarketplaceDiscoveryMenu
+      title={filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}
+      allLabel={filters.view === 'situations' ? t('Все ситуации', 'All situations', 'ทุกสถานการณ์') : undefined} headingId="service-menu-title" itemAttribute={filters.view === 'categories' ? 'data-category-id' : 'data-situation-code'} testId={filters.view === 'categories' ? 'service-discovery-menu' : 'service-situation-menu'}
+      items={filters.view === 'categories'
+        ? [...[...menu.primary, ...menu.more].map(item => ({ id: item.id, label: label(item), icon: item.icon, image: categoryImage(item.id) })), ...(menu.yacht ? [{ id: 'dedicated-yacht-catalogue', label: label(menu.yacht), icon: menu.yacht.icon, href: menu.yacht.path, navigationState: { returnTo } }] : [])]
+        : situations.map(item => ({ id: item.code, label: pickLang(language, { ru: item.titleRu, en: item.titleEn }) }))}
+      onSelect={id => { focusResults.current = true; update(filters.view === 'categories' ? 'category' : 'situation', id); }}
+    />}
+    {showOffers && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
-      <h2 id="home-categories-title" className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
+      <h2 id="home-categories-title" tabIndex={-1} className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">
         <Button variant={child ? 'outline' : 'secondary'} aria-pressed={!child} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', home.id)}>{t('Все услуги для дома', 'All home services', 'บริการสำหรับบ้านทั้งหมด')}</Button>
         {SERVICE_CATEGORIES.map(item => <Button key={item.id} data-home-category-id={item.id} variant={child?.id === item.id ? 'secondary' : 'outline'} aria-pressed={child?.id === item.id} className="h-auto min-h-11 justify-start whitespace-normal text-left" onClick={() => update('category', item.id, home.id)}>{homeServiceCategoryLabel(item.id, language)}</Button>)}
       </div>
     </section>}
     {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
-      <div data-testid="service-results-heading-row" className="flex flex-col items-start gap-2 sm:flex-row sm:items-baseline sm:justify-between"><h2 id="service-results-title" className="font-display text-h3">{t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
+      <div data-testid="service-results-heading-row" className="flex flex-col items-start gap-2 sm:flex-row sm:items-baseline sm:justify-between"><h2 id="service-results-title" tabIndex={-1} className="font-display text-h3">{filters.category ? categoryLabel : t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
       <p className="text-sm text-muted-foreground">{t('Условия, цена и способ заказа — на странице услуги.', 'See conditions, prices and how to order on the service page.', 'ดูเงื่อนไข ราคา และวิธีสั่งบริการในหน้าบริการ')}</p>
       <div className={PUBLIC_CATALOG_COMPACT_GRID} data-testid="service-catalogue-results">
         {rows.slice(0, limit).map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -190,7 +197,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       </div>
       {rows.length > limit && <Button variant="outline" onClick={() => setLimit(value => value + 12)}>{t('Показать ещё', 'Show more', 'แสดงเพิ่มเติม')}</Button>}
     </section>}
-    {noResults && <div className="space-y-3"><EmptyState icon={Search} title={t('Услуги не найдены', 'No services found', 'ไม่พบบริการ')} /><Button variant="outline" onClick={clear}>{t('Сбросить поиск и фильтры', 'Clear search and filters', 'ล้างการค้นหาและตัวกรอง')}</Button></div>}
+    {noResults && <div id="service-empty-results" tabIndex={-1} role="region" aria-label={t('Результаты поиска', 'Search results', 'ผลการค้นหา')} className="space-y-3"><EmptyState icon={Search} title={t('Услуги не найдены', 'No services found', 'ไม่พบบริการ')} /><Button variant="outline" onClick={clear}>{t('Сбросить поиск и фильтры', 'Clear search and filters', 'ล้างการค้นหาและตัวกรอง')}</Button></div>}
     {ready && home && knownSituation && filters.situation && (category === home?.id || Boolean(filters.query.trim())) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="home-situation-note">
       <h2 id="home-situation-note" className="font-display text-h3">{t('Бытовые заявки', 'Home requests', 'คำขอบริการสำหรับบ้าน')}</h2>
       <p className="text-sm text-muted-foreground">{t('Для конкретных бытовых заявок связь с ситуациями не задана. Уберите ситуацию, чтобы выбрать работу; текст поиска сохранится.', 'Specific home requests are not classified by situation yet. Clear the situation to choose a task; your search text will stay.', 'คำขอบริการสำหรับบ้านยังไม่ได้จัดตามสถานการณ์ ล้างสถานการณ์เพื่อเลือกงาน ข้อความค้นหาจะยังคงอยู่')}</p>
