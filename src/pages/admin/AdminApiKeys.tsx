@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
@@ -174,7 +175,7 @@ export default function AdminApiKeys() {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto w-full">
+    <PageShell width="workspace" className="space-y-6">
       <div className="flex items-center justify-between">
         <SectionHeader
           title={isRu ? 'API ключи и секреты' : 'API Keys & Secrets'}
@@ -503,6 +504,6 @@ export default function AdminApiKeys() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

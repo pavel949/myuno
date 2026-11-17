@@ -20,7 +20,7 @@ export function AdminKPIGrid() {
     {kpis.map(kpi => <Link key={kpi.href} to={kpi.href} className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <Surface variant="card" padding="md" radius="xl" className="h-full transition-colors hover:bg-muted/30">
         <p className="text-sm text-muted-foreground">{kpi.title}</p>
-        {isLoading ? <Skeleton className="mt-2 h-8 w-16" /> : <p className="mt-2 break-words text-2xl font-semibold">{kpi.value ?? unavailable}</p>}
+        {isLoading ? <Skeleton className="mt-2 h-8 w-16" /> : <p className="mt-2 break-words text-2xl font-semibold leading-relaxed">{kpi.value ?? unavailable}</p>}
       </Surface>
     </Link>)}
   </div>;
