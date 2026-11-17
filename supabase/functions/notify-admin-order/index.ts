@@ -1,3 +1,4 @@
+import { classifyEmailAcceptance, classifyWhatsAppAcceptance, type NotificationOutcome } from './outcomes.ts';
 import { Resend } from 'npm:resend@2.0.0';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
@@ -34,7 +35,7 @@ let ADMIN_EMAILS: string[] = [];
 let ADMIN_WHATSAPP = '';
 
 // Send WhatsApp notification via URL API
-async function sendWhatsAppNotification(payload: OrderNotificationPayload, phoneOverride?: string): Promise<void> {
+async function sendWhatsAppNotification(payload: OrderNotificationPayload, phoneOverride?: string): Promise<NotificationOutcome> {
   try {
     const orderTypeEmoji: Record<string, string> = {
       restaurant: '🍽️',
@@ -99,12 +100,10 @@ ${pickupAddr ? `\n📍 *From:* ${pickupAddr}` : ''}${dropoffAddr ? `\n🏁 *To:*
 ${itemsList ? `\n📦 *Items:*\n${itemsList}` : ''}
 ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
 
-🔗 View: https://uno.ae/admin/operations`;
+🔗 View: https://myuno.app/admin/operations`;
 
     const targetPhone = phoneOverride || ADMIN_WHATSAPP;
     
-    console.info('[WhatsApp] Notification prepared for:', targetPhone);
-    console.info('[WhatsApp] Message:', message);
     
     // Try to send via UltraMsg API if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -113,6 +112,7 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
     if (ultraMsgInstance && ultraMsgToken) {
       const response = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
         method: 'POST',
+        signal: AbortSignal.timeout(10_000),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           token: ultraMsgToken,
@@ -122,12 +122,13 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
       });
       
       const result = await response.json();
-      console.info('[WhatsApp] UltraMsg response:', result);
+      return classifyWhatsAppAcceptance(response.ok, result);
     } else {
-      console.info('[WhatsApp] No API configured, logging message only');
+      return 'not_configured';
     }
-  } catch (error) {
-    console.error('[WhatsApp] Error sending notification:', error);
+  } catch {
+    console.error('[WhatsApp] Provider request failed');
+    return 'failed';
   }
 }
 
@@ -155,10 +156,9 @@ Deno.serve(async (req) => {
 
     console.info('Sending admin notification for order:', payload.order_number);
 
-    // Send WhatsApp notification to admin (non-blocking)
-    sendWhatsAppNotification(payload).catch(err => 
-      console.error('[WhatsApp] Failed to send:', err)
-    );
+    // Await the existing channel so the edge runtime cannot discard it on return.
+    // Provider acceptance is not delivery to the recipient's device.
+    const whatsapp = await sendWhatsAppNotification(payload);
 
     // Public lead input may notify configured platform contacts, never supplied third parties.
 
@@ -298,7 +298,7 @@ Deno.serve(async (req) => {
             ` : ''}
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <a href="https://uno.ae/admin/operations" class="button">
+              <a href="https://myuno.app/admin/operations" class="button">
                 View in Operations Hub →
               </a>
               ${payload.customer_email ? `
@@ -328,18 +328,22 @@ Deno.serve(async (req) => {
       html: emailHtml,
     });
 
-    console.info('Email sent successfully:', emailResponse);
+    const email = classifyEmailAcceptance(emailResponse);
+    console.info('[Admin notification] Provider outcomes:', { email, whatsapp });
 
     return new Response(
-      JSON.stringify({ success: true, email_id: emailResponse.data?.id }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        success: email === 'accepted' && whatsapp === 'accepted',
+        email_id: email === 'accepted' ? emailResponse.data?.id : undefined,
+        channels: { email, whatsapp },
+      }),
+      { status: email === 'accepted' && whatsapp === 'accepted' ? 200 : 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: unknown) {
-    console.error('Error sending admin notification:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch {
+    console.error('[Admin notification] Request failed');
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ success: false, error: 'Notification request failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
