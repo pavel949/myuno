@@ -60,6 +60,7 @@ export function useAirportServices(airportCode: string = 'HKT', supplierId?: str
 
   const fetchServices = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const [suppliersData] = await Promise.all([fetchSuppliers()]);
       setSuppliers(suppliersData);

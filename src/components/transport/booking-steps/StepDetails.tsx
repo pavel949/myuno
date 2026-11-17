@@ -1,182 +1,71 @@
-import React from 'react';
+import type { MutableRefObject } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Calendar, Clock, Users, Briefcase, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { transliterate } from '@/lib/utils';
-import type { BaseStepProps } from './types';
-
-const stepVariants = {
-  enter: { opacity: 0, x: 40 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
-};
+import { BookingField } from '@/components/booking/BookingField';
+import { bangkokTodayISO } from '@/lib/hotelDates';
+import { PHUKET_TIME_ZONE } from '@/lib/services/airportRequestValidation';
+import type { BaseStepProps, TransferFormData } from './types';
 
 interface StepDetailsProps extends BaseStepProps {
-  meetingSignManuallyEditedRef: React.MutableRefObject<boolean>;
+  meetingSignManuallyEditedRef: MutableRefObject<boolean>;
+  maxPassengers: number;
+  errors: Partial<Record<keyof TransferFormData, string>>;
 }
 
-export function StepDetails({ formData, setFormData, language, meetingSignManuallyEditedRef }: StepDetailsProps) {
+export function StepDetails({ formData, setFormData, language, meetingSignManuallyEditedRef, maxPassengers, errors }: StepDetailsProps) {
+  const tr = (en: string, ru: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
+  const fromAirport = formData.direction === 'from-airport';
+
+  function field(
+    key: keyof TransferFormData,
+    label: string,
+    options: { type?: string; min?: string | number; max?: number; autoComplete?: string; placeholder?: string } = {},
+  ) {
+    const id = `transfer-${key}`;
+    const error = errors[key];
+    return (
+      <BookingField id={id} label={label} error={error}>
+        <Input id={id} {...options} className="h-11"
+          value={formData[key]}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-error` : undefined}
+          onChange={event => {
+            const value = key === 'flightNumber' ? event.target.value.toUpperCase() : event.target.value;
+            if (key === 'meetingSignName') meetingSignManuallyEditedRef.current = true;
+            setFormData(previous => ({ ...previous, [key]: value }));
+          }}
+        />
+      </BookingField>
+    );
+  }
+
   return (
-    <motion.div
-      key="step-details"
-      variants={stepVariants}
-      initial="enter"
-      animate="center"
-      exit="exit"
-      transition={{ duration: 0.25 }}
-      className="space-y-5"
-    >
-      {/* Flight */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-          <Plane className="w-4 h-4" />
-          {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
-          <span className="text-accent">*</span>
-        </Label>
-        <Input
-          value={formData.flightNumber}
-          onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
-          placeholder={language === 'ru' ? 'например, TG 925' : 'e.g. TG 925'}
-          className="h-11 min-w-0"
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
+      {field('flightNumber', tr('Flight number', 'Номер рейса', 'หมายเลขเที่ยวบิน'), { placeholder: 'TG925' })}
+      <div>
+        <p className="mb-2 text-sm text-muted-foreground">{tr('Phuket local time', 'Местное время Пхукета', 'เวลาท้องถิ่นภูเก็ต')} ({PHUKET_TIME_ZONE})</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {field('arrivalDate', fromAirport ? tr('Arrival date', 'Дата прилёта', 'วันที่เดินทางถึง') : tr('Pickup date', 'Дата подачи машины', 'วันที่รับผู้โดยสาร'), { type: 'date', min: bangkokTodayISO() })}
+          {field('arrivalTime', fromAirport ? tr('Arrival time', 'Время прилёта', 'เวลาที่เดินทางถึง') : tr('Pickup time', 'Время подачи машины', 'เวลารับผู้โดยสาร'), { type: 'time' })}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {field('passengers', tr('Passengers', 'Пассажиры', 'จำนวนผู้โดยสาร'), { type: 'number', min: 1, max: maxPassengers })}
+        {field('luggage', tr('Number of bags', 'Количество мест багажа', 'จำนวนสัมภาระ'), { type: 'number', min: 0, max: 10 })}
+      </div>
+      {field('name', tr('Full name', 'Имя и фамилия', 'ชื่อและนามสกุล'), { autoComplete: 'name' })}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {field('phone', tr('Phone with country code', 'Телефон с кодом страны', 'โทรศัพท์พร้อมรหัสประเทศ'), { type: 'tel', autoComplete: 'tel' })}
+        {field('email', tr('Email (optional)', 'Email (необязательно)', 'อีเมล (ไม่บังคับ)'), { type: 'email', autoComplete: 'email' })}
+      </div>
+      {fromAirport && field('meetingSignName', tr('Name on sign (optional)', 'Имя на табличке (необязательно)', 'ชื่อบนป้าย (ไม่บังคับ)'))}
+      <BookingField id="transfer-notes" label={tr('Notes (optional)', 'Примечания (необязательно)', 'หมายเหตุ (ไม่บังคับ)')}>
+        <Textarea id="transfer-notes" value={formData.notes} rows={2}
+          onChange={event => setFormData(previous => ({ ...previous, notes: event.target.value }))}
+          placeholder={tr('Child seats, special requests…', 'Детские кресла, особые пожелания…', 'เบาะนั่งเด็กหรือคำขอพิเศษ…')}
         />
-        <p className="text-[11px] text-muted-foreground">
-          {language === 'ru'
-            ? 'Обязательное поле — водитель отслеживает рейс по номеру'
-            : 'Required — the driver tracks your flight by number'}
-        </p>
-      </div>
-
-
-      {/* Date / Time */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            {language === 'ru' ? 'Дата' : 'Date'}
-          </Label>
-          <Input
-            type="date"
-            value={formData.arrivalDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
-            min={new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}
-            className="h-11"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            {language === 'ru' ? 'Время' : 'Time'}
-          </Label>
-          <Input
-            type="time"
-            value={formData.arrivalTime}
-            onChange={(e) => setFormData(prev => ({ ...prev, arrivalTime: e.target.value }))}
-            className="h-11"
-          />
-        </div>
-      </div>
-
-      {/* Pax / Luggage */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            {language === 'ru' ? 'Пассажиры' : 'Passengers'}
-          </Label>
-          <Input
-            type="number"
-            min="1"
-            max="8"
-            value={formData.passengers}
-            onChange={(e) => setFormData(prev => ({ ...prev, passengers: e.target.value }))}
-            className="h-11"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Briefcase className="w-4 h-4" />
-            {language === 'ru' ? 'Багаж' : 'Luggage'}
-          </Label>
-          <Input
-            type="number"
-            min="0"
-            max="10"
-            value={formData.luggage}
-            onChange={(e) => setFormData(prev => ({ ...prev, luggage: e.target.value }))}
-            className="h-11"
-          />
-        </div>
-      </div>
-
-      {/* Contacts */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-          <User className="w-4 h-4" />
-          {language === 'ru' ? 'Контакты' : 'Contact Info'}
-        </Label>
-        <Input
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
-          className="h-11"
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            placeholder={language === 'ru' ? 'Телефон' : 'Phone'}
-            className="h-11"
-          />
-          <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="Email"
-            className="h-11"
-          />
-        </div>
-      </div>
-
-      {/* Meeting sign — only when arriving */}
-      {formData.direction === 'from-airport' && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
-          </Label>
-          <Input
-            value={formData.meetingSignName}
-            onChange={(e) => {
-              meetingSignManuallyEditedRef.current = true;
-              setFormData(prev => ({ ...prev, meetingSignName: e.target.value }));
-            }}
-            placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : 'In Latin letters'}
-            className="h-11"
-          />
-          {!formData.meetingSignName && formData.name && (
-            <p className="text-[11px] text-muted-foreground">
-              {language === 'ru' ? 'Подставится автоматически: ' : 'Will auto-fill as: '}
-              <span className="font-mono">{transliterate(formData.name)}</span>
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Notes */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          {language === 'ru' ? 'Примечания' : 'Notes'}
-        </Label>
-        <Textarea
-          value={formData.notes}
-          onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-          placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
-          className="resize-none"
-          rows={2}
-        />
-      </div>
+      </BookingField>
     </motion.div>
   );
 }

@@ -6,11 +6,12 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const root = process.cwd();
 const output = '/tmp/browser/unified-property-search-isolated';
+const cssOrigin = process.env.PROPERTY_SEARCH_CSS_ORIGIN || 'http://localhost:8080';
 await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,
   '@/contexts/CurrencyContext': `export const useCurrency=()=>({formatPrice:(n)=>'฿'+Number(n).toLocaleString('en-US')});`,
-  '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({districts:[{id:'layan',valueKey:'layan',labelRu:'Лаян',labelEn:'Layan'},{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});export const applyQuickFilters=(rows)=>rows;`,
+  '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({projects:new URLSearchParams(location.search).has('fixtureProjects')?Array.from({length:6},(_,i)=>({id:'project-'+i,nameEn:'Community '+i,nameRu:'Комплекс '+i,propertyCount:1})):[],districts:[{id:'layan',valueKey:'layan',labelRu:'Лаян',labelEn:'Layan'},{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});export const applyQuickFilters=(rows)=>rows;`,
   '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({filterConfig:{sections:[{id:'priceLevel',titleRu:'Уровень цен',titleEn:'Price level',type:'price-level',options:[]},{id:'bedrooms',titleRu:'Спальни',titleEn:'Bedrooms',type:'multi',options:[]}]},propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
   '@/hooks/useManagementCompanies': `export const useManagementCompanies=()=>{throw Error('Guest discovery must not fetch management companies')};`,
   '@/hooks/useProperties': `
@@ -58,7 +59,7 @@ if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integ
 if(process.argv.includes('--compile-only')) { console.log('Network-isolated property search fixture compiled; production data modules excluded.'); process.exit(0); }
 await writeFile(path.join(output,'synthetic-property.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640"><rect width="640" height="640" fill="#cbd5d0"/><path d="M80 400V240L320 100L560 240V400Z" fill="#f7f5f1"/></svg>');
 const css = await Promise.all(['/src/index.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct','/src/styles/public-commerce.css?direct','/src/styles/premium-public.css?direct'].map(async file => {
-  const response=await fetch('http://localhost:8080'+file);
+  const response=await fetch(cssOrigin+file);
   if(!response.ok) throw Error('Preview CSS unavailable: '+file);
   return response.text();
 }));

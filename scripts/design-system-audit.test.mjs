@@ -79,7 +79,10 @@ test('route inventory distinguishes aliases/layouts and marks every state NOTTES
   assert.deepEqual(home.conditionalTemplates.map(t=>t.module).sort(),['src/pages/Index.tsx','src/pages/Landing.tsx']);
   assert.ok(register.declarations.some(r=>r.resolvedPathPattern==='/mc/properties'&&r.templates.some(t=>t.symbol==='Pages.OwnerProperties')));
   assert.ok(register.declarations.some(r=>r.resolvedPathPattern==='/property/browse'&&r.kind==='redirect-adapter'));
-  assert.ok(register.declarations.some(r=>r.resolvedPathPattern==='/home'&&r.kind==='redirect'));
+  const homeAlias=register.declarations.find(r=>r.resolvedPathPattern==='/home');
+  assert.equal(homeAlias.kind,'redirect-adapter');
+  assert.deepEqual(homeAlias.redirectTargets.map(t=>t.resolvedTarget),['/']);
+  assert.ok(register.declarations.some(r=>r.resolvedPathPattern==='/invite'&&r.kind==='redirect'&&r.redirectTargets.some(t=>t.resolvedTarget==='/join')));
   assert.ok(register.declarations.every(r=>r.coverage.observation==='NOTTESTED'&&r.coverage.states.every(s=>s.observation==='NOTTESTED')));
 });
 test('separate light/dark aliases do not create a fictitious cross-theme cycle',()=>{

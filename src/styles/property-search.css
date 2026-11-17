@@ -99,3 +99,7 @@
 .property-discovery .property-discovery-search-summary:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
 .property-discovery .property-discovery-search-summary::-webkit-details-marker{display:none}
 @media(max-width:430px){.property-discovery .property-discovery-search-summary{padding:12px;gap:12px}.property-discovery .property-discovery-search-summary>span:last-child{flex-shrink:0;white-space:nowrap}}
+/* Community selection is a bounded horizontal rail, not page overflow. */
+.rental-project-picker__rail { display: flex; gap: 1rem; overflow-x: auto; padding: .25rem .25rem .75rem; scroll-snap-type: x proximity; }
+.rental-project-picker__card { flex: 0 0 12rem; min-width: 0; overflow: hidden; scroll-snap-align: start; }
+.rental-project-picker__image { aspect-ratio: 16 / 9; }

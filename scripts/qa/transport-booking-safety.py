@@ -21,9 +21,9 @@ try:
      try:
       page.goto(origin+f'/?scene={scene}&lang={lang}',wait_until='networkidle');page.wait_for_timeout(400)
       if scene.startswith('fast'):
-       expect(page.get_by_text('Synthetic Guest — ••••3456',exact=True)).to_be_visible()
+       expect(page.get_by_text('Synthetic Guest',exact=True)).to_be_visible()
        assert 'TEST123456' not in page.locator('#actual-page').inner_text()
-       button=page.get_by_role('button',name='Забронировать' if lang=='ru' else 'Book Now',exact=True)
+       button=page.get_by_role('button',name='Отправить заявку' if lang=='ru' else 'Send request',exact=True)
        if scene=='fast-invalid':expect(button).to_be_disabled();expect(page.get_by_role('alert')).to_be_visible()
        else:expect(button).to_be_enabled()
       elif 'missing' in scene:
