@@ -44,7 +44,7 @@ jobs:
           done
 
       - name: Property inquiry admission pilot (isolated PostgreSQL)
-        run: npm test -- src/lib/__tests__/propertyInquiryAdmission.postgres.test.ts --maxWorkers=1
+        run: npm test -- src/lib/__tests__/propertyInquiryAdmission.postgres.test.ts src/test/edge/property-inquiry-worker.test.ts src/test/edge/property-inquiry-admin-template.test.tsx --maxWorkers=1
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 

@@ -6,6 +6,7 @@ CREATE SCHEMA IF NOT EXISTS private;
 CREATE TABLE private.admin_intake_dispatch (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   source text NOT NULL CHECK (source = 'property_inquiries'),
+  admitted_actor_id uuid NOT NULL,
   request_id uuid NOT NULL REFERENCES public.property_inquiries(id),
   notification_kind text NOT NULL CHECK (notification_kind = 'new_request'),
   channel text NOT NULL CHECK (channel = 'email'),
@@ -55,8 +56,8 @@ BEGIN
     RAISE EXCEPTION 'Admin recipients unavailable' USING ERRCODE = '22023';
   END IF;
   FOR v_destination IN SELECT DISTINCT lower(btrim(value)) FROM jsonb_array_elements_text(destinations) LOOP
-    INSERT INTO private.admin_intake_dispatch(source,request_id,notification_kind,channel,destination)
-      VALUES('property_inquiries',p_request_id,'new_request','email',v_destination)
+    INSERT INTO private.admin_intake_dispatch(source,request_id,admitted_actor_id,notification_kind,channel,destination)
+      VALUES('property_inquiries',p_request_id,actor,'new_request','email',v_destination)
       ON CONFLICT (source,request_id,notification_kind,channel,destination) DO NOTHING;
     GET DIAGNOSTICS inserted_row = ROW_COUNT;
     inserted_count := inserted_count + inserted_row;

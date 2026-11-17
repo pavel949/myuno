@@ -7,6 +7,7 @@ import postgres from 'postgres';
 import { applyTransactionScript } from '../../test/applyTransactionScript';
 
 const candidate = readFileSync('docs/launch/property-inquiry-admission.candidate.sql', 'utf8');
+const workerCandidate = readFileSync('docs/launch/property-inquiry-worker.candidate.sql', 'utf8');
 const triggerCandidate = readFileSync('docs/launch/property-inquiry-transactional-trigger.candidate.sql', 'utf8');
 const originalInquirySource = readFileSync('supabase/migrations/20260109000415_e52a8107-6f4f-4312-bbe7-56263e1191fc.sql', 'utf8');
 // Execute the actual creator INSERT/SELECT/UPDATE policy definitions, not permissive mocks.
@@ -60,6 +61,7 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       ALTER TABLE public.property_inquiries ENABLE ROW LEVEL SECURITY;
       ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;`);
     await applyTransactionScript(sql, candidate);
+    await applyTransactionScript(sql, workerCandidate);
     await sql.unsafe(creatorPolicies);
     await sql.unsafe('GRANT USAGE ON SCHEMA auth TO authenticated; GRANT SELECT,INSERT,UPDATE ON public.property_inquiries TO authenticated');
   }, 60000);
@@ -160,6 +162,50 @@ suite('property inquiry admission pilot on real isolated PostgreSQL', () => {
       DELETE: 'DELETE FROM private.admin_intake_dispatch',
     };
     await expect(sql.begin(async tx => { await tx.unsafe('SET LOCAL ROLE authenticated'); await tx.unsafe(statements[verb]); })).rejects.toMatchObject({code:'42501'});
+  });
+  describe('private worker claim/completion contract', () => {
+    beforeEach(async () => { await admit(); });
+    it('only one of concurrent workers claims the event', async () => {
+      const claims = await Promise.all([sql`SELECT * FROM private.claim_property_inquiry_email()`,sql`SELECT * FROM private.claim_property_inquiry_email()`]);
+      expect(claims.flat()).toHaveLength(1);
+      const event=claims.flat()[0];
+      expect(event.admitted_actor_id).toBe(actor);expect(event.state).toBe('processing');expect(event.attempts).toBe(1);
+    });
+    it('queues once with matching lease and never claims queued work again', async () => {
+      const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'queued') AS ok`)[0].ok).toBe(true);
+      expect(await sql`SELECT * FROM private.claim_property_inquiry_email()`).toHaveLength(0);
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'failed') AS ok`)[0].ok).toBe(false);
+    });
+    it('does not let a forged claim token complete another worker event', async () => {
+      const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${other},'queued') AS ok`)[0].ok).toBe(false);
+      expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('processing');
+    });
+    it('an expired/crashed claim becomes uncertain, not automatically resent', async () => {
+      const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      await sql`UPDATE private.admin_intake_dispatch SET lease_until=now()-interval '1 second' WHERE id=${e.id}`;
+      expect(await sql`SELECT * FROM private.claim_property_inquiry_email()`).toHaveLength(0);
+      expect((await sql`SELECT state FROM private.admin_intake_dispatch WHERE id=${e.id}`)[0].state).toBe('uncertain');
+      expect((await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'queued') AS ok`)[0].ok).toBe(false);
+    });
+    it('only proven pre-send failure retries after backoff, keeping stable event identity', async () => {
+      const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      await sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},'failed')`;
+      expect(await sql`SELECT * FROM private.claim_property_inquiry_email()`).toHaveLength(0);
+      await sql`UPDATE private.admin_intake_dispatch SET next_attempt_at=now()-interval '1 second' WHERE id=${e.id}`;
+      const [retry]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      expect(retry.id).toBe(e.id);expect(retry.claim_token).not.toBe(e.claim_token);expect(retry.attempts).toBe(2);
+    });
+    it.each(['delivered','accepted','pending'])('worker cannot invent outcome %s', async outcome => {
+      const [e]=await sql`SELECT * FROM private.claim_property_inquiry_email()`;
+      await expect(sql`SELECT private.complete_property_inquiry_email(${e.id},${e.claim_token},${outcome})`).rejects.toMatchObject({code:'22023'});
+    });
+    it.each(['authenticated','anon','service_role'])('worker execution stays ungranted to %s until explicit activation review', async role => {
+      const [acl]=await sql`SELECT has_function_privilege(${role},'private.claim_property_inquiry_email()','EXECUTE') AS claim,
+        has_function_privilege(${role},'private.complete_property_inquiry_email(uuid,uuid,text)','EXECUTE') AS complete`;
+      expect(acl).toEqual({claim:false,complete:false});
+    });
   });
   describe('transactional integration with the existing creator INSERT path', () => {
     const insertedId = '00000000-0000-4000-8000-000000000004';

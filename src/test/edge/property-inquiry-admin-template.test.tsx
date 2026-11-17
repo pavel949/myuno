@@ -1,0 +1,10 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { expect,it } from 'vitest';
+import { PropertyInquiryAdminTemplate } from '../../../docs/launch/pilot/propertyInquiryAdminTemplate';
+import type { PersistedInquiry } from '../../../docs/launch/pilot/propertyInquiryWorker';
+const id='00000000-0000-4000-8000-000000000001';
+const inquiry:PersistedInquiry={id,property_id:id,user_id:id,status:'pending',name:'<script>alert(1)</script>',email:null,phone:null,message:'<a href="https://attacker.test">click</a>',check_in:null,check_out:null,guests:0};
+it('escapes stored customer text rather than trusting HTML',()=>{const html=renderToStaticMarkup(<PropertyInquiryAdminTemplate inquiry={inquiry}/>);expect(html).not.toContain('<script>');expect(html).toContain('&lt;script&gt;');expect(html).not.toContain('<a href="https://attacker.test');});
+it('links only to exact admin request and does not invent a booked/paid state',()=>{const html=renderToStaticMarkup(<PropertyInquiryAdminTemplate inquiry={inquiry}/>);expect(html).toContain(`https://myuno.app/admin/inbox?source=property_inquiries&amp;request=${id}`);expect(html).toContain('не подтверждение бронирования или оплаты');expect(html).toContain('<dd>0</dd>');});
+it('rejects a malformed persisted identity',()=>{expect(()=>renderToStaticMarkup(<PropertyInquiryAdminTemplate inquiry={{...inquiry,id:'../other'}}/>)).toThrow('identity');});
