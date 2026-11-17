@@ -1,4 +1,5 @@
 // Browser coverage for the real airport forms with synthetic catalogues, auth and writers.
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { createServer } from 'node:http';
@@ -66,7 +67,7 @@ const bundle = await build({
     resolveDir: process.cwd(),
     loader: 'tsx',
   },
-  bundle: true, write: false, jsx: 'automatic', format: 'esm', metafile: true,
+  alias: radixOverlayAliases, bundle: true, write: false, jsx: 'automatic', format: 'esm', metafile: true,
   define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.DEV': 'false' },
   plugins: [{
     name: 'isolated-fixtures',

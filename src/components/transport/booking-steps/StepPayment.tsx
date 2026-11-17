@@ -1,3 +1,4 @@
+import { transferFareLabel } from '@/lib/transport/transferFare';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -14,9 +15,9 @@ const stepVariants = {
 };
 
 interface StepPaymentProps extends BaseStepProps {
-  basePrice: number;
+  basePrice: number | null;
   nightSurcharge: number;
-  totalPrice: number;
+  totalPrice: number | null;
   selectedVehicleLabel: string | undefined;
   selectedDestinationDuration?: number | null;
 }
@@ -80,9 +81,9 @@ export function StepPayment({
               {selectedDestinationDuration && ` · ~${selectedDestinationDuration} ${language === 'ru' ? 'мин' : 'min'}`}
             </p>
           </div>
-          <p className="font-bold text-lg shrink-0 whitespace-nowrap tabular-nums">฿{totalPrice.toLocaleString()}</p>
+          <p className={totalPrice === null ? 'text-sm text-muted-foreground min-w-0 flex-1 text-right' : 'font-bold text-lg shrink-0 whitespace-nowrap tabular-nums'}>{transferFareLabel(totalPrice, language)}</p>
         </div>
-        {(nightSurcharge > 0 || basePrice !== totalPrice) && (
+        {basePrice !== null && totalPrice !== null && (nightSurcharge > 0 || basePrice !== totalPrice) && (
           <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
             <div className="flex justify-between text-muted-foreground">
               <span>{language === 'ru' ? 'Базовый тариф' : 'Base fare'}</span>

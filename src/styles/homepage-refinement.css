@@ -324,3 +324,7 @@
   .home-refined .home-hero-image { object-position: 69% center; }
   .home-refined .home-hero-shade { background: linear-gradient(180deg, hsl(var(--brand-navy) / .62), hsl(var(--brand-navy) / .52) 33%, hsl(var(--brand-navy) / .18) 57%, hsl(var(--brand-navy) / .62)); }
 }
+
+/* Empty photo previews still offer concrete, truthful routes into the catalogue. */
+.home-discovery-paths { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin-top: 1rem; }
+.home-discovery-paths a { min-height: 2.75rem; display: inline-flex; align-items: center; }

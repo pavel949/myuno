@@ -1,3 +1,4 @@
+import { configuredTransferBasePrice, transferFareLabel } from '@/lib/transport/transferFare';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -46,9 +47,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
 
       <div className="space-y-2">
         {vehicleTypes.map((vehicle) => {
-          const price = routeBasePrice > 0
-            ? Math.round(routeBasePrice * vehicle.price_multiplier)
-            : vehicle.base_price;
+          const price = configuredTransferBasePrice(routeBasePrice, vehicle);
           const Icon = resolveIcon(vehicle.icon || '🚗');
           const isSelected = formData.vehicleType === vehicle.id;
 
@@ -94,9 +93,9 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
                   {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : 'min'}` : ''}
                 </p>
               </div>
-              {showPrice && Number.isFinite(price) && price > 0 && <div className="text-right shrink-0">
-                <p className="font-bold text-base text-foreground">฿{price.toLocaleString()}</p>
-              </div>}
+              <div className="text-right flex-1 min-w-0">
+                <p className="font-medium text-sm text-foreground">{transferFareLabel(showPrice ? price : null, language)}</p>
+              </div>
               {isSelected && <Check className="w-5 h-5 text-primary shrink-0" />}
             </button>
           );

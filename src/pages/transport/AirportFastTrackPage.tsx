@@ -150,7 +150,7 @@ export default function AirportFastTrackPage() {
 
   const scheduledFlight = phuketScheduledTime(flightDate, flightTime);
   const cutoffHours = selectedService?.cutoff_hours ?? 24;
-  const cutoffViolated = scheduledFlight !== undefined && scheduledFlight < Date.now() + cutoffHours * 3_600_000;
+  const cutoffViolated = !!(flightDate && flightTime) && (scheduledFlight === undefined || scheduledFlight < Date.now() + cutoffHours * 3_600_000);
 
   const base = selectedService ? Number(selectedService.base_price) * passengers.length : 0;
   const nightSurcharge = isNightFlight && selectedService ? Number(selectedService.night_surcharge || 0) * passengers.length : 0;
@@ -733,6 +733,7 @@ export default function AirportFastTrackPage() {
 
       {/* Bottom bar — always visible */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
+        {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive mb-2">{tr(`Request at least ${cutoffHours} hours ahead`, `Подайте заявку минимум за ${cutoffHours} ч`, `ส่งคำขอล่วงหน้าอย่างน้อย ${cutoffHours} ชั่วโมง`)}</p>}
         <div className="ds-frame ds-frame-article flex flex-wrap items-center justify-between gap-2 mb-2">
           <div>
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
@@ -744,7 +745,7 @@ export default function AirportFastTrackPage() {
             'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',
           )} <a className="underline" href="/bookings">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
           {step === 'review' ? (
-            <Button onClick={handleSubmit} className="px-8" disabled={isSubmitting || showUpsell || submissionError}>
+            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting || showUpsell || submissionError}>
               {isSubmitting
                 ? tr('Sending…', 'Отправка…', 'กำลังส่ง…')
                 : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}

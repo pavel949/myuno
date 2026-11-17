@@ -26,3 +26,15 @@ Run `npx vitest run src/lib/services src/pages/services --maxWorkers=2`, `node s
 - Resolve the canonical destination of static home-function requests with a verified catalogue mapping and existing CRM/status reconciliation before changing the writer.
 - Complete RU/EN/TH and visual acceptance for the wider catalogue and remaining verticals. Some existing text in the airport flows still falls back to English in Thai.
 - Public read-only HTTP attempts on the three entry paths returned redirects from `myuno.app` and timed out following `www.myuno.app` in this environment. Confirm the live routes separately.
+
+## Compatibility recovery after PR #234 — 2026-11-17
+
+Reconciled the three transport conflicts against the #234 acceptance head `8d0cd8ff08cf9c220d013c81a8c09390922d2171` and current main `d9bb2b9eb94f7a7c48cebb720ed8974fba287d2f` on the retained #236 branch. This recovery is not production activation.
+
+- Vehicle selection preserves a restored value. The current vehicle/configured finite positive fare is checked through #234's readonly helper, including invalid multipliers and surcharge/total overflow. No THB 800 or default multiplier is restored.
+- Unknown/loading rates remain explicit; vehicle progression cannot bypass the fare gate. Authentication resume retains #234's latest-handler validation and cancellation on unmount while preserving #236's submit lock and actor-bound retry of its existing pending checkout.
+- #236's review omits passport values entirely; submission still includes the supplied passport at the existing boundary. Its configurable service cutoff is retained, strict invalid restored date/time blocks review submission, and submission rechecks the clock.
+- Integration assertions follow the intentional #236 request labels, visible inline failure recovery and required receipt ID. They still verify no write on invalid state, full passport at the mocked submission boundary, no passport in review, no duplicate auth resume and current fare at submission. The clock case verifies the focused invalid date field after returning to the service step.
+- Both isolated fixtures run: 12 responsive/recovery flows from #235 and 48 RU/EN booking review cases from #234. They use synthetic writes only. Radix resolution follows the repository shared alias contract.
+
+Full hosted acceptance and backend notification/idempotency guarantees remain separate gates for any future recovery of #236; this compatibility commit does not reopen or merge it.

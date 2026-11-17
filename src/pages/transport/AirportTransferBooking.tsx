@@ -1,3 +1,4 @@
+import { configuredTransferBasePrice, configuredTransferTotal, transferFareLabel } from '@/lib/transport/transferFare';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -186,7 +187,7 @@ export default function AirportTransferBooking() {
       const matched = vehicleParam
         ? vehicleTypes.find(v => v.name_en.toLowerCase().includes(vehicleParam.toLowerCase()))
         : undefined;
-      setFormData(prev => ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
+      setFormData(prev => prev.vehicleType ? prev : ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
     }
   }, [vehicleTypes, formData.vehicleType, vehicleParam]);
 
@@ -253,10 +254,8 @@ export default function AirportTransferBooking() {
 
   // Pricing
   const routeBasePrice = selectedDestination?.base_price || 0;
-  const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
-  const basePrice = routeBasePrice > 0
-    ? Math.round(routeBasePrice * vehicleMultiplier)
-    : Number(selectedVehicle?.base_price ?? NaN);
+  const configuredBasePrice = configuredTransferBasePrice(routeBasePrice, selectedVehicle);
+  const basePrice = configuredBasePrice ?? NaN;
 
   const isNightArrival = useMemo(() => {
     if (!formData.arrivalTime || !nightSurchargeCfg) return false;
@@ -270,7 +269,7 @@ export default function AirportTransferBooking() {
   const nightSurcharge = isNightArrival && nightSurchargeCfg
     ? (isVan ? nightSurchargeCfg.van : nightSurchargeCfg.sedan)
     : 0;
-  const totalPrice = basePrice + nightSurcharge;
+  const totalPrice = configuredTransferTotal(configuredBasePrice, nightSurcharge) ?? NaN;
   const vendorPayout = Math.round(totalPrice / 1.35);
   const platformFee = totalPrice - vendorPayout;
 
@@ -298,7 +297,7 @@ export default function AirportTransferBooking() {
 
   const handleNext = () => {
     const issues = step === 0 ? getTransferRouteIssues(formData)
-      : step === 1 ? (selectedVehicle ? [] : ['vehicleType']) : detailIssues;
+      : step === 1 ? (quoteReady ? [] : ['vehicleType']) : detailIssues;
     if (issues.length) {
       setAttemptedStep(step);
       requestAnimationFrame(() => (document.getElementById(`transfer-${issues[0]}`) || stepRef.current)?.focus());
@@ -339,7 +338,7 @@ export default function AirportTransferBooking() {
         setAttemptedStep(invalidStep);
         return;
       }
-      if (!quoteReady) return;
+      if (!quoteReady) { toast.error(transferFareLabel(null, language)); return; }
     }
     if (!user) {
       setAuthGateOpen(true);
@@ -535,12 +534,16 @@ export default function AirportTransferBooking() {
     }
   };
 
+  const latestSubmit = useRef(handleSubmit);
+  useEffect(() => { latestSubmit.current = handleSubmit; });
+
   // Only the sign-in success callback marks the wizard for submission.
   // Dismissing the gate does not create an order after a later sign-in.
   useEffect(() => {
     if (user && pendingSubmitRef.current && !authGateOpen) {
       pendingSubmitRef.current = false;
-      void handleSubmit();
+      const timer = setTimeout(() => { void latestSubmit.current(); }, 50);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authGateOpen]);
@@ -697,8 +700,8 @@ export default function AirportTransferBooking() {
                 </p>
               )}
               <p className="text-lg font-bold tabular-nums whitespace-nowrap">{pendingCheckout ? `฿${pendingCheckout.amount.toLocaleString()}` : quoteReady ? `฿${totalPrice.toLocaleString()}` : loadingQuote
-                ? tr('Loading rate…', 'Загружаем тариф…', 'กำลังโหลดราคา…')
-                : tr('Rate unavailable', 'Тариф пока недоступен', 'ไม่มีราคา')}</p>
+                ? transferFareLabel(null, language)
+                : transferFareLabel(null, language)}</p>
             </div>
             {selectedVehicleLabel && (
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">
@@ -707,11 +710,12 @@ export default function AirportTransferBooking() {
             )}
           </div>
 
+          {!quoteReady && <p role="status" className="text-sm text-muted-foreground mb-2">{tr('The fare is not confirmed. Choose another vehicle or route and check the price.', 'Тариф пока не подтверждён. Выберите другой автомобиль или маршрут и проверьте стоимость.', 'โปรดตรวจสอบราคาโดยเลือกเส้นทางหรือรถคันอื่น')}</p>}
           {!isLastStep ? (
             <Button
               type="button"
               className="w-full h-12 text-base font-semibold"
-              disabled={step === 1 && !selectedVehicle}
+              disabled={step === 1 && !quoteReady}
               onClick={handleNext}
             >
               {tr('Continue', 'Далее', 'ถัดไป')}
@@ -728,7 +732,7 @@ export default function AirportTransferBooking() {
                 ? tr('Processing…', 'Обработка…', 'กำลังดำเนินการ…')
                 : pendingCheckout
                   ? tr('Retry card payment', 'Повторить оплату картой', 'ลองชำระด้วยบัตรอีกครั้ง')
-                : formData.paymentMethod === 'stripe'
+                : !quoteReady ? transferFareLabel(null, language) : formData.paymentMethod === 'stripe'
                   ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
                   : formData.paymentMethod === 'cash'
                     ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
@@ -747,9 +751,7 @@ export default function AirportTransferBooking() {
         defaultName={formData.name}
         defaultPhone={formData.phone}
         onAuthenticated={() => { pendingSubmitRef.current = true; }}
-        contextLine={language === 'ru'
-          ? `Трансфер · ฿${totalPrice.toLocaleString()}`
-          : `Transfer · ฿${totalPrice.toLocaleString()}`}
+        contextLine={`${language === 'ru' ? 'Трансфер' : 'Transfer'} · ${transferFareLabel(quoteReady ? totalPrice : null, language)}`}
       />
     </AppLayout>
   );
