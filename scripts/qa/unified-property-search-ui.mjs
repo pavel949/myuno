@@ -10,7 +10,7 @@ await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,
   '@/contexts/CurrencyContext': `export const useCurrency=()=>({formatPrice:(n)=>'฿'+Number(n).toLocaleString('en-US')});`,
-  '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({districts:[{id:'layan',valueKey:'layan',labelRu:'Лаян',labelEn:'Layan'},{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});export const applyQuickFilters=(rows)=>rows;`,
+  '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({projects:new URLSearchParams(location.search).has('fixtureProjects')?Array.from({length:6},(_,i)=>({id:'project-'+i,nameEn:'Community '+i,nameRu:'Комплекс '+i,propertyCount:1})):[],districts:[{id:'layan',valueKey:'layan',labelRu:'Лаян',labelEn:'Layan'},{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});export const applyQuickFilters=(rows)=>rows;`,
   '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({filterConfig:{sections:[{id:'priceLevel',titleRu:'Уровень цен',titleEn:'Price level',type:'price-level',options:[]},{id:'bedrooms',titleRu:'Спальни',titleEn:'Bedrooms',type:'multi',options:[]}]},propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
   '@/hooks/useManagementCompanies': `export const useManagementCompanies=()=>{throw Error('Guest discovery must not fetch management companies')};`,
   '@/hooks/useProperties': `

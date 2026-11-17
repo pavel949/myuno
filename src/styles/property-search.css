@@ -90,3 +90,8 @@
   .property-discovery[data-property-mode=rent] .property-discovery-editor .home-search.home-search--catalogue>.home-search-bedrooms{grid-column:2;grid-row:4}
   .property-discovery[data-property-mode=rent] .property-discovery-editor .home-search.home-search--catalogue>.home-search-submit{grid-column:3 / 5;grid-row:4}
 }
+
+/* Community selection is a bounded horizontal rail, not page overflow. */
+.rental-project-picker__rail { display: flex; gap: 1rem; overflow-x: auto; padding: .25rem .25rem .75rem; scroll-snap-type: x proximity; }
+.rental-project-picker__card { flex: 0 0 12rem; min-width: 0; overflow: hidden; scroll-snap-align: start; }
+.rental-project-picker__image { aspect-ratio: 16 / 9; }

@@ -229,6 +229,7 @@ export interface PropertyFilters {
   ownershipForm?: string;
   ownershipForms?: string[];
   managementCompanyId?: string;
+  projectId?: string;
   /** Rent listings: nightly vs medium (1+ month) vs long-term contract */
   rentTenancy?: 'short' | 'medium' | 'long';
   /** Sale intent: standard | assignment | quick_sale (filters by sale_intent enum) */
@@ -444,6 +445,7 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
   if (owns.length === 1) query = query.eq('ownership_form', owns[0]);
   else if (owns.length > 1) query = query.in('ownership_form', owns);
 
+  if (filters.projectId) query = query.eq('project_id', filters.projectId);
   if (filters.managementCompanyId) {
     query = query.eq('management_company_id', filters.managementCompanyId);
   }

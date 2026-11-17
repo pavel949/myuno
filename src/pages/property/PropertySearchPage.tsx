@@ -1,3 +1,4 @@
+import { RentalProjectPicker } from '@/components/property/RentalProjectPicker';
 import { SEOHead } from '@/components/seo/SEOHead';
 import '@/styles/public-commerce.css';
 /**
@@ -59,7 +60,7 @@ export default function PropertySearchPage() {
   const [focusResults, setFocusResults] = useState(false);
   const [criteriaOpen, setCriteriaOpen] = useState(true);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
-  const { districts } = usePropertyQuickFilters();
+  const { districts, projects = [] } = usePropertyQuickFilters();
   useEffect(() => {
     if (!focusResults) return;
     resultsHeadingRef.current?.focus({ preventScroll: true });
@@ -94,6 +95,12 @@ export default function PropertySearchPage() {
   const sortKey = state.sort;
   const setSortKey = (value: PropertySortKey) => navigate({ search: updatePropertySearchSort(searchParamsUrl, value).toString(), hash: location.hash }, { state: location.state });
   const showMap = searchParamsUrl.get('view') === 'map';
+  const selectedProjectId = searchParamsUrl.get('project');
+  const selectProject = (id: string | null) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    if (id) params.set('project', id); else params.delete('project');
+    navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
+  };
   const selectedCompanyId = searchParamsUrl.get('company');
   const searchText = searchParamsUrl.get('q')?.trim() || '';
   const setShowMap = (show: boolean) => {
@@ -190,6 +197,7 @@ export default function PropertySearchPage() {
       ...(catalogueAll ? { listingType: undefined, rentTenancy: undefined, saleIntent: undefined, isQuickSale: undefined } : {}),
       search: searchText || undefined,
       managementCompanyId: selectedCompanyId || undefined,
+      projectId: selectedProjectId || undefined,
     };
   }, [
     mergedFilterValues,
@@ -198,6 +206,7 @@ export default function PropertySearchPage() {
     searchParams.guests,
     searchParams.instantBooking,
     selectedCompanyId,
+    selectedProjectId,
     searchText,
     rentTenancy,
     state.hasGuestFilter,
@@ -264,7 +273,7 @@ export default function PropertySearchPage() {
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
     return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
   }, categoryFilters.length);
-  const activeFilterCount = advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0) + (state.hasIntent ? 1 : 0);
+  const activeFilterCount = (selectedProjectId ? 1 : 0) + advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0) + (state.hasIntent ? 1 : 0);
 
   const clearAllFilters = () => {
     navigate({ search: clearPropertySearchQuery(searchParamsUrl).toString(), hash: location.hash }, { state: location.state });
@@ -352,6 +361,8 @@ export default function PropertySearchPage() {
             })}
           </div>}
         </header>
+
+        {!catalogueAll && propertyMode === 'rent' && rentTenancy === 'short' && <RentalProjectPicker projects={projects} selectedId={selectedProjectId} onSelect={selectProject} language={language} />}
 
         {availability.enabled && <div role="status" aria-label={availabilityText('Проверка занятости', 'Availability check', 'ตรวจสอบห้องว่าง')} className="my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
           {availability.pending

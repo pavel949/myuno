@@ -81,7 +81,7 @@ export function propertySearchHref(search: string, defaults: Record<string, stri
 /** Clear only catalogue criteria, retaining unrelated bookmark/view context. */
 export function clearPropertySearchQuery(source: URLSearchParams) {
   const params = new URLSearchParams(source);
-  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'q', 'cats', 'sort']);
+  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'project', 'q', 'cats', 'sort']);
   [...params.keys()].forEach(key => { if (owned.has(key) || key.startsWith('f.')) params.delete(key); });
   return params;
 }

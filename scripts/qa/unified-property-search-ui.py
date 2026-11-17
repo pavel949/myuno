@@ -293,6 +293,28 @@ async def main():
                     assert not any(key in reset_calendar for key in ['checkIn','checkOut'])
                     assert len(await page.evaluate('window.fixtureCalendarCalls')) == len(calls)
                     await bounds()
+                    # Visible community cards drive the canonical server filter, not a client-only subset.
+                    await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,'mode':'rent','tenancy':'short','fixtureProjects':'1','guests':'3','sort':'price_asc'}),wait_until='networkidle')
+                    rail = page.locator('.rental-project-picker__rail')
+                    await expect(rail.locator('button')).to_have_count(6)
+                    for index in range(6):
+                        choice = rail.locator('button').nth(index)
+                        await choice.focus()
+                        await bounds(choice)
+                        await choice.press('Enter')
+                        assert (await query())['project']==['project-'+str(index)]
+                        assert await page.evaluate('window.fixtureFilters.projectId')=='project-'+str(index)
+                        await expect(choice).to_have_attribute('aria-pressed','true')
+                    await page.get_by_role('button',name='QA back',exact=True).click()
+                    assert (await query())['project']==['project-4']
+                    await page.get_by_role('button',name='QA forward',exact=True).click()
+                    assert (await query())['project']==['project-5']
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-project-selection.png'),full_page=True)
+                    await page.get_by_role('button',name='Все комплексы' if ru else 'All communities',exact=True).click()
+                    project_reset = await query()
+                    assert 'project' not in project_reset
+                    assert project_reset['guests']==['3'] and project_reset['sort']==['price_asc']
+                    await bounds()
                     assert not errors,errors
                     assert not blocked,blocked
                     results.append({'language':lang,'width':width,'hydration':'pass','inPlaceEdit':'pass','history':'pass',
