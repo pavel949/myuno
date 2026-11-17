@@ -3,6 +3,7 @@
  * CRUD for developers table (property developers/builders)
  */
 import React, { useState, useMemo } from 'react';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   useAdminDevelopers, 
@@ -72,7 +73,8 @@ export default function AdminDevelopers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const { data: developers, isLoading } = useAdminDevelopers();
+  const { data: developers, isLoading, error, refetch, isFetching } = useAdminDevelopers();
+  const catalogueUnavailable = isLoading || !!error;
   const createDeveloper = useCreateDeveloper();
   const updateDeveloper = useUpdateDeveloper();
   const deleteDeveloper = useDeleteDeveloper();
@@ -179,7 +181,7 @@ export default function AdminDevelopers() {
         subtitle={isRu ? 'Управление реестром застройщиков' : 'Manage developer registry'}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setBulkLogoOpen(true)}>
+            <Button variant="outline" disabled={catalogueUnavailable} onClick={() => setBulkLogoOpen(true)}>
               <Upload className="h-4 w-4 mr-2" />
               {isRu ? 'Логотипы' : 'Bulk Logos'}
             </Button>
@@ -205,7 +207,7 @@ export default function AdminDevelopers() {
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{stats.total}</div>
+                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.total}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Всего' : 'Total'}
                 </div>
@@ -220,7 +222,7 @@ export default function AdminDevelopers() {
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{stats.verified}</div>
+                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.verified}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Верифицированы' : 'Verified'}
                 </div>
@@ -235,7 +237,7 @@ export default function AdminDevelopers() {
                 <Star className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{stats.featured}</div>
+                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.featured}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Избранные' : 'Featured'}
                 </div>
@@ -250,7 +252,7 @@ export default function AdminDevelopers() {
                 <Target className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{stats.avgScore}</div>
+                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.avgScore}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Ср. скоринг' : 'Avg Score'}
                 </div>
@@ -278,6 +280,8 @@ export default function AdminDevelopers() {
             <Skeleton key={i} className="h-48" />
           ))}
         </div>
+      ) : error ? (
+        <QueryRecovery onRetry={refetch} isRetrying={isFetching} />
       ) : filteredDevelopers.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">

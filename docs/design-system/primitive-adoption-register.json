@@ -21726,7 +21726,7 @@
     },
     {
       "file": "src/pages/admin/AdminDevelopers.tsx",
-      "sha256": "1518f7191cb98533b55fe8be17a3ca395ed3754efc78064e2141512bc8d3bd6a",
+      "sha256": "6cbd0c53f650457952a95a260fb62049677ba8c4576127ace5e37207720b94ea",
       "directRouteDeclarations": [
         {
           "id": "3bc95514306401ef",
@@ -21743,11 +21743,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            182,
-            186,
-            358,
-            610,
-            617
+            184,
+            188,
+            362,
+            614,
+            621
           ]
         },
         {
@@ -21755,13 +21755,13 @@
           "source": "@/components/ui/card",
           "instances": 7,
           "lines": [
-            201,
-            216,
-            231,
-            246,
-            282,
-            296,
-            560
+            203,
+            218,
+            233,
+            248,
+            286,
+            300,
+            564
           ]
         },
         {
@@ -21769,15 +21769,15 @@
           "source": "@/components/ui/input",
           "instances": 9,
           "lines": [
-            266,
-            439,
-            448,
-            497,
-            509,
-            523,
-            533,
-            542,
-            551
+            268,
+            443,
+            452,
+            501,
+            513,
+            527,
+            537,
+            546,
+            555
           ]
         },
         {
@@ -21785,7 +21785,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            177
+            179
           ]
         },
         {
@@ -21793,7 +21793,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            397
+            401
           ]
         },
         {
@@ -21801,7 +21801,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            409
+            413
           ]
         }
       ]
