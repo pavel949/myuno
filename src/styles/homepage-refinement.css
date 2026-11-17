@@ -314,3 +314,7 @@
 
 .home-refined .home-service-category-card--photo .home-service-category-art img { object-fit: cover; padding: 0; }
 .home-refined .home-category-photo-note { color: hsl(var(--muted-foreground)); font-size: var(--public-label-size); }
+
+/* Editorial category photographs deliberately override the inherited text-only service treatment. */
+.home-refined .home-service-category-card--photo .home-service-category-art { display: flex; }
+.home-refined .premium-newbuilds.home-container { width: calc(100% - 2 * var(--layout-home-gutter) * var(--layout-inset-scale)); max-width: var(--layout-width-home); }

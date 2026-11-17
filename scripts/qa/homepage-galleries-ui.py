@@ -28,7 +28,7 @@ async def main():
                     parsed = urlparse(r.request.url)
                     name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
                     file = OUTPUT/name
-                    if name.startswith('fonts/'): file = Path.cwd()/'public'/name
+                    if name in ('catalog/flowers/pink-garden-roses.webp', 'yachts/catamaran-53-1.webp') or name.startswith('fonts/'): file = Path.cwd()/'public'/name
                     types = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2'}
                     if parsed.netloc == 'localhost:8080' and file.is_file():
                         await r.fulfill(path=str(file), content_type=types.get(file.suffix,'application/octet-stream'))
@@ -40,15 +40,22 @@ async def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(4)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(5)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
+                    rental_heading = await page.locator('#home-stays-title').bounding_box()
+                    purchase_heading = await page.locator('#home-newbuilds-title').bounding_box()
+                    assert abs(rental_heading['x'] - purchase_heading['x']) <= 1, 'Property section gutters must align'
                     category_cards=page.locator('.home-service-category-card')
-                    await expect(category_cards).to_have_count(4)
-                    assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===5')
+                    await expect(category_cards).to_have_count(5)
+                    assert await category_cards.locator('a').evaluate_all('(rows)=>new Set(rows.map(a=>a.pathname)).size===6')
                     for card in await category_cards.all():
                         await card.scroll_into_view_if_needed()
                         image=card.locator('img')
-                        await expect(image).not_to_be_visible()
+                        if 'home-service-category-card--photo' in (await card.get_attribute('class') or ''):
+                            await expect(image).to_be_visible()
+                            await page.wait_for_function('(el)=>el.complete && el.naturalWidth>0', arg=await image.element_handle(), timeout=5000)
+                        else:
+                            await expect(image).not_to_be_visible()
                         await expect(card.locator('.home-service-category-copy')).to_be_visible()
 
                     # Editorial guide/service grids and horizontal listing rails keep their distinct layouts.
@@ -102,7 +109,7 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        for rail in [page.locator('.home-properties .home-rail-viewport'), page.locator('.home-experiences .home-rail-viewport')]:
+                        for rail in [page.locator('.home-properties .home-rail-viewport'), page.locator('.premium-newbuilds .home-rail-viewport'), page.locator('.home-experiences .home-rail-viewport')]:
                             await rail.scroll_into_view_if_needed()
                             await rail.evaluate('(el)=>el.scrollLeft=0')
                             box = await rail.bounding_box()
@@ -139,6 +146,7 @@ async def main():
                         await link.click()
                         await expect(page.get_by_test_id('location')).to_have_text(href)
                     for selector, prefix in [('.home-service-category-card a[href="/flowers"]', '/flowers'),
+                                             ('.home-service-category-card a[href="/yachts"]', '/yachts'),
                                              ('.home-service-category-card a[href="/transport"]', '/transport'),
                                              ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
                                              ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
@@ -154,7 +162,7 @@ async def main():
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':4,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':5,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
