@@ -6,6 +6,7 @@ export interface BookingStep {
   id: string;
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
 }
 
 interface BookingStepProgressProps {
@@ -19,25 +20,19 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
 
   return (
     <div className={cn("w-full py-4", className)}>
-      <div className="flex items-center justify-between relative">
-        {/* Progress line background */}
-        <div className="absolute top-4 left-0 right-0 h-0.5 bg-border" />
-        
-        {/* Active progress line */}
-        <div 
-          className="absolute top-4 left-0 h-0.5 bg-primary transition-all duration-500 ease-out"
-          style={{ 
-            width: `${steps.length > 1 ? Math.min(100, (currentStep / (steps.length - 1)) * 100) : 100}%` 
-          }}
-        />
-
+      <ol className="relative flex items-start justify-between before:absolute before:inset-x-0 before:top-4 before:h-0.5 before:bg-border">
+        {steps.length > 1 && (
+          <li role="presentation" aria-hidden="true" className="absolute left-0 top-4 h-0.5 bg-primary transition-all duration-500"
+            style={{ width: `${Math.min(100, (currentStep / (steps.length - 1)) * 100)}%` }} />
+        )}
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
           const isPending = index > currentStep;
 
           return (
-            <div 
+            <li
+              aria-current={isCurrent ? 'step' : undefined}
               key={step.id} 
               className="relative flex min-w-0 flex-1 flex-col items-center z-10"
             >
@@ -51,7 +46,7 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
                 )}
               >
                 {isCompleted ? (
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4" aria-hidden="true" />
                 ) : (
                   index + 1
                 )}
@@ -64,12 +59,12 @@ export function BookingStepProgress({ steps, currentStep, className }: BookingSt
                   (isCompleted || isCurrent) ? "text-foreground font-medium" : "text-muted-foreground"
                 )}
               >
-                {language === 'ru' ? step.labelRu : step.labelEn}
+                {language === 'ru' ? step.labelRu : language === 'th' ? step.labelTh || step.labelEn : step.labelEn}
               </span>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

@@ -1,8 +1,7 @@
-import { flightCutoffViolated } from '@/lib/transport/flightCutoff';
-import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { Plane, Shield, Clock, Users, Plus, Minus, ChevronLeft, Loader2, AlertCircle, Check, Star, Crown, Sparkles } from 'lucide-react';
+import { Plane, Shield, Clock, Plus, Minus, ChevronLeft, Loader2, Check, Star, Crown, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,22 +15,28 @@ import { toast } from 'sonner';
 import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
 import { useBookingDraft } from '@/hooks/useBookingDraft';
 import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
-import { PriceDisplay } from '@/components/uno/PriceDisplay';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
-import { addDays, format } from 'date-fns';
+import { bangkokTodayISO, toBangkokDateKey } from '@/lib/hotelDates';
+import { BookingField } from '@/components/booking/BookingField';
+import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
+import { FLIGHT_NUMBER_PATTERN, PHUKET_TIME_ZONE, REQUEST_EMAIL_PATTERN, isRequestPhone, phuketScheduledTime } from '@/lib/services/airportRequestValidation';
 import { supabase } from '@/integrations/supabase/client';
 
 // ─── Validation ───
 const LATIN_REGEX = /^[a-zA-Z\s-'.]+$/;
-const FLIGHT_REGEX = /^[A-Z0-9]{2,3}\s?\d{1,4}$/i;
+const fastTrackSteps: BookingStep[] = [
+  { id: 'service', labelEn: 'Flight & service', labelRu: 'Рейс и услуга', labelTh: 'เที่ยวบินและบริการ' },
+  { id: 'passenger', labelEn: 'Passengers', labelRu: 'Пассажиры', labelTh: 'ผู้โดยสาร' },
+  { id: 'review', labelEn: 'Review', labelRu: 'Проверка', labelTh: 'ตรวจสอบ' },
+];
 
 const passengerSchema = z.object({
   firstName: z.string().trim().min(1, 'Required').max(50).regex(LATIN_REGEX, 'Latin characters only'),
   lastName: z.string().trim().min(1, 'Required').max(50).regex(LATIN_REGEX, 'Latin characters only'),
   passportNumber: z.string().trim().min(5, 'Invalid passport').max(20),
   nationality: z.string().trim().min(2, 'Required').max(50),
-  dateOfBirth: z.string().min(1, 'Required'),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => !!toBangkokDateKey(value) && value <= bangkokTodayISO()),
 });
 
 type PassengerData = z.infer<typeof passengerSchema>;
@@ -59,12 +64,16 @@ const getTierIcon = (service: AirportService): React.ReactNode => {
 
 export default function AirportFastTrackPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const stepRef = useRef<HTMLDivElement>(null);
+  const submitLock = useRef(false);
   const { language } = useLanguage();
   const { user } = useAuth();
+  const tr = (en: string, ru: string, th: string) => language === 'th' ? th : language === 'ru' ? ru : en;
   const isRu = language === 'ru';
 
   // White-label: fetch ALL services (no supplier filter), supplier routing is internal
-  const { fastTrackServices, addons, bundles, isLoading } = useAirportServices('HKT');
+  const { fastTrackServices, addons, bundles, isLoading, error: catalogueError, refetch } = useAirportServices('HKT');
 
   // ─── Form State ───
   const [direction, setDirection] = useState<Direction>('arrival');
@@ -75,13 +84,14 @@ export default function AirportFastTrackPage() {
   const [flightTime, setFlightTime] = useState('');
   const [contactWhatsapp, setContactWhatsapp] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  const [preferredLang, setPreferredLang] = useState<Language>('en');
+  const [preferredLang, setPreferredLang] = useState<Language>(language);
   const [specialNotes, setSpecialNotes] = useState('');
   const [passengers, setPassengers] = useState<PassengerData[]>([{ ...emptyPassenger }]);
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
   const [showUpsell, setShowUpsell] = useState(false);
+  const [submissionError, setSubmissionError] = useState(false);
 
   // Persist the whole form so a guest who is bounced to /auth (and returned via
   // ?redirect) — or who simply refreshes — doesn't lose passport data they typed.
@@ -115,11 +125,6 @@ export default function AirportFastTrackPage() {
     return fastTrackServices.filter(s => s.direction === direction || s.direction === 'both');
   }, [fastTrackServices, direction]);
 
-  const selectedService = useMemo(() => {
-    if (selectedServiceId) return directionServices.find(s => s.id === selectedServiceId) || null;
-    return null;
-  }, [directionServices, selectedServiceId]);
-
   const availableAddons = useMemo(() => {
     return addons.filter(a => a.direction === direction || a.direction === 'both');
   }, [addons, direction]);
@@ -128,38 +133,33 @@ export default function AirportFastTrackPage() {
     return bundles.filter(b => b.direction === direction || b.direction === 'both');
   }, [bundles, direction]);
 
+  const selectedService = [...directionServices, ...availableBundles].find(service => service.id === selectedServiceId);
+  const selectedCurrency = selectedService?.currency;
+  const compatibleAddons = availableAddons.filter(addon => !selectedCurrency || addon.currency === selectedCurrency);
+  const selectedCompatibleAddons = compatibleAddons.filter(addon => selectedAddons.has(addon.id));
+  const selectService = (id: string) => {
+    setSelectedServiceId(id);
+    if (id !== selectedServiceId) setSelectedAddons(new Set());
+  };
+
   const isNightFlight = useMemo(() => {
     if (!flightTime) return false;
     const hour = parseInt(flightTime.split(':')[0], 10);
     return hour >= 0 && hour < 6;
   }, [flightTime]);
 
-  const cutoffViolated = flightCutoffViolated(flightDate, flightTime);
+  const scheduledFlight = phuketScheduledTime(flightDate, flightTime);
+  const cutoffHours = selectedService?.cutoff_hours ?? 24;
+  const cutoffViolated = !!(flightDate && flightTime) && (scheduledFlight === undefined || scheduledFlight < Date.now() + cutoffHours * 3_600_000);
 
-  const pricing = useMemo(() => {
-    if (!selectedService) return { base: 0, nightSurcharge: 0, addonsTotal: 0, total: 0 };
-    const base = Number(selectedService.base_price) * passengers.length;
-    const nightSurcharge = isNightFlight ? Number(selectedService.night_surcharge || 0) * passengers.length : 0;
-    let addonsTotal = 0;
-    selectedAddons.forEach(addonId => {
-      const addon = addons.find(a => a.id === addonId);
-      if (addon) addonsTotal += Number(addon.base_price);
-    });
-    return { base, nightSurcharge, addonsTotal, total: base + nightSurcharge + addonsTotal };
-  }, [selectedService, passengers.length, isNightFlight, selectedAddons, addons]);
-
-  // Switching to a service with a smaller capacity must not leave more
-  // passengers selected than allowed — otherwise pricing bills for pax the
-  // service can't carry. Trim down to the new max.
-  useEffect(() => {
-    const max = selectedService?.max_passengers;
-    if (max && passengers.length > max) {
-      setPassengers(prev => prev.slice(0, max));
-    }
-  }, [selectedService, passengers.length]);
+  const base = selectedService ? Number(selectedService.base_price) * passengers.length : 0;
+  const nightSurcharge = isNightFlight && selectedService ? Number(selectedService.night_surcharge || 0) * passengers.length : 0;
+  const addonsTotal = selectedCompatibleAddons.reduce((total, addon) => total + Number(addon.base_price), 0);
+  const pricing = { base, nightSurcharge, addonsTotal, total: base + nightSurcharge + addonsTotal };
 
   // Reset service selection when direction changes
   const handleDirectionChange = (d: Direction) => {
+    if (d === direction) return;
     setDirection(d);
     setSelectedServiceId(null);
     setSelectedAddons(new Set());
@@ -194,32 +194,48 @@ export default function AirportFastTrackPage() {
   const validateStep = (targetStep: 'passenger' | 'review'): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (targetStep === 'passenger' || targetStep === 'review') {
-      if (!selectedServiceId) newErrors.service = isRu ? 'Выберите услугу' : 'Select a service';
-      if (!flightNumber) newErrors.flightNumber = isRu ? 'Укажите номер рейса' : 'Flight number required';
-      if (flightNumber && !FLIGHT_REGEX.test(flightNumber)) newErrors.flightNumber = isRu ? 'Неверный формат рейса' : 'Invalid flight format (e.g. TG123)';
-      if (!flightDate) newErrors.flightDate = isRu ? 'Укажите дату' : 'Date required';
-      if (!flightTime) newErrors.flightTime = isRu ? 'Укажите время' : 'Time required';
-      if (flightCutoffViolated(flightDate, flightTime)) newErrors.flightDate = isRu ? 'Бронирование за 24+ часа' : 'Must book 24+ hours ahead';
+    if (!selectedService || !Number.isFinite(pricing.total) || pricing.total < 0) newErrors.service = tr('Select a service', 'Выберите услугу', 'เลือกบริการ');
+    if (!FLIGHT_NUMBER_PATTERN.test(flightNumber.trim())) newErrors.flightNumber = tr('Enter a flight number such as TG123', 'Укажите номер рейса, например TG123', 'กรอกหมายเลขเที่ยวบิน เช่น TG123');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(flightDate) || !toBangkokDateKey(flightDate)) newErrors.flightDate = tr('Enter the flight date', 'Укажите дату рейса', 'กรอกวันที่เที่ยวบิน');
+    if (!flightTime || (flightDate && scheduledFlight === undefined)) newErrors.flightTime = tr('Enter the flight time', 'Укажите время рейса', 'กรอกเวลาเที่ยวบิน');
+    if (scheduledFlight !== undefined && scheduledFlight < Date.now() + cutoffHours * 3_600_000) {
+      newErrors.flightDate = tr(`Request at least ${cutoffHours} hours ahead`, `Подайте заявку минимум за ${cutoffHours} ч`, `ส่งคำขอล่วงหน้าอย่างน้อย ${cutoffHours} ชั่วโมง`);
     }
-
+    if (selectedService && passengers.length > selectedService.max_passengers) {
+      newErrors.service = tr('The selected service cannot accommodate this group', 'Выбранная услуга не рассчитана на эту группу', 'บริการที่เลือกไม่รองรับจำนวนผู้โดยสารกลุ่มนี้');
+    }
     if (targetStep === 'review') {
-      passengers.forEach((p, i) => {
-        const result = passengerSchema.safeParse(p);
+      passengers.forEach((passenger, index) => {
+        const result = passengerSchema.safeParse(passenger);
         if (!result.success) {
-          result.error.issues.forEach(e => {
-            newErrors[`passenger_${i}_${String(e.path[0])}`] = e.message;
+          result.error.issues.forEach(issue => {
+            newErrors[`passenger_${index}_${String(issue.path[0])}`] = tr('Check this value', 'Проверьте значение', 'ตรวจสอบข้อมูลนี้');
           });
         }
       });
-      if (!contactWhatsapp && !contactEmail) {
-        newErrors.contact = isRu ? 'Укажите WhatsApp или email' : 'WhatsApp or email required';
+      if (!contactWhatsapp.trim() && !contactEmail.trim()) {
+        newErrors.contactWhatsapp = tr('Enter WhatsApp or email', 'Укажите WhatsApp или email', 'กรอก WhatsApp หรืออีเมล');
+      } else if (contactWhatsapp.trim() && !isRequestPhone(contactWhatsapp)) {
+        newErrors.contactWhatsapp = tr('Include the country code', 'Укажите номер с кодом страны', 'กรอกหมายเลขพร้อมรหัสประเทศ');
+      }
+      if (contactEmail.trim() && !REQUEST_EMAIL_PATTERN.test(contactEmail.trim())) {
+        newErrors.contactEmail = tr('Enter a valid email', 'Укажите корректный email', 'กรอกอีเมลที่ถูกต้อง');
       }
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const firstError = Object.keys(newErrors)[0];
+    if (firstError) {
+      const target = firstError.startsWith('passenger_') || firstError.startsWith('contact') ? 'passenger' : 'service';
+      setStep(target);
+      requestAnimationFrame(() => (document.getElementById(`fasttrack-${firstError}`) || stepRef.current)?.focus());
+    }
+    return !firstError;
   };
+
+  useEffect(() => {
+    if (step !== 'service') stepRef.current?.focus();
+  }, [step]);
 
   const handleNext = () => {
     if (step === 'service') {
@@ -232,21 +248,22 @@ export default function AirportFastTrackPage() {
   const handleBack = () => {
     if (step === 'passenger') setStep('service');
     else if (step === 'review') setStep('passenger');
-    else navigate(APP_ROUTES.FAST_TRACK);
+    else navigate(APP_ROUTES.TRANSPORT);
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
+    if (submitLock.current || !validateStep('review') || !selectedService) return;
     if (!user) {
       // Draft is already persisted in sessionStorage; send the guest to /auth
       // with a return path so they land back here and the form restores.
       toast.error(isRu ? 'Войдите в аккаунт' : 'Please sign in');
-      navigate(`/auth?redirect=${encodeURIComponent(APP_ROUTES.FAST_TRACK)}`);
+      navigate(`/auth?redirect=${encodeURIComponent(location.pathname + location.search)}`);
       return;
     }
-    if (!selectedService || !validateStep("review") || isSubmitting) return;
-
+    submitLock.current = true;
+    setSubmissionError(false);
     setIsSubmitting(true);
     try {
       const serviceName = isRu ? selectedService.name_ru : selectedService.name_en;
@@ -257,13 +274,13 @@ export default function AirportFastTrackPage() {
           service_id: selectedService.id,
           service_name: serviceName,
           direction,
-          flight_number: flightNumber,
+          flight_number: flightNumber.trim(),
           airline: airline || undefined,
           flight_date: flightDate,
           flight_time: flightTime,
           is_night_flight: isNightFlight,
-          contact_whatsapp: contactWhatsapp || undefined,
-          contact_email: contactEmail || undefined,
+          contact_whatsapp: contactWhatsapp.trim() || undefined,
+          contact_email: contactEmail.trim() || undefined,
           preferred_language: preferredLang,
           special_notes: specialNotes || undefined,
           base_price: pricing.base,
@@ -279,17 +296,14 @@ export default function AirportFastTrackPage() {
             date_of_birth: p.dateOfBirth,
             is_primary: i === 0,
           })),
-          addon_ids: Array.from(selectedAddons),
-          addon_names: Array.from(selectedAddons).map(id => {
-            const a = addons.find(x => x.id === id);
-            return a ? (isRu ? a.name_ru : a.name_en) : id;
-          }),
+          addon_ids: selectedCompatibleAddons.map(addon => addon.id),
+          addon_names: selectedCompatibleAddons.map(addon => isRu ? addon.name_ru : addon.name_en),
         },
       });
 
-      if (error || data?.error || data?.success === false) throw error || new Error(data?.error || "Booking was not accepted");
+      if (error || data?.success !== true || !data.booking_id) throw error || new Error(data?.error || "Booking was not accepted");
 
-      toast(isRu ? 'Бронирование создано!' : 'Booking created!', {
+      toast(tr('Request received', 'Заявка получена', 'ได้รับคำขอแล้ว'), {
         description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
       });
 
@@ -301,11 +315,10 @@ export default function AirportFastTrackPage() {
         navigate('/bookings');
       }
     } catch (err) {
-      console.error('Fast Track booking error:', err);
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.',
-      });
+      console.error('Fast Track submission could not be confirmed:', err);
+      setSubmissionError(true);
     } finally {
+      submitLock.current = false;
       setIsSubmitting(false);
     }
   };
@@ -318,13 +331,26 @@ export default function AirportFastTrackPage() {
     navigate('/bookings');
   };
 
-  const minDate = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const minDate = bangkokTodayISO(new Date(Date.now() + cutoffHours * 3_600_000));
+  const formatPrice = (amount: number, currency: string) => `${currency || 'THB'} ${amount.toLocaleString(language)}`;
+  const currentStep = fastTrackSteps.findIndex(item => item.id === step);
 
   const getIncludes = (service: AirportService): string[] => {
-    const raw = (service as any).includes_items;
+    const raw = service.includes_items;
     if (Array.isArray(raw)) return raw;
     return [];
   };
+
+  if (catalogueError && !isLoading) {
+    return (
+      <AppLayout title="Fast Track" showBottomNav={false}>
+        <div className="ds-frame ds-frame-article space-y-4 p-4">
+          <p role="alert">{tr('Could not load Fast Track services', 'Не удалось загрузить услуги Fast Track', 'โหลดบริการ Fast Track ไม่สำเร็จ')}</p>
+          <Button onClick={() => void refetch()}>{tr('Try again', 'Повторить', 'ลองอีกครั้ง')}</Button>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -338,69 +364,21 @@ export default function AirportFastTrackPage() {
 
   return (
     <AppLayout title="Fast Track" showBottomNav={false}>
-      <div className="pb-32">
+      <div className="ds-frame ds-frame-article pb-32">
         {/* Back button */}
         <div className="px-4 pt-3">
-          <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={handleBack}>
+          <Button variant="ghost" size="sm" className="min-h-11 gap-1 -ml-2" disabled={isSubmitting} onClick={handleBack}>
             <ChevronLeft className="w-4 h-4" />
-            {isRu ? 'Назад' : 'Back'}
+            {tr('Back', 'Назад', 'ย้อนกลับ')}
           </Button>
         </div>
 
-        {/* Hero — myUNO branded */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background px-4 py-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-none bg-primary/10 flex items-center justify-center">
-              <Shield className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold">
-                {isRu ? 'myUNO Airport VIP' : 'myUNO Airport VIP'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {isRu ? 'Пхукет (HKT) · Fast Track и лаунжи' : 'Phuket (HKT) · Fast Track & Lounges'}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Clock className="w-3 h-3" />
-              {isRu ? 'До 60 мин экономии' : 'Save up to 60 min'}
-            </Badge>
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Users className="w-3 h-3" />
-              {isRu ? 'Персональный эскорт' : 'Personal escort'}
-            </Badge>
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Sparkles className="w-3 h-3" />
-              {isRu ? 'Лаунж и лёгкий проход' : 'Lounge & Fast Track'}
-            </Badge>
-          </div>
-          {/* Trust copy */}
-          <p className="text-xs text-muted-foreground mt-3">
-            {isRu
-              ? 'Фиксированная цена. Без скрытых доплат. Профессиональный эскорт включён.'
-              : 'Fixed price. No hidden fees. Professional escort included.'}
-          </p>
+        <div className="border-b bg-card px-4 py-4">
+          <h1 className="text-xl font-display font-bold">Fast Track</h1>
+          <p className="text-sm text-muted-foreground">{tr('Phuket Airport (HKT)', 'Аэропорт Пхукета (HKT)', 'สนามบินภูเก็ต (HKT)')}</p>
+          <BookingStepProgress steps={fastTrackSteps} currentStep={currentStep} />
         </div>
-
-        {/* Step indicator — 3 steps now */}
-        <div className="px-4 py-3">
-          <div className="flex gap-1">
-            {['service', 'passenger', 'review'].map((s, i) => (
-              <div key={s} className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                i <= ['service', 'passenger', 'review'].indexOf(step) ? "bg-primary" : "bg-muted"
-              )} />
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {step === 'service' && (isRu ? 'Шаг 1: Рейс и услуги' : 'Step 1: Flight & services')}
-            {step === 'passenger' && (isRu ? 'Шаг 2: Данные пассажиров' : 'Step 2: Passenger details')}
-            {step === 'review' && (isRu ? 'Шаг 3: Подтверждение' : 'Step 3: Confirmation')}
-          </p>
-        </div>
-
+        <div ref={stepRef} tabIndex={-1} className="pt-4">
         {/* ═══ Step 1: Service (white-label — no supplier names) ═══ */}
         {step === 'service' && (
           <div className="px-4 space-y-5">
@@ -412,6 +390,7 @@ export default function AirportFastTrackPage() {
                   <button
                     key={d}
                     type="button"
+                    aria-pressed={direction === d}
                     onClick={() => handleDirectionChange(d)}
                     className={cn(
                       "p-3 rounded-none border-2 text-center transition-all",
@@ -423,74 +402,45 @@ export default function AirportFastTrackPage() {
                     <Plane className={cn("w-5 h-5 mx-auto mb-1", d === 'departure' && "rotate-45")} />
                     <span className="text-sm font-medium">
                       {d === 'arrival'
-                        ? (isRu ? 'Прилёт' : 'Arrival')
-                        : (isRu ? 'Вылет' : 'Departure')}
+                        ? tr('Arrival', 'Прилёт', 'ขาเข้า')
+                        : tr('Departure', 'Вылет', 'ขาออก')}
                     </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Flight info */}
             <div className="space-y-3">
-              <Label>{isRu ? 'Информация о рейсе' : 'Flight Information'}</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Input
-                    placeholder={isRu ? 'Номер рейса' : 'Flight number'}
-                    value={flightNumber}
-                    onChange={e => setFlightNumber(e.target.value.toUpperCase())}
-                    className={cn(errors.flightNumber && "border-destructive")}
-                  />
-                  {errors.flightNumber && <p className="text-xs text-destructive mt-1">{errors.flightNumber}</p>}
-                </div>
-                <Input
-                  placeholder={isRu ? 'Авиакомпания' : 'Airline'}
-                  value={airline}
-                  onChange={e => setAirline(e.target.value)}
-                />
+              <h2 className="font-semibold">{tr('Flight details', 'Данные рейса', 'ข้อมูลเที่ยวบิน')}</h2>
+              <p className="text-sm text-muted-foreground">{tr('Phuket local time', 'Местное время Пхукета', 'เวลาท้องถิ่นภูเก็ต')} ({PHUKET_TIME_ZONE})</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <BookingField id="fasttrack-flightNumber" label={tr('Flight number', 'Номер рейса', 'หมายเลขเที่ยวบิน')} error={errors.flightNumber}>
+                  <Input id="fasttrack-flightNumber" value={flightNumber} onChange={e => setFlightNumber(e.target.value.toUpperCase())} aria-invalid={!!errors.flightNumber} aria-describedby={errors.flightNumber ? 'fasttrack-flightNumber-error' : undefined} placeholder="TG123" />
+                </BookingField>
+                <BookingField id="fasttrack-airline" label={tr('Airline (optional)', 'Авиакомпания (необязательно)', 'สายการบิน (ไม่บังคับ)')}>
+                  <Input id="fasttrack-airline" value={airline} onChange={e => setAirline(e.target.value)} />
+                </BookingField>
+                <BookingField id="fasttrack-flightDate" label={tr('Flight date', 'Дата рейса', 'วันที่เที่ยวบิน')} error={errors.flightDate}>
+                  <Input id="fasttrack-flightDate" type="date" min={minDate} value={flightDate} onChange={e => setFlightDate(e.target.value)} aria-invalid={!!errors.flightDate} aria-describedby={errors.flightDate ? 'fasttrack-flightDate-error' : undefined} />
+                </BookingField>
+                <BookingField id="fasttrack-flightTime" label={tr('Flight time', 'Время рейса', 'เวลาเที่ยวบิน')} error={errors.flightTime}>
+                  <Input id="fasttrack-flightTime" type="time" value={flightTime} onChange={e => setFlightTime(e.target.value)} aria-invalid={!!errors.flightTime} aria-describedby={errors.flightTime ? 'fasttrack-flightTime-error' : undefined} />
+                </BookingField>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Input
-                    type="date"
-                    min={minDate}
-                    value={flightDate}
-                    onChange={e => setFlightDate(e.target.value)}
-                    className={cn(errors.flightDate && "border-destructive")}
-                  />
-                  {errors.flightDate && <p className="text-xs text-destructive mt-1">{errors.flightDate}</p>}
-                </div>
-                <div>
-                  <Input
-                    type="time"
-                    value={flightTime}
-                    onChange={e => setFlightTime(e.target.value)}
-                    className={cn(errors.flightTime && "border-destructive")}
-                  />
-                  {errors.flightTime && <p className="text-xs text-destructive mt-1">{errors.flightTime}</p>}
-                </div>
-              </div>
-              {cutoffViolated && (
-                <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 text-destructive text-sm">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {isRu ? 'Бронирование возможно за 24+ часов до рейса' : 'Booking requires 24+ hours before flight'}
-                </div>
-              )}
               {isNightFlight && !cutoffViolated && selectedService && Number(selectedService.night_surcharge) > 0 && (
                 <div className="flex items-center gap-2 p-3 rounded-none bg-accent text-accent-foreground text-sm">
                   <Clock className="w-4 h-4 shrink-0" />
                   {isRu
-                    ? `Ночной рейс — доплата ฿${selectedService.night_surcharge}/чел.`
-                    : `Night flight — surcharge ฿${selectedService.night_surcharge}/pax`}
+                    ? `Ночной рейс — доплата ${selectedService.currency} ${selectedService.night_surcharge}/чел.`
+                    : `Night flight — surcharge ${selectedService.currency} ${selectedService.night_surcharge}/pax`}
                 </div>
               )}
             </div>
 
-            {/* Service selection — white-label, no supplier names */}
-            <div className="space-y-2">
-              <Label>{isRu ? 'Выберите услугу' : 'Select service'}</Label>
-              {errors.service && <p className="text-xs text-destructive">{errors.service}</p>}
+            <div id="fasttrack-service" tabIndex={-1} className="space-y-2">
+              <h2 className="font-semibold">{tr('Select a service', 'Выберите услугу', 'เลือกบริการ')}</h2>
+              {errors.service && <p role="alert" className="text-sm text-destructive">{errors.service}</p>}
+              {directionServices.length === 0 && availableBundles.length === 0 && <p className="text-sm text-muted-foreground">{tr('No Fast Track packages are listed for this direction.', 'Для этого направления нет опубликованных пакетов Fast Track.', 'ไม่มีแพ็กเกจ Fast Track ที่แสดงสำหรับเส้นทางนี้')}</p>}
               <div className="space-y-3">
                 {directionServices.map(service => {
                   const includes = getIncludes(service);
@@ -499,7 +449,8 @@ export default function AirportFastTrackPage() {
                     <button
                       key={service.id}
                       type="button"
-                      onClick={() => setSelectedServiceId(service.id)}
+                      aria-pressed={isSelected}
+                      onClick={() => selectService(service.id)}
                       className={cn(
                         "w-full min-w-0 p-4 rounded-none border-2 text-left transition-all",
                         isSelected
@@ -519,7 +470,7 @@ export default function AirportFastTrackPage() {
                             {isRu ? service.name_ru : service.name_en}
                           </h3>
                         </div>
-                        <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums">฿{Number(service.base_price).toLocaleString("en-US")}</span>
+                        <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums">{formatPrice(Number(service.base_price), service.currency)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">
                         {isRu ? service.description_ru : service.description_en}
@@ -546,13 +497,14 @@ export default function AirportFastTrackPage() {
             </div>
 
             {/* Add-ons */}
-            {availableAddons.length > 0 && (
+            {compatibleAddons.length > 0 && (
               <div className="space-y-2">
                 <Label>{isRu ? 'Дополнительные услуги' : 'Add-ons'}</Label>
-                {availableAddons.map(addon => (
+                {compatibleAddons.map(addon => (
                   <button
                     key={addon.id}
                     type="button"
+                    aria-pressed={selectedAddons.has(addon.id)}
                     onClick={() => toggleAddon(addon.id)}
                     className={cn(
                       "w-full p-3 rounded-none border-2 flex items-center gap-3 text-left transition-all",
@@ -569,7 +521,7 @@ export default function AirportFastTrackPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <PriceDisplay price={addon.base_price} size="sm" sourceCurrency="THB" />
+                      <span className="font-mono tabular-nums">{formatPrice(addon.base_price, addon.currency)}</span>
                       {selectedAddons.has(addon.id) && <Check className="w-4 h-4 text-primary ml-auto" />}
                     </div>
                   </button>
@@ -588,7 +540,8 @@ export default function AirportFastTrackPage() {
                     <button
                       key={bundle.id}
                       type="button"
-                      onClick={() => setSelectedServiceId(bundle.id)}
+                      aria-pressed={isSelected}
+                      onClick={() => selectService(bundle.id)}
                       className={cn(
                         "w-full p-4 rounded-none border-2 text-left transition-all relative overflow-hidden",
                         isSelected
@@ -603,7 +556,7 @@ export default function AirportFastTrackPage() {
                         <h3 className="font-semibold text-sm leading-tight pr-12">
                           {isRu ? bundle.name_ru : bundle.name_en}
                         </h3>
-                        <PriceDisplay price={bundle.base_price} size="sm" sourceCurrency="THB" />
+                        <span className="font-mono tabular-nums">{formatPrice(bundle.base_price, bundle.currency)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">
                         {isRu ? bundle.description_ru : bundle.description_en}
@@ -636,9 +589,6 @@ export default function AirportFastTrackPage() {
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {isRu ? 'Дети до 2 лет — бесплатно' : 'Children under 2 — free'}
-              </p>
             </div>
           </div>
         )}
@@ -654,55 +604,30 @@ export default function AirportFastTrackPage() {
                     {i === 0 && <Badge variant="secondary" className="ml-2 text-[10px]">{isRu ? 'Основной' : 'Primary'}</Badge>}
                   </h3>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">{isRu ? 'Имя (лат.)' : 'First name (Latin)'}</Label>
-                    <Input
-                      value={pax.firstName}
-                      onChange={e => updatePassenger(i, 'firstName', e.target.value)}
-                      placeholder="John"
-                      className={cn(errors[`passenger_${i}_firstName`] && "border-destructive")}
-                    />
-                    {errors[`passenger_${i}_firstName`] && <p className="text-xs text-destructive mt-0.5">{errors[`passenger_${i}_firstName`]}</p>}
-                  </div>
-                  <div>
-                    <Label className="text-xs">{isRu ? 'Фамилия (лат.)' : 'Last name (Latin)'}</Label>
-                    <Input
-                      value={pax.lastName}
-                      onChange={e => updatePassenger(i, 'lastName', e.target.value)}
-                      placeholder="Doe"
-                      className={cn(errors[`passenger_${i}_lastName`] && "border-destructive")}
-                    />
-                    {errors[`passenger_${i}_lastName`] && <p className="text-xs text-destructive mt-0.5">{errors[`passenger_${i}_lastName`]}</p>}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs">{isRu ? 'Номер паспорта' : 'Passport number'}</Label>
-                  <Input
-                    value={pax.passportNumber}
-                    onChange={e => updatePassenger(i, 'passportNumber', e.target.value)}
-                    className={cn(errors[`passenger_${i}_passportNumber`] && "border-destructive")}
-                  />
-                  {errors[`passenger_${i}_passportNumber`] && <p className="text-xs text-destructive mt-0.5">{errors[`passenger_${i}_passportNumber`]}</p>}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">{isRu ? 'Гражданство' : 'Nationality'}</Label>
-                    <Input
-                      value={pax.nationality}
-                      onChange={e => updatePassenger(i, 'nationality', e.target.value)}
-                      className={cn(errors[`passenger_${i}_nationality`] && "border-destructive")}
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">{isRu ? 'Дата рождения' : 'Date of birth'}</Label>
-                    <Input
-                      type="date"
-                      value={pax.dateOfBirth}
-                      onChange={e => updatePassenger(i, 'dateOfBirth', e.target.value)}
-                      className={cn(errors[`passenger_${i}_dateOfBirth`] && "border-destructive")}
-                    />
-                  </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {([
+                    ['firstName', tr('First name (Latin)', 'Имя (лат.)', 'ชื่อ (อักษรละติน)')],
+                    ['lastName', tr('Last name (Latin)', 'Фамилия (лат.)', 'นามสกุล (อักษรละติน)')],
+                    ['passportNumber', tr('Passport number', 'Номер паспорта', 'หมายเลขหนังสือเดินทาง')],
+                    ['nationality', tr('Nationality', 'Гражданство', 'สัญชาติ')],
+                    ['dateOfBirth', tr('Date of birth', 'Дата рождения', 'วันเกิด')],
+                  ] as const).map(([field, label]) => {
+                    const key = `passenger_${i}_${field}`;
+                    const id = `fasttrack-${key}`;
+                    const error = errors[key];
+                    return (
+                      <BookingField key={field} id={id} label={label} error={error}>
+                        <Input id={id}
+                          type={field === 'dateOfBirth' ? 'date' : 'text'}
+                          max={field === 'dateOfBirth' ? bangkokTodayISO() : undefined}
+                          value={pax[field]}
+                          onChange={e => updatePassenger(i, field, e.target.value)}
+                          aria-invalid={!!error}
+                          aria-describedby={error ? `${id}-error` : undefined}
+                        />
+                      </BookingField>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -712,19 +637,12 @@ export default function AirportFastTrackPage() {
             {/* Contact */}
             <div className="space-y-3">
               <Label>{isRu ? 'Контакт' : 'Contact'}</Label>
-              <Input
-                placeholder="WhatsApp"
-                type="tel"
-                value={contactWhatsapp}
-                onChange={e => setContactWhatsapp(e.target.value)}
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={contactEmail}
-                onChange={e => setContactEmail(e.target.value)}
-              />
-              {errors.contact && <p className="text-xs text-destructive">{errors.contact}</p>}
+              <BookingField id="fasttrack-contactWhatsapp" label="WhatsApp" error={errors.contactWhatsapp}>
+                <Input id="fasttrack-contactWhatsapp" type="tel" autoComplete="tel" value={contactWhatsapp} onChange={e => setContactWhatsapp(e.target.value)} aria-invalid={!!errors.contactWhatsapp} aria-describedby={errors.contactWhatsapp ? 'fasttrack-contactWhatsapp-error' : undefined} />
+              </BookingField>
+              <BookingField id="fasttrack-contactEmail" label={tr('Email', 'Email', 'อีเมล')} error={errors.contactEmail}>
+                <Input id="fasttrack-contactEmail" type="email" autoComplete="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} aria-invalid={!!errors.contactEmail} aria-describedby={errors.contactEmail ? 'fasttrack-contactEmail-error' : undefined} />
+              </BookingField>
               <div>
                 <Label className="text-xs">{isRu ? 'Язык общения' : 'Preferred language'}</Label>
                 <div className="flex gap-2 mt-1">
@@ -769,7 +687,7 @@ export default function AirportFastTrackPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRu ? 'Рейс' : 'Flight'}</span>
-                  <span>{flightNumber} — {flightDate} {flightTime}</span>
+                  <span>{flightNumber} · {flightDate} {flightTime} ({PHUKET_TIME_ZONE})</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{isRu ? 'Пассажиры' : 'Passengers'}</span>
@@ -777,7 +695,7 @@ export default function AirportFastTrackPage() {
                 </div>
                 {passengers.map((p, i) => (
                   <div key={i} className="text-xs text-muted-foreground pl-4">
-                    {p.firstName} {p.lastName} — {typeof p.passportNumber === 'string' && p.passportNumber.length > 4 ? `••••${p.passportNumber.slice(-4)}` : '••••'}
+                    {p.firstName} {p.lastName}
                   </div>
                 ))}
               </div>
@@ -787,50 +705,54 @@ export default function AirportFastTrackPage() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span>{isRu ? 'Базовая стоимость' : 'Base price'} × {passengers.length}</span>
-                  <PriceDisplay price={pricing.base} size="sm" sourceCurrency="THB" />
+                  <span className="font-mono tabular-nums">{formatPrice(pricing.base, selectedService.currency)}</span>
                 </div>
                 {pricing.nightSurcharge > 0 && (
                   <div className="flex justify-between text-accent-foreground">
                     <span>{isRu ? 'Ночная доплата' : 'Night surcharge'}</span>
-                    <span>+฿{pricing.nightSurcharge.toLocaleString()}</span>
+                    <span>+{selectedService.currency} {pricing.nightSurcharge.toLocaleString()}</span>
                   </div>
                 )}
                 {pricing.addonsTotal > 0 && (
                   <div className="flex justify-between">
                     <span>{isRu ? 'Доп. услуги' : 'Add-ons'}</span>
-                    <span>+฿{pricing.addonsTotal.toLocaleString()}</span>
+                    <span>+{selectedService.currency} {pricing.addonsTotal.toLocaleString()}</span>
                   </div>
                 )}
                 <Separator />
                 <div className="flex justify-between font-bold text-base">
                   <span>{isRu ? 'Итого' : 'Total'}</span>
-                  <PriceDisplay price={pricing.total} size="md" sourceCurrency="THB" />
+                  <span className="font-mono tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span>
                 </div>
               </div>
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Bottom bar — always visible */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
-        {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive mb-2">
-          {isRu ? 'Проверьте дату и время: бронирование возможно за 24+ часов до рейса.' : 'Check the flight date and time. Booking requires 24+ hours before flight.'}
-        </p>}
-        <div className="flex items-center justify-between mb-2">
+        {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive mb-2">{tr(`Request at least ${cutoffHours} hours ahead`, `Подайте заявку минимум за ${cutoffHours} ч`, `ส่งคำขอล่วงหน้าอย่างน้อย ${cutoffHours} ชั่วโมง`)}</p>}
+        <div className="ds-frame ds-frame-article flex flex-wrap items-center justify-between gap-2 mb-2">
           <div>
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
-            {selectedService ? <PriceDisplay price={pricing.total} size="lg" sourceCurrency="THB" /> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
+            {selectedService ? <span className="font-mono tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
           </div>
+          {submissionError && <p role="alert" className="basis-full text-sm text-destructive">{tr(
+            'We could not verify receipt. Open My Bookings or contact myUNO before sending again.',
+            'Не удалось подтвердить получение. Проверьте «Мои бронирования» или свяжитесь с myUNO перед повторной отправкой.',
+            'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',
+          )} <a className="underline" href="/bookings">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
           {step === 'review' ? (
-            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting}>
+            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting || showUpsell || submissionError}>
               {isSubmitting
-                ? (isRu ? 'Отправка...' : 'Submitting...')
-                : (isRu ? 'Забронировать' : 'Book Now')}
+                ? tr('Sending…', 'Отправка…', 'กำลังส่ง…')
+                : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}
             </Button>
           ) : (
-            <Button onClick={handleNext} className="px-8" disabled={cutoffViolated || (!selectedServiceId && step === 'service')}>
-              {isRu ? 'Далее' : 'Next'}
+            <Button onClick={handleNext} className="px-8" disabled={isSubmitting}>
+              {tr('Continue', 'Далее', 'ถัดไป')}
             </Button>
           )}
         </div>

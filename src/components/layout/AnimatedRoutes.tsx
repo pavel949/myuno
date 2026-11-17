@@ -1,3 +1,4 @@
+import { CanonicalPublicRedirect } from '@/components/routing/CanonicalPublicRedirect';
 /**
  * AnimatedRoutes — P3 Consolidated
  *
@@ -47,7 +48,7 @@ const NewbuildsContextOutlet = () => (
 // Alias: /life-flow/:code → /life/:code (preserves deep-link compatibility)
 const LifeFlowAlias = () => {
   const { code } = useParams();
-  return <Navigate to={`/life/${code ?? ''}`} replace />;
+  return <CanonicalPublicRedirect to={`/life/${code ?? ''}`} />;
 };
 
 // PropertyHubIndex moved to ./routes/propertyHubRoutes.tsx
@@ -107,19 +108,19 @@ const TransportIdRedirect = () => {
   if (id === 'vehicle' || id === 'booking' || id === 'airport-transfer' || id === 'transfer-success' || id === 'airport' || id === 'taxi' || id === 'fast-track') {
     return null;
   }
-  return <Navigate to={`/transport/vehicle/${id}`} replace />;
+  return <CanonicalPublicRedirect to={`/transport/vehicle/${id}`} />;
 };
 
-const TourRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
-const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
-const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
-const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
+const TourRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/experiences/${id}`} />; };
+const TourBookRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/experiences/${id}/book`} />; };
+const WaterDetailRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/experiences/${id}`} />; };
+const WaterBookRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/experiences/${id}/book`} />; };
 
 // Legacy redirect helpers for Property Hub migration
-const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/restaurants/${id}`} replace />; };
-const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
-const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
-const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/invest/${id}`} replace />; };
+const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/restaurants/${id}`} />; };
+const OffplanIdRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/property/offplan/${id}`} />; };
+const DeveloperIdRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/property/developers/${id}`} />; };
+const InvestIdRedirect = () => { const { id } = useParams(); return <CanonicalPublicRedirect to={`/invest/${id}`} />; };
 
 // ── Layout Wrappers ──
 
@@ -201,8 +202,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Routes location={location}>
         {/* ── Core ── */}
         <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
-        <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
-        <Route path="/home" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+        <Route path="/index" element={<CanonicalPublicRedirect to={APP_ROUTES.HOME} />} />
+        <Route path="/home" element={<CanonicalPublicRedirect to={APP_ROUTES.HOME} />} />
 
         {/* Secondary breadth catalogue — reached from Landing «Explore the ecosystem». */}
         <Route path={APP_ROUTES.ECOSYSTEM} element={<PageTransition><Suspense fallback={<LoadingState />}><EcosystemPage /></Suspense></PageTransition>} />
@@ -240,9 +241,9 @@ export const AnimatedRoutes: React.FC = () => {
         ))}
         <Route path={APP_ROUTES.DISCOVER_SITUATIONS} element={<LazyPage><Pages.SituationNavigator /></LazyPage>} />
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
-        <Route path={APP_ROUTES.NAVIGATOR} element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
-        <Route path="/catalog" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
-        <Route path="/categories" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path={APP_ROUTES.NAVIGATOR} element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
+        <Route path="/catalog" element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
+        <Route path="/categories" element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
         {/* Bible-v2 audit A1: the duplicate LEGAL_CLUSTER redirect that used
             to live here was shadowing the real LegalClusterPage route declared
             further down in the LEGAL Cluster block. `/legal` is one of the six
@@ -334,11 +335,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/beauty/booking/:id" element={<LazyPage><Pages.BeautyBooking /></LazyPage>} />
         <Route path={APP_ROUTES.BEAUTY_SERVICES} element={<LazyPage><Pages.BeautyServices /></LazyPage>} />
         <Route path={APP_ROUTES.BEAUTY_MAP} element={<LazyPage><Pages.BeautyMap /></LazyPage>} />
-        <Route path="/salons" element={<Navigate to={APP_ROUTES.BEAUTY} replace />} />
-        <Route path="/spa" element={<Navigate to={APP_ROUTES.BEAUTY} replace />} />
-        <Route path="/gyms" element={<Navigate to={APP_ROUTES.FITNESS} replace />} />
-        <Route path="/clinics" element={<Navigate to={APP_ROUTES.MEDICAL} replace />} />
-        <Route path="/water_activities" element={<Navigate to={`${APP_ROUTES.EXPERIENCES}?type=activity`} replace />} />
+        <Route path="/salons" element={<CanonicalPublicRedirect to={APP_ROUTES.BEAUTY} />} />
+        <Route path="/spa" element={<CanonicalPublicRedirect to={APP_ROUTES.BEAUTY} />} />
+        <Route path="/gyms" element={<CanonicalPublicRedirect to={APP_ROUTES.FITNESS} />} />
+        <Route path="/clinics" element={<CanonicalPublicRedirect to={APP_ROUTES.MEDICAL} />} />
+        <Route path="/water_activities" element={<CanonicalPublicRedirect to={`${APP_ROUTES.EXPERIENCES}?type=activity`} />} />
         
         <Route
           path={APP_ROUTES.STAYS_SEARCH}
@@ -346,26 +347,26 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         {/* ── Property Hub (child routes extracted to ./routes/propertyHubRoutes) ── */}
-        <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
+        <Route path="/properties" element={<CanonicalPublicRedirect to={APP_ROUTES.PROPERTY} />} />
         <Route path={APP_ROUTES.PROPERTY} element={<PageTransition><Suspense fallback={<LoadingState />}><PropertyHub /></Suspense></PageTransition>}>
           {propertyHubRoutes}
         </Route>
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
         
         {/* ── Legacy Property Hub Redirects ── */}
-        <Route path="/offplan" element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path="/offplan" element={<CanonicalPublicRedirect to={APP_ROUTES.OFFPLAN} />} />
         <Route path="/offplan/:id" element={<OffplanIdRedirect />} />
-        <Route path="/developers" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path="/developers" element={<CanonicalPublicRedirect to={APP_ROUTES.DEVELOPERS} />} />
         <Route path="/developers/:id" element={<DeveloperIdRedirect />} />
-        <Route path="/complexes" element={<Navigate to={APP_ROUTES.COMPLEXES} replace />} />
-        <Route path="/invest/market" element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
-        <Route path="/invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
-        <Route path="/invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
+        <Route path="/complexes" element={<CanonicalPublicRedirect to={APP_ROUTES.COMPLEXES} />} />
+        <Route path="/invest/market" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_MARKET} />} />
+        <Route path="/invest/network" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_NETWORK} />} />
+        <Route path="/invest/execution" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_EXECUTION} />} />
         
         {/* ── Restaurants ── */}
-        <Route path="/food" element={<Navigate to={APP_ROUTES.RESTAURANTS} replace />} />
+        <Route path="/food" element={<CanonicalPublicRedirect to={APP_ROUTES.RESTAURANTS} />} />
         <Route path="/food/restaurant/:id" element={<FoodRestaurantIdRedirect />} />
-        <Route path="/food/checkout" element={<Navigate to={APP_ROUTES.RESTAURANTS} replace />} />
+        <Route path="/food/checkout" element={<CanonicalPublicRedirect to={APP_ROUTES.RESTAURANTS} />} />
         <Route path={APP_ROUTES.RESTAURANTS} element={<LazyPage><Pages.RestaurantsIndex /></LazyPage>} />
         <Route path={APP_ROUTES.RESTAURANT_MAP} element={<LazyPage><Pages.RestaurantMap /></LazyPage>} />
         <Route path="/restaurants/:id" element={<LazyPage><Pages.RestaurantDetail /></LazyPage>} />
@@ -380,12 +381,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.AIRPORT_TRANSFER} element={<LazyPage><Pages.AirportTransferBooking /></LazyPage>} />
         <Route path={APP_ROUTES.TRANSFER_SUCCESS} element={<LazyPage><Pages.TransferSuccess /></LazyPage>} />
         <Route path={APP_ROUTES.FAST_TRACK} element={<LazyPage><Pages.AirportFastTrackPage /></LazyPage>} />
-        <Route path="/transport/airport" element={<Navigate to={APP_ROUTES.AIRPORT_TRANSFER} replace />} />
-        <Route path="/airport-transfer" element={<Navigate to={APP_ROUTES.AIRPORT_TRANSFER} replace />} />
+        <Route path="/transport/airport" element={<CanonicalPublicRedirect to={APP_ROUTES.AIRPORT_TRANSFER} />} />
+        <Route path="/airport-transfer" element={<CanonicalPublicRedirect to={APP_ROUTES.AIRPORT_TRANSFER} />} />
         <Route path={APP_ROUTES.LANDING_AIRPORT_TRANSFER} element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
         <Route path={APP_ROUTES.LANDING_FLOWER_DELIVERY} element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
         <Route path={APP_ROUTES.LANDING_RENTAL} element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.NEWBUILDS} replace />} />
+        <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<CanonicalPublicRedirect to={APP_ROUTES.NEWBUILDS} />} />
         
         {/* ── Newbuilds (Premium New Developments) ── */}
         {/* Project microsite — standalone, no app shell, custom SEO */}
@@ -395,9 +396,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Thai business B2B acquisition landing — standalone, TH/EN/RU, lead form */}
         <Route path={APP_ROUTES.THAI_BUSINESS_PARTNER} element={<LazyPage><Pages.ThaiBusinessPartner /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<CanonicalPublicRedirect to={APP_ROUTES.OFFPLAN} />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
-        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
+        <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<CanonicalPublicRedirect to={APP_ROUTES.DEVELOPERS} />} />
         <Route path="/newbuilds/developers/:slug" element={<NewbuildDeveloperToHubRedirect />} />
         <Route element={<NewbuildsContextOutlet />}>
           <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
@@ -421,9 +422,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="team" element={<LazyPage><Pages.DeveloperTeam /></LazyPage>} />
         </Route>
         <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
-        <Route path="/taxi-booking" element={<Navigate to={APP_ROUTES.TAXI} replace />} />
-        <Route path="/transfers" element={<Navigate to={APP_ROUTES.LANDING_AIRPORT_TRANSFER} replace />} />
-        <Route path="/life" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path="/taxi-booking" element={<CanonicalPublicRedirect to={APP_ROUTES.TAXI} />} />
+        <Route path="/transfers" element={<CanonicalPublicRedirect to={APP_ROUTES.LANDING_AIRPORT_TRANSFER} />} />
+        <Route path="/life" element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
         <Route path="/transport/:id" element={<TransportIdRedirect />} />
         
         {/* ── Fitness ── */}
@@ -454,10 +455,10 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Flowers (+ Bloom legacy alias) ── */}
         <Route path={APP_ROUTES.FLOWERS} element={<LazyPage><Pages.FlowersIndex /></LazyPage>} />
-        <Route path="/bloom" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
-        <Route path="/bloom/*" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
+        <Route path="/bloom" element={<CanonicalPublicRedirect to={APP_ROUTES.FLOWERS} />} />
+        <Route path="/bloom/*" element={<CanonicalPublicRedirect to={APP_ROUTES.FLOWERS} />} />
         <Route path="/flowers/bouquet/:id" element={<LazyPage><Pages.BouquetDetail /></LazyPage>} />
-        <Route path="/flowers/shop" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
+        <Route path="/flowers/shop" element={<CanonicalPublicRedirect to={APP_ROUTES.FLOWERS} />} />
         <Route path="/flowers/shop/:id" element={<LazyPage><Pages.FlowerShopDetail /></LazyPage>} />
         <Route path="/flowers/order" element={<LazyPage><Pages.FlowersOrder /></LazyPage>} />
         <Route path="/flowers/order/:id" element={<LazyPage><Pages.FlowersOrder /></LazyPage>} />
@@ -536,7 +537,7 @@ export const AnimatedRoutes: React.FC = () => {
             Legacy /invest/pitch and /invest/articles redirect to canonical entries. */}
         <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         {/* Admin-only ops console (Market/Deals/Network/Execution shell) */}
-        <Route path={APP_ROUTES.INVEST_OPS} element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
+        <Route path={APP_ROUTES.INVEST_OPS} element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_MARKET} />} />
         <Route path={APP_ROUTES.INVEST_MARKET} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
         <Route path={APP_ROUTES.INVEST_DEALS} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
         <Route path={APP_ROUTES.INVEST_NETWORK} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
@@ -544,7 +545,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Specific invest sub-routes BEFORE catch-all :id */}
         <Route path="/invest/thailand" element={<LazyPage><Pages.InvestInThailand /></LazyPage>} />
         {/* Legacy: /invest/pitch → /invest/raise (single canonical raise funnel) */}
-        <Route path="/invest/pitch" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
+        <Route path="/invest/pitch" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_RAISE} />} />
         {/* Phase 3 — universal capital marketplace public routes */}
         <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
@@ -554,17 +555,17 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Wave 2: unified tools hub (ClearView + Calculator + Advisory + DD) */}
         <Route path={APP_ROUTES.INVEST_TOOLS} element={<LazyPage><Pages.InvestmentToolsHub /></LazyPage>} />
         {/* Wave 2: /invest/clearview alias → canonical /property/clearview */}
-        <Route path="/invest/clearview" element={<Navigate to={APP_ROUTES.CLEARVIEW} replace />} />
+        <Route path="/invest/clearview" element={<CanonicalPublicRedirect to={APP_ROUTES.CLEARVIEW} />} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         {/* Legacy: /invest/articles → /invest/knowledge (merged hub) */}
-        <Route path="/invest/articles" element={<Navigate to={APP_ROUTES.INVEST_KNOWLEDGE} replace />} />
+        <Route path="/invest/articles" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST_KNOWLEDGE} />} />
         <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
         <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy: /invest/:id → /invest/project/:id */}
         <Route path="/invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy aliases */}
-        <Route path="/invest-hub" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path="/invest-hub" element={<CanonicalPublicRedirect to={APP_ROUTES.INVEST} />} />
         
         {/* ── Knowledge ── */}
         <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
@@ -580,10 +581,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/experiences/:id/book" element={<LazyPage><Pages.ExperienceBooking /></LazyPage>} />
         
         {/* Legacy Tours/Water */}
-        <Route path="/tours" element={<Navigate to="/experiences?type=tour" replace />} />
+        <Route path="/tours" element={<CanonicalPublicRedirect to="/experiences?type=tour" />} />
         <Route path="/tours/:id" element={<TourRedirect />} />
         <Route path="/tours/:id/book" element={<TourBookRedirect />} />
-        <Route path="/water" element={<Navigate to="/experiences?type=activity" replace />} />
+        <Route path="/water" element={<CanonicalPublicRedirect to="/experiences?type=activity" />} />
         <Route path="/water/:id" element={<WaterDetailRedirect />} />
         <Route path="/water/:id/book" element={<WaterBookRedirect />} />
         
@@ -608,7 +609,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/cleaning/:id/book" element={<LazyPage><Pages.CleaningBooking /></LazyPage>} />
         
         {/* ── Babysitter ── */}
-        <Route path="/babysitters" element={<Navigate to="/babysitter" replace />} />
+        <Route path="/babysitters" element={<CanonicalPublicRedirect to="/babysitter" />} />
         <Route path="/babysitter" element={<LazyPage><Pages.BabysitterIndex /></LazyPage>} />
         <Route path="/babysitter/:id" element={<LazyPage><Pages.BabysitterDetail /></LazyPage>} />
         <Route path="/babysitter/:id/book" element={<LazyPage><Pages.BabysitterBooking /></LazyPage>} />
@@ -617,8 +618,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/delivery" element={<LazyPage><Pages.DeliveryIndex /></LazyPage>} />
         
         {/* ── Market (+ /marketplace alias) ── */}
-        <Route path="/marketplace" element={<Navigate to="/market" replace />} />
-        <Route path="/marketplace/*" element={<Navigate to="/market" replace />} />
+        <Route path="/marketplace" element={<CanonicalPublicRedirect to="/market" />} />
+        <Route path="/marketplace/*" element={<CanonicalPublicRedirect to="/market" />} />
         <Route path="/market" element={<LazyPage><Pages.MarketIndex /></LazyPage>} />
         <Route path="/market/categories" element={<LazyPage><Pages.MarketCatalogPage /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><Pages.MarketCategoryPage /></LazyPage>} />
@@ -661,14 +662,14 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/g-trust" element={<LazyPage><Pages.GTrustPage /></LazyPage>} />
         <Route path="/ip-policy" element={<LazyPage><Pages.IPPolicyPage /></LazyPage>} />
         <Route path="/partner-agreement" element={<LazyPage><Pages.PartnerAgreementPage /></LazyPage>} />
-        <Route path="/partner-terms" element={<Navigate to="/partner-agreement" replace />} />
+        <Route path="/partner-terms" element={<CanonicalPublicRedirect to="/partner-agreement" />} />
         <Route path="/dispute-resolution" element={<LazyPage><Pages.DisputeResolutionPage /></LazyPage>} />
-        <Route path="/view-history" element={<Navigate to="/history" replace />} />
+        <Route path="/view-history" element={<CanonicalPublicRedirect to="/history" />} />
         <Route path="/guide/:token" element={<LazyPage><Pages.PublicGuidebook /></LazyPage>} />
         
         {/* ── Legacy redirects ── */}
-        <Route path="/demo" element={<Navigate to="/" replace />} />
-        <Route path="/demo/*" element={<Navigate to="/" replace />} />
+        <Route path="/demo" element={<CanonicalPublicRedirect to="/" />} />
+        <Route path="/demo/*" element={<CanonicalPublicRedirect to="/" />} />
         
         {/* ── Admin (route definitions extracted to ./routes/adminRoutes) ── */}
         <Route element={<AdminRouteLayout />}>
