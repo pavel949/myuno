@@ -43,8 +43,8 @@
       "sourceInstances": 312
     },
     "PageHeader": {
-      "directConsumerFiles": 136,
-      "sourceInstances": 173
+      "directConsumerFiles": 137,
+      "sourceInstances": 174
     },
     "Tabs": {
       "directConsumerFiles": 131,
@@ -95,8 +95,8 @@
       "sourceInstances": 44
     },
     "PageShell": {
-      "directConsumerFiles": 38,
-      "sourceInstances": 44
+      "directConsumerFiles": 42,
+      "sourceInstances": 49
     },
     "UnifiedSectionHeader": {
       "directConsumerFiles": 7,
@@ -21363,7 +21363,7 @@
     },
     {
       "file": "src/pages/admin/AdminCities.tsx",
-      "sha256": "08765d7424d26d990c9d82160b25637d10bbbd1bf4415546f527f6b97055b0d0",
+      "sha256": "bfc5ac9e53718272d072ed40d37edffed2809bbe2244e5dae3423b75f202eba5",
       "directRouteDeclarations": [
         {
           "id": "ee9886eb8c554453",
@@ -21380,12 +21380,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            253,
-            301,
-            309,
-            343,
-            539,
-            542
+            254,
+            302,
+            310,
+            344,
+            540,
+            543
           ]
         },
         {
@@ -21393,8 +21393,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            268,
-            339
+            269,
+            340
           ]
         },
         {
@@ -21402,7 +21402,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            358
+            359
           ]
         },
         {
@@ -21410,19 +21410,27 @@
           "source": "@/components/ui/input",
           "instances": 13,
           "lines": [
-            374,
-            382,
-            394,
-            402,
-            410,
-            422,
-            431,
-            439,
-            451,
-            461,
-            475,
-            483,
-            495
+            375,
+            383,
+            395,
+            403,
+            411,
+            423,
+            432,
+            440,
+            452,
+            462,
+            476,
+            484,
+            496
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            238
           ]
         }
       ]
@@ -23396,7 +23404,7 @@
     },
     {
       "file": "src/pages/admin/AdminOfficialNews.tsx",
-      "sha256": "4ef8a2dfe14923e22f3b0d9fcba6f6eb22429f51c112984c2dbeebf5c7ef7ced",
+      "sha256": "cf9c023546aecb421f28d09bc91d054366f8708b4b934b35a03fc166777abfa4",
       "directRouteDeclarations": [
         {
           "id": "2dfa9ff3c3f19171",
@@ -23413,7 +23421,15 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            146
+            147
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            144
           ]
         }
       ]
@@ -24205,7 +24221,7 @@
     },
     {
       "file": "src/pages/admin/AdminQuickListings.tsx",
-      "sha256": "0d4b0043e5e671711fb5305324ed435494186fd2e5bf9a72d1f4b441828bcaef",
+      "sha256": "97d53a16e3dcc667774349981e9c5f82d83459205c1367f71ae99c1910685809",
       "directRouteDeclarations": [
         {
           "id": "4ac7d5bf5cdf32cf",
@@ -24250,7 +24266,16 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            214
+            216
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 2,
+          "lines": [
+            198,
+            215
           ]
         },
         {
@@ -25761,7 +25786,7 @@
     },
     {
       "file": "src/pages/admin/LifecycleMessaging.tsx",
-      "sha256": "a343102591d518a481f8351b8f6e0ed7cdf5c8269e773a0e8fdaf402197b0799",
+      "sha256": "6af73c09ff9cc538fc1a0876340a3b445cb0b1042418ee40dc1dd47a397f7648",
       "directRouteDeclarations": [
         {
           "id": "c4d5e2a01f1ce118",
@@ -25778,9 +25803,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            223,
-            292,
-            295
+            224,
+            293,
+            296
           ]
         },
         {
@@ -25788,11 +25813,11 @@
           "source": "@/components/ui/card",
           "instances": 5,
           "lines": [
-            128,
-            134,
-            140,
-            149,
-            189
+            129,
+            135,
+            141,
+            150,
+            190
           ]
         },
         {
@@ -25800,7 +25825,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            236
+            237
           ]
         },
         {
@@ -25808,12 +25833,28 @@
           "source": "@/components/ui/input",
           "instances": 6,
           "lines": [
-            245,
-            249,
-            273,
-            279,
-            283,
-            287
+            246,
+            250,
+            274,
+            280,
+            284,
+            288
+          ]
+        },
+        {
+          "name": "PageHeader",
+          "source": "@/components/page/PageHeader",
+          "instances": 1,
+          "lines": [
+            120
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            119
           ]
         },
         {
@@ -25821,7 +25862,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            264
+            265
           ]
         },
         {
@@ -25829,8 +25870,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            254,
-            258
+            255,
+            259
           ]
         }
       ]
