@@ -12,7 +12,9 @@ it('keeps full catalogues reachable with honest empty previews', () => {
   show();
   expect(screen.getByRole('link', { name: 'All homes' })).toHaveAttribute('href', '/property/search?mode=rent');
   expect(screen.getByRole('link', { name: 'All new developments' })).toBeVisible();
-  expect(screen.getByText(/No homes with published photos/)).toBeVisible();
+  expect(screen.getByText(/No photo preview to show/)).toBeVisible();
+  expect(screen.getByRole('link', { name: 'For a holiday' })).toHaveAttribute('href', '/property/rent/short-term');
+  expect(screen.getByRole('link', { name: 'For a longer stay' })).toHaveAttribute('href', '/property/rent/long-term');
   expect(screen.getByText(/Published projects will appear here/)).toBeVisible();
 });
 it('distinguishes loading from empty and supports retry after a failed read', () => {
