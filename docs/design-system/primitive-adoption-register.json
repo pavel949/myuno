@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 896,
-      "sourceInstances": 2933
+      "directConsumerFiles": 897,
+      "sourceInstances": 2936
     },
     "Card": {
       "directConsumerFiles": 531,
@@ -55,8 +55,8 @@
       "sourceInstances": 68
     },
     "Input": {
-      "directConsumerFiles": 401,
-      "sourceInstances": 1555
+      "directConsumerFiles": 402,
+      "sourceInstances": 1556
     },
     "SelectTrigger": {
       "directConsumerFiles": 232,
@@ -4453,6 +4453,33 @@
           "instances": 1,
           "lines": [
             240
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/settings/SocialNetworkSettings.tsx",
+      "sha256": "b3c13a166b79d1483da1a6222d1542a1dbb21ab0e9323a0a41faba91fb22d2fd",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 3,
+          "lines": [
+            63,
+            70,
+            70
+          ]
+        },
+        {
+          "name": "Input",
+          "source": "@/components/ui/input",
+          "instances": 1,
+          "lines": [
+            68
           ]
         }
       ]
@@ -24810,7 +24837,7 @@
     },
     {
       "file": "src/pages/admin/AdminSystemSettings.tsx",
-      "sha256": "30f2d3b5ee9108522f869d4af78f722d187e3111fcabbb09572744ccfa793a69",
+      "sha256": "8d06450350cd000066b343ef2c72d6f9a3640c905e8960e1786bd946faa595ac",
       "directRouteDeclarations": [
         {
           "id": "9c8bbbd0a2edcc13",
@@ -24827,7 +24854,7 @@
           "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
-            42
+            46
           ]
         },
         {
@@ -24835,7 +24862,7 @@
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            43
+            47
           ]
         },
         {
@@ -24843,7 +24870,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            69
+            73
           ]
         }
       ]

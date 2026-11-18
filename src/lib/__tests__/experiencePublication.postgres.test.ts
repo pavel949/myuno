@@ -37,7 +37,7 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
       CREATE TYPE app_role AS ENUM('admin');
       CREATE TABLE user_roles(user_id uuid,role app_role);
       CREATE TABLE providers(id uuid,user_id uuid);
-      CREATE TABLE listings(id uuid PRIMARY KEY,vertical text NOT NULL,is_active boolean,approval_status text,attributes jsonb,provider_id uuid,is_verified boolean DEFAULT false, name_en text, name_ru text, price numeric, category text, slug text, is_featured boolean DEFAULT false, review_count integer DEFAULT 0, persona_tags text[], i18n jsonb, created_at timestamptz, updated_at timestamptz);
+      CREATE TABLE listings(id uuid PRIMARY KEY,vertical text NOT NULL,is_active boolean,approval_status text,attributes jsonb,provider_id uuid,is_verified boolean DEFAULT false, name_en text, name_ru text, price numeric, category text, slug text, is_featured boolean DEFAULT false, review_count integer DEFAULT 0, persona_tags text[], i18n jsonb, created_at timestamptz, updated_at timestamptz, future_system_field text);
       CREATE TABLE life_situations(id uuid PRIMARY KEY,code text,is_active boolean);
       CREATE TABLE catalog_life_map(entity_type text,entity_id uuid,life_situation_id uuid,weight integer,role_scope text[],rules jsonb);
       GRANT SELECT ON providers TO authenticated;
@@ -49,12 +49,15 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
       const roles=p.roles.slice(1,-1);
       await sql.unsafe(`CREATE POLICY ${p.policyname} ON listings FOR ${p.cmd} TO ${roles}${p.qual?` USING (${p.qual})`:''}${p.with_check?` WITH CHECK (${p.with_check})`:''}`);
     }
+    for (const trigger of JSON.parse(file('listings-triggers-snapshot.json')).rows) {
+      await sql.unsafe(trigger.function_definition); await sql.unsafe(trigger.trigger_definition);
+    }
     // Synthetic projection of fields used by exact live resolver. Invoker semantics match live view.
     await sql.unsafe(`CREATE VIEW life_os_catalog WITH(security_invoker=true) AS
       SELECT vertical AS entity_type,id::text AS entity_id,name_en AS title,name_en AS title_ru,price,'THB'::text AS currency,'synthetic'::text AS location,provider_id::text,'standard'::text AS trust_level FROM listings WHERE is_active=true;
       GRANT SELECT ON life_os_catalog TO anon,authenticated;`);
     for(const r of JSON.parse(file('listings-rpc-snapshot.json')).rows) await sql.unsafe(r.definition);
-    await sql.unsafe(`INSERT INTO user_roles VALUES('${uid(900)}','admin'); INSERT INTO providers VALUES('${uid(800)}','${uid(901)}');
+    await sql.unsafe(`INSERT INTO user_roles VALUES('${uid(900)}','admin'); INSERT INTO providers VALUES('${uid(800)}','${uid(901)}'),('${uid(801)}','${uid(901)}');
       INSERT INTO life_situations VALUES('${uid(700)}','family',true);`);
     const rows=[
       ['experience',true,'approved',{status:'published'},null],
@@ -90,7 +93,7 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
   });
   it('admin reads and edits draft; editor policies unchanged',async()=>{
     expect(await as('authenticated','SELECT id FROM listings',uid(900))).toHaveLength(8);
-    expect(await as('authenticated',`UPDATE listings SET name_en=name_en WHERE id='${uid(6)}' RETURNING id`,uid(900))).toHaveLength(1);
+    expect(await as('authenticated',`UPDATE listings SET is_verified=true,attributes=attributes || '{"admin_review":true}'::jsonb WHERE id='${uid(6)}' RETURNING id`,uid(900))).toHaveLength(1);
     expect(await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname NOT IN ('listings_public_read','listings_provider_update') ORDER BY policyname`).toEqual(policiesBefore);
   });
   it.each([['anon',''],['authenticated',uid(902)],['authenticated',uid(901)],['authenticated',uid(900)]])('public discovery RPC applies same publication gate for %s',async(role,user)=>{
@@ -101,11 +104,11 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
   });
   it('ordinary visitor cannot mutate listings',async()=>{expect(await as('authenticated','UPDATE listings SET name_en=name_en RETURNING id',uid(902))).toHaveLength(0);});
   it('provider can edit descriptive content of own draft without changing approval',async()=>{
-    const result=await as('authenticated',`UPDATE listings SET name_en='Provider description',price=250,attributes=attributes || '{"highlights":["Recorded highlight"]}'::jsonb WHERE id='${uid(2)}' RETURNING id,approval_status`,uid(901));
-    expect(result).toHaveLength(1);expect(result[0].approval_status).toBe('approved');
+    const result=await as('authenticated',`UPDATE listings SET name_en='Provider description',price=250,attributes=attributes || '{"highlights":["Recorded highlight"]}'::jsonb WHERE id='${uid(2)}' RETURNING id,approval_status,updated_at`,uid(901));
+    expect(result).toHaveLength(1);expect(result[0].approval_status).toBe('approved'); expect(result[0].updated_at).toBeTruthy();
   });
   it.each([
-    "is_verified=true", "approval_status='approved-new'", "provider_id=null", "id='00000000-0000-0000-0000-000000000099'",
+    "attributes=attributes - 'status'", "attributes='{}'::jsonb", "provider_id='00000000-0000-0000-0000-000000000801'", "future_system_field='escape'", "is_verified=true", "approval_status='approved-new'", "provider_id=null", "id='00000000-0000-0000-0000-000000000099'",
     "vertical='restaurant'", "category='system-category'", "slug='new-slug'", "is_featured=true", "review_count=100", "is_active=false",
     "persona_tags=ARRAY['vip']", "i18n='{\"claim\":true}'::jsonb", "created_at=now()",
     "attributes=attributes || '{\"status\":\"published\"}'::jsonb", "attributes=attributes || '{\"operating_status\":\"open\"}'::jsonb",
@@ -118,4 +121,17 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
     expect(await as('authenticated',`UPDATE listings SET name_en='No' WHERE id='${uid(6)}' RETURNING id`,uid(901))).toHaveLength(0);
     expect(await as('anon',`UPDATE listings SET name_en='No' RETURNING id`)).toHaveLength(0);
   });
+  it('emergency containment disables provider updates without losing admin access or public gates',async()=>{
+    await sql.begin(async tx=>{
+      await tx.unsafe(body('listings-provider-update-containment.sql'));
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      await tx`SELECT set_config('request.jwt.claim.sub',${uid(901)},true)`;
+      expect(await tx.unsafe(`UPDATE listings SET name_en=name_en WHERE id='${uid(2)}' RETURNING id`)).toHaveLength(0);
+      await tx`SELECT set_config('request.jwt.claim.sub',${uid(900)},true)`;
+      expect(await tx.unsafe(`UPDATE listings SET name_en=name_en WHERE id='${uid(6)}' RETURNING id`)).toHaveLength(1);
+      await tx.unsafe('SET LOCAL ROLE anon');
+      expect((await tx.unsafe('SELECT id FROM listings ORDER BY id')).map(r=>r.id)).toEqual([uid(1),uid(7)]);
+    });
+  });
+
 });

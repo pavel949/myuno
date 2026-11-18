@@ -1,4 +1,5 @@
 import { createRef } from 'react';
+import { validateStyleMin } from '@maplibre/maplibre-gl-style-spec';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapLibreMap, MapLibreMapHandle } from './MapLibreMap';
@@ -17,13 +18,14 @@ vi.mock('maplibre-gl', () => ({ default: {
   Map: class {
     constructor(options: Record<string, unknown>) {
       mock.options.push(options);
-      if (mock.fail) throw new Error('WebGL unavailable');
+      if (mock.fail) { (options.container as HTMLElement).appendChild(document.createElement('canvas')); throw new Error('WebGL unavailable'); }
     }
     on(name: string, handler: () => void) { mock.events[name] = handler; }
     off() {}
     remove() {}
     addControl() {}
     loaded() { return true; }
+    getLayer() { return false; }
     setStyle = mock.setStyle;
     fitBounds = mock.fit;
     flyTo = mock.fly;
@@ -57,8 +59,10 @@ describe('MapLibreMap safe baseline', () => {
   it('uses the verified own PMTiles archive and its Latin place labels', () => {
     render(<MapLibreMap center={center} markers={markers} />);
     expect(mock.options[0].style).toMatchObject({ sources: { omt: { url: expect.stringMatching(/^pmtiles:\/\/.*phuket\.zip$/) } } });
+    expect(mock.options[0].style).toMatchObject({ glyphs: `${window.location.origin}/map-glyphs/noto-sans-regular/{range}.pbf?fontstack={fontstack}` });
     const style = mock.options[0].style as { layers: Array<{ id: string; layout?: Record<string, unknown> }> };
     expect(style.layers.find((layer) => layer.id === 'place-labels')?.layout?.['text-field']).toEqual(['coalesce', ['get', 'name:en'], ['get', 'name:latin'], ['get', 'name']]);
+    expect(validateStyleMin(mock.options[0].style as Parameters<typeof validateStyleMin>[0])).toEqual([]);
     act(() => mock.events.load());
     expect(screen.getByText('Карта онлайн')).toBeInTheDocument();
   });
@@ -72,10 +76,13 @@ describe('MapLibreMap safe baseline', () => {
   it('contains a WebGL initialization failure and offers an explicit retry', () => {
     mock.fail = true;
     render(<MapLibreMap center={center} />);
-    expect(screen.getByText(/Не удалось загрузить фон карты/)).toBeInTheDocument();
+    expect(screen.getByText(/В этом браузере недоступна графика карты/)).toBeInTheDocument();
+    expect(document.querySelectorAll('canvas')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }));
+    expect(document.querySelectorAll('canvas')).toHaveLength(0);
     mock.fail = false;
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }));
-    expect(mock.options).toHaveLength(2);
+    expect(mock.options).toHaveLength(3);
     act(() => mock.events.load());
     expect(screen.getByText('Карта онлайн')).toBeInTheDocument();
   });

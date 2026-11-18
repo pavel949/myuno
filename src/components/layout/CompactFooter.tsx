@@ -10,9 +10,8 @@
  */
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Instagram, MessageCircle, Download, Smartphone } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -21,6 +20,7 @@ import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
+import { FooterSocialLinks } from './FooterSocialLinks';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
@@ -65,12 +65,6 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     { to: APP_ROUTES.REFUND_POLICY, label: t(ECOSYSTEM_FOOTER_UI.refunds) },
   ];
 
-  const socialLinks = [
-    { href: COMPANY_CONTACTS.social.telegram, icon: Send, label: 'Telegram' },
-    { href: COMPANY_CONTACTS.social.instagram, icon: Instagram, label: 'Instagram' },
-    { href: COMPANY_CONTACTS.social.whatsapp, icon: MessageCircle, label: 'WhatsApp' },
-  ];
-
   // ─── Desktop: slim 3-row footer ────────────────────────────────────────
   if (isLargeDesktop) {
     return (
@@ -84,20 +78,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="grid h-11 w-11 place-items-center rounded-none border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-                >
-                  <social.icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
+            <FooterSocialLinks />
           </div>
 
           {/* Row 1.5 — surface explore (Master Taxonomy v1.0) */}
@@ -178,20 +159,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           </div>
         )}
 
-        <div className="flex justify-center gap-3">
-          {socialLinks.map((social) => (
-            <a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={social.label}
-              className="grid h-11 w-11 place-items-center rounded-none border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-            >
-              <social.icon className="h-4 w-4" />
-            </a>
-          ))}
-        </div>
+        <div className="flex justify-center"><FooterSocialLinks /></div>
 
         <nav
           aria-label={t({ ru: 'Жизненный цикл', en: 'Lifecycle', th: 'ช่วงการใช้ชีวิต' })}

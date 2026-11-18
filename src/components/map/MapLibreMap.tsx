@@ -32,7 +32,7 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
   // tilemaker --output phuket.mbtiles (default profile) produces this schema.
   return {
     version: 8,
-    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    glyphs: `${window.location.origin}/map-glyphs/noto-sans-regular/{range}.pbf?fontstack={fontstack}`,
     sources: {
       omt: {
         type: 'vector',
@@ -163,7 +163,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
 ) {
   const { language } = useLanguage();
   const ru = language === 'ru';
-  const [mapState, setMapState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [mapState, setMapState] = useState<'loading' | 'ready' | 'error' | 'unsupported'>('loading');
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [retry, setRetry] = useState(0);
   const fittedPositionsRef = useRef('');
@@ -268,8 +268,12 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       ...(coverageBounds ? { maxBounds: [[...coverageBounds[0]], [...coverageBounds[1]]] as [[number, number], [number, number]] } : {}),
       attributionControl: { compact: true },
       });
-    } catch {
-      setMapState('error');
+    } catch (error) {
+      // MapLibre can append a canvas before WebGL initialization throws. There
+      // is no returned Map instance to remove, so discard only its owned DOM.
+      containerRef.current?.replaceChildren();
+      const message = error instanceof Error ? error.message : String(error);
+      setMapState(/webgl/i.test(message) ? 'unsupported' : 'error');
       return;
     }
     let usingArchive = Boolean(PHUKET_PMTILES_URL);
@@ -281,6 +285,11 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     const onReady = () => {
       if (disposed || failed || !map.loaded()) return;
       window.clearTimeout(timeout);
+      // Expose non-sensitive render health, not offer data, for production QA.
+      const root = containerRef.current?.parentElement;
+      if (root && map.getLayer('place-labels')) {
+        root.setAttribute('data-map-label-count', String(map.queryRenderedFeatures({ layers: ['place-labels'] }).length));
+      }
       setMapState('ready');
     };
     const onError = () => {
@@ -387,23 +396,25 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   }, [center.lat, center.lng, zoom, markers.length, coverageBounds]);
 
   return (
-    <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div className={className} data-map-render-state={mapState} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div className="absolute left-3 top-3 z-10 right-20 lg:right-auto rounded-lg border border-border bg-card/95 px-3 py-2 text-xs text-foreground shadow-sm" role="status" aria-live="polite">
         {!online
           ? (ru ? 'Нет сети. Карта и предложения могут быть неполными.' : 'Offline. The map and offers may be incomplete.')
           : mapState === 'loading'
             ? (ru ? 'Загружаем карту…' : 'Loading map…')
+            : mapState === 'unsupported'
+              ? (ru ? 'В этом браузере недоступна графика карты (WebGL). Откройте предложения списком или попробуйте другой браузер.' : 'Map graphics (WebGL) are unavailable in this browser. View offers as a list or try another browser.')
             : mapState === 'error'
               ? (ru ? 'Не удалось загрузить фон карты. Предложения доступны в списке.' : 'The basemap could not load. Offers are available in the list.')
               : (ru ? 'Карта онлайн' : 'Online map')}
-        {mapState === 'error' && online && (
+        {(mapState === 'error' || mapState === 'unsupported') && online && (
           <button type="button" className="ml-2 min-h-11 underline underline-offset-4 font-medium" onClick={() => setRetry((value) => value + 1)}>
             {ru ? 'Повторить' : 'Retry'}
           </button>
         )}
       </div>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
-      {showLocateButton && !minimal && (
+      {showLocateButton && !minimal && mapState !== 'unsupported' && (
         <div className="absolute right-3 bottom-20 z-10 flex flex-col items-end gap-2 pointer-events-none">
           {locateError && (
             <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-none border border-border shadow-md">
