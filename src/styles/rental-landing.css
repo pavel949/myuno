@@ -44,7 +44,7 @@
   font-size: var(--public-display-size);
   line-height: 1.08;
   letter-spacing: -0.035em;
-  max-width: 11ch;
+  max-width: none;
   margin-block: 1.5rem;
 }
 .rental-hero-lead {
@@ -456,9 +456,6 @@
   }
 }
 
-.rental-hero h1 {
-  max-width: none;
-}
 .rental-title-kicker {
   display: block;
   font-family: var(--font-body);
