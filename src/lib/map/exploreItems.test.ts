@@ -52,6 +52,12 @@ describe('truthful map catalogue projection', () => {
     expect(experienceExploreItem({ ...exp, lat: 8.2, lng: 98.2 })).toMatchObject({ locationKind: 'meeting_point', lat: 8.2 });
     expect(experienceExploreItem({ id: 'trip', district: 'bang-tao' })).toBeNull();
   });
+  it('labels an explicitly fixed venue only when using its primary coordinates', () => {
+    const venue = { id: 'aquaria', lat: 7.8887188, lng: 98.3658599, location_type: 'fixed_venue', catalog_kind: 'venue' };
+    expect(experienceExploreItem(venue)).toMatchObject({ locationKind: 'place' });
+    expect(experienceExploreItem({ ...venue, location_type: undefined })).toMatchObject({ locationKind: 'meeting_point' });
+    expect(experienceExploreItem({ ...venue, lat: null, lng: null, meeting_point_lat: 8, meeting_point_lng: 98 })).toMatchObject({ locationKind: 'meeting_point' });
+  });
   it('omits explicitly closed experiences without marking unknown status as open', () => {
     const record = { id: 'venue', lat: 8, lng: 98, currency: 'THB' };
     for (const operating_status of ['temporarily_closed', 'permanently_closed', 'closed']) {
