@@ -22,3 +22,16 @@ describe('experience discovery classification (not inventory)', () => {
   expect(isClosedExperience(null)).toBe(false);
  });
 });
+
+import { experienceCategoryLabel, populatedExperienceCategories } from '../experienceDiscovery';
+it('keeps aquarium and escape-room identities distinct and admits only populated topics', () => {
+ const categories = [{ slug: 'aquarium', name_ru: 'Океанариумы', name_en: 'Aquariums' }, { slug: 'escape-room', name_ru: 'Квест-комната', name_en: 'Escape Room' }];
+ expect(populatedExperienceCategories(categories, [{ category: 'aquarium' }])).toEqual([categories[0]]);
+ expect(populatedExperienceCategories(categories, [])).toEqual([]);
+ expect(categories).toHaveLength(2); // Admin registry is not mutated by public projection.
+ expect(experienceCategoryLabel(categories[0], 'ru')).toBe('Океанариумы');
+ expect(experienceCategoryLabel(categories[0], 'en')).toBe('Aquariums');
+ expect(experienceCategoryLabel(categories[0], 'th')).toBe('พิพิธภัณฑ์สัตว์น้ำ');
+ expect(experienceCategoryLabel({ slug: 'custom', name_ru: 'Особая тема', name_en: 'Custom topic' }, 'th')).toBe('Custom topic');
+ expect(experienceGroup('shows')).toBe('culture');
+});

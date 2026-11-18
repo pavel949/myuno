@@ -22,14 +22,26 @@ export const DISCOVERY_TOPIC_LABELS: Record<string, { ru: string; en: string; th
  spa:{ru:'Спа',en:'Spa',th:'สปา'}, massage:{ru:'Массаж',en:'Massage',th:'นวด'}, yoga:{ru:'Йога и медитация',en:'Yoga & meditation',th:'โยคะและสมาธิ'}, onsen:{ru:'Онсэны',en:'Onsen',th:'ออนเซ็น'}, 'resort-pass':{ru:'День в отеле',en:'Resort day passes',th:'เดย์พาสรีสอร์ต'},
  festival:{ru:'Фестивали',en:'Festivals',th:'เทศกาล'}, concert:{ru:'Концерты',en:'Concerts',th:'คอนเสิร์ต'}, 'sport-event':{ru:'Спортивные события',en:'Sports events',th:'งานกีฬา'}, 'seasonal-event':{ru:'Сезонные события',en:'Seasonal events',th:'กิจกรรมตามฤดูกาล'},
 };
-const aliases: Record<string, string> = {'island-hopping':'islands', cultural:'culture', kayak:'kayaking', sea_canoe:'kayaking', 'cooking-class':'cooking_class'};
+const aliases: Record<string, string> = {'island-hopping':'islands', cultural:'culture', kayak:'kayaking', sea_canoe:'kayaking', 'cooking-class':'cooking_class', shows:'show'};
 export const discoveryTopic = (slug: string) => aliases[slug] || slug;
 export function experienceGroup(category: string | null | undefined): ExperienceGroupId | undefined {
- return EXPERIENCE_DISCOVERY_GROUPS.find(group => (group.categories as readonly string[]).includes(category || ''))?.id;
+ return EXPERIENCE_DISCOVERY_GROUPS.find(group => (group.categories as readonly string[]).includes(discoveryTopic(category || '')))?.id;
 }
 export function isClosedExperience(status: string | null | undefined) {
  return ['temporarily_closed', 'permanently_closed', 'closed'].includes(status?.trim().toLowerCase() || '');
 }
 export function isFixedVenue(item: { location_type?: string | null; catalog_kind?: string | null }) {
  return item.location_type === 'fixed_venue' && item.catalog_kind === 'venue';
+}
+
+/** Public topic labels keep editable RU/EN names; Thai uses reviewed translations when available. */
+export function experienceCategoryLabel(category: { slug: string; name_ru: string; name_en: string }, language: string): string {
+ if (language === 'ru') return category.name_ru || category.name_en;
+ if (language === 'th') return DISCOVERY_TOPIC_LABELS[discoveryTopic(category.slug)]?.th || category.name_en || category.name_ru;
+ return category.name_en || category.name_ru;
+}
+/** Inventory is admitted published offers, not the prospective registry or place type guesses. */
+export function populatedExperienceCategories<T extends { slug: string }>(categories: T[], offers: { category: string | null }[]): T[] {
+ const populated = new Set(offers.map(offer => offer.category));
+ return categories.filter(category => populated.has(category.slug));
 }

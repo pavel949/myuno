@@ -1,7 +1,7 @@
 import { CATEGORIES, type CategoryEntry } from '@/lib/catalog/taxonomy';
 
 /** Group existing destinations only; this is navigation, not service inventory. */
-export function groupCatalogDestinations<T extends { serviceId: string; path: string }>(items: T[]): { id: string; category: CategoryEntry | null; items: T[] }[] {
+export function groupCatalogDestinations<T extends { serviceId: string; path: string }>(items: T[], categories: CategoryEntry[] = CATEGORIES): { id: string; category: CategoryEntry | null; items: T[] }[] {
   const seen = new Set<string>();
   const unique = items.filter(item => {
     const key = `${item.serviceId}:${item.path}`;
@@ -9,8 +9,9 @@ export function groupCatalogDestinations<T extends { serviceId: string; path: st
     seen.add(key);
     return true;
   });
-  const categoryOf = (item: T) => CATEGORIES.find(category => category.services.some(service => service.id === item.serviceId));
-  const groups = CATEGORIES.map(category => ({
+  const categoryOf = (item: T) => categories.find(category => category.services.some(service => service.id === item.serviceId))
+    ?? categories.find(category => category.services.some(service => service.path === item.path));
+  const groups = categories.map(category => ({
     id: category.id,
     category,
     items: unique.filter(item => categoryOf(item)?.id === category.id),

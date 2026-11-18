@@ -206,3 +206,6 @@ Canonical docs describe approved architecture. Convergence/audit docs are eviden
 Passing tests is evidence, **not automatic approval**. Never start the next critical tranche automatically. Critical reports state files/migrations/functions, behavior changed, canonical logic unchanged, tests/counts, production evidence, blockers, rollback, SHA, GO/NO-GO.
 
 **Final rule:** when speed conflicts with canonical integrity, preserve canonical truth. When documentation conflicts with evidence, preserve evidence and update documentation.
+
+### Service navigation situation mapping (2026-11-18)
+Public service situation filters consume `catalog_life_map` service identities and active `life_situations` through `useCatalogFromDB`. Existing generated deterministic service UUIDs remain canonical; explicit slug aliases do not create duplicate entities. Admin LifeOS mapping edits invalidate catalogue caches. A successful empty mapping is authoritative; static situation tags are degraded loading/error fallback only. Menu parent placement is edited in Master Catalogue; this is distinct from property/project relations and experience topics.

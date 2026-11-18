@@ -1,0 +1,37 @@
+name: catalog-mapping-acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - src/pages/admin/AdminMasterCatalog.tsx
+      - src/lib/catalog/catalogHierarchy*
+      - e2e/fixtures/catalog-mapping/**
+      - .github/workflows/catalog-mapping-acceptance.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: catalog-mapping-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npx playwright install --with-deps chromium
+      - name: Category placement save, reopen, cancel and Escape (synthetic data)
+        run: |
+          npx vite --config e2e/fixtures/catalog-mapping/vite.config.mjs > /tmp/catalog-mapping-vite.log 2>&1 &
+          for n in $(seq 1 60); do curl -fsS http://127.0.0.1:4185 >/dev/null && break; sleep 1; done
+          node e2e/fixtures/catalog-mapping/capture.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalog-mapping-viewport-evidence
+          path: test-results/catalog-mapping

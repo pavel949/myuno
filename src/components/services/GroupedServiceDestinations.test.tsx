@@ -5,10 +5,14 @@ import type { ReactNode } from 'react';
 import { Wrench } from 'lucide-react';
 import ArriveClusterPage from '@/pages/arrive/ArriveClusterPage';
 import LegalClusterPage from '@/pages/legal/LegalClusterPage';
+import { CATEGORIES } from '@/lib/catalog/taxonomy';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { groupCatalogDestinations } from '@/lib/services/catalogServiceGroups';
 import { GroupedServiceDestinations } from './GroupedServiceDestinations';
 
+let categories = CATEGORIES;
+let isFromDB = false;
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories, isFromDB }) }));
 let language: 'en' | 'ru' | 'th' = 'en';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language }) }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: ReactNode }) => children }));
@@ -16,11 +20,19 @@ vi.mock('@/components/uno/CalmClusterHero', () => ({ CalmClusterHero: ({ title }
 vi.mock('@/components/navigation/ClusterBreadcrumb', () => ({ ClusterBreadcrumb: () => null }));
 vi.mock('@/components/navigation/ExploreMoreRail', () => ({ ExploreMoreRail: () => null }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
-beforeEach(() => { language = 'en'; });
+beforeEach(() => { language = 'en'; categories = CATEGORIES; isFromDB = false; });
 const mount = (page: ReactNode) => render(<MemoryRouter>{page}</MemoryRouter>);
 const hrefs = () => screen.getAllByRole('link').map(link => link.getAttribute('href')).sort();
 
 describe('mounted thematic service grouping', () => {
+  it('uses admin-controlled live grouping and does not resurrect removed services', () => {
+    const finance = CATEGORIES.find(category => category.id === 'cat-finance')!;
+    categories = [{ ...finance, labelEn: 'Money matters', services: finance.services.filter(service => service.id === 'exchange') }];
+    isFromDB = true;
+    mount(<ArriveClusterPage />);
+    expect(within(screen.getByRole('region', { name: 'Money matters' })).getByRole('link', { name: /Exchange Rates/ })).toBeVisible();
+    expect(screen.queryByRole('link', { name: /SIM Cards/ })).toBeNull();
+  });
   it('preserves all visiting destinations under canonical categories and arrival stages', () => {
     mount(<ArriveClusterPage />);
     expect(screen.getByRole('heading', { name: 'Before You Come' })).toBeVisible();
@@ -63,6 +75,13 @@ describe('mounted thematic service grouping', () => {
     expect(screen.getByText('Информация')).toBeVisible();
     expect(screen.queryByText('Для специалистов')).toBeNull();
     expect(screen.getByRole('link')).toHaveAttribute('href', APP_ROUTES.TAX_NAV);
+  });
+  it('recognizes an existing live slug alias by its exact route', () => {
+    const reference = CATEGORIES.find(category => category.id === 'cat-family-kids')!;
+    categories = [{ ...reference, services: [{ ...reference.services.find(service => service.id === 'education')!, id: 'education-expat' }] }];
+    isFromDB = true;
+    mount(<GroupedServiceDestinations clusterId="arrive" idPrefix="alias" apps={[{ serviceId: 'education', path: '/education', label: 'Schools', labelRu: 'Школы', desc: '', descRu: '', fallbackIcon: Wrench }]} />);
+    expect(within(screen.getByRole('region', { name: reference.labelEn })).getByRole('link', { name: /Schools/ })).toBeVisible();
   });
   it('does not infer a category for unknown IDs or lose distinct destination variants', () => {
     const first = { serviceId: 'unknown', path: '/services?category=one' };

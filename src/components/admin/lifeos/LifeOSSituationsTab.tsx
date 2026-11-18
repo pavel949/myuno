@@ -94,6 +94,9 @@ export function LifeOSSituationsTab() {
       : (isRussian ? 'Ситуация активна' : 'Situation activated')
     );
     queryClient.invalidateQueries({ queryKey: ['admin-life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+    queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
   };
 
   const handleCreate = async () => {
@@ -136,6 +139,9 @@ export function LifeOSSituationsTab() {
       priority: 100,
     });
     queryClient.invalidateQueries({ queryKey: ['admin-life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+    queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
   };
 
   const handleUpdate = async () => {
@@ -162,6 +168,9 @@ export function LifeOSSituationsTab() {
     toast.success(isRussian ? 'Изменения сохранены' : 'Changes saved');
     setEditingSituation(null);
     queryClient.invalidateQueries({ queryKey: ['admin-life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['life-situations'] });
+    queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+    queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
   };
 
   return (
