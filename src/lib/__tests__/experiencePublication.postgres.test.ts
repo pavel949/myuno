@@ -23,6 +23,7 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
     return tx.unsafe(query);
   });
   let prepatchList:number, prepatchRPC:number;
+  let prepatchAdminUpdateCode: string | undefined;
   let policiesBefore: unknown;
   beforeAll(async () => {
     directory=mkdtempSync(join(tmpdir(),'experience-security-pg-')); chmodSync(directory,0o700);
@@ -67,16 +68,18 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
     ];
     for(let i=0;i<rows.length;i++){
       const [vertical,active,approval,attrs,provider]=rows[i];
-      await sql`INSERT INTO listings(id,vertical,is_active,approval_status,attributes,provider_id,name_en,price) VALUES(${uid(i+1)},${vertical as string},${active as boolean},${approval as string|null},${JSON.stringify(attrs)}::jsonb,${provider as string|null},${`synthetic${i+1}`},100)`;
+      await sql`INSERT INTO listings(id,vertical,is_active,approval_status,attributes,provider_id,name_en,price) VALUES(${uid(i+1)},${vertical as string},${active as boolean},${approval as string|null},${sql.json(attrs as postgres.JSONValue)}::jsonb,${provider as string|null},${`synthetic${i+1}`},100)`;
       await sql`INSERT INTO catalog_life_map VALUES(${vertical as string},${uid(i+1)},${uid(700)},90,NULL,'{}')`;
     }
     prepatchList=(await as('anon',"SELECT id FROM listings WHERE vertical='experience'")).length;
     prepatchRPC=(await as('anon',"SELECT * FROM resolve_life_os_context('family') WHERE entity_type='experience'")).length;
+    try { await as('authenticated',`UPDATE listings SET name_en=name_en WHERE id='${uid(6)}' RETURNING id`,uid(900)); } catch(error) { prepatchAdminUpdateCode=(error as {code?:string}).code; }
     policiesBefore=await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname<>'listings_public_read' ORDER BY policyname`;
     await sql.unsafe(body('experience-public-rls-proposal.sql'));
     await sql.unsafe(body('experience-rpc-public-proposal.sql'));
   },30000);
   afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','-w','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
+  it('reproduces existing recursive UPDATE policy before any fix',()=>{expect(prepatchAdminUpdateCode).toBe('42P17');});
   it('reproduces pre-fix draft/closed leak in direct SELECT and definer RPC',()=>{expect(prepatchList).toBe(5);expect(prepatchRPC).toBe(5);});
   it.each([['anon',''],['authenticated',uid(902)]])('limits %s direct listings without changing other vertical public gate',async(role,user)=>{
     expect((await as(role,'SELECT id FROM listings ORDER BY id',user)).map(r=>r.id)).toEqual([uid(1),uid(7)]);

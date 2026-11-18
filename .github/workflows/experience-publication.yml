@@ -35,6 +35,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install isolated test tools
+        id: tools
         run: |
           npm ci
           sudo apt-get update
@@ -45,6 +46,7 @@ jobs:
       - name: Verify real PostgreSQL roles against synthetic records
         run: npx vitest run src/lib/__tests__/experiencePublication.postgres.test.ts
       - name: Verify catalogue and actual admin desktop and mobile
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
         run: node scripts/qa/experiences-journey-ui.mjs
       - name: Upload exact-head experience evidence
         if: always()
