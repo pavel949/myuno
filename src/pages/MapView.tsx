@@ -175,10 +175,10 @@ export default function MapView() {
 
 
   // Fetch data from all verticals
-  const { data: properties, isLoading: propLoading } = usePropertiesForMap({});
+  const { data: properties, isLoading: propLoading, isError: propError } = usePropertiesForMap({});
   const { data: exploreItems, isLoading: exploreLoading, layerErrors = [], missingCoordinates = 0, isError: exploreError } = useExploreLayers();
 
-  const { data: salons, isLoading: salonLoading } = useQuery({
+  const { data: salons, isLoading: salonLoading, isError: salonError } = useQuery({
     queryKey: ['salons-map'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -209,13 +209,13 @@ export default function MapView() {
       },
     });
 
-  const { data: gyms, isLoading: gymLoading } = useGeoLayer('gyms');
-  const { data: pharmacies, isLoading: pharmLoading } = useGeoLayer('pharmacies');
-  const { data: vets, isLoading: vetLoading } = useGeoLayer('veterinary_clinics');
-  const { data: flowerShops, isLoading: flowerLoading } = useGeoLayer('flower_shops');
-  const { data: venues, isLoading: venueLoading } = useGeoLayer('venues');
+  const { data: gyms, isLoading: gymLoading, isError: gymError } = useGeoLayer('gyms');
+  const { data: pharmacies, isLoading: pharmLoading, isError: pharmError } = useGeoLayer('pharmacies');
+  const { data: vets, isLoading: vetLoading, isError: vetError } = useGeoLayer('veterinary_clinics');
+  const { data: flowerShops, isLoading: flowerLoading, isError: flowerError } = useGeoLayer('flower_shops');
+  const { data: venues, isLoading: venueLoading, isError: venueError } = useGeoLayer('venues');
 
-  const { data: events, isLoading: eventLoading } = useQuery({
+  const { data: events, isLoading: eventLoading, isError: eventError } = useQuery({
     queryKey: ['events-map'],
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
@@ -231,7 +231,7 @@ export default function MapView() {
     },
   });
 
-  const { data: communities, isLoading: communityLoading } = useQuery({
+  const { data: communities, isLoading: communityLoading, isError: communityError } = useQuery({
     queryKey: ['communities-map'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -295,6 +295,8 @@ export default function MapView() {
 
   const isDataLoading =
     propLoading || exploreLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading || communityLoading;
+
+  const hasDataError = Boolean(layerErrors.length || exploreError || restaurantError || propError || salonError || gymError || pharmError || vetError || flowerError || venueError || eventError || communityError);
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
@@ -644,7 +646,7 @@ export default function MapView() {
               {language === 'ru' ? (showList ? 'Закрыть список' : 'Показать списком') : (showList ? 'Close list' : 'Show list')}
             </Button>
           </div>
-          {(layerErrors.length > 0 || exploreError || restaurantError) && <p role="alert" className="text-xs text-destructive">{language === 'ru' ? 'Не все слои удалось загрузить. Часть предложений может отсутствовать.' : 'Some layers could not load. Some offers may be missing.'}</p>}
+          {hasDataError && <p role="alert" className="text-xs text-destructive">{language === 'ru' ? 'Не все слои удалось загрузить. Часть предложений может отсутствовать.' : 'Some layers could not load. Some offers may be missing.'}</p>}
           {missingCoordinates > 0 && <p className="text-xs text-muted-foreground">{language === 'ru' ? `${missingCoordinates} предложений пока без точной геопозиции.` : `${missingCoordinates} offers have no precise location yet.`}</p>}
           {!showLoading && (
             <div className="flex items-center justify-between gap-2">
@@ -792,8 +794,6 @@ export default function MapView() {
               })()}
             </div>
           )}
-        </div>
-      </div>
 
       {showList && <MapListBottomSheet
         onClose={() => setShowList(false)}
@@ -807,7 +807,7 @@ export default function MapView() {
       >
         {mlMarkers.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            {showLoading ? (language === 'ru' ? 'Загружаем предложения…' : 'Loading offers…') : (exploreError || layerErrors.length) ? (language === 'ru' ? 'Часть данных не загрузилась. Попробуйте обновить страницу.' : 'Some data could not load. Please refresh.') : (language === 'ru' ? 'Нет предложений с точной геопозицией по этим фильтрам.' : 'No offers with a precise location match these filters.')}
+            {showLoading ? (language === 'ru' ? 'Загружаем предложения…' : 'Loading offers…') : hasDataError ? (language === 'ru' ? 'Часть данных не загрузилась. Попробуйте обновить страницу.' : 'Some data could not load. Please refresh.') : (language === 'ru' ? 'Нет предложений с точной геопозицией по этим фильтрам.' : 'No offers with a precise location match these filters.')}
           </div>
         ) : (
           <div role="listbox" aria-label={language === 'ru' ? 'Список локаций' : 'Locations list'}>
@@ -847,6 +847,8 @@ export default function MapView() {
           </div>
         )}
       </MapListBottomSheet>}
+        </div>
+      </div>
       <PoiClaimSheet open={!!claimPoi} onOpenChange={(v) => !v && setClaimPoi(null)} poi={claimPoi} />
     </AppLayout>
   );
