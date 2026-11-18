@@ -2,13 +2,14 @@
  * Property Hub child routes — extracted from AnimatedRoutes.
  * Rendered as nested children of /property under PropertyHub layout.
  */
-import { Route, Navigate, useParams } from 'react-router-dom';
+import { Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { APP_ROUTES } from '@/lib/config/routes';
 import * as Pages from '../pageRegistry';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { PageTransition } from '../PageTransition';
+import { clearPropertySearchQuery } from '@/lib/propertySearchQuery';
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
   <PageTransition>
@@ -31,6 +32,14 @@ export const PropertyHubIndex = () => {
   return <PropertySearchRedirect />;
 };
 
+export const PropertyRentEntry = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  // Saved criteria still open results. Campaign/context keys do not hide the landing.
+  const hasCriteria = clearPropertySearchQuery(params).toString() !== params.toString();
+  return hasCriteria ? <PropertySearchRedirect defaults={{ mode: 'rent' }} /> : <LazyPage><Pages.PropertyLanding /></LazyPage>;
+};
+
 export const propertyHubRoutes = (
   <>
     <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
@@ -38,7 +47,7 @@ export const propertyHubRoutes = (
     {/* Top-level aliases for persona landings (C8) */}
     <Route
       path="rent"
-      element={<PropertySearchRedirect defaults={{ mode: 'rent' }} />}
+      element={<PropertyRentEntry />}
     />
     <Route
       path="buy"

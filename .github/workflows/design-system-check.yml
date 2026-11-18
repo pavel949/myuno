@@ -31,6 +31,11 @@ jobs:
         run: node scripts/qa/yachts-flowers-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Rental landing areas communities and shared search
+        run: node scripts/qa/rental-landing-ui.mjs
+        env:
+          RENTAL_QA_OUTPUT: artifacts/design-system/rental-landing
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Guard authored theme sources
         run: |
           npm run design:check

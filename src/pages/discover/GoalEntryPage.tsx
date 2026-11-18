@@ -4,7 +4,7 @@
  * Pure navigation surface over existing verticals (see `goalEntries.ts`).
  * No fake metrics, no dead buttons: every tile links to a mounted route.
  */
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead } from '@/components/seo/SEOHead';
@@ -14,14 +14,20 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { GOAL_ENTRIES, isGoalId, type GoalLink } from '@/lib/nav/goalEntries';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import '@/styles/cinematic-home.css';
+import { clearPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { cn } from '@/lib/utils';
 import ServicesIndex from '@/pages/services/ServicesIndex';
 
 export default function GoalEntryPage({ goal }: { goal: string }) {
   const { language } = useLanguage();
+  const location = useLocation();
 
   if (goal === 'services') return <ServicesIndex />;
-  if (goal === 'stay') return <PropertySearchRedirect defaults={{ mode: 'rent' }} />;
+  if (goal === 'stay') {
+    const params = new URLSearchParams(location.search);
+    const hasCriteria = clearPropertySearchQuery(params).toString() !== params.toString();
+    return hasCriteria ? <PropertySearchRedirect defaults={{ mode: 'rent' }} /> : <Navigate replace state={location.state} to={`${APP_ROUTES.PROPERTY_RENT}${location.search}${location.hash}`} />;
+  }
 
   if (!isGoalId(goal)) return <Navigate to={APP_ROUTES.DISCOVER} replace />;
   const entry = GOAL_ENTRIES[goal];
