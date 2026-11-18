@@ -21,9 +21,8 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: '
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (value: number) => `฿${value}` }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ getCityConfig: () => ({ lat: 7.98, lng: 98.31 }) }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
-vi.mock('@tanstack/react-query', () => ({ useQuery: ({queryKey}: {queryKey:string[]}) => ({ data: fixtures.places[queryKey[0]] ?? fixtures.empty, isLoading: false }) }));
+vi.mock('@tanstack/react-query', () => ({ useQuery: ({queryKey}: {queryKey:string[]}) => ({ data: (queryKey[0] === 'restaurants-map' ? fixtures.restaurants : fixtures.places[queryKey[0]]) ?? fixtures.empty, isLoading: false }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesForMap: () => ({ data: fixtures.empty, isLoading: false }), transformPropertiesToMarkers: () => fixtures.empty }));
-vi.mock('@/hooks/useRestaurants', () => ({ useRestaurants: () => ({ restaurants: fixtures.restaurants, isLoading: false }) }));
 vi.mock('@/hooks/useExploreLayers', () => ({ useExploreLayers: () => ({ data: fixtures.offers, isLoading: false, layerErrors: fixtures.empty }) }));
 vi.mock('@/hooks/useExperiences', () => ({ EXPERIENCE_CATEGORIES: [] }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: React.PropsWithChildren) => <main>{children}</main> }));
@@ -52,6 +51,9 @@ describe('MapView integration smoke', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Посуточная аренда' }));
     expect(pins().getAllByRole('button')).toHaveLength(1);
     expect(screen.getByTestId('url')).toHaveTextContent('layers=stay');
+    expect(screen.getByRole('button', { name: 'Посуточная аренда', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Все', exact: true })).toHaveAttribute('aria-pressed', 'false');
+    expect(document.querySelector('[data-map-layer-color=stay]')).toHaveClass('inline-block');
     fireEvent.click(screen.getByRole('button', { name: 'Впечатления' }));
     expect(pins().getAllByRole('button')).toHaveLength(2);
     expect(screen.getByTestId('url')).toHaveTextContent('layers=stay%2Cexperience');

@@ -51,6 +51,7 @@ describe('public map source security guards', () => {
       'price_period', 'currency', 'rating', 'cover_image',
       'meeting_point_lat:attributes->meeting_point_lat',
       'meeting_point_lng:attributes->meeting_point_lng', 'price_per:attributes->>price_per',
+      'operating_status:attributes->>operating_status',
     ]);
     expect(query?.limit).toBe(1000);
     for (const call of mock.calls) {

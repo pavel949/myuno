@@ -26,6 +26,7 @@ const offers = [
 for(const offer of offers){offer.currency='THB';offer.approximate=false;}
 const restaurants=[{id:'food1',name_en:'Synthetic restaurant',name_ru:'Тестовый ресторан',lat:7.96,lng:98.28,rating:0}];
 const places=Object.fromEntries(['salons-map','gyms-map','pharmacies-map','veterinary_clinics-map'].map((key,index)=>[key,[{id:'premise-'+index,name_en:'Synthetic premise '+index,name_ru:['Тестовый салон','Тестовый фитнес','Тестовая аптека','Тестовая клиника'][index],lat:7.94+index*.027,lng:98.36}]]));
+places['restaurants-map']=restaurants;
 const virtual = {
  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:'ru'});`,
  '@/contexts/CurrencyContext': `export const useCurrency=()=>({formatPrice:n=>'฿'+n});`,
@@ -33,7 +34,6 @@ const virtual = {
  '@/integrations/supabase/client': `export const supabase=new Proxy({}, {get(){throw Error('Production data access forbidden in map fixture')}});`,
  '@tanstack/react-query': `const empty=[];const places=${JSON.stringify(places)};export const useQuery=({queryKey})=>({data:places[queryKey[0]]??empty,isLoading:false});`,
  '@/hooks/useProperties': `const data=[];export const usePropertiesForMap=()=>({data,isLoading:false});export const transformPropertiesToMarkers=()=>data;`,
- '@/hooks/useRestaurants': `const restaurants=${JSON.stringify(restaurants)};export const useRestaurants=()=>({restaurants,isLoading:false});`,
  '@/hooks/useExploreLayers': `const data=${JSON.stringify(offers)};const layerErrors=[];export const useExploreLayers=()=>({data,isLoading:false,layerErrors});`,
  '@/hooks/useExperiences': `export const EXPERIENCE_CATEGORIES=[];`,
  '@/components/layout/AppLayout': `import React from'react';export const AppLayout=({children})=><main data-canvas="consumer"><header style={{height:56,padding:'8px 16px',background:'#0A2240',color:'white',fontSize:12}}>MyUno · QA ONLY · Тестовые предложения · настоящая карта Пхукета</header>{children}</main>;`,
@@ -138,7 +138,7 @@ try{
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
   await context.route('**/*',route=>{const url=route.request().url();if(url.startsWith(origin+'/'))return route.continue();denied.push(url);return route.abort();});
-  const screenshot=async(name)=>page.screenshot({path:path.join(output,`${viewport.width}-${name}.png`),fullPage:true});
+  const screenshot=async(name)=>page.screenshot({path:path.join(output,`${viewport.width}-${name}.png`),fullPage:true,animations:'disabled'});
   try{
    await page.goto(origin+'/fixture.html');
    await expect(page.getByRole('heading',{name:'Найдите своё место на Пхукете'})).toBeVisible();
@@ -148,10 +148,25 @@ try{
    if(!await page.evaluate(()=>window.fixtureMap.getCanvas().width>0 && Boolean(window.fixtureMap.getCanvas().getContext('webgl2')||window.fixtureMap.getCanvas().getContext('webgl'))))throw Error('No WebGL drawing context');
    await page.waitForFunction(()=>window.fixtureMap.queryRenderedFeatures({layers:['roads']}).length>0 && window.fixtureMap.queryRenderedFeatures({layers:['place-labels']}).length>0,null,{timeout:60000});
    const geography=await page.evaluate(()=>({roads:window.fixtureMap.queryRenderedFeatures({layers:['roads']}).length,labels:window.fixtureMap.queryRenderedFeatures({layers:['place-labels']}).length}));
+   const legend=await page.locator('[data-map-layer-color]').evaluateAll(elements=>elements.map(element=>{const box=element.getBoundingClientRect();const style=getComputedStyle(element);return {layer:element.dataset.mapLayerColor,width:box.width,height:box.height,color:style.backgroundColor,display:style.display};}));
+   if(legend.length<7||legend.some(dot=>dot.width<8||dot.height<8||dot.color==='rgba(0, 0, 0, 0)'||dot.color==='transparent'))throw Error('Invisible legend dots: '+JSON.stringify(legend));
+   const allChip=page.getByRole('button',{name:'Все',exact:true});
+   const servicesChip=page.getByRole('button',{name:'Услуги',exact:true});
+   await expect(allChip).toHaveAttribute('aria-pressed','true');
+   await expect(servicesChip).toHaveAttribute('aria-pressed','false');
+   const activeBackground=await allChip.evaluate(element=>getComputedStyle(element).backgroundColor);
+   const inactiveBackground=await servicesChip.evaluate(element=>getComputedStyle(element).backgroundColor);
+   if(activeBackground===inactiveBackground)throw Error('Initial layer selection has no visual distinction');
    await screenshot('map');
    await page.getByRole('button',{name:'Услуги',exact:true}).click();
    await expect(page.locator('[data-marker-id]')).toHaveCount(4);
    await expect(page.getByTestId('location')).toHaveText('/map?layers=service');
+   await expect(servicesChip).toHaveAttribute('aria-pressed','true');
+   await expect(allChip).toHaveAttribute('aria-pressed','false');
+   // Wait for real CSS transitions to settle: an immediate screenshot can retain
+   // the previous 'All' color even though React and aria-pressed already updated.
+   await expect(servicesChip).toHaveCSS('background-color',activeBackground);
+   await expect(allChip).toHaveCSS('background-color',inactiveBackground);
    await screenshot('services');
    await page.getByRole('button',{name:'Тестовый фитнес',exact:true}).click();
    await page.getByRole('button',{name:/Открыть предложение/}).click();
@@ -186,7 +201,7 @@ try{
    await expect(page.getByRole('button',{name:/Открыть предложение/})).toBeVisible();
    const mapErrors=await page.evaluate(()=>window.fixtureMapErrors);
    if(errors.length||denied.length||mapErrors.length||assetErrors.length)throw Error(JSON.stringify({errors,denied,mapErrors,assetErrors}));
-   results.push({head,viewport,outcome:'PASS',renderer:'real MapLibre WebGL',data:'synthetic offers; real public Phuket PMTiles and production map style; NOT live offer/backend acceptance',basemap:archiveEvidence,geography,glyphRanges:[...glyphCache.keys()],shell:'AppLayout replaced with labelled QA header; full navigation shell NOT tested',screenshots:['map','services','selected','list'].map(name=>`${viewport.width}-${name}.png`)});
+   results.push({head,viewport,outcome:'PASS',renderer:'real MapLibre WebGL',data:'synthetic offers; real public Phuket PMTiles and production map style; NOT live offer/backend acceptance',basemap:archiveEvidence,geography,glyphRanges:[...glyphCache.keys()],legend,fonts:'UI webfonts not loaded by isolated shell; browser fallbacks only. Map glyphs are real Noto Sans Regular.',shell:'AppLayout replaced with labelled QA header; full navigation shell NOT tested',screenshots:['map','services','selected','list'].map(name=>`${viewport.width}-${name}.png`)});
   }catch(error){await screenshot('failure');throw error;}finally{await context.close();}
  }
 }finally{await writeFile(path.join(output,'asset-requests.json'),JSON.stringify({requests:assetRequests,errors:assetErrors},null,2));await writeFile(path.join(output,'results.json'),JSON.stringify(results,null,2));await browser?.close();await new Promise(resolve=>server.close(resolve));}

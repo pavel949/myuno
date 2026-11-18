@@ -18,7 +18,7 @@ export function useExploreLayers() {
         // Generic provider coordinates do not prove a customer-facing fixed venue.
         // Place-specific service layers are loaded separately by MapView.
         supabase.from('listings')
-          .select<string>('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per')
+          .select<string>('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per, operating_status:attributes->>operating_status')
           .eq('vertical', 'experience').eq('is_active', true).eq('approval_status', 'approved').eq('attributes->>status', 'published').limit(1000),
       ]);
       const sourceNames = ['property', 'newbuild', 'experience'];

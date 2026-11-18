@@ -69,6 +69,9 @@ export function projectExploreItem(record: MapRecord): ExploreItem | null {
     image: str(record.cover_image_url) ?? str(record.cover_image), projectId: String(record.id) };
 }
 export function experienceExploreItem(record: MapRecord): ExploreItem | null {
+  // Publication alone does not make a known closed venue available. Unknown
+  // operating status is not an open-now claim (that filter requires hours).
+  if (['temporarily_closed', 'permanently_closed', 'closed'].includes(str(record.operating_status)?.toLowerCase() ?? '')) return null;
   const place = mapCoordinates(record.lat, record.lng);
   const coords = place ?? mapCoordinates(record.meeting_point_lat, record.meeting_point_lng);
   if (!coords || !str(record.id)) return null;

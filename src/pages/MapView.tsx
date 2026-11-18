@@ -13,10 +13,9 @@ import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
-import { useRestaurants } from '@/hooks/useRestaurants';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { isOpenNow } from '@/lib/filterUtils';
+import { isMapOpenNow } from '@/lib/map/openNow';
 import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
 import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/map/MapSearchBox';
 import { MapListBottomSheet } from '@/components/map/MapListBottomSheet';
@@ -187,6 +186,7 @@ export default function MapView() {
         .from('public_salon_catalog')
         .select('id, name_en, name_ru, lat, lng, rating, price_from, cover_image')
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .not('lat', 'is', null)
         .not('lng', 'is', null);
       if (error) throw error;
@@ -194,18 +194,34 @@ export default function MapView() {
     },
   });
 
-  const { restaurants, isLoading: restLoading, error: restaurantError } = useRestaurants({});
+  const { data: restaurants, isLoading: restLoading, error: restaurantError } = useQuery({
+    queryKey: ['restaurants-map'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('restaurants')
+        .select('id, name_en, name_ru, lat, lng, rating, cover_image, district, cuisine, working_hours')
+        .eq('is_active', true).eq('approval_status', 'approved')
+        .not('lat', 'is', null).not('lng', 'is', null);
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const useGeoLayer = (table: 'gyms' | 'pharmacies' | 'veterinary_clinics' | 'flower_shops' | 'venues') =>
     useQuery({
       queryKey: [`${table}-map`],
       queryFn: async () => {
-        const { data, error } = await supabase
+        let query = supabase
           .from(table)
           .select('id, name_en, name_ru, lat, lng, cover_image')
           .eq('is_active', true)
           .not('lat', 'is', null)
           .not('lng', 'is', null);
+        // Keep public map results identical for guests and privileged sessions.
+        // The other place tables do not have an approval_status column.
+        if (table === 'gyms' || table === 'pharmacies' || table === 'flower_shops') {
+          query = query.eq('approval_status', 'approved');
+        }
+        const { data, error } = await query;
         if (error) throw error;
         return data || [];
       },
@@ -225,6 +241,7 @@ export default function MapView() {
         .from('events')
         .select('id, title_en, title_ru, lat, lng, cover_image, price, event_date')
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .not('lat', 'is', null)
         .not('lng', 'is', null)
         .or(`event_date.is.null,event_date.gte.${today}`);
@@ -332,14 +349,22 @@ export default function MapView() {
       }
     });
     (restaurants || []).forEach((r) => {
-      if (r.lat != null && r.lng != null) {
+      if (r.id && r.lat != null && r.lng != null) {
+        // Compatibility view stores JSON: only supported string day schedules
+        // may enter the open-now parser, never arrays or nested metadata.
+        const workingHours: Record<string, string> = {};
+        if (r.working_hours && typeof r.working_hours === 'object' && !Array.isArray(r.working_hours)) {
+          for (const [day, hours] of Object.entries(r.working_hours)) {
+            if (typeof hours === 'string') workingHours[day] = hours;
+          }
+        }
         markers.push({
-          id: r.id, name: r.name_en, nameRu: r.name_ru,
+          id: r.id, name: r.name_en || r.name_ru || 'Restaurant', nameRu: r.name_ru || r.name_en || 'Ресторан',
           lat: Number(r.lat), lng: Number(r.lng),
           rating: r.rating || 0, priceFrom: 0,
           image: r.cover_image || undefined,
-          vertical: 'restaurant', district: r.district, category: r.cuisine,
-          workingHours: r.working_hours ?? null,
+          vertical: 'restaurant', district: r.district || undefined, category: r.cuisine || undefined,
+          workingHours: Object.keys(workingHours).length ? workingHours : null,
         });
       }
     });
@@ -402,7 +427,7 @@ export default function MapView() {
         if (m.currency !== 'THB' || m.pricePeriod !== 'night' || m.priceFrom == null || m.priceFrom <= 0 || m.priceFrom < min || m.priceFrom >= max) return false;
       }
       if (selectedAvailability === 'open_now') {
-        if (!m.workingHours || !isOpenNow(m.workingHours)) return false;
+        if (!m.workingHours || !isMapOpenNow(m.workingHours)) return false;
       }
       return true;
     });
@@ -637,7 +662,7 @@ export default function MapView() {
 
           <FilterChipGroup scrollable className="touch-pan-x">
             {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'service', 'restaurant'].includes(opt.value)).map((opt) => (
-              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.value === 'all' ? opt.icon : <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: VERTICAL_CONFIG[opt.value].color }} />} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
+              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.value === 'all' ? opt.icon : <span aria-hidden data-map-layer-color={opt.value} className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: VERTICAL_CONFIG[opt.value].color }} />} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
             ))}
           </FilterChipGroup>
 
