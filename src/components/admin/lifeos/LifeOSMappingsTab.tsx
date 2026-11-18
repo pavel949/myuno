@@ -32,6 +32,8 @@ import { toast } from 'sonner';
 import { Plus, Trash2, Search, AlertTriangle, Users, Weight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ChangeImpactModal } from './ChangeImpactModal';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { catalogServiceLifeId } from '@/lib/catalog/serviceSituationLinks';
 import { ENTITY_TYPES, getEntityType, type EntityTypeDefinition } from '@/lib/config/entityTypes';
 
 // Get entity types from centralized config
@@ -64,6 +66,11 @@ interface MappingWithMeta {
 export function LifeOSMappingsTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const { categories } = useCatalogFromDB();
+  const serviceChoices = categories.flatMap(category => category.services).flatMap(service => {
+    const id = catalogServiceLifeId(service.id);
+    return id ? [{ id, label: isRussian ? service.labelRu : service.labelEn }] : [];
+  });
   const queryClient = useQueryClient();
 
   // Governance config
@@ -104,16 +111,18 @@ export function LifeOSMappingsTab() {
   const { data: allMappings, isLoading } = useQuery({
     queryKey: ['lifeos-all-mappings'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('catalog_life_map')
-        .select(`
-          *,
-          life_situations (code, title_en, title_ru)
-        `)
-        .order('weight', { ascending: false });
-
-      if (error) throw error;
-      
+      const data: any[] = [];
+      for (let offset = 0; ; offset += 500) {
+        const { data: page, error } = await supabase
+          .from('catalog_life_map')
+          .select('*, life_situations (code, title_en, title_ru)')
+          .order('id')
+          .range(offset, offset + 499);
+        if (error) throw error;
+        data.push(...(page || []));
+        if (!page || page.length < 500) break;
+      }
+      data.sort((a, b) => b.weight - a.weight);
       return (data || []).map((m: any) => ({
         ...m,
         situation_code: m.life_situations?.code,
@@ -129,10 +138,11 @@ export function LifeOSMappingsTab() {
     return allMappings.filter((m) => {
       if (selectedSituationId !== 'all' && m.life_situation_id !== selectedSituationId) return false;
       if (entityTypeFilter !== 'all' && m.entity_type !== entityTypeFilter) return false;
-      if (searchQuery && !m.entity_id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      const serviceLabel = m.entity_type === 'service' ? serviceChoices.find(service => service.id === m.entity_id)?.label ?? '' : '';
+      if (searchQuery && !`${m.entity_id} ${serviceLabel}`.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
-  }, [allMappings, selectedSituationId, entityTypeFilter, searchQuery]);
+  }, [allMappings, selectedSituationId, entityTypeFilter, searchQuery, serviceChoices]);
 
   // Handlers with governance validation
   const handleCreateWithValidation = useCallback(async () => {
@@ -197,6 +207,9 @@ export function LifeOSMappingsTab() {
       setImpactModalOpen(false);
       resetNewMapping();
       queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['life-os-context'] });
       queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
     } finally {
       setIsSaving(false);
@@ -232,6 +245,9 @@ export function LifeOSMappingsTab() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['life-os-context'] });
     queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
   };
 
@@ -280,6 +296,9 @@ export function LifeOSMappingsTab() {
       toast.success(isRussian ? 'Маппинг удалён' : 'Mapping deleted');
       setImpactModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['life-os-context'] });
       queryClient.invalidateQueries({ queryKey: ['lifeos-health'] });
     } finally {
       setIsSaving(false);
@@ -316,6 +335,9 @@ export function LifeOSMappingsTab() {
     toast.success(`${selectedMappings.size} ${isRussian ? 'маппингов удалено' : 'mappings deleted'}`);
     setSelectedMappings(new Set());
     queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['life-os-context'] });
   };
 
   const handleBulkWeightAdjust = async (delta: number) => {
@@ -336,6 +358,9 @@ export function LifeOSMappingsTab() {
     toast.success(isRussian ? 'Веса обновлены' : 'Weights updated');
     setSelectedMappings(new Set());
     queryClient.invalidateQueries({ queryKey: ['lifeos-all-mappings'] });
+      queryClient.invalidateQueries({ queryKey: ['catalog', 'master-taxonomy', 'v1'] });
+      queryClient.invalidateQueries({ queryKey: ['lifeos-quality-metrics'] });
+      queryClient.invalidateQueries({ queryKey: ['life-os-context'] });
   };
 
   const toggleSelectAll = () => {
@@ -423,7 +448,7 @@ export function LifeOSMappingsTab() {
                 <Label>{isRussian ? 'Тип сущности' : 'Entity Type'}</Label>
                 <Select 
                   value={newMapping.entity_type}
-                  onValueChange={(v) => setNewMapping(m => ({ ...m, entity_type: v }))}
+                  onValueChange={(v) => setNewMapping(m => ({ ...m, entity_type: v, entity_id: '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -438,6 +463,14 @@ export function LifeOSMappingsTab() {
                 </Select>
               </div>
 
+              {newMapping.entity_type === 'service' && <div className="space-y-2">
+                <Label>{isRussian ? 'Услуга в каталоге' : 'Catalogue service'}</Label>
+                <Select value={serviceChoices.some(service => service.id === newMapping.entity_id) ? newMapping.entity_id : ''} onValueChange={entity_id => setNewMapping(mapping => ({ ...mapping, entity_id }))}>
+                  <SelectTrigger><SelectValue placeholder={isRussian ? 'Выберите услугу' : 'Choose a service'} /></SelectTrigger>
+                  <SelectContent>{serviceChoices.map(service => <SelectItem key={service.id} value={service.id}>{service.label}</SelectItem>)}</SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{isRussian ? 'Связи с ролью Guest используются в публичном фильтре услуг. Удалённая связь больше не показывается.' : 'Links admitted for Guest are used by the public service filter. Deleted links are no longer shown.'}</p>
+              </div>}
               <div className="space-y-2">
                 <Label>Entity ID (UUID) *</Label>
                 <Input 
@@ -614,7 +647,7 @@ export function LifeOSMappingsTab() {
                       <Badge variant="outline">{mapping.entity_type}</Badge>
                     </TableCell>
                     <TableCell>
-                      <code className="text-xs">{mapping.entity_id.slice(0, 8)}...</code>
+                      <code className="text-xs">{mapping.entity_type === 'service' ? serviceChoices.find(service => service.id === mapping.entity_id)?.label ?? mapping.entity_id.slice(0, 8) : mapping.entity_id.slice(0, 8)}...</code>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">{mapping.situation_title}</span>

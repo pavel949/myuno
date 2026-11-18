@@ -43,7 +43,7 @@ export function serviceDiscoveryMenu(categories: CategoryEntry[]) {
   // Keep the full returned public category map visible at the first step. Only the
   // specialist emergency directory is progressively disclosed; legal/health/
   // family services must not require discovering an "all categories" control.
-  const order = ['cat-transport', 'cat-business-legal', 'cat-health-wellness', 'cat-family-kids',
+  const order = ['cat-transport', 'cat-connectivity', 'cat-business-legal', 'cat-health-wellness', 'cat-family-kids',
     'cat-pet-services', 'cat-food-delivery', 'cat-tourism', 'cat-leisure', 'cat-finance'];
   const rank = (id: string) => { const index = order.indexOf(id); return index < 0 ? order.length : index; };
   const primary = [home, ...available.filter(category => category !== home && category.id !== 'cat-emergency')

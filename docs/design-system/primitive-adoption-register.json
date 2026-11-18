@@ -23,12 +23,12 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 896,
-      "sourceInstances": 2928
+      "directConsumerFiles": 897,
+      "sourceInstances": 2932
     },
     "Card": {
       "directConsumerFiles": 531,
-      "sourceInstances": 1547
+      "sourceInstances": 1543
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -40,7 +40,7 @@
     },
     "PageContainer": {
       "directConsumerFiles": 173,
-      "sourceInstances": 312
+      "sourceInstances": 313
     },
     "PageHeader": {
       "directConsumerFiles": 137,
@@ -60,15 +60,15 @@
     },
     "SelectTrigger": {
       "directConsumerFiles": 232,
-      "sourceInstances": 457
+      "sourceInstances": 459
     },
     "Sheet": {
       "directConsumerFiles": 75,
       "sourceInstances": 78
     },
     "Table": {
-      "directConsumerFiles": 33,
-      "sourceInstances": 43
+      "directConsumerFiles": 32,
+      "sourceInstances": 42
     },
     "StatusPill": {
       "directConsumerFiles": 2,
@@ -2492,7 +2492,7 @@
     },
     {
       "file": "src/components/admin/lifeos/LifeOSMappingsTab.tsx",
-      "sha256": "e8da3651292fa0a0e94b36e8828562a880eb9f13e20c387aa42d5cedd21a0ec1",
+      "sha256": "2d235d4ae40fe37a57ff86d815553936745d552d825f515ce3128d5be74fa4d5",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2502,13 +2502,13 @@
           "source": "@/components/ui/button",
           "instances": 7,
           "lines": [
-            393,
-            514,
-            527,
-            530,
-            535,
-            558,
-            645
+            418,
+            547,
+            560,
+            563,
+            568,
+            591,
+            678
           ]
         },
         {
@@ -2516,8 +2516,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            524,
-            566
+            557,
+            599
           ]
         },
         {
@@ -2525,20 +2525,21 @@
           "source": "@/components/ui/input",
           "instances": 2,
           "lines": [
-            355,
-            443
+            380,
+            476
           ]
         },
         {
           "name": "SelectTrigger",
           "source": "@/components/ui/select",
-          "instances": 5,
+          "instances": 6,
           "lines": [
-            364,
-            378,
-            409,
-            428,
-            476
+            389,
+            403,
+            434,
+            453,
+            469,
+            509
           ]
         },
         {
@@ -2546,7 +2547,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            391
+            416
           ]
         },
         {
@@ -2554,37 +2555,33 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            568
+            601
           ]
         }
       ]
     },
     {
       "file": "src/components/admin/lifeos/LifeOSQualityTab.tsx",
-      "sha256": "426f71666665e1a242b68b1fc2a68b34fae1d79229ee405c082a6736c958b215",
+      "sha256": "d5fd83fa328aee939120ebd4400975c12f1354b9594eff703e550a7ed3746054",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
-          "name": "Card",
-          "source": "@/components/ui/card",
-          "instances": 6,
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 2,
           "lines": [
-            140,
-            156,
-            172,
-            194,
-            218,
-            327
+            41,
+            52
           ]
         },
         {
-          "name": "Table",
-          "source": "@/components/ui/table",
+          "name": "Card",
+          "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            230
+            39
           ]
         }
       ]
@@ -2710,7 +2707,7 @@
     },
     {
       "file": "src/components/admin/lifeos/LifeOSSituationsTab.tsx",
-      "sha256": "99bd3a04aa91db2dce83da1873c079b7205292f39debd7e7ef23cfd8616a95e2",
+      "sha256": "53da78ac99d0fca4dbcebe6bee5e4ccb8c784745c031615559a72f59b1d2c016",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2720,12 +2717,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            178,
-            255,
-            314,
-            318,
-            338,
-            345
+            187,
+            264,
+            323,
+            327,
+            347,
+            354
           ]
         },
         {
@@ -2733,7 +2730,7 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            272
+            281
           ]
         },
         {
@@ -2741,14 +2738,14 @@
           "source": "@/components/ui/input",
           "instances": 8,
           "lines": [
-            190,
-            202,
-            209,
-            232,
-            240,
+            199,
+            211,
+            218,
+            241,
             249,
-            301,
-            307
+            258,
+            310,
+            316
           ]
         },
         {
@@ -2756,7 +2753,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            176
+            185
           ]
         },
         {
@@ -2764,8 +2761,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            217,
-            224
+            226,
+            233
           ]
         }
       ]
@@ -22971,7 +22968,7 @@
     },
     {
       "file": "src/pages/admin/AdminLifeOS.tsx",
-      "sha256": "d1fcda54d2a437908ac7585a1924c5ddea674da1dc6f09a24a649278161fc02f",
+      "sha256": "64ab0615c36ef98f8a0b6a18c63f247d6770f71476b5df9943f3b072cd4efb25",
       "directRouteDeclarations": [
         {
           "id": "5e6577d45fc12924",
@@ -23219,7 +23216,7 @@
     },
     {
       "file": "src/pages/admin/AdminMasterCatalog.tsx",
-      "sha256": "5e8d2042f46ebdf10b1ea45dc610140c1356e88683d296e809d31a6a08f43657",
+      "sha256": "03c2df6d0f796b80c80a21380b6ebf5d72c175bf4ea274dd142f4b5665b6eecc",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -23227,19 +23224,22 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 3,
+          "instances": 5,
           "lines": [
-            191,
-            405,
-            408
+            143,
+            201,
+            255,
+            437,
+            440
           ]
         },
         {
           "name": "Card",
           "source": "@/components/ui/card",
-          "instances": 1,
+          "instances": 2,
           "lines": [
-            170
+            180,
+            253
           ]
         },
         {
@@ -23247,19 +23247,20 @@
           "source": "@/components/ui/input",
           "instances": 4,
           "lines": [
-            295,
-            302,
-            326,
-            336
+            327,
+            334,
+            358,
+            368
           ]
         },
         {
           "name": "PageContainer",
           "source": "@/components/uno/PageContainer",
-          "instances": 2,
+          "instances": 3,
           "lines": [
-            137,
-            146
+            143,
+            147,
+            156
           ]
         },
         {
@@ -23267,15 +23268,16 @@
           "source": "@/components/ds",
           "instances": 1,
           "lines": [
-            147
+            157
           ]
         },
         {
           "name": "SelectTrigger",
           "source": "@/components/ui/select",
-          "instances": 1,
+          "instances": 2,
           "lines": [
-            316
+            314,
+            348
           ]
         },
         {
@@ -23283,7 +23285,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            283
+            301
           ]
         },
         {
@@ -23291,7 +23293,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            157
+            167
           ]
         }
       ]
