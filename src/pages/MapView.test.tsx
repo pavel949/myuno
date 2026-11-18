@@ -48,13 +48,13 @@ describe('MapView integration smoke', () => {
     mount();
     expect(screen.getByRole('heading', { name: 'Найдите своё место на Пхукете' })).toBeInTheDocument();
     expect(pins().getAllByRole('button')).toHaveLength(5);
-    fireEvent.click(screen.getByRole('button', { name: 'Посуточная аренда', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Посуточная аренда' }));
     expect(pins().getAllByRole('button')).toHaveLength(1);
     expect(screen.getByTestId('url')).toHaveTextContent('layers=stay');
-    fireEvent.click(screen.getByRole('button', { name: 'Впечатления', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Впечатления' }));
     expect(pins().getAllByRole('button')).toHaveLength(2);
     expect(screen.getByTestId('url')).toHaveTextContent('layers=stay%2Cexperience');
-    fireEvent.click(screen.getByRole('button', { name: 'Все', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Все' }));
     expect(pins().getAllByRole('button')).toHaveLength(5);
   });
   it.each([
@@ -65,7 +65,7 @@ describe('MapView integration smoke', () => {
     ['Ресторан у моря', '/restaurants/restaurant-1'],
   ])('opens the real card route from %s', (name, route) => {
     mount();
-    fireEvent.click(pins().getByRole('button', { name, exact: true }));
+    fireEvent.click(pins().getByRole('button', { name }));
     expect(screen.getByTestId('url').textContent).toContain('focus=');
     fireEvent.click(screen.getByRole('button', { name: /Открыть предложение/ }));
     expect(screen.getByTestId('url').textContent?.split('?')[0]).toBe(route);
