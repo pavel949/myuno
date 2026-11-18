@@ -493,7 +493,7 @@ describe('one residential results surface', () => {
   it('keeps the four property actions visible from the Homes entrance', () => {
     mount('/property');
     const journeys = within(screen.getByRole('navigation', { name: 'Choose your journey' }));
-    expect(journeys.getByRole('link', { name: /Rent a place/ })).toHaveAttribute('href', '/property/search?mode=rent');
+    expect(journeys.getByRole('link', { name: /Rent a place/ })).toHaveAttribute('href', '/property/rent');
     expect(journeys.getByRole('link', { name: /Buy property/ })).toHaveAttribute('href', '/discover/buy');
     expect(journeys.getByRole('link', { name: /Sell a property/ })).toHaveAttribute('href', '/property/sell');
     expect(journeys.getByRole('link', { name: /Manage a property/ })).toHaveAttribute('href', '/for-owners');

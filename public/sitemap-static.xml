@@ -53,6 +53,15 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property?lang=th"/>
   </url>
   <url>
+    <loc>https://www.myuno.app/property/rent</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/property/rent?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/property/rent?lang=ru"/>
+    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/property/rent?lang=th"/>
+  </url>
+  <url>
     <loc>https://www.myuno.app/property/search</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>daily</changefreq>
