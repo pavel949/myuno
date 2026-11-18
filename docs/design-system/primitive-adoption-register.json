@@ -23,12 +23,12 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 896,
-      "sourceInstances": 2928
+      "directConsumerFiles": 895,
+      "sourceInstances": 2926
     },
     "Card": {
-      "directConsumerFiles": 532,
-      "sourceInstances": 1554
+      "directConsumerFiles": 531,
+      "sourceInstances": 1547
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -22099,7 +22099,7 @@
     },
     {
       "file": "src/pages/admin/AdminExperiences.tsx",
-      "sha256": "9cfb1cc34a39b828551fb2eed666b1797a9e71a22d1aebb49018a304c73078fe",
+      "sha256": "47f94e3f6585700d1645fe511921f861057dfc171807a60b05c6fb96fd9324f4",
       "directRouteDeclarations": [
         {
           "id": "351a75540190210d",
@@ -22116,15 +22116,15 @@
           "source": "@/components/ui/button",
           "instances": 9,
           "lines": [
-            306,
-            344,
-            384,
-            447,
-            450,
-            556,
-            557,
+            310,
+            348,
+            388,
+            451,
+            454,
             571,
-            572
+            572,
+            586,
+            587
           ]
         },
         {
@@ -22132,10 +22132,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            340,
-            352,
-            440,
-            464
+            344,
+            356,
+            444,
+            468
           ]
         },
         {
@@ -22143,8 +22143,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            474,
-            566
+            478,
+            581
           ]
         },
         {
@@ -22152,7 +22152,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            382
+            386
           ]
         },
         {
@@ -22160,14 +22160,14 @@
           "source": "@/components/ui/input",
           "instances": 8,
           "lines": [
-            510,
-            511,
-            520,
-            521,
-            537,
-            538,
-            542,
-            543
+            525,
+            526,
+            535,
+            536,
+            552,
+            553,
+            557,
+            558
           ]
         },
         {
@@ -22175,9 +22175,9 @@
           "source": "@/components/uno/PageContainer",
           "instances": 3,
           "lines": [
-            263,
-            278,
-            301
+            267,
+            282,
+            305
           ]
         },
         {
@@ -22185,7 +22185,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            302
+            306
           ]
         },
         {
@@ -22193,9 +22193,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            487,
-            497,
-            525
+            491,
+            501,
+            540
           ]
         },
         {
@@ -22203,7 +22203,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            318
+            322
           ]
         },
         {
@@ -22211,8 +22211,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            515,
-            516
+            530,
+            531
           ]
         }
       ]
@@ -28301,47 +28301,8 @@
       ]
     },
     {
-      "file": "src/pages/experiences/ExperienceBooking.tsx",
-      "sha256": "6ae915b09f87439b537e011022bdc625e3706cab39d9814136de27fc515ac55b",
-      "directRouteDeclarations": [
-        {
-          "id": "daa01ab5a56ce003",
-          "path": "/experiences/:id/book",
-          "actor": "public-or-page-gated",
-          "kind": "rendered-template"
-        }
-      ],
-      "runtime": "NOTTESTED",
-      "visual": "NOTTESTED",
-      "primitiveImports": [
-        {
-          "name": "Button",
-          "source": "@/components/ui/button",
-          "instances": 2,
-          "lines": [
-            333,
-            343
-          ]
-        },
-        {
-          "name": "Card",
-          "source": "@/components/ui/card",
-          "instances": 7,
-          "lines": [
-            233,
-            270,
-            291,
-            320,
-            366,
-            385,
-            418
-          ]
-        }
-      ]
-    },
-    {
       "file": "src/pages/experiences/ExperienceDetail.tsx",
-      "sha256": "16ee36fcbc44b60132eee2b8419303576e287557b9c0dc6472e799d71cc94c91",
+      "sha256": "a2449a1ff34750a941201382869af7279d661d21da9de3c40158a99acc85f8db",
       "directRouteDeclarations": [
         {
           "id": "d7297c8e1aa48a4a",
@@ -28358,11 +28319,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            58,
-            58,
-            71,
+            60,
+            60,
+            73,
             267,
-            480
+            477
           ]
         },
         {
@@ -28370,17 +28331,17 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            199,
-            211,
-            225,
-            280,
-            298,
-            318,
-            357,
-            378,
-            396,
-            416,
-            431
+            201,
+            213,
+            227,
+            277,
+            295,
+            315,
+            354,
+            375,
+            393,
+            413,
+            428
           ]
         }
       ]
