@@ -181,10 +181,10 @@ export function OffplanHubToolsStrip() {
     p.startsWith(APP_ROUTES.DEVELOPERS) ||
     p.startsWith(APP_ROUTES.COMPLEXES);
 
-  if (!show) return null;
+  if (!show || p === APP_ROUTES.OFFPLAN || p === `${APP_ROUTES.OFFPLAN}/`) return null;
 
   const links = [
-    { to: APP_ROUTES.OFFPLAN, labelRu: 'Каталог', labelEn: 'Catalog' },
+    { to: APP_ROUTES.OFFPLAN_SEARCH, labelRu: 'Каталог', labelEn: 'Catalog' },
     { to: APP_ROUTES.NEWBUILDS_MAP, labelRu: 'Карта', labelEn: 'Map' },
     { to: APP_ROUTES.NEWBUILDS_COMPARE, labelRu: 'Сравнение', labelEn: 'Compare' },
     { to: APP_ROUTES.DEVELOPERS, labelRu: 'Застройщики', labelEn: 'Developers' },
@@ -194,8 +194,8 @@ export function OffplanHubToolsStrip() {
     <div className="property-hub-tools flex flex-wrap gap-2 px-4 py-2 bg-muted/30 border-b border-border/40 text-xs">
       {links.map((item) => {
         const active =
-          item.to === APP_ROUTES.OFFPLAN
-            ? p === APP_ROUTES.OFFPLAN || p.startsWith(`${APP_ROUTES.OFFPLAN}/`)
+          item.to === APP_ROUTES.OFFPLAN_SEARCH
+            ? p === APP_ROUTES.OFFPLAN_SEARCH || p.startsWith(`${APP_ROUTES.OFFPLAN}/`)
             : p === item.to || p.startsWith(`${item.to}/`);
         return (
           <Link
@@ -211,7 +211,7 @@ export function OffplanHubToolsStrip() {
             {item.to === APP_ROUTES.NEWBUILDS_MAP && <Map className="w-3.5 h-3.5" />}
             {item.to === APP_ROUTES.NEWBUILDS_COMPARE && <GitCompare className="w-3.5 h-3.5" />}
             {item.to === APP_ROUTES.DEVELOPERS && <Users className="w-3.5 h-3.5" />}
-            {item.to === APP_ROUTES.OFFPLAN && <Building2 className="w-3.5 h-3.5" />}
+            {item.to === APP_ROUTES.OFFPLAN_SEARCH && <Building2 className="w-3.5 h-3.5" />}
             {isRu ? item.labelRu : item.labelEn}
           </Link>
         );
@@ -315,6 +315,8 @@ export default function PropertyHub() {
 
   /** PropertyIndex embeds tabs; landing has its own layout */
   const hideOuterTabs =
+    p === APP_ROUTES.OFFPLAN ||
+    p === `${APP_ROUTES.OFFPLAN}/` ||
     p === APP_ROUTES.PROPERTY_RENT ||
     p === `${APP_ROUTES.PROPERTY_RENT}/` ||
     p === APP_ROUTES.PROPERTY ||

@@ -11,7 +11,7 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
  * Shows gallery, developer info, myUNO scoring, investment metrics
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Building2,
@@ -101,6 +101,12 @@ export default function OffplanDetail() {
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
   const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
+  const loadedProjectId = sourceProject?.id;
+  useEffect(() => {
+    if (!loadedProjectId || journeyLocation.hash !== '#project-units') return;
+    const frame = requestAnimationFrame(() => document.getElementById('project-units')?.scrollIntoView({ block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
   const { data: allDocs = [] } = useProjectDocuments(id);
@@ -304,7 +310,7 @@ export default function OffplanDetail() {
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             {/* Development Units / Floor Plans */}
-            {id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setSelectedUnit(unit); setShowLeadForm(true); }} />}
+            <div id="project-units" className="scroll-mt-28">{id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setSelectedUnit(unit); setShowLeadForm(true); }} />}</div>
 
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (

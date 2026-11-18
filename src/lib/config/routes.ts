@@ -115,6 +115,7 @@ export const APP_ROUTES = {
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',
+  OFFPLAN_SEARCH: '/property/offplan/search',
   OFFPLAN_DETAIL: (id: string) => `/property/offplan/${id}`,
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
