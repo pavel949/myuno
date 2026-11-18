@@ -21,7 +21,7 @@ async def main():
                 page = await context.new_page(); page.on('pageerror', lambda e: errors.append(str(e)))
                 await page.goto(f'http://fixture.local/fixture.html?lang={lang}')
                 await expect(page.locator('article')).to_be_visible()
-                await page.wait_for_function('Array.from(document.images).some(i=>i.complete&&i.naturalWidth>0)')
+                await page.wait_for_function('Array.from(document.images).some(i=>i.complete&&i.naturalWidth>0&&Number(getComputedStyle(i).opacity)>0.99&&i.getBoundingClientRect().height>100)')
                 link = page.locator('article a'); await expect(link).to_have_attribute('href', 'https://operator.example/programme')
                 assert await link.count() == 1
                 assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (lang, width, 'overflow')
