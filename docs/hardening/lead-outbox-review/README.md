@@ -1,0 +1,48 @@
+# Consultation notification admission + durable dispatch review candidate
+
+**NO-GO / unapplied / not an integrated production fix.** Built against main b4bbfde5dca7a301940d3baf8c04695221ae0701 and coordinated with #261 b88f68262fd15de030d67e27fab0f1a6f9dfc4b3. No runtime paths, settings, migration auto-apply, Edge deployment, customer rows or provider sends changed. #260 owns the newbuild UI; this package does not touch its branch.
+
+## Verified source findings
+
+`notify-admin-order` #261 still accepts client-authored payloads. It has no actor/object gate and is not safe just because recipients are fixed. `useUniversalLead` has a browser-crash gap between persisted intake and dispatch. `notify-lead-whatsapp` is another body-ID ingress, not a safe substitute. Provider acceptance is not recipient delivery.
+
+Canonical admission exists in **unapplied** `docs/hardening/consultation-intake/forward.sql`: server auth.uid, typed allowlist, canonical published project and project/unit/property relation checks, nonce/fingerprint recovery, immutable identity guard. This must be reviewed and proven in the target DB. Merely finding the function name is insufficient. Direct-table insert grants/guards and every alternate writer must be inventoried. This candidate does not recreate or weaken that canonical admission.
+
+Searched existing repository for `outbox` and `notification_queue`: no active durable consultation queue implementation found, only release-gap docs. Proposed private table is transport state keyed to existing consultation_requests, NOT a new CRM/request authority. No guest request lookup, no new public PII read, no service-role lookup from browser-supplied ID.
+
+## Candidate mechanics
+
+1. `forward.sql` wraps the existing checked intake. Canonical save and two channel intents commit together. Failed enqueue rolls back save; unchanged repeat returns the same receipt and cannot duplicate jobs. Pre-existing receipts are not backfilled because their legacy dispatch status is unknown. Concurrent new calls converge through the canonical unique nonce index and queue unique key.
+2. Private RLS-enabled queue has no client/table grants. Only service-role RPCs may claim/finish; scheduler ingress must validate its dedicated secret **before** constructing privileged client. JWT presence/ordinary logged-in actor is not scheduler authority.
+3. Atomic SKIP LOCKED claim with unguessable lease token, conditional live-token acknowledgement. Each channel has independent state. Stored canonical source, never HTTP body, supplies message details; budgets must remain labelled budgets, never order totals. Only strict protected MyUNO admin contacts are recipients. No supplier/manager contacts.
+4. Explicitly rejected-before-acceptance attempts may retry up to five times with backoff. Missing settings become blocked. Ambiguous/network-timeout/provider-without-reference outcomes and expired leases become uncertain, requiring operator reconciliation. They must NOT automatically retry: UltraMsg exactly-once/idempotency support is unverified. Accepted means provider accepted, not delivered.
+5. `worker.mjs` is an executable dependency-injected core, not a wired Edge endpoint. It rejects every nonempty scheduler body, authorizes before store construction, keeps channel results independent, bounds sends and removes PII from responses. Durable records contain reference/status only, not provider payloads or exception strings.
+
+## Test evidence
+
+Run `node --test docs/hardening/lead-outbox-review/worker.test.mjs` (Node 24). **13/13 passed** in isolated mocks: anonymous/failed admission before privileged store, arbitrary body denial, method gate, independent channels, definite vs uncertain rejection, reference requirement, missing/failed settings, timeout, stale ack, stored source/recipient selection. No network sends occurred.
+
+**Not run:** actual SQL execution, real Postgres concurrent transactions, RLS/grants actor matrix, real Edge runtime integration, sender/provider acceptance or delivered receipt. Local executor has Node but no psql/postgres/initdb, Docker or Deno; existing local checkouts are another app or incomplete. A complete clone of the target repo was not available. Do not substitute worker mocks for SQL tests or all-repository CI.
+
+## Required isolated SQL acceptance before activation
+
+Use disposable Postgres/Supabase (not shared preview production data), load the existing intake fixture and forward.sql, then this candidate. Assert:
+- anon/authenticated cannot SELECT/INSERT/UPDATE/TRUNCATE private queue or EXECUTE claim/finish;
+- unauthenticated fake IDs cannot cause reads/sends; cross-actor nonce, forged user_id/status, nonpublic project, foreign unit/property rejected by canonical writer;
+- new valid request yields exactly two jobs; enqueue error rolls request back; unchanged retries and two concurrent submits yield one request/two jobs;
+- old receipt recovery never backfills; changed payload is a conflict; guest recovery returns only receipt, no PII;
+- simultaneous claimers get disjoint jobs; wrong/stale/expired token finish returns false; accepted channel never reclaims;
+- explicit rejection retries with bound/backoff, fifth rejection dead; timeout/expired lease uncertain, never automatic resend;
+- data deletion/retention policy accounted for (FK intentionally restricts deletion until governed cleanup).
+
+## Coordinated cutover blockers
+
+Do NOT apply this SQL or deploy worker independently. First inventory every `notify-admin-order` and `notify-lead-whatsapp` caller: non-consultation orders/services must retain independently admitted dispatch semantics. #261's caller waits are transitional, not durable. The new worker needs an actual pinned Supabase adapter, strict contact reader from #261, verified provider adapters, scheduler-secret validation/rate limits, and a separately configured scheduler. The current arbitrary-body endpoint must be closed/migrated without breaking non-lead flows. Remove browser consultation notification calls only with server bridge activated; never run both for new leads. Public intake abuse throttling is also a release gate, not solved by scheduler auth.
+
+Production acceptance needs dated verified existing-intake definition/grants, reviewed schema/RLS approval, exact deploy artifact, outbox visibility and operational alerting for blocked/uncertain/dead state, configured MyUNO recipients and verified sender, permitted synthetic delivery followed by recipient confirmation. Existing provider idempotency horizon must be checked before any retry broadening. Do not promise delivery before that.
+
+## Security-preserving rollback
+
+Pause scheduler; retain queue and request rows. Do not reopen arbitrary-body dispatch or drop pending evidence. Restore the reviewed canonical intake wrapper without enqueue only after explicitly pausing new public intake or establishing another durable bridge; otherwise save-without-notification gap returns. No destructive DROP/data backfill/replay included. Reconciliation and requeue require separately admitted operator action and recorded evidence; never a generic guest RPC.
+
+Docs reviewed: Supabase changelog 2026-11-18 and RLS guide. Relevant recent CLI v3 default-target change does not authorize hosted actions. All SQL remains review-only outside migration folders.
