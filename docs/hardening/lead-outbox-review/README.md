@@ -46,3 +46,7 @@ Production acceptance needs dated verified existing-intake definition/grants, re
 Pause scheduler; retain queue and request rows. Do not reopen arbitrary-body dispatch or drop pending evidence. Restore the reviewed canonical intake wrapper without enqueue only after explicitly pausing new public intake or establishing another durable bridge; otherwise save-without-notification gap returns. No destructive DROP/data backfill/replay included. Reconciliation and requeue require separately admitted operator action and recorded evidence; never a generic guest RPC.
 
 Docs reviewed: Supabase changelog 2026-11-18 and RLS guide. Relevant recent CLI v3 default-target change does not authorize hosted actions. All SQL remains review-only outside migration folders.
+
+## Follow-up isolated CI package
+
+`postgres.test.mjs` exercises the actual existing canonical intake SQL plus proposed outbox SQL using a disposable Unix-socket PostgreSQL server, no production connection. Dedicated workflow runs the existing intake actor suite first, then 12 outbox actor/concurrency/lifecycle cases. `adapters.mjs` supplies exact RPC adapters and dedicated scheduler-secret admission. Three new adapter tests pass locally (16 local Node tests total). Provider adapters remain deliberately unwired. PostgreSQL results are pending remote CI; initial missing local binaries are not a pass. No production credentials are used by this workflow.
