@@ -12,11 +12,12 @@ export interface ServiceSituationLink {
   role_scope: string[] | null;
   life_situations: { code: string; is_active: boolean | null } | null;
 }
-/** Public discovery uses guest-admitted links only. A removed link stays removed. */
+/** Public discovery uses guest-admitted links; null/empty scopes mean all roles,
+ * matching resolve_life_os_context. A removed link stays removed. */
 export function publicServiceSituationCodes(service: Pick<ServiceEntry, 'id' | 'catalogRowId'>, links: ServiceSituationLink[]): string[] {
   const identity = catalogServiceLifeId(service.id, service.catalogRowId);
   if (!identity) return [];
   return [...new Set(links.filter(link => link.entity_id === identity
-    && (link.role_scope === null || link.role_scope.includes('guest'))
+    && (link.role_scope === null || link.role_scope.length === 0 || link.role_scope.includes('guest'))
     && link.life_situations?.is_active === true).map(link => link.life_situations!.code))];
 }

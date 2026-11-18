@@ -9,7 +9,7 @@ describe('admin-edited service situation links', () => {
   });
   it('honours inactive situations, public role admission and exact identities', () => {
     expect(publicServiceSituationCodes({ id: 'exchange' }, [{ ...link, role_scope: ['owner'] }])).toEqual([]);
-    expect(publicServiceSituationCodes({ id: 'exchange' }, [{ ...link, role_scope: [] }])).toEqual([]);
+    expect(publicServiceSituationCodes({ id: 'exchange' }, [{ ...link, role_scope: [] }])).toEqual(['arrival']);
     expect(publicServiceSituationCodes({ id: 'exchange' }, [{ ...link, life_situations: { code: 'arrival', is_active: false } }])).toEqual([]);
     expect(publicServiceSituationCodes({ id: 'unknown' }, [link])).toEqual([]);
   });

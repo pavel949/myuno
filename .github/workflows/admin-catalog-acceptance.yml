@@ -1,0 +1,37 @@
+name: admin-catalog-acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - src/components/admin/AdminCatalogHub.tsx
+      - src/pages/admin/AdminCatalogWorkspace.tsx
+      - e2e/fixtures/admin-catalog/**
+      - .github/workflows/admin-catalog-acceptance.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: admin-catalog-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npx playwright install --with-deps chromium
+      - name: Synthetic catalog navigation rendering, no production data
+        run: |
+          npx vite --config e2e/fixtures/admin-catalog/vite.config.mjs > /tmp/catalog-vite.log 2>&1 &
+          for n in $(seq 1 60); do curl -fsS http://127.0.0.1:4183 >/dev/null && break; sleep 1; done
+          node e2e/fixtures/admin-catalog/capture.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-catalog-viewport-evidence
+          path: test-results/admin-catalog

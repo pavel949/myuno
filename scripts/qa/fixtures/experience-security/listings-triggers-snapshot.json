@@ -1,0 +1,9 @@
+{
+  "rows": [
+    {
+      "function_definition": "CREATE OR REPLACE FUNCTION public.fn_listings_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  NEW.updated_at = now();\n  RETURN NEW;\nEND;\n$function$\n",
+      "tgname": "trg_listings_updated_at",
+      "trigger_definition": "CREATE TRIGGER trg_listings_updated_at BEFORE UPDATE ON public.listings FOR EACH ROW EXECUTE FUNCTION fn_listings_updated_at()"
+    }
+  ]
+}

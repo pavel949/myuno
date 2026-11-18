@@ -1,0 +1,2 @@
+import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter} from 'react-router-dom'; import {AdminCatalogHub} from '../../../src/components/admin/AdminCatalogHub'; import '../../../src/index.css';
+createRoot(document.getElementById('root')!).render(<MemoryRouter><main className="mx-auto max-w-7xl p-4 sm:p-8"><h1 className="text-2xl font-semibold">Каталоги</h1><p className="text-muted-foreground">Что хотите добавить или обновить?</p><AdminCatalogHub/></main></MemoryRouter>);

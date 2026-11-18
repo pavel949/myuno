@@ -1,0 +1,18 @@
+{
+  "rows": [
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.count_life_os_context(p_user_role text DEFAULT 'guest'::text)\n RETURNS TABLE(life_situation_id uuid, item_count bigint)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\n  SELECT\n    clm.life_situation_id,\n    count(*)::bigint AS item_count\n  FROM public.catalog_life_map clm\n  INNER JOIN public.life_situations ls\n    ON ls.id = clm.life_situation_id AND ls.is_active = true\n  INNER JOIN public.life_os_catalog loc\n    ON loc.entity_type = clm.entity_type AND loc.entity_id = clm.entity_id::text\n  WHERE\n    clm.role_scope IS NULL\n    OR array_length(clm.role_scope, 1) IS NULL\n    OR p_user_role = ANY(clm.role_scope)\n  GROUP BY clm.life_situation_id;\n$function$\n",
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,sandbox_exec_kakkwibljrjsawxgnupk=X/postgres,sandbox_exec=X/postgres,anon=X/postgres}",
+      "proname": "count_life_os_context",
+      "prosecdef": true
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.resolve_life_os_context(p_life_code text, p_user_role text DEFAULT 'guest'::text, p_locale text DEFAULT 'en'::text, p_limit integer DEFAULT 200)\n RETURNS TABLE(entity_type text, entity_id text, title text, title_localized text, price numeric, currency text, location text, provider_id text, trust_level text, weight integer, role_scope text[], rules jsonb)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nBEGIN\n  RETURN QUERY\n  SELECT\n    clm.entity_type,\n    clm.entity_id::text,\n    loc.title,\n    CASE WHEN p_locale = 'ru' THEN COALESCE(loc.title_ru, loc.title)\n         ELSE COALESCE(loc.title, loc.title_ru) END AS title_localized,\n    loc.price,\n    loc.currency,\n    loc.location,\n    loc.provider_id,\n    loc.trust_level,\n    clm.weight,\n    clm.role_scope,\n    clm.rules\n  FROM public.catalog_life_map clm\n  INNER JOIN public.life_situations ls\n    ON ls.id = clm.life_situation_id AND ls.is_active = true\n  INNER JOIN public.life_os_catalog loc\n    ON loc.entity_type = clm.entity_type AND loc.entity_id = clm.entity_id::text\n  WHERE ls.code = p_life_code\n    AND (\n      clm.role_scope IS NULL\n      OR array_length(clm.role_scope, 1) IS NULL\n      OR p_user_role = ANY(clm.role_scope)\n    )\n  ORDER BY\n    clm.weight DESC,\n    CASE WHEN loc.trust_level = 'verified' THEN 0 ELSE 1 END,\n    loc.price ASC NULLS LAST\n  LIMIT p_limit;\nEND;\n$function$\n",
+      "owner": "postgres",
+      "proacl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres,sandbox_exec_kakkwibljrjsawxgnupk=X/postgres,sandbox_exec=X/postgres,anon=X/postgres}",
+      "proname": "resolve_life_os_context",
+      "prosecdef": true
+    }
+  ]
+}

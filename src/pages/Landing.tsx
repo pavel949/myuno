@@ -8,6 +8,7 @@ import { APP_ROUTES as R } from '@/lib/config/routes';
 import { BottomBar } from '@/components/nav/BottomBar';
 import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
+import { FooterSocialLinks } from '@/components/layout/FooterSocialLinks';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
@@ -69,6 +70,7 @@ export default function Landing() {
       <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       </main>
       <footer className="home-footer home-container">
+        <div className="mb-6 flex justify-center lg:justify-start"><FooterSocialLinks /></div>
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>
           <Link to={R.FOR_OWNERS}>{t(copy.owners)}</Link><Link to={R.FOR_MANAGEMENT_COMPANIES}>{t({ ru: 'Управляющим компаниям', en: 'Management companies', th: 'สำหรับบริษัทจัดการ' })}</Link><Link to={R.FOR_LOCAL_SERVICE_PROVIDERS}>{t(copy.partners)}</Link><Link to={R.FOR_REAL_ESTATE_DEVELOPERS}>{t({ ru: 'Застройщикам', en: 'For developers', th: 'สำหรับผู้พัฒนา' })}</Link><Link to={R.INVEST}>{t(copy.invest)}</Link><Link to={R.FOR_BUSINESS}>{t(copy.business)}</Link>
