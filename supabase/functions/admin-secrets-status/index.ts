@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { stripeConfigStatus } from "../_shared/stripe-config.ts";
 
 
 const KNOWN_SECRETS = [
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
       .select("key, value, description, updated_at");
 
     return new Response(
-      JSON.stringify({ secrets, configs: configs || [] }),
+      JSON.stringify({ secrets, configs: configs || [], stripe: stripeConfigStatus((name) => Deno.env.get(name)) }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

@@ -1,5 +1,5 @@
 // Deno.serve used (native edge runtime)
-import { createStripeClient } from "../_shared/stripe.ts";
+import { createStripeClient, isStripeConfigured, stripeNotConfiguredResponse } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
@@ -80,6 +80,12 @@ Deno.serve(async (req) => {
       user.id,
     );
     if (rateLimitResponse) return rateLimitResponse;
+
+    // Fail before any order or inventory hold exists when cards cannot be taken.
+    if (!isStripeConfigured()) {
+      logStep("ERROR: STRIPE_SECRET_KEY missing or invalid");
+      return stripeNotConfiguredResponse(corsHeaders);
+    }
 
     const body: PropertyDepositRequest = await req.json();
     let { property_id } = body;
@@ -360,16 +366,6 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
-      );
-    }
-
-    // Initialize Stripe
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      logStep("ERROR: STRIPE_SECRET_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "Payment system not configured" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
 
