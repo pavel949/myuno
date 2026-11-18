@@ -134,7 +134,7 @@ async def main():
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
                     await expect(cards()).to_have_count(1)
-                    await expect(page.locator('#experience-results-title')).to_be_focused()
+                    await expect(page.get_by_role('button', name=filter_name, exact=True)).to_be_focused()
                     assert await page.evaluate('window.fixtureReadOptions.category') == 'islands'
                     await screenshot('02-category-results')
                     await expect(cards().first).to_have_attribute('href', '/experiences/island-tour')
