@@ -16,6 +16,8 @@ describe('catalog workspace navigation', () => {
     show('/admin/catalog');
     expect(screen.getByRole('heading', { name: 'Впечатления' })).toBeInTheDocument();
     expect(screen.queryByText(/Existing .* editor/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Дополнительные инструменты'));
+    expect(screen.getByRole('link', { name: /Жизненные ситуации/ })).toHaveAttribute('href', '/admin/life-situations');
   });
   it('keeps existing service deep links and provider query context', () => {
     show('/admin/catalog?tab=services&provider=synthetic');

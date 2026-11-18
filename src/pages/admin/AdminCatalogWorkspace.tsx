@@ -28,6 +28,10 @@ export default function AdminCatalogWorkspace() {
               ['taxonomy', 'Связи и теги', 'Relationships and tags'],
               ['lookups', 'Справочники', 'Reference data'],
             ].map(([tab, ru, en]) => <Link className="inline-flex min-h-11 items-center text-sm text-primary underline" key={tab} to={`?tab=${tab}`}>{isRu ? ru : en}</Link>)}
+            <Link className="inline-flex min-h-11 flex-col justify-center text-sm text-primary underline" to="/admin/life-situations">
+              {isRu ? 'Жизненные ситуации' : 'Life situations'}
+              <span className="text-xs text-muted-foreground">{isRu ? 'Связи предложений с задачами клиентов' : 'Connect offerings with customer needs'}</span>
+            </Link>
           </nav>
         </details>
       </PageContainer>

@@ -21449,7 +21449,7 @@
     },
     {
       "file": "src/pages/admin/AdminCatalogWorkspace.tsx",
-      "sha256": "a5399214571e74f5da62c0c05d2e49f67878c4d6f62d8204edacbc6b41f9478f",
+      "sha256": "3ee65bbe916e04fc81fc156568b9ee1485440d17f895bdcafb72de6124f3d1e2",
       "directRouteDeclarations": [
         {
           "id": "ae5e2ae4d013bd59",
