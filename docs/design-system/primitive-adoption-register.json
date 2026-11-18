@@ -27,8 +27,8 @@
       "sourceInstances": 2931
     },
     "Card": {
-      "directConsumerFiles": 532,
-      "sourceInstances": 1554
+      "directConsumerFiles": 531,
+      "sourceInstances": 1547
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -857,7 +857,7 @@
     },
     {
       "file": "src/components/admin/ProviderSelector.tsx",
-      "sha256": "5a86075d2076f36ed413d905922f1ae0ca2f0c8b4ba09aa67545f0445c672e13",
+      "sha256": "e1b434dbce7582d98b25814cce714cb6cb31157b30cd8e34cf8d5469881ed1eb",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -5832,6 +5832,23 @@
           "instances": 1,
           "lines": [
             68
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/experiences/ExperienceDiscoveryDetail.tsx",
+      "sha256": "9a16a28e183c6eb6f9684add78045c47600f204015e6d92cec0eb30cd0bebeb9",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            34
           ]
         }
       ]
@@ -22099,7 +22116,7 @@
     },
     {
       "file": "src/pages/admin/AdminExperiences.tsx",
-      "sha256": "da5ee459469bc9cebc3a393ecd665e511a334a49257cffbf3459f5d185c677d7",
+      "sha256": "42c0873703dbc259da57eb6b14ebdfeaa194827a6363cabd17b89382c919debf",
       "directRouteDeclarations": [
         {
           "id": "351a75540190210d",
@@ -22116,15 +22133,15 @@
           "source": "@/components/ui/button",
           "instances": 9,
           "lines": [
-            308,
-            346,
-            386,
-            449,
-            452,
-            560,
-            561,
+            312,
+            350,
+            390,
+            453,
+            456,
             575,
-            576
+            576,
+            590,
+            591
           ]
         },
         {
@@ -22132,10 +22149,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            342,
-            354,
-            442,
-            466
+            346,
+            358,
+            446,
+            470
           ]
         },
         {
@@ -22143,8 +22160,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            476,
-            570
+            480,
+            585
           ]
         },
         {
@@ -22152,7 +22169,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            384
+            388
           ]
         },
         {
@@ -22160,14 +22177,14 @@
           "source": "@/components/ui/input",
           "instances": 8,
           "lines": [
-            514,
-            515,
-            524,
-            525,
-            541,
-            542,
-            546,
-            547
+            529,
+            530,
+            539,
+            540,
+            556,
+            557,
+            561,
+            562
           ]
         },
         {
@@ -22175,9 +22192,9 @@
           "source": "@/components/uno/PageContainer",
           "instances": 3,
           "lines": [
-            265,
-            280,
-            303
+            269,
+            284,
+            307
           ]
         },
         {
@@ -22185,7 +22202,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            304
+            308
           ]
         },
         {
@@ -22193,9 +22210,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            489,
-            500,
-            529
+            493,
+            504,
+            544
           ]
         },
         {
@@ -22203,7 +22220,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            320
+            324
           ]
         },
         {
@@ -22211,8 +22228,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            519,
-            520
+            534,
+            535
           ]
         }
       ]
@@ -28304,47 +28321,8 @@
       ]
     },
     {
-      "file": "src/pages/experiences/ExperienceBooking.tsx",
-      "sha256": "6ae915b09f87439b537e011022bdc625e3706cab39d9814136de27fc515ac55b",
-      "directRouteDeclarations": [
-        {
-          "id": "daa01ab5a56ce003",
-          "path": "/experiences/:id/book",
-          "actor": "public-or-page-gated",
-          "kind": "rendered-template"
-        }
-      ],
-      "runtime": "NOTTESTED",
-      "visual": "NOTTESTED",
-      "primitiveImports": [
-        {
-          "name": "Button",
-          "source": "@/components/ui/button",
-          "instances": 2,
-          "lines": [
-            333,
-            343
-          ]
-        },
-        {
-          "name": "Card",
-          "source": "@/components/ui/card",
-          "instances": 7,
-          "lines": [
-            233,
-            270,
-            291,
-            320,
-            366,
-            385,
-            418
-          ]
-        }
-      ]
-    },
-    {
       "file": "src/pages/experiences/ExperienceDetail.tsx",
-      "sha256": "16ee36fcbc44b60132eee2b8419303576e287557b9c0dc6472e799d71cc94c91",
+      "sha256": "8732741e21856f8bacdce5c893347cbb06749967c72b8a8c66fc827a015a90b3",
       "directRouteDeclarations": [
         {
           "id": "d7297c8e1aa48a4a",
@@ -28361,10 +28339,10 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            58,
-            58,
-            71,
-            267,
+            61,
+            61,
+            74,
+            270,
             480
           ]
         },
@@ -28373,9 +28351,9 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            199,
-            211,
-            225,
+            204,
+            216,
+            230,
             280,
             298,
             318,
@@ -28390,7 +28368,7 @@
     },
     {
       "file": "src/pages/experiences/ExperiencesIndex.tsx",
-      "sha256": "f65338bdd0de015fba6c52f225ade19d59234ac6eabc0b61b336a6e0a6c9ee19",
+      "sha256": "a1397e3841219daec04ef25b7491edce750454870a1332c53a0c1fc8a68642b0",
       "directRouteDeclarations": [
         {
           "id": "adbdb71aca374db4",
@@ -28405,13 +28383,14 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 5,
+          "instances": 6,
           "lines": [
-            137,
-            155,
-            158,
-            162,
-            167
+            151,
+            174,
+            177,
+            180,
+            181,
+            187
           ]
         },
         {
@@ -28419,8 +28398,8 @@
           "source": "@/components/uno/EmptyState",
           "instances": 2,
           "lines": [
-            168,
-            170
+            188,
+            190
           ]
         }
       ]
