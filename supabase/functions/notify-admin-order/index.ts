@@ -1,3 +1,4 @@
+import { attemptChannel, emailAccepted, whatsAppAccepted } from './delivery.ts';
 import { Resend } from 'npm:resend@2.0.0';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
@@ -29,13 +30,8 @@ interface OrderNotificationPayload {
   manager_phone?: string | null;
 }
 
-// Loaded from system_settings at runtime
-let ADMIN_EMAILS: string[] = [];
-let ADMIN_WHATSAPP = '';
-
-// Send WhatsApp notification via URL API
-async function sendWhatsAppNotification(payload: OrderNotificationPayload, phoneOverride?: string): Promise<void> {
-  try {
+// Send WhatsApp only to the server-resolved platform contact.
+async function sendWhatsAppNotification(payload: OrderNotificationPayload, targetPhone: string): Promise<void> {
     const orderTypeEmoji: Record<string, string> = {
       restaurant: '🍽️',
       flowers: '💐',
@@ -99,13 +95,8 @@ ${pickupAddr ? `\n📍 *From:* ${pickupAddr}` : ''}${dropoffAddr ? `\n🏁 *To:*
 ${itemsList ? `\n📦 *Items:*\n${itemsList}` : ''}
 ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
 
-🔗 View: https://uno.ae/admin/operations`;
+🔗 View: https://myuno.app/admin/operations`;
 
-    const targetPhone = phoneOverride || ADMIN_WHATSAPP;
-    
-    console.info('[WhatsApp] Notification prepared for:', targetPhone);
-    console.info('[WhatsApp] Message:', message);
-    
     // Try to send via UltraMsg API if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
     const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
@@ -114,21 +105,19 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
       const response = await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: AbortSignal.timeout(8000),
         body: new URLSearchParams({
           token: ultraMsgToken,
-          to: `+${targetPhone}`,
+          to: `+${targetPhone.replace(/[^0-9]/g, '')}`,
           body: message,
         }),
       });
       
       const result = await response.json();
-      console.info('[WhatsApp] UltraMsg response:', result);
+      if (!response.ok || !whatsAppAccepted(result)) throw new Error('WhatsApp acceptance unconfirmed');
     } else {
-      console.info('[WhatsApp] No API configured, logging message only');
+      throw new Error('WhatsApp not configured');
     }
-  } catch (error) {
-    console.error('[WhatsApp] Error sending notification:', error);
-  }
 }
 
 Deno.serve(async (req) => {
@@ -136,29 +125,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Load admin contacts from DB
-  ADMIN_EMAILS = await getAdminEmails();
-  ADMIN_WHATSAPP = await getAdminWhatsApp();
-
   try {
-    const resendKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendKey) {
-      console.error('RESEND_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Email service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const resend = new Resend(resendKey);
     const payload: OrderNotificationPayload = await req.json();
+    const [adminEmails, adminWhatsApp] = await Promise.all([getAdminEmails(), getAdminWhatsApp()]);
+    const resendKey = Deno.env.get('RESEND_API_KEY');
 
     console.info('Sending admin notification for order:', payload.order_number);
-
-    // Send WhatsApp notification to admin (non-blocking)
-    sendWhatsAppNotification(payload).catch(err => 
-      console.error('[WhatsApp] Failed to send:', err)
-    );
 
     // Public lead input may notify configured platform contacts, never supplied third parties.
 
@@ -298,7 +270,7 @@ Deno.serve(async (req) => {
             ` : ''}
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <a href="https://uno.ae/admin/operations" class="button">
+              <a href="https://myuno.app/admin/operations" class="button">
                 View in Operations Hub →
               </a>
               ${payload.customer_email ? `
@@ -319,25 +291,31 @@ Deno.serve(async (req) => {
     `;
 
     // Manager distribution requires a separately verified recipient contract; never trust body contacts.
-    const recipients = [...ADMIN_EMAILS];
-
-    const emailResponse = await resend.emails.send({
-      from: 'UNO Orders <orders@resend.dev>',
-      to: recipients,
-      subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
-      html: emailHtml,
-    });
-
-    console.info('Email sent successfully:', emailResponse);
-
+    const [email, whatsapp] = await Promise.all([
+      attemptChannel(Boolean(resendKey && adminEmails.length), async () => {
+        const response = await new Resend(resendKey!).emails.send({
+          from: 'UNO Orders <orders@resend.dev>',
+          to: adminEmails,
+          subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
+          html: emailHtml,
+        });
+        if (!emailAccepted(response)) throw new Error('Email acceptance unconfirmed');
+      }),
+      attemptChannel(Boolean(adminWhatsApp && Deno.env.get('ULTRAMSG_INSTANCE') && Deno.env.get('ULTRAMSG_TOKEN')),
+        () => sendWhatsAppNotification(payload, adminWhatsApp)),
+    ]);
+    // Acceptance is not delivery. No response bodies, contact details or secrets in logs.
+    console.info('Admin notification outcomes', { request_id: payload.order_id, email, whatsapp });
+    const success = email === 'accepted' || whatsapp === 'accepted';
+    const partial = email !== 'accepted' || whatsapp !== 'accepted';
     return new Response(
-      JSON.stringify({ success: true, email_id: emailResponse.data?.id }),
+      JSON.stringify({ success, partial, channels: { email, whatsapp } }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: unknown) {
-    console.error('Error sending admin notification:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch {
+    console.error('Admin notification attempt failed');
+    const errorMessage = 'Notification acceptance unconfirmed';
     return new Response(
       JSON.stringify({ success: false, error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

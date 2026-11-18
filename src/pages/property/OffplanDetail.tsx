@@ -11,7 +11,7 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
  * Shows gallery, developer info, myUNO scoring, investment metrics
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Building2,
@@ -99,6 +99,14 @@ export default function OffplanDetail() {
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
+  useEffect(() => {
+    setShowLeadForm(false);
+    setSelectedUnit(null);
+  }, [id]);
+  const openProjectEnquiry = () => {
+    setSelectedUnit(null);
+    setShowLeadForm(true);
+  };
   const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const { data: developer } = useDeveloper(project?.developerId || '');
@@ -230,7 +238,7 @@ export default function OffplanDetail() {
               <ProjectStartingPrice price={project.priceFrom} />
             </span>
           </div>
-          <Button size="lg" className="w-full min-h-12 gap-2" onClick={() => setShowLeadForm(true)}>
+          <Button size="lg" className="w-full min-h-12 gap-2" onClick={openProjectEnquiry}>
             <MessageCircle className="w-5 h-5" />
             {pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามโครงการนี้' })}
           </Button>
@@ -366,7 +374,7 @@ export default function OffplanDetail() {
                     ? 'Публичные документы пока не опубликованы.'
                     : 'No public documents have been published yet.'}
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
+                <Button variant="outline" size="sm" onClick={openProjectEnquiry} className="gap-2">
                   <FileSearch className="w-4 h-4" />
                   {pickLang(language, {"ru": "Запросить пакет документов", "en": "Request document package", "th": "ขอเอกสารโครงการ"})}
                 </Button>
@@ -436,11 +444,12 @@ export default function OffplanDetail() {
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
       <ResponsiveModal
         open={showLeadForm}
-        onOpenChange={setShowLeadForm}
+        onOpenChange={(open) => { setShowLeadForm(open); if (!open) setSelectedUnit(null); }}
         title={pickLang(language, { ru: selectedUnit ? 'Запросить информацию о юните' : 'Обсудить проект', en: selectedUnit ? 'Ask about this unit' : 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
         <LandingLeadForm
+          key={`${project.id}:${selectedUnit?.id || 'project'}`}
           variant="universal"
           verticalId="properties"
           entryPoint={`offplan_project_${project.id}`}

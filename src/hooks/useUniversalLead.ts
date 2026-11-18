@@ -1,3 +1,4 @@
+import { observeLeadNotification } from '@/lib/leadNotification';
 import { useRef } from 'react';
 import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -101,9 +102,10 @@ export function useUniversalLead() {
         }).catch((e) => logger.error(`[useUniversalLead] notify-lead-whatsapp failed for lead ${data.id}:`, e));
       }
 
-      // Notify admin about new lead via email (non-blocking, logged on failure).
+      // Observe a bounded notification attempt after the durable save. Provider acceptance
+      // is not delivery; failure must never turn a saved enquiry into an intake error.
       if (receipt.shouldDispatch && data) {
-        supabase.functions.invoke('notify-admin-order', {
+        const notificationStatus = await observeLeadNotification(() => supabase.functions.invoke('notify-admin-order', {
           body: {
             order_id: data.id,
             order_number: `LEAD-${data.id.slice(0, 8).toUpperCase()}`,
@@ -113,9 +115,13 @@ export function useUniversalLead() {
             customer_name: input.name,
             customer_email: input.email,
             customer_phone: input.phone,
-            notes: input.notes || `Lead: ${input.request_type} via ${input.entry_point}`,
+            notes: [`Lead: ${input.request_type} via ${input.entry_point}`, input.notes].filter(Boolean).join('\n'),
           },
-        }).catch((e) => logger.error(`[useUniversalLead] notify-admin-order failed for lead ${data.id}:`, e));
+        }));
+        if (notificationStatus !== 'accepted') {
+          // The receipt remains successful. Do not invite a duplicate enquiry.
+          logger.error(`[useUniversalLead] admin notification unconfirmed for lead ${data.id}`);
+        }
       }
 
       // Trigger auto lead scoring (non-blocking, logged on failure).
