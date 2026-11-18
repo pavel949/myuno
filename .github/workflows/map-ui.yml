@@ -1,0 +1,46 @@
+name: Map browser acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/pages/MapView*'
+      - 'src/components/map/**'
+      - 'src/hooks/useExploreLayers*'
+      - 'src/lib/map/**'
+      - 'scripts/qa/map-ui*'
+      - '.github/workflows/map-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: map-browser-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  map-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Verify map desktop and mobile with isolated fixtures
+        run: node scripts/qa/map-ui.mjs
+      - name: Upload exact-head map evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: map-browser-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/browser/map-isolated/
+          if-no-files-found: error
+          retention-days: 14

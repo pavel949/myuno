@@ -5,11 +5,12 @@
  *  - не было overlay (карта остаётся интерактивной);
  *  - работали snapPoints (peek/half/full).
  *
- * На desktop (≥lg) скрыт — список рендерится в обычной колонке вызывающим кодом.
+ * На desktop список расположен справа поверх карты.
  */
 import * as React from 'react';
 import { Drawer as Vaul } from 'vaul';
 import { cn } from '@/lib/utils';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 const SNAP_POINTS = ['120px', 0.5, 0.92] as const;
 
@@ -23,6 +24,8 @@ export interface MapListBottomSheetProps {
   snap?: number | string | null;
   onSnapChange?: (snap: number | string | null) => void;
   className?: string;
+  onClose?: () => void;
+  closeLabel?: string;
 }
 
 export function MapListBottomSheet({
@@ -32,14 +35,27 @@ export function MapListBottomSheet({
   snap,
   onSnapChange,
   className,
+  onClose,
+  closeLabel = "Close list",
 }: MapListBottomSheetProps) {
-  const [internalSnap, setInternalSnap] = React.useState<number | string | null>(SNAP_POINTS[0]);
+  const { isLargeDesktop } = useBreakpoint();
+  const [internalSnap, setInternalSnap] = React.useState<number | string | null>(SNAP_POINTS[1]);
 
   const activeSnap = snap !== undefined ? snap : internalSnap;
   const setSnap = (s: number | string | null) => {
     setInternalSnap(s);
     onSnapChange?.(s);
   };
+
+  if (isLargeDesktop) return (
+    <aside aria-label={closeLabel === "Закрыть список" ? "Предложения на карте" : "Map offers"} className="hidden lg:flex absolute right-4 top-4 bottom-4 z-30 w-96 flex-col border border-border bg-background shadow-xl">
+      <div className="px-4 py-2 flex items-center justify-between border-b border-border shrink-0">
+        <h2 className="text-sm font-semibold">{title}</h2>{headerRight}
+        {onClose && <button type="button" onClick={onClose} className="px-3 py-2 min-h-11 text-sm text-primary">{closeLabel}</button>}
+      </div>
+      <div className="flex-1 overflow-y-auto">{children}</div>
+    </aside>
+  );
 
   return (
     <Vaul.Root
@@ -56,7 +72,7 @@ export function MapListBottomSheet({
           aria-label="Список локаций"
           className={cn(
             'fixed inset-x-0 bottom-0 z-30 flex flex-col bg-background border-t border-border shadow-2xl',
-            'h-[92dvh] outline-none lg:hidden',
+            'h-[92dvh] outline-none lg:hidden rounded-t-xl',
             className,
           )}
         >
@@ -64,6 +80,7 @@ export function MapListBottomSheet({
           <div className="px-4 py-2 flex items-center justify-between border-b border-border shrink-0">
             <Vaul.Title className="text-sm font-semibold text-foreground">{title}</Vaul.Title>
             {headerRight}
+            {onClose && <button type="button" onClick={onClose} className="px-3 py-2 text-sm text-primary">{closeLabel}</button>}
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
         </Vaul.Content>
