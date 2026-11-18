@@ -48,7 +48,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
         return;
       }
       const attemptId = attempt.id;
-      // 1. Record attribution (cookie + fingerprint + RLN)
+      // 1. Record attribution (cookie + fingerprint; no external notification)
       let attributionId: string | null = null;
       try {
         const result = await recordAttribution({
