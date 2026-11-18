@@ -39910,7 +39910,7 @@
     },
     {
       "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "184750ed0fbb9f9a44f2697d99f2e11e9c4c6e378c1f819c5aea02dd2ba821eb",
+      "sha256": "98ccb1324d8c65ecf8381fb75e4e90aa4d575427600dcfdaa1899c4ed0620325",
       "directRouteDeclarations": [
         {
           "id": "f6261970d1fabea9",
@@ -39928,7 +39928,7 @@
           "instances": 2,
           "lines": [
             165,
-            250
+            253
           ]
         }
       ]

@@ -211,10 +211,11 @@ export default function PropertyLanding() {
   return (
     <div className="rental-landing" data-testid="rental-landing">
       <SEOHead
+        url="https://www.myuno.app/property/rent"
         title={t({
-          ru: "Аренда на Пхукете: районы, комплексы и жильё — myUNO",
-          en: "Rent in Phuket: areas, communities and homes — myUNO",
-          th: "เช่าที่พักภูเก็ต: ย่าน โครงการ และบ้าน — myUNO",
+          ru: "Аренда на Пхукете: районы, комплексы и жильё",
+          en: "Rent in Phuket: areas, communities and homes",
+          th: "เช่าที่พักภูเก็ต: ย่าน โครงการ และบ้าน",
         })}
         description={t({
           ru: "Найдите свой район и формат жизни на Пхукете. Изучите комплексы, сравните сроки аренды и переходите к реальным предложениям жилья.",
@@ -224,20 +225,22 @@ export default function PropertyLanding() {
       />
       <section className="rental-hero" aria-labelledby="rental-title">
         <div className="rental-hero-copy">
-          <p className="rental-eyebrow">
-            myUNO /{" "}
-            {t({
-              ru: "Аренда на Пхукете",
-              en: "Rent in Phuket",
-              th: "เช่าที่พักภูเก็ต",
-            })}
-          </p>
           <h1 id="rental-title">
-            {t({
-              ru: "Найдите свой Пхукет.",
-              en: "Find your Phuket.",
-              th: "ค้นพบภูเก็ตในแบบคุณ",
-            })}
+            <span className="rental-eyebrow rental-title-kicker">
+              myUNO /{" "}
+              {t({
+                ru: "Аренда на Пхукете",
+                en: "Rent in Phuket",
+                th: "เช่าที่พักภูเก็ต",
+              })}
+            </span>
+            <span className="rental-title-text">
+              {t({
+                ru: "Найдите свой Пхукет.",
+                en: "Find your Phuket.",
+                th: "ค้นพบภูเก็ตในแบบคุณ",
+              })}
+            </span>
           </h1>
           <p className="rental-hero-lead">
             {t({

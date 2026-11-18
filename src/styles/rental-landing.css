@@ -455,3 +455,17 @@
     width: 100%;
   }
 }
+
+.rental-hero h1 {
+  max-width: none;
+}
+.rental-title-kicker {
+  display: block;
+  font-family: var(--font-body);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.rental-title-text {
+  display: block;
+  max-width: 11ch;
+}
