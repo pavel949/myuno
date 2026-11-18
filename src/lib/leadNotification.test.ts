@@ -61,9 +61,9 @@ describe('independent provider outcomes', () => {
 });
 
 describe('source integration guards (not browser acceptance)', () => {
-  const detail = readFileSync(new URL('../pages/property/OffplanDetail.tsx', import.meta.url), 'utf8');
-  const hook = readFileSync(new URL('../hooks/useUniversalLead.ts', import.meta.url), 'utf8');
-  const edge = readFileSync(new URL('../../supabase/functions/notify-admin-order/index.ts', import.meta.url), 'utf8');
+  const detail = readFileSync('src/pages/property/OffplanDetail.tsx', 'utf8');
+  const hook = readFileSync('src/hooks/useUniversalLead.ts', 'utf8');
+  const edge = readFileSync('supabase/functions/notify-admin-order/index.ts', 'utf8');
   it('clears unit context for project actions and route changes', () => {
     expect(detail).toContain('const openProjectEnquiry = () => {\n    setSelectedUnit(null);');
     expect(detail.match(/onClick={openProjectEnquiry}/g)).toHaveLength(2);
