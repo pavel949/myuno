@@ -58,10 +58,19 @@ describe('public map source security guards', () => {
       expect(call.columns.split(',').map(column => column.trim())).not.toEqual(expect.arrayContaining(['attributes']));
       expect(call.columns).not.toMatch(/phone|email|commission|bank|contact|reviewed_by|rejection_reason/);
     }
-    expect(mock.calls.map(call => call.table)).toEqual(['public_property_catalog', 'property_projects', 'public_provider_catalog', 'listings']);
+    expect(mock.calls.map(call => call.table)).toEqual(['public_property_catalog', 'property_projects', 'listings']);
+    expect(mock.calls.some(call => call.table === 'public_provider_catalog' || call.table === 'providers')).toBe(false);
     expect(mock.calls.find(call => call.table === 'property_projects')?.filters).toEqual([
       ['is_approved', true], ['is_active', true], ['public_listing_enabled', true],
     ]);
+  });
+
+  it('does not turn generic provider coordinates into stationary service pins', async () => {
+    mock.responses.public_provider_catalog = { data: [{ id: 'mobile-provider', name: 'Mobile service', lat: 8, lng: 98, is_active: true }], error: null };
+    const { result } = renderMapHook();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.calls.some(call => call.table === 'public_provider_catalog' || call.table === 'providers')).toBe(false);
+    expect(result.current.data).toEqual([]);
   });
 
   it('preserves successful layers and exposes a partial source failure', async () => {
@@ -76,13 +85,13 @@ describe('public map source security guards', () => {
   });
 
   it('does not present an all-source failure as a successful empty catalogue without warnings', async () => {
-    for (const table of ['public_property_catalog', 'property_projects', 'public_provider_catalog', 'listings']) {
+    for (const table of ['public_property_catalog', 'property_projects', 'listings']) {
       mock.responses[table] = { data: null, error: { message: 'query unavailable' } };
     }
     const { result } = renderMapHook();
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
-    expect(result.current.layerErrors).toEqual(['property', 'newbuild', 'service', 'experience']);
+    expect(result.current.layerErrors).toEqual(['property', 'newbuild', 'experience']);
   });
 
   it('omits unlocated records and reports them without inventing coordinates', async () => {

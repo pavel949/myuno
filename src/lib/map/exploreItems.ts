@@ -80,10 +80,3 @@ export function experienceExploreItem(record: MapRecord): ExploreItem | null {
     // A primary coordinate therefore does not establish a fixed attraction venue.
     locationKind: 'meeting_point' };
 }
-export function providerExploreItem(record: MapRecord): ExploreItem | null {
-  const coords = mapCoordinates(record.lat, record.lng);
-  if (!coords || !str(record.id)) return null;
-  return { ...base(record, coords, 'Service', 'Услуга'), id: `service-${record.id}`, layer: 'service',
-    href: `/services/provider/${record.id}`, priceFrom: null, currency: null, pricePeriod: null,
-    category: str(record.business_category), image: str(record.cover_image) ?? str(record.logo_url) };
-}

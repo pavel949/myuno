@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVeterinaryClinics, VeterinaryClinic } from '@/hooks/useVeterinaryClinics';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -23,7 +24,20 @@ const VeterinaryPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [show24h, setShow24h] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
-  const [selectedClinic, setSelectedClinic] = useState<VeterinaryClinic | null>(null);
+  // Resolve only from the existing active/public query, never fetch arbitrary IDs.
+  // URL is the source of truth so deep links and browser history stay in sync.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedClinic = !isLoading
+    ? clinics.find((clinic) => clinic.id === searchParams.get('clinic')) ?? null
+    : null;
+  const setSelectedClinic = (clinic: VeterinaryClinic | null) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      if (clinic) next.set('clinic', clinic.id);
+      else next.delete('clinic');
+      return next;
+    });
+  };
 
   const isRussian = language === 'ru';
 
@@ -148,7 +162,7 @@ const VeterinaryPage = () => {
         )}
 
         {/* Clinic Details Dialog */}
-        <Dialog open={!!selectedClinic} onOpenChange={() => setSelectedClinic(null)}>
+        <Dialog open={!!selectedClinic} onOpenChange={(open) => { if (!open) setSelectedClinic(null); }}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             {selectedClinic && (
               <>

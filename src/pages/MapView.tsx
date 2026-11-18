@@ -97,19 +97,19 @@ const VERTICAL_CONFIG: Record<
   Exclude<VerticalFilter, 'all'>,
   { icon: string; color: string; labelEn: string; labelRu: string; route: (id: string) => string }
 > = {
-  stay: { icon: '🛏️', color: '#0F766E', labelEn: 'Short stays', labelRu: 'Посуточная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
-  rent: { icon: '🔑', color: '#0A2240', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
-  sale: { icon: '🏷️', color: '#D96B1A', labelEn: 'For sale', labelRu: 'Продажа жилья', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
-  newbuild: { icon: '🏗️', color: '#78716C', labelEn: 'New developments', labelRu: 'Новостройки', route: (id) => APP_ROUTES.OFFPLAN_DETAIL(id) },
-  experience: { icon: '✦', color: 'hsl(var(--primary))', labelEn: 'Experiences', labelRu: 'Впечатления', route: (id) => APP_ROUTES.EXPERIENCE_DETAIL(id) },
-  service: { icon: '🛠️', color: '#3F6212', labelEn: 'Services', labelRu: 'Услуги', route: (id) => `/services/provider/${id}` },
+  stay: { icon: '🛏️', color: 'hsl(var(--cat-real-estate))', labelEn: 'Short stays', labelRu: 'Посуточная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  rent: { icon: '🔑', color: 'hsl(var(--accent-indigo))', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  sale: { icon: '🏷️', color: 'hsl(var(--accent-coral))', labelEn: 'Resale homes', labelRu: 'Вторичное жильё', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  newbuild: { icon: '🏗️', color: 'hsl(var(--accent-amber))', labelEn: 'New developments', labelRu: 'Новостройки', route: (id) => APP_ROUTES.OFFPLAN_DETAIL(id) },
+  experience: { icon: '✦', color: 'hsl(var(--cat-tourism))', labelEn: 'Experiences', labelRu: 'Впечатления', route: (id) => APP_ROUTES.EXPERIENCE_DETAIL(id) },
+  service: { icon: '🛠️', color: 'hsl(var(--accent-emerald))', labelEn: 'Services', labelRu: 'Услуги', route: (id) => `/services/provider/${id}` },
   commercial: { icon: '🏢', color: '#C9A84C', labelEn: 'Commercial', labelRu: 'Коммерческая недвижимость', route: (id) => `/property/commercial/${id}` },
   land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земельные участки', route: (id) => `/property/land/${id}` },
-  beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
-  restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
-  fitness: { icon: '🏋️', color: '#0ea5e9', labelEn: 'Fitness', labelRu: 'Фитнес', route: (id) => `/fitness/${id}` },
-  pharmacy: { icon: '💊', color: '#16a34a', labelEn: 'Pharmacy', labelRu: 'Аптеки', route: (id) => `/pharmacy/${id}` },
-  vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветеринарные клиники', route: (id) => `/pets/vet/${id}` },
+  beauty: { icon: '💇', color: 'hsl(var(--accent-emerald))', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
+  restaurant: { icon: '🍽️', color: 'hsl(var(--cat-food))', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
+  fitness: { icon: '🏋️', color: 'hsl(var(--accent-emerald))', labelEn: 'Fitness', labelRu: 'Фитнес', route: (id) => `/fitness/gym/${id}` },
+  pharmacy: { icon: '💊', color: 'hsl(var(--accent-emerald))', labelEn: 'Pharmacy', labelRu: 'Аптеки', route: (id) => `/pharmacy/${id}` },
+  vet: { icon: '🐾', color: 'hsl(var(--accent-emerald))', labelEn: 'Vet', labelRu: 'Ветеринарные клиники', route: (id) => `${APP_ROUTES.VETERINARY}?clinic=${encodeURIComponent(id)}` },
   flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
   venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
   event: { icon: '🎉', color: '#f59e0b', labelEn: 'Events', labelRu: 'События', route: (id) => APP_ROUTES.EVENT_DETAIL(id) },
@@ -120,7 +120,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'all', labelEn: 'All', labelRu: 'Все', icon: '🗺️' },
   { value: 'stay', labelEn: 'Short stays', labelRu: 'Посуточная аренда', icon: '🛏️' },
   { value: 'rent', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', icon: '🔑' },
-  { value: 'sale', labelEn: 'For sale', labelRu: 'Продажа жилья', icon: '🏷️' },
+  { value: 'sale', labelEn: 'Resale homes', labelRu: 'Вторичное жильё', icon: '🏷️' },
   { value: 'newbuild', labelEn: 'New developments', labelRu: 'Новостройки', icon: '🏗️' },
   { value: 'experience', labelEn: 'Experiences', labelRu: 'Впечатления', icon: '✦' },
   { value: 'service', labelEn: 'Services', labelRu: 'Услуги', icon: '🛠️' },
@@ -136,6 +136,8 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
   { value: 'community', labelEn: 'Communities', labelRu: 'Сообщества', icon: '🛕' },
 ];
+
+const STATIONARY_SERVICE_LAYERS: VerticalFilter[] = ['beauty', 'fitness', 'pharmacy', 'vet'];
 
 const OSM_CATEGORIES = ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'];
 
@@ -393,7 +395,8 @@ export default function MapView() {
       if (searchParams.get('project') && m.projectId !== searchParams.get('project')) return false;
       if (searchParams.get('bedrooms') && (m.bedrooms == null || m.bedrooms < Number(searchParams.get('bedrooms')))) return false;
       if (searchParams.get('category') && m.category !== searchParams.get('category')) return false;
-      if (selectedLayers.length && !selectedLayers.includes(m.vertical as Exclude<VerticalFilter, 'all'>)) return false;
+      if (selectedLayers.length && !selectedLayers.includes(m.vertical as Exclude<VerticalFilter, 'all'>)
+        && !(selectedLayers.includes('service') && STATIONARY_SERVICE_LAYERS.includes(m.vertical))) return false;
       if (selectedPrice !== 'all' && (m.vertical === 'stay' || m.vertical === 'all')) {
         const [min, max] = PRICE_RANGES[selectedPrice];
         if (m.currency !== 'THB' || m.pricePeriod !== 'night' || m.priceFrom == null || m.priceFrom <= 0 || m.priceFrom < min || m.priceFrom >= max) return false;
@@ -633,8 +636,8 @@ export default function MapView() {
           </div>
 
           <FilterChipGroup scrollable className="touch-pan-x">
-            {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'restaurant'].includes(opt.value)).map((opt) => (
-              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
+            {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'service', 'restaurant'].includes(opt.value)).map((opt) => (
+              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.value === 'all' ? opt.icon : <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: VERTICAL_CONFIG[opt.value].color }} />} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
             ))}
           </FilterChipGroup>
 

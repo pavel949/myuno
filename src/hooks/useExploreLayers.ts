@@ -1,12 +1,12 @@
 /** Public catalogue map projection. Missing coordinates are not invented. */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { experienceExploreItem, propertyExploreItems, projectExploreItem, providerExploreItem, mapCoordinates, type ExploreItem, type MapRecord } from '@/lib/map/exploreItems';
+import { experienceExploreItem, propertyExploreItems, projectExploreItem, mapCoordinates, type ExploreItem, type MapRecord } from '@/lib/map/exploreItems';
 export type { ExploreLayer, ExploreItem } from '@/lib/map/exploreItems';
 
 export function useExploreLayers() {
   const query = useQuery({
-    queryKey: ['explore-layers-v2'],
+    queryKey: ['explore-layers-v3'],
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const results = await Promise.all([
@@ -15,13 +15,13 @@ export function useExploreLayers() {
         supabase.from('property_projects')
           .select('id, slug, name_en, name_ru, lat, lng, location_lat, location_lng, district, price_from, cover_image_url, cover_image')
           .eq('is_approved', true).eq('is_active', true).eq('public_listing_enabled', true).limit(1000),
-        supabase.from('public_provider_catalog')
-          .select('id, name, lat, lng, rating, cover_image, logo_url, business_category').eq('is_active', true).limit(1000),
+        // Generic provider coordinates do not prove a customer-facing fixed venue.
+        // Place-specific service layers are loaded separately by MapView.
         supabase.from('listings')
           .select<string>('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per')
           .eq('vertical', 'experience').eq('is_active', true).eq('approval_status', 'approved').eq('attributes->>status', 'published').limit(1000),
       ]);
-      const sourceNames = ['property', 'newbuild', 'service', 'experience'];
+      const sourceNames = ['property', 'newbuild', 'experience'];
       const items: ExploreItem[] = [];
       const layerErrors: string[] = [];
       let missingCoordinates = 0;
@@ -29,7 +29,7 @@ export function useExploreLayers() {
         if (result.error) { layerErrors.push(sourceNames[index]); return; }
         const records = (result.data ?? []) as unknown as MapRecord[];
         for (const row of records) {
-          const transformed = index === 0 ? propertyExploreItems(row) : [index === 1 ? projectExploreItem(row) : index === 2 ? providerExploreItem(row) : experienceExploreItem(row)].filter((item): item is ExploreItem => item !== null);
+          const transformed = index === 0 ? propertyExploreItems(row) : [index === 1 ? projectExploreItem(row) : experienceExploreItem(row)].filter((item): item is ExploreItem => item !== null);
           if (!transformed.length && !mapCoordinates(row.lat, row.lng) && !mapCoordinates(row.location_lat, row.location_lng) && !mapCoordinates(row.meeting_point_lat, row.meeting_point_lng)) missingCoordinates++;
           items.push(...transformed);
         }
