@@ -5,7 +5,7 @@ import { emojiToIconMap } from '@/lib/iconMap';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { ExperienceCategory } from '@/hooks/useExperienceCategories';
 import { MarketplaceDiscoveryMenu, type MarketplaceCategoryItem } from '@/components/services/MarketplaceDiscoveryMenu';
-import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup } from '@/lib/taxonomies/experienceDiscovery';
+import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, experienceCategoryLabel } from '@/lib/taxonomies/experienceDiscovery';
 import type { Experience } from '@/hooks/useExperiences';
 import yachtImage from '@/assets/solutions/yacht.webp';
 
@@ -23,7 +23,7 @@ export function ExperienceCategoryMenu({ categories, onSelect, images = {}, offe
   if (!categories.length && !offers.length) return null;
   const items: MarketplaceCategoryItem[] = categories.filter(category => offers.some(offer => offer.category === category.slug)).map(category => ({
     id: category.slug,
-    label: language === 'ru' ? category.name_ru || category.name_en : category.name_en || category.name_ru,
+    label: experienceCategoryLabel(category, language),
     icon: emojiToIconMap[category.icon] ?? Compass,
     image: images[category.slug],
   }));

@@ -82,7 +82,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
     <div className="flex items-center gap-2"><CalendarCheck className="size-4 text-primary" aria-hidden="true" />
       <h2 id="bookable-services" className="font-display text-h3">{L('Предложения специалистов', 'Provider offers', 'ข้อเสนอจากผู้ให้บริการ')}</h2>
     </div>
-    <p className="text-sm text-muted-foreground">{L('Укажите удобное время. Запись нужно подтвердить с исполнителем.', 'Request a suitable time. The provider must confirm the booking.', 'ระบุเวลาที่สะดวก ผู้ให้บริการต้องยืนยันการจอง')}</p>
+    <p className="text-sm text-muted-foreground">{L('Укажите удобное время. Консьерж MyUNO уточнит доступность. Дождитесь подтверждения записи.', 'Request a suitable time. The MyUNO concierge will check availability. Please wait for booking confirmation.', 'ระบุเวลาที่สะดวก ทีมคอนเซียร์จ MyUNO จะตรวจสอบเวลาว่าง กรุณารอการยืนยันการจอง')}</p>
     {filters.invalid && <p role="alert" className="text-sm text-destructive">{L('Проверьте район, дату, валюту и диапазон цены в фильтрах.', 'Check the area, date, currency and price range in the filters.', 'ตรวจสอบพื้นที่ วันที่ สกุลเงิน และช่วงราคาในตัวกรอง')}</p>}
     {filtersUI}
     {Boolean(data && data.length >= 60) && <p role="status" className="text-sm text-muted-foreground">{L('Фильтры применяются к подборке из 60 последних опубликованных предложений. За дополнительным подбором обратитесь к консьержу.', 'Filters apply to the latest 60 published offers. Ask concierge for a wider selection.', 'ตัวกรองใช้กับ 60 ข้อเสนอที่เผยแพร่ล่าสุด ติดต่อคอนเซียร์จเพื่อค้นหาเพิ่มเติม')}</p>}

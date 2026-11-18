@@ -6,7 +6,7 @@
  *
  * Reads from DB (live), writes via supabase upsert. Admin-only (RLS enforces).
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,6 +24,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronRight, Edit2, Layers, Loader2, Plus, Tag, Save } from 'lucide-react';
+import { auditCatalogHierarchy, resolveCatalogPlacement } from '@/lib/catalog/catalogHierarchy';
 import { toast } from 'sonner';
 import { JTBD_CLUSTERS, PERSONAS, type JtbdClusterId, type PersonaCode } from '@/lib/taxonomies/master';
 
@@ -66,7 +67,7 @@ export default function AdminMasterCatalog() {
   const [editing, setEditing] = useState<DBCategory | null>(null);
   const [activeSurface, setActiveSurface] = useState<string>('all');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-master-catalog'],
     queryFn: async () => {
       const [groupsRes, catsRes] = await Promise.all([
@@ -91,9 +92,13 @@ export default function AdminMasterCatalog() {
 
   const updateMutation = useMutation({
     mutationFn: async (patch: Partial<DBCategory> & { id: string }) => {
-      const { error } = await supabase
+      const original = data?.categories.find(row => row.id === patch.id);
+      if (!original || !data) throw new Error(t('Reload the catalogue before saving.', 'Обновите каталог перед сохранением.'));
+      const placement = resolveCatalogPlacement(original, { ...original, ...patch }, data.categories, data.groups);
+      const { data: saved, error } = await supabase
         .from('categories')
         .update({
+          ...placement,
           name_en: patch.name_en,
           name_ru: patch.name_ru,
           status: patch.status,
@@ -103,8 +108,9 @@ export default function AdminMasterCatalog() {
           persona_codes: (patch.persona_codes ?? []) as never,
           is_active: patch.is_active,
         })
-        .eq('id', patch.id);
+        .eq('id', patch.id).select('id').single();
       if (error) throw error;
+      if (!saved) throw new Error(t('The change was not saved.', 'Изменения не сохранены.'));
     },
     onSuccess: () => {
       toast.success(t('Saved', 'Сохранено'));
@@ -131,6 +137,10 @@ export default function AdminMasterCatalog() {
       return { group: g, categories: cats };
     });
   }, [data, activeSurface]);
+
+  const hierarchyIssues = data ? auditCatalogHierarchy(data.categories, data.groups) : [];
+
+  if (error) return <PageContainer><p role="alert">{t("Could not load the catalogue. Nothing was changed.", "Не удалось загрузить каталог. Данные не изменены.")}</p><Button onClick={() => refetch()}>{t("Try again", "Повторить")}</Button></PageContainer>;
 
   if (isLoading) {
     return (
@@ -240,7 +250,13 @@ export default function AdminMasterCatalog() {
         ))}
       </div>
 
+      {hierarchyIssues.length > 0 && <Card><CardHeader><CardTitle>{t('Check catalogue links', 'Проверьте связи каталога')}</CardTitle></CardHeader><CardContent className="space-y-2">
+        <p className="text-sm text-muted-foreground">{t('These records have missing, inactive or nested parents, missing sections, or duplicate codes. No data has been changed automatically.', 'У этих записей отсутствует раздел, неверная или неактивная родительская категория либо повторяется код. Автоматически данные не менялись.')}</p>
+        {[...new Set(hierarchyIssues.map(issue => issue.id))].map(id => { const row = data?.categories.find(item => item.id === id); return row ? <Button key={id} variant="outline" onClick={() => setEditing(row)}>{isRu ? row.name_ru : row.name_en} · {row.slug}</Button> : null; })}
+      </CardContent></Card>}
       <EditSheet
+        categories={data?.categories ?? []}
+        groups={data?.groups ?? []}
         item={editing}
         onClose={() => setEditing(null)}
         onSave={(patch) => updateMutation.mutate(patch)}
@@ -252,6 +268,8 @@ export default function AdminMasterCatalog() {
 }
 
 interface EditSheetProps {
+  categories: DBCategory[];
+  groups: DBGroup[];
   item: DBCategory | null;
   onClose: () => void;
   onSave: (patch: Partial<DBCategory> & { id: string }) => void;
@@ -259,12 +277,12 @@ interface EditSheetProps {
   isRu: boolean;
 }
 
-function EditSheet({ item, onClose, onSave, saving, isRu }: EditSheetProps) {
+function EditSheet({ categories, groups, item, onClose, onSave, saving, isRu }: EditSheetProps) {
   const t = (en: string, ru: string) => (isRu ? ru : en);
   const [draft, setDraft] = useState<DBCategory | null>(item);
 
   // Reset draft on item change
-  useMemo(() => setDraft(item), [item]);
+  useEffect(() => setDraft(item), [item]);
 
   if (!item || !draft) return null;
 
@@ -289,6 +307,20 @@ function EditSheet({ item, onClose, onSave, saving, isRu }: EditSheetProps) {
         </SheetHeader>
 
         <div className="space-y-4 mt-4">
+          <div>
+            <Label htmlFor="catalog-placement">{item.parent_id ? t('Category', 'Категория') : t('Section', 'Раздел')}</Label>
+            <Select value={item.parent_id ? draft.parent_id ?? '' : draft.group_id ?? ''}
+              onValueChange={value => setDraft(item.parent_id ? { ...draft, parent_id: value } : { ...draft, group_id: value })}>
+              <SelectTrigger id="catalog-placement"><SelectValue placeholder={t('Choose a destination', 'Выберите раздел')} /></SelectTrigger>
+              <SelectContent>
+                {item.parent_id ? categories.filter(category => !category.parent_id && category.id !== item.id && (category.is_active || category.id === item.parent_id)).map(category =>
+                  <SelectItem key={category.id} value={category.id}>{isRu ? category.name_ru : category.name_en}</SelectItem>)
+                  : groups.filter(group => group.is_active || group.id === item.group_id).map(group => <SelectItem key={group.id} value={group.id}>{isRu ? group.name_ru : group.name_en}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">{t('Changes navigation grouping, not the service address, offers or booking flow.', 'Меняется группировка в меню, но не адрес услуги, предложения или процесс заявки.')}</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label className="text-xs">EN name</Label>

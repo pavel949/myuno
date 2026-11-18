@@ -75,7 +75,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
       // Retain the pending ID on failure; never rotate an uncertain attempt.
       try { await completeLeadAttempt(payload, attemptId); } catch { /* Keep acknowledged UI state. */ }
       setSubmitted(true);
-      toast.success('Запрос отправлен! Мы свяжемся с вами в течение 2 часов.');
+      toast.success('Запрос отправлен! Ответ команды ожидается. Срок ответа не подтверждён.');
     } catch (error) {
       const duplicate = typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
       if (duplicate) {
@@ -112,7 +112,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
       <div className="nb-glass p-6 text-center">
         <div className="text-2xl mb-2">✓</div>
         <p className="nb-display text-lg" style={{ color: 'hsl(var(--nb-gold))' }}>Запрос отправлен</p>
-        <p className="text-sm mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>Мы свяжемся с вами в течение 2 часов</p>
+        <p className="text-sm mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>Ответ команды ожидается. Срок ответа не подтверждён.</p>
         <button type="button" onClick={handleNewEnquiry} disabled={loading} className="nb-btn-gold mt-4 disabled:opacity-50">Отправить новый запрос</button>
       </div>
     );
@@ -165,7 +165,7 @@ export function NbLeadForm({ projectId, developerId, source = 'project_page', co
         {loading ? 'Отправляем...' : 'Отправить запрос'}
       </button>
       <p className="text-[11px] text-center" style={{ color: 'hsl(var(--nb-muted))' }}>
-        Мы свяжемся с вами в течение 2 часов
+        Ответ команды ожидается. Срок ответа не подтверждён.
       </p>
     </form>
   );

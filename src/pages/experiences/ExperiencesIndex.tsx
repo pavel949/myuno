@@ -1,5 +1,5 @@
 import { EXPERIENCE_DURATIONS, matchesExperienceFilters, readExperienceFilters } from '@/lib/experiences/discoveryFilters';
-import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue } from '@/lib/taxonomies/experienceDiscovery';
+import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue, experienceCategoryLabel, populatedExperienceCategories } from '@/lib/taxonomies/experienceDiscovery';
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 import { useEffect, useMemo, useRef } from 'react';
@@ -61,6 +61,8 @@ export default function ExperiencesIndex() {
   const groupRecord = EXPERIENCE_DISCOVERY_GROUPS.find(group => group.id === selectedGroup);
   const cleanQuery = sanitizeSearchTerm(query);
   const invalidFilters = discovery.invalid || (selectedGroup !== 'all' && !groupRecord) || (!!params.get('place') && !venueOnly) || rawType !== viewType || rawSort !== sortKey || Boolean(query.trim() && !cleanQuery);
+  // Separate unfiltered public inventory keeps sibling topics available after selecting a topic.
+  const inventory = useExperiences({ publishedOnly: true });
   const { experiences: loadedExperiences, isLoading, error, refetch } = useExperiences({
     publishedOnly: true,
     type: viewType === 'all' ? undefined : viewType,
@@ -70,9 +72,11 @@ export default function ExperiencesIndex() {
   const experiences = useMemo(() => loadedExperiences.filter(item => (selectedGroup === 'all' || experienceGroup(item.category) === selectedGroup) && (!venueOnly || isFixedVenue(item))), [loadedExperiences, selectedGroup, venueOnly]);
   const categoriesQuery = useExperienceCategories();
   const categories = categoriesQuery.data ?? [];
-  const availableCategories = categories.filter(category => (selectedGroup === 'all' || experienceGroup(category.slug) === selectedGroup)).filter(category => viewType === 'all' || category.experience_type === 'all' || category.experience_type === viewType);
+  const facetOffers = inventory.experiences.filter(item => (viewType === 'all' || item.experience_type === viewType) && (!venueOnly || isFixedVenue(item)));
+  const availableCategories = populatedExperienceCategories(categories, facetOffers).filter(category => selectedGroup === 'all' || experienceGroup(category.slug) === selectedGroup);
   const categoryRecord = categories.find(category => category.slug === selectedCategory);
-  const categoryName = categoryRecord ? (language === 'ru' ? categoryRecord.name_ru || categoryRecord.name_en : categoryRecord.name_en || categoryRecord.name_ru) : '';
+  const categoryName = categoryRecord ? experienceCategoryLabel(categoryRecord, language) : '';
+  const selectableCategories = categoryRecord && !availableCategories.includes(categoryRecord) ? [categoryRecord, ...availableCategories] : availableCategories;
   const filtered = discovery.min !== undefined || discovery.max !== undefined || Boolean(discovery.duration) || selectedGroup !== 'all' || venueOnly || viewType !== 'all' || selectedCategory !== 'all' || Boolean(query.trim()) || sortKey !== 'recommended' || invalidFilters;
   const overview = !filtered;
   const pricedCurrencies = experiences.filter(exp => matchesExperienceFilters(exp, discovery) && priceValue(exp.price) !== null).map(exp => exp.currency?.trim().toUpperCase());
@@ -166,7 +170,7 @@ export default function ExperiencesIndex() {
     <label className="block space-y-2 text-sm"><span className="font-medium">{t('Категория', 'Category', 'หมวดหมู่')}</span>
         <select className="min-h-11 w-full border border-border bg-background px-3" value={selectedCategory} onChange={event => update('category', event.target.value)}>
           <option value="all">{t('Все категории', 'All categories', 'ทุกหมวดหมู่')}</option>
-          {availableCategories.map(category => <option key={category.id} value={category.slug}>{language === 'ru' ? category.name_ru || category.name_en : category.name_en || category.name_ru}</option>)}
+          {selectableCategories.map(category => <option key={category.id} value={category.slug}>{experienceCategoryLabel(category, language)}</option>)}
         </select>
       </label></div></MarketplaceFilterSheet>}>
     <SEOHead title={t('Впечатления на Пхукете', 'Experiences in Phuket', 'ประสบการณ์ในภูเก็ต')}
@@ -174,7 +178,7 @@ export default function ExperiencesIndex() {
     {categoriesQuery.isError && <div role="alert" className="space-y-3 border border-border p-4"><p>{t('Не удалось загрузить темы. Каталог и поиск остаются доступны.', 'Categories could not be loaded. You can still browse and search the catalogue.', 'โหลดหมวดหมู่ไม่สำเร็จ คุณยังสามารถดูและค้นหาในรายการได้')}</p><Button variant="outline" onClick={() => categoriesQuery.refetch()}>{t('Повторить загрузку тем', 'Retry categories', 'ลองโหลดหมวดหมู่อีกครั้ง')}</Button></div>}
     {overview && !categoriesQuery.isError && <ExperienceCategoryMenu categories={availableCategories} offers={experiences} onGroupSelect={group => { focusResults.current = true; update('group', group); }} selected={selectedCategory} images={categoryImages} onSelect={slug => { focusResults.current = true; update('category', slug); }} />}
     {groupRecord && <nav className="flex flex-wrap gap-2" aria-label={t('Темы раздела', 'Section topics', 'หัวข้อในหมวด')}>
-      {availableCategories.map(category => <Button key={category.id} variant={selectedCategory === category.slug ? 'secondary' : 'outline'} size="sm" aria-pressed={selectedCategory === category.slug} onClick={() => update('category', category.slug)}>{language === 'ru' ? category.name_ru || category.name_en : category.name_en || category.name_ru}</Button>)}
+      {availableCategories.map(category => <Button key={category.id} variant={selectedCategory === category.slug ? 'secondary' : 'outline'} size="sm" aria-pressed={selectedCategory === category.slug} onClick={() => update('category', category.slug)}>{experienceCategoryLabel(category, language)}</Button>)}
     </nav>}
     {filtered && <div className="flex flex-wrap items-center justify-between gap-2" role="group" aria-label={t('Выбранные фильтры', 'Selected filters', 'ตัวกรองที่เลือก')}>
       <div className="flex min-w-0 flex-wrap gap-2">{selectedFilters.map(filter => <Button key={filter.key} variant="secondary" className="min-h-11 max-w-full whitespace-normal text-left" aria-label={`${t('Убрать фильтр', 'Remove filter', 'ลบตัวกรอง')}: ${filter.label}`} onClick={() => update(filter.key, '')}><span className="break-words">{filter.label}</span><X className="size-4 shrink-0" aria-hidden="true" /></Button>)}</div>

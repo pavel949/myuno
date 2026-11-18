@@ -210,3 +210,25 @@ it('does not compare raw amounts across currencies as though they were one price
   mount('/experiences?place=fixed'); expect(screen.queryAllByTestId('offer')).toHaveLength(0);
   expect(screen.getByText('No offers match these filters')).toBeInTheDocument();
  });
+
+it('parks shows populated aquarium topics, not empty escape rooms, and keeps siblings after selection', () => {
+ state.language = 'ru';
+ categories.push(
+  { id: 'aquarium-category', slug: 'aquarium', name_en: 'Aquariums', name_ru: 'Океанариумы', experience_type: 'activity' },
+  { id: 'waterpark-category', slug: 'waterpark', name_en: 'Water parks', name_ru: 'Аквапарки', experience_type: 'activity' },
+  { id: 'escape-category', slug: 'escape-room', name_en: 'Escape rooms', name_ru: 'Квест-комната', experience_type: 'activity' },
+ );
+ offers.push(
+  { id: 'aquaria', title_en: 'Aquaria Phuket', title_ru: 'Океанариум Aquaria Phuket', category: 'aquarium', experience_type: 'activity', price: null, rating: 0 },
+  { id: 'andamanda', title_en: 'Andamanda', title_ru: 'Андаманда', category: 'waterpark', experience_type: 'activity', price: null, rating: 0 },
+ );
+ try {
+  mount('/experiences?group=parks');
+  const topics = screen.getByRole('navigation', { name: 'Темы раздела' });
+  expect(within(topics).queryByText('Квест-комната')).toBeNull();
+  fireEvent.click(within(topics).getByRole('button', { name: 'Океанариумы' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('group=parks&category=aquarium');
+  expect(screen.getAllByTestId('offer')).toHaveLength(1);
+  expect(within(screen.getByRole('navigation', { name: 'Темы раздела' })).getByRole('button', { name: 'Аквапарки' })).toBeVisible();
+ } finally { categories.splice(-3); offers.splice(-2); }
+});
