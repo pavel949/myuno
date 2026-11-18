@@ -21,6 +21,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { formatRecordedPrice } from '@/lib/format/price';
 import { InquiryForm } from '@/components/vertical-wizard/InquiryForm';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { ExperienceDiscoveryDetail } from '@/components/experiences/ExperienceDiscoveryDetail';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +34,7 @@ export default function ExperienceDetail() {
     else navigate(target.href, { replace: target.replace, state: target.state });
   };
   const { experience, isLoading, error, refetch } = useExperience(id);
-  const { data: pricingOptions = [] } = useExperiencePricing(id);
+  const { data: pricingOptions = [] } = useExperiencePricing(experience && !experience.discovery_only ? id : undefined);
   const [activeImage, setActiveImage] = useState(0);
   const [inquiryOpen, setInquiryOpen] = useState(() => new URLSearchParams(location.search).get('inquiry') === '1');
   const isRu = language === 'ru';
@@ -77,6 +78,8 @@ export default function ExperienceDetail() {
       </MiniAppLayout>
     );
   }
+
+  if (experience.discovery_only) return <ExperienceDiscoveryDetail experience={experience} onBack={returnToCatalogue} initialInquiryOpen={inquiryOpen} />;
 
   const isTour = experience.experience_type === 'tour';
   const images = experience.cover_image 

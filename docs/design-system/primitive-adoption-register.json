@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 895,
-      "sourceInstances": 2926
+      "directConsumerFiles": 896,
+      "sourceInstances": 2927
     },
     "Card": {
       "directConsumerFiles": 531,
@@ -5832,6 +5832,23 @@
           "instances": 1,
           "lines": [
             68
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/experiences/ExperienceDiscoveryDetail.tsx",
+      "sha256": "9a16a28e183c6eb6f9684add78045c47600f204015e6d92cec0eb30cd0bebeb9",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            34
           ]
         }
       ]
@@ -28302,7 +28319,7 @@
     },
     {
       "file": "src/pages/experiences/ExperienceDetail.tsx",
-      "sha256": "a2449a1ff34750a941201382869af7279d661d21da9de3c40158a99acc85f8db",
+      "sha256": "8732741e21856f8bacdce5c893347cbb06749967c72b8a8c66fc827a015a90b3",
       "directRouteDeclarations": [
         {
           "id": "d7297c8e1aa48a4a",
@@ -28319,11 +28336,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            60,
-            60,
-            73,
-            267,
-            477
+            61,
+            61,
+            74,
+            270,
+            480
           ]
         },
         {
@@ -28331,17 +28348,17 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            201,
-            213,
-            227,
-            277,
-            295,
-            315,
-            354,
-            375,
-            393,
-            413,
-            428
+            204,
+            216,
+            230,
+            280,
+            298,
+            318,
+            357,
+            378,
+            396,
+            416,
+            431
           ]
         }
       ]
