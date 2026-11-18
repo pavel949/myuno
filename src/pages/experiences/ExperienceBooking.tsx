@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { ExperienceDiscoveryDetail } from '@/components/experiences/ExperienceDiscoveryDetail';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function ExperienceBooking() {
@@ -61,10 +62,10 @@ export default function ExperienceBooking() {
 
   // Auth redirect
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isLoading && experience && !experience.discovery_only) {
       redirectToAuth(navigate, { from: `/experiences/${id}/book` });
     }
-  }, [authLoading, user, navigate, id]);
+  }, [authLoading, user, navigate, id, isLoading, experience]);
 
   if (isLoading || authLoading) {
     return (
@@ -77,7 +78,7 @@ export default function ExperienceBooking() {
     );
   }
 
-  if (!user) {
+  if (!user && !experience?.discovery_only) {
     return null;
   }
 
@@ -91,6 +92,8 @@ export default function ExperienceBooking() {
       </MiniAppLayout>
     );
   }
+
+  if (experience.discovery_only) return <ExperienceDiscoveryDetail experience={experience} onBack={() => navigate(`/experiences/${experience.id}`)} />;
 
   const totalPrice = (experience.price || 0) * participants;
   const experienceTitle = isRu ? experience.title_ru : experience.title_en;

@@ -23,6 +23,8 @@ export interface IncludeItem {
 }
 
 export interface Experience {
+  /** Editorial discovery, with terms confirmed directly by the named operator. */
+  discovery_only?: boolean;
   id: string;
   experience_type: ExperienceType;
   title_en: string;
@@ -131,6 +133,7 @@ const transformExperience = (raw: Record<string, unknown>): Experience => {
   const get = (key: string) => raw[key] !== undefined ? raw[key] : attrs[key];
 
   return {
+    discovery_only: get('discovery_only') === true,
     id: raw.id as string,
     experience_type: (get('experience_type') as ExperienceType) || 'tour',
     title_en: (raw.title_en || raw.name_en) as string,
