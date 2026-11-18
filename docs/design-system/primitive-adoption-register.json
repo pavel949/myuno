@@ -25793,7 +25793,7 @@
     },
     {
       "file": "src/pages/admin/ExperienceCategoriesPage.tsx",
-      "sha256": "1ee9ed51f9c1a760151f51d84999f68bc7c660b1ab02ac8f8ec0a16d3ef4f1ea",
+      "sha256": "df806d6a029918b801f36ec2c29736888498725af0cc023512311dacef928969",
       "directRouteDeclarations": [
         {
           "id": "cbc3b32a37d823a3",

@@ -174,7 +174,7 @@ export default function ExperienceCategoriesPage() {
                 <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => openEditDialog(category)}><Pencil className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}</Button><Button variant="ghost" className="text-destructive" onClick={() => setDeleteConfirmId(category.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="h-4 w-4" /></Button></div>
               </article>)}
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:block overflow-x-auto">
             <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>
