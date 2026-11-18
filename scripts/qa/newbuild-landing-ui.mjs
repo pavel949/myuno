@@ -1,4 +1,4 @@
-// Actual rental landing and shared search, synthetic read boundary; no production backend.
+// Actual newbuild discovery and project search, synthetic read boundary; no production backend.
 import { build } from "esbuild";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";

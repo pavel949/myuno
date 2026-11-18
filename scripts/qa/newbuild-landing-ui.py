@@ -25,7 +25,9 @@ async def main():
     await expect(page.locator('#newbuild-life a[href="/experiences"]')).to_have_count(1);await expect(page.locator('#newbuild-life a[href="/discover/services"]')).to_have_count(1)
     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {lang}/{width}'
     assert not await page.locator('#newbuild-projects').filter(has_text='2028').count()
-    await page.screenshot(path=str(out/f'{lang}-{width}.png'),full_page=True)
+    await page.locator('#newbuild-projects').scroll_into_view_if_needed();await expect(page.locator('#newbuild-projects img')).to_be_visible()
+    await page.wait_for_function("document.querySelector('#newbuild-projects img')?.naturalWidth > 0")
+    await page.evaluate('scrollTo(0,0)');await page.screenshot(path=str(out/f'{lang}-{width}.png'),full_page=True)
     await page.locator('.newbuild-search input').fill('Synthetic & home');await page.locator('select[name="district"]').select_option('Bang Tao');await page.locator('select[name="budget"]').select_option('10to20');await page.locator('.newbuild-search button[type="submit"]').click()
     await expect(page.get_by_test_id('location')).to_contain_text('/property/offplan/search?q=Synthetic+%26+home&district=Bang+Tao&budget=10to20')
     assert not blocked,blocked
