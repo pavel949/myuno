@@ -10,7 +10,7 @@
  */
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Instagram, Youtube, Linkedin, Facebook, MessageCircle, Download, Smartphone } from 'lucide-react';
+import { Send, Instagram, Youtube, Linkedin, Facebook, ArrowUpRight, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlatformSocialLinks } from '@/hooks/usePlatformSocialLinks';
 import { COMPANY_CONTACTS } from '@/lib/config';
@@ -76,6 +76,20 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     { href: COMPANY_CONTACTS.social.whatsapp, icon: MessageCircle, label: 'WhatsApp' },
   ];
 
+  const socialPanel = <section aria-label={t({ ru: 'Социальные сети и связь', en: 'Social networks and contact', th: 'โซเชียลมีเดียและการติดต่อ' })} className="w-full border border-border bg-muted/30 p-4 lg:w-auto lg:shrink-0">
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h2 className="font-display text-lg">{t({ ru: 'Будем на связи', en: 'Stay connected', th: 'ติดตามและติดต่อเรา' })}</h2>
+      <span className="text-caption text-muted-foreground">myUNO</span>
+    </div>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {socialLinks.map(social => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} className="group flex min-h-11 min-w-0 items-center gap-2 border border-border bg-background px-3 py-2 text-foreground transition-colors hover:border-primary/40 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <social.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="min-w-0 flex-1 text-caption font-medium">{social.label}</span>
+        <ArrowUpRight className="size-3 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+      </a>)}
+    </div>
+  </section>;
+
   // ─── Desktop: slim 3-row footer ────────────────────────────────────────
   if (isLargeDesktop) {
     return (
@@ -89,20 +103,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="grid h-11 w-11 place-items-center rounded-none border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-                >
-                  <social.icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
+            {socialPanel}
           </div>
 
           {/* Row 1.5 — surface explore (Master Taxonomy v1.0) */}
@@ -183,20 +184,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           </div>
         )}
 
-        <div className="flex flex-wrap justify-center gap-3">
-          {socialLinks.map((social) => (
-            <a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={social.label}
-              className="grid h-11 w-11 place-items-center rounded-none border border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-            >
-              <social.icon className="h-4 w-4" />
-            </a>
-          ))}
-        </div>
+        <div className="flex justify-center">{socialPanel}</div>
 
         <nav
           aria-label={t({ ru: 'Жизненный цикл', en: 'Lifecycle', th: 'ช่วงการใช้ชีวิต' })}

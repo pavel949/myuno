@@ -30,6 +30,7 @@ async def main():
     for label in ['YouTube','Instagram','LinkedIn','Facebook']:
      link=page.get_by_role('link',name=label,exact=True);await expect(link).to_be_visible();await expect(link).to_have_attribute('target','_blank');await expect(link).to_have_attribute('rel','noopener noreferrer')
     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),'Overflow'
+    await page.get_by_text({'ru':'Социальные сети сохранены','en':'Social networks saved','th':'บันทึกโซเชียลมีเดียแล้ว'}[lang],exact=True).wait_for(state='hidden',timeout=10000)
     await page.screenshot(path=str(OUT/f'{lang}-{width}-saved.png'),full_page=True)
     await page.get_by_role('textbox',name='Instagram',exact=True).fill('');await page.get_by_role('button',name={'ru':'Сохранить','en':'Save','th':'บันทึก'}[lang],exact=True).click()
     await expect(page.get_by_role('link',name='Instagram',exact=True)).to_have_count(0)
