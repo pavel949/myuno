@@ -45,7 +45,7 @@ const virtual = {
    const style=structuredClone(options.style);
    if(!style?.sources?.omt?.url?.startsWith('pmtiles://'))throw Error('Expected production PMTiles style');
    style.sources.omt.url='pmtiles://'+location.origin+'/phuket.pmtiles';
-   style.glyphs=location.origin+'/fonts/{fontstack}/{range}.pbf';
+   if(!style.glyphs.startsWith(location.origin+'/map-glyphs/'))throw Error('Expected same-origin production glyphs');
    super({...options,style});window.fixtureMap=this;window.fixtureMapErrors=[];
    this.on('error',event=>window.fixtureMapErrors.push(String(event.error?.message||event.error)));
  }}
@@ -112,12 +112,12 @@ const server=createServer(async(req,res)=>{
    }
    res.writeHead(200,{'Content-Length':archive.length});res.end(archive);return;
   }
-  const glyph=/^\/fonts\/Noto%20Sans%20Regular\/(\d+)-(\d+)\.pbf$/.exec(pathname);
+  const glyph=/^\/map-glyphs\/noto-sans-regular\/(\d+)-(\d+)\.pbf$/.exec(pathname);
   if(glyph){
    const start=Number(glyph[1]),end=Number(glyph[2]);
    if(start%256!==0||end!==start+255||end>65535)throw Error('Glyph range outside allowlist');
    const key=`${start}-${end}`;
-   if(!glyphCache.has(key))glyphCache.set(key,staticFetch('https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/'+key+'.pbf'));
+   if(!glyphCache.has(key))glyphCache.set(key,readFile(path.join(root,'public/map-glyphs/noto-sans-regular',key+'.pbf')));
    const bytes=await glyphCache.get(key);
    if(bytes.length===0||bytes.length>2000000)throw Error('Invalid glyph payload size');
    await writeFile(path.join(output,`glyph-${key}.pbf`),bytes);

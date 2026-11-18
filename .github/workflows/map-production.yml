@@ -11,7 +11,7 @@ permissions:
 jobs:
   production-map:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -23,10 +23,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Read-only deployed map across three browser engines and two viewports
+      - name: Build the exact production bundle with its unmodified CSP
+        run: npm run build
+      - name: Read-only exact-head production map across three browser engines and two viewports
         env:
           MAP_BROWSER_ENGINES: chromium,firefox,webkit
-        run: node scripts/qa/map-production-smoke.mjs
+        run: node scripts/qa/map-production-smoke.mjs --local-dist
       - name: Preserve diagnostic evidence including failures
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
