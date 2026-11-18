@@ -9,7 +9,12 @@ export function createWorker({ authorize, openStore, readContacts, send, timeout
     try { admitted = await authorize(req); } catch { /* fail closed */ }
     if (!admitted) return reply(401, { error: 'unauthorized' });
     // Do not accept client-selected source IDs or notification content even on scheduler path.
-    if ((await req.text()).trim() !== '') return reply(400, { error: 'body_not_allowed' });
+    // Scheduler calls carry no body at all. Do not buffer unbounded input or
+    // hang on a streaming body; cancellation also rejects whitespace payloads.
+    if (req.body !== null) {
+      try { void req.body.cancel().catch(() => {}); } catch { /* no privileged work on read failure */ }
+      return reply(400, { error: 'body_not_allowed' });
+    }
     try {
       const store = await openStore();
       const contacts = await readContacts(); // strict configured MyUNO contacts only; throws on failed read

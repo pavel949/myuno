@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorker } from './worker.mjs';
-const req = (body='',method='POST') => new Request('https://example.invalid/worker',{method,...(method==='POST'?{body}:{})});
+const req = (body='',method='POST') => new Request('https://example.invalid/worker',{method,...(method==='POST' && body!==''?{body}:{})});
 function fixture(overrides={}) {
  const effects=[];
  const jobs=['email','whatsapp'].map((channel,i)=>({job_id:`job-${i}`,token:`token-${i}`,channel,lead:{id:'canonical-id',name:'synthetic'}}));
@@ -21,3 +21,5 @@ test('settings query error prevents claiming and sending',async()=>{const f=fixt
 test('bounded timeout becomes uncertain, not retry',async()=>{const f=fixture({timeoutMs:5,send:{email:()=>new Promise(()=>{}),whatsapp:async()=>({accepted:true,reference:'wa'})}});assert.equal((await(await f.handle(req())).json()).counts.uncertain,1);});
 test('stale lease or failed ack never reported committed',async()=>{const f=fixture({openStore:async()=>({claim:async()=>[{job_id:'x',token:'old',channel:'email',lead:{}}],finish:async()=>false})});const r=await f.handle(req());assert.equal(r.status,503);assert.equal((await r.json()).counts.uncommitted,1);});
 test('only stored payload and configured target reach adapter',async()=>{let seen;const f=fixture({send:{email:async x=>{seen=x;return {accepted:true,reference:'ok'};},whatsapp:async()=>({accepted:true,reference:'ok'})}});await f.handle(req());assert.deepEqual(seen.target,['admin@example.invalid']);assert.equal(seen.lead.id,'canonical-id');assert.equal(seen.idempotencyKey,'consultation:job-0');});
+
+test('streaming and whitespace bodies denied before privileged access',async()=>{for(const body of ['   ',new ReadableStream({pull(){}})]){const f=fixture();const r=new Request('https://example.invalid',{method:'POST',body,duplex:'half'});assert.equal((await f.handle(r)).status,400);assert.deepEqual(f.effects,[]);}});
