@@ -1,6 +1,6 @@
 /**
  * @module catalog/taxonomy
- * @description **Single Source of Truth** for the public service catalog.
+ * @description Static compatibility/fallback registry for the public service catalog.
  *
  * Hierarchy:
  *
@@ -19,7 +19,9 @@
  * They drifted apart and produced inconsistent navigation:
  * footer ≠ home grid ≠ discover ≠ catalog page.
  *
- * **Rule:** any new public-facing service or category is added HERE first.
+ * **Runtime rule:** live menu placement and service-situation links are edited in
+ * the existing DB catalogue/LifeOS editors. Add new route/icon adapters here
+ * when needed; never override a successful empty DB mapping with static tags.
  * Older modules (`verticalGroups.ts`, `nav/clusterCatalog.ts`,
  * `appRegistry.ts`) are now thin adapters that re-derive their shape
  * from this SSOT.

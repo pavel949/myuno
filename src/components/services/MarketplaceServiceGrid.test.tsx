@@ -7,14 +7,20 @@ let data: MarketplaceService[] = [];
 let isLoading = false;
 let isError = false;
 const refetch = vi.fn();
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+const locale = vi.hoisted(() => ({ language: 'en' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data, isLoading, isError, refetch }) }));
 vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: {}, isFetching: false, refetch: vi.fn() }) }));
 vi.mock('./ServiceBookingSheet', () => ({ ServiceBookingSheet: () => null }));
 const service = { id: 'test-service', name_en: 'Fixture cleaning', provider_id: 'provider-1', provider: { id: 'provider-1', name: 'Fixture provider' } } as MarketplaceService;
 const mount = (search = '') => render(<MemoryRouter><MarketplaceServiceGrid search={search} returnTo="/discover/services?q=cleaning" /></MemoryRouter>);
-beforeEach(() => { data = []; isLoading = false; isError = false; refetch.mockClear(); });
+beforeEach(() => { locale.language = 'en'; data = []; isLoading = false; isError = false; refetch.mockClear(); });
 describe('provider catalogue states', () => {
+  it.each(['ru', 'en', 'th'])('routes booking coordination through MyUNO in %s', language => {
+    locale.language = language; data = [service]; mount();
+    expect(screen.getByText(/MyUNO/)).toBeVisible();
+    expect(screen.queryByText(/The provider must confirm/)).toBeNull();
+  });
   it('distinguishes absent supply even when there is a search', () => {
     mount('cleaning');
     expect(screen.getByText(/No published provider offers yet/)).toBeInTheDocument();

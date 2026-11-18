@@ -3,6 +3,7 @@ fs.mkdirSync('test-results/catalog-mapping',{recursive:true});
 (async()=>{const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox']});
 for(const width of [375,390,430,1440]){const page=await browser.newPage({viewport:{width,height:1000}});await page.goto('http://127.0.0.1:4185'); await page.getByRole('button',{name:'Курсы валют'}).click();
 await page.getByRole('combobox').first().click(); await page.getByRole('option',{name:'Финансы',exact:true}).click();
+await page.getByRole('listbox').waitFor({state:'hidden'});
 await page.screenshot({path:`test-results/catalog-mapping/edit-${width}.png`,fullPage:true});
 assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
 await page.getByRole('button',{name:'Сохранить',exact:true}).click(); await page.getByRole('dialog').waitFor({state:'hidden'});
