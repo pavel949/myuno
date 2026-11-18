@@ -23,12 +23,12 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 898,
-      "sourceInstances": 2932
+      "directConsumerFiles": 897,
+      "sourceInstances": 2930
     },
     "Card": {
-      "directConsumerFiles": 532,
-      "sourceInstances": 1554
+      "directConsumerFiles": 531,
+      "sourceInstances": 1547
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -5838,7 +5838,7 @@
     },
     {
       "file": "src/components/experiences/ExperienceDiscoveryDetail.tsx",
-      "sha256": "68a28bbc715bc276f08d2e62b25571d5aee4163584dc3a51e465f67137afb067",
+      "sha256": "9a16a28e183c6eb6f9684add78045c47600f204015e6d92cec0eb30cd0bebeb9",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -5848,7 +5848,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            25
+            34
           ]
         }
       ]
@@ -22116,7 +22116,7 @@
     },
     {
       "file": "src/pages/admin/AdminExperiences.tsx",
-      "sha256": "9cfb1cc34a39b828551fb2eed666b1797a9e71a22d1aebb49018a304c73078fe",
+      "sha256": "47f94e3f6585700d1645fe511921f861057dfc171807a60b05c6fb96fd9324f4",
       "directRouteDeclarations": [
         {
           "id": "351a75540190210d",
@@ -22133,15 +22133,15 @@
           "source": "@/components/ui/button",
           "instances": 9,
           "lines": [
-            306,
-            344,
-            384,
-            447,
-            450,
-            556,
-            557,
+            310,
+            348,
+            388,
+            451,
+            454,
             571,
-            572
+            572,
+            586,
+            587
           ]
         },
         {
@@ -22149,10 +22149,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            340,
-            352,
-            440,
-            464
+            344,
+            356,
+            444,
+            468
           ]
         },
         {
@@ -22160,8 +22160,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            474,
-            566
+            478,
+            581
           ]
         },
         {
@@ -22169,7 +22169,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            382
+            386
           ]
         },
         {
@@ -22177,14 +22177,14 @@
           "source": "@/components/ui/input",
           "instances": 8,
           "lines": [
-            510,
-            511,
-            520,
-            521,
-            537,
-            538,
-            542,
-            543
+            525,
+            526,
+            535,
+            536,
+            552,
+            553,
+            557,
+            558
           ]
         },
         {
@@ -22192,9 +22192,9 @@
           "source": "@/components/uno/PageContainer",
           "instances": 3,
           "lines": [
-            263,
-            278,
-            301
+            267,
+            282,
+            305
           ]
         },
         {
@@ -22202,7 +22202,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            302
+            306
           ]
         },
         {
@@ -22210,9 +22210,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            487,
-            497,
-            525
+            491,
+            501,
+            540
           ]
         },
         {
@@ -22220,7 +22220,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            318
+            322
           ]
         },
         {
@@ -22228,8 +22228,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            515,
-            516
+            530,
+            531
           ]
         }
       ]
@@ -28318,47 +28318,8 @@
       ]
     },
     {
-      "file": "src/pages/experiences/ExperienceBooking.tsx",
-      "sha256": "b7e3afc86f62c9cc3215d8b559a94e398d6a713e1427dbfdb63abfbdea8ae582",
-      "directRouteDeclarations": [
-        {
-          "id": "daa01ab5a56ce003",
-          "path": "/experiences/:id/book",
-          "actor": "public-or-page-gated",
-          "kind": "rendered-template"
-        }
-      ],
-      "runtime": "NOTTESTED",
-      "visual": "NOTTESTED",
-      "primitiveImports": [
-        {
-          "name": "Button",
-          "source": "@/components/ui/button",
-          "instances": 2,
-          "lines": [
-            336,
-            346
-          ]
-        },
-        {
-          "name": "Card",
-          "source": "@/components/ui/card",
-          "instances": 7,
-          "lines": [
-            236,
-            273,
-            294,
-            323,
-            369,
-            388,
-            421
-          ]
-        }
-      ]
-    },
-    {
       "file": "src/pages/experiences/ExperienceDetail.tsx",
-      "sha256": "fc85a9396e22989837da7cccf52de2a7678b6f6518aff510f28039d3e86a5a8e",
+      "sha256": "8732741e21856f8bacdce5c893347cbb06749967c72b8a8c66fc827a015a90b3",
       "directRouteDeclarations": [
         {
           "id": "d7297c8e1aa48a4a",
@@ -28375,11 +28336,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            59,
-            59,
-            72,
+            61,
+            61,
+            74,
             270,
-            483
+            480
           ]
         },
         {
@@ -28387,17 +28348,17 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            202,
-            214,
-            228,
-            283,
-            301,
-            321,
-            360,
-            381,
-            399,
-            419,
-            434
+            204,
+            216,
+            230,
+            280,
+            298,
+            318,
+            357,
+            378,
+            396,
+            416,
+            431
           ]
         }
       ]

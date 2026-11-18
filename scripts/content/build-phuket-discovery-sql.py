@@ -24,8 +24,8 @@ for row in rows:
         'status': 'published', 'discovery_only': True, 'content_version': version,
         'experience_type': row['experience_type'], 'location_name': row['location_name'],
         'source_page_url': row['source_page_url'], 'photo_source_url': row['photo_source_url'],
-        # Older cached clients also retain an external operator handoff.
-        'booking_url': row['source_page_url'], 'external_link': row['source_page_url'],
+        # Never expose an actionable supplier booking handoff; keep provenance separately.
+        'booking_url': None, 'external_link': None,
         'short_description': None, 'long_description': None,
         'duration_minutes': None, 'min_participants': None, 'max_participants': None,
         'available_days': [], 'start_times': [], 'source_type': 'editorial',

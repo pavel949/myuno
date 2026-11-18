@@ -1,5 +1,5 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { cleanup, render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import ExperienceDetail from '../ExperienceDetail';
 import ExperienceBooking from '../ExperienceBooking';
@@ -18,20 +18,24 @@ vi.mock('@/components/ui/optimized-image', () => ({ OptimizedImage: ({ src, alt 
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 vi.mock('@/components/crosssell', () => ({ CrossSellSection: () => null, RelatedServicesSection: () => null }));
 vi.mock('@/components/booking', () => ({}));
+vi.mock('@/components/vertical-wizard/InquiryForm', () => ({ InquiryForm: ({ open, listingId, entryPoint }: { open: boolean; listingId: string; entryPoint: string }) => open ? <div role="dialog" data-listing={listingId} data-entry={entryPoint}>myUNO inquiry</div> : null }));
 beforeEach(() => { vi.clearAllMocks(); state.language = 'en'; state.source = 'https://operator.example/programme'; });
 afterEach(cleanup);
-it.each(['en', 'ru', 'th'])('shows editorial information and the exact operator link in %s, without inherited tariff options', language => {
+it.each(['en', 'ru', 'th'])('shows editorial information and concierge inquiry in %s, without inherited tariff options', language => {
   state.language = language;
   render(<MemoryRouter><ExperienceDetail /></MemoryRouter>);
-  expect(screen.getByRole('link')).toHaveAttribute('href', state.source);
-  expect(screen.getByRole('link')).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(screen.queryByRole('link')).toBeNull();
+  fireEvent.click(screen.getByRole('button'));
+  expect(screen.getByRole('dialog')).toHaveAttribute('data-listing', 'synthetic');
+  expect(screen.getByRole('dialog')).toHaveAttribute('data-entry', 'experience_discovery:concierge');
   expect(screen.queryByText(/9.?999/)).toBeNull();
   expect(state.pricing).toHaveBeenCalledWith(undefined);
   expect(screen.getByRole('img')).toHaveAttribute('src', 'https://operator.example/photo.webp');
 });
 it('keeps a direct booking URL in discovery mode without auth, availability or order actions', () => {
-  render(<MemoryRouter initialEntries={['/experiences/synthetic/book']}><ExperienceBooking /></MemoryRouter>);
-  expect(screen.getByRole('link', { name: 'Check with the operator' })).toBeVisible();
+  render(<MemoryRouter initialEntries={['/experiences/synthetic/book']}><Routes><Route path='/experiences/:id/book' element={<ExperienceBooking />} /><Route path='/experiences/:id' element={<ExperienceDetail />} /></Routes></MemoryRouter>);
+  expect(screen.getByRole('dialog')).toHaveAttribute('data-listing', 'synthetic');
+  expect(screen.queryByRole('link')).toBeNull();
   expect(state.order).not.toHaveBeenCalled(); expect(state.availability).not.toHaveBeenCalled(); expect(state.redirect).not.toHaveBeenCalled();
   expect(screen.queryByText(/9.?999/)).toBeNull();
 });
