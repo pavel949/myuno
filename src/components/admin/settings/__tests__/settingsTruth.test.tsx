@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationSettings } from '../NotificationSettings';
 import { OrgProfileEditor } from '../OrgProfileEditor';
+import { SocialNetworkSettings } from '../SocialNetworkSettings';
 import { FeatureFlagManager } from '../FeatureFlagManager';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import type { Json } from '@/integrations/supabase/types';
@@ -119,5 +120,48 @@ describe('feature flag requested state is not runtime activation', () => {
   });
   it('treats malformed stored flag configuration as an error rather than a truthy default', async () => {
     state.store.set('feature_flag:auth_phone', '{"enabled":"false"}'); show(<FeatureFlagManager />); expect(await screen.findByRole('alert')).toHaveTextContent('unavailable'); expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+  });
+});
+
+
+describe('platform social links use confirmed actor-bound settings', () => {
+  it('loads stored profiles, normalizes a save, and removes a profile with an empty field', async () => {
+    state.store.set('org_social_links', { youtube:'https://youtube.com/@old', instagram:'https://instagram.com/old', linkedin:'' });
+    show(<SocialNetworkSettings />);
+    const youtube = await screen.findByLabelText('YouTube');
+    expect(youtube).toHaveValue('https://youtube.com/@old');
+    fireEvent.change(youtube, {target:{value:'https://www.youtube.com/@new?tracking=remove'}});
+    fireEvent.change(screen.getByLabelText('Instagram'), {target:{value:''}});
+    fireEvent.click(screen.getByRole('button',{name:'Save'}));
+    await waitFor(() => expect(state.success).toHaveBeenCalled());
+    expect(state.store.get('org_social_links')).toEqual({youtube:'https://www.youtube.com/@new',instagram:'',linkedin:''});
+    expect(state.reads).toHaveLength(2);
+  });
+  it('rejects another network or an unsafe address before writing', async () => {
+    show(<SocialNetworkSettings />);
+    fireEvent.change(await screen.findByLabelText('Instagram'),{target:{value:'https://evil.example/profile'}});
+    fireEvent.click(screen.getByRole('button',{name:'Save'}));
+    expect(await screen.findByRole('alert')).toHaveTextContent('HTTPS profile URL');
+    expect(state.writes).toHaveLength(0);
+  });
+  it('does not substitute empty editable fields after a failed read', async () => {
+    state.readError=true;show(<SocialNetworkSettings />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded');
+    expect(screen.queryByRole('button',{name:'Save'})).toBeNull();
+  });
+  it('does not claim success or allow a blind retry after an unacknowledged write', async () => {
+    state.zeroAck=true;show(<SocialNetworkSettings />);
+    const save=await screen.findByRole('button',{name:'Save'});fireEvent.click(save);
+    await waitFor(() => expect(state.error).toHaveBeenCalled());
+    expect(state.success).not.toHaveBeenCalled();expect(save).toBeDisabled();
+    expect(screen.getByRole('button',{name:'Reload settings'})).toBeInTheDocument();
+  });
+  it('ignores a late save when the active account changes', async () => {
+    const pending=deferred<Reply>();const view=show(<SocialNetworkSettings />);
+    const save=await screen.findByRole('button',{name:'Save'});state.writeOverride=()=>pending.promise;fireEvent.click(save);
+    await waitFor(()=>expect(state.writes).toHaveLength(1));state.user={id:'admin-b'};view.redraw(<SocialNetworkSettings />);
+    await screen.findByLabelText('YouTube');
+    await act(async()=>pending.resolve({data:state.writes[0].rows,error:null}));
+    expect(state.success).not.toHaveBeenCalled();
   });
 });

@@ -10,8 +10,9 @@
  */
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Instagram, MessageCircle, Download, Smartphone } from 'lucide-react';
+import { Send, Instagram, Youtube, Linkedin, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePlatformSocialLinks } from '@/hooks/usePlatformSocialLinks';
 import { COMPANY_CONTACTS } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -25,6 +26,7 @@ import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
+  const socialSettings = usePlatformSocialLinks();
   const { isInstalled, canInstall, isIOS, install } = usePWAInstall();
   // Use ≥1024px (true laptop/desktop) for the wide footer — phones in PWA
   // standalone sometimes report ≥768px and were getting the desktop layout.
@@ -67,7 +69,9 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
 
   const socialLinks = [
     { href: COMPANY_CONTACTS.social.telegram, icon: Send, label: 'Telegram' },
-    { href: COMPANY_CONTACTS.social.instagram, icon: Instagram, label: 'Instagram' },
+    ...(socialSettings.data?.youtube ? [{ href: socialSettings.data.youtube, icon: Youtube, label: 'YouTube' }] : []),
+    ...(socialSettings.data?.instagram ? [{ href: socialSettings.data.instagram, icon: Instagram, label: 'Instagram' }] : []),
+    ...(socialSettings.data?.linkedin ? [{ href: socialSettings.data.linkedin, icon: Linkedin, label: 'LinkedIn' }] : []),
     { href: COMPANY_CONTACTS.social.whatsapp, icon: MessageCircle, label: 'WhatsApp' },
   ];
 
@@ -84,7 +88,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
@@ -178,7 +182,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           </div>
         )}
 
-        <div className="flex justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {socialLinks.map((social) => (
             <a
               key={social.label}
