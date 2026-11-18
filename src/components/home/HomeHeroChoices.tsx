@@ -14,7 +14,7 @@ type HeroChoice = {
 const choices: HeroChoice[] = [
   {
     icon: Home,
-    href: `${R.PROPERTY_SEARCH}?mode=rent`,
+    href: R.PROPERTY_RENT,
     label: { ru: 'Снять жильё', en: 'Rent a home', th: 'เช่าที่พัก' },
     description: { ru: 'На отпуск, несколько месяцев или надолго', en: 'For a holiday, a few months, or longer', th: 'สำหรับวันหยุด หลายเดือน หรือระยะยาว' },
   },
