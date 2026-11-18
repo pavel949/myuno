@@ -24,7 +24,7 @@
   "families": {
     "Button": {
       "directConsumerFiles": 897,
-      "sourceInstances": 2936
+      "sourceInstances": 2938
     },
     "Card": {
       "directConsumerFiles": 531,
@@ -25793,7 +25793,7 @@
     },
     {
       "file": "src/pages/admin/ExperienceCategoriesPage.tsx",
-      "sha256": "915b1f8f61b3ab6bb8266544eb22462a61cf01822eca24bab4c738987c531d8b",
+      "sha256": "1ee9ed51f9c1a760151f51d84999f68bc7c660b1ab02ac8f8ec0a16d3ef4f1ea",
       "directRouteDeclarations": [
         {
           "id": "cbc3b32a37d823a3",
@@ -25808,17 +25808,19 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 9,
+          "instances": 11,
           "lines": [
-            120,
-            136,
-            154,
-            210,
-            218,
-            326,
-            329,
-            350,
-            353
+            122,
+            138,
+            156,
+            174,
+            174,
+            221,
+            229,
+            339,
+            342,
+            363,
+            366
           ]
         },
         {
@@ -25826,7 +25828,7 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            155
+            157
           ]
         },
         {
@@ -25834,8 +25836,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            238,
-            338
+            251,
+            351
           ]
         },
         {
@@ -25843,12 +25845,12 @@
           "source": "@/components/ui/input",
           "instances": 6,
           "lines": [
-            147,
-            253,
-            262,
-            273,
-            282,
-            308
+            149,
+            266,
+            275,
+            286,
+            295,
+            321
           ]
         },
         {
@@ -25856,7 +25858,7 @@
           "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
-            110
+            112
           ]
         },
         {
@@ -25864,7 +25866,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            296
+            309
           ]
         },
         {
@@ -25872,7 +25874,7 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            167
+            178
           ]
         }
       ]
