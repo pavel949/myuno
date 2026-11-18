@@ -68,7 +68,7 @@ export function LifeOSMappingsTab() {
   const isRussian = language === 'ru';
   const { categories } = useCatalogFromDB();
   const serviceChoices = categories.flatMap(category => category.services).flatMap(service => {
-    const id = catalogServiceLifeId(service.id);
+    const id = catalogServiceLifeId(service.id, service.catalogRowId);
     return id ? [{ id, label: isRussian ? service.labelRu : service.labelEn }] : [];
   });
   const queryClient = useQueryClient();

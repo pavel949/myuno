@@ -2492,7 +2492,7 @@
     },
     {
       "file": "src/components/admin/lifeos/LifeOSMappingsTab.tsx",
-      "sha256": "2d235d4ae40fe37a57ff86d815553936745d552d825f515ce3128d5be74fa4d5",
+      "sha256": "2647ebcdae231fc96a190c1cd381b5d8f9af976059ec10594115701ea481dc62",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",

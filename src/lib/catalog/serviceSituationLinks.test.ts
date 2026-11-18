@@ -13,6 +13,11 @@ describe('admin-edited service situation links', () => {
     expect(publicServiceSituationCodes({ id: 'exchange' }, [{ ...link, life_situations: { code: 'arrival', is_active: false } }])).toEqual([]);
     expect(publicServiceSituationCodes({ id: 'unknown' }, [link])).toEqual([]);
   });
+  it('supports new persisted service identities without changing legacy ones', () => {
+    expect(catalogServiceLifeId('new-service', 'new-uuid')).toBe('new-uuid');
+    expect(catalogServiceLifeId('exchange', 'category-uuid')).toBe(entity_id);
+    expect(publicServiceSituationCodes({ id: 'new-service', catalogRowId: 'new-uuid' }, [{ ...link, entity_id: 'new-uuid' }])).toEqual(['arrival']);
+  });
   it('preserves the declared static seed identity across verified live slug aliases', () => {
     expect(catalogServiceLifeId('restaurants')).toBe(catalogServiceLifeId('restaurant'));
     expect(catalogServiceLifeId('education-expat')).toBe(catalogServiceLifeId('education'));

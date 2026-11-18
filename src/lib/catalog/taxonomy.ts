@@ -117,6 +117,8 @@ export type RoleTag =
   | 'all';
 
 export interface ServiceEntry {
+  /** Persisted category identity for newly registered services without a legacy seed UUID. */
+  catalogRowId?: string;
   /** Stable id (used as react key, analytics tag) */
   id: string;
   /** Internal route — must come from APP_ROUTES whenever possible */

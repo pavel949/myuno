@@ -184,6 +184,7 @@ function adaptRowToService(
   const staticService = staticParent?.services.find((s) => s.id === row.slug);
   return {
     id: row.slug,
+    catalogRowId: row.id,
     path: catalogServicePath(parentSlug, row.slug, row.app_path) ?? staticService?.path ?? '#',
     labelRu: row.name_ru || staticService?.labelRu || row.name_en,
     labelEn: row.name_en || staticService?.labelEn || row.slug,
@@ -244,6 +245,19 @@ function buildClusterCatalog(
 // Hook
 // ─────────────────────────────────────────────────────────────────────────
 
+async function fetchServiceLinks() {
+  const links: ServiceSituationLink[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await supabase.from('catalog_life_map')
+      .select('entity_id, role_scope, life_situations(code, is_active)')
+      .eq('entity_type', 'service').order('id').range(offset, offset + 499);
+    if (error) throw error;
+    links.push(...((data ?? []) as ServiceSituationLink[]));
+    if (!data || data.length < 500) break;
+  }
+  return { data: links, error: null };
+}
+
 async function fetchCatalog(): Promise<{
   groups: DBGroupRow[];
   categories: DBCategoryRow[];
@@ -275,9 +289,7 @@ async function fetchCatalog(): Promise<{
       .select(
         'cluster_id, life_situation_id, weight, is_primary, life_situations(code, title_en, title_ru, description_en, description_ru, icon, color, priority, is_active)',
       ),
-    supabase.from('catalog_life_map')
-      .select('entity_id, role_scope, life_situations(code, is_active)')
-      .eq('entity_type', 'service'),
+    fetchServiceLinks(),
     supabase.from('life_situations').select('code, title_en, title_ru, description_en, description_ru, icon, color, priority, is_active').eq('is_active', true),
   ]);
 
