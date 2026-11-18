@@ -22,3 +22,10 @@ The browser observes the admin notification for at most 10 seconds; rejected and
 
 ## Rollback
 Revert this frontend/edge code commit independently and redeploy the previously approved version through the governed release process. There are no migrations, data changes, new credentials, recipient changes or RLS changes. Do not deploy the edge handler automatically with this review branch.
+
+## Independent security review follow-up
+Verified in source: legacy admin-config defaults fall back to old contacts on settings failure, including a WhatsApp number different from the owner's current supplied number. This endpoint now uses a strict reader of the existing protected settings: query failure aborts dispatch, missing/malformed settings disable that channel, and no default recipient is used. Other callers retain their existing behavior and require separate review. No settings were changed.
+
+Only POST and OPTIONS are accepted. User-controlled request identifiers are not logged. Additional isolated tests cover settings failure (zero outbound attempts), missing/malformed contacts and unsupported methods. Updated total: 36 isolated Node assertions passed; 18 Vitest cases authored. Full CI on the preceding head was still running at review; no complete CI or real delivery claim.
+
+**Edge activation NO-GO:** no actor/object admission or durable canonical dispatch exists in this legacy endpoint. CORS is not authorization. Restricting to authenticated users would break legitimate guest intake and would still not establish object authority; adding a service-role lookup based solely on a supplied ID would be an unsafe substitute. These shortcuts were not implemented. A separately reviewed server-owned persisted-intake event/claim contract with replay/rate protection is required before calling notifications commercially reliable. No secrets or third-party messages were used for QA.

@@ -1,6 +1,6 @@
 import { attemptChannel, emailAccepted, whatsAppAccepted } from './delivery.ts';
 import { Resend } from 'npm:resend@2.0.0';
-import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
+import { getConfiguredAdminContacts } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 
 interface OrderNotificationPayload {
@@ -125,12 +125,13 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') return new Response(null, { status: 405, headers: { ...corsHeaders, Allow: 'POST, OPTIONS' } });
+
   try {
     const payload: OrderNotificationPayload = await req.json();
-    const [adminEmails, adminWhatsApp] = await Promise.all([getAdminEmails(), getAdminWhatsApp()]);
+    const { emails: adminEmails, whatsapp: adminWhatsApp } = await getConfiguredAdminContacts();
     const resendKey = Deno.env.get('RESEND_API_KEY');
 
-    console.info('Sending admin notification for order:', payload.order_number);
 
     // Public lead input may notify configured platform contacts, never supplied third parties.
 
@@ -305,7 +306,7 @@ Deno.serve(async (req) => {
         () => sendWhatsAppNotification(payload, adminWhatsApp)),
     ]);
     // Acceptance is not delivery. No response bodies, contact details or secrets in logs.
-    console.info('Admin notification outcomes', { request_id: payload.order_id, email, whatsapp });
+    console.info('Admin notification outcomes', { email, whatsapp });
     const success = email === 'accepted' || whatsapp === 'accepted';
     const partial = email !== 'accepted' || whatsapp !== 'accepted';
     return new Response(

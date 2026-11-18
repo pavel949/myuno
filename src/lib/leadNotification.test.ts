@@ -85,3 +85,24 @@ describe('source integration guards (not browser acceptance)', () => {
     expect(edge).not.toContain('https://uno.ae');
   });
 });
+
+describe('strict configured recipients', () => {
+  it('missing settings never choose a legacy recipient', async () => {
+    const { configuredAdminContacts } = await import('../../supabase/functions/_shared/admin-notification-contacts');
+    expect(configuredAdminContacts([])).toEqual({ emails: [], whatsapp: '' });
+  });
+  it('uses valid explicitly configured recipients only', async () => {
+    const { configuredAdminContacts } = await import('../../supabase/functions/_shared/admin-notification-contacts');
+    expect(configuredAdminContacts([
+      { key: 'admin_emails', value: '["synthetic@example.invalid"]' },
+      { key: 'admin_whatsapp', value: '+66 000 000 000' },
+    ])).toEqual({ emails: ['synthetic@example.invalid'], whatsapp: '66000000000' });
+  });
+  it('fails malformed channels closed independently', async () => {
+    const { configuredAdminContacts } = await import('../../supabase/functions/_shared/admin-notification-contacts');
+    expect(configuredAdminContacts([
+      { key: 'admin_emails', value: ['valid@example.invalid', 'bad\naddress'] },
+      { key: 'admin_whatsapp', value: 'undefined' },
+    ])).toEqual({ emails: [], whatsapp: '' });
+  });
+});
