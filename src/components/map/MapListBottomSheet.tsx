@@ -10,6 +10,7 @@
 import * as React from 'react';
 import { Drawer as Vaul } from 'vaul';
 import { cn } from '@/lib/utils';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 const SNAP_POINTS = ['120px', 0.5, 0.92] as const;
 
@@ -37,7 +38,8 @@ export function MapListBottomSheet({
   onClose,
   closeLabel = "Close list",
 }: MapListBottomSheetProps) {
-  const [internalSnap, setInternalSnap] = React.useState<number | string | null>(SNAP_POINTS[0]);
+  const { isLargeDesktop } = useBreakpoint();
+  const [internalSnap, setInternalSnap] = React.useState<number | string | null>(SNAP_POINTS[1]);
 
   const activeSnap = snap !== undefined ? snap : internalSnap;
   const setSnap = (s: number | string | null) => {
@@ -45,8 +47,7 @@ export function MapListBottomSheet({
     onSnapChange?.(s);
   };
 
-  return (
-    <>
+  if (isLargeDesktop) return (
     <aside aria-label={closeLabel === "Закрыть список" ? "Предложения на карте" : "Map offers"} className="hidden lg:flex absolute right-4 top-4 bottom-4 z-30 w-96 flex-col border border-border bg-background shadow-xl">
       <div className="px-4 py-2 flex items-center justify-between border-b border-border shrink-0">
         <h2 className="text-sm font-semibold">{title}</h2>{headerRight}
@@ -54,6 +55,9 @@ export function MapListBottomSheet({
       </div>
       <div className="flex-1 overflow-y-auto">{children}</div>
     </aside>
+  );
+
+  return (
     <Vaul.Root
       open
       modal={false}
@@ -82,7 +86,6 @@ export function MapListBottomSheet({
         </Vaul.Content>
       </Vaul.Portal>
     </Vaul.Root>
-    </>
   );
 }
 
