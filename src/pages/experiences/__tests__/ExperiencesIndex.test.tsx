@@ -46,7 +46,8 @@ afterEach(cleanup);
 describe('public experience catalogue journey', () => {
  it('shows one category entry and a native yacht catalogue link before real offers', () => {
   mount(); expect(screen.getAllByTestId('offer')).toHaveLength(3);
-  expect(screen.getAllByRole('button', { name: 'Islands' })).toHaveLength(1);
+  expect(screen.getAllByRole('button', { name: 'Sea & islands' })).toHaveLength(1);
+  expect(screen.queryByRole('button', { name: 'Wellness & relaxation' })).toBeNull();
   expect(screen.getByRole('link', { name: 'Yachts' })).toHaveAttribute('href', '/yachts');
   expect(screen.queryByText('Experiences worth remembering')).toBeNull();
  });
@@ -54,10 +55,10 @@ describe('public experience catalogue journey', () => {
   mount('/experiences?type=tour'); fireEvent.click(screen.getByRole('link', { name: 'Native activity link' }));
   expect(screen.getByRole('button', { name: 'Activities' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getAllByTestId('offer')).toHaveLength(1);
-  expect(state.read).toHaveBeenLastCalledWith({ type: 'activity', category: undefined, search: undefined });
+  expect(state.read).toHaveBeenLastCalledWith({ publishedOnly: true, type: 'activity', category: undefined, search: undefined });
  });
  it('uses only returned category slugs and retains URL filters after returning from a detail', () => {
-  mount(); fireEvent.click(screen.getByRole('button', { name: /Islands/ }));
+  mount(); fireEvent.change(screen.getByRole('combobox', { name: 'Category' }), { target: { value: 'islands' } });
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?category=islands');
   fireEvent.click(screen.getByRole('link', { name: 'Island route' }));
   expect(screen.getByRole('heading', { name: 'Offer details' })).toBeInTheDocument();
@@ -83,7 +84,7 @@ describe('public experience catalogue journey', () => {
  });
  it('reads search from the URL, sanitizes the reader query, and resets only catalogue filters', () => {
   mount('/experiences?ref=source'); fireEvent.change(screen.getByRole('textbox', { name: 'Search experiences…' }), { target: { value: 'Island,()%' } });
-  expect(state.read).toHaveBeenLastCalledWith({ type: undefined, category: undefined, search: 'Island' });
+  expect(state.read).toHaveBeenLastCalledWith({ publishedOnly: true, type: undefined, category: undefined, search: 'Island' });
   expect(screen.getAllByTestId('offer')).toHaveLength(1);
   fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?ref=source');
@@ -171,3 +172,19 @@ it('does not compare raw amounts across currencies as though they were one price
  expect(screen.getByRole('option', { name: 'Price: low to high' })).toBeDisabled();
  expect(screen.getAllByTestId('offer')).toHaveLength(3);
 });
+
+ it('drills from a group into existing topics and preserves group on history return', () => {
+  mount(); fireEvent.click(screen.getByRole('button', { name: 'Sea & islands' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('group=sea');
+  fireEvent.click(screen.getByRole('button', { name: 'Diving' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('group=sea&category=diving');
+  expect(screen.getAllByTestId('offer')).toHaveLength(1);
+ });
+ it.each(['group=unknown', 'place=unknown'])('rejects unknown discovery filter %s', query => {
+  mount('/experiences?' + query); expect(screen.getByText('Unknown filter')).toBeInTheDocument();
+  expect(screen.queryAllByTestId('offer')).toHaveLength(0);
+ });
+ it('does not infer a visitable venue from an activity category', () => {
+  mount('/experiences?place=fixed'); expect(screen.queryAllByTestId('offer')).toHaveLength(0);
+  expect(screen.getByText('No offers match these filters')).toBeInTheDocument();
+ });
