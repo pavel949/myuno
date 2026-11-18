@@ -73,7 +73,8 @@ async def main():
                     await expect(menu.locator('[data-category-id=cat-home-services]')).to_be_visible()
                     await menu.get_by_role('button',name={'ru': 'Все категории', 'en': 'All categories', 'th': 'ทุกหมวดหมู่'}[lang],exact=True).click()
                     chooser=page.get_by_role('dialog')
-                    await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(11)
+                    await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(12)
+                    await expect(chooser.locator('[data-category-id=cat-connectivity]')).to_be_visible()
                     await expect(chooser.locator('a[href="/yachts"]')).to_have_count(1)
                     await chooser.locator('[data-category-id=cat-tourism]').focus()
                     await chooser.locator('[data-category-id=cat-tourism]').press('Enter')
@@ -98,7 +99,8 @@ async def main():
                     await page.get_by_role('button',name={'ru': 'Показать предложения', 'en': 'Show offers', 'th': 'แสดงข้อเสนอ'}[lang],exact=True).click()
                     await expect(page.get_by_role('dialog')).to_have_count(0)
                     await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
-                    await expect(grid.get_by_role('link')).to_have_count(4)
+                    await expect(grid.get_by_role('link')).to_have_count(3)
+                    await expect(grid.locator('a[href="/sim"]')).to_have_count(0)
                     row['menu'] = menu_metrics
                     row['grid'] = metrics
                 elif surface == 'housing':
