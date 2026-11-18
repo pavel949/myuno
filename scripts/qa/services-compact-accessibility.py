@@ -28,6 +28,10 @@ async def main():
       await expect(group.locator('a[href="/sim"]')).to_have_count(0)
       await expect(group.locator('a[href="/transport/airport-transfer"]')).to_be_visible()
       await expect(group.locator('a[href="/transport/fast-track"]')).to_be_visible()
+      # A selected category hides the overview; reset before choosing another category.
+      await expect(page.get_by_test_id('service-discovery-menu')).to_have_count(0)
+      await page.get_by_role('button',name='Reset all' if lang=='en' else 'Сбросить всё',exact=True).click()
+      await expect(page.get_by_test_id('location')).to_have_text('/discover/services')
       # SIM remains discoverable, but belongs to connectivity rather than transport.
       await page.get_by_test_id('service-discovery-menu').get_by_role('button',name='All categories' if lang=='en' else 'Все категории',exact=True).click()
       await page.get_by_role('dialog').locator('[data-category-id=cat-connectivity]').click()
