@@ -61,7 +61,8 @@ async def main():
                     if mode:
                         query['mode'] = mode
                     await page.goto(ORIGIN + '/fixture.html?' + urlencode(query), wait_until='networkidle')
-                    await expect(page.get_by_role('heading', name=c['title'], exact=True, level=1)).to_be_visible()
+                    expected_title = ('Категории активностей' if lang == 'ru' else 'Experience Categories') if entry.startswith('/admin/') else c['title']
+                    await expect(page.get_by_role('heading', name=expected_title, exact=True, level=1)).to_be_visible()
                     await page.evaluate('document.fonts.ready')
 
                 async def geometry():

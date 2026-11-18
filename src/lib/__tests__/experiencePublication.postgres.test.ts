@@ -37,7 +37,7 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
       CREATE TYPE app_role AS ENUM('admin');
       CREATE TABLE user_roles(user_id uuid,role app_role);
       CREATE TABLE providers(id uuid,user_id uuid);
-      CREATE TABLE listings(id uuid PRIMARY KEY,vertical text NOT NULL,is_active boolean,approval_status text,attributes jsonb,provider_id uuid,is_verified boolean DEFAULT false, name_en text, price numeric);
+      CREATE TABLE listings(id uuid PRIMARY KEY,vertical text NOT NULL,is_active boolean,approval_status text,attributes jsonb,provider_id uuid,is_verified boolean DEFAULT false, name_en text, name_ru text, price numeric, category text, slug text, is_featured boolean DEFAULT false, review_count integer DEFAULT 0, persona_tags text[], i18n jsonb, created_at timestamptz, updated_at timestamptz);
       CREATE TABLE life_situations(id uuid PRIMARY KEY,code text,is_active boolean);
       CREATE TABLE catalog_life_map(entity_type text,entity_id uuid,life_situation_id uuid,weight integer,role_scope text[],rules jsonb);
       GRANT SELECT ON providers TO authenticated;
@@ -74,9 +74,10 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
     prepatchList=(await as('anon',"SELECT id FROM listings WHERE vertical='experience'")).length;
     prepatchRPC=(await as('anon',"SELECT * FROM resolve_life_os_context('family') WHERE entity_type='experience'")).length;
     try { await as('authenticated',`UPDATE listings SET name_en=name_en WHERE id='${uid(6)}' RETURNING id`,uid(900)); } catch(error) { prepatchAdminUpdateCode=(error as {code?:string}).code; }
-    policiesBefore=await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname<>'listings_public_read' ORDER BY policyname`;
+    policiesBefore=await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname NOT IN ('listings_public_read','listings_provider_update') ORDER BY policyname`;
     await sql.unsafe(body('experience-public-rls-proposal.sql'));
     await sql.unsafe(body('experience-rpc-public-proposal.sql'));
+    await sql.unsafe(body('listings-provider-update-proposal.sql'));
   },30000);
   afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','-w','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
   it('reproduces existing recursive UPDATE policy before any fix',()=>{expect(prepatchAdminUpdateCode).toBe('42P17');});
@@ -90,7 +91,7 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
   it('admin reads and edits draft; editor policies unchanged',async()=>{
     expect(await as('authenticated','SELECT id FROM listings',uid(900))).toHaveLength(8);
     expect(await as('authenticated',`UPDATE listings SET name_en=name_en WHERE id='${uid(6)}' RETURNING id`,uid(900))).toHaveLength(1);
-    expect(await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname<>'listings_public_read' ORDER BY policyname`).toEqual(policiesBefore);
+    expect(await sql`SELECT policyname,roles,cmd,qual,with_check FROM pg_policies WHERE tablename='listings' AND policyname NOT IN ('listings_public_read','listings_provider_update') ORDER BY policyname`).toEqual(policiesBefore);
   });
   it.each([['anon',''],['authenticated',uid(902)],['authenticated',uid(901)],['authenticated',uid(900)]])('public discovery RPC applies same publication gate for %s',async(role,user)=>{
     const rows=await as(role,"SELECT * FROM resolve_life_os_context('family') ORDER BY entity_id",user);
@@ -99,4 +100,22 @@ describe('experience publication boundaries — socket-only isolated PostgreSQL'
     expect((await as(role,"SELECT * FROM count_life_os_context()",user))[0].item_count).toBe('3');
   });
   it('ordinary visitor cannot mutate listings',async()=>{expect(await as('authenticated','UPDATE listings SET name_en=name_en RETURNING id',uid(902))).toHaveLength(0);});
+  it('provider can edit descriptive content of own draft without changing approval',async()=>{
+    const result=await as('authenticated',`UPDATE listings SET name_en='Provider description',price=250,attributes=attributes || '{"highlights":["Recorded highlight"]}'::jsonb WHERE id='${uid(2)}' RETURNING id,approval_status`,uid(901));
+    expect(result).toHaveLength(1);expect(result[0].approval_status).toBe('approved');
+  });
+  it.each([
+    "is_verified=true", "approval_status='approved-new'", "provider_id=null", "id='00000000-0000-0000-0000-000000000099'",
+    "vertical='restaurant'", "category='system-category'", "slug='new-slug'", "is_featured=true", "review_count=100", "is_active=false",
+    "persona_tags=ARRAY['vip']", "i18n='{\"claim\":true}'::jsonb", "created_at=now()",
+    "attributes=attributes || '{\"status\":\"published\"}'::jsonb", "attributes=attributes || '{\"operating_status\":\"open\"}'::jsonb",
+    "attributes=attributes || '{\"booking_url\":\"https://unapproved.example\"}'::jsonb", "attributes=attributes || '{\"commission\":100}'::jsonb",
+    "attributes=attributes || '{\"unknown_future_key\":true}'::jsonb", "attributes='[]'::jsonb", "attributes=null"
+  ])('denies provider privilege/content escape: %s',async assignment=>{
+    await expect(as('authenticated',`UPDATE listings SET ${assignment} WHERE id='${uid(2)}' RETURNING id`,uid(901))).rejects.toMatchObject({code:'42501'});
+  });
+  it('nonowner and anon cannot edit another listing',async()=>{
+    expect(await as('authenticated',`UPDATE listings SET name_en='No' WHERE id='${uid(6)}' RETURNING id`,uid(901))).toHaveLength(0);
+    expect(await as('anon',`UPDATE listings SET name_en='No' RETURNING id`)).toHaveLength(0);
+  });
 });
