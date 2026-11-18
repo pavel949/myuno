@@ -91,6 +91,8 @@ export const APP_ROUTES = {
 
   // ── Property Hub ──
   PROPERTY: '/property',
+  /** Rental discovery landing; filtered results retain PROPERTY_SEARCH. */
+  PROPERTY_RENT: '/property/rent',
   /** Catalog grid (Airbnb-style); landing lives at PROPERTY */
   PROPERTY_BROWSE: '/property/browse',
   /** Canonical short-term rent path (redirects to PROPERTY_BROWSE with tenancy=short) */

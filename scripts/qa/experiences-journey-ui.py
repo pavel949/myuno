@@ -61,7 +61,8 @@ async def main():
                     if mode:
                         query['mode'] = mode
                     await page.goto(ORIGIN + '/fixture.html?' + urlencode(query), wait_until='networkidle')
-                    await expect(page.get_by_role('heading', name=c['title'], exact=True, level=1)).to_be_visible()
+                    expected_title = ('Категории активностей' if lang == 'ru' else 'Experience Categories') if entry.startswith('/admin/') else c['title']
+                    await expect(page.get_by_role('heading', name=expected_title, exact=True, level=1)).to_be_visible()
                     await page.evaluate('document.fonts.ready')
 
                 async def geometry():
@@ -124,40 +125,30 @@ async def main():
                         await page.keyboard.press('Escape')
                         await expect(dialog).not_to_be_visible()
                     menu = page.get_by_role('region', name=c['category_menu'], exact=True)
-                    # Six primary tiles, with every recorded category keyboard-accessible in the sheet.
-                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
+                    # Only groups backed by returned offers are promoted publicly.
+                    await expect(menu.locator('[data-category-id]')).to_have_count(3)
+                    await expect(menu.locator('[data-category-id="wellness"]')).to_have_count(0)
                     first=await cards().first.bounding_box()
                     assert first and first['y']<900,('First offer below initial viewport',first)
-                    await menu.get_by_role('button',name=c['all_categories'],exact=True).click()
-                    chooser=page.get_by_role('dialog',name=c['category_menu'],exact=True)
-                    await expect(chooser.locator('[data-category-id]')).to_have_count(9)
-                    ninth=chooser.locator('[data-category-id="wellness"]')
-                    await ninth.focus()
-                    await expect(ninth).to_be_focused()
-                    await ninth.press('Enter')
-                    await expect(page.get_by_role('dialog')).to_have_count(0)
-                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
-                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
-                    assert await page.evaluate('window.fixtureReadOptions.category') == 'wellness'
-                    await expect(cards()).to_have_count(0)
-                    await expect(page.get_by_text(c['empty'], exact=True)).to_be_visible()
+                    await menu.locator('[data-category-id="sea"]').click()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('group=sea')
+                    await expect(cards()).to_have_count(2)
+                    await expect(page.locator('#experience-results-title')).to_be_focused()
                     await page.get_by_test_id('history-back').click()
-                    await expect(menu).to_be_visible()
-                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
                     await expect(cards()).to_have_count(4)
                     await page.get_by_test_id('history-forward').click()
-                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
-                    await expect(cards()).to_have_count(0)
+                    await expect(cards()).to_have_count(2)
                     await page.get_by_test_id('history-back').click()
-                    await expect(menu).to_be_visible()
                     await screenshot('01-overview')
-                    row['checks'].append('Actual public header has one active destination; all nine compact categories remain accessible, including keyboard selection beyond the old eight-item limit and Back/Forward')
-
-                    await menu.get_by_role('button').filter(has_text=c['island']).click()
+                    row['checks'].append('Only populated groups promoted; group filtering, focus and Back/Forward work')
+                    await open_filters()
+                    category_label={'ru':'Категория','en':'Category','th':'หมวดหมู่'}[lang]
+                    await page.get_by_role('combobox',name=category_label,exact=True).select_option('islands')
+                    await close_filters()
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
                     await expect(cards()).to_have_count(1)
-                    await expect(page.locator('#experience-results-title')).to_be_focused()
+                    await expect(page.get_by_role('button', name=filter_name, exact=True)).to_be_focused()
                     assert await page.evaluate('window.fixtureReadOptions.category') == 'islands'
                     await screenshot('02-category-results')
                     await expect(cards().first).to_have_attribute('href', '/experiences/island-tour')
@@ -173,7 +164,7 @@ async def main():
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await page.get_by_test_id('history-back').click()
                     await expect(menu).to_be_visible()
-                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
+                    await expect(menu.locator('[data-category-id]')).to_have_count(3)
                     row['checks'].append('Category result, native card Enter/destination/public journey state and real router history preserve filters')
 
                     await open_filters()
@@ -246,9 +237,33 @@ async def main():
                     await page.get_by_role('button', name=c['retry_category'], exact=True).click()
                     await expect(page.get_by_role('alert')).to_have_count(0)
                     await expect(menu).to_be_visible()
-                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
+                    await expect(menu.locator('[data-category-id]')).to_have_count(3)
                     assert await page.evaluate('window.fixtureCategoryRetries') == 1
                     row['checks'].append('Unknown filters, genuine empty, read failure/loading and category failure remain distinct and retryable')
+                    await goto('/admin/experience-categories')
+                    await expect(page.locator('details')).to_have_count(8)
+                    mobile_categories = page.get_by_test_id('mobile-category-cards')
+                    if width < 768:
+                        await expect(mobile_categories).to_be_visible()
+                        await expect(mobile_categories.locator('article')).to_have_count(9)
+                        assert await mobile_categories.locator('article').first.evaluate('(el) => el.getBoundingClientRect().height') < 260
+                    else:
+                        await expect(mobile_categories).not_to_be_visible()
+                    await geometry()
+                    await page.screenshot(path=str(OUT / f'{prefix}-08-admin-structure.png'), full_page=True)
+                    await page.locator('details').first.locator('summary').click()
+                    # Prepare opens a real editor; writes are captured by an isolated stub.
+                    await page.locator('details').first.get_by_role('button', name='Подготовить' if lang == 'ru' else 'Prepare', exact=True).first.click()
+                    dialog = page.get_by_role('dialog')
+                    await expect(dialog).to_be_visible()
+                    await expect(dialog.get_by_role('switch')).to_have_attribute('data-state','unchecked')
+                    await geometry()
+                    await page.screenshot(path=str(OUT / f'{prefix}-09-admin-prepare.png'), full_page=True)
+                    await dialog.get_by_role('button',name='Сохранить' if lang == 'ru' else 'Save',exact=True).click()
+                    await expect(dialog).not_to_be_visible()
+                    saved=await page.evaluate('window.fixturePreparedCategory')
+                    assert saved['slug']=='waterpark' and saved['is_active'] is False, saved
+                    row['checks'].append('Actual admin has eight groups and prepares hidden waterpark category through explicit Save; writes stubbed')
                     await geometry()
                     assert not errors, errors
                     assert not blocked, blocked

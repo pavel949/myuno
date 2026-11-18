@@ -1,3 +1,5 @@
+// Social persistence is verified separately; these tests retain synthetic public catalogue boundaries.
+vi.mock('@/hooks/usePlatformSocialLinks', () => ({ usePlatformSocialLinks: () => ({ data: {} }) }));
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
