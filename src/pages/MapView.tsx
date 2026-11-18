@@ -210,18 +210,14 @@ export default function MapView() {
     useQuery({
       queryKey: [`${table}-map`],
       queryFn: async () => {
-        let query = supabase
-          .from(table)
-          .select('id, name_en, name_ru, lat, lng, cover_image')
-          .eq('is_active', true)
-          .not('lat', 'is', null)
-          .not('lng', 'is', null);
-        // Keep public map results identical for guests and privileged sessions.
-        // The other place tables do not have an approval_status column.
-        if (table === 'gyms' || table === 'pharmacies' || table === 'flower_shops') {
-          query = query.eq('approval_status', 'approved');
-        }
-        const { data, error } = await query;
+        // Narrow the table union before building the query so approval_status
+        // is only requested from schemas that actually expose it.
+        const columns = 'id, name_en, name_ru, lat, lng, cover_image';
+        const query = table === 'gyms' || table === 'pharmacies' || table === 'flower_shops'
+          ? supabase.from(table).select(columns).eq('approval_status', 'approved')
+          : supabase.from(table).select(columns);
+        const { data, error } = await query.eq('is_active', true)
+          .not('lat', 'is', null).not('lng', 'is', null);
         if (error) throw error;
         return data || [];
       },

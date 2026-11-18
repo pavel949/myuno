@@ -51,8 +51,8 @@ describe('MapView integration smoke', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Посуточная аренда' }));
     expect(pins().getAllByRole('button')).toHaveLength(1);
     expect(screen.getByTestId('url')).toHaveTextContent('layers=stay');
-    expect(screen.getByRole('button', { name: 'Посуточная аренда', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Все', exact: true })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Посуточная аренда' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Все' })).toHaveAttribute('aria-pressed', 'false');
     expect(document.querySelector('[data-map-layer-color=stay]')).toHaveClass('inline-block');
     fireEvent.click(screen.getByRole('button', { name: 'Впечатления' }));
     expect(pins().getAllByRole('button')).toHaveLength(2);
