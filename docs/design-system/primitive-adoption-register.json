@@ -857,7 +857,7 @@
     },
     {
       "file": "src/components/admin/ProviderSelector.tsx",
-      "sha256": "5a86075d2076f36ed413d905922f1ae0ca2f0c8b4ba09aa67545f0445c672e13",
+      "sha256": "e1b434dbce7582d98b25814cce714cb6cb31157b30cd8e34cf8d5469881ed1eb",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
