@@ -1,3 +1,4 @@
+import { mergeExperienceUpdate } from '@/lib/experiences/mergeExperienceUpdate';
 import { useSupabaseCRUD } from './useSupabaseCRUD';
 import { Json } from '@/integrations/supabase/types';
 import { ExperienceType, BookingModel } from './useExperiences';
@@ -181,7 +182,14 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
       experience_type: data.experience_type || 'tour',
       is_active: data.is_active ?? true,
     }) as any),
-    updateExperience: async (id: string, updates: Partial<AdminExperience>) => update(id, mapToListing(updates) as any),
+    updateExperience: async (id: string, updates: Partial<AdminExperience>) => {
+      const existing = rawItems?.find((item: any) => item.id === id);
+      if (!existing) throw new Error('Experience must be loaded before editing.');
+      const mapped = mapToListing(updates);
+      // Default tour type belongs to creation only, not partial edits.
+      if (updates.experience_type === undefined) delete mapped.attributes.experience_type;
+      return update(id, mergeExperienceUpdate(existing, mapped) as any);
+    },
     deleteExperience: async (id: string) => remove(id),
     refetch,
   };
