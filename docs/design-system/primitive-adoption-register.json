@@ -23,12 +23,12 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 898,
-      "sourceInstances": 2940
+      "directConsumerFiles": 899,
+      "sourceInstances": 2941
     },
     "Card": {
-      "directConsumerFiles": 531,
-      "sourceInstances": 1547
+      "directConsumerFiles": 532,
+      "sourceInstances": 1548
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -39,12 +39,12 @@
       "sourceInstances": 294
     },
     "PageContainer": {
-      "directConsumerFiles": 173,
-      "sourceInstances": 312
+      "directConsumerFiles": 174,
+      "sourceInstances": 313
     },
     "PageHeader": {
-      "directConsumerFiles": 137,
-      "sourceInstances": 174
+      "directConsumerFiles": 138,
+      "sourceInstances": 175
     },
     "Tabs": {
       "directConsumerFiles": 131,
@@ -154,6 +154,31 @@
             76,
             90,
             117
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/AdminCatalogHub.tsx",
+      "sha256": "69e780088debda3267ae6c08211816fa11ca9fd6284d22045cb71e6624e2c6a1",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            58
+          ]
+        },
+        {
+          "name": "Card",
+          "source": "@/components/ui/card",
+          "instances": 1,
+          "lines": [
+            52
           ]
         }
       ]
@@ -21447,6 +21472,38 @@
           "instances": 1,
           "lines": [
             30
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminCatalogWorkspace.tsx",
+      "sha256": "3ee65bbe916e04fc81fc156568b9ee1485440d17f895bdcafb72de6124f3d1e2",
+      "directRouteDeclarations": [
+        {
+          "id": "ae5e2ae4d013bd59",
+          "path": "/admin/catalog",
+          "actor": "admin",
+          "kind": "rendered-template"
+        }
+      ],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "PageContainer",
+          "source": "@/components/uno/PageContainer",
+          "instances": 1,
+          "lines": [
+            20
+          ]
+        },
+        {
+          "name": "PageHeader",
+          "source": "@/components/uno/PageHeader",
+          "instances": 1,
+          "lines": [
+            21
           ]
         }
       ]
