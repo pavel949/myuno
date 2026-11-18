@@ -18,7 +18,7 @@ export function useExploreLayers() {
         supabase.from('public_provider_catalog')
           .select('id, name, lat, lng, rating, cover_image, logo_url, business_category').eq('is_active', true).limit(1000),
         supabase.from('listings')
-          .select('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per')
+          .select<string>('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per')
           .eq('vertical', 'experience').eq('is_active', true).eq('approval_status', 'approved').eq('attributes->>status', 'published').limit(1000),
       ]);
       const sourceNames = ['property', 'newbuild', 'service', 'experience'];
