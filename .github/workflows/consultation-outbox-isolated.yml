@@ -31,3 +31,15 @@ jobs:
         run: node --test docs/hardening/lead-outbox-review/postgres.test.mjs
       - name: Worker and scheduler adapters (no external sends)
         run: node --test docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs docs/hardening/lead-outbox-review/providers.test.mjs docs/hardening/lead-outbox-review/runtime.test.mjs
+      - name: Checkout pinned shared recipient parser from coordinated PR 261
+        uses: actions/checkout@v4
+        with:
+          ref: b88f68262fd15de030d67e27fab0f1a6f9dfc4b3
+          path: .outbox-pr261
+          sparse-checkout: supabase/functions/_shared/admin-notification-contacts.ts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Cross-PR actual parser composition (provider network mocked)
+        env:
+          OUTBOX_CONTACTS_MODULE: .outbox-pr261/supabase/functions/_shared/admin-notification-contacts.ts
+        run: node --test docs/hardening/lead-outbox-review/parser-integration.test.mjs

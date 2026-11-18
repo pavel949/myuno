@@ -15,14 +15,14 @@ export function providerAdapters({resendKey,emailFrom,ultraInstance,ultraToken},
  if(resendKey && typeof emailFrom==='string' && emailFrom.includes('@') && !/[\r\n]/.test(emailFrom)) send.email=async({lead,target,signal,idempotencyKey})=>{
   const response=await fetchApi('https://api.resend.com/emails',{method:'POST',signal,redirect:'error',headers:{Authorization:`Bearer ${resendKey}`,'Content-Type':'application/json','Idempotency-Key':idempotencyKey},body:JSON.stringify({from:emailFrom,to:target,subject:`MyUNO: заявка ${clean(lead.id,36)}`,text:leadText(lead)})});
   const result=await response.json();
-  return response.ok && typeof result.id==='string' && result.id.trim() ? {accepted:true,reference:result.id} : {};
+  return response.ok && result && !result.error && typeof result.id==='string' && result.id.trim() ? {accepted:true,reference:result.id} : {};
  };
  if(typeof ultraInstance==='string' && /^instance\d+$/.test(ultraInstance) && ultraToken) send.whatsapp=async({lead,target,signal})=>{
   if(typeof target!=='string' || !/^\+?[1-9]\d{6,14}$/.test(target))return {}; // strict platform phone, not arbitrary chat/group ID
   const response=await fetchApi(`https://api.ultramsg.com/${ultraInstance}/messages/chat`,{method:'POST',signal,redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({token:ultraToken,to:target.startsWith('+')?target:`+${target}`,body:leadText(lead)})});
   const result=await response.json();
-  const reference=(typeof result.id==='string'||typeof result.id==='number')?String(result.id):'';
-  return response.ok && (result.sent===true || result.sent==='true') && reference && reference!=='0' ? {accepted:true,reference} : {};
+  const reference=(result && (typeof result.id==='string'||typeof result.id==='number'))?String(result.id):'';
+  return response.ok && result && !result.error && (result.sent===true || result.sent==='true') && reference && reference!=='0' ? {accepted:true,reference} : {};
  };
  // Conservative: non-2xx and malformed responses remain uncertain, no automatic replay.
  return send;
