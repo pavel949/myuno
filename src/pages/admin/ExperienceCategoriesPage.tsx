@@ -1,5 +1,6 @@
 import { PageShell } from '@/components/page/PageShell';
 import { useState } from 'react';
+import { EXPERIENCE_DISCOVERY_GROUPS, DISCOVERY_TOPIC_LABELS, discoveryTopic, experienceGroup } from '@/lib/taxonomies/experienceDiscovery';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminExperienceCategories, ExperienceCategory, ExperienceCategoryInsert } from '@/hooks/useExperienceCategories';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Pencil, Trash2, GripVertical, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const categoryIcon = (category: ExperienceCategory) => category.icon && !/^[a-z_-]+$/i.test(category.icon) ? category.icon : EXPERIENCE_DISCOVERY_GROUPS.find(group => group.id === experienceGroup(category.slug))?.icon || '🎯';
 
 const EMPTY_FORM: Partial<ExperienceCategoryInsert> = {
   slug: '',
@@ -28,8 +31,11 @@ export default function ExperienceCategoriesPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const { categories, isLoading, create, update, remove, isCreating, isUpdating, isDeleting } = useAdminExperienceCategories();
+  const { categories, isLoading, error, refetch, create, update, remove, isCreating, isUpdating, isDeleting } = useAdminExperienceCategories();
   
+  const [search, setSearch] = useState('');
+  const [group, setGroup] = useState('all');
+  const visibleCategories = categories.filter(category => (group === 'all' || experienceGroup(category.slug) === group || (group === 'other' && !experienceGroup(category.slug))) && `${category.name_ru} ${category.name_en} ${category.slug}`.toLowerCase().includes(search.trim().toLowerCase()));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<ExperienceCategory | null>(null);
   const [formData, setFormData] = useState<Partial<ExperienceCategoryInsert>>(EMPTY_FORM);
@@ -56,11 +62,12 @@ export default function ExperienceCategoriesPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.slug || !formData.name_en || !formData.name_ru) {
+    if (!formData.slug?.trim() || !formData.name_en?.trim() || !formData.name_ru?.trim()) {
       toast.error(isRu ? 'Заполните все обязательные поля' : 'Fill in all required fields');
       return;
     }
 
+    if (!editingCategory && categories.some(category => category.slug === formData.slug?.trim())) { toast.error(isRu ? 'Такая категория уже есть. Откройте её для редактирования.' : 'This category already exists. Edit it instead.'); return; }
     try {
       if (editingCategory) {
         await update(editingCategory.id, formData as ExperienceCategoryInsert);
@@ -103,7 +110,7 @@ export default function ExperienceCategoriesPage() {
 
   return (
     <PageShell width="wide" className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">
             {isRu ? 'Категории активностей' : 'Experience Categories'}
@@ -118,6 +125,35 @@ export default function ExperienceCategoriesPage() {
         </Button>
       </div>
 
+      <section className="space-y-3" aria-label={isRu ? 'Структура впечатлений' : 'Experience structure'}>
+        <h2 className="text-lg font-semibold">{isRu ? 'Структура каталога' : 'Catalogue structure'}</h2>
+        <p className="text-sm text-muted-foreground">{isRu ? 'Это структура для наполнения, а не список доступных предложений. Место, программа и условия бронирования заполняются в карточке. Категории сервисов и недвижимости остаются в своих каталогах.' : 'A structure for content, not a list of available offers. Enter the venue, programme and booking terms in each listing. Services and property keep their own catalogues.'}</p>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {EXPERIENCE_DISCOVERY_GROUPS.map(section => <details key={section.id} className="min-w-0 border border-border bg-card p-4">
+            <summary className="min-h-11 cursor-pointer font-medium">{section.icon} {isRu ? section.ru : section.en}</summary>
+            <div className="space-y-2 pt-3">{section.categories.filter(slug => discoveryTopic(slug) === slug).map(slug => {
+              const label = DISCOVERY_TOPIC_LABELS[slug];
+              const existing = categories.find(category => discoveryTopic(category.slug) === slug);
+              return <div key={slug} className="flex items-center justify-between gap-2 text-sm"><span>{existing ? (isRu ? existing.name_ru : existing.name_en) : (isRu ? label?.ru : label?.en) || slug}</span>
+                <Button size="sm" variant="outline" disabled={isLoading || !!error} onClick={() => {
+                  if (existing) openEditDialog(existing);
+                  else { setEditingCategory(null); setFormData({ ...EMPTY_FORM, slug, name_en: label?.en || slug, name_ru: label?.ru || slug, icon: section.icon, is_active: false, sort_order: (categories.length + 1) * 10 }); setDialogOpen(true); }
+                }}>{existing ? (isRu ? 'Изменить' : 'Edit') : (isRu ? 'Подготовить' : 'Prepare')}</Button>
+              </div>;
+            })}</div>
+          </details>)}
+        </div>
+        <p className="text-xs text-muted-foreground">{isRu ? '«Подготовить» открывает редактор. Новая категория сохраняется скрытой, пока вы её не включите. Ничего не публикуется автоматически.' : 'Prepare opens the editor. New categories are saved hidden until you enable them. Nothing is published automatically.'}</p>
+      </section>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Input aria-label={isRu ? 'Найти категорию' : 'Find category'} placeholder={isRu ? 'Найти категорию…' : 'Find category…'} value={search} onChange={event => setSearch(event.target.value)} />
+        <select className="min-h-11 min-w-0 w-full sm:w-auto border border-border bg-background px-3" aria-label={isRu ? 'Раздел каталога' : 'Catalogue section'} value={group} onChange={event => setGroup(event.target.value)}>
+          <option value="all">{isRu ? 'Все разделы' : 'All sections'}</option>
+          {EXPERIENCE_DISCOVERY_GROUPS.map(section => <option key={section.id} value={section.id}>{isRu ? section.ru : section.en}</option>)}
+          <option value="other">{isRu ? 'Другие категории' : 'Other categories'}</option>
+        </select>
+      </div>
+      {error && <div role="alert" className="space-y-2"><p>{isRu ? 'Не удалось загрузить категории. Создание из структуры временно недоступно, чтобы избежать дублей.' : 'Categories could not be loaded. Preparing categories is disabled to avoid duplicates.'}</p><Button onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
@@ -130,7 +166,16 @@ export default function ExperienceCategoriesPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <Table>
+            <>
+            <div className="space-y-3 md:hidden" data-testid="mobile-category-cards">
+              {visibleCategories.map(category => <article key={category.id} className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-start gap-3"><span aria-hidden="true" className="text-2xl shrink-0">{categoryIcon(category)}</span><div className="min-w-0"><h3 className="font-medium break-words">{isRu ? category.name_ru : category.name_en}</h3><p className="text-sm text-muted-foreground break-words">{category.slug}</p></div></div>
+                <div className="flex items-center justify-between gap-3"><span className="text-sm">{category.is_active ? (isRu ? 'Видна в каталоге' : 'Visible in catalogue') : (isRu ? 'Скрыта' : 'Hidden')}</span><Switch aria-label={`${isRu ? 'Видимость' : 'Visibility'}: ${category.name_ru || category.name_en}`} checked={category.is_active} onCheckedChange={() => handleToggleActive(category)} disabled={isUpdating} /></div>
+                <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => openEditDialog(category)}><Pencil className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}</Button><Button variant="ghost" className="text-destructive" onClick={() => setDeleteConfirmId(category.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="h-4 w-4" /></Button></div>
+              </article>)}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
+            <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
@@ -144,7 +189,7 @@ export default function ExperienceCategoriesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
+                {visibleCategories.map((category) => (
                   <TableRow key={category.id}>
                     <TableCell className="text-muted-foreground">
                       <div className="flex items-center gap-1">
@@ -152,7 +197,7 @@ export default function ExperienceCategoriesPage() {
                         {category.sort_order}
                       </div>
                     </TableCell>
-                    <TableCell className="text-2xl">{category.icon}</TableCell>
+                    <TableCell className="text-2xl whitespace-nowrap">{categoryIcon(category)}</TableCell>
                     <TableCell className="font-mono text-sm">{category.slug}</TableCell>
                     <TableCell>{category.name_en}</TableCell>
                     <TableCell>{category.name_ru}</TableCell>
@@ -196,6 +241,8 @@ export default function ExperienceCategoriesPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -220,7 +267,7 @@ export default function ExperienceCategoriesPage() {
                   value={formData.icon || ''}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   className="text-center text-2xl"
-                  maxLength={2}
+                  maxLength={12}
                 />
               </div>
               <div className="col-span-3">

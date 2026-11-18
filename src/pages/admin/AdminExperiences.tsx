@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminExperienceCategories } from '@/hooks/useExperienceCategories';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminExperiences, AdminExperience } from '@/hooks/useAdminExperiences';
-import { ExperienceType, EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
+import { ExperienceType } from '@/hooks/useExperiences';
 import { experienceDifficultyOptions } from '@/components/filters';
 
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -115,6 +116,7 @@ export default function AdminExperiences() {
   const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const isRu = language === 'ru';
+  const categoryCatalogue = useAdminExperienceCategories();
   const importMedia = useImportExperienceMedia();
 
   const [filterProviderId, setFilterProviderId] = useState<string>('');
@@ -496,13 +498,15 @@ export default function AdminExperiences() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Category</Label>
+                    <Label>{isRu ? 'Категория' : 'Category'}</Label>
+                    {categoryCatalogue.error && <p role="alert" className="text-sm text-destructive">{isRu ? 'Категории не загрузились. Сохранённая категория не изменена.' : 'Categories could not load. The saved category is unchanged.'}</p>}
                     <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {EXPERIENCE_CATEGORIES.filter(c => c.id !== 'all').map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>{cat.icon} {cat.labelEn}</SelectItem>
+                        {categoryCatalogue.categories.map(cat => (
+                          <SelectItem key={cat.id} value={cat.slug}>{cat.icon} {isRu ? cat.name_ru : cat.name_en}{!cat.is_active ? (isRu ? ' · скрыта' : ' · hidden') : ''}</SelectItem>
                         ))}
+                        {formData.category && !categoryCatalogue.categories.some(cat => cat.slug === formData.category) && <SelectItem value={formData.category}>{formData.category}</SelectItem>}
                       </SelectContent>
                     </Select>
                   </div>
