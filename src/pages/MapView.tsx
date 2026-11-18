@@ -599,7 +599,7 @@ export default function MapView() {
                       {language === 'ru' ? 'Цена за ночь · посуточное жильё' : 'Nightly price · short stays'}
                     </p>
                     {['all', 'stay'].includes(selectedVertical) && (
-                      <FilterChipGroup scrollable>
+                      <FilterChipGroup scrollable className="touch-pan-x">
                         {PRICE_OPTIONS.map((opt) => (
                           <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { updateParam('price', opt.value); }} size="md" />
                         ))}
@@ -610,7 +610,7 @@ export default function MapView() {
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                       {language === 'ru' ? 'Доступность' : 'Availability'}
                     </p>
-                    <FilterChipGroup scrollable>
+                    <FilterChipGroup scrollable className="touch-pan-x">
                       {AVAILABILITY_OPTIONS.map((opt) => (
                         <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { updateParam('availability', opt.value); }} size="md" />
                       ))}
@@ -620,7 +620,7 @@ export default function MapView() {
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                       {language === 'ru' ? 'Объекты OpenStreetMap' : 'OSM places (OpenStreetMap)'}
                     </p>
-                    <FilterChipGroup scrollable>
+                    <FilterChipGroup scrollable className="touch-pan-x">
                       <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть объекты OSM' : 'Показать объекты OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
                       {showOsm && OSM_CATEGORIES.map((c) => (
                         <FilterChip key={c} label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c} isActive={osmCategory === c} onToggle={() => setOsmCategory(c)} size="md" />
@@ -632,7 +632,7 @@ export default function MapView() {
             </Sheet>
           </div>
 
-          <FilterChipGroup scrollable>
+          <FilterChipGroup scrollable className="touch-pan-x">
             {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'restaurant'].includes(opt.value)).map((opt) => (
               <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
             ))}
@@ -709,7 +709,7 @@ export default function MapView() {
 
           {selected && (
             <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-card border border-border rounded-xl shadow-xl p-4 z-20 max-h-[65%] overflow-y-auto">
-              <span className="absolute -top-2 left-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
+              <span className="inline-block mb-2 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
                 {language === 'ru' ? 'Вы выбрали' : 'Selected place'}
               </span>
               <button

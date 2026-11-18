@@ -367,7 +367,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
 
   return (
     <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <div className="absolute left-3 top-3 z-10 right-20 rounded-lg border border-border bg-card/95 px-3 py-2 text-xs text-foreground shadow-sm" role="status" aria-live="polite">
+      <div className="absolute left-3 top-3 z-10 right-20 lg:right-auto rounded-lg border border-border bg-card/95 px-3 py-2 text-xs text-foreground shadow-sm" role="status" aria-live="polite">
         {!online
           ? (ru ? 'Нет сети. Карта и предложения могут быть неполными.' : 'Offline. The map and offers may be incomplete.')
           : mapState === 'loading'

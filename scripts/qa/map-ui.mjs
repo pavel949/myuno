@@ -101,7 +101,11 @@ try{
    await page.waitForFunction(()=>window.fixtureMap?.loaded());
    await page.getByRole('button',{name:'Показать списком',exact:true}).click();
    await expect(page.getByRole('listbox',{name:'Список локаций'}).filter({visible:true})).toBeVisible();
+   const firstOffer=page.getByRole('option',{name:/Тестовая вилла/}).filter({visible:true});
+   await expect(firstOffer).toBeInViewport({ratio:0.9});
    await screenshot('list');
+   await firstOffer.click();
+   await expect(page.getByRole('button',{name:/Открыть предложение/})).toBeVisible();
    if(errors.length||denied.length)throw Error(JSON.stringify({errors,denied}));
    results.push({head,viewport,outcome:'PASS',renderer:'real MapLibre WebGL',data:'synthetic offers and polygon; NOT live Phuket/basemap acceptance',shell:'AppLayout replaced with labelled QA header; full navigation shell NOT tested',screenshots:['map','selected','list'].map(name=>`${viewport.width}-${name}.png`)});
   }catch(error){await screenshot('failure');throw error;}finally{await context.close();}
