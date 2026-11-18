@@ -144,7 +144,7 @@ async def main():
                     await expect(page.locator('.home-search-entry-button,.premium-plan-links')).to_have_count(0)
                     choices=page.locator('.home-hero-choice')
                     await expect(choices).to_have_count(4)
-                    destinations = ['/property/search?mode=rent', '/discover/buy', '/experiences', '/discover/services']
+                    destinations = ['/property/rent', '/discover/buy', '/experiences', '/discover/services']
                     for index,destination in enumerate(destinations):
                         await expect(choices.nth(index)).to_have_attribute('href', destination)
                         await choices.nth(index).focus()

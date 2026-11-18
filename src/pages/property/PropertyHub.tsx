@@ -315,6 +315,8 @@ export default function PropertyHub() {
 
   /** PropertyIndex embeds tabs; landing has its own layout */
   const hideOuterTabs =
+    p === APP_ROUTES.PROPERTY_RENT ||
+    p === `${APP_ROUTES.PROPERTY_RENT}/` ||
     p === APP_ROUTES.PROPERTY ||
     p === `${APP_ROUTES.PROPERTY}/` ||
     p === APP_ROUTES.PROPERTY_BROWSE ||
