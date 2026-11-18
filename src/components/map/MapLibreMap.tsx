@@ -3,6 +3,8 @@ import maplibregl, { Map as MlMap, MapGeoJSONFeature, StyleSpecification } from 
 import { Protocol } from 'pmtiles';
 import { Crosshair, Loader2 } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { isValidMapPosition, resolvePmtilesUrl } from '@/lib/map/basemap';
 import phuketPmtilesAsset from '@/assets/map/phuket.pmtiles.asset.json';
 
 
@@ -16,17 +18,17 @@ function ensurePmtilesProtocol() {
 }
 
 // ---------- Style resolution ----------
-// Priority:
-//   1. VITE_PHUKET_PMTILES_URL override (custom self-hosted)
-//   2. Bundled CDN asset (Lovable assets-v1 — works offline once cached)
-//   3. OpenFreeMap public vector tiles (network fallback)
-const PHUKET_PMTILES_URL =
-  (import.meta.env.VITE_PHUKET_PMTILES_URL as string | undefined) ||
-  (phuketPmtilesAsset?.url ?? '');
+// The bundled asset has a .zip suffix but verified PMTiles v3 bytes. Its protocol
+// validates the header at runtime. Neither an archive URL nor a cached
+// application shell proves that tiles, labels and current offers work offline.
+const PHUKET_PMTILES_URL = resolvePmtilesUrl(
+  import.meta.env.VITE_PHUKET_PMTILES_URL,
+  phuketPmtilesAsset?.url,
+);
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
-  // Minimal dark style consuming OpenMapTiles schema from a local pmtiles archive.
+  // Quiet light style consuming OpenMapTiles schema from a local pmtiles archive.
   // tilemaker --output phuket.mbtiles (default profile) produces this schema.
   return {
     version: 8,
@@ -85,7 +87,7 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
         source: 'omt',
         'source-layer': 'place',
         layout: {
-          'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name']],
+          'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name:latin'], ['get', 'name']],
           'text-font': ['Noto Sans Regular'],
           'text-size': 12,
         },
@@ -148,6 +150,13 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   },
   ref,
 ) {
+  const { language } = useLanguage();
+  const ru = language === 'ru';
+  const [mapState, setMapState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
+  const [retry, setRetry] = useState(0);
+  const fittedPositionsRef = useRef('');
+  const validMarkers = useMemo(() => markers.filter((m) => isValidMapPosition(m.lat, m.lng)), [markers]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -186,7 +195,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
 
   const locate = () => {
     if (!('geolocation' in navigator)) {
-      setLocateError('Геолокация недоступна');
+      setLocateError(ru ? 'Геолокация недоступна' : 'Location is unavailable');
       return;
     }
     setLocating(true);
@@ -198,7 +207,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       },
       (err) => {
         setLocating(false);
-        setLocateError(err.code === err.PERMISSION_DENIED ? 'Доступ запрещён' : 'Не удалось определить');
+        setLocateError(err.code === err.PERMISSION_DENIED ? (ru ? 'Доступ к геолокации запрещён' : 'Location permission denied') : (ru ? 'Не удалось определить местоположение' : 'Could not find your location'));
         setTimeout(() => setLocateError(null), 3000);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
@@ -214,17 +223,58 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     },
   }));
 
-  // Init map once.
+  useEffect(() => {
+    const updateOnline = () => setOnline(navigator.onLine);
+    window.addEventListener('online', updateOnline);
+    window.addEventListener('offline', updateOnline);
+    return () => {
+      window.removeEventListener('online', updateOnline);
+      window.removeEventListener('offline', updateOnline);
+    };
+  }, []);
+
+  // Init map; retry is explicit so a network error never causes a reload loop.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = new maplibregl.Map({
+    setMapState('loading');
+    let map: MlMap;
+    try {
+      map = new maplibregl.Map({
       container: containerRef.current,
       style,
       center: [center.lng, center.lat],
       zoom,
       attributionControl: { compact: true },
-    });
+      });
+    } catch {
+      setMapState('error');
+      return;
+    }
+    let usingArchive = Boolean(PHUKET_PMTILES_URL);
+    let disposed = false;
+    let failed = false;
+    const timeout = window.setTimeout(() => {
+      if (!disposed && !map.loaded()) setMapState('error');
+    }, 20000);
+    const onReady = () => {
+      if (disposed || failed || !map.loaded()) return;
+      window.clearTimeout(timeout);
+      setMapState('ready');
+    };
+    const onError = () => {
+      if (usingArchive) {
+        usingArchive = false;
+        // Bad archive/CORS/range requests must not leave a permanently blank map.
+        map.setStyle(OPENFREEMAP_STYLE);
+      } else {
+        failed = true;
+        setMapState('error');
+      }
+    };
+    map.on('load', onReady);
+    map.on('idle', onReady);
+    map.on('error', onError);
 
     if (!minimal) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right');
@@ -234,6 +284,12 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     mapRef.current = map;
 
     return () => {
+      disposed = true;
+      window.clearTimeout(timeout);
+      map.off('load', onReady);
+      map.off('idle', onReady);
+      map.off('error', onError);
+      fittedPositionsRef.current = '';
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
       userMarkerRef.current?.remove();
@@ -242,24 +298,27 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [style]);
+  }, [style, retry]);
 
   // Sync markers.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
+    const focusedId = document.activeElement?.getAttribute('data-marker-id');
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    markers.forEach((m) => {
+    validMarkers.forEach((m) => {
       const isActive = activeMarkerId === m.id;
       const el = document.createElement('button');
       el.type = 'button';
       el.setAttribute('aria-label', m.title || m.id);
       el.setAttribute('data-marker-id', m.id);
       if (isActive) el.setAttribute('data-active', 'true');
-      const size = isActive ? 36 : 28;
+      el.setAttribute('aria-pressed', String(isActive));
+      el.title = m.title || m.id;
+      const size = isActive ? 48 : 44;
       const ring = isActive
         ? 'box-shadow: 0 0 0 3px hsl(var(--primary)), 0 0 0 6px hsl(var(--background)), 0 4px 10px rgba(0,0,0,0.5);'
         : 'box-shadow: 0 2px 6px rgba(0,0,0,0.4);';
@@ -282,16 +341,22 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
         .setLngLat([m.lng, m.lat])
         .addTo(map);
       markersRef.current.push(marker);
+      if (focusedId === m.id) el.focus({ preventScroll: true });
     });
 
-    if (fitToMarkers && markers.length > 1) {
-      const bounds = new maplibregl.LngLatBounds();
-      markers.forEach((m) => bounds.extend([m.lng, m.lat]));
-      map.fitBounds(bounds, { padding: 60, maxZoom: 15, duration: 600 });
-    } else if (fitToMarkers && markers.length === 1) {
-      map.flyTo({ center: [markers[0].lng, markers[0].lat], zoom: 14, duration: 600 });
+    // Selection must not zoom the map back out after a marker click.
+    const positions = validMarkers.map((m) => `${m.id}:${m.lat}:${m.lng}`).join('|');
+    if (fitToMarkers && positions !== fittedPositionsRef.current) {
+      fittedPositionsRef.current = positions;
+      if (validMarkers.length > 1) {
+        const bounds = new maplibregl.LngLatBounds();
+        validMarkers.forEach((m) => bounds.extend([m.lng, m.lat]));
+        map.fitBounds(bounds, { padding: 60, maxZoom: 15, duration: 600 });
+      } else if (validMarkers.length === 1) {
+        map.flyTo({ center: [validMarkers[0].lng, validMarkers[0].lat], zoom: 14, duration: 600 });
+      }
     }
-  }, [markers, fitToMarkers, onMarkerClick, activeMarkerId]);
+  }, [validMarkers, fitToMarkers, onMarkerClick, activeMarkerId, retry]);
 
   // React to center prop changes when no markers drive the view.
   useEffect(() => {
@@ -302,6 +367,20 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
 
   return (
     <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div className="absolute left-3 top-3 z-10 right-20 rounded-lg border border-border bg-card/95 px-3 py-2 text-xs text-foreground shadow-sm" role="status" aria-live="polite">
+        {!online
+          ? (ru ? 'Нет сети. Карта и предложения могут быть неполными.' : 'Offline. The map and offers may be incomplete.')
+          : mapState === 'loading'
+            ? (ru ? 'Загружаем карту…' : 'Loading map…')
+            : mapState === 'error'
+              ? (ru ? 'Не удалось загрузить фон карты. Предложения доступны в списке.' : 'The basemap could not load. Offers are available in the list.')
+              : (ru ? 'Карта онлайн' : 'Online map')}
+        {mapState === 'error' && online && (
+          <button type="button" className="ml-2 min-h-11 underline underline-offset-4 font-medium" onClick={() => setRetry((value) => value + 1)}>
+            {ru ? 'Повторить' : 'Retry'}
+          </button>
+        )}
+      </div>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       {showLocateButton && !minimal && (
         <div className="absolute right-3 bottom-20 z-10 flex flex-col items-end gap-2 pointer-events-none">

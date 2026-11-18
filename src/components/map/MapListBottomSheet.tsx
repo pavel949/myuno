@@ -5,7 +5,7 @@
  *  - не было overlay (карта остаётся интерактивной);
  *  - работали snapPoints (peek/half/full).
  *
- * На desktop (≥lg) скрыт — список рендерится в обычной колонке вызывающим кодом.
+ * На desktop список расположен справа поверх карты.
  */
 import * as React from 'react';
 import { Drawer as Vaul } from 'vaul';
@@ -23,6 +23,8 @@ export interface MapListBottomSheetProps {
   snap?: number | string | null;
   onSnapChange?: (snap: number | string | null) => void;
   className?: string;
+  onClose?: () => void;
+  closeLabel?: string;
 }
 
 export function MapListBottomSheet({
@@ -32,6 +34,8 @@ export function MapListBottomSheet({
   snap,
   onSnapChange,
   className,
+  onClose,
+  closeLabel = "Close list",
 }: MapListBottomSheetProps) {
   const [internalSnap, setInternalSnap] = React.useState<number | string | null>(SNAP_POINTS[0]);
 
@@ -56,7 +60,7 @@ export function MapListBottomSheet({
           aria-label="Список локаций"
           className={cn(
             'fixed inset-x-0 bottom-0 z-30 flex flex-col bg-background border-t border-border shadow-2xl',
-            'h-[92dvh] outline-none lg:hidden',
+            'h-[92dvh] outline-none lg:inset-x-auto lg:right-4 lg:w-96 rounded-t-xl',
             className,
           )}
         >
@@ -64,6 +68,7 @@ export function MapListBottomSheet({
           <div className="px-4 py-2 flex items-center justify-between border-b border-border shrink-0">
             <Vaul.Title className="text-sm font-semibold text-foreground">{title}</Vaul.Title>
             {headerRight}
+            {onClose && <button type="button" onClick={onClose} className="px-3 py-2 text-sm text-primary">{closeLabel}</button>}
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
         </Vaul.Content>

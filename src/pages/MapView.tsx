@@ -22,6 +22,7 @@ import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/
 import { MapListBottomSheet } from '@/components/map/MapListBottomSheet';
 import { MapListItem } from '@/components/map/MapListItem';
 import { useMapListSync } from '@/hooks/useMapListSync';
+import { EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
 import { useExploreLayers } from '@/hooks/useExploreLayers';
 import { PoiClaimSheet, type ClaimablePoi } from '@/components/map/PoiClaimSheet';
 
@@ -32,6 +33,7 @@ type VerticalFilter =
   | 'rent'
   | 'sale'
   | 'newbuild'
+  | 'experience'
   | 'service'
   | 'commercial'
   | 'land'
@@ -80,6 +82,15 @@ interface UniversalMarker {
   workingHours?: Record<string, string> | null;
   approximate?: boolean;
   routeId?: string;
+  href?: string;
+  currency?: string | null;
+  pricePeriod?: string | null;
+  district?: string;
+  projectId?: string;
+  propertyType?: string;
+  bedrooms?: number;
+  category?: string;
+  locationKind?: 'place' | 'meeting_point';
 }
 
 const VERTICAL_CONFIG: Record<
@@ -90,6 +101,7 @@ const VERTICAL_CONFIG: Record<
   rent: { icon: '🔑', color: '#0A2240', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
   sale: { icon: '🏷️', color: '#D96B1A', labelEn: 'For sale', labelRu: 'Продажа жилья', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
   newbuild: { icon: '🏗️', color: '#78716C', labelEn: 'New developments', labelRu: 'Новостройки', route: (id) => APP_ROUTES.OFFPLAN_DETAIL(id) },
+  experience: { icon: '✦', color: 'hsl(var(--primary))', labelEn: 'Experiences', labelRu: 'Впечатления', route: (id) => APP_ROUTES.EXPERIENCE_DETAIL(id) },
   service: { icon: '🛠️', color: '#3F6212', labelEn: 'Services', labelRu: 'Услуги', route: (id) => `/services/provider/${id}` },
   commercial: { icon: '🏢', color: '#C9A84C', labelEn: 'Commercial', labelRu: 'Коммерческая недвижимость', route: (id) => `/property/commercial/${id}` },
   land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земельные участки', route: (id) => `/property/land/${id}` },
@@ -110,6 +122,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'rent', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', icon: '🔑' },
   { value: 'sale', labelEn: 'For sale', labelRu: 'Продажа жилья', icon: '🏷️' },
   { value: 'newbuild', labelEn: 'New developments', labelRu: 'Новостройки', icon: '🏗️' },
+  { value: 'experience', labelEn: 'Experiences', labelRu: 'Впечатления', icon: '✦' },
   { value: 'service', labelEn: 'Services', labelRu: 'Услуги', icon: '🛠️' },
   { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерч.', icon: '🏢' },
   { value: 'land', labelEn: 'Land', labelRu: 'Земельные участки', icon: '🌾' },
@@ -138,24 +151,24 @@ export default function MapView() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialVertical = (searchParams.get('vertical') as VerticalFilter) || 'all';
-  const initialPrice = (searchParams.get('price') as PriceFilter) || 'all';
-  const initialAvailability = (searchParams.get('availability') as AvailabilityFilter) || 'all';
-  const [selectedVertical, setSelectedVertical] = useState<VerticalFilter>(initialVertical);
-  const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
-  const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
+  // URL is the source of truth, including browser Back/Forward and shared links.
+  const selectedLayers = useMemo(() => (searchParams.get('layers') ?? searchParams.get('vertical') ?? '')
+    .split(',').filter((value): value is Exclude<VerticalFilter, 'all'> => value !== 'all' && FILTER_OPTIONS.some((option) => option.value === value)), [searchParams]);
+  const selectedVertical: VerticalFilter = selectedLayers.length === 1 ? selectedLayers[0] : 'all';
+  const selectedPrice: PriceFilter = PRICE_OPTIONS.some((option) => option.value === searchParams.get('price')) ? searchParams.get('price') as PriceFilter : 'all';
+  const selectedAvailability: AvailabilityFilter = searchParams.get('availability') === 'open_now' ? 'open_now' : 'all';
+  const [showMoreLayers, setShowMoreLayers] = useState(false);
+  const [showList, setShowList] = useState(false);
   const [selected, setSelected] = useState<ClickedMarker>(null);
   const { selectedId: focusedMarkerId, select: selectMarker } = useMapListSync();
   const activeMarkerId = focusedMarkerId ?? undefined;
   const mapRef = useRef<MapLibreMapHandle | null>(null);
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
-  const pendingSearchPickRef = useRef<MapSearchResult | null>(null);
 
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
-    pendingSearchPickRef.current = r;
     selectMarker(null);
   }, [selectMarker]);
 
@@ -163,7 +176,7 @@ export default function MapView() {
 
   // Fetch data from all verticals
   const { data: properties, isLoading: propLoading } = usePropertiesForMap({});
-  const { data: exploreItems, isLoading: exploreLoading } = useExploreLayers();
+  const { data: exploreItems, isLoading: exploreLoading, layerErrors = [], missingCoordinates = 0, isError: exploreError } = useExploreLayers();
 
   const { data: salons, isLoading: salonLoading } = useQuery({
     queryKey: ['salons-map'],
@@ -179,7 +192,7 @@ export default function MapView() {
     },
   });
 
-  const { restaurants, isLoading: restLoading } = useRestaurants({});
+  const { restaurants, isLoading: restLoading, error: restaurantError } = useRestaurants({});
 
   const useGeoLayer = (table: 'gyms' | 'pharmacies' | 'veterinary_clinics' | 'flower_shops' | 'venues') =>
     useQuery({
@@ -299,6 +312,9 @@ export default function MapView() {
         id: it.id, name: it.name, nameRu: it.nameRu, lat: it.lat, lng: it.lng,
         rating: it.rating, priceFrom: it.priceFrom, image: it.image,
         vertical: it.layer, approximate: it.approximate, routeId: it.routeId,
+        href: it.href, currency: it.currency, pricePeriod: it.pricePeriod,
+        district: it.district, projectId: it.projectId, propertyType: it.propertyType,
+        bedrooms: it.bedrooms, category: it.category, locationKind: it.locationKind,
       });
     });
     (salons || []).forEach((s) => {
@@ -318,7 +334,7 @@ export default function MapView() {
           lat: Number(r.lat), lng: Number(r.lng),
           rating: r.rating || 0, priceFrom: 0,
           image: r.cover_image || undefined,
-          vertical: 'restaurant',
+          vertical: 'restaurant', district: r.district, category: r.cuisine,
           workingHours: r.working_hours ?? null,
         });
       }
@@ -364,22 +380,28 @@ export default function MapView() {
       });
     });
 
-    return markers;
+    return markers.filter((marker) => Number.isFinite(marker.lat) && Number.isFinite(marker.lng)
+      && Math.abs(marker.lat) <= 90 && Math.abs(marker.lng) <= 180 && (marker.lat !== 0 || marker.lng !== 0));
   }, [properties, exploreItems, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events, communities]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {
-      if (selectedVertical !== 'all' && m.vertical !== selectedVertical) return false;
+      if (searchParams.get('district') && m.district !== searchParams.get('district')) return false;
+      if (searchParams.get('propertyType') && m.propertyType !== searchParams.get('propertyType')) return false;
+      if (searchParams.get('project') && m.projectId !== searchParams.get('project')) return false;
+      if (searchParams.get('bedrooms') && (m.bedrooms == null || m.bedrooms < Number(searchParams.get('bedrooms')))) return false;
+      if (searchParams.get('category') && m.category !== searchParams.get('category')) return false;
+      if (selectedLayers.length && !selectedLayers.includes(m.vertical as Exclude<VerticalFilter, 'all'>)) return false;
       if (selectedPrice !== 'all' && (m.vertical === 'stay' || m.vertical === 'all')) {
         const [min, max] = PRICE_RANGES[selectedPrice];
-        if (m.priceFrom != null && m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
+        if (m.currency !== 'THB' || m.pricePeriod !== 'night' || m.priceFrom == null || m.priceFrom <= 0 || m.priceFrom < min || m.priceFrom >= max) return false;
       }
       if (selectedAvailability === 'open_now') {
-        if (m.workingHours && !isOpenNow(m.workingHours)) return false;
+        if (!m.workingHours || !isOpenNow(m.workingHours)) return false;
       }
       return true;
     });
-  }, [allMarkers, selectedVertical, selectedPrice, selectedAvailability]);
+  }, [allMarkers, searchParams, selectedLayers, selectedPrice, selectedAvailability]);
 
   // Adapt vendor + OSM markers to MapLibre format.
   const mlMarkers = useMemo<MapMarker[]>(() => {
@@ -425,21 +447,6 @@ export default function MapView() {
     mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
   }, [language, selectMarker]);
 
-  // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
-  useEffect(() => {
-    const pick = pendingSearchPickRef.current;
-    if (!pick || mlMarkers.length === 0) return;
-    const EPS = 0.0005; // ~50m
-    const match = mlMarkers.find(
-      (mm) => Math.abs(mm.lat - pick.lat) < EPS && Math.abs(mm.lng - pick.lng) < EPS,
-    );
-    if (match) {
-      selectMarker(match.id);
-      setSelected(match.data as ClickedMarker);
-    }
-    pendingSearchPickRef.current = null;
-  }, [mlMarkers, selectMarker]);
-
   // Drive selection from URL (?focus=<id>) and list clicks → set `selected` and fly to marker.
   useEffect(() => {
     if (!focusedMarkerId) {
@@ -454,11 +461,11 @@ export default function MapView() {
 
   // If active filter removes selected marker — clear selection.
   useEffect(() => {
-    if (!focusedMarkerId) return;
+    if (!focusedMarkerId || isDataLoading) return;
     if (!mlMarkers.find((mm) => mm.id === focusedMarkerId)) {
       selectMarker(null);
     }
-  }, [mlMarkers, focusedMarkerId, selectMarker]);
+  }, [mlMarkers, focusedMarkerId, selectMarker, isDataLoading]);
 
 
 
@@ -479,33 +486,53 @@ export default function MapView() {
   );
 
   const handleFilterChange = (value: VerticalFilter) => {
-    setSelectedVertical(value);
-    updateParam('vertical', value);
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      const layers = value === 'all' ? [] : selectedLayers.includes(value)
+        ? selectedLayers.filter((layer) => layer !== value) : [...selectedLayers, value];
+      next.delete('vertical');
+      next.delete('focus');
+      if (layers.length) next.set('layers', layers.join(',')); else next.delete('layers');
+      return next;
+    });
   };
-
-  const activeFilterCount =
-    (selectedVertical !== 'all' ? 1 : 0) +
-    (selectedPrice !== 'all' ? 1 : 0) +
-    (selectedAvailability !== 'all' ? 1 : 0);
-
+  const activeFilterCount = selectedLayers.length + (selectedPrice !== 'all' ? 1 : 0) + (selectedAvailability !== 'all' ? 1 : 0) + ['district', 'project', 'bedrooms', 'category', 'propertyType'].filter((key) => searchParams.has(key)).length;
   const resetAllFilters = () => {
-    setSelectedVertical('all');
-    setSelectedPrice('all');
-    setSelectedAvailability('all');
-    setSearchParams(new URLSearchParams(), { replace: true });
+    setShowOsm(false);
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      ['layers', 'vertical', 'price', 'availability', 'focus', 'district', 'project', 'bedrooms', 'category', 'propertyType'].forEach((key) => next.delete(key));
+      return next;
+    });
   };
+
+  const mapPrice = (marker: UniversalMarker) => {
+    if (!marker.priceFrom || marker.priceFrom <= 0) return undefined;
+    const value = marker.currency && /^[A-Z]{3}$/.test(marker.currency) && marker.currency !== 'THB'
+      ? new Intl.NumberFormat(language === 'ru' ? 'ru-RU' : 'en', { style: 'currency', currency: marker.currency }).format(marker.priceFrom)
+      : formatPrice(marker.priceFrom);
+    const periods: Record<string, string> = { week: language === 'ru' ? '/нед' : '/week', person: language === 'ru' ? '/чел' : '/person', night: language === 'ru' ? '/ночь' : '/night', month: language === 'ru' ? '/мес' : '/month', year: language === 'ru' ? '/год' : '/year' };
+    return `${value}${periods[marker.pricePeriod || ''] || ''}`;
+  };
+  const districts = [...new Set(allMarkers.map((marker) => marker.district).filter(Boolean))].sort();
+  const categories = [...new Set(allMarkers.filter((marker) => !selectedLayers.length || selectedLayers.includes(marker.vertical as Exclude<VerticalFilter, 'all'>)).map((marker) => marker.category).filter(Boolean))].sort();
+  const propertyTypes = [...new Set(allMarkers.map((marker) => marker.propertyType).filter(Boolean))].sort();
+  const projectsForFilter = [...new Set(allMarkers.map((marker) => marker.projectId).filter(Boolean))];
+  const projectNames = new Map((exploreItems || []).filter((item) => item.layer === 'newbuild').map((item) => [item.routeId, language === 'ru' ? item.nameRu : item.name]));
 
   const showLoading = isDataLoading && allMarkers.length === 0;
 
   const secondaryFilterCount =
     (selectedPrice !== 'all' ? 1 : 0) +
     (selectedAvailability !== 'all' ? 1 : 0) +
-    (showOsm ? 1 : 0);
+    (showOsm ? 1 : 0) + ['district', 'project', 'bedrooms', 'category', 'propertyType'].filter((key) => searchParams.has(key)).length;
 
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100dvh-3.5rem-var(--bottom-nav-h,4rem))]">
-        <div className="px-3 pt-2 pb-2 bg-background/95 border-b border-border z-10 space-y-2 shrink-0">
+        <div className="px-4 pt-3 pb-2 bg-background/95 border-b border-border z-10 space-y-2 shrink-0">
+          <div><h1 className="text-lg font-semibold tracking-tight">{language === 'ru' ? 'Найдите своё место на Пхукете' : 'Find your place in Phuket'}</h1>
+            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Выберите слои и нажмите на метку, чтобы открыть предложение.' : 'Choose layers and select a pin to explore an offer.'}</p></div>
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <MapSearchBox ref={searchBoxRef} onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
@@ -532,6 +559,39 @@ export default function MapView() {
                   <SheetTitle>{language === 'ru' ? 'Фильтры карты' : 'Map filters'}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className="text-sm">{language === 'ru' ? 'Район' : 'Area'}
+                      <select className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3" value={searchParams.get('district') || 'all'} onChange={(event) => updateParam('district', event.target.value)}>
+                        <option value="all">{language === 'ru' ? 'Все районы' : 'All areas'}</option>
+                        {districts.map((district) => <option key={district} value={district}>{district}</option>)}
+                      </select>
+                    </label>
+                    <label className="text-sm">{language === 'ru' ? 'Спальни' : 'Bedrooms'}
+                      <select className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3" value={searchParams.get('bedrooms') || 'all'} onChange={(event) => updateParam('bedrooms', event.target.value)}>
+                        <option value="all">{language === 'ru' ? 'Любое количество' : 'Any number'}</option>
+                        {[1, 2, 3, 4, 5].map((count) => <option key={count} value={count}>{count}+</option>)}
+                      </select>
+                    </label>
+                    {categories.length > 0 && <label className="text-sm">{language === 'ru' ? 'Категория' : 'Category'}
+                      <select className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3" value={searchParams.get('category') || 'all'} onChange={(event) => updateParam('category', event.target.value)}>
+                        <option value="all">{language === 'ru' ? 'Все категории' : 'All categories'}</option>
+                        {categories.map((category) => <option key={category} value={category}>{EXPERIENCE_CATEGORIES.find((item) => item.id === category)?.[language === 'ru' ? 'labelRu' : 'labelEn'] || category}</option>)}
+                      </select>
+                    </label>}
+                    {projectsForFilter.some((id) => projectNames.has(id)) && <label className="text-sm">{language === 'ru' ? 'Комплекс' : 'Development'}
+                      <select className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3" value={searchParams.get('project') || 'all'} onChange={(event) => updateParam('project', event.target.value)}>
+                        <option value="all">{language === 'ru' ? 'Все комплексы' : 'All developments'}</option>
+                        {projectsForFilter.filter((id) => projectNames.has(id)).map((id) => <option key={id} value={id}>{projectNames.get(id)}</option>)}
+                      </select>
+                    </label>}
+                    <label className="text-sm">{language === 'ru' ? 'Тип жилья' : 'Property type'}
+                      <select className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3" value={searchParams.get('propertyType') || 'all'} onChange={(event) => updateParam('propertyType', event.target.value)}>
+                        <option value="all">{language === 'ru' ? 'Все типы' : 'All types'}</option>
+                        {propertyTypes.map((type) => <option key={type} value={type}>{language === 'ru' ? ({villa: 'Вилла', condo: 'Кондоминиум', apartment: 'Квартира', house: 'Дом', townhouse: 'Таунхаус'}[type] || type) : type}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Показываем предложения с сохранённой геопозицией. Доступность на ваши даты уточняется в карточке.' : 'Offers with a saved location are shown. Check date availability on the offer page.'}</p>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                       {language === 'ru' ? 'Цена за ночь · посуточное жильё' : 'Nightly price · short stays'}
@@ -539,7 +599,7 @@ export default function MapView() {
                     {['all', 'stay'].includes(selectedVertical) && (
                       <FilterChipGroup scrollable>
                         {PRICE_OPTIONS.map((opt) => (
-                          <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
+                          <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { updateParam('price', opt.value); }} size="md" />
                         ))}
                       </FilterChipGroup>
                     )}
@@ -550,7 +610,7 @@ export default function MapView() {
                     </p>
                     <FilterChipGroup scrollable>
                       {AVAILABILITY_OPTIONS.map((opt) => (
-                        <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { setSelectedAvailability(opt.value); updateParam('availability', opt.value); }} size="md" />
+                        <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { updateParam('availability', opt.value); }} size="md" />
                       ))}
                     </FilterChipGroup>
                   </div>
@@ -571,11 +631,21 @@ export default function MapView() {
           </div>
 
           <FilterChipGroup scrollable>
-            {FILTER_OPTIONS.map((opt) => (
-              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedVertical === opt.value} onToggle={() => handleFilterChange(opt.value)} size="md" />
+            {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'restaurant'].includes(opt.value)).map((opt) => (
+              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} size="md" />
             ))}
           </FilterChipGroup>
 
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setShowMoreLayers((value) => !value)} aria-expanded={showMoreLayers}>
+              {language === 'ru' ? (showMoreLayers ? 'Меньше слоёв' : 'Другие места и услуги') : (showMoreLayers ? 'Fewer layers' : 'More places & services')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowList((value) => !value)} aria-expanded={showList}>
+              {language === 'ru' ? (showList ? 'Закрыть список' : 'Показать списком') : (showList ? 'Close list' : 'Show list')}
+            </Button>
+          </div>
+          {(layerErrors.length > 0 || exploreError || restaurantError) && <p role="alert" className="text-xs text-destructive">{language === 'ru' ? 'Не все слои удалось загрузить. Часть предложений может отсутствовать.' : 'Some layers could not load. Some offers may be missing.'}</p>}
+          {missingCoordinates > 0 && <p className="text-xs text-muted-foreground">{language === 'ru' ? `${missingCoordinates} предложений пока без точной геопозиции.` : `${missingCoordinates} offers have no precise location yet.`}</p>}
           {!showLoading && (
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
@@ -636,9 +706,9 @@ export default function MapView() {
           {/* Marker detail panel */}
 
           {selected && (
-            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border-2 border-primary rounded-none shadow-xl p-3 z-20 ring-2 ring-primary/20">
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-card border border-border rounded-xl shadow-xl p-4 z-20 max-h-[65%] overflow-y-auto">
               <span className="absolute -top-2 left-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
-                {language === 'ru' ? 'Активный' : 'Active'}
+                {language === 'ru' ? 'Вы выбрали' : 'Selected place'}
               </span>
               <button
                 type="button"
@@ -656,7 +726,7 @@ export default function MapView() {
                 return (
                   <button
                     type="button"
-                    onClick={() => cfg && navigate(cfg.route(m.routeId ?? m.id))}
+                    onClick={() => cfg && navigate(m.href || cfg.route(m.routeId ?? m.id))}
                     className="text-left w-full pr-6"
                   >
                     {m.image && (
@@ -664,11 +734,12 @@ export default function MapView() {
                     )}
                     <div className="font-semibold text-sm">{language === 'ru' ? m.nameRu : m.name}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      {cfg?.icon} {language === 'ru' ? cfg?.labelRu : cfg?.labelEn}
+                      {cfg?.icon} {language === 'ru' ? cfg?.labelRu : cfg?.labelEn}{m.locationKind === 'meeting_point' ? (language === 'ru' ? ' · Точка встречи' : ' · Meeting point') : ''}
                     </div>
+                    <span className="mt-3 inline-flex text-sm font-semibold text-primary">{language === 'ru' ? 'Открыть предложение →' : 'View offer →'}</span>
                     <div className="flex items-center gap-3 mt-1 text-xs">
                       {m.rating > 0 && <span>⭐ {m.rating.toFixed(1)}</span>}
-                      {m.vertical === 'newbuild' ? <ProjectStartingPrice price={m.priceFrom} /> : m.priceFrom != null && m.priceFrom > 0 && <span className="text-primary font-medium">{formatPrice(m.priceFrom)}+</span>}
+                      {m.vertical === 'newbuild' ? <ProjectStartingPrice price={m.priceFrom} /> : m.priceFrom != null && m.priceFrom > 0 && <span className="text-primary font-medium">{mapPrice(m)}</span>}
                     </div>
                   </button>
                 );
@@ -724,7 +795,9 @@ export default function MapView() {
         </div>
       </div>
 
-      <MapListBottomSheet
+      {showList && <MapListBottomSheet
+        onClose={() => setShowList(false)}
+        closeLabel={language === 'ru' ? 'Закрыть список' : 'Close list'}
         title={
           <span>
             {mlMarkers.length}{' '}
@@ -734,7 +807,7 @@ export default function MapView() {
       >
         {mlMarkers.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            {language === 'ru' ? 'Ничего не найдено — измените фильтры' : 'Nothing found — adjust filters'}
+            {showLoading ? (language === 'ru' ? 'Загружаем предложения…' : 'Loading offers…') : (exploreError || layerErrors.length) ? (language === 'ru' ? 'Часть данных не загрузилась. Попробуйте обновить страницу.' : 'Some data could not load. Please refresh.') : (language === 'ru' ? 'Нет предложений с точной геопозицией по этим фильтрам.' : 'No offers with a precise location match these filters.')}
           </div>
         ) : (
           <div role="listbox" aria-label={language === 'ru' ? 'Список локаций' : 'Locations list'}>
@@ -756,9 +829,10 @@ export default function MapView() {
                   title={title}
                   subtitle={subtitle}
                   rating={vendor?.rating}
-                  priceLabel={vendor?.vertical === 'newbuild' ? projectStartingPriceText(vendor.priceFrom, language) : vendor && vendor.priceFrom != null && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}${vendor.vertical === 'rent' ? (language === 'ru' ? '/мес' : '/mo') : vendor.vertical === 'stay' ? (language === 'ru' ? '/ночь' : '/night') : '+'}` : undefined}
+                  priceLabel={vendor?.vertical === 'newbuild' ? projectStartingPriceText(vendor.priceFrom, language) : vendor ? mapPrice(vendor) : undefined}
                   isSelected={activeMarkerId === m.id}
                   onSelect={(id) => {
+                    setShowList(false);
                     selectMarker(id);
                     // also trigger same flyTo path as marker click
                     const mm = mlMarkers.find((x) => x.id === id);
@@ -772,7 +846,7 @@ export default function MapView() {
             })}
           </div>
         )}
-      </MapListBottomSheet>
+      </MapListBottomSheet>}
       <PoiClaimSheet open={!!claimPoi} onOpenChange={(v) => !v && setClaimPoi(null)} poi={claimPoi} />
     </AppLayout>
   );

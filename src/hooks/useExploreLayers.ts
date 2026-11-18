@@ -1,110 +1,41 @@
-/**
- * useExploreLayers — real data for the Phuket Explore map core layers:
- *   stay (nightly) · rent (monthly) · sale · newbuild (projects) · service (providers)
- * Only approved/active public records. No invented prices or ratings.
- */
+/** Public catalogue map projection. Missing coordinates are not invented. */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { districtCentroid } from '@/lib/map/phuketDistricts';
-
-export type ExploreLayer = 'stay' | 'rent' | 'sale' | 'newbuild' | 'service';
-
-export interface ExploreItem {
-  id: string;
-  name: string;
-  nameRu: string;
-  lat: number;
-  lng: number;
-  rating: number;
-  priceFrom: number | null;
-  image?: string;
-  layer: ExploreLayer;
-  approximate: boolean;
-  routeId: string;
-}
-
-const num = (v: unknown) => (v == null || v === '' ? NaN : Number(v));
-const valid = (lat: number, lng: number) =>
-  Number.isFinite(lat) && Number.isFinite(lng) && !(Math.abs(lat) < 1e-5 && Math.abs(lng) < 1e-5);
+import { experienceExploreItem, propertyExploreItems, projectExploreItem, providerExploreItem, mapCoordinates, type ExploreItem, type MapRecord } from '@/lib/map/exploreItems';
+export type { ExploreLayer, ExploreItem } from '@/lib/map/exploreItems';
 
 export function useExploreLayers() {
-  return useQuery({
-    queryKey: ['explore-layers-v1'],
+  const query = useQuery({
+    queryKey: ['explore-layers-v2'],
     staleTime: 5 * 60_000,
-    queryFn: async (): Promise<ExploreItem[]> => {
-      const [props, projects, providers] = await Promise.all([
-        supabase
-          .from('public_property_catalog')
-          .select('id, title_en, title_ru, lat, lng, district, listing_type, price, price_period, sale_price, cover_image')
-          .limit(1000),
-        supabase
-          .from('property_projects')
+    queryFn: async () => {
+      const results = await Promise.all([
+        supabase.from('public_property_catalog')
+          .select('id, title_en, title_ru, lat, lng, district, asset_class, listing_type, listing_modes, is_for_sale, tenancy_modes, price, price_period, currency, sale_price, sale_currency, price_per_night, price_per_month, price_per_year, cover_image, project_id, property_type, bedrooms').limit(1000),
+        supabase.from('property_projects')
           .select('id, slug, name_en, name_ru, lat, lng, location_lat, location_lng, district, price_from, cover_image_url, cover_image')
-          .eq('is_approved', true)
-          .eq('is_active', true)
-          .eq('public_listing_enabled', true)
-          .limit(1000),
-        supabase
-          .from('public_provider_catalog')
-          .select('id, name, lat, lng, rating, cover_image, logo_url, business_category')
-          .eq('is_active', true)
-          .not('lat', 'is', null)
-          .limit(1000),
+          .eq('is_approved', true).eq('is_active', true).eq('public_listing_enabled', true).limit(1000),
+        supabase.from('public_provider_catalog')
+          .select('id, name, lat, lng, rating, cover_image, logo_url, business_category').eq('is_active', true).limit(1000),
+        supabase.from('listings')
+          .select('id, name_en, name_ru, lat, lng, district, category, price, price_period, currency, rating, cover_image, meeting_point_lat:attributes->meeting_point_lat, meeting_point_lng:attributes->meeting_point_lng, price_per:attributes->>price_per')
+          .eq('vertical', 'experience').eq('is_active', true).eq('approval_status', 'approved').eq('attributes->>status', 'published').limit(1000),
       ]);
-      const out: ExploreItem[] = [];
-
-      if (!props.error) {
-        for (const p of props.data ?? []) {
-          let lat = num(p.lat), lng = num(p.lng), approximate = false;
-          if (!valid(lat, lng)) {
-            const c = districtCentroid(p.district, p.id);
-            if (!c) continue;
-            [lat, lng] = c; approximate = true;
-          }
-          const base = {
-            name: p.title_en || 'Property', nameRu: p.title_ru || p.title_en || 'Объект',
-            lat, lng, rating: 0, image: p.cover_image || undefined, approximate, routeId: p.id,
-          };
-          // properties.listing_type carries only 'rent'/'sale' — the monthly
-          // flag lives in price_period ('night' | 'month' | 'year').
-          const isMonthly = p.listing_type === 'long_term' || p.listing_type === 'rent_long'
-            || p.price_period === 'month' || p.price_period === 'year';
-          if (p.listing_type === 'sale' && !isMonthly) out.push({ ...base, id: `sale-${p.id}`, layer: 'sale', priceFrom: Number(p.sale_price) || 0 });
-          else if (isMonthly) out.push({ ...base, id: `rent-${p.id}`, layer: 'rent', priceFrom: Number(p.price) || 0 });
-          else out.push({ ...base, id: `stay-${p.id}`, layer: 'stay', priceFrom: Number(p.price) || 0 });
+      const sourceNames = ['property', 'newbuild', 'service', 'experience'];
+      const items: ExploreItem[] = [];
+      const layerErrors: string[] = [];
+      let missingCoordinates = 0;
+      results.forEach((result, index) => {
+        if (result.error) { layerErrors.push(sourceNames[index]); return; }
+        const records = (result.data ?? []) as unknown as MapRecord[];
+        for (const row of records) {
+          const transformed = index === 0 ? propertyExploreItems(row) : [index === 1 ? projectExploreItem(row) : index === 2 ? providerExploreItem(row) : experienceExploreItem(row)].filter((item): item is ExploreItem => item !== null);
+          if (!transformed.length && !mapCoordinates(row.lat, row.lng) && !mapCoordinates(row.location_lat, row.location_lng) && !mapCoordinates(row.meeting_point_lat, row.meeting_point_lng)) missingCoordinates++;
+          items.push(...transformed);
         }
-      }
-
-      if (!projects.error) {
-        for (const pr of projects.data ?? []) {
-          let lat = num(pr.lat ?? pr.location_lat), lng = num(pr.lng ?? pr.location_lng), approximate = false;
-          if (!valid(lat, lng)) {
-            const c = districtCentroid(pr.district, pr.id);
-            if (!c) continue;
-            [lat, lng] = c; approximate = true;
-          }
-          out.push({
-            id: `newbuild-${pr.id}`, layer: 'newbuild', routeId: pr.id,
-            name: pr.name_en || 'Project', nameRu: pr.name_ru || pr.name_en || 'Проект',
-            lat, lng, rating: 0, approximate,
-            priceFrom: typeof pr.price_from === 'number' && Number.isFinite(pr.price_from) && pr.price_from > 0 ? pr.price_from : null,
-            image: pr.cover_image_url || pr.cover_image || undefined,
-          });
-        }
-      }
-
-      if (!providers.error) {
-        for (const s of providers.data ?? []) {
-          const lat = num(s.lat), lng = num(s.lng);
-          if (!valid(lat, lng)) continue;
-          out.push({
-            id: `service-${s.id}`, layer: 'service', routeId: s.id,
-            name: s.name, nameRu: s.name, lat, lng, rating: Number(s.rating) || 0, priceFrom: 0,
-            image: s.cover_image || s.logo_url || undefined, approximate: false,
-          });
-        }
-      }
-      return out;
+      });
+      return { items, layerErrors, missingCoordinates };
     },
   });
+  return { ...query, data: query.data?.items, layerErrors: query.data?.layerErrors ?? [], missingCoordinates: query.data?.missingCoordinates ?? 0 };
 }
