@@ -4,7 +4,7 @@ Owner authorised publishing the researched experiences and repairing their photo
 
 ## Presentation and data contract
 
-`attributes.discovery_only = true` identifies information about a verified real operator, not a partner-approved commercial offer. Such entries have no asserted myUNO price, rating, schedule, capacity or availability. Their detail and direct `/book` route render the same informational view with a checked HTTP(S) source link; they do not show inherited pricing variants or admit the order form. Old pricing rows are retained as historical catalogue data, not displayed for editorial entries. This frontend restriction does not certify or change server order authorization.
+`attributes.discovery_only = true` identifies information about a verified real operator, not a partner-approved commercial offer. Such entries have no asserted myUNO price, rating, schedule, capacity or availability. Their detail and direct `/book` route render the same informational view with an internal myUNO concierge inquiry; they do not show inherited pricing variants or admit an order or payment form. The inquiry is not a booking confirmation; source URLs remain provenance, not supplier handoffs. Old pricing rows are retained as historical catalogue data, not displayed for editorial entries. This frontend restriction does not certify or change server order authorization.
 
 Publication uses the existing `approval_status = approved`, `is_active = true`, `attributes.status = published` reader contract. It does not grant a provider verified status or change policies/roles. Ratings, coordinates and prices without verified attribution are cleared only on the selected entries. Commission, provider mapping, settlement and operational records are untouched.
 
