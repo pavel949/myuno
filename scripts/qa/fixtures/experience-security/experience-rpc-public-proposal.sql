@@ -32,7 +32,7 @@ AS $function$
       )
     )
   GROUP BY clm.life_situation_id;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION public.resolve_life_os_context(p_life_code text, p_user_role text DEFAULT 'guest'::text, p_locale text DEFAULT 'en'::text, p_limit integer DEFAULT 200)
  RETURNS TABLE(entity_type text, entity_id text, title text, title_localized text, price numeric, currency text, location text, provider_id text, trust_level text, weight integer, role_scope text[], rules jsonb)
@@ -86,6 +86,6 @@ BEGIN
     loc.price ASC NULLS LAST
   LIMIT p_limit;
 END;
-$function$
+$function$;
 
 COMMIT;
