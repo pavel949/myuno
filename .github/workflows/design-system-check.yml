@@ -31,6 +31,10 @@ jobs:
         run: node scripts/qa/yachts-flowers-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Platform social settings and footer with synthetic transport
+        run: SOCIAL_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/social-links" node scripts/qa/platform-social-links-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Rental landing areas communities and shared search
         run: node scripts/qa/rental-landing-ui.mjs
         env:
