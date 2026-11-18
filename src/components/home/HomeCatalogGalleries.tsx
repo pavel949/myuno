@@ -112,7 +112,7 @@ export function HomeExperienceGallery() {
   const preview = experiences.flatMap(item => {
     const image = [item.cover_image, ...(item.images ?? [])].map(complexMediaUrl).find(image => image && !failedMedia.has(image));
     return image ? [{ item, image }] : [];
-  }).slice(0, 4);
+  }).slice(0, 12);
   const title = t({
     ru: 'За пределами дома',
     en: 'More of the island',

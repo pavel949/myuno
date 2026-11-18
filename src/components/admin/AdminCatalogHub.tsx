@@ -51,11 +51,11 @@ export function AdminCatalogHub() {
         {catalogs.map(({ id, icon: Icon, title, description, action, to, links }) => (
           <Card key={id} className="flex min-w-0 flex-col gap-4 p-5">
             <Icon className="h-7 w-7 text-primary" aria-hidden="true" />
-            <div className="space-y-2">
+            <div className="space-y-2 lg:min-h-28">
               <h2 className="text-xl font-semibold">{title[locale]}</h2>
               <p className="text-sm text-muted-foreground">{description[locale]}</p>
             </div>
-            <Button asChild className="mt-auto h-auto min-h-11 whitespace-normal text-center">
+            <Button asChild className="h-auto min-h-11 whitespace-normal text-center">
               <Link to={to}>{action[locale]}<ArrowRight className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" /></Link>
             </Button>
             <ul className="border-t pt-2">

@@ -183,11 +183,11 @@ it.each([
   expect(screen.queryByText(/available|confirmed|instant/i)).toBeNull();
 });
 
-it('omits experiences without usable stored media and caps the preview at four', () => {
-  state.experiences = [{ id: 'missing', title_en: 'No media', cover_image: 'javascript:bad' }, ...Array.from({ length: 6 }, (_, i) => ({ id: `tour-${i}`, title_en: `Tour ${i}`, cover_image: `https://example.invalid/tour-${i}.jpg` }))];
+it('omits experiences without usable stored media and caps the scrollable preview at twelve', () => {
+  state.experiences = [{ id: 'missing', title_en: 'No media', cover_image: 'javascript:bad' }, ...Array.from({ length: 14 }, (_, i) => ({ id: `tour-${i}`, title_en: `Tour ${i}`, cover_image: `https://example.invalid/tour-${i}.jpg` }))];
   show();
-  expect(document.querySelectorAll('.home-experiences article')).toHaveLength(4);
-  expect(screen.queryByText('No media')).toBeNull(); expect(screen.queryByText('Tour 4')).toBeNull();
+  expect(document.querySelectorAll('.home-experiences article')).toHaveLength(12);
+  expect(screen.queryByText('No media')).toBeNull(); expect(screen.queryByText('Tour 12')).toBeNull();
 });
 
 it.each(['empty', 'loading', 'error', 'fallback'])('keeps explicit flower/yacht catalogue navigation separate from %s supply states', mode => {

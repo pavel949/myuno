@@ -96,6 +96,8 @@ One primary Space/property unless approved otherwise; cross-space membership exp
 
 **Services Marketplace:** `Services → Category → Provider/Offering → Availability → Price → REQUEST|BOOK|BOOK+PAY → Confirmation → My Services`. Existing/partial verticals include transport, vehicles, tours, yachts, flowers, beauty/spa, cleaning, fitness, restaurants/events. Code/route existence ≠ readiness. Verify real providers, approved offerings, safe fields, price, availability, commerce mode, mapping, fulfilment, settlement where applicable, and admin editing. No fake fallback catalogue.
 
+Experience editorial discovery (`attributes.discovery_only`) may publish verified concierge-mediated information before commercial onboarding. It displays source-backed photography/descriptions and direct concierge-mediated information, without inherited tariff variants, myUNO booking/payment forms or claims of partnership, price, availability or commission. Public approval is editorial publication, not provider verification or commercial readiness.
+
 **Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil. Concierge may maintain a case/orchestration record for conversation, requirements, coordination and resolution, but that record must not become a competing booking, payment, inventory or service-order authority. When a structured service is selected, return the transaction to the canonical Marketplace/service workflow.
 
 **PMS:** Today, Calendar, Bookings, Properties, Workspace, Stay Detail, Housekeeping, Maintenance, Rates, Inventory, Finance, Owners, Staff.
