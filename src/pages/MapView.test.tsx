@@ -93,4 +93,15 @@ describe('MapView integration smoke', () => {
     expect(pins().getAllByRole('button')).toHaveLength(9);
     expect(screen.getByTestId('url')).toHaveTextContent('/map?campaign=summer');
   });
+  it('excludes an outside-city offer from pins and fit targets without changing its coordinates', () => {
+    const outside = { ...fixtures.offers[0], id: 'outside-city', nameRu: 'Бангкок', lat: 13.75, lng: 100.52 };
+    fixtures.offers.push(outside);
+    try {
+      mount();
+      expect(pins().queryByRole('button', { name: 'Бангкок' })).not.toBeInTheDocument();
+      expect(screen.getByText('Вне покрытия карты Пхукета: 1.')).toBeInTheDocument();
+      expect(outside).toMatchObject({ lat: 13.75, lng: 100.52 });
+    } finally { fixtures.offers.pop(); }
+  });
+
 });

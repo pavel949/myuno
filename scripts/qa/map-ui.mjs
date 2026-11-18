@@ -27,6 +27,7 @@ for(const offer of offers){offer.currency='THB';offer.approximate=false;}
 const restaurants=[{id:'food1',name_en:'Synthetic restaurant',name_ru:'Тестовый ресторан',lat:7.96,lng:98.28,rating:0}];
 const places=Object.fromEntries(['salons-map','gyms-map','pharmacies-map','veterinary_clinics-map'].map((key,index)=>[key,[{id:'premise-'+index,name_en:'Synthetic premise '+index,name_ru:['Тестовый салон','Тестовый фитнес','Тестовая аптека','Тестовая клиника'][index],lat:7.94+index*.027,lng:98.36}]]));
 places['restaurants-map']=restaurants;
+places['communities-map']=[{slug:'qa-bangkok',name_en:'QA Bangkok community',name_ru:'Тестовое сообщество в Бангкоке',lat:13.75,lng:100.52}];
 const virtual = {
  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:'ru'});`,
  '@/contexts/CurrencyContext': `export const useCurrency=()=>({formatPrice:n=>'฿'+n});`,
@@ -36,7 +37,7 @@ const virtual = {
  '@/hooks/useProperties': `const data=[];export const usePropertiesForMap=()=>({data,isLoading:false});export const transformPropertiesToMarkers=()=>data;`,
  '@/hooks/useExploreLayers': `const data=${JSON.stringify(offers)};const layerErrors=[];export const useExploreLayers=()=>({data,isLoading:false,layerErrors});`,
  '@/hooks/useExperiences': `export const EXPERIENCE_CATEGORIES=[];`,
- '@/components/layout/AppLayout': `import React from'react';export const AppLayout=({children})=><main data-canvas="consumer"><header style={{height:56,padding:'8px 16px',background:'#0A2240',color:'white',fontSize:12}}>MyUno · QA ONLY · Тестовые предложения · настоящая карта Пхукета</header>{children}</main>;`,
+ '@/components/layout/AppLayout': `import React from'react';export const AppLayout=({children})=><main data-canvas="consumer"><header style={{height:'var(--consumer-header-height,56px)',padding:'8px 16px',background:'#0A2240',color:'white',fontSize:12}}>MyUno · QA ONLY · Тестовые предложения · настоящая карта Пхукета</header>{children}</main>;`,
  '@/components/map/PoiClaimSheet': `export const PoiClaimSheet=()=>null;`,
  // Preserve production style/layers. Rewrite only static asset origins to local mirrors.
  'maplibre-gl': `import real from '${root}/node_modules/maplibre-gl/dist/maplibre-gl.js';
@@ -144,7 +145,10 @@ try{
    await expect(page.getByRole('heading',{name:'Найдите своё место на Пхукете'})).toBeVisible();
    await page.waitForFunction(()=>window.fixtureMap?.loaded(),null,{timeout:60000});
    await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+   if(!await page.locator('.maplibregl-canvas').evaluate(element=>element.getBoundingClientRect().bottom<=innerHeight+1))throw Error('Map escapes viewport below responsive header');
    await expect(page.locator('[data-marker-id]')).toHaveCount(10);
+   await expect(page.getByText('Вне покрытия карты Пхукета: 1.',{exact:true})).toBeVisible();
+   if(!await page.evaluate(()=>{const map=window.fixtureMap;const center=map.getCenter();return center.lat>=7.7&&center.lat<=8.25&&center.lng>=98.2&&center.lng<=98.55&&JSON.stringify(map.getMaxBounds().toArray())===JSON.stringify([[98.2,7.7],[98.55,8.25]]);}))throw Error('Map escaped Phuket coverage');
    if(!await page.evaluate(()=>window.fixtureMap.getCanvas().width>0 && Boolean(window.fixtureMap.getCanvas().getContext('webgl2')||window.fixtureMap.getCanvas().getContext('webgl'))))throw Error('No WebGL drawing context');
    await page.waitForFunction(()=>window.fixtureMap.queryRenderedFeatures({layers:['roads']}).length>0 && window.fixtureMap.queryRenderedFeatures({layers:['place-labels']}).length>0,null,{timeout:60000});
    const geography=await page.evaluate(()=>({roads:window.fixtureMap.queryRenderedFeatures({layers:['roads']}).length,labels:window.fixtureMap.queryRenderedFeatures({layers:['place-labels']}).length}));

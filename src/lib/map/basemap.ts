@@ -20,3 +20,10 @@ export function isValidMapPosition(lat: number, lng: number): boolean {
   return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
     && !(lat === 0 && lng === 0);
 }
+
+/** Bounds read from the bundled Phuket PMTiles v3 header (not offer coordinates). */
+export const PHUKET_MAP_BOUNDS: [[number, number], [number, number]] = [[98.2, 7.7], [98.55, 8.25]];
+export function isInPhuketMapCoverage(lat: number, lng: number): boolean {
+  return isValidMapPosition(lat, lng) && lat >= PHUKET_MAP_BOUNDS[0][1] && lat <= PHUKET_MAP_BOUNDS[1][1]
+    && lng >= PHUKET_MAP_BOUNDS[0][0] && lng <= PHUKET_MAP_BOUNDS[1][0];
+}

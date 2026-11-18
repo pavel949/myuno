@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
+import { PHUKET_MAP_BOUNDS, isInPhuketMapCoverage } from '@/lib/map/basemap';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isMapOpenNow } from '@/lib/map/openNow';
 import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
@@ -167,7 +168,14 @@ export default function MapView() {
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
 
+  const [searchOutsideCoverage, setSearchOutsideCoverage] = useState(false);
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
+    if (!isInPhuketMapCoverage(r.lat, r.lng)) {
+      setSearchPin(null);
+      setSearchOutsideCoverage(true);
+      return;
+    }
+    setSearchOutsideCoverage(false);
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
     selectMarker(null);
@@ -262,7 +270,7 @@ export default function MapView() {
 
   const defaultCenter = useMemo(() => {
     const cityConfig = getCityConfig();
-    if (cityConfig) return { lat: cityConfig.lat, lng: cityConfig.lng };
+    if (cityConfig && isInPhuketMapCoverage(cityConfig.lat, cityConfig.lng)) return { lat: cityConfig.lat, lng: cityConfig.lng };
     const c = getMapCenter(DEFAULT_CITY);
     return { lat: c[1], lng: c[0] };
   }, [getCityConfig]);
@@ -284,7 +292,7 @@ export default function MapView() {
         in_limit: 600,
       });
       if (error) throw error;
-      return (data || []).filter((p: any) => p.source === 'osm');
+      return (data || []).filter((p: any) => p.source === 'osm' && isInPhuketMapCoverage(Number(p.lat), Number(p.lng)));
     },
   });
 
@@ -313,7 +321,7 @@ export default function MapView() {
 
   const hasDataError = Boolean(layerErrors.length || exploreError || restaurantError || propError || salonError || gymError || pharmError || vetError || flowerError || venueError || eventError || communityError);
 
-  const allMarkers = useMemo<UniversalMarker[]>(() => {
+  const locatedMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
     const propMarkers = transformPropertiesToMarkers(properties || []);
     const acById = new Map<string, 'residential' | 'commercial' | 'land' | null>();
@@ -408,6 +416,11 @@ export default function MapView() {
     return markers.filter((marker) => Number.isFinite(marker.lat) && Number.isFinite(marker.lng)
       && Math.abs(marker.lat) <= 90 && Math.abs(marker.lng) <= 180 && (marker.lat !== 0 || marker.lng !== 0));
   }, [properties, exploreItems, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events, communities]);
+
+  // The page uses the Phuket archive. Other-city records remain untouched in
+  // their catalogues, but must not pull fitBounds beyond the available map.
+  const allMarkers = useMemo(() => locatedMarkers.filter(marker => isInPhuketMapCoverage(marker.lat, marker.lng)), [locatedMarkers]);
+  const outsideCoverageCount = locatedMarkers.length - allMarkers.length;
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {
@@ -554,8 +567,8 @@ export default function MapView() {
     (showOsm ? 1 : 0) + ['district', 'project', 'bedrooms', 'category', 'propertyType'].filter((key) => searchParams.has(key)).length;
 
   return (
-    <AppLayout>
-      <div className="flex flex-col h-[calc(100dvh-3.5rem-var(--bottom-nav-h,4rem))]">
+    <AppLayout usePageContainer={false}>
+      <div className="flex flex-col h-[calc(100dvh-var(--shell-header-height,var(--consumer-header-height,3.5rem))-var(--bottom-nav-h,4rem))]">
         <div className="px-4 pt-3 pb-2 bg-background/95 border-b border-border z-10 space-y-2 shrink-0">
           <div><h1 className="text-lg font-semibold tracking-tight">{language === 'ru' ? 'Найдите своё место на Пхукете' : 'Find your place in Phuket'}</h1>
             <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Выберите слои и нажмите на метку, чтобы открыть предложение.' : 'Choose layers and select a pin to explore an offer.'}</p></div>
@@ -671,6 +684,8 @@ export default function MapView() {
             </Button>
           </div>
           {hasDataError && <p role="alert" className="text-xs text-destructive">{language === 'ru' ? 'Не все слои удалось загрузить. Часть предложений может отсутствовать.' : 'Some layers could not load. Some offers may be missing.'}</p>}
+          {searchOutsideCoverage && <p role="alert" className="text-xs text-muted-foreground">{language === 'ru' ? 'Это место вне покрытия карты Пхукета. Выберите место на Пхукете.' : 'This place is outside the Phuket map coverage. Choose a place in Phuket.'}</p>}
+          {outsideCoverageCount > 0 && <p className="text-xs text-muted-foreground">{language === 'ru' ? `Вне покрытия карты Пхукета: ${outsideCoverageCount}.` : `${outsideCoverageCount} offers outside the Phuket map coverage are not shown.`}</p>}
           {missingCoordinates > 0 && <p className="text-xs text-muted-foreground">{language === 'ru' ? `${missingCoordinates} предложений пока без точной геопозиции.` : `${missingCoordinates} offers have no precise location yet.`}</p>}
           {!showLoading && (
             <div className="flex items-center justify-between gap-2">
@@ -698,6 +713,7 @@ export default function MapView() {
             <MapLibreMap
               ref={mapRef}
               center={defaultCenter}
+              coverageBounds={PHUKET_MAP_BOUNDS}
               zoom={11}
               markers={mlMarkers}
               onMarkerClick={handleMarkerClick}

@@ -1,6 +1,7 @@
+import { createRef } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MapLibreMap } from './MapLibreMap';
+import { MapLibreMap, MapLibreMapHandle } from './MapLibreMap';
 
 const mock = vi.hoisted(() => ({
   fail: false,
@@ -99,4 +100,43 @@ describe('MapLibreMap safe baseline', () => {
     act(() => window.dispatchEvent(new Event('offline')));
     expect(screen.getByText('Нет сети. Карта и предложения могут быть неполными.')).toBeInTheDocument();
   });
+  it('applies coverage only when explicitly supplied and filters outlier markers', () => {
+    const bounds = [[98.2, 7.7], [98.55, 8.25]] as const;
+    const { unmount } = render(<MapLibreMap center={center} coverageBounds={bounds} markers={[markers[0], { id: 'bangkok', lat: 13.75, lng: 100.5 }]} />);
+    expect(mock.options[0].maxBounds).toEqual(bounds);
+    expect(mock.elements).toHaveLength(1);
+    expect(mock.fly).toHaveBeenCalledWith(expect.objectContaining({ center: [center.lng, center.lat] }));
+    unmount();
+    render(<MapLibreMap center={center} />);
+    expect(mock.options.at(-1)).not.toHaveProperty('maxBounds');
+  });
+  it('does not jump or place a user marker outside coverage', () => {
+    const getCurrentPosition = vi.fn((success) => success({ coords: { latitude: 13.75, longitude: 100.5, accuracy: 10 } }));
+    Object.defineProperty(navigator, 'geolocation', { configurable: true, value: { getCurrentPosition } });
+    const ref = createRef<MapLibreMapHandle>();
+    render(<MapLibreMap ref={ref} center={center} coverageBounds={[[98.2, 7.7], [98.55, 8.25]]} />);
+    mock.fly.mockClear();
+    act(() => ref.current?.locate());
+    expect(mock.fly).not.toHaveBeenCalled();
+    expect(mock.elements).toHaveLength(0);
+    expect(screen.getByText(/Вы за пределами доступной карты/)).toBeInTheDocument();
+    getCurrentPosition.mockImplementation((success) => success({ coords: { latitude: center.lat, longitude: center.lng, accuracy: 10 } }));
+    act(() => ref.current?.locate());
+    expect(mock.fly).toHaveBeenCalledWith(expect.objectContaining({ center: [center.lng, center.lat] }));
+    expect(mock.elements).toHaveLength(1);
+  });
+  it('guards imperative navigation without restricting callers that have no coverage', () => {
+    const ref = createRef<MapLibreMapHandle>();
+    const { unmount } = render(<MapLibreMap ref={ref} center={center} coverageBounds={[[98.2, 7.7], [98.55, 8.25]]} />);
+    mock.fly.mockClear();
+    act(() => ref.current?.flyTo(13.75, 100.5));
+    expect(mock.fly).not.toHaveBeenCalled();
+    expect(screen.getByText(/Эта точка за пределами доступной карты/)).toBeInTheDocument();
+    unmount();
+    render(<MapLibreMap ref={ref} center={center} />);
+    mock.fly.mockClear();
+    act(() => ref.current?.flyTo(13.75, 100.5));
+    expect(mock.fly).toHaveBeenCalledWith(expect.objectContaining({ center: [100.5, 13.75] }));
+  });
+
 });

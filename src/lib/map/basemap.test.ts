@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isPmtilesArchiveUrl, resolvePmtilesUrl, isValidMapPosition } from './basemap';
+import { isPmtilesArchiveUrl, resolvePmtilesUrl, isValidMapPosition, isInPhuketMapCoverage } from './basemap';
 
 describe('basemap source admission', () => {
   it('preserves the byte-verified bundled PMTiles archive despite its ZIP suffix', () => {
@@ -20,4 +20,13 @@ describe('basemap source admission', () => {
       expect(isValidMapPosition(lat, lng)).toBe(false);
     }
   });
+  it('uses the real Phuket archive bounds, excluding Bangkok without relocating it', () => {
+    expect(isInPhuketMapCoverage(7.7, 98.2)).toBe(true);
+    expect(isInPhuketMapCoverage(8.25, 98.55)).toBe(true);
+    expect(isInPhuketMapCoverage(7.98, 98.31)).toBe(true);
+    expect(isInPhuketMapCoverage(13.75, 100.52)).toBe(false);
+    expect(isInPhuketMapCoverage(8.251, 98.4)).toBe(false);
+    expect(isInPhuketMapCoverage(NaN, 98.4)).toBe(false);
+  });
+
 });

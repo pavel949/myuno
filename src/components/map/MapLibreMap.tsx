@@ -112,9 +112,19 @@ export interface MapMarker {
   data?: unknown;
 }
 
+export type MapCoverageBounds = readonly [readonly [number, number], readonly [number, number]];
+
+function isWithinCoverage(lat: number, lng: number, bounds?: MapCoverageBounds) {
+  return isValidMapPosition(lat, lng) && (!bounds || (
+    lng >= bounds[0][0] && lng <= bounds[1][0] && lat >= bounds[0][1] && lat <= bounds[1][1]
+  ));
+}
+
 export interface MapLibreMapProps {
   center: { lat: number; lng: number };
   zoom?: number;
+  /** Optional SW/NE [longitude, latitude] coverage. Other callers remain unrestricted. */
+  coverageBounds?: MapCoverageBounds;
   markers?: MapMarker[];
   onMarkerClick?: (marker: MapMarker) => void;
   /** Fit bounds to markers when they change. Default true. */
@@ -147,6 +157,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     showLocateButton = true,
     locateLabel = 'Найти меня',
     activeMarkerId,
+    coverageBounds,
   },
   ref,
 ) {
@@ -156,7 +167,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [retry, setRetry] = useState(0);
   const fittedPositionsRef = useRef('');
-  const validMarkers = useMemo(() => markers.filter((m) => isValidMapPosition(m.lat, m.lng)), [markers]);
+  const validMarkers = useMemo(() => markers.filter((m) => isWithinCoverage(m.lat, m.lng, coverageBounds)), [markers, coverageBounds]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -173,6 +184,10 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   }, []);
 
   const showUserPosition = (lat: number, lng: number, accuracy?: number) => {
+    if (!isWithinCoverage(lat, lng, coverageBounds)) {
+      setLocateError(ru ? 'Вы за пределами доступной карты. Выберите предложение на карте.' : 'You are outside this map’s coverage. Choose an offer on the map.');
+      return;
+    }
     const map = mapRef.current;
     if (!map) return;
     if (!userMarkerRef.current) {
@@ -217,6 +232,11 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   useImperativeHandle(ref, () => ({
     locate,
     flyTo: (lat, lng, z) => {
+      if (!isWithinCoverage(lat, lng, coverageBounds)) {
+        setLocateError(ru ? 'Эта точка за пределами доступной карты.' : 'This location is outside the map’s coverage.');
+        return;
+      }
+      setLocateError(null);
       const map = mapRef.current;
       if (!map) return;
       map.flyTo({ center: [lng, lat], zoom: z ?? map.getZoom(), duration: 600 });
@@ -245,6 +265,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       style,
       center: [center.lng, center.lat],
       zoom,
+      ...(coverageBounds ? { maxBounds: [[...coverageBounds[0]], [...coverageBounds[1]]] as [[number, number], [number, number]] } : {}),
       attributionControl: { compact: true },
       });
     } catch {
@@ -298,7 +319,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [style, retry]);
+  }, [style, retry, coverageBounds?.[0][0], coverageBounds?.[0][1], coverageBounds?.[1][0], coverageBounds?.[1][1]]);
 
   // Sync markers.
   useEffect(() => {
@@ -361,9 +382,9 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   // React to center prop changes when no markers drive the view.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || markers.length > 0) return;
+    if (!map || markers.length > 0 || !isWithinCoverage(center.lat, center.lng, coverageBounds)) return;
     map.flyTo({ center: [center.lng, center.lat], zoom, duration: 400 });
-  }, [center.lat, center.lng, zoom, markers.length]);
+  }, [center.lat, center.lng, zoom, markers.length, coverageBounds]);
 
   return (
     <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
