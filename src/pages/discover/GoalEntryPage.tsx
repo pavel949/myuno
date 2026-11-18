@@ -25,7 +25,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   if (goal === 'services') return <ServicesIndex />;
   if (goal === 'stay') {
     const params = new URLSearchParams(location.search);
-    const hasCriteria = clearPropertySearchQuery(params).toString() !== params.toString();
+    const hasCriteria = params.has('view') || clearPropertySearchQuery(params).toString() !== params.toString();
     return hasCriteria ? <PropertySearchRedirect defaults={{ mode: 'rent' }} /> : <Navigate replace state={location.state} to={`${APP_ROUTES.PROPERTY_RENT}${location.search}${location.hash}`} />;
   }
 

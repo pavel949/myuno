@@ -36,7 +36,7 @@ export const PropertyRentEntry = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   // Saved criteria still open results. Campaign/context keys do not hide the landing.
-  const hasCriteria = clearPropertySearchQuery(params).toString() !== params.toString();
+  const hasCriteria = params.has('view') || clearPropertySearchQuery(params).toString() !== params.toString();
   return hasCriteria ? <PropertySearchRedirect defaults={{ mode: 'rent' }} /> : <LazyPage><Pages.PropertyLanding /></LazyPage>;
 };
 

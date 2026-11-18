@@ -245,3 +245,15 @@ it("keeps explicit Stay criteria in the catalogue", () => {
     "project=community&q=Needle&mode=rent#results",
   );
 });
+
+it.each(["/property/rent", "/discover/stay"])(
+  "preserves the explicit map bookmark from %s",
+  (path) => {
+    entry(`${path}?view=map&ref=saved#results`);
+    expect(screen.getByRole("heading", { name: "Results" })).toBeVisible();
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/property/search?view=map&ref=saved&mode=rent#results",
+    );
+    expect(screen.getByTestId("location")).toHaveTextContent("saved");
+  },
+);
