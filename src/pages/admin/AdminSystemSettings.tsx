@@ -1,6 +1,6 @@
 import { PageShell } from '@/components/page/PageShell';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
@@ -11,6 +11,7 @@ import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
 import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
+import { SocialNetworkSettings } from '@/components/admin/settings/SocialNetworkSettings';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface QuickLink {
@@ -37,6 +38,9 @@ const quickLinks: QuickLink[] = [
 export default function AdminSystemSettings() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [params, setParams] = useSearchParams();
+  const tab = params.get('tab') || 'system';
+  const activeTab = ['system', 'audit', 'logs', 'flags', 'org', 'social'].includes(tab) ? tab : 'system';
 
   return (
     <PageShell width="workspace" className="space-y-4">
@@ -66,7 +70,7 @@ export default function AdminSystemSettings() {
       </div>
 
       {/* Tabs for System, Audit, Logs */}
-      <Tabs defaultValue="system" className="w-full">
+      <Tabs value={activeTab} onValueChange={value => { const next = new URLSearchParams(params); next.set('tab', value); setParams(next); }} className="w-full">
         <TabsList aria-label={isRu ? 'Разделы настроек системы' : 'System settings sections'} className="w-full h-auto flex-wrap justify-start">
           <TabsTrigger value="system" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <Settings className="h-4 w-4" />
@@ -87,6 +91,9 @@ export default function AdminSystemSettings() {
           <TabsTrigger value="org" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
             <Building2 className="h-4 w-4" />
             {isRu ? 'Организация' : 'Organization'}
+          </TabsTrigger>
+          <TabsTrigger value="social" className="flex-none min-h-11 h-auto gap-1.5 whitespace-normal overflow-visible">
+            {isRu ? 'Социальные сети' : language === 'th' ? 'โซเชียลมีเดีย' : 'Social networks'}
           </TabsTrigger>
         </TabsList>
 
@@ -115,6 +122,7 @@ export default function AdminSystemSettings() {
             <OrgProfileEditor />
           </ErrorBoundary>
         </TabsContent>
+        <TabsContent value="social" className="mt-4"><ErrorBoundary><SocialNetworkSettings /></ErrorBoundary></TabsContent>
       </Tabs>
     </PageShell>
   );

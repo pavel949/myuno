@@ -1,3 +1,5 @@
+// Social persistence is verified separately; these tests retain synthetic public catalogue boundaries.
+vi.mock('@/hooks/usePlatformSocialLinks', () => ({ usePlatformSocialLinks: () => ({ data: state.social }) }));
 import React from 'react';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
@@ -6,7 +8,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { APP_ROUTES } from '@/lib/config/routes';
 import Landing from '../Landing';
-const state = vi.hoisted(() => ({ language: 'en', user: null as null | { id: string }, isLoading: false }));
+const state = vi.hoisted(() => ({ language: 'en', user: null as null | { id: string }, isLoading: false, social: {} as Record<string,string> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/components/nav/ConsumerHeader', () => ({ ConsumerHeader: () => <header>Existing public header</header> }));
 vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
@@ -47,7 +49,7 @@ const authenticatedIndex = vi.fn(() => <p>Authenticated home</p>);
 new Function('React', 'useAuth', 'LoadingState', 'Landing', 'Index', 'exports', compiled)(React, () => state, () => <p role="status">Checking session</p>, Landing, authenticatedIndex, registry);
 const HomeRouter = registry.HomeRouter!;
 const show = () => render(<MemoryRouter initialEntries={[APP_ROUTES.HOME]}><Routes><Route path={APP_ROUTES.HOME} element={<HomeRouter />} /></Routes></MemoryRouter>);
-beforeEach(() => { state.language = 'en'; state.user = null; state.isLoading = false; authenticatedIndex.mockClear(); });
+beforeEach(() => { state.language = 'en'; state.user = null; state.isLoading = false; state.social = {}; authenticatedIndex.mockClear(); });
 afterEach(cleanup);
 it.each([
  ['en', 'Main navigation', ['Home', 'Homes', 'Bookings', 'Services', 'Profile']],
@@ -97,4 +99,13 @@ it('uses one choice layer, groups property before island services and keeps cons
  expect(within(partners).queryByText('I need a home or service')).toBeNull();
  expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/for-owners');
  expect(document.querySelector('.home-owner-prompt')).toBeNull();
+});
+
+it('shows configured social profiles in the anonymous homepage footer', () => {
+ state.social = { youtube: 'https://youtube.com/@synthetic' };
+ show();
+ const panel = within(screen.getByRole('contentinfo')).getByRole('region', { name: 'Social networks and contact' });
+ expect(within(panel).getByRole('heading', { name: 'Stay connected' })).toBeVisible();
+ expect(within(panel).getByRole('link', { name: 'YouTube' })).toHaveAttribute('href', 'https://youtube.com/@synthetic');
+ expect(within(panel).queryByRole('link', { name: 'Facebook' })).toBeNull();
 });

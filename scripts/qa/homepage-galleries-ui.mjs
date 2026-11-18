@@ -12,6 +12,7 @@ await mkdir(output, { recursive: true });
 await writeFile(path.join(output, 'fixture-home.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"><rect width="640" height="480" fill="#dce5e3"/><path d="M80 340V190L320 70l240 120v150" fill="#a7bab5"/><text x="48" y="430" font-size="24" fill="#203333">SYNTHETIC HOME / QA ONLY</text></svg>');
 await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
+  '@/hooks/usePlatformSocialLinks': `export const usePlatformSocialLinks=()=>({data:{}});`,
   'home-fixture': `
     const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';
     export const loading=state==='loading',error=state==='error';export const retry=()=>window.fixtureRetries=(window.fixtureRetries||0)+1;
