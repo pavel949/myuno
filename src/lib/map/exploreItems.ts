@@ -79,7 +79,7 @@ export function experienceExploreItem(record: MapRecord): ExploreItem | null {
   return { ...base(record, coords, 'Experience', 'Впечатление'), id: `experience-${record.id}`, layer: 'experience',
     href: APP_ROUTES.EXPERIENCE_DETAIL(String(record.id)), currency, priceFrom: currency ? amount(record.price) : null,
     pricePeriod: str(record.price_period) ?? str(record.price_per) ?? null, category: str(record.category),
-    // The canonical admin writes meeting-point coordinates to listings.lat/lng.
-    // A primary coordinate therefore does not establish a fixed attraction venue.
-    locationKind: 'meeting_point' };
+    // Primary coordinates are a venue only when explicitly identified as fixed.
+    // Backup meeting-point coordinates remain meeting points even for venues.
+    locationKind: place && str(record.location_type) === 'fixed_venue' ? 'place' : 'meeting_point' };
 }
