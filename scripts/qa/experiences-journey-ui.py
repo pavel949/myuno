@@ -239,6 +239,23 @@ async def main():
                     await expect(menu.locator('[data-category-id]')).to_have_count(3)
                     assert await page.evaluate('window.fixtureCategoryRetries') == 1
                     row['checks'].append('Unknown filters, genuine empty, read failure/loading and category failure remain distinct and retryable')
+                    await goto('/admin/experience-categories')
+                    await expect(page.locator('details')).to_have_count(8)
+                    await geometry()
+                    await page.screenshot(path=str(OUT / f'{prefix}-08-admin-structure.png'), full_page=True)
+                    await page.locator('details').first.locator('summary').click()
+                    # Prepare opens a real editor; writes are captured by an isolated stub.
+                    await page.locator('details').first.get_by_role('button', name='Подготовить' if lang == 'ru' else 'Prepare', exact=True).first.click()
+                    dialog = page.get_by_role('dialog')
+                    await expect(dialog).to_be_visible()
+                    await expect(dialog.get_by_role('switch')).to_have_attribute('data-state','unchecked')
+                    await geometry()
+                    await page.screenshot(path=str(OUT / f'{prefix}-09-admin-prepare.png'), full_page=True)
+                    await dialog.get_by_role('button',name='Сохранить' if lang == 'ru' else 'Save',exact=True).click()
+                    await expect(dialog).not_to_be_visible()
+                    saved=await page.evaluate('window.fixturePreparedCategory')
+                    assert saved['slug']=='waterpark' and saved['is_active'] is False, saved
+                    row['checks'].append('Actual admin has eight groups and prepares hidden waterpark category through explicit Save; writes stubbed')
                     await geometry()
                     assert not errors, errors
                     assert not blocked, blocked
