@@ -1,3 +1,4 @@
+import { PageShell } from '@/components/page/PageShell';
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -60,7 +61,7 @@ export default function AdminProviderDetail() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <PageShell width="workspace" className="space-y-4">
       <ProviderDetailHeader provider={provider} onUpdate={refetch} />
       <ProviderQuickStats provider={provider} services={services} products={products} contracts={contracts} />
       <AdminNotesWidget entityType="provider" entityId={provider.id} defaultOpen={false} />
@@ -123,6 +124,6 @@ export default function AdminProviderDetail() {
           <ProviderBookingsTab bookings={bookings} />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

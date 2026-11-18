@@ -1,3 +1,4 @@
+import { configuredTransferBasePrice, transferFareLabel } from '@/lib/transport/transferFare';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -6,9 +7,9 @@ import { resolveIcon } from '@/lib/iconMap';
 import type { BaseStepProps } from './types';
 
 const stepVariants = {
-  enter: { opacity: 0, x: 40 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 interface VehicleType {
@@ -26,9 +27,10 @@ interface VehicleType {
 interface StepVehicleProps extends BaseStepProps {
   vehicleTypes: VehicleType[];
   routeBasePrice: number;
+  showPrice: boolean;
 }
 
-export function StepVehicle({ formData, setFormData, language, vehicleTypes, routeBasePrice }: StepVehicleProps) {
+export function StepVehicle({ formData, setFormData, language, vehicleTypes, routeBasePrice, showPrice }: StepVehicleProps) {
   return (
     <motion.div
       key="step-vehicle"
@@ -45,9 +47,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
 
       <div className="space-y-2">
         {vehicleTypes.map((vehicle) => {
-          const price = routeBasePrice > 0
-            ? Math.round(routeBasePrice * vehicle.price_multiplier)
-            : vehicle.base_price;
+          const price = configuredTransferBasePrice(routeBasePrice, vehicle);
           const Icon = resolveIcon(vehicle.icon || '🚗');
           const isSelected = formData.vehicleType === vehicle.id;
 
@@ -55,6 +55,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
             <button
               key={vehicle.id}
               type="button"
+              aria-pressed={isSelected}
               onClick={() => setFormData(prev => ({ ...prev, vehicleType: vehicle.id }))}
               className={cn(
                 'w-full flex items-center gap-3 p-4 rounded-none border-2 transition-all text-left',
@@ -92,8 +93,8 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
                   {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : 'min'}` : ''}
                 </p>
               </div>
-              <div className="text-right shrink-0">
-                <p className="font-bold text-base text-foreground">฿{price.toLocaleString()}</p>
+              <div className="text-right flex-1 min-w-0">
+                <p className="font-medium text-sm text-foreground">{transferFareLabel(showPrice ? price : null, language)}</p>
               </div>
               {isSelected && <Check className="w-5 h-5 text-primary shrink-0" />}
             </button>

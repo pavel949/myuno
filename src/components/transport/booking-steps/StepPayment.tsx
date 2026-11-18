@@ -1,21 +1,23 @@
+import { transferFareLabel } from '@/lib/transport/transferFare';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plane, MapPin, ArrowRight, Clock, Shield, CreditCard, Banknote, Handshake, Check } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { PHUKET_TIME_ZONE } from '@/lib/services/airportRequestValidation';
 import type { BaseStepProps, TransferPaymentMethod } from './types';
 
 const stepVariants = {
-  enter: { opacity: 0, x: 40 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -40 },
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 interface StepPaymentProps extends BaseStepProps {
-  basePrice: number;
+  basePrice: number | null;
   nightSurcharge: number;
-  totalPrice: number;
+  totalPrice: number | null;
   selectedVehicleLabel: string | undefined;
   selectedDestinationDuration?: number | null;
 }
@@ -32,6 +34,11 @@ export function StepPayment({
 }: StepPaymentProps) {
   const navigate = useNavigate();
 
+  const tr = (en: string, ru: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
+  const airport = formData.terminal === 'domestic'
+    ? tr('HKT Domestic Terminal', 'HKT, внутренний терминал', 'HKT อาคารผู้โดยสารภายในประเทศ')
+    : tr('HKT International Terminal', 'HKT, международный терминал', 'HKT อาคารผู้โดยสารระหว่างประเทศ');
+  const fromAirport = formData.direction === 'from-airport';
   const paymentOptions: Array<{
     key: TransferPaymentMethod;
     icon: typeof CreditCard;
@@ -65,15 +72,18 @@ export function StepPayment({
                 <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
               )}
             </div>
-            <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
+            <p className="text-sm font-medium break-words">
+              {fromAirport ? airport : formData.destinationAddress} → {fromAirport ? formData.destinationAddress : airport}
+            </p>
+            <p className="text-sm text-muted-foreground">{formData.arrivalDate} · {formData.arrivalTime} ({PHUKET_TIME_ZONE}) · {formData.flightNumber}</p>
             <p className="text-xs text-muted-foreground">
               {selectedVehicleLabel}
               {selectedDestinationDuration && ` · ~${selectedDestinationDuration} ${language === 'ru' ? 'мин' : 'min'}`}
             </p>
           </div>
-          <p className="font-bold text-lg shrink-0 whitespace-nowrap tabular-nums">฿{totalPrice.toLocaleString()}</p>
+          <p className={totalPrice === null ? 'text-sm text-muted-foreground min-w-0 flex-1 text-right' : 'font-bold text-lg shrink-0 whitespace-nowrap tabular-nums'}>{transferFareLabel(totalPrice, language)}</p>
         </div>
-        {(nightSurcharge > 0 || basePrice !== totalPrice) && (
+        {basePrice !== null && totalPrice !== null && (nightSurcharge > 0 || basePrice !== totalPrice) && (
           <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
             <div className="flex justify-between text-muted-foreground">
               <span>{language === 'ru' ? 'Базовый тариф' : 'Base fare'}</span>
@@ -83,7 +93,7 @@ export function StepPayment({
               <div className="flex justify-between text-warning">
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {language === 'ru' ? 'Ночной тариф (22:00–06:00)' : 'Night surcharge (22:00–06:00)'}
+                  {language === 'ru' ? 'Ночная доплата' : 'Night surcharge'}
                 </span>
                 <span>+฿{nightSurcharge.toLocaleString()}</span>
               </div>
@@ -124,6 +134,7 @@ export function StepPayment({
             <button
               key={pm.key}
               type="button"
+              aria-pressed={formData.paymentMethod === pm.key}
               onClick={() => setFormData(prev => ({ ...prev, paymentMethod: pm.key }))}
               className={cn(
                 'p-4 min-h-[64px] rounded-none border-2 transition-all text-left relative',

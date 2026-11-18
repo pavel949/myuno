@@ -8,6 +8,7 @@ import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequest
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { Textarea } from '@/components/ui/textarea';
+ import { BookingField } from '@/components/booking/BookingField';
  import { Label } from '@/components/ui/label';
  import { Card, CardContent } from '@/components/ui/card';
  import { Badge } from '@/components/ui/badge';
@@ -371,8 +372,7 @@ import { toast } from 'sonner';
            <CardContent className="p-4 space-y-6">
              <h3 className="font-medium">{isRu ? 'Контактные данные' : 'Contact Information'}</h3>
              
-             <div className="space-y-2">
-               <Label htmlFor="service-request-name">{isRu ? 'Ваше имя' : 'Your name'} *</Label>
+             <BookingField id="service-request-name" label={isRu ? 'Ваше имя *' : 'Your name *'} error={fieldErrors.name}>
                <Input
                  {...fieldProps('name')}
                  autoComplete="name"
@@ -381,11 +381,9 @@ import { toast } from 'sonner';
                  placeholder={isRu ? 'Иван Петров' : 'John Smith'}
                  required
                />
-               {fieldError('name')}
-             </div>
+             </BookingField>
              
-             <div className="space-y-2">
-               <Label htmlFor="service-request-phone">{isRu ? 'Телефон' : 'Phone'} *</Label>
+             <BookingField id="service-request-phone" label={isRu ? 'Телефон *' : 'Phone *'} error={fieldErrors.phone}>
                <Input
                  {...fieldProps('phone')}
                  autoComplete="tel"
@@ -395,8 +393,7 @@ import { toast } from 'sonner';
                  placeholder="+66 XX XXX XXXX"
                  required
                />
-               {fieldError('phone')}
-             </div>
+             </BookingField>
              
              <div className="space-y-2">
                <Label id="service-request-contact-label">{isRu ? 'Как с вами связаться?' : 'How to contact you?'}</Label>

@@ -1,3 +1,4 @@
+import { RentalProjectPicker } from '@/components/property/RentalProjectPicker';
 import { SEOHead } from '@/components/seo/SEOHead';
 import '@/styles/public-commerce.css';
 /**
@@ -57,9 +58,10 @@ export default function PropertySearchPage() {
   const isRu = language === 'ru';
   const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
-  const [criteriaOpen, setCriteriaOpen] = useState(true);
+  // Start with a compact, editable summary so published offers are not buried.
+  const [criteriaOpen, setCriteriaOpen] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
-  const { districts } = usePropertyQuickFilters();
+  const { districts, projects = [] } = usePropertyQuickFilters();
   useEffect(() => {
     if (!focusResults) return;
     resultsHeadingRef.current?.focus({ preventScroll: true });
@@ -94,6 +96,12 @@ export default function PropertySearchPage() {
   const sortKey = state.sort;
   const setSortKey = (value: PropertySortKey) => navigate({ search: updatePropertySearchSort(searchParamsUrl, value).toString(), hash: location.hash }, { state: location.state });
   const showMap = searchParamsUrl.get('view') === 'map';
+  const selectedProjectId = searchParamsUrl.get('project');
+  const selectProject = (id: string | null) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    if (id) params.set('project', id); else params.delete('project');
+    navigate({ search: params.toString(), hash: location.hash }, { state: location.state });
+  };
   const selectedCompanyId = searchParamsUrl.get('company');
   const searchText = searchParamsUrl.get('q')?.trim() || '';
   const setShowMap = (show: boolean) => {
@@ -190,6 +198,7 @@ export default function PropertySearchPage() {
       ...(catalogueAll ? { listingType: undefined, rentTenancy: undefined, saleIntent: undefined, isQuickSale: undefined } : {}),
       search: searchText || undefined,
       managementCompanyId: selectedCompanyId || undefined,
+      projectId: selectedProjectId || undefined,
     };
   }, [
     mergedFilterValues,
@@ -198,6 +207,7 @@ export default function PropertySearchPage() {
     searchParams.guests,
     searchParams.instantBooking,
     selectedCompanyId,
+    selectedProjectId,
     searchText,
     rentTenancy,
     state.hasGuestFilter,
@@ -264,7 +274,7 @@ export default function PropertySearchPage() {
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
     return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
   }, categoryFilters.length);
-  const activeFilterCount = advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0) + (state.hasIntent ? 1 : 0);
+  const activeFilterCount = (selectedProjectId ? 1 : 0) + advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0) + (state.hasIntent ? 1 : 0);
 
   const clearAllFilters = () => {
     navigate({ search: clearPropertySearchQuery(searchParamsUrl).toString(), hash: location.hash }, { state: location.state });
@@ -290,12 +300,22 @@ export default function PropertySearchPage() {
   const summaryExtraFilters = advancedFilterCount + (selectedCompanyId ? 1 : 0);
   const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('Надолго', 'Long stay', 'ระยะยาว')) : (text('Посуточно', 'Nightly', 'รายคืน'));
 
+  const pageTitle = catalogueAll
+    ? text('Недвижимость на Пхукете', 'Homes in Phuket', 'อสังหาริมทรัพย์ในภูเก็ต')
+    : propertyMode === 'buy'
+      ? text('Купить недвижимость на Пхукете', 'Buy a home in Phuket', 'ซื้อบ้านในภูเก็ต')
+      : rentTenancy === 'medium'
+        ? text('Жильё на месяц на Пхукете', 'Monthly stays in Phuket', 'ที่พักรายเดือนในภูเก็ต')
+        : rentTenancy === 'long'
+          ? text('Долгосрочная аренда на Пхукете', 'Long-term homes in Phuket', 'ที่พักระยะยาวในภูเก็ต')
+          : text('Жильё для отдыха на Пхукете', 'Holiday homes in Phuket', 'บ้านพักตากอากาศในภูเก็ต');
+
   return (
     <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search premium-search property-discovery min-h-screen bg-background')}>
-      <SEOHead title={text('Жильё на Пхукете', 'Homes in Phuket', 'ที่พักในภูเก็ต')} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
+      <SEOHead title={pageTitle} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
-          <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
-          <p className="text-body-sm text-muted-foreground">{text('Все опубликованные объекты показаны ниже. Название и параметры только уточняют каталог.', 'Published homes are shown below. Use a name or criteria to narrow the catalogue.', 'ประกาศที่พักแสดงด้านล่าง ใช้ชื่อหรือเงื่อนไขเพื่อกรองรายการ')}</p>
+          <h1 className="property-discovery-title">{pageTitle}</h1>
+          <p className="text-body-sm text-muted-foreground">{text('Сравните предложения и уточните пожелания в поиске.', 'Compare homes and refine your preferences in search.', 'เปรียบเทียบที่พักและปรับความต้องการในการค้นหา')}</p>
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />
             <div className="property-discovery-intent" role="group" aria-label={text('Аренда или покупка', 'Rent or buy', 'เช่าหรือซื้อ')}>
@@ -316,8 +336,8 @@ export default function PropertySearchPage() {
             </Link>)}
           </nav>}
           {catalogueAll && [...searchParamsUrl.keys()].every(key => ['mode', 'lang', 'source'].includes(key)) && <PlatformJourneyLinks journey="property" />}
-          <details open={criteriaOpen} onToggle={event => setCriteriaOpen(event.currentTarget.open)} className="premium-search-criteria">
-            <summary><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
+          <details open={criteriaOpen} className="premium-search-criteria">
+            <summary className="property-discovery-search-summary" onClick={event => { event.preventDefault(); setCriteriaOpen(open => !open); }}><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{criteriaOpen ? text('Свернуть', 'Collapse', 'ย่อ') : text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">
               <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue showGuestsInline initialParams={searchParamsUrl} onSearch={submitSearch} />
             </div>
@@ -352,6 +372,8 @@ export default function PropertySearchPage() {
             })}
           </div>}
         </header>
+
+        {!catalogueAll && propertyMode === 'rent' && rentTenancy === 'short' && <RentalProjectPicker projects={projects} selectedId={selectedProjectId} onSelect={selectProject} language={language} />}
 
         {availability.enabled && <div role="status" aria-label={availabilityText('Проверка занятости', 'Availability check', 'ตรวจสอบห้องว่าง')} className="my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
           {availability.pending

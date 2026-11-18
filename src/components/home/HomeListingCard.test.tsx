@@ -14,8 +14,8 @@ it('keeps the home and its route after cover failure when its own gallery can lo
  expect(container.querySelector('img')).toHaveAttribute('src', 'https://example.invalid/gallery.jpg');
  fireEvent.load(container.querySelector('img')!);
  const links = screen.getAllByRole('link', {name:'Stored home'});
- expect(links).toHaveLength(2);
- for (const link of links) expect(link).toHaveAttribute('href', '/property/home?mode=rent');
+ expect(links).toHaveLength(1);
+ for (const link of links) expect(link).toHaveAttribute('href', '/property/search?mode=rent&focus=home&q=Stored+home');
  expect(unavailable).not.toHaveBeenCalled();
 });
 it('excludes the home only after all unique stored candidates fail', () => {
@@ -27,37 +27,27 @@ it('excludes the home only after all unique stored candidates fail', () => {
  expect(unavailable).toHaveBeenCalledExactlyOnceWith('home');
 });
 
- it('shows both recorded periods on the actual homepage card', () => {
-  render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
-  expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per night');
-  expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per month');
- });
 
- it('keeps the homepage fallback for unsupported-currency multiple tariffs', () => {
-  render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'USD', price: 3000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
-  expect(screen.getByText('Pricing and terms on the listing')).toBeVisible();
-  expect(screen.queryByLabelText('Rental rates')).toBeNull();
- });
-
-it('preserves equal stored tariffs and explicitly asks for confirmation without inventing amounts', () => {
- render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000, listing_type: 'both' }} /></MemoryRouter>);
- expect(screen.getByLabelText('Rental rates')).toHaveTextContent('3000 per night3000 per month');
- expect(screen.getByText(/Different periods show the same amount/)).toBeVisible();
- expect(screen.getByRole('link', { name: /View rental details/ })).toHaveAttribute('href', '/property/home?mode=rent');
- expect(screen.queryByRole('link', { name: 'Buy' })).toBeNull();
-});
-it('does not warn about different legitimate stored tariff amounts', () => {
- render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 60000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
- expect(screen.getByLabelText('Rental rates')).toHaveTextContent('60000 per month');
- expect(screen.queryByText(/Different periods show the same amount/)).toBeNull();
-});
-
-it.each([
- ['ru', 'Одинаковые суммы за разные сроки'],
- ['th', 'ค่าเช่าแต่ละระยะเวลาแสดงยอดเท่ากัน'],
-])('localizes the equal-period review note in %s', (language, message) => {
+it.each(['en', 'ru', 'th'])('keeps %s previews photographic and sends the chosen home to the existing marketplace', language => {
  locale.value = language;
- render(<MemoryRouter><HomeListingCard property={{ ...home, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000 }} /></MemoryRouter>);
- expect(screen.getByText(new RegExp(message))).toBeVisible();
- expect(screen.queryByText(/Different periods show/)).toBeNull();
+ const property = { ...home, district: 'layan', bedrooms: 3, area_sqm: 275, currency: 'THB', price: 3000, price_period: 'month', price_per_night: 3000 };
+ const { container } = render(<MemoryRouter><HomeListingCard property={property} /></MemoryRouter>);
+ const title = language === 'ru' ? home.title_ru : home.title_en;
+ const link = screen.getByRole('link', { name: title! });
+ const url = new URL(link.getAttribute('href')!, 'https://example.invalid');
+ expect(url.pathname).toBe('/property/search');
+ expect(url.searchParams.get('mode')).toBe('rent');
+ expect(url.searchParams.get('focus')).toBe(home.id);
+ expect(url.searchParams.get('q')).toBe(title);
+ expect(container.querySelectorAll('a')).toHaveLength(1);
+ expect(container.querySelector('h3')).toHaveTextContent(title!);
+ expect(container.querySelector('.home-listing-location')).toBeVisible();
+ expect(container.querySelector('.home-listing-facts,.home-listing-pricing,.home-listing-rate-note')).toBeNull();
+ expect(screen.queryByText(/3000|275|View rental details|Explore the neighbourhood/)).toBeNull();
+});
+it('encodes titles without allowing them to change marketplace intent', () => {
+ render(<MemoryRouter><HomeListingCard property={{ ...home, title_en: 'Home & mode=buy #1' }} /></MemoryRouter>);
+ const url = new URL(screen.getByRole('link').getAttribute('href')!, 'https://example.invalid');
+ expect(url.searchParams.get('q')).toBe('Home & mode=buy #1');
+ expect(url.searchParams.get('mode')).toBe('rent');
 });

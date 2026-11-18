@@ -39,8 +39,6 @@ async def main():
                 guests_label = 'Количество гостей' if ru else 'Number of guests'
                 date_label = 'Даты проживания' if ru else 'Stay dates'
                 search_label = 'Найти жильё' if ru else 'Find a home'
-                edit_label = 'Изменить поиск' if ru else 'Edit search'
-                close_label = 'Закрыть поиск' if ru else 'Close search'
                 async def query():
                     text = await page.get_by_test_id('location').text_content()
                     assert text.startswith('/property/search?'), text
@@ -75,7 +73,9 @@ async def main():
                     await expect(criteria).to_be_visible()
                     if await criteria.get_attribute('open') is None:
                         await criteria.locator(':scope > summary').click()
+                    await expect(criteria).to_have_attribute('open','')
                     await expect(page.get_by_role('form')).to_have_count(1)
+                    await expect(page.get_by_role('form')).to_be_visible()
                 async def visible_search(focused=False):
                     # Submission closes the editor and focuses results; criteria can be reopened.
                     if focused:
@@ -107,11 +107,11 @@ async def main():
                     initial = {'lang':lang,'mode':'rent','tenancy':'short','district':'layan','types':'villa',
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
-                    await expect(page.locator('.premium-search-criteria')).to_have_attribute('open','')
-                    await expect(page.get_by_role('button',name=date_label)).to_be_visible()
-                    await expect(page.get_by_label(guests_label)).to_be_visible()
-                    await expect(page.locator('.home-search-secondary')).to_have_count(0)
-                    await visible_search()
+                    # Results-first entry keeps the canonical editor mounted but collapsed.
+                    await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
+                    await expect(page.get_by_role('form',include_hidden=True)).to_have_count(1)
+                    await expect(page.get_by_role('form',include_hidden=True)).not_to_be_visible()
+                    await expect(page.locator('[data-catalog-kind][data-listing-id]')).to_have_count(1)
                     summary = page.locator('.premium-search-criteria > summary')
                     await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
                     await expect(summary).to_contain_text('Лаян' if ru else 'Layan')
@@ -134,6 +134,13 @@ async def main():
                         await page.evaluate("document.documentElement.classList.add('dark')")
                         await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed-dark.png'),full_page=True)
                         await page.evaluate("document.documentElement.classList.remove('dark')")
+                    # The same native summary is keyboard-operable at every viewport.
+                    await summary.press('Enter')
+                    await expect(page.locator('.premium-search-criteria')).to_have_attribute('open','')
+                    await expect(page.get_by_role('button',name=date_label)).to_be_visible()
+                    await expect(page.get_by_label(guests_label)).to_be_visible()
+                    await expect(page.locator('.home-search-secondary')).to_have_count(0)
+                    await visible_search()
                     await hydrated('Вилла' if ru else 'Villa','Лаян' if ru else 'Layan',3)
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('10')
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('15')
@@ -167,8 +174,9 @@ async def main():
                         'company':'synthetic-company','source':'fixture-bookmark','bedrooms':'2+'}
                     assert all(edited.get(k)==[v] for k,v in expected.items()),edited
                     await server({'listingType':'rent','district':'rawai','propertyType':'condo','minGuests':5,'minBedrooms':2,'rentTenancy':'medium'})
-                    await visible_search(focused=True)
+                    await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-edited-collapsed.png'),full_page=True)
+                    await visible_search(focused=True)
                     await hydrated('Кондо' if ru else 'Condo','Равай' if ru else 'Rawai',5)
                     await bounds()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-edited.png'),full_page=True)
@@ -292,6 +300,32 @@ async def main():
                     reset_calendar = await query()
                     assert not any(key in reset_calendar for key in ['checkIn','checkOut'])
                     assert len(await page.evaluate('window.fixtureCalendarCalls')) == len(calls)
+                    await bounds()
+                    # Visible community cards drive the canonical server filter, not a client-only subset.
+                    await page.goto('http://localhost:8080/fixture?'+urlencode({'lang':lang,'mode':'rent','tenancy':'short','fixtureProjects':'1','guests':'3','sort':'price_asc'}),wait_until='networkidle')
+                    rail = page.locator('.rental-project-picker__rail')
+                    await expect(rail.locator('button')).to_have_count(6)
+                    for index in range(6):
+                        choice = rail.locator('button').nth(index)
+                        await choice.focus()
+                        await bounds(choice)
+                        await choice.press('Enter')
+                        await expect(choice).to_have_attribute('aria-pressed','true')
+                        await expect(page.get_by_test_id('location')).to_contain_text('project=project-'+str(index))
+                        assert (await query())['project']==['project-'+str(index)]
+                        assert await page.evaluate('window.fixtureFilters.projectId')=='project-'+str(index)
+                    await page.get_by_role('button',name='QA back',exact=True).click()
+                    await expect(rail.locator('button').nth(4)).to_have_attribute('aria-pressed','true')
+                    assert (await query())['project']==['project-4']
+                    await page.get_by_role('button',name='QA forward',exact=True).click()
+                    await expect(rail.locator('button').nth(5)).to_have_attribute('aria-pressed','true')
+                    assert (await query())['project']==['project-5']
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-project-selection.png'),full_page=True)
+                    await page.get_by_role('button',name='Все комплексы' if ru else 'All communities',exact=True).click()
+                    await expect(page.get_by_role('button',name='Все комплексы' if ru else 'All communities',exact=True)).to_have_attribute('aria-pressed','true')
+                    project_reset = await query()
+                    assert 'project' not in project_reset
+                    assert project_reset['guests']==['3'] and project_reset['sort']==['price_asc']
                     await bounds()
                     assert not errors,errors
                     assert not blocked,blocked

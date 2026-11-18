@@ -328,3 +328,23 @@
 /* Empty photo previews still offer concrete, truthful routes into the catalogue. */
 .home-discovery-paths { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin-top: 1rem; }
 .home-discovery-paths a { min-height: 2.75rem; display: inline-flex; align-items: center; }
+
+/* Detailed rental facts and all recorded tariffs live in the marketplace. */
+:is(.home-refined,.premium-personal-discovery) .home-listing--preview .home-listing-copy {
+  min-height: 0;
+  flex: none;
+  padding: var(--section-heading-gap) 0 0;
+}
+:is(.home-refined,.premium-personal-discovery) .home-listing--preview h3 {
+  min-height: 0;
+  font-size: var(--type-h4-size);
+  margin-bottom: 0;
+}
+/* Keep the catalogue action and rail controls in separate rows, also at zoom. */
+:is(.home-refined,.premium-personal-discovery) .home-properties .home-rail-controls {
+  position: static;
+  margin-bottom: var(--section-control-gap);
+}
+:is(.home-refined,.premium-personal-discovery) .home-properties .home-gallery-heading > .ds-section-action {
+  padding-right: 0;
+}

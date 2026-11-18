@@ -4,6 +4,15 @@ from pathlib import Path
 from urllib.parse import urlparse, quote
 from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
+async def open_catalog_filters(page,lang):
+    title={'ru':'Категории и ситуации','en':'Categories and situations','th':'หมวดหมู่และสถานการณ์'}[lang]
+    if not await page.get_by_role('dialog',name=title,exact=True).count():
+        await page.get_by_role('button',name=title,exact=True).click()
+    await expect(page.get_by_role('dialog',name=title,exact=True)).to_be_visible()
+async def close_catalog_filters(page,lang):
+    await page.get_by_role('button',name={'ru':'Показать предложения','en':'Show offers','th':'แสดงข้อเสนอ'}[lang],exact=True).click()
+    await expect(page.get_by_role('dialog')).to_have_count(0)
+
 async def main():
     provider_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='provider'
     alias_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='home-aliases'
@@ -37,29 +46,32 @@ async def main():
                 await page.goto(url,wait_until='networkidle')
                 assert not errors, errors
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (lang,width,'initial overflow')
+                await open_catalog_filters(page,lang)
                 await expect(page.get_by_role('link',name={'ru':'Мои заявки','en':'My requests','th':'คำขอของฉัน'}[lang])).to_have_attribute('href','/bookings')
-                await expect(page.locator('[data-testid=service-discovery-menu] a[href="/yachts"]')).to_be_visible()
-                # All eleven active main categories are first-level portal entries.
-                await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id]')).to_have_count(11)
-                for category_id in ['cat-business-legal', 'cat-health-wellness', 'cat-family-kids', 'cat-pet-services']:
-                    await expect(page.locator(f'[data-testid=service-discovery-menu] [data-category-id={category_id}]')).to_be_visible()
-                await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id=cat-home-services]')).to_be_visible()
-                await expect(page.locator('[data-testid=service-discovery-menu] [data-category-id=cat-tourism]')).to_be_visible()
-                await expect(page.get_by_test_id('service-catalogue-results')).to_have_count(0)
-                for target in await page.get_by_test_id('service-discovery-menu').locator('button,a').all():
+                await close_catalog_filters(page,lang)
+                menu=page.get_by_test_id('service-discovery-menu')
+                await expect(menu.locator('[data-category-id]')).to_have_count(6)
+                for category_id in ['cat-business-legal','cat-health-wellness','cat-family-kids','cat-pet-services','cat-home-services']:
+                    await expect(menu.locator(f'[data-category-id={category_id}]')).to_be_visible()
+                for target in await menu.locator('button,a').all():
                     box=await target.bounding_box()
                     assert box and box['width']>=44 and box['height']>=44,(lang,width,'menu touch target',box)
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-catalogue.png'),full_page=True)
-                await page.locator('[data-testid=service-discovery-menu] a[href="/yachts"]').click()
+                await menu.get_by_role('button',name={'ru':'Все категории','en':'All categories','th':'ทุกหมวดหมู่'}[lang],exact=True).click()
+                chooser=page.get_by_role('dialog')
+                await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(11)
+                await expect(chooser.locator('[data-category-id=cat-tourism]')).to_be_visible()
+                await chooser.locator('a[href="/yachts"]').click()
                 await expect(page.get_by_test_id('location')).to_have_text('/yachts')
                 await page.go_back()
-                await expect(page.get_by_test_id('service-discovery-menu')).to_be_visible()
+                await expect(menu).to_be_visible()
                 await page.locator('[data-category-id=cat-transport]').click()
                 await page.locator('[data-testid=service-catalogue-results] a[href="/transport/fast-track"]').click()
                 await expect(page.get_by_test_id('location')).to_have_text('/transport/fast-track')
                 await page.go_back()
                 await page.get_by_role('button',name={'ru':'Сбросить всё','en':'Reset all','th':'รีเซ็ตทั้งหมด'}[lang],exact=True).click()
                 # Switch via keyboard: actual Radix tabs, no force click.
+                await open_catalog_filters(page,lang)
                 tabs=page.get_by_role('tab')
                 for tab in await tabs.all():
                     metrics=await tab.evaluate('e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth})')
@@ -67,23 +79,29 @@ async def main():
                 await tabs.nth(1).focus()
                 await tabs.nth(1).press('ArrowLeft')
                 await expect(tabs.nth(0)).to_have_attribute('aria-selected','true')
+                await close_catalog_filters(page,lang)
                 await page.locator('[data-situation-code=arrival]').click()
                 await expect(page.locator('[data-testid=service-catalogue-results] a[href="/transport/airport-transfer"]')).to_have_count(1)
                 await expect(page.locator('[data-testid=service-catalogue-results] a[href="/yachts"]')).to_have_count(0)
+                await open_catalog_filters(page,lang)
+                await tabs.nth(0).focus()
                 await tabs.nth(0).press('ArrowRight')
                 await expect(tabs.nth(1)).to_have_attribute('aria-selected','true')
                 await page.locator('#service-view-trigger').scroll_into_view_if_needed()
                 await page.locator('#service-view-trigger').press('Enter')
                 await page.get_by_role('option',name='Отдых и экскурсии' if lang=='ru' else 'Tourism & Activities',exact=True).click()
+                await close_catalog_filters(page,lang)
                 await expect(page.get_by_text({'ru':'Услуги не найдены','en':'No services found','th':'ไม่พบบริการ'}[lang],exact=True)).to_be_visible()
                 await page.get_by_role('button',name={'ru':'Сбросить поиск и фильтры','en':'Clear search and filters','th':'ล้างการค้นหาและตัวกรอง'}[lang]).click()
                 # Canonical parent and all eleven home choices; keyboard/Popover Escape remains tested.
                 await page.locator('[data-category-id=cat-home-services]').click()
+                await open_catalog_filters(page,lang)
                 parent=page.locator('#service-view-trigger').first
                 await parent.scroll_into_view_if_needed()
                 await parent.press('Enter')
                 await page.get_by_role('listbox').press('Escape')
                 await expect(parent).to_be_focused()
+                await close_catalog_filters(page,lang)
                 await expect(page.locator('[data-home-category-id]')).to_have_count(11)
                 row=page.get_by_test_id('service-results-heading-row')
                 heading=await row.get_by_role('heading',level=2).bounding_box()
@@ -157,8 +175,10 @@ async def main():
             await expect(page.get_by_text('The provider must confirm',exact=False)).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             await page.screenshot(path=str(OUTPUT/f'en-{width}-provider-offer.png'),full_page=True)
+            await open_catalog_filters(page,'en')
             await page.locator('#service-view-trigger').press('Enter')
             await page.get_by_role('option',name='Home services',exact=True).click()
+            await close_catalog_filters(page,'en')
             await expect(page.get_by_text('Synthetic AC service',exact=True)).to_have_count(0)
             await expect(page.get_by_text('Clear the category and situation',exact=False)).to_be_visible()
             await page.get_by_role('button',name='Browse provider offers',exact=True).click()
@@ -258,16 +278,20 @@ async def main():
                     await page.get_by_test_id('home-category-menu').get_by_role('button').first.click()
                     await expect(page.get_by_test_id('location')).to_contain_text('category='+parent_id)
                     await search.fill('')
+                    await open_catalog_filters(page,lang)
                     await page.get_by_role('tab').first.click()
                     await page.locator('#service-view-trigger').press('Enter')
                     await page.get_by_role('option',name='Резидент' if lang=='ru' else 'Resident',exact=True).click()
+                    await close_catalog_filters(page,lang)
                     await expect(page.get_by_test_id('service-request-grid')).to_have_count(0)
                     await page.get_by_role('button',name={'ru':'Выбрать бытовую заявку','en':'Browse home requests','th':'เลือกคำขอบริการสำหรับบ้าน'}[lang],exact=True).click()
                     await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
                     await search.fill('zz-no-home-match')
                     await expect(page.get_by_text({'ru':'Услуги не найдены','en':'No services found','th':'ไม่พบบริการ'}[lang],exact=True)).to_be_visible()
                     await page.get_by_role('button',name={'ru':'Сбросить поиск и фильтры','en':'Clear search and filters','th':'ล้างการค้นหาและตัวกรอง'}[lang],exact=True).click()
+                    await open_catalog_filters(page,lang)
                     await page.get_by_role('tab').nth(1).click()
+                    await close_catalog_filters(page,lang)
                     await expect(home).to_be_visible()
                     before_back=page.url
                     await page.go_back()
@@ -339,13 +363,17 @@ async def main():
                         await page.locator('[data-home-category-id=ac]').click()
                         await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-living')
                         await page.reload(wait_until='networkidle')
+                        await open_catalog_filters(page,'en')
                         await expect(page.locator('#service-view-trigger')).to_have_text('Home & Living')
+                        await close_catalog_filters(page,'en')
                         await expect(page.locator('[data-home-category-id=ac]')).to_have_attribute('aria-pressed','true')
                         await page.get_by_test_id('home-category-menu').get_by_role('button').first.click()
                         await expect(page.get_by_test_id('location')).to_have_text('/discover/services?ref=second&category=cat-home-living')
                         await page.go_back()
                         await expect(page.get_by_test_id('location')).to_contain_text('home=cat-home-living')
+                        await open_catalog_filters(page,'en')
                         await expect(page.locator('#service-view-trigger')).to_have_text('Home & Living')
+                        await close_catalog_filters(page,'en')
                         await page.go_forward()
                         await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-living')
                         for entry in ['/discover/services?category=ac','/discover/services?category=home-services']:
@@ -357,8 +385,10 @@ async def main():
                             await open_entry(entry)
                             await expect(page.get_by_text('selected home category is unavailable',exact=False)).to_be_visible()
                             await expect(page.get_by_test_id('service-request-grid')).to_have_count(0)
+                        await open_catalog_filters(page,'en')
                         await page.locator('#service-view-trigger').press('Enter')
                         await page.get_by_role('option',name='Home & Living',exact=True).click()
+                        await close_catalog_filters(page,'en')
                         await expect(page.locator('[data-home-category-id]')).to_have_count(11)
                         await expect(page.get_by_test_id('service-request-grid')).to_be_visible()
                     assert not errors,errors

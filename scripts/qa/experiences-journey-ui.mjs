@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 // Actual catalogue, native controls and public header; synthetic reads and shell only.
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
@@ -52,6 +53,7 @@ const virtual = {
   '@/integrations/supabase/client': `export const supabase=new Proxy({}, {get(){throw Error('Hosted backend forbidden in experiences journey fixture')}});`,
 };
 const result = await build({
+  alias: radixOverlayAliases,
   stdin: { contents: `import React from 'react';import {createRoot} from 'react-dom/client';import {MemoryRouter,Routes,Route,useLocation,useNavigate} from 'react-router-dom';import Page from '${root}/src/pages/experiences/ExperiencesIndex.tsx';window.fixtureReadRetries=0;window.fixtureCategoryRetries=0;function Navigation(){const l=useLocation(),nav=useNavigate();return <aside aria-label="Synthetic history controls" className="border-t p-4"><output data-testid="fixture-location">{l.pathname+l.search}</output><output hidden data-testid="fixture-state">{JSON.stringify(l.state)}</output><button onClick={()=>nav(-1)} data-testid="history-back">QA history back</button><button onClick={()=>nav(1)} data-testid="history-forward">QA history forward</button></aside>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={[new URLSearchParams(location.search).get('entry')||'/experiences?ref=synthetic']}><Routes><Route path="/experiences" element={<Page/>}/><Route path="/experiences/:id" element={<h1>Synthetic detail boundary</h1>}/><Route path="/yachts" element={<h1>Synthetic yacht destination</h1>}/></Routes><Navigation/></MemoryRouter>);`, loader: 'tsx', resolveDir: root },
   outfile: path.join(output, 'fixture.js'), bundle: true, format: 'esm', jsx: 'automatic', metafile: true,
   loader: { '.svg': 'file', '.png': 'file', '.webp': 'file' },
@@ -70,7 +72,7 @@ const result = await build({
   } }],
 });
 const inputs = Object.keys(result.metafile.inputs);
-const actual = ['src/pages/experiences/ExperiencesIndex.tsx', 'src/components/experiences/ExperienceCategoryMenu.tsx', 'src/components/services/MarketplaceDiscoveryHero.tsx', 'src/components/miniapp/MiniAppLayout.tsx', 'src/components/layout/FeatureLayout.tsx', 'src/components/shared/UnifiedHeader.tsx', 'src/components/nav/ConsumerHeader.tsx', 'src/components/miniapp/CatalogCard.tsx'];
+const actual = ['src/pages/experiences/ExperiencesIndex.tsx', 'src/components/experiences/ExperienceCategoryMenu.tsx', 'src/components/services/MarketplaceDiscoveryMenu.tsx', 'src/components/services/MarketplaceFilterSheet.tsx', 'src/components/miniapp/MiniAppLayout.tsx', 'src/components/layout/FeatureLayout.tsx', 'src/components/shared/UnifiedHeader.tsx', 'src/components/nav/ConsumerHeader.tsx', 'src/components/miniapp/CatalogCard.tsx'];
 for (const file of actual) if (!inputs.some(input => input.endsWith(file))) throw Error('Actual component missing: ' + file);
 if (inputs.some(input => !input.startsWith('synthetic:') && /integrations\/supabase\/client|hooks\/useExperiences\.ts$|hooks\/useExperienceCategories\.ts$/.test(input))) throw Error('Production data module included');
 const routeCss = await readFile(path.join(output, 'fixture.css'), 'utf8');

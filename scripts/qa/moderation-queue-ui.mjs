@@ -22,6 +22,11 @@ const virtual = {
   '@/components/admin/operations/ManagedComplexReviewQueue': `export const ManagedComplexReviewQueue=()=>null;`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:{id:'synthetic-admin'},isLoading:false});`,
+  '@/hooks/useResolvedContext': `export const useResolvedContext=()=>({
+    context:{role:new URLSearchParams(location.search).get('role')||'admin'},
+    permissions:[],isLoading:false,isVerifying:false,
+  });`,
+  '@/hooks/useUserContext': `export const useUserContext=()=>({activeRole:'uno_team',hasRole:()=>false});`,
   '@/hooks/useAdmin': `export const useAdminCheck=()=>({isAdmin:true,isLoading:false});`,
   '@/hooks/useAdminDashboardStats': `
     const data={
@@ -158,6 +163,8 @@ const bundle = await build({
       import {createRoot} from 'react-dom/client';
       import {MemoryRouter,useLocation} from 'react-router-dom';
       import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
+      import AdminReview from '${root}/src/pages/admin/AdminReview.tsx';
+      import {AdminGuard} from '${root}/src/components/auth/RoleGuard.tsx';
       import {OperationsModerationTab} from '${root}/src/components/admin/operations/OperationsModerationTab.tsx';
       import {AdminOperationalAlerts} from '${root}/src/components/admin/dashboard/AdminOperationalAlerts.tsx';
       import {AdminKPIGrid} from '${root}/src/components/admin/dashboard/AdminKPIGrid.tsx';
@@ -168,16 +175,17 @@ const bundle = await build({
       const fixtureParams=new URLSearchParams(location.search);
       const isDashboard=fixtureParams.get('case')==='dashboard-unknown';
       const initialRoute=fixtureParams.get('route')||'/admin/operations?tab=moderation';
+      const isReviewPage=initialRoute.split('?')[0]==='/admin/review';
       const client=new QueryClient({defaultOptions:{queries:{retry:false,refetchOnWindowFocus:false},mutations:{retry:false}}});
       function Probe(){const route=useLocation();return <output data-testid="fixture-route" hidden>{route.pathname}{route.search}</output>;}
       createRoot(document.getElementById('root')).render(
         <QueryClientProvider client={client}>
           <MemoryRouter initialEntries={[isDashboard?'/admin':initialRoute]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}>
-            <main style={{padding:16,maxWidth:1440,margin:'0 auto',minWidth:0}}>
+            <main style={isReviewPage?undefined:{padding:16,maxWidth:1440,margin:'0 auto',minWidth:0}}>
               {isDashboard?<div style={{display:'grid',gap:24,minWidth:0}}>
                 <section data-testid="fixture-dashboard-alerts"><AdminOperationalAlerts/></section>
                 <section data-testid="fixture-dashboard-kpis"><AdminKPIGrid/></section>
-              </div>:<OperationsModerationTab/>}
+              </div>:isReviewPage?<AdminGuard><AdminReview/></AdminGuard>:<OperationsModerationTab/>}
             </main>
             <Probe/>
           </MemoryRouter>

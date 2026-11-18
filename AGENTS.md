@@ -17,7 +17,9 @@
 - Public property/provider/service/salon reads use safe allowlisted projections; private operational records require object/server authorization.
 - Money-moving functions derive actor server-side and never trust client identity, totals, payment status or recipient fields.
 - Before creating a new table, enum, hook, context/provider or workflow engine, search current code/schema for the canonical implementation and prove it cannot represent the requirement.
+- Marketplace entry pages share compact category navigation over active canonical records, with six primary choices and explicit access to all categories; selected-category results omit repeated introductions. Preserve URL/history/return context and each vertical's request/booking/payment semantics; category imagery never establishes supply or availability.
 - Unknown is UNKNOWN, not false/default. Never invent catalogues, prices, availability, provider mappings, property facts or production state.
+- Transfer UI admits only a finite positive configured fare for a current vehicle after catalogue reads settle; delayed authentication resumes validate current state again. Browser fare admission never establishes server-authoritative pricing or payment truth.
 - Public feature-switch reads use an exact-key allowlist backed by public capability admission; wildcard queries never justify revealing internal switches or other settings, and flag visibility never grants domain authority.
 - Property detail questions use contextual public WhatsApp links without weakening internal chat authentication; shared stay calculation is provisional and recommendations rank only eligible public catalogue IDs, never invent totals or availability.
 - High-risk sequence: Audit → Design → Isolated Tests → Implement → Verify → GO/NO-GO. Do not automatically continue after money, inventory, RLS, schema or enforcement changes.

@@ -1,3 +1,4 @@
+import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/premium-services.css';
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { filterProviderOffers, popularProviderOffers, readMarketplaceFilters, se
 import { ServiceBookingSheet, type BookableService } from './ServiceBookingSheet';
 import { MarketplaceServiceCard } from './MarketplaceServiceCard';
 import { MarketplaceFilters } from './MarketplaceFilters';
+import { MarketplaceFilterSheet } from './MarketplaceFilterSheet';
 
 /** Existing public catalogue and booking workflow, with URL-backed discovery. */
 export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services', onConcierge }: {
@@ -53,12 +55,12 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
     pending.current.params = next;
     navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state });
   };
-  const filtersUI = <MarketplaceFilters filters={filters} params={params}
+  const filtersUI = <MarketplaceFilterSheet showLabel title={L('Фильтры предложений', 'Offer filters', 'ตัวกรองข้อเสนอ')} activeCount={MARKETPLACE_FILTER_KEYS.filter(key => params.has(key)).length}><MarketplaceFilters filters={filters} params={params}
     districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
     currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
-    onChange={update} onClear={clear} />;
+    onChange={update} onClear={clear} /></MarketplaceFilterSheet>;
   const fallback = onConcierge && <Button variant="outline" className="h-auto min-h-11 max-w-full whitespace-normal text-center" onClick={onConcierge}>{L('Подобрать услугу с консьержем', 'Find a service with concierge', 'ให้คอนเซียร์จช่วยหาบริการ')}</Button>;
-  const renderCards = (services: MarketplaceService[]) => <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  const renderCards = (services: MarketplaceService[]) => <div className={PUBLIC_CATALOG_GRID}>
     {services.map(service => <MarketplaceServiceCard key={service.id} service={service} returnTo={returnTo}
       availability={filters.date ? availability.data?.[service.id] : undefined}
       onRequest={() => setSelected({
@@ -81,9 +83,10 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
       <h2 id="bookable-services" className="font-display text-h3">{L('Предложения специалистов', 'Provider offers', 'ข้อเสนอจากผู้ให้บริการ')}</h2>
     </div>
     <p className="text-sm text-muted-foreground">{L('Укажите удобное время. Запись нужно подтвердить с исполнителем.', 'Request a suitable time. The provider must confirm the booking.', 'ระบุเวลาที่สะดวก ผู้ให้บริการต้องยืนยันการจอง')}</p>
+    {filters.invalid && <p role="alert" className="text-sm text-destructive">{L('Проверьте район, дату, валюту и диапазон цены в фильтрах.', 'Check the area, date, currency and price range in the filters.', 'ตรวจสอบพื้นที่ วันที่ สกุลเงิน และช่วงราคาในตัวกรอง')}</p>}
     {filtersUI}
     {Boolean(data && data.length >= 60) && <p role="status" className="text-sm text-muted-foreground">{L('Фильтры применяются к подборке из 60 последних опубликованных предложений. За дополнительным подбором обратитесь к консьержу.', 'Filters apply to the latest 60 published offers. Ask concierge for a wider selection.', 'ตัวกรองใช้กับ 60 ข้อเสนอที่เผยแพร่ล่าสุด ติดต่อคอนเซียร์จเพื่อค้นหาเพิ่มเติม')}</p>}
-    {isLoading ? <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-64" />)}</div>
+    {isLoading ? <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className={PUBLIC_CATALOG_GRID}>{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-64" />)}</div>
       : isError ? <div role="alert" className="border border-border p-4 space-y-3"><p>{L('Не удалось загрузить услуги.', 'Could not load services.', 'โหลดบริการไม่สำเร็จ')}</p><Button variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>{fallback}</div>
       : checking ? <p role="status">{L('Проверяем свободное время…', 'Checking request slots…', 'กำลังตรวจสอบเวลาว่าง…')}</p>
       : <>

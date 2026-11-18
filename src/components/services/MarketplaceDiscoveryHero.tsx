@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarCheck, Car, Compass, Flower2, Headphones, Plane, ShieldCheck, Ship, Waves } from 'lucide-react';
+import { ArrowRight, Car, Compass, Flower2, Plane, Ship, Waves } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
+import transferImage from '@/assets/solutions/transfer.webp';
+import flowersImage from '@/assets/solutions/flowers.webp';
+import airportImage from '@/assets/home-service-categories/arrival.svg';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 /** Shared discovery surface for services and experiences. No fabricated offers, prices or availability. */
@@ -18,26 +21,32 @@ export function MarketplaceDiscoveryHero({ kind }: { kind: 'services' | 'experie
     { to: APP_ROUTES.FAST_TRACK, icon: Plane, ru: 'Fast Track в аэропорту', en: 'Airport Fast Track', th: 'บริการช่องทางด่วนสนามบิน', subRu: 'Выберите прилёт или вылет и пакет услуг', subEn: 'Select arrival or departure and a service package', subTh: 'เลือกขาเข้าหรือขาออกและแพ็กเกจบริการ' },
     { to: APP_ROUTES.FLOWERS, icon: Flower2, ru: 'Доставка цветов', en: 'Flower delivery', th: 'บริการส่งดอกไม้', subRu: 'Откройте каталог букетов', subEn: 'Browse the bouquet catalogue', subTh: 'ดูแคตตาล็อกช่อดอกไม้' },
   ];
-  return <section className="space-y-4" aria-label={t('Подборка myUNO', 'myUNO discovery', 'ค้นหาบริการ myUNO')}>
-    <div className="border border-border bg-card p-[var(--card-padding)] sm:p-6 lg:p-8">
-      <p className="text-xs font-semibold uppercase tracking-widest text-accent">{t('myUNO · Пхукет', 'myUNO · Phuket', 'myUNO · ภูเก็ต')}</p>
-      <h2 className="mt-3 font-display text-2xl font-medium leading-tight text-foreground sm:text-3xl">{isExperience
-        ? t('Впечатления, которые запоминаются', 'Experiences worth remembering', 'ประสบการณ์ที่น่าจดจำ')
-        : t('Услуги для ваших задач', 'Services for your plans', 'บริการตามความต้องการของคุณ')}</h2>
-      <p className="mt-3 text-base leading-relaxed text-muted-foreground">{isExperience
-        ? t('Выберите экскурсию, активность или морскую прогулку, затем изучите предложения и условия.', 'Explore offers and request an experience. Availability is confirmed before booking.', 'สำรวจข้อเสนอและส่งคำขอ โดยต้องยืนยันความพร้อมก่อนจอง')
-        : t('Выберите категорию: дом, поездки, юридические вопросы и повседневные дела.', 'Choose a category for home, travel, legal questions or everyday tasks.', 'ค้นหาและขอรับบริการที่ต้องการได้ในที่เดียว')}</p>
-      {isExperience && <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-border pt-4 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-2"><ShieldCheck className="size-4 text-primary" />{t('Заявки под контролем myUNO', 'Requests managed by myUNO', 'myUNO ดูแลคำขอ')}</span>
-        <span className="inline-flex items-center gap-2"><CalendarCheck className="size-4 text-primary" />{t('Подтверждение после проверки', 'Booking confirmed after review', 'ยืนยันหลังตรวจสอบ')}</span>
-        <span className="inline-flex items-center gap-2"><Headphones className="size-4 text-primary" />{t('Поддержка на Пхукете', 'Support in Phuket', 'บริการช่วยเหลือในภูเก็ต')}</span>
-      </div>}
+  const images = [transferImage, airportImage, flowersImage];
+  return <section className="space-y-3" aria-label={t('Подборка myUNO', 'myUNO discovery', 'ค้นหาบริการ myUNO')}>
+    <div className="max-w-[var(--layout-width-article)]">
+      <h2 className="font-display text-xl font-medium leading-tight text-foreground sm:text-2xl">{isExperience
+        ? t('Ваш день на Пхукете', 'Your day in Phuket', 'วันของคุณในภูเก็ต')
+        : t('Для поездки, дома и особых моментов', 'For your trip, home and special moments', 'สำหรับการเดินทาง บ้าน และช่วงเวลาพิเศษ')}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{isExperience
+        ? t('Выберите впечатление. Дату, наличие мест и условия уточнит myUNO.', 'Choose an experience. myUNO will confirm dates, availability and terms.', 'เลือกประสบการณ์ myUNO จะยืนยันวัน ความพร้อม และเงื่อนไข')
+        : t('Выберите услугу и отправьте заявку myUNO. Условия подтверждаются до заказа.', 'Choose a service and send a request to myUNO. Terms are confirmed before ordering.', 'เลือกบริการและส่งคำขอถึง myUNO โดยยืนยันเงื่อนไขก่อนสั่งบริการ')}</p>
     </div>
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {journeys.map(item => <Link key={item.to} to={item.to} className="group flex min-h-32 flex-col justify-between border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <item.icon className="mb-3 size-6 text-primary" aria-hidden="true" /><span className="font-display text-lg font-medium text-foreground">{t(item.ru, item.en, item.th)}</span>
-        <span className="mt-3 flex items-end justify-between gap-2 text-sm text-muted-foreground"><span>{t(item.subRu, item.subEn, item.subTh)}</span><ArrowRight className="size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden="true" /></span>
+    <nav aria-label={t('Направления', 'Explore categories', 'สำรวจหมวดหมู่')}
+      className={isExperience ? 'flex flex-wrap gap-2' : 'flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible'}>
+      {journeys.map((item, index) => <Link key={item.to} to={item.to}
+        onFocus={event => {
+          if (!isExperience) event.currentTarget.scrollIntoView?.({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        }}
+        className={isExperience
+          ? 'group inline-flex min-h-11 items-center gap-2 border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          : 'group flex w-[78%] shrink-0 flex-col overflow-hidden border border-border bg-card transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto'}>
+        {!isExperience && <img src={images[index]} alt="" className="aspect-[16/7] w-full object-cover" />}
+        <span className={isExperience ? 'contents' : 'flex min-h-20 items-center gap-3 p-3'}>
+          <item.icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
+          <span className="min-w-0 flex-1 text-foreground">{t(item.ru, item.en, item.th)}</span>
+          <ArrowRight className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        </span>
       </Link>)}
-    </div>
+    </nav>
   </section>;
 }

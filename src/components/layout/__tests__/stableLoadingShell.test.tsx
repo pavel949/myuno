@@ -7,6 +7,7 @@ import ts from 'typescript';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { composeProviders } from '@/lib/composeProviders';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { CanonicalPublicRedirect } from '@/components/routing/CanonicalPublicRedirect';
 import { RoleGuard, AuthGuard } from '@/components/auth/RoleGuard';
 import { LoadingSpinner, LoadingState } from '@/components/uno/LoadingSpinner';
 const state=vi.hoisted(()=>({retry:vi.fn(),error:null as Error|null,auth:{user:{id:'actor-a'} as {id:string}|null,isLoading:false},resolved:{context:{role:'admin'} as {role:string}|null,isLoading:false,permissions:['*']}}));
@@ -38,7 +39,7 @@ const Empty=()=>null;
 const pages=new Proxy({} as Record<string,React.ComponentType>,{get(target,key:string){return target[key]??(target[key]=()=> <p>{key}</p>);}});
 function actualRoutes() {
   return sourceModule(readFileSync('src/components/layout/AnimatedRoutes.tsx','utf8'),{
-    React,...Router,Suspense:React.Suspense,AnimatePresence,APP_ROUTES,LoadingState,
+    React,...Router,Suspense:React.Suspense,AnimatePresence,APP_ROUTES,LoadingState,CanonicalPublicRedirect,
     ActiveCompanyProvider:Wrapper,AdminLayout:Layout,VendorLayout:Layout,GuestLayout:Layout,MCLayout:Layout,StaffLayout:Layout,CapitalLayout:Layout,
     AdminGuard:({children}:{children:React.ReactNode})=><RoleGuard allowedRoles={['admin']}>{children}</RoleGuard>,
     VendorGuard:Wrapper,TeamGuard:Wrapper,AuthGuard,StaffGuard:Wrapper,MCGuard:Wrapper,InvestorGuard:Wrapper,MCPortalGuard:Wrapper,
@@ -64,6 +65,15 @@ describe('stable source loading boundaries',()=>{
   fireEvent.click(screen.getByText('Properties'));await screen.findByText('AdminProperties');expect(layoutMounts).toBe(1);
   fireEvent.click(screen.getByText('Back'));await screen.findByText('AdminDashboard');expect(layoutMounts).toBe(1);
   fireEvent.click(screen.getByText('Forward'));await screen.findByText('AdminProperties');expect(layoutMounts).toBe(1);expect(layoutUnmounts).toBe(0);
+ });
+ it('executes a declared public alias with its real redirect and retains filters, state and replacement history',async()=>{
+  const Routes=actualRoutes();
+  function Location(){const location=Router.useLocation();return <output data-testid="canonical-location">{location.pathname+location.search+location.hash+'|'+JSON.stringify(location.state)}</output>;}
+  render(<Router.MemoryRouter initialEntries={['/flowers?ref=origin',{pathname:'/bloom',search:'?q=roses&colorPalette=red',hash:'#offers',state:{journey:'flowers'}}]} initialIndex={1}><Navigation/><Location/><Routes/></Router.MemoryRouter>);
+  await screen.findByText('FlowersIndex');
+  expect(screen.getByTestId('canonical-location')).toHaveTextContent('/flowers?q=roses&colorPalette=red#offers|{"journey":"flowers"}');
+  fireEvent.click(screen.getByText('Back'));
+  expect(screen.getByTestId('canonical-location')).toHaveTextContent('/flowers?ref=origin|null');
  });
  it('does not mount protected page/shell during pending authority and renders denial after resolution',async()=>{
   state.resolved={context:null,isLoading:true,permissions:[]};const Routes=actualRoutes();

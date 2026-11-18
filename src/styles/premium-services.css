@@ -1,5 +1,5 @@
 /* Public service presentation over existing tokens and canonical commerce flows. */
-.premium-services h1, .premium-service-provider .service-provider-title {
+.premium-services:not(.premium-services--marketplace) h1, .premium-service-provider .service-provider-title {
   font-family: var(--font-display);
   font-size: var(--public-title-size);
   font-weight: 400;
@@ -7,8 +7,8 @@
   letter-spacing: -.015em;
   overflow-wrap: anywhere;
 }
-.premium-services .public-commerce--services > section { margin-top: var(--public-detail-gap); }
-.premium-services .public-commerce--services :is(h2,h3) { font-weight: 400; }
+.premium-services:not(.premium-services--marketplace) .public-commerce--services > section { margin-top: var(--public-detail-gap); }
+.premium-services:not(.premium-services--marketplace) .public-commerce--services :is(h2,h3) { font-weight: 400; }
 .premium-service-offer { box-shadow: none; transition: border-color var(--public-motion); }
 .premium-service-offer:focus-within { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
 .premium-service-offer > img { height: auto; }
@@ -70,7 +70,7 @@
 .service-quick-card-arrow { flex: 0 0 auto; color: hsl(var(--muted-foreground)); }
 .service-category-card { transition: border-color var(--public-motion), background var(--public-motion), transform var(--public-motion); }
 .service-category-card:hover { border-color: hsl(var(--primary) / .5); background: hsl(var(--muted) / .45); transform: translateY(-1px); }
-.premium-services .public-commerce--services > section:first-of-type { margin-top: var(--public-detail-gap); }
+.premium-services:not(.premium-services--marketplace) .public-commerce--services > section:first-of-type { margin-top: var(--public-detail-gap); }
 
 .premium-service-request > button { min-width: 2.75rem; min-height: 2.75rem; }
 

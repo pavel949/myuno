@@ -1,3 +1,4 @@
+import { configuredTransferBasePrice, configuredTransferTotal, transferFareLabel } from '@/lib/transport/transferFare';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -25,28 +26,31 @@ import { StepDetails } from '@/components/transport/booking-steps/StepDetails';
 import { StepPayment } from '@/components/transport/booking-steps/StepPayment';
 import { TransferSuccess } from '@/components/transport/booking-steps/TransferSuccess';
 import { InlineAuthGate } from '@/components/auth/InlineAuthGate';
+import { getTransferDetailIssues, getTransferRouteIssues, parseTransferDirection } from '@/lib/services/airportRequestValidation';
 import { useBookingDraft } from '@/hooks/useBookingDraft';
 import type {
-  TransferDirection,
   TransferFormData,
   TransferPaymentMethod,
 } from '@/components/transport/booking-steps/types';
 
 const transferSteps: BookingStep[] = [
-  { id: 'route', labelEn: 'Route', labelRu: 'Маршрут' },
-  { id: 'vehicle', labelEn: 'Vehicle', labelRu: 'Авто' },
-  { id: 'details', labelEn: 'Details', labelRu: 'Детали' },
-  { id: 'payment', labelEn: 'Payment', labelRu: 'Оплата' },
+  { id: 'route', labelEn: 'Route', labelRu: 'Маршрут', labelTh: 'เส้นทาง' },
+  { id: 'vehicle', labelEn: 'Vehicle', labelRu: 'Авто', labelTh: 'รถ' },
+  { id: 'details', labelEn: 'Details', labelRu: 'Детали', labelTh: 'รายละเอียด' },
+  { id: 'payment', labelEn: 'Payment', labelRu: 'Оплата', labelTh: 'ชำระเงิน' },
 ];
 
 export default function AirportTransferBooking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
+  const tr = (en: string, ru: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
+  const stepRef = useRef<HTMLDivElement>(null);
+  const submitLock = useRef(false);
   const { user } = useAuth();
 
-  const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
-  const { destinations } = useTransportDestinations('airport_transfer');
+  const { vehicleTypes, isLoading: isLoadingVehicles, error: vehicleError, refetch: refetchVehicles } = useVehicleTypes('airport_transfer');
+  const { destinations, isLoading: destinationsLoading, error: destinationsError, refetch: refetchDestinations } = useTransportDestinations('airport_transfer');
   const { createOrder, isCreating } = useOrders();
   const { profile } = useProfile();
   const { latitude, longitude, loading: geoLoading, getPosition, hasLocation, supported: geoSupported } = useGeolocation();
@@ -55,7 +59,13 @@ export default function AirportTransferBooking() {
 
   const [step, setStep] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderUnverified, setOrderUnverified] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(false);
+  const [pendingCheckout, setPendingCheckout] = useState<{ actor: string; orderId: string; amount: number; vehicleName: string } | null>(null);
+  const [attemptedStep, setAttemptedStep] = useState<number | null>(null);
+  const [nightRateStatus, setNightRateStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [nightRateRetry, setNightRateRetry] = useState(0);
   const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -65,7 +75,7 @@ export default function AirportTransferBooking() {
   const pendingSubmitRef = useRef(false);
 
   const [formData, setFormData] = useState<TransferFormData>({
-    direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
+    direction: parseTransferDirection(searchParams.get('direction')) || 'from-airport',
     terminal: '',
     destinationAddress: '',
     selectedDestinationId: '',
@@ -86,13 +96,20 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
+  const invalidLinkedDirection = searchParams.has('direction') && !parseTransferDirection(searchParams.get('direction'));
+  const source = searchParams.get('from') === 'fast-track' ? searchParams.toString() : undefined;
+
   // Persist the draft so a refresh, OAuth callback, or accidental nav doesn't wipe what the user typed.
   const { clear: clearDraft } = useBookingDraft(
     'transfer_airport',
-    { formData, step },
+    { formData, step, source },
     (draft) => {
       if (draft.formData && typeof draft.formData === 'object') {
-        setFormData((prev) => ({ ...prev, ...(draft.formData as TransferFormData) }));
+        const saved = draft.formData as TransferFormData;
+        const linkedDirection = parseTransferDirection(searchParams.get('direction'));
+        if (linkedDirection && linkedDirection !== saved.direction) return;
+        if (source && draft.source !== source) return;
+        setFormData(prev => ({ ...prev, ...saved, direction: parseTransferDirection(saved.direction) ?? prev.direction }));
       }
       if (typeof draft.step === 'number') {
         setStep(Math.min(Math.max(draft.step, 0), transferSteps.length - 1));
@@ -102,9 +119,10 @@ export default function AirportTransferBooking() {
 
 
 
-  // Load night surcharge config once. If the fetch fails or there's no active
-  // row the price falls back to the day rate — never silently overcharge.
+  // A missing active rule means the day rate applies. A failed read leaves the price unresolved.
   useEffect(() => {
+    let active = true;
+    setNightRateStatus('loading');
     supabase
       .from('transfer_night_surcharge_config')
       .select('start_time, end_time, sedan_gross, sedan_net, van_gross, van_net')
@@ -112,8 +130,10 @@ export default function AirportTransferBooking() {
       .limit(1)
       .maybeSingle()
       .then(({ data, error }) => {
+        if (!active) return;
         if (error) {
-          logger.warn('[Transfer] night surcharge config fetch failed; using day rate', error);
+          logger.warn('[Transfer] night surcharge config fetch failed', error);
+          setNightRateStatus('error');
           return;
         }
         if (data) {
@@ -123,9 +143,13 @@ export default function AirportTransferBooking() {
             sedan: Number(data.sedan_gross) - Number(data.sedan_net),
             van: Number(data.van_gross) - Number(data.van_net),
           });
+        } else {
+          setNightSurchargeCfg(null);
         }
+        setNightRateStatus('ready');
       });
-  }, []);
+    return () => { active = false; };
+  }, [nightRateRetry]);
 
   // Reverse geocode when location is obtained
   useEffect(() => {
@@ -136,12 +160,14 @@ export default function AirportTransferBooking() {
         .then(data => {
           if (data.display_name) {
             const parts = data.display_name.split(',').slice(0, 4).join(',');
-            setFormData(prev => ({ ...prev, destinationAddress: parts }));
+            setDestinationCoords({ lat: latitude, lng: longitude });
+          setFormData(prev => ({ ...prev, destinationAddress: parts, selectedDestinationId: '' }));
           }
           setIsReverseGeocoding(false);
         })
         .catch(() => {
-          setFormData(prev => ({ ...prev, destinationAddress: `${latitude!.toFixed(6)}, ${longitude!.toFixed(6)}` }));
+          setDestinationCoords({ lat: latitude, lng: longitude });
+          setFormData(prev => ({ ...prev, destinationAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, selectedDestinationId: '' }));
           setIsReverseGeocoding(false);
         });
     }
@@ -161,7 +187,7 @@ export default function AirportTransferBooking() {
       const matched = vehicleParam
         ? vehicleTypes.find(v => v.name_en.toLowerCase().includes(vehicleParam.toLowerCase()))
         : undefined;
-      setFormData(prev => ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
+      setFormData(prev => prev.vehicleType ? prev : ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
     }
   }, [vehicleTypes, formData.vehicleType, vehicleParam]);
 
@@ -199,7 +225,7 @@ export default function AirportTransferBooking() {
   // StepRoute clears `selectedDestinationId` (so the manual-address text wins)
   // and forwards `destinationCoords`. Without this effect the price falls back
   // to the vehicle's default base_price (800 ฿). Here we find the nearest
-  // pricing zone within 12 km and pre-select it so the correct route rate
+  // pricing zone within 12 km and pre-select it so the configured route rate
   // applies — toast notifies the customer so the change is not silent.
   const lastAutoMatchedCoordsRef = useRef<string | null>(null);
   useEffect(() => {
@@ -228,81 +254,118 @@ export default function AirportTransferBooking() {
 
   // Pricing
   const routeBasePrice = selectedDestination?.base_price || 0;
-  const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
-  const basePrice = routeBasePrice > 0
-    ? Math.round(routeBasePrice * vehicleMultiplier)
-    : (selectedVehicle?.base_price || 800);
+  const configuredBasePrice = configuredTransferBasePrice(routeBasePrice, selectedVehicle);
+  const basePrice = configuredBasePrice ?? NaN;
 
   const isNightArrival = useMemo(() => {
     if (!formData.arrivalTime || !nightSurchargeCfg) return false;
     const t = formData.arrivalTime;
-    const { start, end } = nightSurchargeCfg;
-    if (start > end) return t >= start.slice(0, 5) || t < end.slice(0, 5);
-    return t >= start.slice(0, 5) && t < end.slice(0, 5);
+    const start = nightSurchargeCfg.start.slice(0, 5);
+    const end = nightSurchargeCfg.end.slice(0, 5);
+    return start > end ? t >= start || t < end : t >= start && t < end;
   }, [formData.arrivalTime, nightSurchargeCfg]);
 
   const isVan = (selectedVehicle?.max_passengers || 4) >= 6;
   const nightSurcharge = isNightArrival && nightSurchargeCfg
     ? (isVan ? nightSurchargeCfg.van : nightSurchargeCfg.sedan)
     : 0;
-  const totalPrice = basePrice + nightSurcharge;
+  const totalPrice = configuredTransferTotal(configuredBasePrice, nightSurcharge) ?? NaN;
   const vendorPayout = Math.round(totalPrice / 1.35);
   const platformFee = totalPrice - vendorPayout;
 
-  // ── Validation (single source of truth, evaluated per step) ─────────────
-  const canProceedStep0 = !!(formData.direction && formData.terminal && formData.destinationAddress);
-  const canProceedStep1 = !!formData.vehicleType;
-  const phoneDigits = (formData.phone || '').replace(/\D/g, '');
-  const canProceedStep2 = !!(
-    formData.flightNumber.trim() &&
-    formData.arrivalDate &&
-    formData.arrivalTime &&
-    formData.name.trim() &&
-    phoneDigits.length >= 8 && phoneDigits.length <= 15 &&
-    (!formData.email || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim())) &&
-    Number(formData.passengers) >= 1 && Number(formData.passengers) <= (selectedVehicle?.max_passengers || 8) &&
-    Number(formData.luggage) >= 0 && Number(formData.luggage) <= 10
-  );
-  const canProceed = step === 0 ? canProceedStep0
-    : step === 1 ? canProceedStep1
-    : step === 2 ? canProceedStep2
-    : true;
-  const canSubmit = canProceedStep0 && canProceedStep1 && canProceedStep2;
+  const maxPassengers = selectedVehicle?.max_passengers ?? 0;
+  const detailIssues = getTransferDetailIssues(formData, maxPassengers, Date.now());
+  const fieldMessages: Partial<Record<keyof TransferFormData, string>> = {
+    flightNumber: tr('Enter a flight number such as TG925.', 'Укажите номер рейса, например TG925.', 'กรอกหมายเลขเที่ยวบิน เช่น TG925'),
+    arrivalDate: tr('Enter a future date and time.', 'Укажите будущие дату и время.', 'กรอกวันที่และเวลาในอนาคต'),
+    arrivalTime: tr('Enter a valid time.', 'Укажите время.', 'กรอกเวลาที่ถูกต้อง'),
+    passengers: tr(`Enter 1–${maxPassengers} passengers for this vehicle.`, `В этой машине может быть от 1 до ${maxPassengers} пассажиров.`, `รถนี้รองรับผู้โดยสาร 1–${maxPassengers} คน`),
+    luggage: tr('Enter a whole number between 0 and 10.', 'Укажите целое число от 0 до 10.', 'กรอกจำนวนเต็มตั้งแต่ 0 ถึง 10'),
+    name: tr('Enter your name.', 'Укажите имя.', 'กรอกชื่อ'),
+    phone: tr('Enter 8–15 digits including your country code.', 'Укажите 8–15 цифр с кодом страны.', 'กรอก 8–15 หลักรวมรหัสประเทศ'),
+    email: tr('Enter a valid email.', 'Укажите корректный email.', 'กรอกอีเมลที่ถูกต้อง'),
+  };
+  const quoteReady = nightRateStatus === 'ready' && !vehicleError && !isLoadingVehicles &&
+    !destinationsError && !destinationsLoading && !!selectedVehicle &&
+    (!formData.selectedDestinationId || !!selectedDestination) && Number.isFinite(totalPrice) && totalPrice > 0;
 
-  const handleNext = () => { if (canProceed && step < transferSteps.length - 1) setStep(step + 1); };
-  const handleBack = () => { if (step > 0) setStep(step - 1); };
+  const moveToStep = (next: number) => {
+    setAttemptedStep(null);
+    setStep(next);
+    stepRef.current?.focus();
+  };
+
+  const handleNext = () => {
+    const issues = step === 0 ? getTransferRouteIssues(formData)
+      : step === 1 ? (quoteReady ? [] : ['vehicleType']) : detailIssues;
+    if (issues.length) {
+      setAttemptedStep(step);
+      requestAnimationFrame(() => (document.getElementById(`transfer-${issues[0]}`) || stepRef.current)?.focus());
+      return;
+    }
+    moveToStep(step + 1);
+  };
+
+  const openCheckout = async (checkout: NonNullable<typeof pendingCheckout>) => {
+    setCheckoutError(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          order_id: checkout.orderId,
+          order_type: 'transport',
+          amount: checkout.amount,
+          currency: 'THB',
+          description: `Airport Transfer - ${checkout.vehicleName}`,
+          success_url: `${window.location.origin}/transport/transfer-success?order_id=${checkout.orderId}`,
+          cancel_url: `${window.location.origin}/transport/airport-transfer`,
+        },
+      });
+      if (error || !data?.url) throw error || new Error('Missing checkout URL');
+      window.location.href = data.url;
+    } catch (err) {
+      logger.error('Stripe checkout error:', err);
+      setCheckoutError(true);
+    }
+  };
 
   const handleSubmit = async () => {
+    if (submitLock.current || orderUnverified) return;
+    if (!pendingCheckout) {
+      const invalidStep = getTransferRouteIssues(formData).length ? 0
+        : !selectedVehicle ? 1 : getTransferDetailIssues(formData, maxPassengers, Date.now()).length ? 2 : null;
+      if (invalidStep !== null) {
+        moveToStep(invalidStep);
+        setAttemptedStep(invalidStep);
+        return;
+      }
+      if (!quoteReady) { toast.error(transferFareLabel(null, language)); return; }
+    }
     if (!user) {
-      // Guest reached payment — show inline auth gate instead of redirecting
-      // (which would nuke all the form data they just typed). The draft stays
-      // in sessionStorage; after sign-in/sign-up onAuthStateChange flips
-      // `user`, the effect below auto-resumes handleSubmit.
-      pendingSubmitRef.current = true;
       setAuthGateOpen(true);
       return;
     }
+    if (pendingCheckout && pendingCheckout.actor !== user.id) return;
 
-
-
-    // Contact validation (E.164-ish phone + RFC-lite email)
-    const phoneDigits = (formData.phone || '').replace(/[^\d]/g, '');
-    if (phoneDigits.length < 8 || phoneDigits.length > 15) {
-      toast.error(language === 'ru'
-        ? 'Введите корректный номер телефона (8–15 цифр, с кодом страны)'
-        : 'Enter a valid phone number (8–15 digits incl. country code)');
-      return;
-    }
-    if (formData.email) {
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email.trim());
-      if (!emailOk) {
-        toast.error(language === 'ru' ? 'Введите корректный email' : 'Enter a valid email');
-        return;
+    submitLock.current = true;
+    setIsSubmitting(true);
+    try {
+      if (pendingCheckout) {
+        await openCheckout(pendingCheckout);
+      } else {
+        await createTransfer(user.id);
       }
+    } catch (error) {
+      logger.warn('[Transfer] Order creation could not be confirmed', error);
+      setOrderUnverified(true);
+    } finally {
+      submitLock.current = false;
+      setIsSubmitting(false);
     }
+  };
 
+  const createTransfer = async (actor: string) => {
     const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00+07:00`;
-    const vehicleName = language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en;
+    const vehicleName = (language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en) || '';
     const terminalLabel = formData.terminal === 'domestic'
       ? (language === 'ru' ? 'Внутренний терминал' : 'Domestic Terminal')
       : (language === 'ru' ? 'Международный терминал' : 'International Terminal');
@@ -329,7 +392,7 @@ export default function AirportTransferBooking() {
         // operator notification (it reads metadata.destination_address) when it
         // re-fires notify-transfer-booking on payment confirmation.
         destination_address: formData.destinationAddress,
-        flight_number: formData.flightNumber,
+        flight_number: formData.flightNumber.trim(),
         vehicle_type: formData.vehicleType,
         vehicle_name: vehicleName,
         vehicle_class: isVan ? 'van' : 'sedan',
@@ -396,7 +459,7 @@ export default function AirportTransferBooking() {
         order_number: result.order_number || '',
         direction: formData.direction,
         terminal: formData.terminal,
-        flight_number: formData.flightNumber,
+        flight_number: formData.flightNumber.trim(),
         vehicle_name: vehicleName,
         meeting_sign_name: formData.meetingSignName || formData.name,
         passengers: parseInt(formData.passengers),
@@ -433,36 +496,9 @@ export default function AirportTransferBooking() {
       }
 
       if (formData.paymentMethod === 'stripe') {
-        setIsProcessingPayment(true);
-        try {
-          const { data, error } = await supabase.functions.invoke('create-checkout', {
-            body: {
-              order_id: result.order_id,
-              order_type: 'transport',
-              amount: totalPrice,
-              currency: 'THB',
-              description: `Airport Transfer - ${vehicleName}`,
-              success_url: `${window.location.origin}/transport/transfer-success?order_id=${result.order_id}`,
-              cancel_url: `${window.location.origin}/transport/airport-transfer`,
-            },
-          });
-          if (error) throw error;
-          if (data?.url) {
-            window.location.href = data.url;
-            return;
-          }
-          // No error but no redirect URL — surface it instead of leaving the CTA
-          // stuck on "Processing…" forever (which pushed users to reload and
-          // create a duplicate order).
-          throw new Error('Checkout session did not return a redirect URL');
-        } catch (err) {
-          logger.error('Stripe checkout error:', err);
-          toast.error(language === 'ru' ? 'Ошибка оплаты' : 'Payment Error', {
-            description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',
-          });
-          setIsProcessingPayment(false);
-          return;
-        }
+        const checkout = { actor, orderId: result.order_id, amount: totalPrice, vehicleName };
+        setPendingCheckout(checkout);
+        await openCheckout(checkout);
       } else {
         // myUNO advance ("concierge_advance") / cash:
         // notification email + WhatsApp to admin/operator already fired via
@@ -493,19 +529,35 @@ export default function AirportTransferBooking() {
         clearDraft();
         setIsSuccess(true);
       }
+    } else {
+      setOrderUnverified(true);
     }
   };
 
-  // Auto-resume submit once the user successfully signs in / signs up via the gate.
-  // pendingSubmitRef guards against double-fire on session refresh.
+  const latestSubmit = useRef(handleSubmit);
+  useEffect(() => { latestSubmit.current = handleSubmit; });
+
+  // Only the sign-in success callback marks the wizard for submission.
+  // Dismissing the gate does not create an order after a later sign-in.
   useEffect(() => {
     if (user && pendingSubmitRef.current && !authGateOpen) {
       pendingSubmitRef.current = false;
-      // Small tick so any profile-prefill effect lands before submit.
-      setTimeout(() => { handleSubmit(); }, 50);
+      const timer = setTimeout(() => { void latestSubmit.current(); }, 50);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authGateOpen]);
+
+  if (invalidLinkedDirection) {
+    return (
+      <AppLayout showBottomNav={false}>
+        <div className="ds-frame ds-frame-article space-y-4 p-4">
+          <p role="alert">{tr('Choose a route to or from Phuket Airport.', 'Выберите маршрут из аэропорта Пхукета или в аэропорт.', 'เลือกเส้นทางไปหรือกลับจากสนามบินภูเก็ต')}</p>
+          <Button onClick={() => navigate(APP_ROUTES.AIRPORT_TRANSFER, { replace: true })}>{tr('Choose route', 'Выбрать маршрут', 'เลือกเส้นทาง')}</Button>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (isSuccess) {
     return <TransferSuccess language={language} formData={formData} createdOrderNumber={createdOrderNumber} />;
@@ -523,6 +575,8 @@ export default function AirportTransferBooking() {
     );
   }
 
+  const loadingQuote = destinationsLoading || nightRateStatus === 'loading';
+  const quoteFailed = !!(vehicleError || destinationsError || nightRateStatus === 'error');
   const isLastStep = step === transferSteps.length - 1;
   const selectedVehicleLabel = selectedVehicle
     ? (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)
@@ -530,18 +584,22 @@ export default function AirportTransferBooking() {
 
   return (
     <AppLayout showBottomNav={false}>
+      <div className="ds-frame ds-frame-article">
       {/* Header */}
       <div className="px-4 pt-4 pb-2 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 mb-3">
           <button
-            onClick={() => step > 0 ? handleBack() : navigate(APP_ROUTES.TRANSPORT)}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
+            type="button"
+            aria-label={tr('Back', 'Назад', 'ย้อนกลับ')}
+            disabled={isSubmitting || !!pendingCheckout || orderUnverified}
+            onClick={() => step > 0 ? moveToStep(step - 1) : navigate(APP_ROUTES.TRANSPORT)}
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
             <h1 className="text-lg font-display font-bold">
-              {language === 'ru' ? 'Трансфер' : 'Airport Transfer'}
+              {tr('Airport transfer', 'Трансфер из аэропорта и в аэропорт', 'รถรับส่งสนามบิน')}
             </h1>
             <p className="text-xs text-muted-foreground">Phuket (HKT)</p>
           </div>
@@ -552,7 +610,21 @@ export default function AirportTransferBooking() {
       </div>
 
       {/* Steps */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-44">
+      <div ref={stepRef} tabIndex={-1} className="px-4 py-4">
+        {quoteFailed && <div className="mb-4 space-y-2">
+          <p role="alert" className="text-sm text-destructive">{tr('Could not load transfer rates.', 'Не удалось загрузить тарифы трансфера.', 'โหลดราคาค่ารถรับส่งไม่สำเร็จ')}</p>
+          <Button type="button" variant="outline" onClick={() => {
+            if (vehicleError) void refetchVehicles();
+            if (destinationsError) void refetchDestinations();
+            if (nightRateStatus === 'error') setNightRateRetry(retry => retry + 1);
+          }}>{tr('Try again', 'Повторить', 'ลองอีกครั้ง')}</Button>
+        </div>}
+        {attemptedStep === 0 && getTransferRouteIssues(formData).length > 0 && <p role="alert" className="mb-3 text-sm text-destructive">
+          {tr('Select a terminal and enter the pickup or drop-off address.', 'Выберите терминал и укажите адрес подачи или назначения.', 'เลือกอาคารผู้โดยสารและกรอกที่อยู่รับหรือส่ง')}
+        </p>}
+        {step === 1 && !vehicleError && vehicleTypes.length === 0 && <p role="status" className="text-sm text-muted-foreground">
+          {tr('No vehicle options are listed.', 'Нет опубликованных вариантов автомобилей.', 'ไม่มีตัวเลือกรถที่แสดง')}
+        </p>}
         <AnimatePresence mode="wait">
           {step === 0 && (
             <StepRoute
@@ -561,7 +633,7 @@ export default function AirportTransferBooking() {
               setFormData={setFormData}
               language={language}
               destinations={destinations}
-              geoSupported={geoSupported}
+              geoSupported={geoSupported && formData.direction === 'to-airport'}
               geoLoading={geoLoading}
               isReverseGeocoding={isReverseGeocoding}
               onUseCurrentLocation={handleUseCurrentLocation}
@@ -577,6 +649,7 @@ export default function AirportTransferBooking() {
               language={language}
               vehicleTypes={vehicleTypes}
               routeBasePrice={routeBasePrice}
+              showPrice={quoteReady}
             />
           )}
           {step === 2 && (
@@ -586,9 +659,11 @@ export default function AirportTransferBooking() {
               setFormData={setFormData}
               language={language}
               meetingSignManuallyEditedRef={meetingSignManuallyEdited}
+              maxPassengers={maxPassengers}
+              errors={attemptedStep === 2 ? Object.fromEntries(detailIssues.map(key => [key, fieldMessages[key]])) : {}}
             />
           )}
-          {step === 3 && (
+          {step === 3 && quoteReady && !pendingCheckout && !orderUnverified && (
             <StepPayment
               key="step-3"
               formData={formData}
@@ -604,6 +679,8 @@ export default function AirportTransferBooking() {
         </AnimatePresence>
       </div>
 
+      {orderUnverified && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('We could not verify receipt. Check My Bookings before sending again.', 'Не удалось подтвердить получение. Проверьте «Мои бронирования» перед повторной отправкой.', 'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันก่อนส่งอีกครั้ง')} <a href="/bookings" className="underline">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
+      {checkoutError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('Your order exists. Retry card payment for the same order.', 'Заказ уже создан. Повторите оплату картой для этого заказа.', 'สร้างคำสั่งซื้อแล้ว ลองชำระคำสั่งซื้อเดิมอีกครั้ง')}</p>}
       {/* Sticky CTA */}
       <div
         className="sticky bottom-0 left-0 right-0 bg-background/95 border-t border-border/50 z-50"
@@ -622,7 +699,9 @@ export default function AirportTransferBooking() {
                   {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
                 </p>
               )}
-              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{formData.vehicleType ? `฿${totalPrice.toLocaleString()}` : (language === "ru" ? "Выберите автомобиль" : "Select a vehicle")}</p>
+              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{pendingCheckout ? `฿${pendingCheckout.amount.toLocaleString()}` : quoteReady ? `฿${totalPrice.toLocaleString()}` : loadingQuote
+                ? transferFareLabel(null, language)
+                : transferFareLabel(null, language)}</p>
             </div>
             {selectedVehicleLabel && (
               <Badge variant="secondary" className="text-xs shrink-0 ml-2">
@@ -631,26 +710,29 @@ export default function AirportTransferBooking() {
             )}
           </div>
 
+          {!quoteReady && <p role="status" className="text-sm text-muted-foreground mb-2">{tr('The fare is not confirmed. Choose another vehicle or route and check the price.', 'Тариф пока не подтверждён. Выберите другой автомобиль или маршрут и проверьте стоимость.', 'โปรดตรวจสอบราคาโดยเลือกเส้นทางหรือรถคันอื่น')}</p>}
           {!isLastStep ? (
             <Button
               type="button"
               className="w-full h-12 text-base font-semibold"
-              disabled={!canProceed}
+              disabled={step === 1 && !quoteReady}
               onClick={handleNext}
             >
-              {language === 'ru' ? 'Далее' : 'Continue'}
+              {tr('Continue', 'Далее', 'ถัดไป')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           ) : (
             <Button
               type="button"
               className="w-full h-12 text-base font-semibold"
-              disabled={isCreating || isProcessingPayment || !canSubmit}
+              disabled={isCreating || isSubmitting || orderUnverified || (pendingCheckout ? pendingCheckout.actor !== user?.id : !quoteReady)}
               onClick={handleSubmit}
             >
-              {isCreating || isProcessingPayment
-                ? (language === 'ru' ? 'Обработка...' : 'Processing...')
-                : formData.paymentMethod === 'stripe'
+              {isCreating || isSubmitting
+                ? tr('Processing…', 'Обработка…', 'กำลังดำเนินการ…')
+                : pendingCheckout
+                  ? tr('Retry card payment', 'Повторить оплату картой', 'ลองชำระด้วยบัตรอีกครั้ง')
+                : !quoteReady ? transferFareLabel(null, language) : formData.paymentMethod === 'stripe'
                   ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
                   : formData.paymentMethod === 'cash'
                     ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
@@ -660,20 +742,16 @@ export default function AirportTransferBooking() {
         </div>
       </div>
 
+      </div>
       <InlineAuthGate
         open={authGateOpen}
-        onOpenChange={(open) => {
-          setAuthGateOpen(open);
-          if (!open) pendingSubmitRef.current = false;
-        }}
+        onOpenChange={setAuthGateOpen}
         language={language === 'ru' ? 'ru' : 'en'}
         defaultEmail={formData.email}
         defaultName={formData.name}
         defaultPhone={formData.phone}
-        onAuthenticated={() => { /* resume happens via useEffect when `user` flips */ }}
-        contextLine={language === 'ru'
-          ? `Трансфер · ฿${totalPrice.toLocaleString()}`
-          : `Transfer · ฿${totalPrice.toLocaleString()}`}
+        onAuthenticated={() => { pendingSubmitRef.current = true; }}
+        contextLine={`${language === 'ru' ? 'Трансфер' : 'Transfer'} · ${transferFareLabel(quoteReady ? totalPrice : null, language)}`}
       />
     </AppLayout>
   );

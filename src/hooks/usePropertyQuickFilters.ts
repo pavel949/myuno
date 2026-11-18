@@ -1,3 +1,4 @@
+import { PUBLIC_RENT_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 /**
  * Hook for dynamic property quick filters
  * Loads property_highlights from lookup_values and property_projects for complex filtering
@@ -93,11 +94,16 @@ export function usePropertyQuickFilters() {
       // Count properties per project
       const { data: projectCounts } = await supabase
         .from('public_property_catalog')
-        .select('project_id')
-        .not('project_id', 'is', null);
+        .select('project_id,cover_image,images')
+        .not('project_id', 'is', null)
+        .or(PUBLIC_RENT_ELIGIBILITY)
+        .or('tenancy_modes.cs.{short},price_period.eq.night,price_period.eq.week,price_period.is.null');
 
       const countMap = new Map<string, number>();
-      (projectCounts || []).forEach((p: { project_id: string }) => {
+      const projectImages = new Map<string, string>();
+      (projectCounts || []).forEach((p: { project_id: string; cover_image?: string; images?: string[] }) => {
+        const image = p.cover_image || p.images?.[0];
+        if (image && !projectImages.has(p.project_id)) projectImages.set(p.project_id, image);
         countMap.set(p.project_id, (countMap.get(p.project_id) || 0) + 1);
       });
 
@@ -127,7 +133,7 @@ export function usePropertyQuickFilters() {
           nameEn: p.name_en,
           nameRu: p.name_ru,
           propertyCount: countMap.get(p.id) || 0,
-          coverImage: p.cover_image,
+          coverImage: p.cover_image || projectImages.get(p.id),
         }))
         .filter((p) => p.propertyCount > 0); // Only show projects with properties
 

@@ -13,9 +13,9 @@ OUT = Path(sys.argv[1]).resolve()
 ROOT = Path.cwd()
 ORIGIN = 'http://127.0.0.1:8936'
 COPY = {
-    'en': {'title': 'Experiences', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_heading': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
-    'ru': {'title': 'Впечатления', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_heading': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все темы', 'menu': 'Открыть меню', 'services': 'Услуги'},
-    'th': {'title': 'ประสบการณ์', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_heading': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'หมวดหมู่ทั้งหมด', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
+    'en': {'title': 'Experiences', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_menu': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
+    'ru': {'title': 'Впечатления', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_menu': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все категории', 'menu': 'Открыть меню', 'services': 'Услуги'},
+    'th': {'title': 'ประสบการณ์', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_menu': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'ทุกหมวดหมู่', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
 }
 
 
@@ -30,7 +30,7 @@ async def main():
             raise RuntimeError('No bundled or local Chromium available')
         browser = await p.chromium.launch(executable_path=executable, headless=True, args=['--no-sandbox'])
         for lang in ['ru', 'en', 'th']:
-            for width in [390, 1440]:
+            for width in [375, 390, 430, 1440]:
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, reduced_motion='reduce', service_workers='block')
                 blocked, errors = [], []
 
@@ -84,6 +84,15 @@ async def main():
                 async def titles():
                     return await cards().locator('h3').all_text_contents()
 
+                filter_name={'ru':'Фильтры впечатлений','en':'Experience filters','th':'ตัวกรองประสบการณ์'}[lang]
+                done_name={'ru':'Показать предложения','en':'Show offers','th':'แสดงข้อเสนอ'}[lang]
+                async def open_filters():
+                    await page.get_by_role('button',name=filter_name,exact=True).click()
+                    await expect(page.get_by_role('dialog',name=filter_name,exact=True)).to_be_visible()
+                async def close_filters():
+                    await page.get_by_role('button',name=done_name,exact=True).click()
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
+
                 def type_button(label):
                     return page.get_by_role('group', name=c['types']).get_by_role('button', name=label, exact=True)
 
@@ -101,18 +110,41 @@ async def main():
                         await expect(dialog.locator('a[aria-current="page"]')).to_have_attribute('href', '/experiences')
                         await page.keyboard.press('Escape')
                         await expect(dialog).not_to_be_visible()
-                    menu = page.locator('[aria-labelledby="experience-category-title"]')
-                    await expect(menu.get_by_role('button')).to_have_count(8)
-                    await menu.locator('summary').click()
-                    await expect(menu.get_by_role('button')).to_have_count(9)
-                    await menu.locator('summary').click()
+                    menu = page.get_by_role('region', name=c['category_menu'], exact=True)
+                    # Six primary tiles, with every recorded category keyboard-accessible in the sheet.
+                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
+                    first=await cards().first.bounding_box()
+                    assert first and first['y']<900,('First offer below initial viewport',first)
+                    await menu.get_by_role('button',name=c['all_categories'],exact=True).click()
+                    chooser=page.get_by_role('dialog',name=c['category_menu'],exact=True)
+                    await expect(chooser.locator('[data-category-id]')).to_have_count(9)
+                    ninth=chooser.locator('[data-category-id="wellness"]')
+                    await ninth.focus()
+                    await expect(ninth).to_be_focused()
+                    await ninth.press('Enter')
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
+                    assert await page.evaluate('window.fixtureReadOptions.category') == 'wellness'
+                    await expect(cards()).to_have_count(0)
+                    await expect(page.get_by_text(c['empty'], exact=True)).to_be_visible()
+                    await page.get_by_test_id('history-back').click()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
+                    await expect(cards()).to_have_count(4)
+                    await page.get_by_test_id('history-forward').click()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=wellness')
+                    await expect(cards()).to_have_count(0)
+                    await page.get_by_test_id('history-back').click()
+                    await expect(menu).to_be_visible()
                     await screenshot('01-overview')
-                    row['checks'].append('Actual public header has one active destination; real category menu expands natively')
+                    row['checks'].append('Actual public header has one active destination; all nine compact categories remain accessible, including keyboard selection beyond the old eight-item limit and Back/Forward')
 
                     await menu.get_by_role('button').filter(has_text=c['island']).click()
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
                     await expect(cards()).to_have_count(1)
+                    await expect(page.locator('#experience-results-title')).to_be_focused()
                     assert await page.evaluate('window.fixtureReadOptions.category') == 'islands'
                     await screenshot('02-category-results')
                     await expect(cards().first).to_have_attribute('href', '/experiences/island-tour')
@@ -127,25 +159,33 @@ async def main():
                     await expect(cards()).to_have_count(1)
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await page.get_by_test_id('history-back').click()
-                    await expect(page.get_by_role('heading', name=c['category_heading'], exact=True)).to_be_visible()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
                     row['checks'].append('Category result, native card Enter/destination/public journey state and real router history preserve filters')
 
-                    await page.locator('a[href="/experiences?type=tour"]').click()
-                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed', 'true')
+                    await open_filters()
+                    await type_button(c['tour']).click()
+                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed','true')
+                    await close_filters()
                     await expect(cards()).to_have_count(3)
-                    assert await page.evaluate('window.fixtureReadOptions.type') == 'tour'
+                    assert await page.evaluate('window.fixtureReadOptions.type')=='tour'
+                    await open_filters()
                     await type_button(c['activity']).click()
-                    await expect(type_button(c['activity'])).to_have_attribute('aria-pressed', 'true')
+                    await expect(type_button(c['activity'])).to_have_attribute('aria-pressed','true')
+                    await close_filters()
                     await expect(cards()).to_have_count(1)
                     await page.get_by_test_id('history-back').click()
-                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed', 'true')
+                    await open_filters()
+                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed','true')
+                    await close_filters()
                     await expect(cards()).to_have_count(3)
                     await screenshot('03-type-history')
-                    row['checks'].append('Same-route hero type link, native type button and Back all update the read filter')
+                    row['checks'].append('Modal type selection and browser Back preserve the actual reader filter')
 
                     await page.get_by_role('button', name=c['clear'], exact=True).click()
                     search = page.get_by_role('searchbox', name=c['search'], exact=True)
                     await search.fill('Synthetic')
+                    await open_filters()
                     select = page.get_by_role('combobox', name=c['sort'], exact=True)
                     await select.select_option('price_asc')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('sort=price_asc')
@@ -155,10 +195,13 @@ async def main():
                     assert '฿' not in await cards().last.inner_text(), 'Unknown price was presented as a recorded amount'
                     await select.select_option('price_desc')
                     assert await titles() == [expected[2], expected[1], expected[0], expected[3]], await titles()
+                    await close_filters()
                     await page.get_by_test_id('history-back').click()
+                    await open_filters()
                     await expect(select).to_have_value('price_asc')
-                    await expect(search).to_have_value('Synthetic')
                     assert await titles() == expected, await titles()
+                    await close_filters()
+                    await expect(search).to_have_value('Synthetic')
                     await screenshot('04-search-sort')
                     row['checks'].append('Actual search/native sort persist in URL/history; unknown prices remain last and never become free')
 
@@ -189,7 +232,8 @@ async def main():
                     await expect(cards()).to_have_count(4)
                     await page.get_by_role('button', name=c['retry_category'], exact=True).click()
                     await expect(page.get_by_role('alert')).to_have_count(0)
-                    await expect(page.get_by_role('heading', name=c['category_heading'], exact=True)).to_be_visible()
+                    await expect(menu).to_be_visible()
+                    await expect(menu.locator('[data-category-id]')).to_have_count(5)
                     assert await page.evaluate('window.fixtureCategoryRetries') == 1
                     row['checks'].append('Unknown filters, genuine empty, read failure/loading and category failure remain distinct and retryable')
                     await geometry()
@@ -205,10 +249,10 @@ async def main():
         await browser.close()
     failed = [row for row in rows if row['outcome'] != 'PASS']
     result = {'cases': len(rows), 'passed': len(rows) - len(failed), 'failed': len(failed), 'results': rows,
-              'scope': 'Actual catalogue, category menu, hero, public header, MiniAppLayout/FeatureLayout and native controls; synthetic reads/shell; detail is a named boundary, not detail acceptance.'}
+              'scope': 'Actual catalogue, shared category grid/sheets, public header, MiniAppLayout/FeatureLayout and native controls; synthetic reads/shell; detail is a named boundary, not detail acceptance.'}
     (OUT / 'results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'cases': len(rows), 'passed': result['passed'], 'failed': result['failed']}))
-    if len(rows) != 6 or failed:
+    if len(rows) != 12 or failed:
         raise SystemExit(1)
 
 

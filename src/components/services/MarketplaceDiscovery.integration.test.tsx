@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MarketplaceServiceGrid } from './MarketplaceServiceGrid';
 import type { MarketplaceService } from '@/hooks/useServiceMarketplace';
 const state = vi.hoisted(() => ({ services: [] as MarketplaceService[], slots: {} as Record<string, { status: 'available' | 'unknown' | 'unavailable'; date: string; error?: 'schedule-read-failed' }>, checking: false }));
+vi.mock('./MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.services, isLoading: false, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: state.slots, isFetching: state.checking, refetch: vi.fn() }) }));

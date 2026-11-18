@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { getLegacyRedirect, APP_ROUTES } from "@/lib/config/routes";
+import { getLegacyRedirect, canonicalRedirectHref, APP_ROUTES } from "@/lib/config/routes";
 import { SEOHead } from '@/components/seo/SEOHead';
 import { logger } from "@/lib/logger";
 
@@ -19,12 +19,13 @@ const NotFound = () => {
 
   useEffect(() => {
     const redirect = getLegacyRedirect(location.pathname);
-    if (redirect) {
-      navigate(redirect, { replace: true });
+    const destination = redirect ? canonicalRedirectHref(redirect, location.search, location.hash) : null;
+    if (destination && destination !== location.pathname + location.search + location.hash) {
+      navigate(destination, { replace: true, state: location.state });
       return;
     }
     logger.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname, navigate]);
+  }, [location.pathname, location.search, location.hash, location.state, navigate]);
 
   return (
     <AppLayout showFooter={false}>
