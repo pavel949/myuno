@@ -30,4 +30,4 @@ jobs:
       - name: Outbox admission, concurrency and lifecycle (separate disposable local DB)
         run: node --test docs/hardening/lead-outbox-review/postgres.test.mjs
       - name: Worker and scheduler adapters (no external sends)
-        run: node --test docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs
+        run: node --test docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs docs/hardening/lead-outbox-review/providers.test.mjs

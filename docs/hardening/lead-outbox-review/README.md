@@ -22,7 +22,7 @@ Searched existing repository for `outbox` and `notification_queue`: no active du
 
 Run `node --test docs/hardening/lead-outbox-review/worker.test.mjs` (Node 24). **13/13 passed** in isolated mocks: anonymous/failed admission before privileged store, arbitrary body denial, method gate, independent channels, definite vs uncertain rejection, reference requirement, missing/failed settings, timeout, stale ack, stored source/recipient selection. No network sends occurred.
 
-**Not run:** actual SQL execution, real Postgres concurrent transactions, RLS/grants actor matrix, real Edge runtime integration, sender/provider acceptance or delivered receipt. Local executor has Node but no psql/postgres/initdb, Docker or Deno; existing local checkouts are another app or incomplete. A complete clone of the target repo was not available. Do not substitute worker mocks for SQL tests or all-repository CI.
+**Initially not run (superseded by CI evidence below for database tests):** actual SQL execution, real Postgres concurrent transactions, RLS/grants actor matrix. **Still not run:** real Edge runtime integration, sender/provider acceptance or delivered receipt. Local executor has Node but no psql/postgres/initdb, Docker or Deno; existing local checkouts are another app or incomplete. A complete clone of the target repo was not available. Do not substitute worker mocks for SQL tests or all-repository CI.
 
 ## Required isolated SQL acceptance before activation
 
@@ -50,3 +50,12 @@ Docs reviewed: Supabase changelog 2026-11-18 and RLS guide. Relevant recent CLI 
 ## Follow-up isolated CI package
 
 `postgres.test.mjs` exercises the actual existing canonical intake SQL plus proposed outbox SQL using a disposable Unix-socket PostgreSQL server, no production connection. Dedicated workflow runs the existing intake actor suite first, then 12 outbox actor/concurrency/lifecycle cases. `adapters.mjs` supplies exact RPC adapters and dedicated scheduler-secret admission. Three new adapter tests pass locally (16 local Node tests total). Provider adapters remain deliberately unwired. PostgreSQL results are pending remote CI; initial missing local binaries are not a pass. No production credentials are used by this workflow.
+
+
+## Verified CI evidence, 18 November 2026
+
+Exact head `092d0a4d1296eb8efa7540d2d4dce910ad56ae65`, [run 44356707869](https://github.com/pavel949/myuno/actions/runs/44356707869), job `134986642272`: **23 existing intake PostgreSQL tests + 12 outbox PostgreSQL tests + 16 worker/scheduler/store mock tests passed**. SQL was actually executed in two disposable Unix-socket databases on the GitHub runner. Actor/grant denial, six concurrent submitters, disjoint claimers, enqueue rollback and expired lease handling passed. This is fixture-based PostgreSQL proof, not production schema or deployed JWT/PostgREST proof.
+
+Follow-up reference `providers.mjs` adds Resend and UltraMsg HTTP adapters with fixed official endpoints, abort signal, redirect rejection, configured sender only, configured MyUNO recipients, plain text/context and bounded WhatsApp body. Resend uses stable idempotency key; official retention is 24 hours, so this does not license indefinite retry. UltraMsg can queue while its instance is offline, therefore acceptance is explicitly not delivery. Errors remain uncertain rather than assumed safe to retry. Four additional mock HTTP tests pass locally (20 non-DB cases total); these exact new files require new CI. No live HTTP provider sends were made.
+
+Primary API contracts inspected: https://resend.com/docs/api-reference/emails/send-email and https://docs.ultramsg.com/api/post/messages/chat . Adapters remain reference code outside deployed functions. Missing deployment glue, verified protected settings reader, scheduler configuration, abuse control, operator reconciliation UI and coordinated legacy-ingress shutdown remain release blockers.
