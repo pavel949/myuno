@@ -43,3 +43,9 @@ jobs:
         env:
           OUTBOX_CONTACTS_MODULE: .outbox-pr261/supabase/functions/_shared/admin-notification-contacts.ts
         run: node --test docs/hardening/lead-outbox-review/parser-integration.test.mjs
+      - name: Install pinned Deno runtime for isolated compatibility proof
+        run: npm install --prefix /tmp/outbox-deno --no-save deno@2.9.6
+      - name: Deno runtime and actual parser (network and subprocess denied)
+        env:
+          OUTBOX_CONTACTS_MODULE: .outbox-pr261/supabase/functions/_shared/admin-notification-contacts.ts
+        run: /tmp/outbox-deno/node_modules/.bin/deno test --no-config --allow-read --allow-env=OUTBOX_CONTACTS_MODULE docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs docs/hardening/lead-outbox-review/providers.test.mjs docs/hardening/lead-outbox-review/runtime.test.mjs docs/hardening/lead-outbox-review/parser-integration.test.mjs

@@ -3,12 +3,14 @@
 const clean=(value,max=200)=>String(value??'').replace(/[\r\n\u0000-\u001f]/g,' ').slice(0,max);
 export function leadText(lead) {
  const m=lead.vertical_metadata||{};
+ // Canonical Inbox contract; the link is selection, never authorization.
+ const href=`https://myuno.app/admin/inbox?${new URLSearchParams({source:'consultation_requests',request:String(lead.id)})}`;
  return ['MyUNO: новая заявка (не бронирование)',`ID: ${clean(lead.id)}`,
  `Клиент: ${clean(lead.name)}`,`Телефон: ${clean(lead.phone)}`,`Почта: ${clean(lead.email)}`,
  `Запрос: ${clean(lead.request_type)}`,`Источник: ${clean(lead.entry_point)}`,
  `Проект: ${clean(lead.development_project_id||m.project_id)}`,`Юнит: ${clean(m.unit_id)}`,`Объект: ${clean(m.property_id)}`,
  `Намерение: ${clean(m.intent)}`,`Бюджет клиента (не цена): ${clean(lead.budget_min)} — ${clean(lead.budget_max)} ${clean(lead.currency)}`,
- `Комментарий: ${clean(lead.notes,1600)}`,'https://myuno.app/admin/operations'].join('\n').slice(0,4000);
+ `Комментарий: ${clean(lead.notes,1600)}`].join('\n').slice(0,4000-href.length-1)+'\n'+href;
 }
 export function providerAdapters({resendKey,emailFrom,ultraInstance,ultraToken},fetchApi=fetch) {
  const send={};

@@ -8,3 +8,13 @@ test('HTTP failure or missing reference is not evidence of acceptance or safe re
 
 test('contradictory success plus provider error is uncertain, never accepted',async()=>{const send=providerAdapters(config,async()=>Response.json({id:'ref',sent:true,error:'rejected'}));assert.deepEqual(await send.email({lead,target:['admin@example.invalid'],idempotencyKey:'k'}),{});assert.deepEqual(await send.whatsapp({lead,target:'1234567'}),{});});
 test('null provider bodies remain uncertain without crashing adapters',async()=>{const send=providerAdapters(config,async()=>Response.json(null));assert.deepEqual(await send.email({lead,target:['admin@example.invalid'],idempotencyKey:'k'}),{});assert.deepEqual(await send.whatsapp({lead,target:'1234567'}),{});});
+
+test('long canonical content retains complete exact-request Inbox handoff',()=>{
+ const id='11111111-1111-4111-8111-111111111111';
+ const long='x'.repeat(5000);
+ const text=leadText({id,name:long,email:long,phone:long,request_type:long,entry_point:long,notes:long,budget_min:long,budget_max:long,currency:long,vertical_metadata:{project_id:long,unit_id:long,property_id:long,intent:long}});
+ assert.ok(text.length<=4000);
+ const link=new URL(text.split('\n').at(-1));
+ assert.equal(link.origin,'https://myuno.app');assert.equal(link.pathname,'/admin/inbox');
+ assert.deepEqual([...link.searchParams],[['source','consultation_requests'],['request',id]]);
+});
