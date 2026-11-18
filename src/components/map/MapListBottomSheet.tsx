@@ -46,6 +46,14 @@ export function MapListBottomSheet({
   };
 
   return (
+    <>
+    <aside aria-label={closeLabel === "Закрыть список" ? "Предложения на карте" : "Map offers"} className="hidden lg:flex absolute right-4 top-4 bottom-4 z-30 w-96 flex-col border border-border bg-background shadow-xl">
+      <div className="px-4 py-2 flex items-center justify-between border-b border-border shrink-0">
+        <h2 className="text-sm font-semibold">{title}</h2>{headerRight}
+        {onClose && <button type="button" onClick={onClose} className="px-3 py-2 min-h-11 text-sm text-primary">{closeLabel}</button>}
+      </div>
+      <div className="flex-1 overflow-y-auto">{children}</div>
+    </aside>
     <Vaul.Root
       open
       modal={false}
@@ -60,7 +68,7 @@ export function MapListBottomSheet({
           aria-label="Список локаций"
           className={cn(
             'fixed inset-x-0 bottom-0 z-30 flex flex-col bg-background border-t border-border shadow-2xl',
-            'h-[92dvh] outline-none lg:inset-x-auto lg:right-4 lg:w-96 rounded-t-xl',
+            'h-[92dvh] outline-none lg:hidden rounded-t-xl',
             className,
           )}
         >
@@ -74,6 +82,7 @@ export function MapListBottomSheet({
         </Vaul.Content>
       </Vaul.Portal>
     </Vaul.Root>
+    </>
   );
 }
 

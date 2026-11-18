@@ -53,7 +53,7 @@ export function MapListItem({
       <span
         aria-hidden
         className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base"
-        style={{ background: color ? `${color}1A` : 'hsl(var(--muted))', color: color || undefined }}
+        style={{ background: color ? `color-mix(in srgb, ${color} 10%, transparent)` : 'hsl(var(--muted))', color: color || undefined }}
       >
         {icon ?? '·'}
       </span>

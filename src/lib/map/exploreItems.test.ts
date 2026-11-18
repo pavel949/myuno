@@ -33,6 +33,12 @@ describe('truthful map catalogue projection', () => {
     expect(items[0].priceFrom).toBeNull();
     expect(propertyExploreItems({ ...property, currency: null })[0].priceFrom).toBeNull();
   });
+  it('does not relabel malformed currencies as THB', () => {
+    expect(propertyExploreItems({ ...property, currency: 'BAHT' })[0]).toMatchObject({ currency: null, priceFrom: null });
+    expect(propertyExploreItems({ ...property, listing_type: 'sale', sale_price: 9000000, sale_currency: '฿' })[0]).toMatchObject({ currency: null, priceFrom: null });
+    expect(experienceExploreItem({ id: 'trip', lat: 8, lng: 98, price: 900, currency: 'BAHT' })).toMatchObject({ currency: null, priceFrom: null });
+    expect(propertyExploreItems({ ...property, currency: ' usd ' })[0]).toMatchObject({ currency: 'USD', priceFrom: 5000 });
+  });
   it('does not duplicate dedicated commercial/land layer', () => {
     expect(propertyExploreItems({ ...property, asset_class: 'land' })).toEqual([]);
     expect(propertyExploreItems({ ...property, asset_class: 'commercial' })).toEqual([]);
@@ -40,10 +46,10 @@ describe('truthful map catalogue projection', () => {
   it('keeps project stored backup coordinate and canonical route', () => {
     expect(projectExploreItem({ id: 'p', lat: 0, lng: 0, location_lat: 8, location_lng: 98, price_from: 7000000 })).toMatchObject({ lat: 8, lng: 98, href: '/property/offplan/p', priceFrom: 7000000 });
   });
-  it('distinguishes recorded experience meeting point from venue', () => {
+  it('labels both canonical experience coordinate sources as meeting points', () => {
     const exp = { id: 'trip', name_en: 'Trip', meeting_point_lat: 8, meeting_point_lng: 98, currency: 'THB', price: 900 };
     expect(experienceExploreItem(exp)).toMatchObject({ locationKind: 'meeting_point', href: '/experiences/trip', priceFrom: 900 });
-    expect(experienceExploreItem({ ...exp, lat: 8.2, lng: 98.2 })).toMatchObject({ locationKind: 'place', lat: 8.2 });
+    expect(experienceExploreItem({ ...exp, lat: 8.2, lng: 98.2 })).toMatchObject({ locationKind: 'meeting_point', lat: 8.2 });
     expect(experienceExploreItem({ id: 'trip', district: 'bang-tao' })).toBeNull();
   });
 });

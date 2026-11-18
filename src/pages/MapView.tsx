@@ -305,7 +305,7 @@ export default function MapView() {
     // this source only feeds the commercial / land layers.
     propMarkers.forEach((m) => {
       const ac = acById.get(m.id);
-      if (ac === 'commercial' || ac === 'land') markers.push({ ...m, vertical: ac });
+      if (ac === 'commercial' || ac === 'land') markers.push({ ...m, vertical: ac, priceFrom: null });
     });
     (exploreItems || []).forEach((it) => {
       markers.push({
@@ -632,7 +632,7 @@ export default function MapView() {
 
           <FilterChipGroup scrollable>
             {FILTER_OPTIONS.filter((opt) => showMoreLayers || ['all', 'stay', 'rent', 'sale', 'newbuild', 'experience', 'restaurant'].includes(opt.value)).map((opt) => (
-              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} size="md" />
+              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} onToggle={() => handleFilterChange(opt.value)} aria-pressed={opt.value === 'all' ? selectedLayers.length === 0 : selectedLayers.includes(opt.value)} className="min-h-11 [&>span]:max-w-none" size="md" />
             ))}
           </FilterChipGroup>
 

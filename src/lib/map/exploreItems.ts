@@ -12,6 +12,10 @@ export interface ExploreItem {
 }
 export type MapRecord = Record<string, unknown>;
 const str = (v: unknown): string | undefined => typeof v === 'string' && v.trim() ? v.trim() : undefined;
+const currencyCode = (v: unknown): string | null => {
+  const value = str(v)?.toUpperCase();
+  return value && /^[A-Z]{3}$/.test(value) ? value : null;
+};
 const amount = (v: unknown): number | null => typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null;
 const strings = (v: unknown): string[] | null => Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string') : null;
 const number = (v: unknown): number | null => typeof v === 'number' && Number.isFinite(v) ? v : null;
@@ -39,7 +43,7 @@ export function propertyExploreItems(record: MapRecord): ExploreItem[] {
   const metadata = { ...base(record, coords), projectId: str(record.project_id), propertyType: str(record.property_type), bedrooms: number(record.bedrooms) ?? undefined };
   const items: ExploreItem[] = [];
   if (propertySupportsMode(intent, 'buy')) {
-    const currency = str(record.sale_price != null ? record.sale_currency : record.currency)?.toUpperCase() ?? null;
+    const currency = currencyCode(record.sale_price != null ? record.sale_currency : record.currency);
     items.push({ ...metadata, id: `sale-${record.id}`, layer: 'sale', href: propertyDetailHref(String(record.id), 'buy'),
       priceFrom: currency ? propertySaleAskingPrice({ ...intent, sale_price: number(record.sale_price), price: number(record.price) }) : null, currency, pricePeriod: 'total' });
   }
@@ -50,7 +54,7 @@ export function propertyExploreItems(record: MapRecord): ExploreItem[] {
     const long = modes.length ? modes.some(m => ['medium', 'long'].includes(m)) : ['month', 'year'].includes(options.declaredPeriod ?? '') || options.rates.some(r => ['month', 'year'].includes(r.period));
     for (const layer of [...(short ? ['stay' as const] : []), ...(long ? ['rent' as const] : [])]) {
       const rate = options.rates.find(r => (layer === 'stay' ? ['night', 'week'] : ['month', 'year']).includes(r.period));
-      const currency = str(record.currency)?.toUpperCase() ?? null;
+      const currency = currencyCode(record.currency);
       items.push({ ...metadata, id: `${layer}-${record.id}`, layer, href: propertyDetailHref(String(record.id), 'rent', `tenancy=${layer === 'stay' ? 'short' : modes.includes('medium') ? 'medium' : 'long'}`),
         priceFrom: currency ? rate?.amount ?? null : null, currency, pricePeriod: rate?.period ?? null });
     }
@@ -68,11 +72,13 @@ export function experienceExploreItem(record: MapRecord): ExploreItem | null {
   const place = mapCoordinates(record.lat, record.lng);
   const coords = place ?? mapCoordinates(record.meeting_point_lat, record.meeting_point_lng);
   if (!coords || !str(record.id)) return null;
-  const currency = str(record.currency)?.toUpperCase() ?? null;
+  const currency = currencyCode(record.currency);
   return { ...base(record, coords, 'Experience', 'Впечатление'), id: `experience-${record.id}`, layer: 'experience',
     href: APP_ROUTES.EXPERIENCE_DETAIL(String(record.id)), currency, priceFrom: currency ? amount(record.price) : null,
     pricePeriod: str(record.price_period) ?? str(record.price_per) ?? null, category: str(record.category),
-    locationKind: place ? 'place' : 'meeting_point' };
+    // The canonical admin writes meeting-point coordinates to listings.lat/lng.
+    // A primary coordinate therefore does not establish a fixed attraction venue.
+    locationKind: 'meeting_point' };
 }
 export function providerExploreItem(record: MapRecord): ExploreItem | null {
   const coords = mapCoordinates(record.lat, record.lng);
