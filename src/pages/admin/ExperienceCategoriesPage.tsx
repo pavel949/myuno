@@ -15,6 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Pencil, Trash2, GripVertical, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+const categoryIcon = (category: ExperienceCategory) => category.icon && !/^[a-z_-]+$/i.test(category.icon) ? category.icon : EXPERIENCE_DISCOVERY_GROUPS.find(group => group.id === experienceGroup(category.slug))?.icon || '🎯';
+
 const EMPTY_FORM: Partial<ExperienceCategoryInsert> = {
   slug: '',
   name_en: '',
@@ -164,7 +166,16 @@ export default function ExperienceCategoriesPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <Table>
+            <>
+            <div className="space-y-3 md:hidden" data-testid="mobile-category-cards">
+              {visibleCategories.map(category => <article key={category.id} className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-start gap-3"><span aria-hidden="true" className="text-2xl shrink-0">{categoryIcon(category)}</span><div className="min-w-0"><h3 className="font-medium break-words">{isRu ? category.name_ru : category.name_en}</h3><p className="text-sm text-muted-foreground break-words">{category.slug}</p></div></div>
+                <div className="flex items-center justify-between gap-3"><span className="text-sm">{category.is_active ? (isRu ? 'Видна в каталоге' : 'Visible in catalogue') : (isRu ? 'Скрыта' : 'Hidden')}</span><Switch aria-label={`${isRu ? 'Видимость' : 'Visibility'}: ${category.name_ru || category.name_en}`} checked={category.is_active} onCheckedChange={() => handleToggleActive(category)} disabled={isUpdating} /></div>
+                <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => openEditDialog(category)}><Pencil className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}</Button><Button variant="ghost" className="text-destructive" onClick={() => setDeleteConfirmId(category.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="h-4 w-4" /></Button></div>
+              </article>)}
+            </div>
+            <div className="hidden md:block">
+            <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
@@ -186,7 +197,7 @@ export default function ExperienceCategoriesPage() {
                         {category.sort_order}
                       </div>
                     </TableCell>
-                    <TableCell className="text-2xl">{category.icon}</TableCell>
+                    <TableCell className="text-2xl whitespace-nowrap">{categoryIcon(category)}</TableCell>
                     <TableCell className="font-mono text-sm">{category.slug}</TableCell>
                     <TableCell>{category.name_en}</TableCell>
                     <TableCell>{category.name_ru}</TableCell>
@@ -230,6 +241,8 @@ export default function ExperienceCategoriesPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
+            </>
           )}
         </CardContent>
       </Card>

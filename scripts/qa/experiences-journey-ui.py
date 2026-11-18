@@ -242,6 +242,13 @@ async def main():
                     row['checks'].append('Unknown filters, genuine empty, read failure/loading and category failure remain distinct and retryable')
                     await goto('/admin/experience-categories')
                     await expect(page.locator('details')).to_have_count(8)
+                    mobile_categories = page.get_by_test_id('mobile-category-cards')
+                    if width < 768:
+                        await expect(mobile_categories).to_be_visible()
+                        await expect(mobile_categories.locator('article')).to_have_count(9)
+                        assert await mobile_categories.locator('article').first.evaluate('(el) => el.getBoundingClientRect().height') < 260
+                    else:
+                        await expect(mobile_categories).not_to_be_visible()
                     await geometry()
                     await page.screenshot(path=str(OUT / f'{prefix}-08-admin-structure.png'), full_page=True)
                     await page.locator('details').first.locator('summary').click()
