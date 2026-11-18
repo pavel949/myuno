@@ -1,0 +1,2 @@
+import {defineConfig} from 'vite'; import react from '@vitejs/plugin-react-swc'; import path from 'node:path';
+export default defineConfig({root:path.resolve('e2e/fixtures/admin-catalog'),plugins:[react()],resolve:{alias:[{find:'@/contexts/LanguageContext',replacement:path.resolve('e2e/fixtures/admin-catalog/lang.ts')},{find:'@',replacement:path.resolve('src')}]},server:{port:4183,host:'127.0.0.1',fs:{allow:[path.resolve('.')]}}});
