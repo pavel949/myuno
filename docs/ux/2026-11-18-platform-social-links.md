@@ -2,11 +2,11 @@
 
 ## Reviewable change
 
-Admin → System Settings → Social networks (`/admin/settings?tab=social`) edits the platform's YouTube, Instagram and LinkedIn profile URLs. Saved nonempty links appear in both CompactFooter layouts. Empty values hide icons; existing Telegram and WhatsApp contact links remain.
+Admin → System Settings → Social networks (`/admin/settings?tab=social`) edits the platform's YouTube, Instagram, LinkedIn and Facebook profile URLs. Saved nonempty links appear in both CompactFooter layouts. Empty values hide icons; existing Telegram and WhatsApp contact links remain.
 
-Use the existing `system_settings` authority and actor-bound `readAdminSystemSettings`/`saveAdminSystemSettings` helpers. A single `org_social_links` JSON object holds exactly the three profile values. No defaults, social accounts, private keys or business records are seeded. Existing admin admission and write policies remain unchanged. Writes require exact row acknowledgement and persisted readback; failed reads never become empty editable defaults. Uncertain writes require reload, and late responses cannot acknowledge a different actor's save.
+Use the existing `system_settings` authority and actor-bound `readAdminSystemSettings`/`saveAdminSystemSettings` helpers. A single `org_social_links` JSON object holds exactly the four profile values. No defaults, social accounts, private keys or business records are seeded. Existing admin admission and write policies remain unchanged. Writes require exact row acknowledgement and persisted readback; failed reads never become empty editable defaults. Uncertain writes require reload, and late responses cannot acknowledge a different actor's save.
 
-Public reads select only `key,value` for this exact key. Validate HTTPS, allowed platform hosts and profile paths; reject credentials, lookalike domains, unsupported protocols and ports, and strip tracking parameters/fragments. Bad stored URLs are not rendered. Public metadata uses the existing QueryClient; verified saves invalidate its key.
+Public reads select only `key,value` for this exact key. Validate HTTPS, allowed platform hosts and profile paths; reject credentials, lookalike domains, unsupported protocols and ports, and strip tracking parameters/fragments. Facebook `profile.php` retains its required numeric `id` parameter. Bad stored URLs are not rendered. Public metadata uses the existing QueryClient; verified saves invalidate its key.
 
 ## Access change and activation gate
 
@@ -18,4 +18,4 @@ Restrictive rollback: `docs/hardening/rollback/2026-11-18-public-social-links.sq
 
 ## Evidence
 
-51 targeted tests passed: URL validation/normalization, actual settings read/write acknowledgement and account changes, public reader, both footer layouts, and isolated socket-only PostgreSQL tests as anon/nonadmin/admin, including restrictive rollback. Actual component browser checks passed at RU375/390/430, EN1440 and TH390 with synthetic settings transport, save/readback/footer update and clearing a profile; all network access stays local. TypeScript, lint, design audit and production build are checked before review; hosted checks verify the final integrated head. Synthetic writes are not live admin acceptance.
+59 targeted tests passed: URL validation/normalization, actual settings read/write acknowledgement and account changes, public reader, both footer layouts, and isolated socket-only PostgreSQL tests as anon/nonadmin/admin, including restrictive rollback. Actual component browser checks passed at RU375/390/430, EN1440 and TH390 with synthetic settings transport, save/readback/footer update and clearing a profile; all network access stays local. TypeScript, lint, design audit and production build are checked before review; hosted checks verify the final integrated head. Synthetic writes are not live admin acceptance.

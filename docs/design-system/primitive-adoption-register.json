@@ -4459,7 +4459,7 @@
     },
     {
       "file": "src/components/admin/settings/SocialNetworkSettings.tsx",
-      "sha256": "354d3acb6719b5f42678de2e3e47d98930a19bc00a8883bbb34b9311ed487e80",
+      "sha256": "b3c13a166b79d1483da1a6222d1542a1dbb21ab0e9323a0a41faba91fb22d2fd",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",

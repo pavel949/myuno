@@ -10,7 +10,7 @@
  */
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Instagram, Youtube, Linkedin, MessageCircle, Download, Smartphone } from 'lucide-react';
+import { Send, Instagram, Youtube, Linkedin, Facebook, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlatformSocialLinks } from '@/hooks/usePlatformSocialLinks';
 import { COMPANY_CONTACTS } from '@/lib/config';
@@ -72,6 +72,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
     ...(socialSettings.data?.youtube ? [{ href: socialSettings.data.youtube, icon: Youtube, label: 'YouTube' }] : []),
     ...(socialSettings.data?.instagram ? [{ href: socialSettings.data.instagram, icon: Instagram, label: 'Instagram' }] : []),
     ...(socialSettings.data?.linkedin ? [{ href: socialSettings.data.linkedin, icon: Linkedin, label: 'LinkedIn' }] : []),
+    ...(socialSettings.data?.facebook ? [{ href: socialSettings.data.facebook, icon: Facebook, label: 'Facebook' }] : []),
     { href: COMPANY_CONTACTS.social.whatsapp, icon: MessageCircle, label: 'WhatsApp' },
   ];
 

@@ -134,7 +134,7 @@ describe('platform social links use confirmed actor-bound settings', () => {
     fireEvent.change(screen.getByLabelText('Instagram'), {target:{value:''}});
     fireEvent.click(screen.getByRole('button',{name:'Save'}));
     await waitFor(() => expect(state.success).toHaveBeenCalled());
-    expect(state.store.get('org_social_links')).toEqual({youtube:'https://www.youtube.com/@new',instagram:'',linkedin:''});
+    expect(state.store.get('org_social_links')).toEqual({youtube:'https://www.youtube.com/@new',instagram:'',linkedin:'',facebook:''});
     expect(state.reads).toHaveLength(2);
   });
   it('rejects another network or an unsafe address before writing', async () => {

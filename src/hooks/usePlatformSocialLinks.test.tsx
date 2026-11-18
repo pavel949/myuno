@@ -17,8 +17,8 @@ describe('public social metadata reader',()=>{
   state.data={key:'org_social_links',value:{youtube:'https://youtube.com/@synthetic?tracking=remove',instagram:'javascript:alert(1)',linkedin:''}};
   const {result}=mount();await waitFor(()=>expect(result.current.isSuccess).toBe(true));
   expect(state.select).toHaveBeenCalledWith('key, value');expect(state.eq).toHaveBeenCalledWith('key','org_social_links');
-  expect(result.current.data).toEqual({youtube:'https://youtube.com/@synthetic',instagram:'',linkedin:''});
+  expect(result.current.data).toEqual({youtube:'https://youtube.com/@synthetic',instagram:'',linkedin:'',facebook:''});
  });
- it('does not invent profiles when no settings exist',async()=>{const {result}=mount();await waitFor(()=>expect(result.current.isSuccess).toBe(true));expect(result.current.data).toEqual({youtube:'',instagram:'',linkedin:''});});
+ it('does not invent profiles when no settings exist',async()=>{const {result}=mount();await waitFor(()=>expect(result.current.isSuccess).toBe(true));expect(result.current.data).toEqual({youtube:'',instagram:'',linkedin:'',facebook:''});});
  it('keeps a read failure distinct from a confirmed empty setting',async()=>{state.error=Error('Synthetic read failure');const {result}=mount();await waitFor(()=>expect(result.current.isError).toBe(true));expect(result.current.data).toBeUndefined();});
 });
