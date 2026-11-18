@@ -44,6 +44,28 @@ function mount(url = '/experiences') { return render(<MemoryRouter initialEntrie
 beforeEach(() => { state.language = 'en'; state.currency = 'THB'; state.mixedCurrency = false; state.error = false; state.loading = false; state.categoryError = false; state.useActualDetail = false; state.detailError = false; state.detailLoading = false; state.detailRetry.mockClear(); state.retry.mockClear(); state.categoryRetry.mockClear(); state.read.mockClear(); });
 afterEach(cleanup);
 describe('public experience catalogue journey', () => {
+ it('combines budget with search, clears one chip and preserves unrelated URL context', () => {
+  mount('/experiences?q=Island&maxPrice=300&ref=campaign');
+  expect(screen.getAllByTestId('offer')).toHaveLength(1);
+  expect(screen.getByRole('spinbutton', { name: 'Maximum price' })).toHaveValue(300);
+  fireEvent.click(screen.getByRole('button', { name: 'Remove filter: Up to 300 THB' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?q=Island&ref=campaign');
+  expect(screen.getByRole('textbox', { name: 'Search experiences…' })).toHaveValue('Island');
+  fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?ref=campaign');
+ });
+ it('shows invalid budget as a validation failure instead of unfiltered offers', () => {
+  mount('/experiences?minPrice=500&maxPrice=100');
+  expect(screen.getByRole('alert')).toHaveTextContent('minimum cannot exceed the maximum');
+  expect(screen.queryAllByTestId('offer')).toHaveLength(0);
+ });
+ it('keeps duration in URL and removes it through its chip', () => {
+  mount('/experiences?ref=campaign');
+  fireEvent.change(screen.getByRole('combobox', { name: 'Duration' }), { target: { value: 'half-day' } });
+  expect(screen.getByTestId('url')).toHaveTextContent('duration=half-day');
+  fireEvent.click(screen.getByRole('button', { name: 'Remove filter: 2–6 hours' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?ref=campaign');
+ });
  it('shows one category entry and a native yacht catalogue link before real offers', () => {
   mount(); expect(screen.getAllByTestId('offer')).toHaveLength(3);
   expect(screen.getAllByRole('button', { name: 'Islands' })).toHaveLength(1);

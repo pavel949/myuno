@@ -97,6 +97,19 @@ async def main():
                     return page.get_by_role('group', name=c['types']).get_by_role('button', name=label, exact=True)
 
                 try:
+                    await goto('/experiences?maxPrice=2500&duration=short&ref=budget-check')
+                    await expect(cards()).to_have_count(2)
+                    await open_filters()
+                    maximum = page.get_by_role('spinbutton').last
+                    await expect(maximum).to_have_value('2500')
+                    await maximum.fill('1800')
+                    await expect(cards()).to_have_count(1)
+                    await close_filters()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=budget-check')
+                    await page.get_by_role('button', name=c['clear'], exact=True).click()
+                    await expect(page.get_by_test_id('fixture-location')).to_have_text('/experiences?ref=budget-check')
+                    await expect(cards()).to_have_count(4)
+                    row['checks'].append('Recorded THB budget and duration combine, update in the actual sheet and reset without losing source context')
                     await goto()
                     await expect(cards()).to_have_count(4)
                     active = page.locator('.consumer-nav a[aria-current="page"]')

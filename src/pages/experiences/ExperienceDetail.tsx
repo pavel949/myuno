@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { formatRecordedPrice } from '@/lib/format/price';
+import { InquiryForm } from '@/components/vertical-wizard/InquiryForm';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { ExperienceDiscoveryDetail } from '@/components/experiences/ExperienceDiscoveryDetail';
 
@@ -35,6 +36,7 @@ export default function ExperienceDetail() {
   const { experience, isLoading, error, refetch } = useExperience(id);
   const { data: pricingOptions = [] } = useExperiencePricing(experience && !experience.discovery_only ? id : undefined);
   const [activeImage, setActiveImage] = useState(0);
+  const [inquiryOpen, setInquiryOpen] = useState(() => new URLSearchParams(location.search).get('inquiry') === '1');
   const isRu = language === 'ru';
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const priceLabel = (amount: number | null | undefined, currency: string | undefined) => formatRecordedPrice(amount, currency, { unknownLabel: t('Цена по запросу', 'Price on request', 'สอบถามราคา'), locale: language, allowZero: true });
@@ -77,7 +79,7 @@ export default function ExperienceDetail() {
     );
   }
 
-  if (experience.discovery_only) return <ExperienceDiscoveryDetail experience={experience} onBack={returnToCatalogue} />;
+  if (experience.discovery_only) return <ExperienceDiscoveryDetail experience={experience} onBack={returnToCatalogue} initialInquiryOpen={inquiryOpen} />;
 
   const isTour = experience.experience_type === 'tour';
   const images = experience.cover_image 
@@ -265,17 +267,12 @@ export default function ExperienceDetail() {
               </div>
             )}
 
-            {/* Book with Operator CTA */}
-            {experience.booking_url && (
-              <Button
-                className="w-full mt-4 gap-2"
-                size="lg"
-                onClick={() => window.open(experience.booking_url!, '_blank', 'noopener')}
-              >
-                <ExternalLink className="w-4 h-4" />
-                {isRu ? 'Забронировать у оператора' : 'Book with Operator'}
-              </Button>
-            )}
+            <Button className="w-full mt-4" size="lg" onClick={() => setInquiryOpen(true)}>
+              {t('Оставить заявку консьержу', 'Ask myUNO concierge', 'ติดต่อคอนเซียร์จ myUNO')}
+            </Button>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t('Консьерж myUNO уточнит наличие мест, программу и итоговую стоимость. Заявка не является подтверждённой бронью.', 'myUNO concierge will check availability, the programme and the final price. An inquiry is not a confirmed booking.', 'คอนเซียร์จ myUNO จะตรวจสอบที่ว่าง โปรแกรม และราคาสุดท้าย คำขอนี้ยังไม่ใช่การยืนยันการจอง')}
+            </p>
           </CardContent>
         </Card>
 
@@ -481,19 +478,14 @@ export default function ExperienceDetail() {
           </p>
         </div>
         <Button 
-          onClick={() => {
-            if (experience.booking_url) {
-              window.open(experience.booking_url, '_blank', 'noopener');
-            } else {
-              navigate(`/experiences/${experience.id}/book`);
-            }
-          }}
+          onClick={() => setInquiryOpen(true)}
           className="gap-2"
         >
-          {experience.booking_url && <ExternalLink className="w-4 h-4" />}
-          {isRu ? 'Забронировать' : 'Book with Operator'}
+          {t('Оставить заявку', 'Send inquiry', 'ส่งคำขอ')}
         </Button>
       </div>
+      <InquiryForm open={inquiryOpen} onOpenChange={setInquiryOpen} verticalId="tour"
+        listingId={experience.id} listingTitle={expTitle} entryPoint="experience_detail:concierge" />
     </MiniAppLayout>
   );
 }

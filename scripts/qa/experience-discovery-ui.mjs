@@ -1,4 +1,4 @@
-// Actual editorial detail, OptimizedImage and DS Button; synthetic shell and record.
+// Actual editorial detail, OptimizedImage and DS Button; synthetic shell, record and inquiry dialog. No external request is sent.
 import { build } from 'esbuild';
 import { mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
@@ -6,6 +6,7 @@ import path from 'node:path';
 const output = path.resolve('artifacts/experience-discovery');
 await mkdir(output, { recursive: true });
 const virtual = {
+  '@/components/vertical-wizard/InquiryForm': `import React from 'react';export const InquiryForm=({open,listingId,entryPoint})=>open?<div role="dialog" data-listing={listingId} data-entry={entryPoint}>Synthetic inquiry boundary; no submission</div>:null;`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
   '@/components/miniapp/MiniAppLayout': `import React from 'react';export const MiniAppLayout=({title,children})=><main className="mx-auto max-w-4xl px-4 pb-8"><p>ISOLATED QA SHELL</p><h1 className="font-display text-h1">{title}</h1>{children}</main>;`,
 };
