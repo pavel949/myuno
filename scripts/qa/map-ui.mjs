@@ -97,7 +97,8 @@ try{
    await screenshot('selected');
    await page.getByRole('button',{name:/Открыть предложение/}).click();
    await expect(page.getByTestId('location')).toContainText('/property/s1');
-   await page.getByRole('button',{name:'Close',exact:true}).click();
+   await page.goto(origin+'/fixture.html');
+   await page.waitForFunction(()=>window.fixtureMap?.loaded());
    await page.getByRole('button',{name:'Показать списком',exact:true}).click();
    await expect(page.getByRole('listbox',{name:'Список локаций'}).filter({visible:true})).toBeVisible();
    await screenshot('list');
