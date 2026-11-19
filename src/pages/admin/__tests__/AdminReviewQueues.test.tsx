@@ -107,7 +107,7 @@ describe('AdminProjects review views', () => {
 
     fireEvent.click(screen.getByRole('checkbox', { name: 'Select Pending coastal project' }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'Select Approved coastal project' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Approve', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: /^Approve$/ }));
 
     await waitFor(() => {
       for (const key of updatedKeys) expect(client.getQueryState(key)?.isInvalidated).toBe(true);
