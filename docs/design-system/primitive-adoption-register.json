@@ -16142,7 +16142,7 @@
     },
     {
       "file": "src/components/property/canonical-form/CanonicalPropertyForm.tsx",
-      "sha256": "e9dc45445e35a697680c8375f0da2ddbfcebd69e64c909512ef450436e5450c3",
+      "sha256": "94043e456cad3cf7f8ee8a3f3d743ac6473e09712421c7182310d8245d8408cf",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -36732,7 +36732,7 @@
     },
     {
       "file": "src/pages/owner/OwnerPropertyDetail.tsx",
-      "sha256": "7822ae0c72e8965f87f01ece0613fad207ecc71e734bd96b250ed0b632e5e8c0",
+      "sha256": "64cf46f8db201b27eaed8a20d1dc1524b4fbb7c6be45bfa0f5db1be19a2584da",
       "directRouteDeclarations": [
         {
           "id": "613b5789269653ac",
@@ -36749,8 +36749,8 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            177,
-            181,
+            128,
+            132,
             295,
             299,
             303
@@ -36761,7 +36761,7 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            128,
+            138,
             241,
             254,
             260,
@@ -36892,7 +36892,7 @@
     },
     {
       "file": "src/pages/owner/OwnerRentalTerms.tsx",
-      "sha256": "1a2ec257f3fc859c14a0dc0af35912a8e0df9075878843aadd73406a208485c2",
+      "sha256": "d77c2ac4fb64abb683c6cc0c139e0ef61b958b571820e2984f769d5fc12d9c9d",
       "directRouteDeclarations": [
         {
           "id": "e87bd8189d1c98cd",
@@ -37511,7 +37511,7 @@
     },
     {
       "file": "src/pages/owner/PropertyEditor.tsx",
-      "sha256": "43880833c8226d662451c428145b8bc4728444027d15619dfa2f8298eda9da66",
+      "sha256": "7651df839f73c63b7b0d86ba10cf626b3a3adef2d7953ff303bafb76c44fbd2c",
       "directRouteDeclarations": [
         {
           "id": "71813ba227558e11",
@@ -37532,10 +37532,10 @@
             666,
             669,
             670,
-            695,
-            713,
-            714,
-            727
+            687,
+            705,
+            706,
+            719
           ]
         },
         {
@@ -37610,7 +37610,7 @@
     },
     {
       "file": "src/pages/owner/PropertyQuickSetup.tsx",
-      "sha256": "ccbf9da38256f36bca94ddd97ce529ff69a0155d928b8a3e020cf4e69a65e0f7",
+      "sha256": "a498a772b39428f52ca509ed15eb4fd1a0887ca028358867025784f4436a82bb",
       "directRouteDeclarations": [
         {
           "id": "58a5391f6226601b",
