@@ -60,7 +60,7 @@ export const CrossSellSection = memo(function CrossSellSection({
       <div className={cn(
         'gap-3',
         variant === 'scroll'
-          ? 'flex snap-x snap-proximity overflow-x-auto pb-2 scrollbar-hide touch-pan-y lg:grid lg:grid-cols-4 lg:overflow-visible'
+          ? 'flex snap-x snap-proximity overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible'
           : 'grid grid-cols-2 lg:grid-cols-4',
       )}>
         {links.map((link, index) => (

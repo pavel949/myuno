@@ -64,7 +64,7 @@ const result = await build({
  }}],
 });
 const inputs=Object.keys(result.metafile.inputs).map(p=>p.replaceAll('\\','/'));
-for(const actual of ['nav/ConsumerHeader.tsx','pages/services/ServicesIndex.tsx','services/ServiceFunctionCard.tsx','pages/property/PropertySearchPage.tsx','home/HomeDiscoverySearch.tsx','property/PropertyListingCard.tsx','property/PropertyMapView.tsx','pages/ForBusinessPage.tsx'])if(!inputs.some(p=>!p.startsWith('fixture:')&&p.endsWith(actual)))throw Error('Actual surface absent: '+actual);
+for(const actual of ['nav/ConsumerHeader.tsx','pages/services/ServicesIndex.tsx','services/ServiceFunctionCard.tsx','pages/property/PropertySearchPage.tsx','home/HomeDiscoverySearch.tsx','property/PropertyListingCard.tsx','property/PropertyMapView.tsx','map/MapLibreMap.tsx','pages/ForBusinessPage.tsx'])if(!inputs.some(p=>!p.startsWith('fixture:')&&p.endsWith(actual)))throw Error('Actual surface absent: '+actual);
 if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|usePropertyFilterOptions|usePropertyQuickFilters|useServiceMarketplace|useSearchPropertyAvailability)\.ts$/.test(p)))throw Error('Production read module bundled');
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 if(process.argv.includes('--bundle-only'))process.exit(0);

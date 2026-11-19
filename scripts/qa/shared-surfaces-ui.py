@@ -83,6 +83,12 @@ async def main():
        };
       }""")
       assert len(grid['cards']) == 4 and not grid['cropped'], grid
+      if width < 1024:
+       rail = related.locator('section > div:nth-child(2)')
+       assert await rail.evaluate("(el) => getComputedStyle(el).touchAction === 'auto'")
+       if await rail.evaluate('(el) => el.scrollWidth > el.clientWidth + 1'):
+        await rail.evaluate('(el) => { el.scrollLeft = el.scrollWidth; }')
+        await expect(rail).not_to_have_js_property('scrollLeft', 0)
       if width >= 1024:
        assert all(card['width'] > 110 and abs(card['top'] - grid['cards'][0]['top']) <= 1 for card in grid['cards']), grid
       assert await page.get_by_test_id('canonical-card-header').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
