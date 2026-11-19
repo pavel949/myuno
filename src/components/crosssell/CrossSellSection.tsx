@@ -1,6 +1,5 @@
 import { pickLang } from '@/lib/i18n/pickLang';
 import { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getCrossSellLinks } from '@/lib/crossSellConfig';
@@ -28,7 +27,6 @@ export const CrossSellSection = memo(function CrossSellSection({
   title,
 }: CrossSellSectionProps) {
   const { language } = useLanguage();
-  const navigate = useNavigate();
   
   const links = getCrossSellLinks(currentVertical, maxItems);
   
@@ -59,30 +57,18 @@ export const CrossSellSection = memo(function CrossSellSection({
         />
       </div>
 
-      {variant === 'scroll' ? (
-        <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-proximity">
-          {links.map((link, index) => (
-            <div key={link.id} className="w-[110px] flex-shrink-0 snap-start touch-manipulation">
-              <CrossSellCard
-                link={link}
-                fromVertical={currentVertical}
-                index={index}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-4 gap-3">
-          {links.map((link, index) => (
-            <CrossSellCard
-              key={link.id}
-              link={link}
-              fromVertical={currentVertical}
-              index={index}
-            />
-          ))}
-        </div>
-      )}
+      <div className={cn(
+        'gap-3',
+        variant === 'scroll'
+          ? 'flex snap-x snap-proximity overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible'
+          : 'grid grid-cols-2 lg:grid-cols-4',
+      )}>
+        {links.map((link, index) => (
+          <div key={link.id} className={cn('min-w-0', variant === 'scroll' && 'w-32 shrink-0 snap-start lg:w-auto')}>
+            <CrossSellCard link={link} index={index} />
+          </div>
+        ))}
+      </div>
     </section>
   );
 });

@@ -8,13 +8,11 @@ import type { CrossSellLink } from '@/lib/crossSellConfig';
 
 interface CrossSellCardProps {
   link: CrossSellLink;
-  fromVertical: string;
   index?: number;
 }
 
 export const CrossSellCard = memo(function CrossSellCard({ 
   link, 
-  fromVertical,
   index = 0 
 }: CrossSellCardProps) {
   const navigate = useNavigate();
@@ -31,8 +29,9 @@ export const CrossSellCard = memo(function CrossSellCard({
       transition={{ delay: index * 0.05, duration: 0.2 }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      type="button"
       onClick={handleClick}
-      className="flex flex-col items-center justify-center p-4 bg-card border border-border rounded-none hover:shadow-lg hover:border-primary/30 transition-all duration-200 min-w-[100px] w-full"
+      className="flex h-full w-full min-w-0 flex-col items-center justify-center border border-border bg-card p-4 text-center transition-colors hover:border-primary/30"
     >
       <IconBadge
         icon={link.icon}
@@ -41,11 +40,11 @@ export const CrossSellCard = memo(function CrossSellCard({
         gradient={link.gradient}
         className="mb-2"
       />
-      <span className="font-medium text-sm text-foreground truncate w-full text-center">
+      <span className="w-full break-words whitespace-normal text-sm font-medium leading-snug text-foreground">
         {pickLang(language, { ru: link.labelRu, en: link.labelEn, th: link.labelTh })}
       </span>
       {(link.descriptionEn || link.descriptionRu) && (
-        <span className="text-xs text-muted-foreground truncate w-full text-center mt-0.5">
+        <span className="mt-1 w-full break-words whitespace-normal text-xs leading-snug text-muted-foreground">
           {pickLang(language, { ru: link.descriptionRu || '', en: link.descriptionEn || '', th: link.descriptionTh })}
         </span>
       )}
