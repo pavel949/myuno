@@ -1,11 +1,16 @@
 # Developer Portal — End-to-End QA Checklist
 
 > Smoke test the full developer journey from registration through admin moderation.
-> Estimated time: 20–30 minutes per pass. Run before every release that touches `/developer-portal/*` or `/admin/newbuilds`.
+> Run the applicable checks before releases that touch `/developer-portal/*` or `/admin/newbuilds`. Record the deployed revision and the exact scope of the checks.
+
+## Environment and stop condition
+
+Production and Lovable preview share the same business database. Treat both as live. On them, use read-only navigation: open published pages and authenticated views without submitting a form, changing a record or role, impersonating a developer, uploading media, or sending a notification.
+
+Run registration, mutations, approval/rejection, cleanup, and lead submission only against a verified separate database with disposable fixtures and isolated notification sinks. A fake name or a `[TEST]` label does not isolate the request. If that environment is unavailable, mark write and delivery acceptance **BLOCKED**, not passed.
 
 ## Test Accounts
-- **Developer (test):** `dev-portal-qa+<date>@myuno.app`
-- **Admin (existing):** use admin account with `roles.role = 'admin'`
+- **Developer and admin:** disposable accounts in the isolated environment, with the same roles as the corresponding production accounts. Route synthetic mail and WhatsApp delivery only to test sinks.
 
 ## Steps
 
@@ -62,12 +67,12 @@
 ### 10. Edit after approval
 33. Back as developer → edit project description.
 34. Save.
-35. **Expect:** small edits keep `approval_status='approved'`. Significant changes (price, units) trigger re-review (status reverts to `pending`).
+35. **Expect:** isolated tests confirm the configured moderation rule. With a disposable fixture, make one authorized photo or starting-price change, then read the public project from a separate signed-out session. Confirm approved changes propagate and pending/rejected changes do not appear. Record project ID, role, result, and build revision; a success toast does not prove public propagation.
 
 ### 11. Lead capture
-36. As anonymous visitor, submit lead form on the project page.
-37. **Expect:** row in `nb_leads` with `project_id` set, notification to developer email.
-38. Developer dashboard → "Leads" tab shows new lead.
+36. **Isolated only.** As an anonymous visitor, submit one synthetic lead for a known project; keep the request ID. Repeat the same request after a simulated lost response.
+37. **Expect:** one durable request linked to the intended project, visible in the internal myUNO admin queue. Reconcile the same ID in the configured myUNO email and WhatsApp test sinks. A configured recipient or an accepted send is not delivery evidence.
+38. **Expect:** no forwarding to the developer or any supplier, and no customer contact or lead exposure in a supplier workspace. Any legacy notification path, duplicate, missing record/delivery, or wrong recipient blocks acceptance.
 
 ### 12. Admin impersonation
 39. Admin → `/admin/developers` → click developer → "Impersonate".
@@ -107,8 +112,8 @@ WHERE approval_status = 'pending' AND created_at < now() - interval '7 days';
 ```
 
 ## Sign-off
-- [ ] All 15 steps pass
-- [ ] No console errors during run
-- [ ] No 4xx/5xx in network tab
-- [ ] Mobile + desktop both verified
-- [ ] Tester: __________ Date: __________
+- [ ] Read-only smoke: published build, desktop and mobile scope recorded.
+- [ ] Isolated CRUD: test roles, disposable project, signed-out readback, and expected moderation outcome.
+- [ ] Isolated delivery: one request ID, same project, myUNO admin visibility and confirmed internal test-sink delivery; no supplier notification or duplicate.
+- [ ] Blocked or skipped checks and relevant console/network failures documented.
+- [ ] Tester: __________ Date: __________ Revision: __________
