@@ -1,0 +1,51 @@
+name: consultation-outbox-isolated
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - docs/hardening/lead-outbox-review/**
+      - docs/hardening/consultation-intake/**
+      - .github/workflows/consultation-outbox-isolated.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Install isolated PostgreSQL binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-client
+          echo "POSTGRES_TEST_BIN_DIR=$(pg_config --bindir)" >> "$GITHUB_ENV"
+      - name: Existing canonical intake actor tests (disposable local DB)
+        run: npx vitest run src/lib/__tests__/consultationIntake.postgres.test.ts
+      - name: Outbox admission, concurrency and lifecycle (separate disposable local DB)
+        run: node --test docs/hardening/lead-outbox-review/postgres.test.mjs
+      - name: Worker and scheduler adapters (no external sends)
+        run: node --test docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs docs/hardening/lead-outbox-review/providers.test.mjs docs/hardening/lead-outbox-review/runtime.test.mjs
+      - name: Checkout pinned shared recipient parser from coordinated PR 261
+        uses: actions/checkout@v4
+        with:
+          ref: b88f68262fd15de030d67e27fab0f1a6f9dfc4b3
+          path: .outbox-pr261
+          sparse-checkout: supabase/functions/_shared/admin-notification-contacts.ts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Cross-PR actual parser composition (provider network mocked)
+        env:
+          OUTBOX_CONTACTS_MODULE: .outbox-pr261/supabase/functions/_shared/admin-notification-contacts.ts
+        run: node --test docs/hardening/lead-outbox-review/parser-integration.test.mjs
+      - name: Install pinned Deno runtime for isolated compatibility proof
+        run: npm install --prefix /tmp/outbox-deno --no-save deno@2.9.6
+      - name: Deno runtime and actual parser (network and subprocess denied)
+        env:
+          OUTBOX_CONTACTS_MODULE: .outbox-pr261/supabase/functions/_shared/admin-notification-contacts.ts
+        run: /tmp/outbox-deno/node_modules/.bin/deno test --no-config --allow-read --allow-env=OUTBOX_CONTACTS_MODULE docs/hardening/lead-outbox-review/worker.test.mjs docs/hardening/lead-outbox-review/adapters.test.mjs docs/hardening/lead-outbox-review/providers.test.mjs docs/hardening/lead-outbox-review/runtime.test.mjs docs/hardening/lead-outbox-review/parser-integration.test.mjs
