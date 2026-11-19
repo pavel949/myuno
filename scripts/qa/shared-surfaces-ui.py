@@ -69,6 +69,22 @@ async def main():
        box=await locator.bounding_box();assert box and box['x']>=-1 and box['y']>=-1 and box['x']+box['width']<=width+1 and box['y']+box['height']<=641,box
        assert await locator.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1')
       assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+      related = page.get_by_test_id('related-offers')
+      grid = await related.evaluate("""root => {
+       const cards = [...root.querySelectorAll('section > div:nth-child(2) button')];
+       return {
+        cards: cards.map(card => {
+         const rect = card.getBoundingClientRect();
+         return {width: rect.width, top: rect.top};
+        }),
+        cropped: cards.flatMap(card => [...card.querySelectorAll(':scope > span')])
+         .filter(label => label.textContent.trim() && label.scrollWidth > label.clientWidth + 1)
+         .map(label => label.textContent),
+       };
+      }""")
+      assert len(grid['cards']) == 4 and not grid['cropped'], grid
+      if width >= 1024:
+       assert all(card['width'] > 110 and abs(card['top'] - grid['cards'][0]['top']) <= 1 for card in grid['cards']), grid
       assert await page.get_by_test_id('canonical-card-header').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
       assert await page.get_by_test_id('canonical-section').locator('..').evaluate('(el)=>parseFloat(getComputedStyle(el).paddingLeft)') == EXPECTED_PADDING
       assert await page.get_by_test_id('canonical-inset').evaluate('(el)=>getComputedStyle(el).boxShadow') == 'none'
