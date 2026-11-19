@@ -1,5 +1,6 @@
 import { PageShell } from '@/components/page/PageShell';
-import { invalidateProjectPriceReaders } from '@/lib/real-estate/invalidateProjectPriceReaders';
+import { invalidateProjectCatalog } from '@/hooks/usePropertyProjects';
+import { assertAdminRows } from '@/lib/assertAdminRows';
 import { projectStartingPrice } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * Admin — Newbuilds management (projects, developers, featured, leads)
@@ -82,12 +83,12 @@ export default function AdminNewbuilds() {
   const updateProject = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: ProjectUpdate }) => {
       if (updates.price_from != null && projectStartingPrice(updates.price_from) == null) throw new Error('Укажите положительную цену в THB или очистите поле.');
-      const { error } = await supabase.from('property_projects').update(updates).eq('id', id);
+      const { data, error } = await supabase.from('property_projects').update(updates).eq('id', id).select('id');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(qc, data.map(row => row.id));
+      assertAdminRows(data, [id], () => true);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-nb-projects'] });
-      void invalidateProjectPriceReaders(qc);
       toast.success('Обновлено');
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Ошибка'),
@@ -107,12 +108,12 @@ export default function AdminNewbuilds() {
   const bulkUpdateProjects = useMutation({
     mutationFn: async ({ ids, updates }: { ids: string[]; updates: ProjectUpdate }) => {
       if (updates.price_from != null && projectStartingPrice(updates.price_from) == null) throw new Error('Укажите положительную цену в THB или очистите поле.');
-      const { error } = await supabase.from('property_projects').update(updates).in('id', ids);
+      const { data, error } = await supabase.from('property_projects').update(updates).in('id', ids).select('id');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(qc, data.map(row => row.id));
+      assertAdminRows(data, ids, () => true);
     },
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['admin-nb-projects'] });
-      void invalidateProjectPriceReaders(qc);
       clearSelection();
       toast.success(`Обновлено ${vars.ids.length} проектов`);
     },
