@@ -440,7 +440,7 @@ export default function AdminProjects() {
         />
 
         {/* Search + Moderation filter */}
-        <div className="mb-4 space-y-3">
+        <div className="mb-5 space-y-4 border bg-card p-4 sm:p-5">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -455,9 +455,9 @@ export default function AdminProjects() {
             <legend className="mb-2 text-sm font-medium">{pickLang(language, { en: "Review queue", ru: "Очередь проверки", th: "คิวตรวจสอบ" })}</legend>
             <div className="flex gap-2 flex-wrap">
               {PROJECT_REVIEW_FILTERS.map(review => (
-                <Button key={review} size="sm" className="min-h-11" variant={moderationFilter === review ? 'default' : 'outline'}
+                <Button key={review} size="sm" className="min-h-11 whitespace-normal px-3 text-left leading-snug" variant={moderationFilter === review ? 'default' : 'outline'}
                   aria-pressed={moderationFilter === review} onClick={() => setFilters({ filter: review })}>
-                  {reviewLabels[review]}{' '}<span className="ml-2 font-mono">{reviewCount(review)}</span>
+                  {reviewLabels[review]}{' '}<span className="tabular-nums">{reviewCount(review)}</span>
                 </Button>
               ))}
             </div>
@@ -489,9 +489,9 @@ export default function AdminProjects() {
               <span className="text-sm font-medium">
                 {isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`}
               </span>
-              <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+              <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:flex-1">
                 <Select value={bulkDeveloperId} onValueChange={setBulkDeveloperId}>
-                  <SelectTrigger className="h-9 w-[260px]">
+                  <SelectTrigger className="min-w-0 flex-1">
                     <SelectValue placeholder={isRu ? 'Назначить застройщика…' : 'Assign developer…'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -555,7 +555,7 @@ export default function AdminProjects() {
                   <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={isSelected}
-                      aria-label={`${pickLang(language, { en: "Select", ru: "Выбрать", th: "เลือก" })} ${isRu ? project.name_ru : project.name_en}`}
+                      aria-label={`${pickLang(language, { en: "Select", ru: "Выбрать", th: "เลือก" })} ${(isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru)}`}
                       onCheckedChange={() => toggleSelect(project.id)}
                       className="bg-background/80"
                     />
@@ -589,13 +589,13 @@ export default function AdminProjects() {
                 </div>
                 
                 <CardContent className="p-4 cursor-pointer" onClick={() => handleOpenEdit(project)}>
-                  <h3 className="font-semibold truncate">
-                    {isRu ? project.name_ru : project.name_en}
+                  <h3 className="font-display text-lg font-semibold leading-tight [overflow-wrap:anywhere]">
+                    {(isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru)}
                   </h3>
                   
                   {project.address ? (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <MapPin className="h-3 w-3" />
+                    <p className="mt-2 flex items-start gap-2 break-words text-sm text-muted-foreground">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
                       {project.address}
                     </p>
                   ) : (
@@ -626,14 +626,14 @@ export default function AdminProjects() {
                     )}
                   </div>
                 </CardContent>
-                <div className="px-4 pb-3 flex gap-2 border-t pt-2">
+                <div className="flex flex-wrap gap-2 border-t p-3">
                   <Button asChild size="sm" variant="ghost" className="flex-1" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/admin/newbuilds/projects/${project.id}/documents`}>
                       <FileText className="h-3.5 w-3.5 mr-1" />
                       {isRu ? 'Документы' : 'Documents'}
                     </Link>
                   </Button>
-                  <Button size="sm" variant="ghost" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
                     <Edit className="h-3.5 w-3.5 mr-1" />
                     {pickLang(language, { en: "Review details", ru: "Проверить", th: "ตรวจสอบข้อมูล" })}
                   </Button>
@@ -646,7 +646,7 @@ export default function AdminProjects() {
         {/* Edit/Create Sheet */}
         <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
           <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
-            <SheetHeader className="p-6 pb-0">
+            <SheetHeader className="px-4 pb-0 pt-5 sm:px-6">
               <SheetTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
                 {editingProject 
@@ -656,21 +656,21 @@ export default function AdminProjects() {
               </SheetTitle>
             </SheetHeader>
 
-            <Tabs defaultValue="basic" className="p-6 pt-4">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="basic">
+            <Tabs defaultValue="basic" className="p-4 sm:p-6">
+              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-5">
+                <TabsTrigger value="basic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Основное' : 'Basic'}
                 </TabsTrigger>
-                <TabsTrigger value="units">
+                <TabsTrigger value="units" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Юниты' : 'Units'}
                 </TabsTrigger>
-                <TabsTrigger value="media">
+                <TabsTrigger value="media" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Медиа' : 'Media'}
                 </TabsTrigger>
-                <TabsTrigger value="amenities">
+                <TabsTrigger value="amenities" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Удобства' : 'Amenities'}
                 </TabsTrigger>
-                <TabsTrigger value="juristic">
+                <TabsTrigger value="juristic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'УК' : 'Mgmt'}
                 </TabsTrigger>
               </TabsList>

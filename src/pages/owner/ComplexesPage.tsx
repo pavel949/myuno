@@ -27,14 +27,14 @@ export default function ComplexesPage() {
   const [editContext, setEditContext] = useState<{ row: PropertyComplex; actorId?: string; companyId?: string } | null>(null);
   const editing = editContext?.actorId === user?.id && editContext?.companyId === activeCompany?.company_id ? editContext?.row : null;
   // Employee-created records always use the checked form, even for dual-role users.
+  const query = search.trim().toLowerCase();
   const filtered = (complexes || []).filter(complex => !complex.approval_status).filter(complex => {
-    const query = search.toLowerCase();
     return !query || complex.name.toLowerCase().includes(query) || complex.name_ru?.toLowerCase().includes(query) || complex.district?.toLowerCase().includes(query);
   });
 
   return <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
     <div>
-      <h1 className="text-2xl font-bold text-foreground flex items-center gap-2"><Building2 className="h-6 w-6 shrink-0 text-primary" />{text('Property Complexes', 'Жилые комплексы', 'โครงการที่พักอาศัย')}</h1>
+      <h1 className="flex items-start gap-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl"><Building2 className="h-6 w-6 shrink-0 text-primary" />{text('Property Complexes', 'Жилые комплексы', 'โครงการที่พักอาศัย')}</h1>
       <p className="text-sm text-muted-foreground mt-1">{text('Complex content and publication review.', 'Данные комплексов и проверка перед публикацией.', 'ข้อมูลโครงการและการตรวจสอบก่อนเผยแพร่')}</p>
     </div>
     <ManagedComplexDrafts />
@@ -46,6 +46,10 @@ export default function ComplexesPage() {
       </div>
       {isLoading ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map(index => <Skeleton key={index} className="h-64 rounded-none" />)}</div>
         : error ? <div role="alert" className="space-y-2"><p>{text('Existing complexes could not be loaded.', 'Не удалось загрузить существующие комплексы.', 'โหลดโครงการเดิมไม่ได้')}</p><Button variant="outline" onClick={() => void refetch()}>{text('Retry', 'Повторить', 'ลองอีกครั้ง')}</Button></div>
+          : filtered.length === 0 && query ? <div className="space-y-2 border bg-card p-4">
+            <p>{text('No complexes match your search.', 'По вашему запросу комплексы не найдены.', 'ไม่พบโครงการที่ตรงกับคำค้นหา')}</p>
+            <Button variant="ghost" onClick={() => setSearch('')}>{text('Clear search', 'Сбросить поиск', 'ล้างการค้นหา')}</Button>
+          </div>
           : filtered.length === 0 ? <p className="py-6 text-muted-foreground">{text('No existing complexes available to manage.', 'Нет существующих комплексов, доступных для управления.', 'ไม่มีโครงการเดิมที่คุณสามารถดูแลได้')}</p>
             : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{filtered.map(complex => <ComplexCard key={complex.id} complex={complex} onClick={() => setEditContext({ row: complex, actorId: user?.id, companyId: activeCompany?.company_id })} />)}</div>}
     </section>
