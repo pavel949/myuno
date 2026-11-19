@@ -6,7 +6,6 @@ import { useMyProperties } from '@/hooks/useMyProperties';
 import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { 
   usePropertyFinancialsPaginated, 
-  useFinancialStats,
   useDeleteFinancial,
   usePropertyFinancialsCount,
   INCOME_CATEGORIES,
@@ -32,12 +31,11 @@ import { format, parseISO } from 'date-fns';
 import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
 import { FinancialCharts } from '@/components/owner/FinancialCharts';
 import { ReceiptViewer } from '@/components/owner/ReceiptViewer';
-import { FinancialStatsCards } from '@/components/owner/financials/FinancialStatsCards';
 import { TransactionCard } from '@/components/owner/financials/TransactionCard';
 import { ExpenseTemplates } from '@/components/owner/expense/ExpenseTemplates';
 import { CashFlowForecast } from '@/components/owner/financials/CashFlowForecast';
 import { useOwnerBookingRevenue } from '@/hooks/useOwnerBookingRevenue';
-import { useCurrency } from '@/contexts/CurrencyContext';
+import { formatPropertyRate } from '@/lib/owner/propertyRateDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -71,14 +69,12 @@ export default function OwnerFinancials() {
     ...delegatedProperties.filter(dp => !myProperties.some(op => op.property_id === dp.id)),
   ];
 
-  const { data: financialsData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePropertyFinancialsPaginated(
+  const { data: financialsData, isLoading, isError: financialsError, fetchNextPage, hasNextPage, isFetchingNextPage } = usePropertyFinancialsPaginated(
     selectedProperty === 'all' ? undefined : selectedProperty
   );
   const { data: totalCount } = usePropertyFinancialsCount(selectedProperty === 'all' ? undefined : selectedProperty);
-  const { data: stats } = useFinancialStats(selectedProperty === 'all' ? undefined : selectedProperty);
   const deleteFinancial = useDeleteFinancial();
-  const { items: bookingItems, summary: bookingSummary, isLoading: bookingsLoading } = useOwnerBookingRevenue(selectedProperty === 'all' ? undefined : selectedProperty);
-  const { formatPrice } = useCurrency();
+  const { items: bookingItems, isLoading: bookingsLoading, isError: bookingsError } = useOwnerBookingRevenue(selectedProperty === 'all' ? undefined : selectedProperty);
 
   const financials = useMemo(() => {
     if (!financialsData?.pages) return [];
@@ -116,12 +112,12 @@ export default function OwnerFinancials() {
     if (!filteredFinancials.length) return;
     const headers = [
       isRu ? 'Дата' : 'Date', isRu ? 'Тип' : 'Type', isRu ? 'Категория' : 'Category',
-      isRu ? 'Сумма' : 'Amount', isRu ? 'Объект' : 'Property', isRu ? 'Описание' : 'Description', isRu ? 'Статус' : 'Status',
+      isRu ? 'Сумма' : 'Amount', isRu ? 'Валюта' : 'Currency', isRu ? 'Объект' : 'Property', isRu ? 'Описание' : 'Description', isRu ? 'Статус' : 'Status',
     ];
     const rows = filteredFinancials.map(f => [
       f.transaction_date,
-      f.transaction_type === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расход' : 'Expense'),
-      getCategoryLabel(f.category, f.transaction_type), f.amount, f.property?.title || '', f.description || '', f.status || '',
+      f.transaction_type === 'deposit' ? (isRu ? 'Залог' : 'Deposit') : f.transaction_type === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расход' : 'Expense'),
+      getCategoryLabel(f.category, f.transaction_type), f.amount, f.currency || '', f.property?.title || '', f.description || '', f.status || '',
     ]);
     const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -142,10 +138,10 @@ export default function OwnerFinancials() {
   return (
     <PageContainer>
       <BackButton fallbackPath="/owner/finance" />
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Транзакции' : 'Transactions'}</h1>
-          <p className="text-sm text-muted-foreground">{isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}</p>
+          <p className="text-sm text-muted-foreground">{isRu ? 'Записи по объектам недвижимости' : 'Property transaction records'}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate('/mc/budget')}>
@@ -177,7 +173,7 @@ export default function OwnerFinancials() {
       </div>
 
       {/* View Toggle */}
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}>
           <Receipt className="h-4 w-4 mr-2" />{isRu ? 'Список' : 'List'}
         </Button>
@@ -192,7 +188,11 @@ export default function OwnerFinancials() {
         </Button>
       </div>
 
-      {viewMode !== 'forecast' && <FinancialStatsCards stats={stats} isRu={isRu} />}
+      <p className="mb-4 border-l-4 border-primary py-1 pl-3 text-sm text-muted-foreground">
+        {isRu
+          ? 'Записи и суммы бронирований здесь не сверены с оплатами. Они не показывают прибыль, полученные деньги или сумму к выплате.'
+          : 'Records and booking amounts here are not reconciled to payments. They do not show profit, cash received, or amounts owed.'}
+      </p>
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -231,35 +231,30 @@ export default function OwnerFinancials() {
         <CashFlowForecast propertyId={selectedProperty === 'all' ? undefined : selectedProperty} />
       )}
 
-      {viewMode === 'charts' && financials && (
-        <FinancialCharts financials={financials} dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined} />
+      {viewMode === 'charts' && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {isRu ? 'График включает только загруженные записи в THB, без залогов.' : 'The chart includes only loaded records in THB and excludes deposits.'}
+          </p>
+          {financialsError ? (
+            <p role="alert" className="text-sm text-muted-foreground">
+              {isRu ? 'Не удалось загрузить записи для графика.' : 'Could not load records for the chart.'}
+            </p>
+          ) : <FinancialCharts financials={filteredFinancials.filter(f => f.currency?.trim().toUpperCase() === 'THB' &&
+            (f.transaction_type === 'expense' || (f.transaction_type === 'income' && f.category !== 'deposit')))}
+            dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined} />}
+        </div>
       )}
 
       {viewMode === 'bookings' && (
         <div className="space-y-4">
-          {/* Booking Revenue Summary */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Card><CardContent className="p-3">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Выручка' : 'Revenue'}</p>
-              <p className="text-lg font-bold">{formatPrice(bookingSummary.totalRevenue)}</p>
-            </CardContent></Card>
-            <Card><CardContent className="p-3">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Комиссия' : 'Commission'}</p>
-              <p className="text-lg font-bold text-accent">{formatPrice(bookingSummary.totalCommission)}</p>
-            </CardContent></Card>
-            <Card><CardContent className="p-3">
-              <p className="text-xs text-muted-foreground">{isRu ? 'К выплате' : 'Net Payout'}</p>
-              <p className="text-lg font-bold text-success">{formatPrice(bookingSummary.totalNetPayout)}</p>
-            </CardContent></Card>
-            <Card><CardContent className="p-3">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Бронирований' : 'Bookings'}</p>
-              <p className="text-lg font-bold">{bookingSummary.bookingCount}</p>
-            </CardContent></Card>
-          </div>
-
           {/* Booking List */}
           {bookingsLoading ? (
             <div className="space-y-3">{[1,2,3].map(i => <Card key={i}><CardContent className="p-4"><Skeleton className="h-16" /></CardContent></Card>)}</div>
+          ) : bookingsError ? (
+            <p role="alert" className="text-sm text-muted-foreground">
+              {isRu ? 'Не удалось загрузить записи бронирований.' : 'Could not load booking records.'}
+            </p>
           ) : bookingItems.length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">
               {isRu ? 'Нет подтверждённых бронирований' : 'No confirmed bookings'}
@@ -280,10 +275,8 @@ export default function OwnerFinancials() {
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold">{formatPrice(b.totalAmount)}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {isRu ? 'Нетто' : 'Net'}: {formatPrice(b.netPayout)}
-                        </p>
+                        <p className="text-sm font-semibold">{formatPropertyRate(b.totalAmount, b.currency, isRu)}</p>
+                        <p className="text-xs text-muted-foreground">{isRu ? 'Сумма бронирования' : 'Booking amount'}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -305,6 +298,10 @@ export default function OwnerFinancials() {
           <TabsContent value={activeTab} className="space-y-3">
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">{isRu ? 'Загрузка...' : 'Loading...'}</div>
+            ) : financialsError ? (
+              <p role="alert" className="py-8 text-center text-muted-foreground">
+                {isRu ? 'Не удалось загрузить записи операций.' : 'Could not load transaction records.'}
+              </p>
             ) : !filteredFinancials?.length ? (
               <Card>
                 <CardContent className="py-8 text-center">

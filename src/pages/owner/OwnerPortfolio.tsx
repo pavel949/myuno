@@ -1,439 +1,121 @@
-import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import { subDays } from 'date-fns';
+import { BarChart3, Home } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCityCurrency } from '@/hooks/useCityCurrency';
-
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { usePropertyFinancialsFull, useFinancialStats, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
 import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  TrendingUp, TrendingDown, DollarSign, Home, 
-  Calendar, PieChart, BarChart3, ArrowUpRight, ArrowDownRight
-} from 'lucide-react';
-import { format, subDays, differenceInDays, isWithinInterval } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import {
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from 'recharts';
-import { CHART_THEME } from '@/lib/chartTheme';
-import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { bangkokTodayDate, civilStaySpan, toBangkokDateKey } from '@/lib/hotelDates';
 
-const CHART_COLORS = CHART_THEME.palette;
+const REPORTABLE_BOOKING_STATUSES = new Set(['confirmed', 'active', 'checked_in', 'checked_out', 'completed']);
 
 export default function OwnerPortfolio() {
   const { language } = useLanguage();
-  const { symbol: curSym } = useCityCurrency();
-
   const { user } = useAuth();
-  const navigate = useNavigate();
   const isRu = language === 'ru';
+  const { data: properties, isLoading: propertiesLoading, error: propertiesError } = useOwnerProperties();
+  const { bookings, isLoading: bookingsLoading, error: bookingsError } = useAllPropertyBookings();
 
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
-  const { data: financials, isLoading: financialsLoading } = usePropertyFinancialsFull();
-  const { data: stats } = useFinancialStats();
-  const { bookings, isLoading: bookingsLoading } = useAllPropertyBookings();
-
-  const isLoading = propertiesLoading || financialsLoading || bookingsLoading;
-
-  // Calculate property-level metrics
   const propertyMetrics = useMemo(() => {
-    if (!properties || !financials || !bookings) return [];
-
-    const last30Days = {
-      start: subDays(new Date(), 30),
-      end: new Date(),
-    };
-
-    return properties.map(property => {
-      // Financials for this property
-      const propertyFinancials = financials.filter(f => f.property_id === property.id);
-      const income = propertyFinancials
-        .filter(f => f.transaction_type === 'income')
-        .reduce((sum, f) => sum + Number(f.amount), 0);
-      const expenses = propertyFinancials
-        .filter(f => f.transaction_type === 'expense')
-        .reduce((sum, f) => sum + Number(f.amount), 0);
-      const netProfit = income - expenses;
-
-      // Bookings for this property
-      const propertyBookings = bookings.filter(b => b.property_id === property.id);
-      
-      // Calculate occupancy (last 30 days)
-      let bookedDays = 0;
-      propertyBookings.forEach(booking => {
-        const checkIn = new Date(booking.check_in);
-        const checkOut = new Date(booking.check_out);
-        
-        // Count days within last 30 days
-        for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
-          if (isWithinInterval(d, last30Days)) {
-            bookedDays++;
-          }
+    // Report distinct booked nights in the past 30 completed Phuket dates.
+    // Booking data is not proof of actual occupancy or earned income.
+    const start = subDays(bangkokTodayDate(), 30);
+    return (properties ?? []).map(property => {
+      const occupiedDates = new Set<number>();
+      if (!bookingsError && !bookingsLoading && bookings) {
+        for (const booking of bookings) {
+          if (booking.property_id !== property.id || !booking.status ||
+              !REPORTABLE_BOOKING_STATUSES.has(booking.status)) continue;
+          const checkIn = toBangkokDateKey(booking.check_in);
+          const checkOut = toBangkokDateKey(booking.check_out);
+          if (!checkIn || !checkOut) continue;
+          const span = civilStaySpan({ check_in: checkIn, check_out: checkOut }, start, 30);
+          if (!span) continue;
+          for (let day = span.startOffset; day < span.endOffset; day++) occupiedDates.add(day);
         }
-      });
-      const occupancyRate = Math.min((bookedDays / 30) * 100, 100);
-
-      // Average nightly rate
-      const confirmedBookings = propertyBookings.filter(b => 
-        b.status === 'confirmed' && b.total_amount && b.total_amount > 0
-      );
-      const avgNightlyRate = confirmedBookings.length > 0
-        ? confirmedBookings.reduce((sum, b) => {
-            const nights = differenceInDays(new Date(b.check_out), new Date(b.check_in));
-            return sum + (Number(b.total_amount) / Math.max(nights, 1));
-          }, 0) / confirmedBookings.length
-        : property.price_per_night || 0;
-
-      // Simple ROI calculation (annual projection based on current data)
-      const monthlyNet = netProfit; // Assuming data is for ~1 month
-      const annualProjection = monthlyNet * 12;
-      const estimatedValue = (property.price_per_night || 0) * 365 * 0.6; // Rough estimate
-      const roi = estimatedValue > 0 ? (annualProjection / estimatedValue) * 100 : 0;
-
+      }
       return {
         id: property.id,
         title: isRu && property.title_ru ? property.title_ru : property.title,
         coverImage: property.cover_image,
-        income,
-        expenses,
-        netProfit,
-        occupancyRate,
-        avgNightlyRate,
-        roi,
-        totalBookings: propertyBookings.length,
+        bookedNights: bookingsError || bookingsLoading || !bookings ? null : occupiedDates.size,
       };
-    });
-  }, [properties, financials, bookings, isRu]);
+    }).sort((a, b) => (b.bookedNights ?? -1) - (a.bookedNights ?? -1));
+  }, [properties, bookings, bookingsError, bookingsLoading, isRu]);
 
-  // Sortable property comparison — lets the owner surface under/over-performers
-  const [sortBy, setSortBy] = useState<'net' | 'income' | 'occupancy' | 'rate'>('net');
-  const sortedMetrics = useMemo(() => {
-    const keyFn: Record<typeof sortBy, (p: typeof propertyMetrics[number]) => number> = {
-      net: p => p.netProfit,
-      income: p => p.income,
-      occupancy: p => p.occupancyRate,
-      rate: p => p.avgNightlyRate,
-    };
-    return [...propertyMetrics].sort((a, b) => keyFn[sortBy](b) - keyFn[sortBy](a));
-  }, [propertyMetrics, sortBy]);
-
-  // Expense breakdown by category
-  const expensesByCategory = useMemo(() => {
-    if (!financials) return [];
-
-    const categoryTotals: Record<string, number> = {};
-    financials
-      .filter(f => f.transaction_type === 'expense')
-      .forEach(f => {
-        const cat = f.category || 'other';
-        categoryTotals[cat] = (categoryTotals[cat] || 0) + Number(f.amount);
-      });
-
-    return Object.entries(categoryTotals)
-      .map(([category, amount]) => {
-        const catInfo = EXPENSE_CATEGORIES.find(c => c.value === category);
-        return {
-          name: catInfo ? (isRu ? catInfo.labelRu : catInfo.labelEn) : category,
-          value: amount,
-          category,
-        };
-      })
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8);
-  }, [financials, isRu]);
-
-  // Portfolio totals
-  const totals = useMemo(() => {
-    const totalIncome = propertyMetrics.reduce((sum, p) => sum + p.income, 0);
-    const totalExpenses = propertyMetrics.reduce((sum, p) => sum + p.expenses, 0);
-    const avgOccupancy = propertyMetrics.length > 0
-      ? propertyMetrics.reduce((sum, p) => sum + p.occupancyRate, 0) / propertyMetrics.length
-      : 0;
-    
-    return {
-      totalIncome,
-      totalExpenses,
-      netProfit: totalIncome - totalExpenses,
-      avgOccupancy,
-      propertyCount: properties?.length || 0,
-    };
-  }, [propertyMetrics, properties]);
-
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `${curSym}${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `${curSym}${(value / 1000).toFixed(0)}K`;
-    return `${curSym}${value.toFixed(0)}`;
-  };
-
-
-  if (!user) {
-    redirectToAuth(navigate);
-    return null;
-  }
+  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <PageContainer>
       <BackButton fallbackPath="/owner" />
-      <PageHeader 
+      <PageHeader
         title={isRu ? 'Аналитика портфеля' : 'Portfolio Analytics'}
-        subtitle={isRu ? 'Обзор всех объектов' : 'Overview of all properties'}
+        subtitle={isRu ? 'Недвижимость и бронирования' : 'Properties and bookings'}
       />
-
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-success" />
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Доходы' : 'Income'}
-              </span>
-            </div>
-            {isLoading ? (
-              <Skeleton className="h-7 w-20" />
-            ) : (
-              <p className="text-xl font-bold text-success">
-                {formatCurrency(totals.totalIncome)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingDown className="h-4 w-4 text-destructive" />
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Расходы' : 'Expenses'}
-              </span>
-            </div>
-            {isLoading ? (
-              <Skeleton className="h-7 w-20" />
-            ) : (
-              <p className="text-xl font-bold text-destructive">
-                {formatCurrency(totals.totalExpenses)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 text-primary" />
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Чистая прибыль' : 'Net Profit'}
-              </span>
-            </div>
-            {isLoading ? (
-              <Skeleton className="h-7 w-20" />
-            ) : (
-              <p className={`text-xl font-bold ${totals.netProfit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {formatCurrency(totals.netProfit)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Calendar className="h-4 w-4 text-info" />
-              <span className="text-xs text-muted-foreground">
-                {isRu ? 'Загрузка' : 'Occupancy'}
-              </span>
-            </div>
-            {isLoading ? (
-              <Skeleton className="h-7 w-20" />
-            ) : (
-              <p className="text-xl font-bold text-info">
-                {totals.avgOccupancy.toFixed(0)}%
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Property Comparison Table */}
       <Card className="mb-6">
+        <CardContent className="space-y-2 p-4">
+          <h2 className="font-semibold">{isRu ? 'Финансовые результаты не сверены' : 'Financial results are not reconciled'}</h2>
+          <p className="text-sm text-muted-foreground">
+            {isRu
+              ? 'Записи по объектам не подтверждают поступления, прибыль или доходность.'
+              : 'Property records do not establish receipts, profit, or return on investment.'}
+          </p>
+          <Link to="/mc/financials" className="inline-block text-sm font-medium text-primary underline">
+            {isRu ? 'Открыть записи операций' : 'Open transaction records'}
+          </Link>
+        </CardContent>
+      </Card>
+      <Card>
         <CardHeader className="pb-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              {isRu ? 'Сравнение объектов' : 'Property Comparison'}
-            </CardTitle>
-            {propertyMetrics.length > 1 && (
-              <div className="flex flex-wrap gap-1">
-                {([
-                  { key: 'net', label: isRu ? 'Прибыль' : 'Net' },
-                  { key: 'income', label: isRu ? 'Доход' : 'Income' },
-                  { key: 'occupancy', label: isRu ? 'Загр.' : 'Occ.' },
-                  { key: 'rate', label: isRu ? 'Ночь' : 'Night' },
-                ] as const).map(opt => (
-                  <Button
-                    key={opt.key}
-                    size="sm"
-                    variant={sortBy === opt.key ? 'default' : 'outline'}
-                    className="h-7 px-2 text-xs"
-                    onClick={() => setSortBy(opt.key)}
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 className="h-4 w-4" />
+            {isRu ? 'Сравнение объектов' : 'Property comparison'}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {isRu ? 'Забронированные ночи за последние 30 завершённых дней, время Пхукета.' : 'Booked nights over the last 30 completed days, Phuket time.'}
+          </p>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-20 w-full" />
-              ))}
-            </div>
+          {propertiesLoading ? (
+            <Skeleton className="h-20 w-full" />
+          ) : propertiesError ? (
+            <p role="alert" className="text-sm text-muted-foreground">
+              {isRu ? 'Не удалось загрузить объекты.' : 'Could not load properties.'}
+            </p>
           ) : propertyMetrics.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Home className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>{isRu ? 'Нет объектов для анализа' : 'No properties to analyze'}</p>
-            </div>
+            <p className="py-8 text-center text-muted-foreground">
+              {isRu ? 'Нет объектов для анализа' : 'No properties to analyze'}
+            </p>
           ) : (
             <div className="space-y-3">
-              {sortedMetrics.map((property) => (
-                <Link
-                  key={property.id}
-                  className="block p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  to={`/mc/properties/${property.id}`}
-                >
-                  <div className="flex flex-col items-start gap-3 sm:flex-row">
-                    {property.coverImage ? (
-                      <img 
-                        src={property.coverImage} 
-                        alt={property.title}
-                        className="w-16 h-12 rounded-none object-cover flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-16 h-12 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
-                        <Home className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    )}
-                    
-                    <div className="w-full min-w-0 sm:flex-1">
-                      <p className="font-medium text-sm truncate">{property.title}</p>
-                      
-                      <div className="grid grid-cols-2 gap-3 mt-2 text-xs sm:grid-cols-4">
-                        <div>
-                          <p className="text-muted-foreground">{isRu ? 'Доход' : 'Income'}</p>
-                          <p className="font-medium text-success">{formatCurrency(property.income)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">{isRu ? 'Расход' : 'Expense'}</p>
-                          <p className="font-medium text-destructive">{formatCurrency(property.expenses)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">{isRu ? 'Загр.' : 'Occ.'}</p>
-                          <p className="font-medium">{property.occupancyRate.toFixed(0)}%</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">{isRu ? 'Ночь' : 'Night'}</p>
-                          <p className="font-medium">{curSym}{property.avgNightlyRate.toFixed(0)}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Occupancy Progress Bar */}
-                      <div className="mt-2">
-                        <Progress value={property.occupancyRate} className="h-1.5" />
-                      </div>
+              {propertyMetrics.map(property => (
+                <Link key={property.id} to={`/mc/properties/${property.id}`}
+                  className="flex flex-wrap items-center gap-3 border bg-card p-3 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {property.coverImage ? (
+                    <img src={property.coverImage} alt="" className="h-12 w-16 shrink-0 object-cover" />
+                  ) : (
+                    <div className="flex h-12 w-16 shrink-0 items-center justify-center bg-muted">
+                      <Home className="h-5 w-5 text-muted-foreground" />
                     </div>
-
-                    <div className="text-right flex-shrink-0">
-                      <Badge 
-                        variant={property.netProfit >= 0 ? 'default' : 'destructive'}
-                        className="text-xs"
-                      >
-                        {property.netProfit >= 0 ? (
-                          <ArrowUpRight className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="h-3 w-3 mr-1" />
-                        )}
-                        {formatCurrency(property.netProfit)}
-                      </Badge>
-                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="break-words font-medium">{property.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {property.bookedNights === null
+                        ? bookingsLoading
+                          ? (isRu ? 'Загрузка бронирований…' : 'Loading bookings…')
+                          : (isRu ? 'Данные бронирований недоступны' : 'Booking data unavailable')
+                        : isRu ? `Ночей: ${property.bookedNights} из 30` : `Nights: ${property.bookedNights} of 30`}
+                    </p>
                   </div>
                 </Link>
               ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Expense Category Breakdown */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <PieChart className="h-4 w-4" />
-            {isRu ? 'Расходы по категориям' : 'Expenses by Category'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <Skeleton className="h-[200px] w-full" />
-          ) : expensesByCategory.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              {isRu ? 'Нет данных о расходах' : 'No expense data'}
-            </div>
-          ) : (
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={expensesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={70}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {expensesByCategory.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={CHART_COLORS[index % CHART_COLORS.length]} 
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Legend 
-                    layout="vertical"
-                    align="right"
-                    verticalAlign="middle"
-                    formatter={(value) => (
-                      <span className="text-xs">{value}</span>
-                    )}
-                  />
-                </RechartsPieChart>
-              </ResponsiveContainer>
             </div>
           )}
         </CardContent>
