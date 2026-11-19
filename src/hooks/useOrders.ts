@@ -48,7 +48,7 @@ const queryClient = useQueryClient();
 
   const t = (key: string) => {
     const translations: Record<string, Record<string, string>> = {
-      'order.success': { en: 'Order confirmed!', ru: 'Заказ подтверждён!' },
+      'order.success': { en: 'Order created', ru: 'Заказ создан' },
       'order.error': { en: 'Order failed', ru: 'Ошибка заказа' },
       'order.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения' },
       'order.cancelled': { en: 'Order cancelled', ru: 'Заказ отменён' },

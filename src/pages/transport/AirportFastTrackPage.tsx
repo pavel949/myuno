@@ -92,6 +92,7 @@ export default function AirportFastTrackPage() {
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
   const [showUpsell, setShowUpsell] = useState(false);
   const [submissionError, setSubmissionError] = useState(false);
+  const [incompleteBookingId, setIncompleteBookingId] = useState<string | null>(null);
 
   // Persist the whole form so a guest who is bounced to /auth (and returned via
   // ?redirect) — or who simply refreshes — doesn't lose passport data they typed.
@@ -101,9 +102,14 @@ export default function AirportFastTrackPage() {
     {
       direction, selectedServiceId, flightNumber, airline, flightDate, flightTime,
       contactWhatsapp, contactEmail, preferredLang, specialNotes,
-      passengers, selectedAddons: Array.from(selectedAddons), step,
+      passengers, selectedAddons: Array.from(selectedAddons), step, submissionError, incompleteBookingId,
     },
     (draft) => {
+      if (draft.submissionError === true) setSubmissionError(true);
+      if (typeof draft.incompleteBookingId === 'string' && draft.incompleteBookingId) {
+        setIncompleteBookingId(draft.incompleteBookingId);
+        setSubmissionError(true);
+      }
       if (draft.direction) setDirection(draft.direction as Direction);
       if (draft.selectedServiceId !== undefined) setSelectedServiceId((draft.selectedServiceId as string | null) ?? null);
       if (typeof draft.flightNumber === 'string') setFlightNumber(draft.flightNumber);
@@ -118,6 +124,7 @@ export default function AirportFastTrackPage() {
       if (Array.isArray(draft.selectedAddons)) setSelectedAddons(new Set(draft.selectedAddons as string[]));
       if (draft.step === 'service' || draft.step === 'passenger' || draft.step === 'review') setStep(draft.step);
     },
+    { debounceMs: 0 },
   );
 
   // ─── Derived ───
@@ -254,7 +261,7 @@ export default function AirportFastTrackPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (submitLock.current || !validateStep('review') || !selectedService) return;
+    if (submitLock.current || submissionError || incompleteBookingId || !validateStep('review') || !selectedService) return;
     if (!user) {
       // Draft is already persisted in sessionStorage; send the guest to /auth
       // with a return path so they land back here and the form restores.
@@ -301,6 +308,11 @@ export default function AirportFastTrackPage() {
         },
       });
 
+      if (data?.receipt_status === 'incomplete' && typeof data.booking_id === 'string' && data.booking_id) {
+        setIncompleteBookingId(data.booking_id);
+        setSubmissionError(true);
+        return;
+      }
       if (error || data?.success !== true || !data.booking_id) throw error || new Error(data?.error || "Booking was not accepted");
 
       toast(tr('Request received', 'Заявка получена', 'ได้รับคำขอแล้ว'), {
@@ -739,7 +751,11 @@ export default function AirportFastTrackPage() {
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
             {selectedService ? <span className="font-mono tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
           </div>
-          {submissionError && <p role="alert" className="basis-full text-sm text-destructive">{tr(
+          {submissionError && <p role="alert" className="basis-full text-sm text-destructive">{incompleteBookingId ? tr(
+            `Request ${incompleteBookingId} was created, but passenger details were not saved. Do not send another request. Contact myUNO with this reference to complete it.`,
+            `Заявка ${incompleteBookingId} создана, но данные пассажиров не сохранены. Не отправляйте новую заявку. Свяжитесь с myUNO и назовите этот номер для завершения.`,
+            `สร้างคำขอ ${incompleteBookingId} แล้ว แต่บันทึกข้อมูลผู้โดยสารไม่สำเร็จ อย่าส่งคำขอใหม่ โปรดติดต่อ myUNO พร้อมหมายเลขนี้`,
+          ) : tr(
             'We could not verify receipt. Open My Bookings or contact myUNO before sending again.',
             'Не удалось подтвердить получение. Проверьте «Мои бронирования» или свяжитесь с myUNO перед повторной отправкой.',
             'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',

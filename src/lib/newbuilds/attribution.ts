@@ -12,10 +12,9 @@
  *     cookie OR email_hash OR phone_hash
  *  4. If found → update last_touch_at + append touchpoint
  *  5. If not found → create new attribution record
- *  6. First qualified touchpoint on a project triggers an RLN record
+ *  6. Attribution does not notify external parties.
  */
 
-import { supabase } from '@/integrations/supabase/client';
 import { typedFrom as from } from '@/lib/untypedTables';
 
 // ─── Cookie helpers ──────────────────────────────────────────────────────────
@@ -88,7 +87,6 @@ export interface TouchpointPayload {
 export interface AttributionResult {
   attributionId: string;
   isNew: boolean;
-  rlnTriggered: boolean;
 }
 
 export async function recordAttribution(opts: {
@@ -145,7 +143,6 @@ export async function recordAttribution(opts: {
 
   let attributionId: string;
   let isNew = false;
-  let rlnTriggered = false;
 
   if (existing) {
     attributionId = existing.id as string;
@@ -185,78 +182,7 @@ export async function recordAttribution(opts: {
 
     if (error || !created) throw new Error(error?.message ?? 'Attribution insert failed');
     attributionId = (created as { id: string }).id;
-
-    if (opts.projectId && ['form_submit', 'viewing_booked', 'calc_run'].includes(opts.touchpoint.type)) {
-      rlnTriggered = await triggerRln({ attributionId, projectId: opts.projectId, email: opts.email, phone: opts.phone });
-    }
   }
 
-  return { attributionId, isNew, rlnTriggered };
-}
-
-// ─── RLN (Registered Lead Notice) ───────────────────────────────────────────
-
-async function triggerRln(opts: {
-  attributionId: string;
-  projectId: string;
-  email?: string;
-  phone?: string;
-}): Promise<boolean> {
-  try {
-    const { data: project } = await supabase
-      .from('property_projects')
-      .select('id, name_en, developer_id, developer_name')
-      .eq('id', opts.projectId)
-      .maybeSingle();
-
-    if (!project) return false;
-
-    const { data: existingRln } = await from('rln_events')
-      .select('id')
-      .eq('lead_attribution_id', opts.attributionId)
-      .eq('project_id', opts.projectId)
-      .maybeSingle();
-
-    if (existingRln) return false;
-
-    const year = new Date().getFullYear();
-    const { count } = await from('rln_events').select('id', { count: 'exact', head: true });
-    const seq = String((count ?? 0) + 1).padStart(5, '0');
-    const rlnNumber = `RLN-${year}-${seq}`;
-
-    let developerEmail: string | null = null;
-    if (project.developer_id) {
-      const { data: dev } = await from('developers')
-        .select('email')
-        .eq('id', project.developer_id)
-        .maybeSingle();
-      developerEmail = (dev as { email: string | null } | null)?.email ?? null;
-    }
-
-    await from('rln_events').insert({
-      lead_attribution_id: opts.attributionId,
-      project_id: opts.projectId,
-      developer_id: project.developer_id ?? null,
-      rln_number: rlnNumber,
-      sent_to_email: developerEmail ?? 'sales@myuno.app',
-      sent_at: new Date().toISOString(),
-    });
-
-    // Fire-and-forget: notify Edge Function
-    supabase.functions.invoke('notify-rln', {
-      body: {
-        rln_number: rlnNumber,
-        project_name: project.name_en,
-        developer_name: project.developer_name,
-        developer_email: developerEmail,
-        lead_email: opts.email ?? null,
-        lead_phone: opts.phone ?? null,
-        attribution_id: opts.attributionId,
-      },
-    }).catch(() => { /* best-effort */ });
-
-    return true;
-  } catch {
-    return false;
-  }
+  return { attributionId, isNew };
 }
