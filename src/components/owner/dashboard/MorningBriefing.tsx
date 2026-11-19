@@ -12,7 +12,7 @@ export function MorningBriefing() {
   const isTh = language === 'th';
   const t = (en: string, ru: string, th?: string) => isRu ? ru : isTh && th ? th : en;
 
-  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
+  const { data: metrics, isLoading: metricsLoading, isError: metricsError } = useDashboardMetrics();
   const { data: dayItems = [], isLoading: dayLoading } = useDayBriefing();
 
   const isLoading = metricsLoading || dayLoading;
@@ -21,14 +21,17 @@ export function MorningBriefing() {
     return <Skeleton className="h-20 w-full rounded-none" />;
   }
 
+  const metricsUnavailable = metricsError || !metrics?.ops;
+  const ops = metricsUnavailable ? null : metrics.ops;
+
   const checkIns = dayItems.filter((i: DayItem) => i.type === 'check_in').length;
   const checkOuts = dayItems.filter((i: DayItem) => i.type === 'check_out').length;
   const cleanings = dayItems.filter((i: DayItem) =>
     i.type === 'staff_task' && i.subtitle?.toLowerCase().includes('clean')
   ).length;
-  const overdue = metrics?.ops?.overdueTasks || 0;
-  const pendingPayments = metrics?.ops?.pendingInvoices || 0;
-  const openTasks = metrics?.ops?.openTasks || 0;
+  const overdue = ops?.overdueTasks || 0;
+  const pendingPayments = ops?.pendingInvoices || 0;
+  const openTasks = ops?.openTasks || 0;
 
   const chips: { icon: React.ElementType; label: string; count: number; color: string; bg: string }[] = [];
 
@@ -36,10 +39,13 @@ export function MorningBriefing() {
   if (checkOuts > 0) chips.push({ icon: LogOut, label: t('Departures', 'Выезды', 'เช็คเอาท์'), count: checkOuts, color: 'text-warning', bg: 'bg-warning/10' });
   if (cleanings > 0) chips.push({ icon: Sparkles, label: t('Cleanings', 'Уборки', 'ทำความสะอาด'), count: cleanings, color: 'text-primary', bg: 'bg-primary/10' });
   if (overdue > 0) chips.push({ icon: AlertTriangle, label: t('Overdue', 'Просрочено', 'เกินกำหนด'), count: overdue, color: 'text-destructive', bg: 'bg-destructive/10' });
-  if (pendingPayments > 0) chips.push({ icon: CreditCard, label: t('Payments', 'Платежи', 'ชำระเงิน'), count: pendingPayments, color: 'text-warning', bg: 'bg-warning/10' });
+  if (pendingPayments > 0) chips.push({ icon: CreditCard, label: t('Pending expenses', 'Расходы к оплате', 'ค่าใช้จ่ายที่รอชำระ'), count: pendingPayments, color: 'text-warning', bg: 'bg-warning/10' });
   if (openTasks > 0) chips.push({ icon: ClipboardCheck, label: t('Tasks', 'Задачи', 'งาน'), count: openTasks, color: 'text-info', bg: 'bg-info/10' });
 
   if (chips.length === 0) {
+    if (metricsUnavailable) return <Card><CardContent className="p-4 text-sm text-muted-foreground">
+      {t('Dashboard data unavailable.', 'Сводка пока недоступна.', 'ยังไม่มีข้อมูลสรุป')}
+    </CardContent></Card>;
     return (
       <Card className="bg-success/5 border-success/20">
         <CardContent className="py-4 text-center">
@@ -58,6 +64,9 @@ export function MorningBriefing() {
         <Sun className="h-4 w-4 text-warning" />
         {t('Morning Briefing', 'Сводка на сегодня', 'สรุปประจำวัน')}
       </h3>
+      {metricsUnavailable && <p className="text-sm text-muted-foreground">
+        {t('Some counters are unavailable.', 'Часть показателей недоступна.', 'ตัวเลขบางส่วนไม่พร้อมใช้งาน')}
+      </p>}
       <Card>
         <CardContent className="py-3 px-4">
           <div className="flex flex-wrap gap-2">

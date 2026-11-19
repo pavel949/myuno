@@ -28,7 +28,7 @@
     },
     "Card": {
       "directConsumerFiles": 532,
-      "sourceInstances": 1540
+      "sourceInstances": 1543
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -10783,7 +10783,7 @@
     },
     {
       "file": "src/components/owner/dashboard/BusinessHealthCard.tsx",
-      "sha256": "3a2d3ad14c9bacb3d4c3055e3d1054db64730031155489671406f66e1ed82519",
+      "sha256": "ac48af93decd8cb98882585547e902df40f0d5563e7211be27077c1165c9fa09",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -10791,10 +10791,11 @@
         {
           "name": "Card",
           "source": "@/components/ui/card",
-          "instances": 2,
+          "instances": 3,
           "lines": [
             42,
-            60
+            57,
+            66
           ]
         }
       ]
@@ -10941,7 +10942,7 @@
     },
     {
       "file": "src/components/owner/dashboard/MorningBriefing.tsx",
-      "sha256": "7d716f317dfccfb272c52000706970e5b8debae2df3d8f8a2d578be85e1d0534",
+      "sha256": "cdd47eeee293231f8860939b5677f301d9993b69dba5bb5f018445ddfa62e1f0",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -10949,10 +10950,11 @@
         {
           "name": "Card",
           "source": "@/components/ui/card",
-          "instances": 2,
+          "instances": 3,
           "lines": [
-            44,
-            61
+            46,
+            50,
+            70
           ]
         }
       ]
@@ -11183,7 +11185,7 @@
     },
     {
       "file": "src/components/owner/dashboard/TodayActionsWidget.tsx",
-      "sha256": "cf148b5bfe7e8657e66a12eada9abc19e8a2f96306ca31b5aa09b39fa28c3066",
+      "sha256": "8c08916d97bbbfebfbce417888d0ea7e95e3eab7c9a66dd45ccb16e652e25e26",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -11191,10 +11193,11 @@
         {
           "name": "Card",
           "source": "@/components/ui/card",
-          "instances": 2,
+          "instances": 3,
           "lines": [
-            117,
-            146
+            111,
+            123,
+            152
           ]
         }
       ]
