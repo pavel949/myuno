@@ -68,7 +68,7 @@ export default function AdminOperations() {
     },
     { 
       id: 'leads', 
-      label: pickLang(language, { en: 'Supplier prospects', ru: 'Потенциальные поставщики', th: 'ผู้ให้บริการที่คาดหวัง' }),
+      label: pickLang(language, { en: 'Supplier prospects', ru: 'Потенциальные поставщики', th: 'ผู้ให้บริการที่คาดหวัง' }), 
       icon: Users,
       badge: overview?.newLeads,
     },

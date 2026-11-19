@@ -14,10 +14,10 @@ function AdminTabRedirect({ to, tab }: { to: string; tab: string }) {
   return <Navigate to={`${to}?${params.toString()}`} replace />;
 }
 
-function AdminLeadsRedirect() {
+const AdminLeadsRedirect = () => {
   const { search, hash } = useLocation();
-  return <Navigate to={{ pathname: '/admin/inbox', search, hash }} replace />;
-}
+  return <Navigate to={`/admin/inbox${search}${hash}`} replace />;
+};
 
 export const adminRoutes = (
   <>
