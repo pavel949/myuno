@@ -4,7 +4,8 @@ import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { 
-  useAdminPropertyProjects, 
+  invalidateProjectCatalog,
+  useAdminPropertyProjects,
   useCreatePropertyProject, 
   useUpdatePropertyProject,
   PropertyProject,
@@ -126,8 +127,7 @@ export default function AdminProjects() {
           ? `AI обогатил ${data.enriched} из ${data.total} проектов` 
           : `AI enriched ${data.enriched} of ${data.total} projects`
       );
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
+      void invalidateProjectCatalog(queryClient);
     } catch (err) {
       console.error('Enrich error:', err);
       toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
@@ -186,9 +186,9 @@ export default function AdminProjects() {
         .in('id', Array.from(selectedIds))
         .select('id,developer_id,needs_review');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(queryClient, data.map(({ id }) => id));
       assertAdminRows(data, selectedIds, row => row.developer_id === bulkDeveloperId && row.needs_review === false);
       toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
       setBulkDeveloperId('');
     } catch (e) {
@@ -208,9 +208,9 @@ export default function AdminProjects() {
         .in('id', Array.from(selectedIds))
         .select('id,is_approved,needs_review');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(queryClient, data.map(({ id }) => id));
       assertAdminRows(data, selectedIds, row => row.is_approved === true && row.needs_review === false);
       toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Bulk approve failed');

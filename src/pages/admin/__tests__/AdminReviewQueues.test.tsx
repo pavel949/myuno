@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,6 +9,8 @@ import AdminProjects from '../AdminProjects';
 const mocks = vi.hoisted(() => ({
   language: 'en', loading: false, error: null as Error | null,
   properties: [] as Record<string, unknown>[], projects: [] as Record<string, unknown>[],
+  bulkUpdate: vi.fn<() => { in: (column: string, ids: string[]) => unknown }>(() => { throw Error('Unexpected bulk write'); }),
+  notifySuccess: vi.fn(), notifyError: vi.fn(),
   retry: vi.fn(), write: vi.fn(() => { throw Error('Business writes forbidden'); }),
 }));
 vi.mock('@/components/admin/PublishedPropertyRevisionQueue', () => ({ PublishedPropertyRevisionQueue: () => null }));
@@ -16,11 +18,12 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: m
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' }, isLoading: false }) }));
 vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: true, isLoading: false }) }));
 vi.mock('@/hooks/useAdminContent', () => ({ useAdminProperties: () => ({ properties: mocks.properties, isLoading: mocks.loading, error: mocks.error, refetch: mocks.retry, updateProperty: mocks.write, createProperty: mocks.write, deleteProperty: mocks.write }) }));
-vi.mock('@/hooks/usePropertyProjects', () => ({ useAdminPropertyProjects: () => ({ data: mocks.projects, isLoading: mocks.loading, error: mocks.error, refetch: mocks.retry }), useCreatePropertyProject: () => ({ mutateAsync: mocks.write }), useUpdatePropertyProject: () => ({ mutateAsync: mocks.write }) }));
+vi.mock('@/hooks/usePropertyProjects', async importOriginal => ({ ...await importOriginal<typeof import('@/hooks/usePropertyProjects')>(), useAdminPropertyProjects: () => ({ data: mocks.projects, isLoading: mocks.loading, error: mocks.error, refetch: mocks.retry }), useCreatePropertyProject: () => ({ mutateAsync: mocks.write }), useUpdatePropertyProject: () => ({ mutateAsync: mocks.write }) }));
 vi.mock('@/hooks/useAdminDevelopers', () => ({ useAdminDevelopers: () => ({ data: [] }) }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => ({ data: [] }) }));
 vi.mock('@/hooks/useCityCurrency', () => ({ useCityCurrency: () => ({ code: 'THB' }) }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.write, functions: { invoke: mocks.write } } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => table === 'property_projects' ? { update: mocks.bulkUpdate } : mocks.write(), functions: { invoke: mocks.write } } }));
+vi.mock('sonner', () => ({ toast: { success: mocks.notifySuccess, error: mocks.notifyError } }));
 vi.mock('@/components/admin/ProviderSelector', () => ({ ProviderSelector: () => null }));
 vi.mock('@/components/admin/RealEstateDomainHealthPanel', () => ({ RealEstateDomainHealthPanel: () => null }));
 vi.mock('@/components/admin/PropertyProjectBulkLinkPanel', () => ({ PropertyProjectBulkLinkPanel: () => null }));
@@ -38,8 +41,8 @@ function RouteProbe() {
   const location = useLocation(), navigate = useNavigate();
   return <><div data-testid="route">{location.pathname}{location.search}</div><button onClick={() => navigate(-1)}>Back fixture</button></>;
 }
-function renderPage(page: 'properties' | 'projects', entries: string[]) {
-  return render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={entries} initialIndex={entries.length - 1} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{page === 'properties' ? <AdminProperties /> : <AdminProjects />}<RouteProbe /></MemoryRouter></QueryClientProvider>);
+function renderPage(page: 'properties' | 'projects', entries: string[], client = new QueryClient()) {
+  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={entries} initialIndex={entries.length - 1} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{page === 'properties' ? <AdminProperties /> : <AdminProjects />}<RouteProbe /></MemoryRouter></QueryClientProvider>);
 }
 const pendingProperty = { id: 'pending', title_en: 'Pending coastal home', approval_status: 'pending', is_active: true };
 const approvedProperty = { id: 'approved', title_en: 'Approved coastal home', approval_status: 'approved', is_active: true };
@@ -84,6 +87,40 @@ describe('AdminProperties review views', () => {
 });
 
 describe('AdminProjects review views', () => {
+  it.each([false, true])('refreshes committed project catalogue rows with partial response = %s', async partial => {
+    const client = new QueryClient();
+    const updatedKeys = [
+      ['admin-property-projects'], ['public-property-projects', 24], ['offplan-projects', {}],
+      ['newbuild-projects', {}], ['newbuild-project', 'pending-project', true],
+      ['offplan-project', pendingProject.id], ['property-project', pendingProject.id, true],
+    ];
+    const unrelated = ['property-project', 'other', true];
+    for (const key of [...updatedKeys, unrelated]) client.setQueryData(key, { fixture: true });
+    const select = vi.fn(async () => ({
+      data: (partial ? [pendingProject] : [pendingProject, approvedProject])
+        .map(({ id }) => ({ id, is_approved: true, needs_review: false })),
+      error: null,
+    }));
+    const selectIds = vi.fn(() => ({ select }));
+    mocks.bulkUpdate.mockImplementationOnce(() => ({ in: selectIds }));
+    renderPage('projects', ['/admin/projects'], client);
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Pending coastal project' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Approved coastal project' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Approve', exact: true }));
+
+    await waitFor(() => {
+      for (const key of updatedKeys) expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+      expect(partial ? mocks.notifyError : mocks.notifySuccess).toHaveBeenCalledTimes(1);
+    });
+    expect(selectIds).toHaveBeenCalledWith('id', [pendingProject.id, approvedProject.id]);
+    expect(client.getQueryState(unrelated)?.isInvalidated).toBe(false);
+    if (partial) {
+      expect(mocks.notifySuccess).not.toHaveBeenCalled();
+      expect(screen.getByText('Selected: 2')).toBeInTheDocument();
+    }
+  });
+
   it('honors newbuilds pending links, composes stage/search, and opens the existing editor', () => {
     renderPage('projects', ['/admin/projects?filter=pending&stage=offplan&q=coastal&source=newbuilds']);
     expect(screen.getByText(pendingProject.name_en)).toBeInTheDocument();
