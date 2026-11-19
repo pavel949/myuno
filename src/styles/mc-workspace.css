@@ -32,3 +32,8 @@
   font-weight: 650;
   box-shadow: inset 3px 0 hsl(var(--sidebar-ring));
 }
+
+/* The mobile Sheet is portaled and does not inherit the desktop rail palette. */
+[data-sidebar=sidebar][data-mobile=true] .mc-workspace-sidebar {
+  background-color: hsl(var(--sidebar-background));
+}
