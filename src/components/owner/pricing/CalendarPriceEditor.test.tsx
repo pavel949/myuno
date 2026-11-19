@@ -4,20 +4,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalendarPriceEditor } from './CalendarPriceEditor';
 import type { UnifiedProperty } from '@/hooks/useMyProperties';
-const state = vi.hoisted(() => ({ rpc: vi.fn(), error: vi.fn(), success: vi.fn(), rows: [] as unknown[], seasons: [] as { start_date: string; end_date: string; nightly_rate: number }[] }));
+const state = vi.hoisted(() => ({ rpc: vi.fn(), error: vi.fn(), success: vi.fn(), rows: [] as unknown[], terms: {} as { price?: number; price_period?: string }, seasons: [] as { start_date: string; end_date: string; nightly_rate: number }[] }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({user:{id:'actor'}}) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({language:'en'}) }));
 vi.mock('@/hooks/useRoomCategories', () => ({ useRoomCategories: () => ({data:{categories:[{id:'category',name_en:'Superior'}]},isLoading:false,isError:false}) }));
-vi.mock('@/hooks/usePropertyCare', () => ({ useOwnerProperty: () => ({ data: {} }) }));
+vi.mock('@/hooks/usePropertyCare', () => ({ useOwnerProperty: () => ({ data: state.terms }) }));
 vi.mock('@/hooks/usePropertyRateSeasons', () => ({ usePropertyRateSeasons: () => ({ data: state.seasons }) }));
 vi.mock('@/hooks/useStaysUnifiedCalendar', () => ({ useStaysUnifiedCalendar: () => ({data:{unifiedDayMeta:new Map([['2026-10-21',{}]])}}) }));
 vi.mock('sonner', () => ({toast:{error:state.error,success:state.success}}));
 vi.mock('@/integrations/supabase/client', () => ({supabase:{rpc:state.rpc,from:() => { const chain: Record<string, unknown> = {}; for(const key of ['select','eq','gte']) chain[key]=()=>chain; chain.lt=()=>Promise.resolve({data:state.rows,error:null}); return chain; }}}));
-function mount(currency: string | null = 'THB') {
- const property = {property_id:'property',title:'Villa',record_currency:currency,price_per_night:1500} as UnifiedProperty;
+function mount(currency: string | null = 'THB', basePrice: number | null = 1500) {
+ const property = {property_id:'property',title:'Villa',record_currency:currency,price_per_night:basePrice} as UnifiedProperty;
  return render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><MemoryRouter initialEntries={['/mc/rates?date=2026-10-21']}><CalendarPriceEditor property={property}/></MemoryRouter></QueryClientProvider>);
 }
-beforeEach(() => { vi.clearAllMocks(); state.seasons = []; state.rows=[{date:'2026-10-21',price_override:100,status:'blocked',booking_id:'booking',min_nights_override:2}]; state.rpc.mockImplementation(async (name,args) => name === 'get_property_calendar_prices' ? {data:state.rows,error:null} : ({data:{property_id:args.p_property_id,category_id:args.p_category_id,nights:1,nightly_rate:args.p_price,currency:args.p_currency},error:null})); });
+beforeEach(() => { vi.clearAllMocks(); state.seasons = []; state.terms = {}; state.rows=[{date:'2026-10-21',price_override:100,status:'blocked',booking_id:'booking',min_nights_override:2}]; state.rpc.mockImplementation(async (name,args) => name === 'get_property_calendar_prices' ? {data:state.rows,error:null} : ({data:{property_id:args.p_property_id,category_id:args.p_category_id,nights:1,nightly_rate:args.p_price,currency:args.p_currency},error:null})); });
 describe('CalendarPriceEditor', () => {
  it('saves native unit price through the price-only RPC with inventory snapshot', async () => {
   mount(); await screen.findByLabelText('2026-10-21 100 · Unavailable');
@@ -82,6 +82,12 @@ describe('CalendarPriceEditor', () => {
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2026-10-24');
   expect(screen.getByRole('button', { name: '2026-10-21 100 · Unavailable' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.queryByRole('combobox', { name: 'Property' })).toBeNull();
+ });
+
+ it.each([['night', '2026-10-20 1750'], ['month', '2026-10-20 Inherited rate']])('respects the legacy %s billing unit', async (period, label) => {
+  state.terms = { price: 1750, price_period: period };
+  mount('THB', null);
+  await waitFor(() => expect(screen.getByRole('button', { name: label })).toBeEnabled());
  });
 
 });
