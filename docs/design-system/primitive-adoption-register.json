@@ -39613,7 +39613,7 @@
     },
     {
       "file": "src/pages/property/OffplanDetail.tsx",
-      "sha256": "4303db48d96e334fd9fe509dddd130310381d75a179053607b5807608ca67a9b",
+      "sha256": "ab4297155cd940fa274c3180622976327e5cc7271769a2c7b11f275d25f20568",
       "directRouteDeclarations": [
         {
           "id": "05a4704d48f8e0ff",
@@ -39630,10 +39630,10 @@
           "source": "@/components/ui/button",
           "instances": 4,
           "lines": [
-            129,
-            233,
-            369,
-            409
+            137,
+            241,
+            377,
+            417
           ]
         },
         {
@@ -39641,7 +39641,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            293
+            301
           ]
         }
       ]
