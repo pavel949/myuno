@@ -123,6 +123,10 @@ export function SideRail({ role, badges }: SideRailProps) {
         {groups.map((group) => {
           const hasCurrent = groupHasActive(group);
           const open = (!group.mobileQuickLinks && hasCurrent) || group.defaultOpen || false;
+          const groupLabel = labelOf(group);
+          const currentGroupLabel = isOwner && hasCurrent
+            ? `${groupLabel}. ${pickLang(language, { en: 'Contains current page', ru: 'Здесь текущая страница', th: 'มีหน้าปัจจุบัน' })}`
+            : undefined;
           return (
             <Collapsible key={`${group.labelEn}:${hasCurrent}:${isCollapsed}`} defaultOpen={isCollapsed || open}>
               <SidebarGroup>
@@ -135,16 +139,9 @@ export function SideRail({ role, badges }: SideRailProps) {
                         isOwner && hasCurrent && 'mc-rail-current-group',
                       )}
                     >
-                      <button type="button">
-                        <span>{labelOf(group)}</span>
-                        {isOwner && hasCurrent && (
-                          <>
-                            <span aria-hidden className="ml-auto size-2 shrink-0 rounded-full bg-sidebar-ring" />
-                            <span className="sr-only">
-                              {pickLang(language, { en: 'Contains current page', ru: 'Здесь текущая страница', th: 'มีหน้าปัจจุบัน' })}
-                            </span>
-                          </>
-                        )}
+                      <button type="button" aria-label={currentGroupLabel}>
+                        <span>{groupLabel}</span>
+                        {isOwner && hasCurrent && <span aria-hidden className="ml-auto size-2 shrink-0 rounded-full bg-sidebar-ring" />}
                         <ChevronDown aria-hidden className="mc-rail-chevron size-3.5 shrink-0 transition-transform" />
                       </button>
                     </SidebarGroupLabel>
