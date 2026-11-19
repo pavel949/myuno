@@ -209,6 +209,8 @@ export interface SidebarNavGroup {
   labelRu: string;
   labelTh?: string;
   defaultOpen?: boolean;
+  /** Quick links are collapsed in the mobile drawer because they also have bottom tabs. */
+  mobileQuickLinks?: boolean;
   items: SidebarNavItem[];
 }
 
@@ -287,7 +289,8 @@ function groupOwnerSidebar(groups: SidebarNavGroup[]): SidebarNavGroup[] {
   const areas = [
     { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', sources: ['Control Tower'], defaultOpen: true },
     { labelEn: 'Properties & rates', labelRu: 'Объекты и тарифы', labelTh: 'ที่พักและราคา', sources: ['Properties', 'Operations'] },
-    { labelEn: 'Finance & sales', labelRu: 'Финансы и продажи', labelTh: 'การเงินและการขาย', sources: ['Finance', 'CRM & Sales'] },
+    { labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', sources: ['Finance'] },
+    { labelEn: 'Sales & CRM', labelRu: 'Продажи и CRM', labelTh: 'การขายและ CRM', sources: ['CRM & Sales'] },
     { labelEn: 'Team & settings', labelRu: 'Команда и настройки', labelTh: 'ทีมงานและการตั้งค่า', sources: ['Team & Settings'] },
   ];
   return areas.map(({ sources, ...area }) => ({
@@ -295,6 +298,44 @@ function groupOwnerSidebar(groups: SidebarNavGroup[]): SidebarNavGroup[] {
     items: groups.filter(group => sources.includes(group.labelEn)).flatMap(group => group.items),
   })).filter(group => group.items.length > 0);
 }
+/**
+ * Keep the same persona-filtered destinations on every viewport. On mobile,
+ * bottom-tab links stay available in a single compact fallback (for screens
+ * where the bottom bar is hidden), not spread across the daily workflow.
+ */
+export function getOwnerSidebarForViewport(groups: SidebarNavGroup[], isMobile: boolean): SidebarNavGroup[] {
+  if (!isMobile) return groups;
+
+  const tabItems = groups.flatMap(group => group.items).filter(item => isBottomBarRoute('owner', item.path));
+  const workflowGroups = groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => !isBottomBarRoute('owner', item.path)),
+  })).filter(group => group.items.length > 0);
+
+  return tabItems.length ? [...workflowGroups, {
+    labelEn: 'Quick links',
+    labelRu: 'Быстрые переходы',
+    labelTh: 'ลิงก์ด่วน',
+    mobileQuickLinks: true,
+    items: tabItems,
+  }] : workflowGroups;
+}
+
+/** Pick the most specific accessible destination, never a sibling or MC root. */
+export function getActiveOwnerSidebarPath(groups: SidebarNavGroup[], pathname: string): string | undefined {
+  const path = pathname.replace(/\/+$/, '');
+  const financeRoutes = [APP_ROUTES.MC_FINANCIALS, APP_ROUTES.MC_REPORTS, APP_ROUTES.MC_BUDGET];
+  const items = groups.flatMap(group => group.items);
+  const match = items
+    .filter(item => item.path === path || (item.path !== '/mc' && path.startsWith(`${item.path}/`)))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+
+  if (match) return match.path;
+  if (financeRoutes.some(route => path === route || path.startsWith(`${route}/`)) &&
+      items.some(item => item.path === APP_ROUTES.MC_FINANCE)) return APP_ROUTES.MC_FINANCE;
+  return undefined;
+}
+
 const OWNER_SIDEBAR = groupOwnerSidebar(OWNER_SIDEBAR_SOURCE);
 
 /**
