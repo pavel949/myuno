@@ -12,7 +12,7 @@ vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children, usePag
 afterEach(cleanup);
 
 describe('property catalogue frame ownership', () => {
-  it.each(['/property/search', '/property/search/', '/property/offplan', '/property/offplan/project', '/property/complex/project'])('lets only %s own its wide frame and canonical gutters', path => {
+  it.each(['/property/search', '/property/search/', '/property/offplan', '/property/offplan/search', '/property/offplan/search/', '/property/offplan/project', '/property/complex/project'])('lets only %s own its wide frame and canonical gutters', path => {
     render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Actual search route boundary</p>} /></Route></Routes></MemoryRouter>);
     expect(screen.getByTestId('layout-boundary')).toHaveAttribute('data-automatic-container', 'false');
     expect(screen.getByText('Actual search route boundary')).toBeInTheDocument();
@@ -39,4 +39,10 @@ it.each([['/property/commercial','Commercial'],['/property/land','Land'],['/prop
 it('hides unrelated menu tabs on a hotel UUID detail', () => {
  render(<MemoryRouter initialEntries={['/property/hotels/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Hotel detail</p>} /></Route></Routes></MemoryRouter>);
  expect(screen.queryByRole('group',{name:'Property sections'})).toBeNull();
+});
+
+it('lets newbuild discovery own its chapters while the results keep canonical catalogue tools', () => {
+ const tree = (path: string) => <MemoryRouter initialEntries={[path]}><Routes><Route path="/property" element={<PropertyHub />}><Route path="*" element={<p>Route content</p>} /></Route></Routes></MemoryRouter>;
+ const view = render(tree('/property/offplan')); expect(screen.queryByRole('group', {name:'Property sections'})).toBeNull(); expect(screen.queryByRole('link', {name:'Catalog'})).toBeNull();
+ view.unmount();render(tree('/property/offplan/search'));expect(screen.getByRole('link',{name:'Catalog'})).toHaveAttribute('href','/property/offplan/search');expect(screen.getByTestId('layout-boundary')).toHaveAttribute('data-automatic-container','false');
 });

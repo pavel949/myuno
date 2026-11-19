@@ -70,3 +70,8 @@ it('routes the public sale form to the existing property consultation workflow',
    notes: 'Property sale\nSynthetic apartment in Bang Tao',
  }));
 });
+
+it('shows only the confirmed consultation reference and keeps team delivery pending', async () => {
+ fixture.submit.mockResolvedValue({id:'synthetic-confirmed-receipt'});show();fireEvent.click(screen.getByRole('button',{name:'Submit request'}));
+ expect(await screen.findByText('synthetic-confirmed-receipt')).toBeVisible();expect(screen.getByText(/A team reply is pending/)).toBeVisible();
+});

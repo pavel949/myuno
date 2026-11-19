@@ -6,6 +6,7 @@ import { fetchInboxRequest, INBOX_DETAIL_FIELDS, isInboxSource } from '@/lib/adm
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { BuyerRequestSummary } from '@/components/newbuilds/BuyerRequestSummary';
 
 export function InboxRequestDetail({ source, requestId, onClose }: { source: string | null; requestId: string; onClose: () => void }) {
   const { user } = useAuth();
@@ -23,6 +24,10 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
     },
     retry: false,
   });
+  const metadata = source === 'consultation_requests' ? data?.vertical_metadata : null;
+  const buyerContext = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata as Record<string, unknown>
+    : null;
   return (
     <Sheet open onOpenChange={open => { if (!open) onClose(); }}>
       <SheetContent side="bottom" className="max-h-[85dvh]" closeLabel={isRu ? 'Закрыть' : 'Close'}>
@@ -37,13 +42,16 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
             : isLoading ? <Skeleton className="h-24" />
             : isError ? <div role="alert">{isRu ? 'Не удалось загрузить обращение.' : 'Could not load request.'}<Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>
             : !data ? <p role="status">{isRu ? 'Обращение не найдено или недоступно.' : 'Request not found or unavailable.'}</p>
-            : <dl className="space-y-3">
-              {([['status', 'Status', 'Статус'], ['created_at', 'Created', 'Создано'], ...(isInboxSource(source) ? INBOX_DETAIL_FIELDS[source] : [])] as readonly (readonly string[])[]).map(([field, en, ru]) => {
-                const value = data[field];
-                if (typeof value !== 'string' && typeof value !== 'number') return null;
-                return <div key={field} className="grid gap-1 sm:grid-cols-[10rem_1fr]"><dt className="text-sm text-muted-foreground">{isRu ? ru : en}</dt><dd className="whitespace-pre-wrap break-words text-sm">{value}</dd></div>;
-              })}
-            </dl>}
+            : <>
+              <dl className="space-y-3">
+                {([['status', 'Status', 'Статус'], ['created_at', 'Created', 'Создано'], ...(isInboxSource(source) ? INBOX_DETAIL_FIELDS[source] : [])] as readonly (readonly string[])[]).map(([field, en, ru]) => {
+                  const value = data[field];
+                  if (typeof value !== 'string' && typeof value !== 'number') return null;
+                  return <div key={field} className="grid gap-1 sm:grid-cols-[10rem_1fr]"><dt className="text-sm text-muted-foreground">{isRu ? ru : en}</dt><dd className="whitespace-pre-wrap break-words text-sm">{value}</dd></div>;
+                })}
+              </dl>
+              {buyerContext && <div className="mt-4"><BuyerRequestSummary metadata={buyerContext} /></div>}
+            </>}
         </div>
       </SheetContent>
     </Sheet>

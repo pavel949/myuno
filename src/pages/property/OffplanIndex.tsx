@@ -136,7 +136,7 @@ export default function OffplanIndex() {
   const seoDescription = isRu
     ? 'Опубликованные проекты Пхукета. Начальные цены требуют уточнения; поиск по району и застройщику.'
     : 'Published Phuket projects. Starting prices require confirmation; search by district and developer.';
-  const canonicalUrl = 'https://www.myuno.app/property/offplan';
+  const canonicalUrl = 'https://www.myuno.app/property/offplan/search';
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: 'Property', url: 'https://www.myuno.app/property' },
     { name: pickLang(language, {"ru": "Новостройки", "en": "Off-Plan", "th": "โครงการใหม่"}), url: canonicalUrl },

@@ -6,12 +6,13 @@ import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPres
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
 import '@/styles/public-commerce.css';
 import { projectFeatureLabel } from '@/lib/offplan/presentation';
+import { OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 /**
  * OffplanDetail - Detailed view of an off-plan project
  * Shows gallery, developer info, myUNO scoring, investment metrics
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Building2,
@@ -99,8 +100,25 @@ export default function OffplanDetail() {
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
+  const [enquiryIntent, setEnquiryIntent] = useState<'consultation' | 'documents'>('consultation');
+  useEffect(() => {
+    setShowLeadForm(false);
+    setSelectedUnit(null);
+    setEnquiryIntent('consultation');
+  }, [id]);
+  const openProjectEnquiry = (intent: 'consultation' | 'documents' = 'consultation') => {
+    setEnquiryIntent(intent);
+    setSelectedUnit(null);
+    setShowLeadForm(true);
+  };
   const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
+  const loadedProjectId = sourceProject?.id;
+  useEffect(() => {
+    if (!loadedProjectId || journeyLocation.hash !== '#project-units') return;
+    const frame = requestAnimationFrame(() => document.getElementById('project-units')?.scrollIntoView({ block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
   const { data: allDocs = [] } = useProjectDocuments(id);
@@ -230,7 +248,7 @@ export default function OffplanDetail() {
               <ProjectStartingPrice price={project.priceFrom} />
             </span>
           </div>
-          <Button size="lg" className="w-full min-h-12 gap-2" onClick={() => setShowLeadForm(true)}>
+          <Button size="lg" className="w-full min-h-12 gap-2" onClick={() => openProjectEnquiry()}>
             <MessageCircle className="w-5 h-5" />
             {pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามโครงการนี้' })}
           </Button>
@@ -304,7 +322,7 @@ export default function OffplanDetail() {
 
           <TabsContent value="overview" className="space-y-4 pt-4">
             {/* Development Units / Floor Plans */}
-            {id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setSelectedUnit(unit); setShowLeadForm(true); }} />}
+            <div id="project-units" className="scroll-mt-28">{id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setEnquiryIntent('consultation'); setSelectedUnit(unit); setShowLeadForm(true); }} />}</div>
 
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
@@ -366,7 +384,7 @@ export default function OffplanDetail() {
                     ? 'Публичные документы пока не опубликованы.'
                     : 'No public documents have been published yet.'}
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setShowLeadForm(true)} className="gap-2">
+                <Button variant="outline" size="sm" onClick={() => openProjectEnquiry('documents')} className="gap-2">
                   <FileSearch className="w-4 h-4" />
                   {pickLang(language, {"ru": "Запросить пакет документов", "en": "Request document package", "th": "ขอเอกสารโครงการ"})}
                 </Button>
@@ -436,18 +454,23 @@ export default function OffplanDetail() {
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
       <ResponsiveModal
         open={showLeadForm}
-        onOpenChange={setShowLeadForm}
+        onOpenChange={(open) => { setShowLeadForm(open); if (!open) { setSelectedUnit(null); setEnquiryIntent('consultation'); } }}
         title={pickLang(language, { ru: selectedUnit ? 'Запросить информацию о юните' : 'Обсудить проект', en: selectedUnit ? 'Ask about this unit' : 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
         <LandingLeadForm
+          key={`${project.id}:${selectedUnit?.id ?? "project"}:${enquiryIntent}`}
           variant="universal"
           verticalId="properties"
-          entryPoint={`offplan_project_${project.id}`}
+          entryPoint={OFFPLAN_BUYER_ENTRY}
           leadSource="cta"
-          universalRequestType="property_purchase"
+          universalRequestType="property_consultation"
           contextMetadata={{
+            schema_version: 1,
             project_id: project.id,
+            intent: enquiryIntent,
+            request_only: true,
+            offer_id: null,
             ...(selectedUnit ? { unit_id: selectedUnit.id, property_id: selectedUnit.property_id } : {}),
           }}
         />

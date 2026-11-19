@@ -189,3 +189,7 @@ verify_jwt = false
     verify_jwt = false
   [functions.thai-notify]
     verify_jwt = false
+
+[functions.dispatch-consultation-notifications]
+# Machine-only admission is handled by the worker's dedicated secret check.
+verify_jwt = false
