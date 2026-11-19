@@ -157,21 +157,32 @@ async def main():
                     search = page.locator('.home-search')
                     await expect(search.locator('button[type=submit]')).to_be_visible()
                     if width >= 1280:
-                        submit = await search.locator('button[type=submit]').bounding_box()
-                        mode = await page.locator('.property-discovery').get_attribute('data-property-mode')
-                        selector = '.home-search-type,.home-search-bedrooms' if mode == 'rent' else '.home-search-type,.home-search-location,.home-search-bedrooms'
-                        controls = await search.locator(selector).evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom}})')
-                        # Labels may make a field taller; controls share the
-                        # bottom baseline of one real criteria row.
                         mode = await page.locator('.property-discovery').get_attribute('data-property-mode')
                         assert mode in ['all', 'rent', 'buy'], mode
+                        selector = '.home-search-type,.home-search-bedrooms' if mode == 'rent' else '.home-search-type,.home-search-location,.home-search-bedrooms'
+                        # Read in one browser frame. Focus can scroll the viewport
+                        # after keyboard navigation from a map marker.
+                        layout = await search.evaluate("""(form, selector) => {
+                            const rect = e => {
+                                const { left, right, top, bottom } = e.getBoundingClientRect();
+                                return { left, right, top, bottom };
+                            };
+                            const fields = selector => [...form.querySelectorAll(selector)].map(rect);
+                            return {
+                                submit: rect(form.querySelector('button[type=submit]')),
+                                controls: fields(selector),
+                                primary: fields('.home-search-location,.home-search-dates,.home-search-guests-inline'),
+                            };
+                        }""", selector)
+                        submit = layout['submit']
+                        controls = layout['controls']
                         expected_fields = 2 if mode == 'rent' else 3
                         if mode == 'rent':
-                            primary = await search.locator('.home-search-location,.home-search-dates,.home-search-guests-inline').evaluate_all('els=>els.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom}})')
+                            primary = layout['primary']
                             assert len(primary) == 3 and all(abs(box['bottom']-primary[0]['bottom']) <= 2 for box in primary), primary
                             assert primary[0]['right'] <= primary[1]['left'] and primary[1]['right'] <= primary[2]['left'], primary
-                            assert primary[0]['bottom'] <= submit['y'], {'primary': primary, 'submit': submit}
-                        assert submit and len(controls) == expected_fields and all(abs(box['bottom']-submit['y']-submit['height']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
+                            assert primary[0]['bottom'] <= submit['top'], {'primary': primary, 'submit': submit}
+                        assert len(controls) == expected_fields and all(abs(box['bottom']-submit['bottom']) <= 2 for box in controls), {'criteria': controls, 'submit': submit}
                     if state == 'error':
                         await expect(page.get_by_role('alert').filter(has_text='could not be loaded')).to_be_visible()
                     if state == 'empty':
