@@ -43,8 +43,8 @@ export function BusinessHealthCard() {
         <CardContent className="p-4 space-y-3">
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-3 w-full" />
-          <div className="grid grid-cols-5 gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
+          <div className="grid grid-cols-4 gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-8" />
             ))}
           </div>
@@ -53,8 +53,14 @@ export function BusinessHealthCard() {
     );
   }
 
-  const scoreColor = score >= 70 ? 'text-success' : score >= 40 ? 'text-accent' : 'text-destructive';
-  const progressColor = score >= 70 ? '[&>div]:bg-success' : score >= 40 ? '[&>div]:bg-accent' : '[&>div]:bg-destructive';
+  if (score === null) {
+    return <Card><CardContent className="p-4 text-sm text-muted-foreground">
+      {isRu ? 'Недостаточно данных для оценки работы.' : 'Not enough data for an operational score.'}
+    </CardContent></Card>;
+  }
+  const percent = score / 80 * 100;
+  const scoreColor = percent >= 70 ? 'text-success' : percent >= 40 ? 'text-accent' : 'text-destructive';
+  const progressColor = percent >= 70 ? '[&>div]:bg-success' : percent >= 40 ? '[&>div]:bg-accent' : '[&>div]:bg-destructive';
 
   return (
     <Card className="overflow-hidden">
@@ -64,16 +70,20 @@ export function BusinessHealthCard() {
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-sm">
-              {isRu ? 'Показатели работы' : 'Business Health'}
+              {isRu ? 'Оценка операционной работы' : 'Operational score'}
             </h3>
           </div>
           <span className={cn('text-2xl font-bold tabular-nums', scoreColor)}>
-            {score}<span className="text-sm font-normal text-muted-foreground">/100</span>
+            {score}<span className="text-sm font-normal text-muted-foreground">/80</span>
           </span>
         </div>
 
         {/* Progress bar */}
-        <Progress value={score} className={cn('h-2', progressColor)} />
+        <Progress value={percent} className={cn('h-2', progressColor)} />
+
+        <p className="text-sm text-muted-foreground">
+          {isRu ? 'Финансы не входят в оценку.' : 'Financial results are excluded.'}
+        </p>
 
         {/* Status badges */}
         <div className="flex items-center gap-2">
