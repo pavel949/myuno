@@ -93,9 +93,10 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
         </div>
       )}
       {openProperty && (
-        <section aria-label={isRu ? 'Объект на карте' : 'Home on map'} className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] max-h-[calc(100%-2rem)] overflow-auto bg-background border shadow-lg p-3">
+        <div className="pointer-events-none absolute inset-4 grid grid-cols-1 grid-rows-1 items-end justify-items-start">
+        <section aria-label={isRu ? 'Объект на карте' : 'Home on map'} className="pointer-events-auto min-w-0 max-w-full max-h-full overflow-auto bg-background border shadow-lg p-3">
           <button type="button" onClick={() => setOpenId(null)} className="min-h-11 px-3 mb-2 text-sm" aria-label={isRu ? 'Закрыть карточку' : 'Close property card'}>{isRu ? 'Закрыть' : 'Close'}</button>
-            <div className="w-[260px] text-foreground">
+            <div className="w-[260px] max-w-full text-foreground">
               <button
                 type="button"
                 onClick={() => navigate(propertyDetailHref(openProperty.id, mode === 'all' ? propertyDetailMode(openProperty) : mode, location.search), { state: publicJourneyState(location) })}
@@ -144,7 +145,8 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               </button>
             </div>
         </section>
-        )}
+        </div>
+      )}
 
     </div>
   );
