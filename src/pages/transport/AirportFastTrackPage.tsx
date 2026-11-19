@@ -89,7 +89,7 @@ export default function AirportFastTrackPage() {
   const [specialNotes, setSpecialNotes] = useState('');
   const [passengers, setPassengers] = useState<PassengerData[]>([{ ...emptyPassenger }]);
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [validatedStep, setValidatedStep] = useState<'passenger' | 'review' | null>(null);
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
   const [showUpsell, setShowUpsell] = useState(false);
   const [submissionError, setSubmissionError] = useState(false);
@@ -192,7 +192,7 @@ export default function AirportFastTrackPage() {
     });
   };
 
-  const validateStep = (targetStep: 'passenger' | 'review'): boolean => {
+  const getValidationErrors = (targetStep: 'passenger' | 'review') => {
     const newErrors: Record<string, string> = {};
 
     if (!selectedService || !Number.isFinite(pricing.total) || pricing.total < 0) newErrors.service = tr('Select a service', 'Выберите услугу', 'เลือกบริการ');
@@ -224,8 +224,14 @@ export default function AirportFastTrackPage() {
       }
     }
 
-    setErrors(newErrors);
-    const firstError = Object.keys(newErrors)[0];
+    return newErrors;
+  };
+
+  const errors = validatedStep ? getValidationErrors(validatedStep) : {};
+
+  const validateStep = (targetStep: 'passenger' | 'review'): boolean => {
+    const firstError = Object.keys(getValidationErrors(targetStep))[0];
+    setValidatedStep(targetStep);
     if (firstError) {
       const target = firstError.startsWith('passenger_') || firstError.startsWith('contact') ? 'passenger' : 'service';
       setStep(target);
