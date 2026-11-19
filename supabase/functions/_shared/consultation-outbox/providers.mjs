@@ -1,0 +1,33 @@
+// Provider HTTP adapters. No fallback sender or recipient.
+// Supplied config is protected server configuration, never request-body input.
+const clean=(value,max=200)=>String(value??'').replace(/[\r\n\u0000-\u001f]/g,' ').slice(0,max);
+export function leadText(lead) {
+ const m=lead.vertical_metadata||{};
+ // Canonical Inbox contract; the link is selection, never authorization.
+ const href=`https://myuno.app/admin/inbox?${new URLSearchParams({source:'consultation_requests',request:String(lead.id)})}`;
+ return ['MyUNO: новая заявка (не бронирование)',`ID: ${clean(lead.id)}`,
+ `Клиент: ${clean(lead.name)}`,`Телефон: ${clean(lead.phone)}`,`Почта: ${clean(lead.email)}`,
+ `Запрос: ${clean(lead.request_type)}`,`Источник: ${clean(lead.entry_point)}`,
+ `Проект: ${clean(lead.development_project_id||m.project_id)}`,`Юнит: ${clean(m.unit_id)}`,`Объект: ${clean(m.property_id)}`,
+ `Намерение: ${clean(m.intent)}`,`Бюджет клиента (не цена): ${clean(lead.budget_min)} — ${clean(lead.budget_max)} ${clean(lead.currency)}`,
+ `Комментарий: ${clean(lead.notes,1600)}`].join('\n').slice(0,4000-href.length-1)+'\n'+href;
+}
+export function providerAdapters({resendKey,emailFrom,ultraInstance,ultraToken},fetchApi=fetch) {
+ const send={};
+ if(resendKey && typeof emailFrom==='string' && emailFrom.includes('@') && !/[\r\n]/.test(emailFrom)) send.email=async({lead,target,signal,idempotencyKey})=>{
+  const response=await fetchApi('https://api.resend.com/emails',{method:'POST',signal,redirect:'error',headers:{Authorization:`Bearer ${resendKey}`,'Content-Type':'application/json','Idempotency-Key':idempotencyKey},body:JSON.stringify({from:emailFrom,to:target,subject:`MyUNO: заявка ${clean(lead.id,36)}`,text:leadText(lead)})});
+  const result=await response.json();
+  // Resend documents this 429 as rejection before acceptance. Reuse the job key.
+  if (response.status===429 && result?.name==='rate_limit_exceeded' && !result.id) return {definitelyNotAccepted:true};
+  return response.ok && result && !result.error && typeof result.id==='string' && result.id.trim() ? {accepted:true,reference:result.id} : {};
+ };
+ if(typeof ultraInstance==='string' && /^instance\d+$/.test(ultraInstance) && ultraToken) send.whatsapp=async({lead,target,signal})=>{
+  if(typeof target!=='string' || !/^\+?[1-9]\d{6,14}$/.test(target))return {}; // strict platform phone, not arbitrary chat/group ID
+  const response=await fetchApi(`https://api.ultramsg.com/${ultraInstance}/messages/chat`,{method:'POST',signal,redirect:'error',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({token:ultraToken,to:target.startsWith('+')?target:`+${target}`,body:leadText(lead)})});
+  const result=await response.json();
+  const reference=(result && (typeof result.id==='string'||typeof result.id==='number'))?String(result.id):'';
+  return response.ok && result && !result.error && (result.sent===true || result.sent==='true') && reference && reference!=='0' ? {accepted:true,reference} : {};
+ };
+ // Unclassified failures and malformed responses remain uncertain.
+ return send;
+}

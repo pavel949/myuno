@@ -3,6 +3,7 @@
  * Reads admin contacts from system_settings table instead of hardcoding.
  */
 
+import { configuredAdminContacts } from "./admin-notification-contacts.ts";
 import { createServiceClient } from "./supabase.ts";
 
 const DEFAULTS = {
@@ -76,4 +77,13 @@ export async function getAdminEmails(): Promise<string[]> {
 export async function getAdminWhatsApp(): Promise<string> {
   const config = await loadConfig();
   return config.whatsapp;
+}
+
+/** Sensitive notification path: never send to defaults on settings failure. */
+export async function getConfiguredAdminContacts(): Promise<{ emails: string[]; whatsapp: string }> {
+  const sb = createServiceClient();
+  const { data, error } = await sb.from("system_settings")
+    .select("key, value").in("key", ["admin_emails", "admin_whatsapp"]);
+  if (error || !data) throw new Error("Platform notification settings unavailable");
+  return configuredAdminContacts(data);
 }
