@@ -3,17 +3,17 @@
   "status": "SOURCE_ONLY_NOTTESTED",
   "scope": "pavel949/myuno, active-route declarations plus explicit source JSX consumers",
   "routeSummary": {
-    "declarations": 715,
-    "directRedirects": 46,
+    "declarations": 716,
+    "directRedirects": 45,
     "kindCounts": {
       "conditional-entry": 4,
-      "redirect-adapter": 82,
-      "rendered-template": 579,
-      "redirect": 46,
+      "redirect-adapter": 83,
+      "rendered-template": 580,
+      "redirect": 45,
       "layout": 4
     }
   },
-  "templateCatalogEntries": 588,
+  "templateCatalogEntries": 591,
   "limitations": [
     "Route declarations are not unique screens",
     "Direct named JSX imports only; namespace/barrel indirection and programmatic construction can be missed",
@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 900,
-      "sourceInstances": 2945
+      "directConsumerFiles": 901,
+      "sourceInstances": 2950
     },
     "Card": {
       "directConsumerFiles": 532,
@@ -6648,7 +6648,7 @@
     },
     {
       "file": "src/components/landings/LandingLeadForm.tsx",
-      "sha256": "92cfa7a6d14da618a82b162a31476e8527dfd1af91db6697a6ab89828d623923",
+      "sha256": "a404ef39ab67408f2f4766b5e4247c18305669e1ebae91e09afa0d38ac47bd8c",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6658,7 +6658,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            308
+            311
           ]
         },
         {
@@ -6666,8 +6666,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            176,
-            197
+            178,
+            200
           ]
         },
         {
@@ -6675,9 +6675,9 @@
           "source": "@/components/ui/input",
           "instances": 3,
           "lines": [
-            204,
-            214,
-            227
+            207,
+            217,
+            230
           ]
         },
         {
@@ -6685,9 +6685,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            240,
-            258,
-            276
+            243,
+            261,
+            279
           ]
         },
         {
@@ -6695,7 +6695,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            292
+            295
           ]
         }
       ]
@@ -6915,7 +6915,7 @@
     },
     {
       "file": "src/components/layout/routes/propertyHubRoutes.tsx",
-      "sha256": "87850492fafbd73d6f1b3e376f83adaef727f0e5d68df589fee0165f4ec3bed7",
+      "sha256": "7117b4450f8d6eb925c0ef96bf84beb49f42a4cedf7fc8ebf2a30fa5198f255c",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -39302,13 +39302,13 @@
       "sha256": "848500bc338b5be77dc783f6c746097386523ab59a149df51c12411524ef0f37",
       "directRouteDeclarations": [
         {
-          "id": "34d8d3cbab22d30f",
+          "id": "607235ca327b072e",
           "path": "/property/commercial/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "962b043957443a43",
+          "id": "34821bf6e772b36d",
           "path": "/property/hotels/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39333,13 +39333,13 @@
       "sha256": "56e914a0717b4e4812a83f3faf6e8f95b4543bf54d903f3a8091db9ef06c2f7f",
       "directRouteDeclarations": [
         {
-          "id": "1ccceb4d64c7dc2e",
+          "id": "cc4266daa5b099c4",
           "path": "/property/commercial",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "929e25cf3e999c47",
+          "id": "0ad15c8514e6d797",
           "path": "/property/commercial/browse",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39363,7 +39363,7 @@
       "sha256": "43fbce2b9c797ca261b7703c929426f4f04826ed7e30917bf7033c8b3ee9c2a6",
       "directRouteDeclarations": [
         {
-          "id": "1e1b899a3fc37496",
+          "id": "f41029070fc81dad",
           "path": "/property/developers/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39389,7 +39389,7 @@
       "sha256": "cd4b4241331059aaa35adaadb45490c91ec43b102b840d2e5993090ea3d96665",
       "directRouteDeclarations": [
         {
-          "id": "4069dd4aea55fa1a",
+          "id": "a15837fac6d5ef5b",
           "path": "/property/developers",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39414,7 +39414,7 @@
       "sha256": "69f2d450793bb9d8bc9094dfeb3cb677431e2d0a7741ba9b97da420737020c47",
       "directRouteDeclarations": [
         {
-          "id": "ca18d74f7dbe874a",
+          "id": "c0484ee0d51bc5b4",
           "path": "/property/complex/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39445,7 +39445,7 @@
       "sha256": "b1fc7c6db0e62db80606b401123658993fffe3fe171e479110b46e5ef747649b",
       "directRouteDeclarations": [
         {
-          "id": "741d75dc6f8beea2",
+          "id": "6c8a070e79678b4c",
           "path": "/property/hotels",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39470,7 +39470,7 @@
       "sha256": "29fc2265ba659be3ea19ef5322807988dec3b8015a01053a64baa80d8608f3ab",
       "directRouteDeclarations": [
         {
-          "id": "14769714c181f5d1",
+          "id": "dafe51b171cb407f",
           "path": "/property/land/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39494,13 +39494,13 @@
       "sha256": "395f07438fa3e2592aa4bcd5a622923d6a5a7566e977a6b9d595e8fd8d3fbdf6",
       "directRouteDeclarations": [
         {
-          "id": "3145fe31210729d6",
+          "id": "d18472ea4b1722e8",
           "path": "/property/land",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         },
         {
-          "id": "58da0e15eab07577",
+          "id": "4df8dde163d12cd6",
           "path": "/property/land/browse",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39576,7 +39576,7 @@
       "sha256": "d4cc023c113959a00cf5fc0f8eb068bec245ae02e82ca6df06c66407b2843c5f",
       "directRouteDeclarations": [
         {
-          "id": "3b28614609c8b940",
+          "id": "fe50214ebb8ec95f",
           "path": "/property/booking/manual-payment/:orderId",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39612,11 +39612,39 @@
       ]
     },
     {
-      "file": "src/pages/property/OffplanDetail.tsx",
-      "sha256": "4303db48d96e334fd9fe509dddd130310381d75a179053607b5807608ca67a9b",
+      "file": "src/pages/property/NewbuildLanding.tsx",
+      "sha256": "f6202ce23726c692d4167b4651cd37a5a1beb2568553676fb1db092a077e6093",
       "directRouteDeclarations": [
         {
-          "id": "05a4704d48f8e0ff",
+          "id": "99928c93b9076907",
+          "path": "/property/offplan",
+          "actor": "public-or-page-gated",
+          "kind": "rendered-template"
+        }
+      ],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 5,
+          "lines": [
+            192,
+            221,
+            512,
+            626,
+            707
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/pages/property/OffplanDetail.tsx",
+      "sha256": "35261ffd60dc2edd55140049d2a5afd74f28d3de91f2b1ddb686adfa6acb6a82",
+      "directRouteDeclarations": [
+        {
+          "id": "78467c65281fe5f7",
           "path": "/property/offplan/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39630,10 +39658,10 @@
           "source": "@/components/ui/button",
           "instances": 4,
           "lines": [
-            129,
-            233,
-            369,
-            409
+            146,
+            250,
+            386,
+            426
           ]
         },
         {
@@ -39641,18 +39669,18 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            293
+            310
           ]
         }
       ]
     },
     {
       "file": "src/pages/property/OffplanIndex.tsx",
-      "sha256": "e4f7020c92c3d9d575f54af248c3c5bd8bb4425db8ecf9a5354bf75f10446030",
+      "sha256": "bca7099e3d83dcbce515384735b54dd4306d4cc3370667ca4149cb5dfbd7074f",
       "directRouteDeclarations": [
         {
-          "id": "7cb3db647f9c0305",
-          "path": "/property/offplan",
+          "id": "cd5e289dd9dc4aec",
+          "path": "/property/offplan/search",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
         }
@@ -39707,10 +39735,10 @@
     },
     {
       "file": "src/pages/property/PropertyConsultation.tsx",
-      "sha256": "e0212bdfce442bac059755fc83a6c11be9ed80db27fb795a6a751201052558be",
+      "sha256": "93c6d2cdc3b8fa6f1817b25926b713b712b45bbab5d630ac78ca380829e498b3",
       "directRouteDeclarations": [
         {
-          "id": "1e423129e70672bd",
+          "id": "d33f9e4e8bfdc32d",
           "path": "/property/consultation",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39726,21 +39754,21 @@
           "lines": [
             190,
             202,
-            472,
-            475,
-            478,
-            484,
-            487,
-            574,
-            680,
-            824,
-            827,
-            851,
-            883,
-            1101,
-            1104,
-            1274,
-            1277
+            485,
+            488,
+            491,
+            497,
+            500,
+            587,
+            693,
+            837,
+            840,
+            864,
+            896,
+            1114,
+            1117,
+            1288,
+            1291
           ]
         },
         {
@@ -39748,13 +39776,13 @@
           "source": "@/components/ui/card",
           "instances": 7,
           "lines": [
-            549,
-            590,
-            614,
-            635,
-            659,
-            922,
-            1176
+            562,
+            603,
+            627,
+            648,
+            672,
+            935,
+            1190
           ]
         },
         {
@@ -39762,21 +39790,21 @@
           "source": "@/components/ui/input",
           "instances": 15,
           "lines": [
-            701,
-            711,
-            721,
-            731,
-            757,
-            946,
-            961,
-            967,
-            984,
-            990,
+            714,
+            724,
+            734,
+            744,
+            770,
+            959,
+            974,
+            980,
+            997,
             1003,
-            1009,
-            1122,
-            1131,
-            1141
+            1016,
+            1022,
+            1136,
+            1145,
+            1155
           ]
         },
         {
@@ -39784,8 +39812,8 @@
           "source": "@/components/uno/PageContainer",
           "instances": 2,
           "lines": [
-            439,
-            499
+            449,
+            512
           ]
         },
         {
@@ -39793,8 +39821,8 @@
           "source": "@/components/uno/PageHeader",
           "instances": 2,
           "lines": [
-            440,
-            500
+            450,
+            513
           ]
         },
         {
@@ -39802,8 +39830,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            811,
-            1090
+            824,
+            1103
           ]
         }
       ]
@@ -39813,7 +39841,7 @@
       "sha256": "668a3490b39bf92fccb57524b03fbbd91ff8e0143a7b3a3e70a10ccbdcad8b79",
       "directRouteDeclarations": [
         {
-          "id": "ca8762f3146961c1",
+          "id": "9714f7612bbca5cb",
           "path": "/property/deposit-success",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39847,7 +39875,7 @@
       "sha256": "02f476301cfe845fe0307c2466111ed3daeae793248f272c6286e8664b1bb3a8",
       "directRouteDeclarations": [
         {
-          "id": "f59f14c0a6f796a4",
+          "id": "7414234e88791665",
           "path": "/property/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39920,7 +39948,7 @@
       "sha256": "08e151d37f65fa878625d50e9294dcd3d1532c98b40f7c6779f81e016d288a4e",
       "directRouteDeclarations": [
         {
-          "id": "272b7ab18ff1b1b4",
+          "id": "0c27d266195b2747",
           "path": "/property/:id/inquiry",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -39968,7 +39996,7 @@
       "sha256": "98ccb1324d8c65ecf8381fb75e4e90aa4d575427600dcfdaa1899c4ed0620325",
       "directRouteDeclarations": [
         {
-          "id": "2659d8eee8fc85fb",
+          "id": "2492a5f81192388c",
           "path": "/property/rent",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -40020,7 +40048,7 @@
       "sha256": "5551836e601e82601a32a36adaa22295ec9e0ee8ba8f3d06fe6945f8207711f7",
       "directRouteDeclarations": [
         {
-          "id": "d6edc37ed655ecb0",
+          "id": "0f05cdd4295df9da",
           "path": "/property/my",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -40053,7 +40081,7 @@
       "sha256": "f2fe1111b63726359ecb8980f275dcf262dd1c53d792e07bfc4a0ba396e37e20",
       "directRouteDeclarations": [
         {
-          "id": "1a8ee165ead258d7",
+          "id": "2394e6ffdd06a39f",
           "path": "/property/search",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -40107,7 +40135,7 @@
       "sha256": "3489814e91851e5f3daf5924a61a6fa5454e4d656836010154bcefb42ab42fe7",
       "directRouteDeclarations": [
         {
-          "id": "80a1463c84f5ea70",
+          "id": "7ada7fff2db4f989",
           "path": "/property/resale/:id",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
@@ -40132,7 +40160,7 @@
       "sha256": "24a5989cffcafcb2683eb8d37eb809bbc86dab318bbdc08be547132bd12ecf75",
       "directRouteDeclarations": [
         {
-          "id": "7593e347a72701db",
+          "id": "77e356dd792164ad",
           "path": "/property/resale",
           "actor": "public-or-page-gated",
           "kind": "rendered-template"
