@@ -48,6 +48,11 @@ const queryClient = useQueryClient();
 
   const t = (key: string) => {
     const translations: Record<string, Record<string, string>> = {
+      'order.airportTransferSaved': {
+        en: 'Transfer request saved',
+        ru: 'Заявка на трансфер сохранена',
+        th: 'บันทึกคำขอรถรับส่งแล้ว',
+      },
       'order.success': { en: 'Order confirmed!', ru: 'Заказ подтверждён!' },
       'order.error': { en: 'Order failed', ru: 'Ошибка заказа' },
       'order.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения' },
@@ -55,7 +60,7 @@ const queryClient = useQueryClient();
       'order.refunded': { en: 'Payment refunded to wallet', ru: 'Оплата возвращена на кошелёк' },
       'order.insufficientBalance': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств на кошельке' },
     };
-    return translations[key]?.[language] || key;
+    return translations[key]?.[language] || (key === 'order.airportTransferSaved' ? translations[key].en : key);
   };
 
   // Fetch user's orders
@@ -239,7 +244,8 @@ const queryClient = useQueryClient();
         },
       }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
-      toast(t('order.success'), {
+      const isAirportTransfer = input.order_type === 'vehicle' && input.metadata?.transfer_type === 'airport';
+      toast(t(isAirportTransfer ? 'order.airportTransferSaved' : 'order.success'), {
         description: orderNumber,
       });
 
