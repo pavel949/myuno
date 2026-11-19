@@ -14,6 +14,11 @@ function AdminTabRedirect({ to, tab }: { to: string; tab: string }) {
   return <Navigate to={`${to}?${params.toString()}`} replace />;
 }
 
+function AdminLeadsRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/admin/inbox', search, hash }} replace />;
+}
+
 export const adminRoutes = (
   <>
     <Route path="/admin" element={<Pages.AdminDashboard />} />
@@ -83,7 +88,7 @@ export const adminRoutes = (
     <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
     <Route path="/admin/nb-leads" element={<Pages.AdminNbLeads />} />
     <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
-    <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
+    <Route path="/admin/leads" element={<AdminLeadsRedirect />} />
     <Route path="/admin/finance" element={<Pages.AdminFinance />} />
     <Route path="/admin/disputes" element={<Pages.AdminDisputes />} />
     <Route path="/admin/investor-metrics" element={<AdminTabRedirect to="/admin/analytics" tab="revenue" />} />
