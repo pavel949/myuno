@@ -42,7 +42,7 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
       );
     }
     if (approvalStatus === 'approved' && isActive) {
-      return <Badge className="bg-success">{isRu ? 'Активен' : 'Active'}</Badge>;
+      return <Badge className="bg-success/10 text-success">{isRu ? 'Активен' : 'Active'}</Badge>;
     }
     if (approvalStatus === 'approved' && !isActive) {
       return <Badge variant="outline">{isRu ? 'Скрыт' : 'Hidden'}</Badge>;
@@ -54,46 +54,36 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
   const hasClearView = !!(property.clearview_badge || property.clearview_score);
 
   return (
-    <div className="relative rounded-none overflow-hidden mb-6">
+    <header className="mb-4 grid overflow-hidden border bg-card sm:grid-cols-3">
       {property.cover_image ? (
-        <img
-          src={property.cover_image}
-          alt={property.title}
-          className="w-full h-48 object-cover"
-        />
+        <img src={property.cover_image} alt="" className="aspect-video w-full object-cover sm:aspect-auto sm:h-full" />
       ) : (
-        <div className="w-full h-48 bg-muted flex items-center justify-center">
-          <Home className="h-16 w-16 text-muted-foreground" />
+        <div className="grid aspect-video place-items-center bg-muted sm:aspect-auto">
+          <Home aria-hidden="true" className="h-10 w-10 text-muted-foreground" />
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold text-white truncate">
-              {isRu && property.title_ru ? property.title_ru : property.title}
-            </h1>
-            <p className="text-white/80 text-sm flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {property.district || property.address}
-            </p>
-            {hasClearView && (
-              <div className="mt-2">
-                <ClearViewBadge
-                  grade={property.clearview_badge}
-                  score={property.clearview_score}
-                  isRu={isRu}
-                  onClick={
-                    property.project_id
-                      ? () => navigate(`/newbuilds/${property.project_id}#clearview`)
-                      : undefined
-                  }
-                />
-              </div>
-            )}
-          </div>
+      <div className="min-w-0 space-y-3 p-4 sm:col-span-2 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2">
           {getStatusBadge(property.approval_status, property.is_active)}
+          {hasClearView && (
+            <ClearViewBadge
+              grade={property.clearview_badge}
+              score={property.clearview_score}
+              isRu={isRu}
+              onClick={property.project_id ? () => navigate(`/newbuilds/${property.project_id}#clearview`) : undefined}
+            />
+          )}
         </div>
+        <h1 className="font-display text-2xl font-semibold leading-tight text-foreground [overflow-wrap:anywhere] sm:text-3xl">
+          {isRu && property.title_ru ? property.title_ru : property.title}
+        </h1>
+        {(property.district || property.address) && (
+          <p className="flex items-start gap-2 text-sm text-muted-foreground">
+            <MapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+            <span className="min-w-0 [overflow-wrap:anywhere]">{property.district || property.address}</span>
+          </p>
+        )}
       </div>
-    </div>
+    </header>
   );
 }

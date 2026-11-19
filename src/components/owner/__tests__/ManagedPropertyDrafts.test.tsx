@@ -8,7 +8,11 @@ vi.mock('@/lib/propertyAuthoring', () => ({ listManagedPropertyDrafts: mocks.lis
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: mocks.actor } }) }));
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: mocks.company ? { company_id: mocks.company } : null }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
-function mount() { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter><ManagedPropertyDrafts /></MemoryRouter></QueryClientProvider>); }
+function mount() { const view = render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><MemoryRouter><ManagedPropertyDrafts /></MemoryRouter></QueryClientProvider>);
+  const summary = view.container.querySelector('summary');
+  if (summary) fireEvent.click(summary);
+  return view;
+}
 beforeEach(() => { vi.clearAllMocks(); mocks.company = 'company-a'; mocks.language = 'en'; mocks.list.mockResolvedValue([]); });
 afterEach(cleanup);
 describe('catalogue-only data entry list', () => {
