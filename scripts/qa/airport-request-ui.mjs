@@ -167,6 +167,9 @@ async function fastTrack(page, direction, width, simulateFailure) {
   await page.getByLabel('Flight number').fill('TG123');
   await page.getByLabel('Flight date').fill(flightDate);
   await page.getByLabel('Flight time').fill('12:00');
+  for (const label of ['Flight number', 'Flight date', 'Flight time']) {
+    await expect(page.getByLabel(label)).toHaveAttribute('aria-invalid', 'false');
+  }
   await screenshot(page, `fasttrack-flight-${width}`);
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel('First name (Latin)').fill('Sample');
