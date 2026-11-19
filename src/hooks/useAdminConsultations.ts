@@ -16,6 +16,13 @@ export interface ConsultationFilters {
 export function useAdminConsultations(filters?: ConsultationFilters) {
   const queryClient = useQueryClient();
 
+  const refreshConsultation = (id: string) => queryClient.invalidateQueries({
+    predicate: ({ queryKey: [family, , source, requestId] }) =>
+      family === 'admin-consultations' ||
+      (family === 'admin-inbox' && source === 'consultation_requests') ||
+      (family === 'admin-inbox-request' && source === 'consultation_requests' && requestId === id),
+  });
+
   // Fetch all consultation requests (admin only)
   const { data: consultations, isLoading, refetch } = useQuery({
     queryKey: ['admin-consultations', filters],
@@ -72,8 +79,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+    onSuccess: (_data, { id }) => {
+      void refreshConsultation(id);
       toast.success('Статус обновлён');
     },
     onError: () => {
@@ -94,8 +101,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+    onSuccess: (_data, { id }) => {
+      void refreshConsultation(id);
       toast.success('Заметка сохранена');
     },
     onError: () => {

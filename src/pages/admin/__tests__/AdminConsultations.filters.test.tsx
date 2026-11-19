@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -107,6 +107,32 @@ describe('consultation filters use canonical read aliases', () => {
     expect(state.matches).toHaveBeenCalledWith('eq', 'request_type', 'property_consultation');
     expect(state.matches).toHaveBeenCalledWith('in', 'vertical_id', ['legal_services', 'legal', 'lawyers']);
     expect(state.matches).toHaveBeenCalledWith('in', 'lead_source', ['website', 'WEBSITE']);
+  });
+  it.each(['status', 'notes'] as const)('refreshes the saved consultation in the inbox after saving %s', async kind => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const id = state.rows[0].id as string;
+    const queue = ['admin-inbox', 'synthetic-admin', 'consultation_requests', 0, 'all', ''];
+    const detail = ['admin-inbox-request', 'synthetic-admin', 'consultation_requests', id];
+    const other = ['admin-inbox-request', 'synthetic-admin', 'consultation_requests', 'other'];
+    const partnerQueue = ['admin-inbox', 'synthetic-admin', 'partner_applications', 0, 'all', ''];
+    for (const key of [queue, detail, other, partnerQueue]) queryClient.setQueryData(key, { status: 'pending' });
+    const single = vi.fn(async () => ({ data: { id, status: 'contacted', admin_notes: 'Synthetic follow-up' }, error: null }));
+    const select = vi.fn(() => ({ single }));
+    const eq = vi.fn(() => ({ select }));
+    state.mutations.mockReturnValueOnce({ eq });
+    const wrapper = ({ children }: { children: React.ReactNode }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    const { result } = renderHook(() => useAdminConsultations(), { wrapper });
+
+    await act(async () => {
+      if (kind === 'status') await result.current.updateStatus.mutateAsync({ id, status: 'contacted' });
+      else await result.current.updateNotes.mutateAsync({ id, admin_notes: 'Synthetic follow-up' });
+    });
+
+    expect(eq).toHaveBeenCalledWith('id', id);
+    expect(queryClient.getQueryState(queue)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(detail)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(other)?.isInvalidated).toBe(false);
+    expect(queryClient.getQueryState(partnerQueue)?.isInvalidated).toBe(false);
   });
   it('preserves query failures rather than converting them to empty results', async () => {
     state.error = new Error('Synthetic read failure');
