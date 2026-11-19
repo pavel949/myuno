@@ -63,10 +63,10 @@ const Email = ({
 export const template = {
   component: Email,
   subject: (data: Record<string, unknown>) =>
-    (data?.subjectText as string) || `Booking #${(data?.orderNumber as string) || ''} received`,
-  displayName: 'Transfer: Booking received (customer)',
+    (data?.subjectText as string) || `Request #${(data?.orderNumber as string) || ''} received`,
+  displayName: 'Transfer: Request received (customer)',
   previewData: {
-    subjectText: 'Заявка #TR-001 принята — ждём подтверждения оператора',
+    subjectText: 'Заявка #TR-001 получена — ожидает подтверждения',
     title: 'Спасибо! Заявка на трансфер принята',
     orderNumber: 'TR-001',
     orderLabel: 'Номер заявки',
@@ -74,7 +74,7 @@ export const template = {
     routeValue: 'Аэропорт Пхукета → Отель Marriott',
     dateLabel: 'Дата',
     dateValue: '12 июн. 2026 14:30 ICT',
-    operatorLine: 'Оператор Klod свяжется с вами в течение ~30 минут для подтверждения.',
+    operatorLine: 'Команда myUNO проверит детали и свяжется с вами для подтверждения.',
     amountLabel: 'Сумма',
     amountValue: '฿2,500',
   },
