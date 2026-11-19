@@ -24,11 +24,11 @@
   "families": {
     "Button": {
       "directConsumerFiles": 900,
-      "sourceInstances": 2945
+      "sourceInstances": 2947
     },
     "Card": {
       "directConsumerFiles": 532,
-      "sourceInstances": 1544
+      "sourceInstances": 1540
     },
     "Dialog": {
       "directConsumerFiles": 164,
@@ -3569,7 +3569,7 @@
     },
     {
       "file": "src/components/admin/operations/OperationsBookingsTab.tsx",
-      "sha256": "b40f1f788b24b560cb70299ae057cdeee08e27b8eb0227602407fa75b9d6d2e7",
+      "sha256": "6d10f8d312d1ff8b8bc38776064133803daffe37e9e4c1bfdf750fe62c69c2f3",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -3577,25 +3577,23 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 5,
+          "instances": 7,
           "lines": [
-            112,
-            189,
-            194,
-            195,
-            259
+            134,
+            150,
+            208,
+            213,
+            214,
+            229,
+            308
           ]
         },
         {
           "name": "Card",
           "source": "@/components/ui/card",
-          "instances": 5,
+          "instances": 1,
           "lines": [
-            118,
-            127,
-            136,
-            145,
-            157
+            176
           ]
         },
         {
@@ -3603,7 +3601,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            169
+            188
           ]
         },
         {
@@ -3611,7 +3609,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            177
+            196
           ]
         },
         {
@@ -3619,7 +3617,7 @@
           "source": "@/components/ui/table",
           "instances": 1,
           "lines": [
-            205
+            254
           ]
         }
       ]
@@ -23585,7 +23583,7 @@
     },
     {
       "file": "src/pages/admin/AdminOperations.tsx",
-      "sha256": "6f6ed93ba02b4f70c43d03e4962e51f9e0ab838122a24c6514bd91e5f432c64a",
+      "sha256": "c0de6b6fb3fbe0caf513a94416963d7db012e395182f9efd216ed4ded206c50d",
       "directRouteDeclarations": [
         {
           "id": "3a149afaf0247437",
