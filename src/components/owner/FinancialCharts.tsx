@@ -249,7 +249,7 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4" />
-            {isRu ? 'Чистый доход по месяцам' : 'Monthly Net Income'}
+            {isRu ? 'Разница по записям за месяц' : 'Monthly difference in records'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -262,7 +262,7 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
                 <Tooltip content={<CustomTooltip />} />
                 <Bar 
                   dataKey="net" 
-                  name={isRu ? 'Чистый доход' : 'Net Income'}
+                  name={isRu ? 'Начисления минус расходы' : 'Recorded accruals less expenses'}
                   radius={CHART_THEME.bar.radius}
                   animationDuration={CHART_THEME.bar.animationDuration}
                 >

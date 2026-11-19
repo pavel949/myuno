@@ -49,8 +49,8 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
   const isRu = language === 'ru';
 
   // Fetch upcoming bookings as projected income
-  const { data: bookings, isLoading: bookingsLoading } = useQuery({
-    queryKey: ['forecast-bookings', user?.id, propertyId],
+  const { data: bookings, isLoading: bookingsLoading, isError: bookingsError } = useQuery({
+    queryKey: ['forecast-bookings', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       const now = new Date();
@@ -69,6 +69,7 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
         .from('property_bookings')
         .select('id, check_in, check_out, total_amount, currency, status, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
+        .eq('currency', 'THB')
         .in('status', ['confirmed', 'active', 'pending'])
         .gte('check_in', now.toISOString().split('T')[0])
         .lte('check_in', threeMonthsLater.toISOString().split('T')[0])
@@ -81,8 +82,8 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
   });
 
   // Fetch recurring expenses
-  const { data: recurringExpenses, isLoading: recurringLoading } = useQuery({
-    queryKey: ['forecast-recurring', user?.id, propertyId],
+  const { data: recurringExpenses, isLoading: recurringLoading, isError: recurringError } = useQuery({
+    queryKey: ['forecast-recurring', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       let propIds: string[] = [];
@@ -98,6 +99,8 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
         .from('property_financials')
         .select('*, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
+        .eq('currency', 'THB')
+        .eq('transaction_type', 'expense')
         .eq('recurring', true)
         .not('recurring_interval', 'is', null);
 
@@ -108,8 +111,8 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
   });
 
   // Fetch planned (pending) transactions
-  const { data: plannedTx, isLoading: plannedLoading } = useQuery({
-    queryKey: ['forecast-planned', user?.id, propertyId],
+  const { data: plannedTx, isLoading: plannedLoading, isError: plannedError } = useQuery({
+    queryKey: ['forecast-planned', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       const now = new Date();
@@ -128,6 +131,8 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
         .from('property_financials')
         .select('*, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
+        .eq('currency', 'THB')
+        .in('transaction_type', ['income', 'expense'])
         .eq('status', 'pending')
         .gte('due_date', now.toISOString().split('T')[0])
         .lte('due_date', threeMonthsLater.toISOString().split('T')[0])
@@ -161,7 +166,7 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
             date: b.check_in,
             type: 'income',
             amount: Number(b.total_amount) || 0,
-            label: isRu ? 'Поступление аренды' : 'Rental income',
+            label: isRu ? 'Оценка по бронированию' : 'Booking estimate',
             source: 'booking',
             status: b.status === 'confirmed' || b.status === 'active' ? 'confirmed' : 'expected',
             propertyTitle: isRu && prop?.title_ru ? prop.title_ru : prop?.title,
@@ -271,10 +276,23 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
     );
   }
 
+  if (bookingsError || recurringError || plannedError) {
+    return <p role="alert" className="text-sm text-muted-foreground">
+      {isRu ? 'Не удалось загрузить данные для прогноза.' : 'Could not load forecast records.'}
+    </p>;
+  }
+
   const hasData = forecast.some(m => m.items.length > 0);
+  if (!hasData) return <p className="text-sm text-muted-foreground">
+    {isRu ? 'Нет записей в THB для предварительного прогноза.' : 'No THB records for a provisional forecast.'}
+  </p>;
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {isRu ? 'Предварительная оценка по записям в THB. Не подтверждение оплаты или выплат.'
+          : 'Provisional estimate based on records in THB. Not evidence of payments or payouts.'}
+      </p>
       {/* Summary header */}
       <div className="grid grid-cols-3 gap-2">
         <Card className="bg-success/5 border-success/20">
