@@ -21,6 +21,7 @@ import { OperationsManualPaymentsTab } from '@/components/admin/operations/Opera
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { applyOrderQueue, applyTicketQueue } from '@/lib/adminDashboardQueues';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 function useOperationsOverview() {
   return useQuery({
@@ -67,7 +68,7 @@ export default function AdminOperations() {
     },
     { 
       id: 'leads', 
-      label: isRu ? 'Лиды' : 'Leads', 
+      label: pickLang(language, { en: 'Supplier prospects', ru: 'Потенциальные поставщики', th: 'ผู้ให้บริการที่คาดหวัง' }),
       icon: Users,
       badge: overview?.newLeads,
     },
@@ -127,7 +128,7 @@ export default function AdminOperations() {
     <PageShell width="workspace">
       <PageHeader
         title={isRu ? 'Операции' : 'Operations'}
-        subtitle={isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
+        subtitle={pickLang(language, { en: 'Orders, moderation, supplier prospects and support tickets', ru: 'Заказы, модерация, потенциальные поставщики и обращения в поддержку', th: 'คำสั่งซื้อ การตรวจสอบ ผู้ให้บริการที่คาดหวัง และคำขอความช่วยเหลือ' })}
         actions={
           <Button
             variant="ghost"

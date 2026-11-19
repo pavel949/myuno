@@ -26,7 +26,7 @@ export function TodayActionsWidget() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { data: metrics, isLoading } = useDashboardMetrics();
+  const { data: metrics, isLoading, isError } = useDashboardMetrics();
   const ops = metrics?.ops;
 
   const actions = useMemo<ActionItem[]>(() => {
@@ -85,8 +85,8 @@ export function TodayActionsWidget() {
       items.push({
         id: 'pending-invoices',
         icon: CreditCard,
-        title: isRu ? 'Ожидают оплаты' : 'Pending Payments',
-        subtitle: isRu ? `${ops.pendingInvoices} неоплаченных` : `${ops.pendingInvoices} unpaid`,
+        title: isRu ? 'Расходы к оплате' : 'Pending expenses',
+        subtitle: isRu ? `${ops.pendingInvoices} записей` : `${ops.pendingInvoices} records`,
         count: ops.pendingInvoices,
         priority: ops.pendingInvoices > 2 ? 'high' : 'normal',
         href: APP_ROUTES.MC_INVOICES,
@@ -105,6 +105,12 @@ export function TodayActionsWidget() {
         <Skeleton className="h-14 w-full rounded-none" />
       </div>
     );
+  }
+
+  if (isError || !ops) {
+    return <Card><CardContent className="p-4 text-sm text-muted-foreground">
+      {isRu ? 'Данные по задачам пока недоступны.' : 'Action data is unavailable.'}
+    </CardContent></Card>;
   }
 
   if (actions.length === 0) {

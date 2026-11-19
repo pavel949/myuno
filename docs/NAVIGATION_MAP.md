@@ -160,16 +160,17 @@ Fullscreen-префиксы (без шелла): `/auth`, `/checkout`, `/cart`, 
 
 **BottomBar (5):** Dashboard · Properties · Calendar · Finance · Messages.
 
-**SideRail (6 групп):**
+**SideRail (5 групп):**
 
 | Группа              | Пункты                                                                                  |
 |---------------------|-----------------------------------------------------------------------------------------|
-| Control Tower       | Dashboard `/mc` · Bookings · Calendar · Tasks · Messages                                |
-| Properties          | Properties · Performance · Reviews                                                      |
-| Operations          | Rates & Channels · Inventory · Insurance & Docs · Templates                             |
+| Daily work          | Dashboard `/mc` · Today · Bookings · Calendar · Tasks · Messages                        |
+| Properties & rates  | Properties · Performance · Reviews · Rates & Channels · Inventory · Insurance · Documents |
 | Finance             | Finance Hub · Invoices & AR · Management Terms                                          |
-| CRM & Sales         | CRM Dashboard · Contacts · Owners · Vendor Acquisition                                  |
+| Sales & CRM         | CRM Dashboard · Contacts · Owners · Vendor Acquisition                                  |
 | Team & Settings     | Staff & Access · Settings · Help Center                                                 |
+
+На мобильном пункты BottomBar собраны в свёрнутые «Быстрые переходы» внизу меню: ссылки остаются доступны даже без BottomBar. Под названием кабинета видно текущее назначение, даже когда его раздел свёрнут.
 
 **Persona-фильтр** (`getOwnerSidebarForRole`):
 

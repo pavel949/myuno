@@ -5,3 +5,35 @@
 .mc-workspace-sidebar [data-sidebar=group-label]:hover{color:hsl(var(--sidebar-foreground))}
 .mc-workspace-sidebar [data-sidebar=menu-button]{color:hsl(var(--sidebar-foreground));font-size:13px}
 .mc-workspace-sidebar [data-sidebar=menu-button]:focus-visible{outline:2px solid hsl(var(--sidebar-ring));outline-offset:-2px}
+
+.mc-rail-content [data-sidebar=group] {
+  padding-block: 2px;
+}
+
+.mc-rail-content [data-sidebar=group-label] {
+  font-size: var(--type-body-size);
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.mc-rail-content .mc-rail-current-group {
+  color: hsl(var(--sidebar-foreground));
+}
+
+[data-sidebar=group-label][data-state=closed] .mc-rail-chevron {
+  transform: rotate(-90deg);
+}
+
+.mc-workspace-sidebar [data-sidebar=menu-button].mc-rail-destination {
+  font-size: var(--type-body-size);
+}
+
+.mc-workspace-sidebar [data-sidebar=menu-button].mc-rail-destination[data-active=true] {
+  font-weight: 650;
+  box-shadow: inset 3px 0 hsl(var(--sidebar-ring));
+}
+
+/* The mobile Sheet is portaled and does not inherit the desktop rail palette. */
+[data-sidebar=sidebar][data-mobile=true] .mc-workspace-sidebar {
+  background-color: hsl(var(--sidebar-background));
+}
