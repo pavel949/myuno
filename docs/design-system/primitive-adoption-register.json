@@ -23435,7 +23435,7 @@
     },
     {
       "file": "src/pages/admin/AdminNewbuilds.tsx",
-      "sha256": "136f8b69486e734ce8df0301f8566f3c8775b050f9c22eeba590cf8ead17db93",
+      "sha256": "8797490b95a97699865b44148a38ed2a7ea9f1505ab4cb2de163d3496da696cd",
       "directRouteDeclarations": [
         {
           "id": "b581590ef06396d2",
@@ -23452,22 +23452,22 @@
           "source": "@/components/ui/button",
           "instances": 16,
           "lines": [
-            154,
             155,
             156,
-            256,
-            259,
-            262,
-            275,
-            278,
-            372,
-            375,
-            378,
-            452,
+            157,
+            257,
+            260,
+            263,
+            276,
+            279,
+            373,
+            376,
+            379,
             453,
-            488,
-            507,
-            511
+            454,
+            489,
+            508,
+            512
           ]
         },
         {
@@ -23475,22 +23475,22 @@
           "source": "@/components/ui/input",
           "instances": 16,
           "lines": [
-            181,
-            390,
-            394,
-            398,
-            402,
-            417,
-            432,
-            436,
-            440,
-            469,
-            482,
-            519,
-            523,
-            527,
-            531,
-            535
+            182,
+            391,
+            395,
+            399,
+            403,
+            418,
+            433,
+            437,
+            441,
+            470,
+            483,
+            520,
+            524,
+            528,
+            532,
+            536
           ]
         },
         {
@@ -23498,7 +23498,7 @@
           "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
-            147
+            148
           ]
         },
         {
@@ -23506,9 +23506,9 @@
           "source": "@/components/ui/select",
           "instances": 3,
           "lines": [
-            184,
-            407,
-            422
+            185,
+            408,
+            423
           ]
         },
         {
@@ -23516,7 +23516,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            169
+            170
           ]
         }
       ]
@@ -23950,7 +23950,7 @@
     },
     {
       "file": "src/pages/admin/AdminProjects.tsx",
-      "sha256": "8b3083ea3ae910bccb6c7b29ffe0f62cb99d7b01588519fd0c5c15862a7e7034",
+      "sha256": "89a5c07ecd91f10691c4622daf40ee3d86b1a3a4a91e50c8575e94795bc21cef",
       "directRouteDeclarations": [
         {
           "id": "1c16752565341f30",
