@@ -157,6 +157,7 @@ export interface CreateConsultationInput {
   notes?: string;
   guests_count?: number;
   children_count?: number;
+  vertical_id?: string;
   vertical_metadata?: Record<string, unknown>;
   entry_point?: string;
   lead_source?: string;

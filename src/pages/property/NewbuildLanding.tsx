@@ -705,7 +705,7 @@ export default function NewbuildLanding() {
           </p>
         </Heading>
         <Button asChild size="lg">
-          <Link to="/property/consultation" state={journey}>
+          <Link to="/property/consultation?market=newbuilds" state={journey}>
             {t(
               text(
                 "Обсудить подбор",

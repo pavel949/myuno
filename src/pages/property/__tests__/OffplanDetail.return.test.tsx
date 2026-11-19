@@ -55,3 +55,12 @@ it('clears a previous unit when the project enquiry is reopened', () => {
   expect(context).not.toHaveProperty('unit_id');
   expect(context).not.toHaveProperty('property_id');
 });
+
+it('keeps document requests explicit and clears a previous unit context', () => {
+ state.project = {id:'synthetic-project',nameEn:'Synthetic project',nameRu:'Проект',district:'Bang Tao',amenities:[],coverImage:null};
+ render(<MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button',{name:'Ask unit A'}));fireEvent.click(screen.getByRole('button',{name:'Close enquiry'}));
+ fireEvent.mouseDown(screen.getByRole('tab',{name:'Docs'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Request document package'}));
+ const context=JSON.parse(screen.getByTestId('enquiry-context').textContent!);expect(context).toMatchObject({project_id:'synthetic-project',intent:'documents',request_only:true});expect(context).not.toHaveProperty('unit_id');
+ expect(screen.getByTestId('enquiry-context')).toHaveAttribute('data-request-type','property_consultation');
+});
