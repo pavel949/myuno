@@ -32,6 +32,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { ChevronDown, LayoutGrid } from 'lucide-react';
 import '@/styles/mc-workspace.css';
 import { cn } from '@/lib/utils';
@@ -76,6 +77,7 @@ export function SideRail({ role, badges }: SideRailProps) {
   const activeDestination = groups.flatMap(group => group.items).find(item => item.path === ownerActivePath);
   const allToolsActive = location.pathname === '/mc/modules';
   const toolsLabel = pickLang(language, { en: 'All tools', ru: 'Все инструменты', th: 'เครื่องมือทั้งหมด' });
+  const workspaceLabel = pickLang(language, { en: 'Management workspace', ru: 'Кабинет управления', th: 'พื้นที่จัดการ' });
   const currentDestination = activeDestination ? labelOf(activeDestination) : (allToolsActive ? toolsLabel : undefined);
 
   const isActive = (path: string) => {
@@ -102,9 +104,14 @@ export function SideRail({ role, badges }: SideRailProps) {
         <SidebarHeader className={cn('border-b', isOwner ? 'mc-workspace-sidebar gap-1 border-sidebar-border px-4 py-4' : 'border-border/70 px-2 py-2')}>
           {isOwner ? (
             <>
-              <p className="text-base font-semibold leading-tight">
-                {pickLang(language, { en: 'Management workspace', ru: 'Кабинет управления', th: 'พื้นที่จัดการ' })}
-              </p>
+              {isMobile ? (
+                <>
+                  <SheetTitle className="text-base font-semibold leading-tight text-sidebar-foreground">{workspaceLabel}</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    {pickLang(language, { en: 'Navigation for workspace tasks', ru: 'Переход к задачам кабинета', th: 'เมนูสำหรับงานในพื้นที่จัดการ' })}
+                  </SheetDescription>
+                </>
+              ) : <p className="text-base font-semibold leading-tight">{workspaceLabel}</p>}
               {currentDestination && (
                 <p className="break-words text-sm leading-snug text-muted-foreground">
                   {pickLang(language, { en: 'You are here:', ru: 'Сейчас:', th: 'หน้าปัจจุบัน:' })}{' '}
@@ -165,7 +172,7 @@ export function SideRail({ role, badges }: SideRailProps) {
                               className={cn(
                                 'cursor-pointer h-auto min-h-10 py-2',
                                 active && 'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
-                                isOwner && 'mc-rail-destination',
+                                isOwner && 'mc-rail-destination min-h-11',
                               )}
                             >
                               <Icon className="size-5 shrink-0" aria-hidden />
