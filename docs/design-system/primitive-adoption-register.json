@@ -36644,7 +36644,7 @@
     },
     {
       "file": "src/pages/owner/OwnerProperties.tsx",
-      "sha256": "adac1986f0a0e0c10ff3705c1122025d2917f5244930ab46e34cb9020ab1da6c",
+      "sha256": "74d53ca98216e3d3da5be8c0c96435dd82709f2852a570058c73c6269bb1f891",
       "directRouteDeclarations": [
         {
           "id": "26a082c368ea182d",
@@ -36661,25 +36661,25 @@
           "source": "@/components/ui/button",
           "instances": 19,
           "lines": [
-            359,
-            366,
-            372,
-            380,
-            413,
+            350,
+            357,
+            363,
+            371,
+            404,
+            459,
             468,
-            477,
-            516,
-            529,
-            685,
-            696,
-            707,
-            718,
-            729,
-            740,
-            846,
-            853,
-            879,
-            882
+            507,
+            520,
+            676,
+            687,
+            698,
+            709,
+            720,
+            731,
+            837,
+            844,
+            870,
+            873
           ]
         },
         {
@@ -36687,9 +36687,9 @@
           "source": "@/components/ui/card",
           "instances": 3,
           "lines": [
-            507,
-            523,
-            613
+            498,
+            514,
+            604
           ]
         },
         {
@@ -36697,7 +36697,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            836
+            827
           ]
         },
         {
@@ -36705,7 +36705,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            400
+            391
           ]
         },
         {
@@ -36713,7 +36713,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            355
+            346
           ]
         },
         {
@@ -36721,7 +36721,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            356
+            347
           ]
         },
         {
@@ -36729,8 +36729,8 @@
           "source": "@/components/ui/select",
           "instances": 2,
           "lines": [
-            863,
-            902
+            854,
+            893
           ]
         }
       ]
