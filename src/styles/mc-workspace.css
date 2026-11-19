@@ -11,7 +11,7 @@
 }
 
 .mc-rail-content [data-sidebar=group-label] {
-  font-size: 14px;
+  font-size: var(--type-body-size);
   line-height: 1.35;
   font-weight: 600;
 }
@@ -25,7 +25,7 @@
 }
 
 .mc-workspace-sidebar [data-sidebar=menu-button].mc-rail-destination {
-  font-size: 14px;
+  font-size: var(--type-body-size);
 }
 
 .mc-workspace-sidebar [data-sidebar=menu-button].mc-rail-destination[data-active=true] {
