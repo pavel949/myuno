@@ -1,7 +1,7 @@
 /**
  * Admin hooks for managing developers (property developers/builders)
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -57,6 +57,14 @@ export interface DeveloperFormData {
   is_active?: boolean;
 }
 
+// Keep private rows separate from public allowlisted projections. A successful
+// write may change activity or slug, so refresh every public lookup variant.
+function invalidateDeveloperCatalogues(queryClient: QueryClient) {
+  for (const key of ['admin-developers', 'admin-developer', 'developers', 'developer', 'developer-slug-or-id']) {
+    void queryClient.invalidateQueries({ queryKey: [key] });
+  }
+}
+
 // Fetch all developers
 export function useAdminDevelopers() {
   return useQuery({
@@ -76,7 +84,7 @@ export function useAdminDevelopers() {
 // Fetch single developer
 export function useDeveloper(id?: string) {
   return useQuery({
-    queryKey: ['developer', id],
+    queryKey: ['admin-developer', id],
     queryFn: async () => {
       if (!id) return null;
       
@@ -114,7 +122,7 @@ export function useCreateDeveloper() {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-developers'] });
+      invalidateDeveloperCatalogues(queryClient);
       toast.success('Developer created');
     },
     onError: () => {
@@ -142,9 +150,8 @@ export function useUpdateDeveloper() {
       if (error) throw error;
       return result;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-developers'] });
-      queryClient.invalidateQueries({ queryKey: ['developer', data.id] });
+    onSuccess: () => {
+      invalidateDeveloperCatalogues(queryClient);
       toast.success('Developer updated');
     },
     onError: () => {
@@ -169,7 +176,7 @@ export function useDeleteDeveloper() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-developers'] });
+      invalidateDeveloperCatalogues(queryClient);
       toast.success('Developer deleted');
     },
     onError: () => {
