@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { useRevenueAnalytics } from '@/hooks/useRevenueAnalytics';
-import { useFinancialStats } from '@/hooks/usePropertyFinancials';
+import { useMcFinanceOverview } from '@/hooks/usePropertyFinancials';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,165 +8,201 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  DollarSign, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  Plus, Minus, Receipt, FileText, Target, BarChart3, LineChart,
-  ChevronRight, Wallet, PiggyBank, ArrowRightLeft,
+  Plus, Minus, Receipt, FileText, Target, LineChart, ChevronRight,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   BarChart, Bar,
 } from 'recharts';
 
 export default function FinanceOverview() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { currencyInfo, convertPrice } = useCurrency();
   const isRu = language === 'ru';
-  const { monthlyMetrics, kpi, isLoading } = useRevenueAnalytics(6);
-  const { data: stats } = useFinancialStats();
+  const lang = language === 'th' ? 'th' : isRu ? 'ru' : 'en';
+  const locale = { ru: 'ru-RU', en: 'en-GB', th: 'th-TH' }[lang];
+  const { months, asOf, isLoading, isError, retry } = useMcFinanceOverview();
+  const current = months?.[months.length - 1];
+  const omitted = months?.some(month => month.omittedRecords > 0);
+  const t = {
+    ru: {
+      title: 'Финансы', subtitle: 'Учёт операций управляющей компании',
+      actual: 'Фактические поступления и расходы', unreconciled: 'Не сверено',
+      actualNote: 'На этом экране нет сверки с оплатами. Суммы ниже показывают записи учёта, а не движение денег или прибыль.',
+      recordedIncome: 'Начисления без сверки', recordedExpenses: 'Расходы по записям',
+      recordedNote: 'По датам операций до указанной даты включительно, время Пхукета.',
+      noEntries: 'За этот месяц записей нет', noScope: 'Нет доступных финансовых данных для выбранной компании.',
+      error: 'Не удалось загрузить записи учёта.', retry: 'Повторить',
+      chart: 'Записи учёта по месяцам', months: '6 мес. · THB',
+      chartNote: 'Только суммы в батах. Это не отчёт о прибыли или движении денег.',
+      omitted: 'Некоторые суммы не включены: валюта или сумма в записи не указана корректно.',
+      transactions: 'Транзакции', reports: 'Отчёты', budget: 'Бюджет',
+      planning: 'Финансовое планирование', invoices: 'Инвойсы',
+      addExpense: 'Добавить расход', addIncome: 'Добавить доход', sections: 'Разделы',
+    },
+    en: {
+      title: 'Finance', subtitle: 'Management company transaction records',
+      actual: 'Actual cash in and out', unreconciled: 'Not reconciled',
+      actualNote: 'This screen does not reconcile payments. The amounts below are records, not cash flows or profit.',
+      recordedIncome: 'Unreconciled accruals', recordedExpenses: 'Recorded expenses',
+      recordedNote: 'Based on transaction dates through the date shown, Phuket time.',
+      noEntries: 'No records this month', noScope: 'No financial data is accessible for the selected company.',
+      error: 'Could not load transaction records.', retry: 'Retry',
+      chart: 'Transaction records by month', months: '6 mo. · THB',
+      chartNote: 'Thai baht only. This is not a profit or cash-flow report.',
+      omitted: 'Some amounts were excluded because the recorded currency or amount is invalid.',
+      transactions: 'Transactions', reports: 'Reports', budget: 'Budget',
+      planning: 'Financial planning', invoices: 'Invoices',
+      addExpense: 'Add expense', addIncome: 'Add income', sections: 'Sections',
+    },
+    th: {
+      title: 'การเงิน', subtitle: 'รายการบันทึกของบริษัทจัดการ',
+      actual: 'เงินรับและเงินจ่ายจริง', unreconciled: 'ยังไม่ได้กระทบยอด',
+      actualNote: 'หน้านี้ยังไม่ได้กระทบยอดกับการชำระเงิน ยอดด้านล่างเป็นรายการบันทึก ไม่ใช่กระแสเงินสดหรือกำไร',
+      recordedIncome: 'รายได้ค้างรับที่ยังไม่กระทบยอด', recordedExpenses: 'ค่าใช้จ่ายตามรายการบันทึก',
+      recordedNote: 'อิงวันที่ทำรายการจนถึงวันที่แสดง ตามเวลาภูเก็ต',
+      noEntries: 'ไม่มีรายการในเดือนนี้', noScope: 'ไม่มีข้อมูลการเงินที่เข้าถึงได้สำหรับบริษัทที่เลือก',
+      error: 'โหลดรายการบันทึกไม่สำเร็จ', retry: 'ลองอีกครั้ง',
+      chart: 'รายการบันทึกรายเดือน', months: '6 เดือน · THB',
+      chartNote: 'แสดงเฉพาะเงินบาท ไม่ใช่รายงานกำไรหรือกระแสเงินสด',
+      omitted: 'ไม่รวมบางรายการเนื่องจากสกุลเงินหรือจำนวนเงินไม่ถูกต้อง',
+      transactions: 'รายการธุรกรรม', reports: 'รายงาน', budget: 'งบประมาณ',
+      planning: 'วางแผนการเงิน', invoices: 'ใบแจ้งหนี้',
+      addExpense: 'เพิ่มค่าใช้จ่าย', addIncome: 'เพิ่มรายรับ', sections: 'เมนูการเงิน',
+    },
+  }[lang];
 
-  const fmt = (value: number) => {
-    const v = convertPrice(value);
-    if (v >= 1000000) return `${currencyInfo.symbol}${(v / 1000000).toFixed(1)}M`;
-    if (v >= 1000) return `${currencyInfo.symbol}${(v / 1000).toFixed(0)}K`;
-    return `${currencyInfo.symbol}${Math.round(v)}`;
-  };
+  const fmt = (value: number, currency = 'THB', compact = false) => new Intl.NumberFormat(locale, {
+    style: 'currency', currency,
+    ...(compact ? { notation: 'compact', maximumFractionDigits: 1 } : {}),
+  }).format(value);
+  const dateLabel = (day: string, options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(locale, { ...options, timeZone: 'UTC' })
+      .format(new Date(`${day}T00:00:00Z`));
 
-  // Chart data
-  const chartData = monthlyMetrics.map(m => ({
-    label: m.label,
-    income: Math.round(m.income),
-    expenses: Math.round(m.expenses),
-    net: Math.round(m.netProfit),
-  }));
-
-  const netIncome = stats?.netIncome ?? (kpi?.income ?? 0) - (kpi?.expenses ?? 0);
-  const thisMonthIncome = stats?.thisMonthIncome ?? kpi?.income ?? 0;
-  const thisMonthExpenses = stats?.thisMonthExpenses ?? kpi?.expenses ?? 0;
+  const chartData = (months ?? []).map(month => {
+    const thb = month.byCurrency.find(row => row.currency === 'THB');
+    return {
+      label: dateLabel(month.start, { month: 'short' }),
+      income: thb?.recordedIncome ?? null,
+      expenses: thb?.recordedExpenses ?? null,
+    };
+  });
 
   // Quick navigation cards
   const quickLinks = [
-    { icon: Receipt, label: isRu ? 'Транзакции' : 'Transactions', path: '/mc/financials', color: 'text-primary' },
-    { icon: FileText, label: isRu ? 'Отчёты' : 'Reports', path: '/mc/reports', color: 'text-info' },
-    { icon: Target, label: isRu ? 'Бюджет' : 'Budget', path: '/mc/budget', color: 'text-warning' },
-    { icon: LineChart, label: isRu ? 'Финансовое планирование' : 'Financial planning', path: APP_ROUTES.MC_FINANCE_PLANNING, color: 'text-success dark:text-success' },
-    { icon: Receipt, label: isRu ? 'Инвойсы' : 'Invoices', path: '/mc/invoices', color: 'text-muted-foreground' },
+    { icon: Receipt, label: t.transactions, path: '/mc/financials', color: 'text-primary' },
+    { icon: FileText, label: t.reports, path: '/mc/reports', color: 'text-info' },
+    { icon: Target, label: t.budget, path: '/mc/budget', color: 'text-warning' },
+    { icon: LineChart, label: t.planning, path: APP_ROUTES.MC_FINANCE_PLANNING, color: 'text-success dark:text-success' },
+    { icon: Receipt, label: t.invoices, path: '/mc/invoices', color: 'text-muted-foreground' },
   ];
 
   return (
     <PageContainer>
       <PageHeader
-        title={isRu ? 'Финансы' : 'Finance'}
-        subtitle={isRu ? 'Обзор доходов, расходов и аналитики' : 'Income, expenses and analytics overview'}
+        title={t.title}
+        subtitle={t.subtitle}
         showBack
         fallbackPath="/owner"
       />
 
-      {/* Hero Cards */}
+      <Card className="mb-4">
+        <CardContent className="space-y-2 p-4">
+          <h2 className="font-semibold">{t.actual}</h2>
+          <Badge variant="secondary">{t.unreconciled}</Badge>
+          <p className="text-sm text-muted-foreground">{t.actualNote}</p>
+        </CardContent>
+      </Card>
+
       {isLoading ? (
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}
+        <div className="mb-6 grid gap-3 sm:grid-cols-2">
+          {[1, 2].map(i => <Skeleton key={i} className="h-24" />)}
         </div>
+      ) : isError ? (
+        <div role="alert" className="mb-6 flex flex-wrap items-center gap-3 text-sm">
+          {t.error}
+          <Button variant="outline" size="sm" onClick={() => void retry()}>{t.retry}</Button>
+        </div>
+      ) : !current ? (
+        <p className="mb-6 text-sm text-muted-foreground">{t.noScope}</p>
       ) : (
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {/* Net Income */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-3 relative">
-              <div className="flex items-center gap-1 mb-1">
-                <Wallet className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                  {isRu ? 'Чистый' : 'Net'}
-                </span>
-              </div>
-              <p className={cn(
-                "text-lg font-bold leading-tight",
-                netIncome >= 0 ? 'text-success' : 'text-destructive'
-              )}>
-                {fmt(netIncome)}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* This month income */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-3 relative">
-              <div className="flex items-center gap-1 mb-1">
-                <TrendingUp className="h-3.5 w-3.5 text-success" />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                  {isRu ? 'Доход' : 'Income'}
-                </span>
-              </div>
-              <p className="text-lg font-bold text-success leading-tight">
-                {fmt(thisMonthIncome)}
-              </p>
-              <p className="text-[10px] text-muted-foreground">{isRu ? 'этот месяц' : 'this month'}</p>
-            </CardContent>
-          </Card>
-
-          {/* This month expenses */}
-          <Card className="relative overflow-hidden">
-            <CardContent className="p-3 relative">
-              <div className="flex items-center gap-1 mb-1">
-                <TrendingDown className="h-3.5 w-3.5 text-destructive" />
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                  {isRu ? 'Расходы' : 'Expenses'}
-                </span>
-              </div>
-              <p className="text-lg font-bold text-destructive leading-tight">
-                {fmt(thisMonthExpenses)}
-              </p>
-              <p className="text-[10px] text-muted-foreground">{isRu ? 'этот месяц' : 'this month'}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <section aria-label={dateLabel(asOf, { month: 'long', year: 'numeric' })} className="mb-6 space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {dateLabel(asOf, { day: 'numeric', month: 'long', year: 'numeric' })}. {t.recordedNote}
+          </p>
+          {!current.byCurrency.length ? (
+            !current.omittedRecords && <p className="text-sm text-muted-foreground">{t.noEntries}</p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(['recordedIncome', 'recordedExpenses'] as const).map(field => (
+                <Card key={field}>
+                  <CardContent className="space-y-2 p-4">
+                    <h2 className="text-sm font-medium">{t[field]}</h2>
+                    {current.byCurrency.every(row => row[field] === null)
+                      ? <p className="text-sm text-muted-foreground">{t.noEntries}</p>
+                      : current.byCurrency.map(row => {
+                        const value = row[field];
+                        return value === null ? null : (
+                          <p key={row.currency} className="break-words text-lg font-semibold tabular-nums">
+                            {fmt(value, row.currency)}
+                          </p>
+                        );
+                      })}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          {omitted && <p className="text-sm text-muted-foreground">{t.omitted}</p>}
+        </section>
       )}
 
       {/* Quick Actions */}
-      <div className="flex gap-2 mb-6">
+      <div className="grid gap-2 mb-6 sm:grid-cols-2">
         <Button
-          className="flex-1"
+          className="w-full"
           variant="default"
           onClick={() => navigate('/mc/quick-expense')}
         >
           <Minus className="h-4 w-4 mr-2" />
-          {isRu ? 'Расход' : 'Expense'}
+          {t.addExpense}
         </Button>
         <Button
-          className="flex-1 border-success text-success hover:bg-success/10"
+          className="w-full border-success text-success hover:bg-success/10"
           variant="outline"
           onClick={() => navigate('/mc/income/quick')}
         >
           <Plus className="h-4 w-4 mr-2" />
-          {isRu ? 'Доход' : 'Income'}
+          {t.addIncome}
         </Button>
       </div>
 
       {/* Revenue Chart */}
-      {chartData.length > 0 && (
+      {chartData.some(month => month.income !== null || month.expenses !== null) && (
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold">
-                {isRu ? 'Доходы и расходы' : 'Income & Expenses'}
-              </h3>
+              <h2 className="text-sm font-semibold">
+                {t.chart}
+              </h2>
               <Badge variant="secondary" className="text-[10px]">
-                {isRu ? '6 мес' : '6 mo'}
+                {t.months}
               </Badge>
             </div>
+            <p className="mb-3 text-sm text-muted-foreground">{t.chartNote}</p>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} barGap={2}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v)} width={50} />
+                  <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v, 'THB', true)} width={64} />
                   <Tooltip
                     formatter={(value: number, name: string) => [
                       fmt(value),
-                      name === 'income' ? (isRu ? 'Доход' : 'Income') :
-                      name === 'expenses' ? (isRu ? 'Расход' : 'Expenses') :
-                      (isRu ? 'Чистый' : 'Net')
+                      name === 'income' ? t.recordedIncome : t.recordedExpenses,
                     ]}
                     contentStyle={{
                       borderRadius: '8px',
@@ -178,7 +211,7 @@ export default function FinanceOverview() {
                       fontSize: '12px',
                     }}
                   />
-                  <Bar dataKey="income" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="income" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expenses" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} opacity={0.7} />
                 </BarChart>
               </ResponsiveContainer>
@@ -187,43 +220,11 @@ export default function FinanceOverview() {
         </Card>
       )}
 
-      {/* KPI Row */}
-      {kpi && (
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <Card>
-            <CardContent className="p-3">
-              <p className="text-[10px] text-muted-foreground uppercase mb-1">
-                {isRu ? 'Загрузка' : 'Occupancy'}
-              </p>
-              <p className="text-xl font-bold">{kpi.occupancy}%</p>
-              {kpi.occupancyChange !== 0 && (
-                <div className={cn("flex items-center text-xs mt-0.5", kpi.occupancyChange > 0 ? 'text-success' : 'text-destructive')}>
-                  {kpi.occupancyChange > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                  {Math.abs(kpi.occupancyChange)}%
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3">
-              <p className="text-[10px] text-muted-foreground uppercase mb-1">ADR</p>
-              <p className="text-xl font-bold">{fmt(kpi.adr)}</p>
-              {kpi.revenueChange !== 0 && (
-                <div className={cn("flex items-center text-xs mt-0.5", kpi.revenueChange > 0 ? 'text-success' : 'text-destructive')}>
-                  {kpi.revenueChange > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                  {Math.abs(kpi.revenueChange)}%
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Quick Navigation */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground px-1">
-          {isRu ? 'Разделы' : 'Sections'}
-        </h3>
+        <h2 className="text-sm font-semibold text-muted-foreground px-1">
+          {t.sections}
+        </h2>
         <div className="divide-y rounded-none border overflow-hidden">
           {quickLinks.map(link => {
             const Icon = link.icon;
