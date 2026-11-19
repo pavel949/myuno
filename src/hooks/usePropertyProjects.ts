@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { ProjectLifecycleStatus } from '@/lib/real-estate/canonicalModel';
 import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
+import { invalidateProjectPriceReaders } from '@/lib/real-estate/invalidateProjectPriceReaders';
 import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 
 function withNormalizedProjectAmenities<T extends { amenities?: string[] | null }>(row: T): T {
@@ -156,19 +157,19 @@ export function usePropertyProject(id?: string, publicOnly = false) {
 
 const projectCollectionKeys = [
   'property-projects', 'admin-property-projects', 'public-property-projects', 'my-property-projects',
-  'offplan-projects', 'newbuild-projects', 'project-districts', 'newbuild-locations',
-  'newbuild-stats', 'admin-newbuilds-kpi', 'developer-projects',
+  'admin-nb-projects', 'project-districts', 'newbuild-locations', 'admin-newbuilds-kpi', 'developer-projects',
 ];
 
 export function invalidateProjectCatalog(queryClient: QueryClient, projectIds?: Iterable<string>) {
   const ids = projectIds ? new Set(projectIds) : undefined;
-  return queryClient.invalidateQueries({
-    predicate: ({ queryKey: [family, id] }) =>
-      (typeof family === 'string' && projectCollectionKeys.includes(family)) ||
-      family === 'newbuild-project' || // This surface also indexes details by slug.
-      ((family === 'property-project' || family === 'offplan-project') &&
-        (!ids || (typeof id === 'string' && ids.has(id)))),
-  });
+  return Promise.all([
+    invalidateProjectPriceReaders(queryClient),
+    queryClient.invalidateQueries({
+      predicate: ({ queryKey: [family, id] }) =>
+        (typeof family === 'string' && projectCollectionKeys.includes(family)) ||
+        (family === 'property-project' && (!ids || (typeof id === 'string' && ids.has(id)))),
+    }),
+  ]);
 }
 
 export function useCreatePropertyProject() {
