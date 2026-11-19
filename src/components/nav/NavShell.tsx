@@ -72,8 +72,8 @@ export function NavShell({
   );
   const sidebarVisible = hasSidebar(resolvedRole);
   const renderBottomBar = showBottomNav && !isFullscreen;
-  const isPropertyPortfolio = /^\/mc\/properties\/?$/.test(location.pathname);
-  const renderFab = !isFullscreen && !isPropertyPortfolio && hasFab(resolvedRole);
+  const hasWorkspaceActions = /^\/mc\/(properties|rates)\/?$/.test(location.pathname);
+  const renderFab = !isFullscreen && !hasWorkspaceActions && hasFab(resolvedRole);
   const renderHeader = showHeader && !isFullscreen;
 
   // Workspace shell: SidebarProvider + SideRail + Inset main.

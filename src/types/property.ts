@@ -80,6 +80,9 @@ export interface OwnerProperty extends BaseProperty {
   
   // Rental terms - Basic
   price_per_night?: number;
+  /** Legacy rental amount and billing unit, used if a dedicated nightly rate is absent. */
+  price?: number | null;
+  price_period?: string | null;
   /** Listing currency for nightly rate (matches `properties.currency` in DB) */
   currency?: string;
   min_stay_nights?: number;
