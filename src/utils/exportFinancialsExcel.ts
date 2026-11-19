@@ -61,7 +61,7 @@ export async function exportTransactionsExcel(
       type: t.transaction_type,
       category: t.category || '',
       amount: Number(t.amount),
-      currency: t.currency || 'THB',
+      currency: t.currency ?? '',
       description: (isRu ? t.description_ru : t.description) || t.description || '',
       vendor: t.vendor_name || '',
       property: t.property?.title || '',
@@ -71,18 +71,6 @@ export async function exportTransactionsExcel(
   });
 
   ws.getColumn('amount').numFmt = '#,##0.00';
-
-  const totalIncome = transactions
-    .filter(t => t.transaction_type === 'income')
-    .reduce((s, t) => s + Number(t.amount), 0);
-  const totalExpense = transactions
-    .filter(t => t.transaction_type === 'expense')
-    .reduce((s, t) => s + Number(t.amount), 0);
-
-  ws.addRow({});
-  ws.addRow({ date: isRu ? 'ИТОГО Доход' : 'TOTAL Income', amount: totalIncome });
-  ws.addRow({ date: isRu ? 'ИТОГО Расход' : 'TOTAL Expense', amount: totalExpense });
-  ws.addRow({ date: isRu ? 'Чистый доход' : 'Net Income', amount: totalIncome - totalExpense });
 
   styledHeader(ws);
   autoWidth(ws);

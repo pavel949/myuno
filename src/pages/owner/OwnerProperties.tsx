@@ -5,6 +5,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { confirmPropertyWrite, type PropertyWriteReceipt } from '@/lib/propertyWriteReceipt';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -223,65 +224,64 @@ export default function OwnerProperties() {
     queryClient.invalidateQueries({ queryKey: ['properties'] });
   };
 
-  // --- Bulk handlers ---
-  const handleBulkToggleActive = async (activate: boolean) => {
-    setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
-    const { error } = await supabase.from('properties').update({ is_active: activate }).in('id', ids);
-    setBulkProcessing(false);
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: error.message,
+  const reportPropertyWrite = (receipt: PropertyWriteReceipt, success: string) => {
+    if (receipt.kind === 'complete') {
+      toast(success);
+    } else if (receipt.kind === 'partial') {
+      toast.error(isRu ? 'Изменена только часть объектов' : 'Only some properties changed', {
+        description: isRu
+          ? `Подтверждено: ${receipt.confirmed} из ${receipt.requested}. Проверьте обновлённый список перед повтором.`
+          : `Confirmed: ${receipt.confirmed} of ${receipt.requested}. Check the refreshed list before retrying.`,
       });
     } else {
-      toast(isRu ? `${ids.length} объектов ${activate ? 'активированы' : 'деактивированы'}` : `${ids.length} properties ${activate ? 'activated' : 'deactivated'}`);
-      invalidateAll();
-      exitSelectionMode();
+      toast.error(isRu ? 'Изменение не подтверждено' : 'Change not confirmed', {
+        description: isRu
+          ? 'Проверьте обновлённый список и доступ к объектам перед повтором.'
+          : 'Check the refreshed list and access to these properties before retrying.',
+      });
     }
+    invalidateAll();
+  };
+
+  // --- Bulk handlers ---
+  const handleBulkToggleActive = async (activate: boolean) => {
+    if (bulkProcessing || selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    const receipt = await confirmPropertyWrite([...selectedIds], ids =>
+      supabase.from('properties').update({ is_active: activate }).in('id', ids).is('deleted_at', null).select('id'));
+    setBulkProcessing(false);
+    reportPropertyWrite(receipt, isRu ? `Обновлено объектов: ${receipt.confirmed}` : `Updated ${receipt.confirmed} properties`);
+    exitSelectionMode();
   };
 
   const handleBulkDelete = async () => {
+    if (bulkProcessing || selectedIds.size === 0 || !user) return;
     setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
-    const { error } = await supabase
+    const receipt = await confirmPropertyWrite([...selectedIds], ids => supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
-      .in('id', ids);
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, is_active: false } as never)
+      .in('id', ids).is('deleted_at', null).select('id'));
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
-    if (error) {
-      toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? `${ids.length} объектов удалено` : `${ids.length} properties deleted`);
-      invalidateAll();
-      exitSelectionMode();
-    }
+    reportPropertyWrite(receipt, isRu ? `Архивировано объектов: ${receipt.confirmed}` : `Archived ${receipt.confirmed} properties`);
+    exitSelectionMode();
   };
 
   const handleBulkReassign = async () => {
-    if (!reassignTargetId) return;
+    if (bulkProcessing || !reassignTargetId || selectedIds.size === 0) return;
     setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
     const updatePayload = reassignType === 'complex'
       ? { complex_id: reassignTargetId }
       : { project_id: reassignTargetId };
-    const { error } = await supabase.from('properties').update(updatePayload).in('id', ids);
+    const receipt = await confirmPropertyWrite([...selectedIds], ids =>
+      supabase.from('properties').update(updatePayload).in('id', ids).is('deleted_at', null).select('id'));
     setBulkProcessing(false);
     setBulkReassignOpen(false);
     setReassignTargetId('');
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? `${ids.length} объектов обновлено` : `${ids.length} properties updated`);
-      invalidateAll();
-      queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
-      queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
-      exitSelectionMode();
-    }
+    reportPropertyWrite(receipt, isRu ? `Обновлено объектов: ${receipt.confirmed}` : `Updated ${receipt.confirmed} properties`);
+    queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
+    queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
+    exitSelectionMode();
   };
 
   const handleBulkExport = () => {
@@ -325,29 +325,20 @@ export default function OwnerProperties() {
   const handleDuplicate = (id: string) => navigate(`/mc/properties/new?cloneFrom=${id}`);
 
   const handleToggleActive = async (id: string, activate: boolean) => {
-    const { error } = await supabase.from('properties').update({ is_active: activate }).eq('id', id);
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
-    } else {
-      toast(activate ? (isRu ? 'Объект активирован' : 'Property activated') : (isRu ? 'Объект деактивирован' : 'Property deactivated'));
-      invalidateAll();
-    }
+    const receipt = await confirmPropertyWrite([id], ([target]) =>
+      supabase.from('properties').update({ is_active: activate }).eq('id', target).is('deleted_at', null).select('id'));
+    reportPropertyWrite(receipt, activate
+      ? (isRu ? 'Объект активирован' : 'Property activated')
+      : (isRu ? 'Объект деактивирован' : 'Property deactivated'));
   };
 
   const handleDelete = async () => {
-    if (!deleteTarget) return;
-    const { error } = await supabase
+    if (!deleteTarget || !user) return;
+    const receipt = await confirmPropertyWrite([deleteTarget], ([id]) => supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
-      .eq('id', deleteTarget);
-    if (error) {
-      toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? 'Объект удалён' : 'Property deleted');
-      invalidateAll();
-    }
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, is_active: false } as never)
+      .eq('id', id).is('deleted_at', null).select('id'));
+    reportPropertyWrite(receipt, isRu ? 'Объект архивирован' : 'Property archived');
     setDeleteTarget(null);
   };
 

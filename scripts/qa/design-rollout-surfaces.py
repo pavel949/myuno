@@ -14,12 +14,12 @@ try:
   if os.environ.get('CHROMIUM_PATH'):options['executable_path']=os.environ['CHROMIUM_PATH']
   browser=p.chromium.launch(**options)
   for width in [375,390,430,1440]:
-   for lang in ['ru','en']:
+   for lang in ['ru','en','th']:
     for theme in ['light','dark']:
      context=browser.new_context(viewport={'width':width,'height':1000},reduced_motion='reduce',service_workers='block')
      context.route('**/*',lambda route:route.continue_() if route.request.url.startswith(origin+'/') else route.abort())
      page=context.new_page()
-     for scene in ['management','services','vendor-landing','finance','portfolio','payouts']:
+     for scene in (['finance'] if lang=='th' else ['management','services','vendor-landing','finance','portfolio','payouts']):
       errors=[]
       def on_error(error):errors.append(str(error))
       page.on('pageerror',on_error)
@@ -34,6 +34,15 @@ try:
        assert not metrics['overflow'],'Horizontal overflow'
        assert not metrics['gradients'],metrics['gradients']
        assert metrics['writes']==0,'Unexpected mutation'
+       if scene=='finance':
+        cash={'ru':'Не сверено','en':'Not reconciled','th':'ยังไม่ได้กระทบยอด'}[lang]
+        accruals={'ru':'Начисления без сверки','en':'Unreconciled accruals','th':'รายได้ค้างรับที่ยังไม่กระทบยอด'}[lang]
+        expenses={'ru':'Расходы по записям','en':'Recorded expenses','th':'ค่าใช้จ่ายตามรายการบันทึก'}[lang]
+        expect(page.get_by_text(cash,exact=True)).to_be_visible()
+        expect(page.get_by_role('heading',name=accruals,exact=True)).to_be_visible()
+        expect(page.get_by_role('heading',name=expenses,exact=True)).to_be_visible()
+        assert '48.5M' not in metrics['body'] and '80.9M' not in metrics['body']
+        assert '12,000' in metrics['body'] or '12 000' in metrics['body']
        if scene=='portfolio':
         card=page.locator('a[href="/mc/properties/synthetic-home"]')
         assert card.locator('.grid p').evaluate_all("els=>els.every(e=>{const range=document.createRange();range.selectNodeContents(e);return new Set([...range.getClientRects()].map(r=>Math.round(r.top))).size===1})"),'Property metrics split into narrow lines'

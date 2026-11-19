@@ -5,7 +5,7 @@
  * Reads SIDEBAR_NAV[role] from the SSOT navigation model.
  *
  * Visibility:
- *  - Hidden on mobile (<768px) — bottom-bar handles primary nav.
+ *  - On mobile: drawer for workflows, bottom bar for primary destinations.
  *  - Mini-collapse (icons only) on tablet (768–1023px).
  *  - Full-width by default on desktop (≥1024px); collapse/expand uses the `SidebarTrigger`
  *    in `TopBar` only (avoids duplicating the toggle in this rail).
@@ -32,6 +32,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { ChevronDown, LayoutGrid } from 'lucide-react';
 import '@/styles/mc-workspace.css';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,8 @@ import {
   SIDEBAR_NAV,
   hasSidebar,
   getOwnerSidebarForRole,
+  getOwnerSidebarForViewport,
+  getActiveOwnerSidebarPath,
   type NavRoleKey,
   type SidebarNavGroup,
 } from '@/lib/nav/navigationModel';
@@ -55,6 +58,7 @@ interface SideRailProps {
 
 export function SideRail({ role, badges }: SideRailProps) {
   const location = useLocation();
+  const groupHintId = React.useId();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -65,11 +69,20 @@ export function SideRail({ role, badges }: SideRailProps) {
 
   if (!hasSidebar(role)) return null;
 
-  const groups: SidebarNavGroup[] = role === 'owner'
-    ? getOwnerSidebarForRole(businessRole, { propertyCount: allProperties?.length ?? 0 })
+  const isOwner = role === 'owner';
+  const groups: SidebarNavGroup[] = isOwner
+    ? getOwnerSidebarForViewport(getOwnerSidebarForRole(businessRole, { propertyCount: allProperties?.length ?? 0 }), isMobile)
     : SIDEBAR_NAV[role];
 
+  const ownerActivePath = isOwner ? getActiveOwnerSidebarPath(groups, location.pathname) : undefined;
+  const activeDestination = groups.flatMap(group => group.items).find(item => item.path === ownerActivePath);
+  const allToolsActive = location.pathname === '/mc/modules';
+  const toolsLabel = pickLang(language, { en: 'All tools', ru: 'Все инструменты', th: 'เครื่องมือทั้งหมด' });
+  const workspaceLabel = pickLang(language, { en: 'Management workspace', ru: 'Кабинет управления', th: 'พื้นที่จัดการ' });
+  const currentDestination = activeDestination ? labelOf(activeDestination) : (allToolsActive ? toolsLabel : undefined);
+
   const isActive = (path: string) => {
+    if (isOwner) return path === ownerActivePath;
     if (path === location.pathname) return true;
     // Treat root dashboards as exact-match to avoid every subpath highlighting them.
     if (path === '/admin' || path === '/vendor' || path === '/mc' || path === '/team') {
@@ -89,28 +102,60 @@ export function SideRail({ role, badges }: SideRailProps) {
   return (
     <Sidebar collapsible="icon" className={cn("border-r border-border", role === 'owner' && 'mc-workspace-sidebar')}>
       {!isCollapsed && (
-        <SidebarHeader className="border-b border-border/70 px-2 py-2">
-          <div className="flex items-center">
+        <SidebarHeader className={cn('border-b', isOwner ? 'mc-workspace-sidebar gap-1 border-sidebar-border px-4 py-4' : 'border-border/70 px-2 py-2')}>
+          {isOwner ? (
+            <>
+              {isMobile ? (
+                <>
+                  <SheetTitle className="text-base font-semibold leading-tight text-sidebar-foreground">{workspaceLabel}</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    {pickLang(language, { en: 'Navigation for workspace tasks', ru: 'Переход к задачам кабинета', th: 'เมนูสำหรับงานในพื้นที่จัดการ' })}
+                  </SheetDescription>
+                </>
+              ) : <p className="text-base font-semibold leading-tight">{workspaceLabel}</p>}
+              {currentDestination && (
+                <p className="break-words text-sm leading-snug text-muted-foreground">
+                  {pickLang(language, { en: 'You are here:', ru: 'Сейчас:', th: 'หน้าปัจจุบัน:' })}{' '}
+                  <span className="font-medium text-sidebar-foreground">{currentDestination}</span>
+                </p>
+              )}
+            </>
+          ) : (
             <span className="text-xs font-medium text-muted-foreground">
               {pickLang(language, { en: 'Navigation', ru: 'Навигация', th: 'เมนู' })}
             </span>
-          </div>
+          )}
         </SidebarHeader>
       )}
-      <SidebarContent>
+      <SidebarContent className={cn(isOwner && 'mc-workspace-sidebar mc-rail-content gap-0 py-2')}>
         {groups.map((group) => {
-          const open = groupHasActive(group) || group.defaultOpen || false;
+          const hasCurrent = groupHasActive(group);
+          const open = (!group.mobileQuickLinks && hasCurrent) || group.defaultOpen || false;
+          const groupLabel = labelOf(group);
+          const currentGroup = isOwner && hasCurrent;
           return (
-            <Collapsible key={`${group.labelEn}:${groupHasActive(group)}:${isCollapsed}`} defaultOpen={isCollapsed || open}>
+            <Collapsible key={`${group.labelEn}:${hasCurrent}:${isCollapsed}`} defaultOpen={isCollapsed || open}>
               <SidebarGroup>
                 {!isCollapsed && (
                   <CollapsibleTrigger asChild>
                     <SidebarGroupLabel asChild
-                      className="flex items-center justify-between cursor-pointer hover:text-foreground transition-colors"
+                      className={cn(
+                        'flex cursor-pointer items-center justify-between transition-colors hover:text-foreground',
+                        isOwner && 'gap-2',
+                        isOwner && hasCurrent && 'mc-rail-current-group',
+                      )}
                     >
-                      <button type="button">
-                        <span>{labelOf(group)}</span>
-                        <ChevronDown aria-hidden className="h-3.5 w-3.5 shrink-0 transition-transform data-[state=closed]:-rotate-90" />
+                      <button type="button" aria-describedby={currentGroup ? groupHintId : undefined}>
+                        <span>{groupLabel}</span>
+                        {currentGroup && (
+                          <>
+                            <span aria-hidden className="ml-auto size-2 shrink-0 rounded-full bg-sidebar-ring" />
+                            <span id={groupHintId} hidden>
+                              {pickLang(language, { en: 'Contains current page', ru: 'Здесь текущая страница', th: 'มีหน้าปัจจุบัน' })}
+                            </span>
+                          </>
+                        )}
+                        <ChevronDown aria-hidden className="mc-rail-chevron size-3.5 shrink-0 transition-transform" />
                       </button>
                     </SidebarGroupLabel>
                   </CollapsibleTrigger>
@@ -127,14 +172,16 @@ export function SideRail({ role, badges }: SideRailProps) {
                           <SidebarMenuItem key={item.path}>
                             <SidebarMenuButton
                               isActive={active}
+                              aria-current={active ? (item.path === location.pathname ? 'page' : 'location') : undefined}
                               tooltip={label}
                               onClick={() => handleNavigate(item.path)}
                               className={cn(
                                 'cursor-pointer h-auto min-h-10 py-2',
                                 active && 'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
+                                isOwner && 'mc-rail-destination min-h-11',
                               )}
                             >
-                              <Icon className="size-5 shrink-0" />
+                              <Icon className="size-5 shrink-0" aria-hidden />
                               <span className="min-w-0 break-words leading-snug" style={{ whiteSpace: 'normal', overflow: 'visible', textOverflow: 'clip' }}>{label}</span>
                               {badge && badge > 0 ? (
                                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
@@ -153,12 +200,24 @@ export function SideRail({ role, badges }: SideRailProps) {
           );
         })}
       </SidebarContent>
-      {role === 'owner' && <SidebarFooter className="border-t border-sidebar-border p-2">
-        <SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => handleNavigate('/mc/modules')} tooltip={pickLang(language, {en:'All tools',ru:'Все инструменты',th:'เครื่องมือทั้งหมด'})} isActive={location.pathname === '/mc/modules'} className="min-h-11 h-auto py-2">
-          <LayoutGrid className="size-5 shrink-0" aria-hidden />
-          <span className="min-w-0 whitespace-normal break-words">{pickLang(language, {en:'All tools',ru:'Все инструменты',th:'เครื่องมือทั้งหมด'})}</span>
-        </SidebarMenuButton></SidebarMenuItem></SidebarMenu>
-      </SidebarFooter>}
+      {isOwner && (
+        <SidebarFooter className="mc-workspace-sidebar border-t border-sidebar-border p-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => handleNavigate('/mc/modules')}
+                tooltip={toolsLabel}
+                isActive={allToolsActive}
+                aria-current={allToolsActive ? 'page' : undefined}
+                className="mc-rail-destination h-auto min-h-11 py-2"
+              >
+                <LayoutGrid className="size-5 shrink-0" aria-hidden />
+                <span className="min-w-0 whitespace-normal break-words">{toolsLabel}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      )}
       <SidebarRail />
     </Sidebar>
   );

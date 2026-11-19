@@ -1,4 +1,5 @@
-import { DollarSign, TrendingDown, Percent, CalendarCheck, ClipboardList, Handshake, BedDouble, Users, Wrench, PackageOpen, BarChart3, TrendingUp } from 'lucide-react';
+import { CalendarCheck, ClipboardList, Handshake, BedDouble, Users, Wrench, PackageOpen, type LucideIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
@@ -23,23 +24,12 @@ interface BusinessKPIWidgetProps {
 export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: metrics, isLoading: loading } = useDashboardMetrics();
+  const { data: metrics, isLoading: loading, isError } = useDashboardMetrics();
   const data = metrics?.kpi ?? null;
   const ops = metrics?.ops ?? null;
 
-  const pctChange = (curr: number, prev: number) => {
-    if (prev === 0) return curr > 0 ? 100 : 0;
-    return Math.round(((curr - prev) / prev) * 100);
-  };
-
-  const revChange = data ? pctChange(data.revenue, data.revenuePrev) : 0;
-  const expChange = data ? pctChange(data.expenses, data.expensesPrev) : 0;
-
-  const fmt = (n: number) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
-    return n.toLocaleString();
-  };
+  const availableOps = isError ? null : ops;
+  const bookedShare = isError ? null : data?.occupancyRate;
 
   const visibleOpsCards = ROLE_OPS_CARDS[role] || ROLE_OPS_CARDS.general;
 
@@ -50,117 +40,76 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       </Badge>
     ) : null;
 
-  const opsCards: Record<OpsCardKey, { title: string; value: string; icon: any; iconColor: string; href: string; badge?: React.ReactNode }> = {
+  const opsCards: Record<OpsCardKey, { title: string; value: string; icon: LucideIcon; iconColor: string; href: string; badge?: React.ReactNode }> = {
     tasks: {
       title: isRu ? 'Задачи' : 'Tasks',
-      value: String(ops?.openTasks ?? 0),
+      value: String(availableOps?.openTasks ?? '—'),
       icon: ClipboardList,
       iconColor: 'text-primary',
       href: APP_ROUTES.MC_TASKS,
-      badge: ops && ops.openTasks > 5 ? alertBadge(ops.openTasks) : undefined,
+      badge: availableOps && availableOps.openTasks > 5 ? alertBadge(availableOps.openTasks) : undefined,
     },
     deals: {
       title: isRu ? 'Сделки' : 'Deals',
-      value: ops ? `${ops.activeDeals} / ฿${fmt(ops.dealsPipelineValue)}` : '0',
+      value: String(availableOps?.activeDeals ?? '—'),
       icon: Handshake,
       iconColor: 'text-accent-foreground',
       href: APP_ROUTES.MC_SALES,
     },
     bookings: {
       title: isRu ? 'Бронирования' : 'Bookings',
-      value: String(ops?.upcomingBookings ?? 0),
+      value: String(availableOps?.upcomingBookings ?? '—'),
       icon: BedDouble,
       iconColor: 'text-success',
       href: APP_ROUTES.MC_CALENDAR,
     },
     staff: {
       title: isRu ? 'Персонал' : 'Staff',
-      value: String(ops?.staffCount ?? 0),
+      value: String(availableOps?.staffCount ?? '—'),
       icon: Users,
       iconColor: 'text-primary',
       href: APP_ROUTES.MC_STAFF,
     },
     service: {
       title: isRu ? 'Заявки' : 'Requests',
-      value: String(ops?.openServiceRequests ?? 0),
+      value: String(availableOps?.openServiceRequests ?? '—'),
       icon: Wrench,
       iconColor: 'text-warning',
       href: APP_ROUTES.MC_TASKS,
-      badge: ops && ops.openServiceRequests > 3 ? alertBadge(ops.openServiceRequests) : undefined,
+      badge: availableOps && availableOps.openServiceRequests > 3 ? alertBadge(availableOps.openServiceRequests) : undefined,
     },
     inventory: {
       title: isRu ? 'Расходные материалы' : 'Stock',
-      value: ops?.lowStockItems ? `!${ops.lowStockItems}` : '✓',
+      value: !availableOps ? '—' : availableOps.lowStockItems ? `!${availableOps.lowStockItems}` : '✓',
       icon: PackageOpen,
-      iconColor: ops?.lowStockItems ? 'text-destructive' : 'text-success',
+      iconColor: availableOps?.lowStockItems ? 'text-destructive' : 'text-success',
       href: APP_ROUTES.MC_INVENTORY,
-      badge: ops?.lowStockItems ? alertBadge(ops.lowStockItems) : undefined,
+      badge: availableOps?.lowStockItems ? alertBadge(availableOps.lowStockItems) : undefined,
     },
   };
 
   return (
     <div className="space-y-3">
-      {/* Tier 1: Financial KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1 border bg-card p-4">
+          <h3 className="text-sm font-semibold">{isRu ? 'Фактические финансы' : 'Actual financial results'}</h3>
+          <p className="text-sm text-muted-foreground">{isRu ? 'Не сверено' : 'Not reconciled'}</p>
+          <Link to={APP_ROUTES.MC_FINANCE} className="inline-block text-sm font-medium text-primary underline">
+            {isRu ? 'Открыть финансы' : 'Open finance'}
+          </Link>
+        </div>
         <OwnerKPICard
-          title={isRu ? 'Доход' : 'Revenue'}
-          value={`฿${fmt(data?.revenue ?? 0)}`}
-          icon={DollarSign}
-          iconColor="text-success"
-          change={revChange}
-          trend={revChange >= 0 ? 'up' : 'down'}
-          changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href={APP_ROUTES.MC_FINANCIALS}
-          loading={loading}
-        />
-        <OwnerKPICard
-          title={isRu ? 'Расходы' : 'Expenses'}
-          value={`฿${fmt(data?.expenses ?? 0)}`}
-          icon={TrendingDown}
-          iconColor="text-destructive"
-          change={expChange}
-          trend={expChange <= 0 ? 'up' : 'down'}
-          changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href={APP_ROUTES.MC_FINANCIALS}
-          loading={loading}
-        />
-        <OwnerKPICard
-          title={isRu ? 'Прибыль' : 'Margin'}
-          value={`${data?.margin ?? 0}%`}
-          icon={Percent}
-          iconColor="text-primary"
-          trend={data && data.margin >= 30 ? 'up' : data && data.margin >= 0 ? 'neutral' : 'down'}
-          href={APP_ROUTES.MC_FINANCIALS}
-          loading={loading}
-        />
-        <OwnerKPICard
-          title={isRu ? 'Заполняемость' : 'Occupancy'}
-          value={`${data?.occupancyRate ?? 0}%`}
+          title={isRu ? 'Ночи забронированы в этом месяце' : 'Share of nights booked this month'}
+          value={bookedShare == null ? '—' : `${bookedShare}%`}
           icon={CalendarCheck}
           iconColor="text-accent-foreground"
-          trend={data && data.occupancyRate >= 70 ? 'up' : data && data.occupancyRate >= 40 ? 'neutral' : 'down'}
           href={APP_ROUTES.MC_CALENDAR}
           loading={loading}
         />
-        <OwnerKPICard
-          title="ADR"
-          value={`฿${fmt(data?.adr ?? 0)}`}
-          icon={BarChart3}
-          iconColor="text-primary"
-          trend={data && data.adr > 0 ? 'up' : 'neutral'}
-          href={APP_ROUTES.MC_REPORTS}
-          loading={loading}
-        />
-        <OwnerKPICard
-          title="RevPAR"
-          value={`฿${fmt(data?.revpar ?? 0)}`}
-          icon={TrendingUp}
-          iconColor="text-accent-foreground"
-          trend={data && data.revpar > 0 ? 'up' : 'neutral'}
-          href={APP_ROUTES.MC_REPORTS}
-          loading={loading}
-        />
       </div>
+      {isError && <p role="alert" className="text-sm text-muted-foreground">
+        {isRu ? 'Не удалось загрузить рабочие показатели.' : 'Could not load operational metrics.'}
+      </p>}
 
       {/* Tier 2: Operational Metrics */}
       <ScrollArea className="w-full md:hidden">
