@@ -253,6 +253,7 @@ function emptyBreakdown(rules: PricingRules): PricingBreakdown {
 export interface RateSeasonRecord {
   id: string;
   property_id: string;
+  category_id?: string | null;
   name_en: string;
   name_ru?: string | null;
   start_date: string;

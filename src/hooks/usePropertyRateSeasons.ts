@@ -50,26 +50,21 @@ export function usePropertyRateSeasons(propertyId?: string) {
   });
 }
 
-/**
- * Fetch rate seasons for multiple properties (used by MC rate management page)
- */
-export function useOwnerRateSeasons(ownerId?: string, propertyId?: string) {
+/** Read seasons only for properties admitted by the current workspace. RLS remains authoritative. */
+export function useOwnerRateSeasons(actorId: string | undefined, propertyId: string | undefined, scopedPropertyIds: string[]) {
+  const ids = [...scopedPropertyIds].sort();
   return useQuery({
-    queryKey: ['rate-seasons', ownerId, propertyId || 'all'],
+    queryKey: ['rate-seasons', actorId, propertyId, ids],
     queryFn: async () => {
-      let q = supabase
+      const { data, error } = await supabase
         .from('property_rate_seasons')
         .select('*')
-        .eq('owner_id', ownerId!)
+        .in('property_id', ids)
         .order('start_date', { ascending: true });
-      if (propertyId && propertyId !== 'all') {
-        q = q.eq('property_id', propertyId);
-      }
-      const { data, error } = await q;
       if (error) throw error;
       return (data || []) as RateSeasonRecord[];
     },
-    enabled: !!ownerId,
+    enabled: !!actorId && ids.length > 0,
   });
 }
 
@@ -109,13 +104,15 @@ export function useSaveRateSeason() {
     }) => {
       const { season, id, basePricePerNight } = params;
       if (id) {
-        const { error } = await supabase.from('property_rate_seasons').update(season as never).eq('id', id);
-        if (error) throw error;
+        const { owner_id: actorId, property_id: propertyId, ...changes } = season;
+        const { data, error } = await supabase.from('property_rate_seasons')
+          .update(changes).eq('id', id).eq('property_id', propertyId).select('id').maybeSingle();
+        if (error || data?.id !== id) throw error ?? new Error('Unconfirmed season update');
 
         // Log update
         await logActivity({
-          propertyId: season.property_id,
-          actorId: season.owner_id,
+          propertyId,
+          actorId,
           action: 'season_updated',
           entityType: 'rate_season',
           entityId: id,
@@ -152,8 +149,9 @@ export function useDeleteRateSeason() {
 
   return useMutation({
     mutationFn: async (params: { id: string; propertyId: string; basePricePerNight: number; actorId?: string; seasonName?: string }) => {
-      const { error } = await supabase.from('property_rate_seasons').delete().eq('id', params.id);
-      if (error) throw error;
+      const { data, error } = await supabase.from('property_rate_seasons')
+        .delete().eq('id', params.id).eq('property_id', params.propertyId).select('id').maybeSingle();
+      if (error || data?.id !== params.id) throw error ?? new Error('Unconfirmed season deletion');
       await syncRateSeasonsToProperty(params.propertyId, params.basePricePerNight);
 
       // Log deletion

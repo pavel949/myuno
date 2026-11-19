@@ -22,9 +22,13 @@ vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
   useQuery: ({ queryKey }: { queryKey: string[] }) => ({ data: queryKey[0] === 'company-properties' ? (state.source === 'company' ? [state.property] : []) : state.logs, isLoading: false }),
 }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ update: (value: unknown) => { state.update(value); return { eq: async () => ({ error: null }) }; }, insert: async (value: unknown) => { state.insert(value); return { error: null }; } }) } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ update: (value: unknown) => { state.update(value); return { eq: () => ({ select: () => ({ maybeSingle: async () => ({ data: { id: 'p1', price_per_night: 7000 }, error: null }) }) }) }; }, insert: async (value: unknown) => { state.insert(value); return { error: null }; } }) } }));
 function Probe() { const { allProperties } = useMyProperties(); return <div data-testid="legacy-currency">{allProperties[0]?.currency}</div>; }
-function mount() { return render(<MemoryRouter initialEntries={['/mc/rates?property=p1']}><RateManagementPage /><Probe /></MemoryRouter>); }
+function mount() {
+  const result = render(<MemoryRouter initialEntries={['/mc/rates?property=p1']}><RateManagementPage /><Probe /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Price settings' }));
+  return result;
+}
 const season = (currency: string | null): RateSeasonRecord => ({ id: 's1', property_id: 'p1', name_en: 'Fixture season', start_date: '2026-12-01', end_date: '2026-12-31', nightly_rate: 8000, currency, is_active: true });
 beforeEach(() => { state.property = { id: 'p1', title: 'Fixture villa', price_per_night: 7000, currency: 'THB', deposit_currency: 'USD', management_company_id: 'company' }; state.source = 'owned'; state.rates = []; state.logs = []; vi.clearAllMocks(); });
 describe('Rates use stored denomination, never city or deposit', () => {

@@ -158,6 +158,10 @@ UI `paid` is not payment truth. Manual/off-platform payment requires authorized 
 ## 13. UX Principles
 Trusted infrastructure, not noisy marketplace. Task first. One obvious primary action. Next **safe** action, not every action. Exceptions before dashboards. Progressive disclosure. Information density may be high; control density low. Mobile-first 375px. RU/EN resilient. Status not color-only. Loading/empty/error distinct. Failed data never zero/all-clear. No page-level overflow. Project Card ≠ Unit Card. Respect public/private boundaries. Admin/content tooling is production-grade. UNKNOWN remains unknown.
 
+### Property pricing workspace
+
+`/mc/rates` opens the selected property's price calendar. Two dates select an inclusive range in either order, while date fields support cross-month edits. Calendar cells show the nightly amount before discounts, fees and rate plan adjustments. Base rates, stay discounts, and seasons are accessible through price settings. The property selector uses the existing workspace access list. Calendar saves use the checked, price-only writer and never write occupancy or historical booking totals.
+
 ## 14. Engineering Rules
 Small reviewable tranches. Never combine auth cutover, schema redesign, money changes and broad UX redesign.
 

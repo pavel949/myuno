@@ -1,7 +1,8 @@
 import { CalendarPriceEditor } from '@/components/owner/pricing/CalendarPriceEditor';
-import { useState, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { accessiblePropertySelection, propertyContextBackPath } from '@/lib/owner/propertyNavigation';
+import { bangkokTodayDate, parseCivilDate } from '@/lib/hotelDates';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { propertyRateCurrencyLabel, formatPropertyRate, matchingRateCurrencies } from '@/lib/owner/propertyRateDisplay';
 
@@ -46,27 +47,39 @@ export default function RateManagementPage() {
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
   const t = (en: string, rur: string) => isRu ? rur : en;
-  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const { allProperties, isLoading: propertiesLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const [params, setParams] = useSearchParams();
   const requestedProperty = params.get('property');
-  const selectedProperty = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, 'all');
+  const selectedProperty = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, allProperties.length === 1 && !params.has('view') ? 'first' : 'all');
   const setSelectedProperty = (id: string) => {
     if (id !== 'all' && !allProperties.some(p => p.property_id === id)) return;
     const next = new URLSearchParams(params);
-    if (id === 'all') next.delete('property'); else { next.set('property', id); next.set('view', 'calendar'); }
+    if (id === 'all') { next.delete('property'); next.set('view', 'matrix'); }
+    else { next.set('property', id); next.set('view', 'calendar'); }
+    setSheetOpen(false);
     setParams(next);
   };
-  const pricingView = params.get('view') || (selectedProperty && selectedProperty !== 'all' ? 'calendar' : 'matrix');
-  const visibleProperties = selectedProperty === 'all' ? allProperties : allProperties.filter(p => p.property_id === selectedProperty);
-  const changeView = (view: string) => { const next = new URLSearchParams(params); next.set('view', view); if(view === 'calendar' && selectedProperty === 'all' && allProperties.length === 1) next.set('property', allProperties[0].property_id); setParams(next); };
+  const property = allProperties.find(p => p.property_id === selectedProperty);
+  const visibleProperties = property ? [property] : allProperties;
+  const pricingView = !property || params.get('view') === 'matrix' ? 'matrix'
+    : params.get('view') === 'settings' ? 'settings' : 'calendar';
+  const changeView = (view: string) => {
+    const next = new URLSearchParams(params);
+    next.set('view', view);
+    if (property) next.set('property', property.property_id);
+    setParams(next);
+  };
   const backPath = propertyContextBackPath(params.get('returnTo'), selectedProperty);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<RateSeasonRecord | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const { data: rates, isLoading } = useOwnerRateSeasons(selectedProperty ? user?.id : undefined, selectedProperty || undefined);
+  const scopedProperties = selectedProperty && !propertiesError ? visibleProperties.map(p => p.property_id) : [];
+  const { data: rates, isLoading, isError: seasonsError, refetch: refetchSeasons } = useOwnerRateSeasons(
+    scopedProperties.length ? user?.id : undefined, selectedProperty || undefined, scopedProperties,
+  );
   const deleteMutation = useDeleteRateSeason();
-  const aiPropId = !selectedProperty ? undefined : selectedProperty !== 'all' ? selectedProperty : allProperties[0]?.property_id;
+  const aiPropId = !selectedProperty || propertiesError ? undefined : selectedProperty !== 'all' ? selectedProperty : undefined;
   const { suggestions, generateSuggestions, acceptSuggestion, dismissSuggestion } = useAIPricingSuggestions(aiPropId);
 
   const activeRates = rates?.filter(r => r.is_active) || [];
@@ -76,8 +89,8 @@ export default function RateManagementPage() {
     ? allProperties.map(p => p.property_id)
     : selectedProperty ? [selectedProperty] : [];
 
-  const { data: activityLogs = [], isLoading: logsLoading } = useQuery({
-    queryKey: ['pricing-activity-logs', propertyIds.sort().join(',')],
+  const { data: activityLogs = [], isLoading: logsLoading, isError: logsError, refetch: refetchLogs } = useQuery({
+    queryKey: ['pricing-activity-logs', user?.id, [...propertyIds].sort().join(',')],
     queryFn: async () => {
       if (propertyIds.length === 0) return [];
       const { data, error } = await supabase
@@ -93,7 +106,7 @@ export default function RateManagementPage() {
       if (error) throw error;
       return data || [];
     },
-    enabled: propertyIds.length > 0,
+    enabled: !propertiesError && !!user && pricingView === 'settings' && propertyIds.length > 0,
   });
 
   const handleDelete = (rate: RateSeasonRecord) => {
@@ -111,9 +124,17 @@ export default function RateManagementPage() {
           toast.success(t('Season deleted', 'Сезон удалён'));
           queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] });
         },
+        onError: () => toast.error(t('Could not delete the season.', 'Не удалось удалить сезон.')),
       }
     );
   };
+
+  if (propertiesError) {
+    return <div className="p-4">
+      <p role="alert">{t('Could not load properties.', 'Не удалось загрузить объекты.')}</p>
+      <Button variant="outline" onClick={() => refetchProperties()}>{t('Retry', 'Повторить')}</Button>
+    </div>;
+  }
 
   if (!selectedProperty) {
     return <div className="p-4 space-y-3">
@@ -126,141 +147,78 @@ export default function RateManagementPage() {
   }
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" aria-label={t('Back', 'Назад')} onClick={() => navigate(backPath)}>
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold">{t('Rate Management', 'Управление тарифами')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('Base prices, seasonal rates & discounts', 'Базовые цены, сезоны и скидки')}
-          </p>
+    <div className="container space-y-4 pb-24 pt-4 lg:pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button variant="ghost" size="icon" className="size-11 shrink-0" aria-label={t('Back', 'Назад')} onClick={() => navigate(backPath)}>
+            <ChevronLeft className="size-5" />
+          </Button>
+          <h1 className="font-sans text-2xl font-semibold tracking-tight">{t('Property rates', 'Тарифы')}</h1>
         </div>
-        <Button onClick={() => { setEditingRate(null); setSheetOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1" />
-          {t('Season', 'Сезон')}
-        </Button>
       </div>
 
-      {/* Property filter */}
-      {allProperties.length > 0 && (
+      <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger aria-label={t('Property', 'Объект')} className="w-full md:w-64">
+          <SelectTrigger aria-label={t('Property', 'Объект')} className="h-11 w-full min-w-0 bg-card text-left sm:w-72">
             <SelectValue placeholder={t('All properties', 'Все объекты')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('All Properties', 'Все объекты')}</SelectItem>
             {allProperties.map(p => (
               <SelectItem key={p.property_id} value={p.property_id}>
-                {p.title || p.property_id.slice(0, 8)}
+                {(isRu ? p.title_ru || p.title : p.title) || p.property_id.slice(0, 8)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      )}
+        {property && <nav aria-label={t('Pricing view', 'Вид тарифов')} className="flex flex-wrap gap-1 bg-muted p-1">
+          {([
+            ['calendar', t('Calendar', 'Календарь')],
+            ['settings', t('Price settings', 'Настройки цен')],
+            ['matrix', t('Overview', 'Обзор')],
+          ] as const).map(([view, label]) => <Button key={view} size="sm" className="min-h-10 flex-1 px-2.5 sm:px-3"
+            variant={pricingView === view ? 'default' : 'ghost'} aria-pressed={pricingView === view}
+            onClick={() => changeView(view)}>{label}</Button>)}
+        </nav>}
+      </div>
 
-      <div role="group" aria-label={t('Pricing view', 'Вид тарифов')} className="flex gap-2"><Button variant={pricingView === 'matrix' ? 'default' : 'outline'} onClick={() => changeView('matrix')}>{t('Table', 'Таблица')}</Button><Button variant={pricingView === 'calendar' ? 'default' : 'outline'} onClick={() => changeView('calendar')}>{t('Calendar', 'Календарь')}</Button></div>
-      {pricingView === 'calendar' && selectedProperty === 'all' && <p className="text-sm text-muted-foreground">{t('Select a property to edit its calendar.', 'Выберите объект для настройки календаря.')}</p>}
-      {pricingView === 'calendar' && selectedProperty && selectedProperty !== 'all' && allProperties.find(p => p.property_id === selectedProperty) && <CalendarPriceEditor key={selectedProperty} property={allProperties.find(p => p.property_id === selectedProperty)!} />}
+      {pricingView === 'calendar' && property && <CalendarPriceEditor key={property.property_id} property={property} />}
 
-      {pricingView === 'matrix' && <section className="border bg-card overflow-hidden">
-        <div className="p-5"><h2 className="font-semibold">{t('Rates by property', 'Тарифы по объектам')}</h2><p className="text-sm text-muted-foreground">{t('Open a property calendar or select a seasonal rate to edit.', 'Откройте календарь объекта или выберите сезонный тариф для редактирования.')}</p></div>
-        <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="bg-muted/50"><tr><th className="p-4">{t('Property', 'Объект')}</th><th className="p-4">{t('Base / night', 'База / ночь')}</th>{Array.from(new Set(activeRates.map(r => r.name_en))).map(name => <th className="p-4" key={name}>{name}</th>)}</tr></thead><tbody>
-          {visibleProperties.map(prop => <tr key={prop.property_id} className="border-t"><th className="p-4"><button className="text-left underline underline-offset-4" onClick={() => setSelectedProperty(prop.property_id)}>{isRu ? prop.title_ru || prop.title : prop.title}</button></th><td className="p-4 whitespace-nowrap">{formatPropertyRate(prop.price_per_night, prop.record_currency, isRu)}</td>{Array.from(new Set(activeRates.map(r => r.name_en))).map(name => { const rate = activeRates.find(r => r.property_id === prop.property_id && r.name_en === name); return <td className="p-4" key={name}>{rate ? <button className="border px-3 py-2 whitespace-nowrap hover:bg-muted" onClick={() => { setEditingRate(rate); setSheetOpen(true); }}>{formatPropertyRate(rate.nightly_rate, rate.currency, isRu)}</button> : <span className="text-muted-foreground">—</span>}</td>; })}</tr>)}
-        </tbody></table></div>
+      {pricingView === 'matrix' && <section className="overflow-hidden border bg-card">
+        <h2 className="px-4 py-3 font-sans font-semibold">{t('Rates by property', 'Тарифы по объектам')}</h2>
+        {seasonsError && <p role="alert" className="px-4 text-sm">{t('Seasonal rates could not be loaded.', 'Не удалось загрузить сезонные тарифы.')}
+          <Button variant="ghost" onClick={() => refetchSeasons()}>{t('Retry', 'Повторить')}</Button>
+        </p>}
+        <div className="divide-y border-t">
+          {visibleProperties.map(prop => <div key={prop.property_id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 px-4 py-3">
+            <div className="min-w-0 flex-1 basis-36">
+              <p className="break-words text-sm font-semibold">{isRu ? prop.title_ru || prop.title : prop.title}</p>
+              <p className="text-sm text-muted-foreground">{prop.price_per_night && prop.price_per_night > 0
+                ? formatPropertyRate(prop.price_per_night, prop.record_currency, isRu)
+                : t('Base price not set', 'Базовая цена не задана')}</p>
+            </div>
+            <Button variant="outline" className="min-h-11" onClick={() => setSelectedProperty(prop.property_id)}>{t('Open calendar', 'Календарь')}</Button>
+            {activeRates.filter(rate => rate.property_id === prop.property_id).map(rate => <Button key={rate.id} variant="ghost"
+              className="h-auto min-h-11 w-full justify-start whitespace-normal text-left"
+              onClick={() => { setEditingRate(rate); setSheetOpen(true); }}>
+              {isRu ? rate.name_ru || rate.name_en : rate.name_en} · {formatPropertyRate(rate.nightly_rate, rate.currency, isRu)}
+            </Button>)}
+          </div>)}
+        </div>
       </section>}
 
-      {/* ─── AI Pricing Suggestions ─── */}
-      {aiPropId && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Tag className="w-4 h-4 text-primary" />
-                {t('AI Price Suggestions', 'AI-рекомендации по ценам')}
-              </h3>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => generateSuggestions.mutate(aiPropId)}
-                disabled={generateSuggestions.isPending}
-              >
-                {generateSuggestions.isPending
-                  ? (isRu ? 'Анализ...' : 'Analyzing...')
-                  : (isRu ? 'Обновить' : 'Refresh')}
-              </Button>
-            </div>
-            {suggestions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                {t('No suggestions yet. Click Refresh to generate AI-powered pricing recommendations.',
-                   'Пока нет рекомендаций. Нажмите «Обновить» для AI-анализа цен.')}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {suggestions.map(s => {
-                  const priceDiff = s.recommended_price - s.current_price;
-                  const pctChange = s.current_price > 0 ? Math.round((priceDiff / s.current_price) * 100) : 0;
-                  return (
-                    <div key={s.id} className="p-3 bg-background rounded-none border">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(s.date_from), 'dd MMM', { locale: isRu ? ru : undefined })}
-                          {' → '}
-                          {format(new Date(s.date_to), 'dd MMM', { locale: isRu ? ru : undefined })}
-                        </span>
-                        <Badge variant={priceDiff > 0 ? 'default' : 'secondary'} className="text-xs">
-                          {priceDiff > 0 ? '+' : ''}{pctChange}%
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm line-through text-muted-foreground">
-                          {s.current_price} {s.currency}
-                        </span>
-                        <span className="text-sm font-bold">
-                          → {s.recommended_price} {s.currency}
-                        </span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {s.confidence}% {t('confidence', 'уверенность')}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-2">{s.reasoning}</p>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="h-7 text-xs"
-                          onClick={(e) => { e.stopPropagation(); acceptSuggestion.mutate(s.id); }}
-                        >
-                          <Check className="w-3 h-3 mr-1" /> {t('Apply', 'Применить')}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs"
-                          onClick={(e) => { e.stopPropagation(); dismissSuggestion.mutate(s.id); }}
-                        >
-                          <X className="w-3 h-3 mr-1" /> {t('Dismiss', 'Пропустить')}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
+      {pricingView === 'settings' && property && <div className="space-y-5">
+        <Button asChild variant="outline" className="min-h-11">
+          <Link to={`/mc/properties/${encodeURIComponent(property.property_id)}/terms`}><Tag className="mr-2 size-4" />{t('Stay discounts', 'Скидки на проживание')}</Link>
+        </Button>
       {/* ─── Section 1: Property Base Prices ─── */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+        <h2 className="flex items-center gap-2 font-sans text-base font-semibold">
           <Home className="h-4 w-4" />
           {t('Base Prices', 'Базовые цены')}
         </h2>
         <div className="space-y-2">
-          {(selectedProperty === 'all' ? allProperties : allProperties.filter(p => p.property_id === selectedProperty)).map(prop => {
+          {visibleProperties.map(prop => {
             const seasonCount = rates?.filter(r => r.property_id === prop.property_id && r.is_active).length || 0;
             return (
               <PropertyPriceRow
@@ -282,12 +240,16 @@ export default function RateManagementPage() {
 
       {/* ─── Section 2: Seasonal Rates ─── */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          {t('Seasonal Rates', 'Сезонные тарифы')}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-sans text-base font-semibold">{t('Seasonal Rates', 'Сезонные тарифы')}</h2>
+          <Button variant="outline" className="min-h-11" onClick={() => { setEditingRate(null); setSheetOpen(true); }}>
+            <Plus className="mr-1 size-4" />{t('Season', 'Сезон')}
+          </Button>
+        </div>
 
-        {isLoading ? (
+        {seasonsError ? <p role="alert" className="text-sm">{t('Seasonal rates could not be loaded.', 'Не удалось загрузить сезонные тарифы.')}
+          <Button variant="ghost" onClick={() => refetchSeasons()}>{t('Retry', 'Повторить')}</Button>
+        </p> : isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-none" />)}
           </div>
@@ -305,9 +267,9 @@ export default function RateManagementPage() {
           <div className="space-y-3">
             {activeRates.map(rate => {
               const property = allProperties.find(p => p.property_id === rate.property_id);
-              const today = new Date();
-              const start = new Date(rate.start_date);
-              const end = new Date(rate.end_date);
+              const today = bangkokTodayDate();
+              const start = parseCivilDate(rate.start_date);
+              const end = parseCivilDate(rate.end_date);
               const isCurrentSeason = today >= start && today <= end;
               const daysUntil = differenceInDays(start, today);
               const basePrice = property?.price_per_night || 0;
@@ -391,6 +353,91 @@ export default function RateManagementPage() {
 
       <Separator />
 
+      <details className="rounded-sm border bg-card p-3">
+        <summary className="min-h-9 cursor-pointer py-2 text-sm font-semibold">{t('AI price suggestions', 'AI-рекомендации по ценам')}</summary>
+      {/* ─── AI Pricing Suggestions ─── */}
+      {aiPropId && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />
+                {t('AI Price Suggestions', 'AI-рекомендации по ценам')}
+              </h3>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => generateSuggestions.mutate(aiPropId)}
+                disabled={generateSuggestions.isPending}
+              >
+                {generateSuggestions.isPending
+                  ? (isRu ? 'Анализ...' : 'Analyzing...')
+                  : (isRu ? 'Обновить' : 'Refresh')}
+              </Button>
+            </div>
+            {suggestions.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                {t('No suggestions yet. Click Refresh to generate AI-powered pricing recommendations.',
+                   'Пока нет рекомендаций. Нажмите «Обновить» для AI-анализа цен.')}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {suggestions.map(s => {
+                  const priceDiff = s.recommended_price - s.current_price;
+                  const pctChange = s.current_price > 0 ? Math.round((priceDiff / s.current_price) * 100) : 0;
+                  return (
+                    <div key={s.id} className="p-3 bg-background rounded-none border">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">
+                          {format(parseCivilDate(s.date_from), 'dd MMM', { locale: isRu ? ru : undefined })}
+                          {' → '}
+                          {format(parseCivilDate(s.date_to), 'dd MMM', { locale: isRu ? ru : undefined })}
+                        </span>
+                        <Badge variant={priceDiff > 0 ? 'default' : 'secondary'} className="text-xs">
+                          {priceDiff > 0 ? '+' : ''}{pctChange}%
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm line-through text-muted-foreground">
+                          {s.current_price} {s.currency}
+                        </span>
+                        <span className="text-sm font-bold">
+                          → {s.recommended_price} {s.currency}
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          {s.confidence}% {t('confidence', 'уверенность')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">{s.reasoning}</p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7 text-xs"
+                          onClick={(e) => { e.stopPropagation(); acceptSuggestion.mutate(s.id); }}
+                        >
+                          <Check className="w-3 h-3 mr-1" /> {t('Apply', 'Применить')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs"
+                          onClick={(e) => { e.stopPropagation(); dismissSuggestion.mutate(s.id); }}
+                        >
+                          <X className="w-3 h-3 mr-1" /> {t('Dismiss', 'Пропустить')}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      </details>
+
       {/* ─── Section 3: Activity History ─── */}
       <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
         <CollapsibleTrigger asChild>
@@ -406,7 +453,9 @@ export default function RateManagementPage() {
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-2 mt-2">
-          {logsLoading ? (
+          {logsError ? <p role="alert" className="text-sm">{t('History could not be loaded.', 'Не удалось загрузить историю.')}
+            <Button variant="ghost" onClick={() => refetchLogs()}>{t('Retry', 'Повторить')}</Button>
+          </p> : logsLoading ? (
             <div className="space-y-2">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-none" />)}
             </div>
@@ -444,11 +493,13 @@ export default function RateManagementPage() {
         </CollapsibleContent>
       </Collapsible>
 
-      {sheetOpen && <RateSeasonSheet
+      </div>}
+
+      {sheetOpen && (!editingRate || visibleProperties.some(p => p.property_id === editingRate.property_id)) && <RateSeasonSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         editingRate={editingRate}
-        properties={allProperties}
+        properties={visibleProperties}
         initialPropertyId={selectedProperty}
         ownerId={user?.id || ''}
         onSaved={() => queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] })}
@@ -482,6 +533,11 @@ function ActivityDetails({ details, action, isRu }: { details: any; action: stri
         {details.date}: {details.old_value?.toLocaleString()} → {details.new_value?.toLocaleString()} ({currencyLabel})
       </p>
     );
+  }
+  if (action === 'price_override' && typeof details.nightly_rate === 'number') {
+    return <p className="mt-0.5 text-xs text-muted-foreground">
+      {details.date_from} · {details.nights} {isRu ? 'ноч.' : 'night(s)'} · {formatPropertyRate(details.nightly_rate, details.currency, isRu)}
+    </p>;
   }
   if (action === 'base_price_changed') {
     return (
@@ -532,14 +588,16 @@ function PropertyPriceRow({
   const save = async () => {
     if (saving) return;
     const num = Number(value);
-    if (!Number.isFinite(num) || num <= 0) return;
+    if (!/^\d+(?:\.\d{1,2})?$/.test(value) || !Number.isFinite(num) || num <= 0) return;
     setSaving(true);
     try {
-    const { error } = await supabase
-      .from('properties')
-      .update({ price_per_night: num })
-      .eq('id', propertyId);
-    if (error) throw error;
+      const { data, error } = await supabase
+        .from('properties')
+        .update({ price_per_night: num })
+        .eq('id', propertyId)
+        .select('id, price_per_night')
+        .maybeSingle();
+      if (error || data?.id !== propertyId || data.price_per_night !== num) throw new Error('Unconfirmed base price write');
       toast.success(isRu ? 'Цена обновлена' : 'Price updated');
 
       // Log base price change
@@ -552,7 +610,7 @@ function PropertyPriceRow({
             action: 'base_price_changed',
             entity_type: 'property',
             entity_id: propertyId,
-            details: { old_value: pricePerNight, new_value: num },
+            details: { old_value: pricePerNight, new_value: num, currency: currency ?? null },
           });
         } catch { /* ignored */ }
       }
@@ -563,6 +621,7 @@ function PropertyPriceRow({
       queryClient.invalidateQueries({ queryKey: ['owner-property', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['property', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['property-rental-terms', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] });
       setEditing(false);
     } catch {
@@ -603,7 +662,7 @@ function PropertyPriceRow({
             </>
           ) : (
             <>
-              <span className="font-semibold text-sm">{formatPropertyRate(pricePerNight, currency, isRu)}</span>
+              <span className="font-semibold text-sm">{pricePerNight > 0 ? formatPropertyRate(pricePerNight, currency, isRu) : isRu ? 'Не задана' : 'Not set'}</span>
               <span className="text-xs text-muted-foreground">/{isRu ? 'ночь' : 'night'}</span>
               <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Редактировать' : 'Edit'} onClick={() => { setValue(String(pricePerNight)); setEditing(true); }}>
                 <Pencil className="h-3 w-3" />
