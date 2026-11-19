@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { typedFrom as from } from '@/lib/untypedTables';
 import { Building2, Clock, DollarSign, FileText, Send, Users, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
@@ -29,7 +29,7 @@ import { PageShell } from '@/components/page/PageShell';
 interface RlnEvent {
   id: string;
   rln_number: string;
-  sent_at: string;
+  sent_at: string | null;
   project_id: string;
   developer_id: string | null;
   lead_attribution_id: string;
@@ -157,55 +157,48 @@ function useActiveHolds() {
 }
 
 function useSendManualRln() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (opts: {
-      attributionId: string;
-      projectId: string;
-      email?: string;
-      phone?: string;
-    }) => {
-      const { data: project } = await supabase
-        .from('property_projects')
-        .select('name_en, developer_id, developer_name')
-        .eq('id', opts.projectId)
-        .maybeSingle();
+    mutationFn: async (attributionId: string) => {
+      const { data: attribution, error: attributionError } = await from('lead_attributions')
+        .select('project_id').eq('id', attributionId).maybeSingle();
+      if (attributionError || typeof attribution?.project_id !== 'string') throw new Error('Не удалось найти проект заявки');
 
-      if (!project) throw new Error('Project not found');
+      // Production does not expose the optional sequence RPC. Preserve the existing
+      // number scheme; the unique index rejects concurrent collisions before any notice.
+      const { count, error: countError } = await from('rln_events').select('id', { count: 'exact', head: true });
+      if (countError || !Number.isSafeInteger(count) || count < 0) throw new Error('Не удалось получить номер регистрации');
+      const rlnNumber = `RLN-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
 
-      const year = new Date().getFullYear();
-      const { count } = await from('rln_events').select('id', { count: 'exact', head: true });
-      const seq = String((count ?? 0) + 1).padStart(5, '0');
-      const rlnNumber = `RLN-${year}-${seq}`;
-
-      // Create RLN event
-      await from('rln_events').insert({
-        lead_attribution_id: opts.attributionId,
-        project_id: opts.projectId,
-        developer_id: (project as Record<string, string | null>).developer_id ?? null,
+      const { data: event, error } = await from('rln_events').insert({
+        lead_attribution_id: attributionId,
+        project_id: attribution.project_id,
+        // Provider-visible legacy registrations retain developer_id. This is internal only.
+        developer_id: null,
         rln_number: rlnNumber,
-        sent_to_email: 'sales@myuno.app',
-        sent_at: new Date().toISOString(),
-      });
+        sent_to_email: '',
+        sent_at: null,
+        delivery_status: 'internal_notice_pending',
+      }).select('id').single();
+      if (error || !event?.id) throw new Error('Не удалось сохранить регистрацию');
 
-      // Fire notify function
-      await supabase.functions.invoke('notify-rln', {
-        body: {
-          rln_number: rlnNumber,
-          project_name: (project as Record<string, string>).name_en,
-          developer_name: (project as Record<string, string | null>).developer_name ?? null,
-          developer_email: null,
-          lead_email: opts.email ?? null,
-          lead_phone: opts.phone ?? null,
-          attribution_id: opts.attributionId,
-        },
-      });
-
-      return rlnNumber;
+      let noticeRecorded = false;
+      try {
+        const { data, error: notifyError } = await supabase.functions.invoke('notify-rln', {
+          body: { event_id: event.id },
+        });
+        noticeRecorded = !notifyError && data?.accepted === true && data?.recorded === true;
+      } catch {
+        // The internal registration is already persisted; never retry the creation on notice failure.
+      }
+      return { rlnNumber, noticeRecorded };
     },
-    onSuccess: (rlnNumber) => {
-      toast.success(`RLN ${rlnNumber} отправлен`);
+    onSuccess: ({ rlnNumber, noticeRecorded }) => {
+      if (noticeRecorded) toast.success(`Регистрация ${rlnNumber} сохранена, уведомление принято к отправке`);
+      else toast.info(`Регистрация ${rlnNumber} сохранена. Уведомление не подтверждено`);
+      void queryClient.invalidateQueries({ queryKey: ['capital-rln-events'] });
     },
-    onError: (e: Error) => toast.error(e.message || 'Ошибка отправки RLN'),
+    onError: (e: Error) => toast.error(e.message || 'Не удалось сохранить регистрацию'),
   });
 }
 
@@ -383,12 +376,7 @@ export default function CapitalNewbuildsDeals() {
                         <td className="p-3">
                           {a.project_id && (
                             <button
-                              onClick={() => sendRln.mutate({
-                                attributionId: a.id,
-                                projectId: a.project_id!,
-                                email: lead?.email ?? undefined,
-                                phone: lead?.phone ?? undefined,
-                              })}
+                              onClick={() => sendRln.mutate(a.id)}
                               disabled={sendRln.isPending}
                               className="flex items-center gap-1 text-xs px-2 py-1 rounded-none bg-success/10 text-success hover:bg-success/10 transition-colors"
                             >
@@ -516,9 +504,9 @@ export default function CapitalNewbuildsDeals() {
                       <td className="p-3 font-mono text-xs font-semibold text-success">{r.rln_number}</td>
                       <td className="p-3 text-xs text-muted-foreground">{r.property_projects?.name_en ?? '—'}</td>
                       <td className="p-3 text-xs text-muted-foreground">
-                        {new Date(r.sent_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}
+                        {r.sent_at ? new Date(r.sent_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : 'Не подтверждено'}
                       </td>
-                      <td className="p-3 text-xs text-muted-foreground">{r.sent_to_email}</td>
+                      <td className="p-3 text-xs text-muted-foreground">{r.sent_to_email || '—'}</td>
                     </tr>
                   ))}
                 </tbody>

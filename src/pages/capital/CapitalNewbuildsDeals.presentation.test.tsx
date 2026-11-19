@@ -1,13 +1,15 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { toast } from 'sonner';
 import CapitalNewbuildsDeals from './CapitalNewbuildsDeals';
-const fixture = vi.hoisted(() => ({ pending: false, withLead: false, failContact: false, failTables: new Set<string>(), writes: vi.fn(), reads: vi.fn() }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => { if(table!=='nb_leads') throw Error('Unexpected raw SDK read'); const q={select:()=>q,in:async()=>({data:fixture.failContact?null:[{attribution_id:'synthetic-attribution',name:'Synthetic owner contact with a long display name',email:'long.synthetic.contact@example.test',phone:'+660000000000'}],error:fixture.failContact?new Error('Synthetic contact read failure'):null})};return q; }, functions: { invoke: () => { fixture.writes(); throw Error('Real dispatch forbidden'); } } } }));
+const fixture = vi.hoisted(() => ({ notice: vi.fn(), insert: vi.fn(), count: vi.fn(), allowSyntheticManual: false, pending: false, withLead: false, failContact: false, failTables: new Set<string>(), writes: vi.fn(), reads: vi.fn() }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => { if(table!=='nb_leads') throw Error('Unexpected raw SDK read'); const q={select:()=>q,in:async()=>({data:fixture.failContact?null:[{attribution_id:'synthetic-attribution',name:'Synthetic owner contact with a long display name',email:'long.synthetic.contact@example.test',phone:'+660000000000'}],error:fixture.failContact?new Error('Synthetic contact read failure'):null})};return q; }, functions: { invoke: (...args: unknown[]) => { if(fixture.allowSyntheticManual) return fixture.notice(...args); fixture.writes(); throw Error('Real dispatch forbidden'); } } } }));
 vi.mock('@/lib/untypedTables', () => ({ typedFrom: (table: string) => {
  const filters: [string, unknown][] = [];
- const q = { select: (_value: string) => q, eq: (key: string, value: unknown) => { filters.push([key,value]); return q; }, is: (key: string, value: unknown) => { filters.push([key,value]); return q; }, order: () => q, limit: () => q,
- insert: () => { fixture.writes(); throw Error('Writes forbidden'); },
+ const q = { select: (_value: string, opts?: { head?: boolean }) => (fixture.allowSyntheticManual && fixture.count.getMockImplementation() && table === 'rln_events' && opts?.head ? fixture.count() : q), eq: (key: string, value: unknown) => { filters.push([key,value]); return q; }, is: (key: string, value: unknown) => { filters.push([key,value]); return q; }, order: () => q, limit: () => q,
+ insert: (input: unknown) => { if(fixture.allowSyntheticManual && table==='rln_events') return {select:()=>({single:()=>fixture.insert(input)})}; fixture.writes(); throw Error('Writes forbidden'); },
+ maybeSingle: async () => fixture.allowSyntheticManual && table === 'lead_attributions' ? {data:{project_id:'stored-project'},error:null} : {data:null,error:new Error('Unexpected single read')},
  then: (resolve: (value: unknown) => unknown) => { fixture.reads(table);
  if(fixture.pending) return new Promise(() => {});
  if(fixture.failTables.has(table)) return Promise.resolve({data:null,count:null,error:new Error('Synthetic read failure')}).then(resolve);
@@ -21,7 +23,7 @@ vi.mock('@/lib/untypedTables', () => ({ typedFrom: (table: string) => {
 } }));
 const clients: QueryClient[]=[];
 function show(){ const client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});clients.push(client);return render(<QueryClientProvider client={client}><CapitalNewbuildsDeals/></QueryClientProvider>); }
-beforeEach(()=>{fixture.pending=false;fixture.withLead=false;fixture.failContact=false;fixture.failTables.clear();vi.clearAllMocks();});afterEach(()=>{cleanup();clients.forEach(client=>client.clear());clients.length=0;});
+beforeEach(()=>{fixture.count.mockReset();fixture.allowSyntheticManual=false;fixture.pending=false;fixture.withLead=false;fixture.failContact=false;fixture.failTables.clear();vi.clearAllMocks();});afterEach(()=>{vi.restoreAllMocks();cleanup();clients.forEach(client=>client.clear());clients.length=0;});
 it('preserves actual query arithmetic, booking statuses, TTL and forecast distinction with theme-aware surfaces',async()=>{
  show();expect(await screen.findByText('฿7,500')).toBeVisible();expect(screen.getByText('Newbuilds — Broker Console').closest('h1')).toHaveClass('text-foreground');
  fireEvent.click(screen.getByRole('button',{name:/Удержания/}));expect(await screen.findByText('Истёк')).toHaveClass('text-danger');expect(screen.getAllByText('paid')).toHaveLength(2);expect(screen.getByText('pending')).toBeVisible();
@@ -80,4 +82,45 @@ it('renders enriched attribution contacts and keeps the populated lead region ke
 it('treats failed contact enrichment as unavailable leads, then retries only reads',async()=>{
  fixture.withLead=true;fixture.failContact=true;show();expect(await screen.findByRole('alert',{name:'Лиды недоступны'})).toBeVisible();expect(screen.queryByText('Нет лидов')).toBeNull();expect(screen.queryByText('long.synthetic.contact@example.test')).toBeNull();expect(screen.queryByText(/Attribution Records — 0/)).toBeNull();
  fixture.failContact=false;fireEvent.click(screen.getByRole('button',{name:'Повторить загрузку лидов'}));expect(await screen.findByText('long.synthetic.contact@example.test')).toBeVisible();expect(fixture.writes).not.toHaveBeenCalled();
+});
+
+
+it('registers a manual internal event against the persisted project, then sends only its ID', async () => {
+ fixture.allowSyntheticManual=true; fixture.withLead=true;
+ fixture.count.mockResolvedValue({count:20,error:null});
+ fixture.insert.mockResolvedValue({data:{id:'saved-internal-event'},error:null});
+ fixture.notice.mockResolvedValue({data:{accepted:true,recorded:true},error:null});
+ const notification=vi.spyOn(toast, 'success').mockImplementation(() => 'synthetic-notice');
+ show();
+ fireEvent.click(await screen.findByRole('button',{name:'RLN'}));
+ await waitFor(() => expect(notification).toHaveBeenCalledWith(`Регистрация RLN-${new Date().getFullYear()}-00021 сохранена, уведомление принято к отправке`));
+ expect(fixture.insert).toHaveBeenCalledWith({
+  lead_attribution_id:'synthetic-attribution',project_id:'stored-project',developer_id:null,
+  rln_number:`RLN-${new Date().getFullYear()}-00021`,sent_to_email:'',sent_at:null,delivery_status:'internal_notice_pending',
+ });
+ expect(fixture.notice).toHaveBeenCalledExactlyOnceWith('notify-rln',{body:{event_id:'saved-internal-event'}});
+});
+
+it('keeps a saved registration distinct from a failed or unrecorded notice', async () => {
+ fixture.allowSyntheticManual=true; fixture.withLead=true;
+ fixture.count.mockResolvedValue({count:21,error:null});
+ fixture.insert.mockResolvedValue({data:{id:'saved-internal-event'},error:null});
+ fixture.notice.mockResolvedValue({data:{accepted:true,recorded:false},error:null});
+ const notification=vi.spyOn(toast, 'info').mockImplementation(() => 'synthetic-notice');
+ show();
+ fireEvent.click(await screen.findByRole('button',{name:'RLN'}));
+ await waitFor(() => expect(notification).toHaveBeenCalledWith(`Регистрация RLN-${new Date().getFullYear()}-00022 сохранена. Уведомление не подтверждено`));
+ expect(fixture.insert).toHaveBeenCalledTimes(1);
+ expect(fixture.notice).toHaveBeenCalledTimes(1);
+});
+
+it('never dispatches a notice when registration failed', async () => {
+ fixture.allowSyntheticManual=true; fixture.withLead=true;
+ fixture.count.mockResolvedValue({count:22,error:null});
+ fixture.insert.mockResolvedValue({data:null,error:new Error('Synthetic database rejection')});
+ const notification=vi.spyOn(toast, 'error').mockImplementation(() => 'synthetic-notice');
+ show();
+ fireEvent.click(await screen.findByRole('button',{name:'RLN'}));
+ await waitFor(() => expect(notification).toHaveBeenCalledWith('Не удалось сохранить регистрацию'));
+ expect(fixture.notice).not.toHaveBeenCalled();
 });

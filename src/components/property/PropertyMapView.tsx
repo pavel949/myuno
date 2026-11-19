@@ -1,40 +1,25 @@
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { propertyDetailMode, propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
-/**
- * PropertyMapView — Airbnb-style map with price markers
- * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
- *
- * Marker click opens an InfoWindow mini-card showing photo, title, price and
- * trust signals (TrustStrip) so users can validate listings without leaving
- * the map. A "View details" CTA navigates to the detail page.
+/** Public property-map adapter over the canonical Phuket MapLibre/PMTiles map.
+ * Catalogue data, price semantics and detail-return context remain unchanged.
  */
 
-import React, { useRef, useCallback, useState, useMemo, forwardRef } from 'react';
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import React, { useRef, useState, useMemo, forwardRef } from 'react';
+import { MapLibreMap, type MapLibreMapHandle } from '@/components/map/MapLibreMap';
+import { isValidMapPosition } from '@/lib/map/basemap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
-import { DEFAULT_MAP_CENTER } from '@/lib/googleMaps';
+const DEFAULT_MAP_CENTER = { lat: 7.95, lng: 98.33 };
 import { TrustStrip } from './TrustStrip';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const DEFAULT_ZOOM = 10.5;
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
-
-// Google Maps renders markers on a canvas/overlay outside the CSS cascade, so
-// `hsl(var(--token))` does not resolve. Use literal hex values mirroring the
-// design tokens (src/styles/tokens.css): primary navy, cream background, ink.
-const MARKER_COLORS = {
-  primary: '#0A2240',
-  primaryForeground: '#F7F5F1',
-  background: '#F7F5F1',
-  foreground: '#1C1916',
-} as const;
 
 interface PropertyMapViewProps {
   properties: Property[];
@@ -48,7 +33,6 @@ interface PropertyMapViewProps {
 }
 
 
-const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
 type PropertyTrustExt = Property & {
   title_deed_type?: string | null;
@@ -68,12 +52,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   mode = 'rent',
   className,
 }, ref) {
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const mapRef = useRef<MapLibreMapHandle | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
-  const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const isRu = language === 'ru';
   // External selection wins; fall back to local state for standalone usage.
   const [localOpenId, setLocalOpenId] = useState<string | null>(null);
@@ -81,143 +64,37 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const setOpenId = (id: string | null) => (onSelect ? onSelect(id) : setLocalOpenId(id));
 
 
-  const validProps = useMemo(() => {
-    return properties.filter((p) => {
-      const lat = typeof p.lat === 'number' ? p.lat : Number(p.lat);
-      const lng = typeof p.lng === 'number' ? p.lng : Number(p.lng);
-      return Number.isFinite(lat) && Number.isFinite(lng) && !(Math.abs(lat) < 1e-5 && Math.abs(lng) < 1e-5);
-    });
-  }, [properties]);
-
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
-
-  const onMapUnmount = useCallback(() => {
-    mapRef.current = null;
-  }, []);
-
+  const validProps = useMemo(() => properties.filter((p) =>
+    p.lat != null && p.lng != null && isValidMapPosition(Number(p.lat), Number(p.lng))
+  ), [properties]);
+  const markers = useMemo(() => validProps.map((property) => {
+    const surface = surfaceFromProperty(property, mode === 'all' ? propertyDetailMode(property) : mode);
+    const suffix = ({ per_night: '/n', per_week: '/wk', per_month: '/mo', per_year: '/yr' } as Record<string, string>)[surface.priceMode] ?? '';
+    return { id: property.id, lat: Number(property.lat), lng: Number(property.lng),
+      title: isRu ? property.title_ru : property.title_en,
+      icon: surface.priceHintThb !== null ? `${formatPrice(surface.priceHintThb)}${suffix}` : '—' };
+  }), [validProps, mode, isRu, formatPrice]);
   React.useEffect(() => {
-    if (!mapRef.current || validProps.length === 0) return;
-    const bounds = new google.maps.LatLngBounds();
-    validProps.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
-    mapRef.current.fitBounds(bounds, 60);
-  }, [validProps]);
-
-  // Pan to selected pin (only if it's outside current viewport).
-  React.useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !openId) return;
-    const p = validProps.find((x) => x.id === openId);
-    if (!p || p.lat == null || p.lng == null) return;
-    const bounds = map.getBounds();
-    const pos = new google.maps.LatLng(p.lat, p.lng);
-    if (!bounds || !bounds.contains(pos)) {
-      map.panTo(pos);
-    }
+    const property = validProps.find((p) => p.id === openId);
+    if (property) mapRef.current?.flyTo(Number(property.lat), Number(property.lng));
   }, [openId, validProps]);
-
-
-  const noKey = !hasKey || loadError;
-  const isLoading = hasKey && !isLoaded;
-
-  if (noKey) {
-    return (
-      <div
-        className={cn(
-          'w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border flex flex-col items-center justify-center bg-muted/30 gap-2 p-4',
-          className
-        )}
-      >
-        <MapPin className="w-8 h-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground text-center">
-          {loadError?.message?.includes('auth')
-            ? (isRu
-              ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа в Google Cloud Console.'
-              : 'Google Maps auth error. Check API key restrictions in Google Cloud Console.')
-            : (isRu ? 'Карта недоступна' : 'Map unavailable')}
-        </p>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div
-        className={cn(
-          'w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border flex items-center justify-center bg-muted/30',
-          className
-        )}
-      >
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
 
   const openProperty = openId ? (validProps.find((p) => p.id === openId) as PropertyTrustExt | undefined) : undefined;
 
   return (
-    <div className={cn('w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border', className)}>
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={DEFAULT_MAP_CENTER}
-        zoom={DEFAULT_ZOOM}
-        onLoad={onMapLoad}
-        onUnmount={onMapUnmount}
-        options={{
-          mapTypeControl: true,
-          streetViewControl: false,
-          fullscreenControl: true,
-          zoomControl: true,
-        }}
-        onClick={() => setOpenId(null)}
-      >
-        {validProps.map((property) => {
-          const surface = surfaceFromProperty(property, mode === 'all' ? propertyDetailMode(property) : mode);
-          const price = surface.priceHintThb;
-          const suffix = ({ per_night: '/n', per_week: '/wk', per_month: '/mo', per_year: '/yr' } as Record<string, string>)[surface.priceMode] ?? '';
-          const priceLabel = price !== null ? `${formatPrice(price)}${suffix}` : '—';
-          const isActive = openId === property.id;
-
-          return (
-            <Marker
-              key={property.id}
-              position={{ lat: property.lat!, lng: property.lng! }}
-              label={{
-                text: priceLabel,
-                color: isActive ? MARKER_COLORS.primaryForeground : MARKER_COLORS.foreground,
-                fontWeight: isActive ? '700' : '600',
-                fontSize: isActive ? '13px' : '12px',
-              }}
-              icon={
-                isActive
-                  ? {
-                      path: google.maps.SymbolPath.CIRCLE,
-                      scale: 22,
-                      fillColor: MARKER_COLORS.primary,
-                      fillOpacity: 1,
-                      strokeColor: MARKER_COLORS.background,
-                      strokeWeight: 3,
-                    }
-                  : undefined
-              }
-              zIndex={isActive ? 999 : undefined}
-              title={isRu ? property.title_ru : property.title_en}
-              onClick={() => {
-                setOpenId(property.id);
-                onHover?.(property.id);
-              }}
-            />
-          );
-        })}
-
-
-        {openProperty && (
-          <InfoWindow
-            position={{ lat: openProperty.lat!, lng: openProperty.lng! }}
-            onCloseClick={() => setOpenId(null)}
-            options={{ pixelOffset: new google.maps.Size(0, -32), maxWidth: 280 }}
-          >
+    <div ref={ref} className={cn('relative w-full h-[400px] lg:h-[500px] rounded-none overflow-hidden border', className)}>
+      <MapLibreMap ref={mapRef} center={DEFAULT_MAP_CENTER} zoom={DEFAULT_ZOOM}
+        className="h-full w-full [&_[data-marker-id]]:!w-auto [&_[data-marker-id]]:!min-w-11 [&_[data-marker-id]]:!px-3 [&_[data-marker-id]]:!text-xs [&_[data-marker-id]]:!whitespace-nowrap" markers={markers} activeMarkerId={openId ?? hoveredProperty ?? undefined}
+        onMarkerClick={(marker) => { setOpenId(marker.id); onHover(marker.id); }} showLocateButton={false} />
+      {validProps.length === 0 && (
+        <div role="status" className="absolute inset-x-4 top-4 bg-background border p-3 text-sm flex items-center gap-2">
+          <MapPin className="h-4 w-4" />
+          {isRu ? 'У этих объектов пока нет координат. Откройте карточку из списка.' : 'These homes have no map coordinates yet. Open a home from the list.'}
+        </div>
+      )}
+      {openProperty && (
+        <section aria-label={isRu ? 'Объект на карте' : 'Home on map'} className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] max-h-[calc(100%-2rem)] overflow-auto bg-background border shadow-lg p-3">
+          <button type="button" onClick={() => setOpenId(null)} className="min-h-11 px-3 mb-2 text-sm" aria-label={isRu ? 'Закрыть карточку' : 'Close property card'}>{isRu ? 'Закрыть' : 'Close'}</button>
             <div className="w-[260px] text-foreground">
               <button
                 type="button"
@@ -266,9 +143,9 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                 {isRu ? 'Открыть' : 'View details'}
               </button>
             </div>
-          </InfoWindow>
+        </section>
         )}
-      </GoogleMap>
+
     </div>
   );
 });

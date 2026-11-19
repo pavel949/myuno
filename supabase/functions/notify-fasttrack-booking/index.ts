@@ -174,7 +174,13 @@ Deno.serve(async (req) => {
 
     if (passError) {
       console.error('[FastTrack] Passengers insert error:', passError);
-      // Don't throw - booking is already created
+      // Retain the existing draft and its ID. Do not announce a complete request
+      // or dispatch passenger details that were not persisted. HTTP 200 carries
+      // the explicit partial outcome through functions.invoke (not a success).
+      return new Response(
+        JSON.stringify({ success: false, booking_id: bookingId, receipt_status: 'incomplete', error: 'PASSENGERS_NOT_SAVED' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
     }
 
     // 4. Send WhatsApp (non-blocking). ADMIN_WHATSAPP is handler-scoped, so it

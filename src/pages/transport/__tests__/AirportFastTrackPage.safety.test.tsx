@@ -25,6 +25,19 @@ afterEach(()=>{cleanup();vi.useRealTimers();vi.restoreAllMocks();});
 describe('Fast Track review and submission with synthetic boundary',()=>{
  it.each(['arrival','departure'])('omits passports in review but sends the intact passport for %s',async direction=>{mount(direction);await screen.findByText('Synthetic Guest');expect(screen.queryByText(/TEST123456/)).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Send request'}));await waitFor(()=>expect(f.invoke).toHaveBeenCalledTimes(1));expect(f.invoke.mock.calls[0][0]).toBe('notify-fasttrack-booking');expect(f.invoke.mock.calls[0][1].body).toMatchObject({direction,passengers:[{passport_number:'TEST123456'}]});await waitFor(()=>expect(sessionStorage.getItem('booking_draft:fasttrack_airport')).toBeNull());});
  it('keeps the draft on failed submit',async()=>{f.invoke.mockResolvedValue({data:{success:false,error:'Synthetic rejection'},error:null});mount();fireEvent.click(await screen.findByRole('button',{name:'Send request'}));await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('could not verify receipt'));expect(sessionStorage.getItem('booking_draft:fasttrack_airport')).not.toBeNull();expect(screen.queryByText('Synthetic upsell boundary')).toBeNull();});
+ it('retains an incomplete receipt and blocks duplicate submit even after remount',async()=>{
+  f.invoke.mockResolvedValue({data:{success:false,booking_id:'synthetic-partial',receipt_status:'incomplete',error:'PASSENGERS_NOT_SAVED'},error:null});
+  const view=mount();fireEvent.click(await screen.findByRole('button',{name:'Send request'}));
+  await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Request synthetic-partial was created, but passenger details were not saved'));
+  expect(screen.getByRole('button',{name:'Send request'})).toBeDisabled();
+  expect(screen.queryByText('Synthetic upsell boundary')).toBeNull();
+  await waitFor(()=>expect(JSON.parse(sessionStorage.getItem('booking_draft:fasttrack_airport')!).data.incompleteBookingId).toBe('synthetic-partial'));
+  view.unmount();
+  render(<MemoryRouter initialEntries={['/transport/fast-track']}><AirportFastTrackPage/></MemoryRouter>);
+  await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Do not send another request'));
+  fireEvent.click(screen.getByRole('button',{name:'Send request'}));
+  expect(f.invoke).toHaveBeenCalledTimes(1);
+ });
  it('retains the restored draft while sending a guest to the canonical auth return',async()=>{f.user=null;mount();fireEvent.click(await screen.findByRole('button',{name:'Send request'}));expect(screen.getByTestId('location')).toHaveTextContent('/auth?redirect=%2Ftransport%2Ffast-track');expect(f.invoke).not.toHaveBeenCalled();expect(sessionStorage.getItem('booking_draft:fasttrack_airport')).not.toBeNull();});
  it('rechecks the clock when a valid review was left open across the cutoff',()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2099-11-30T04:59:00Z'));mount('arrival','2099-12-01');const book=screen.getByRole('button',{name:'Send request'});expect(book).toBeEnabled();vi.setSystemTime(new Date('2099-11-30T05:01:00Z'));fireEvent.click(book);expect(f.invoke).not.toHaveBeenCalled();expect(screen.getByText('Request at least 24 hours ahead')).toBeVisible();expect(document.getElementById('fasttrack-flightDate')).toHaveAttribute('aria-invalid','true');});
  it('omits a malformed restored passport without crashing or submitting it',async()=>{mount('arrival','2099-12-01',null);await screen.findByText('Synthetic Guest');fireEvent.click(screen.getByRole('button',{name:'Send request'}));expect(f.invoke).not.toHaveBeenCalled();});
