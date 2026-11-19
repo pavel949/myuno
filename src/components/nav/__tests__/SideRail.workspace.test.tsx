@@ -28,8 +28,9 @@ it('keeps current destination visible after collapse and opens the new active wo
     </MemoryRouter>,
   );
   expect(screen.getByText('Management workspace')).toBeVisible();
-  const section = screen.getByRole('button', { name: /Finance\. Contains current page/ });
+  const section = screen.getByRole('button', { name: 'Finance' });
   expect(section).toHaveAttribute('aria-expanded', 'true');
+  expect(section).toHaveAccessibleDescription('Contains current page');
   expect(screen.getByRole('button', { name: 'Finance Hub' })).toHaveAttribute('aria-current', 'page');
   fireEvent.click(section);
   expect(section).toHaveAttribute('aria-expanded', 'false');
@@ -37,7 +38,7 @@ it('keeps current destination visible after collapse and opens the new active wo
   expect(screen.getByText('You are here:')).toHaveTextContent('Finance Hub');
 
   fireEvent.click(screen.getByRole('button', { name: 'Open booking list' }));
-  expect(screen.getByRole('button', { name: /Daily work\. Contains current page/ })).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByRole('button', { name: 'Daily work' })).toHaveAttribute('aria-expanded', 'true');
   expect(screen.getByRole('button', { name: 'Bookings' })).toHaveAttribute('aria-current', 'page');
   expect(screen.getByText('You are here:')).toHaveTextContent('Bookings');
 });
@@ -54,8 +55,9 @@ it('shows the current mobile quick link without opening the duplicate list', asy
   );
   fireEvent.click(screen.getByRole('button', { name: 'Toggle Sidebar' }));
   const drawer = await screen.findByRole('dialog');
-  const quickLinks = within(drawer).getByRole('button', { name: /Quick links\. Contains current page/ });
+  const quickLinks = within(drawer).getByRole('button', { name: 'Quick links' });
   expect(quickLinks).toHaveAttribute('aria-expanded', 'false');
+  expect(quickLinks).toHaveAccessibleDescription('Contains current page');
   expect(within(drawer).queryByRole('button', { name: 'Finance Hub' })).not.toBeInTheDocument();
   expect(within(drawer).getByText('You are here:')).toHaveTextContent('Finance Hub');
   fireEvent.click(quickLinks);

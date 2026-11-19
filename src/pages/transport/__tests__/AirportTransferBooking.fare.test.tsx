@@ -13,7 +13,6 @@ vi.mock('@/hooks/useGeolocation',()=>({useGeolocation:()=>({supported:false})}))
 vi.mock('@/components/layout/AppLayout',()=>({AppLayout:({children}:any)=><main>{children}</main>}));
 vi.mock('@/components/transport/booking-steps/StepRoute',()=>({StepRoute:()=>null}));
 vi.mock('@/components/transport/booking-steps/StepDetails',()=>({StepDetails:()=>null}));
-vi.mock('@/components/transport/booking-steps/TransferSuccess',()=>({TransferSuccess:()=> <p>Submission complete</p>}));
 vi.mock('@/components/auth/InlineAuthGate',()=>({InlineAuthGate:({open,onOpenChange,onAuthenticated}:any)=>open?<div><button onClick={()=>{f.user={id:'synthetic-user'};onAuthenticated();onOpenChange(false);}}>Synthetic sign in</button><button onClick={()=>onOpenChange(false)}>Cancel auth</button></div>:null}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{from:(table:string)=>{if(table!=='transfer_night_surcharge_config')throw Error('Unexpected read');const q={select:()=>q,eq:()=>q,limit:()=>q,maybeSingle:()=>f.nightRead()};return q;},functions:{invoke:(...args:any[])=>f.invoke(...args)}}}));
 vi.mock('sonner',()=>({toast:{error:(...args:any[])=>f.toast(...args),info:vi.fn()}}));
@@ -29,7 +28,28 @@ describe('actual transfer page with synthetic read/write boundaries',()=>{
  it('uses the same confirmation label in the actual vehicle picker',async()=>{f.vehicles[0].base_price=0;mount(1);await screen.findByText('Choose your vehicle');expect(screen.getAllByText('Price requires confirmation').length).toBeGreaterThan(0);expect(screen.getByRole('button',{name:/Continue/})).toBeDisabled();});
  it('rejects an orphaned saved vehicle even when a route rate exists',async()=>{f.destinations=[{id:'zone',base_price:1800}];mount(3,{vehicleType:'removed',selectedDestinationId:'zone'});await screen.findAllByText('Price requires confirmation');expect(f.create).not.toHaveBeenCalled();});
  it.each(['from-airport','to-airport'])('preserves a valid configured cash submission for %s',async direction=>{mount(3,{direction});fireEvent.click(await screen.findByRole('button',{name:/Book • Cash/}));await waitFor(()=>expect(f.create).toHaveBeenCalledTimes(1));expect(f.create.mock.calls[0][0]).toMatchObject({total_amount:1200,currency:'THB',metadata:{base_price:1200,direction},payment:{method:'cash',amount:1200}});});
- it.each(['cash','concierge_advance'])('keeps configured %s notification dispatch on the existing boundary',async method=>{vi.spyOn(window,'open').mockImplementation(()=>null);f.create.mockResolvedValue({success:true,order_id:'synthetic-order',order_number:'SYNTHETIC'});mount(3,{paymentMethod:method});fireEvent.click(await screen.findByRole('button',{name:/Book •/}));await screen.findByText('Submission complete');expect(f.invoke).toHaveBeenCalledTimes(1);expect(f.invoke.mock.calls[0]).toMatchObject(['notify-transfer-booking',{body:{order_id:'synthetic-order',total_amount:1200,payment_method:method}}]);});
+ it.each(['cash','concierge_advance'])('keeps configured %s notification dispatch on the existing boundary',async method=>{vi.spyOn(window,'open').mockImplementation(()=>null);f.create.mockResolvedValue({success:true,order_id:'synthetic-order',order_number:'SYNTHETIC'});mount(3,{paymentMethod:method});fireEvent.click(await screen.findByRole('button',{name:/Book •/}));await screen.findByText('Transfer request saved');expect(f.invoke).toHaveBeenCalledTimes(1);expect(f.invoke.mock.calls[0]).toMatchObject(['notify-transfer-booking',{body:{order_id:'synthetic-order',total_amount:1200,payment_method:method}}]);});
+ it('shows only saved request, not confirmation or delivered alerts, when notification fails',async()=>{
+  f.create.mockResolvedValue({success:true,order_id:'synthetic-order',order_number:'SYNTHETIC'});
+  f.invoke.mockResolvedValue({data:{success:false},error:null});
+  mount();fireEvent.click(await screen.findByRole('button',{name:/Book • Cash/}));
+  await screen.findByText('Transfer request saved');
+  expect(screen.getByText('Awaiting myUNO confirmation')).toBeVisible();
+  expect(screen.queryByText('Confirmed')).toBeNull();
+  expect(screen.queryByText('Transfer Booked!')).toBeNull();
+  expect(screen.getByText(/trip is not confirmed yet/)).toBeVisible();
+  expect(f.create).toHaveBeenCalledTimes(1);
+ });
+ it('a guest authenticates before a saved request appears, with no duplicate creation',async()=>{
+  f.user=null;f.create.mockResolvedValue({success:true,order_id:'synthetic-order',order_number:'SYNTHETIC'});
+  const view=mount();fireEvent.click(await screen.findByRole('button',{name:/Book • Cash/}));
+  expect(f.create).not.toHaveBeenCalled();
+  fireEvent.click(await screen.findByRole('button',{name:'Synthetic sign in'}));
+  view.rerender(<MemoryRouter><AirportTransferBooking/></MemoryRouter>);
+  await screen.findByText('Transfer request saved');
+  expect(f.create).toHaveBeenCalledTimes(1);
+  expect(f.invoke.mock.calls[0][0]).toBe('notify-transfer-booking');
+ });
  it('does not notify before card payment and surfaces checkout failure',async()=>{vi.spyOn(console,'error').mockImplementation(()=>{});f.create.mockResolvedValue({success:true,order_id:'synthetic-order'});f.invoke.mockResolvedValue({data:null,error:Error('Synthetic checkout failure')});mount(3,{paymentMethod:'stripe'});fireEvent.click(await screen.findByRole('button',{name:/Pay ฿/}));await screen.findByText(/Your order exists/);expect(f.invoke).toHaveBeenCalledTimes(1);expect(f.invoke.mock.calls[0][0]).toBe('create-checkout');expect(f.invoke.mock.calls[0][1].body.amount).toBe(1200);expect(sessionStorage.getItem('booking_draft:transfer_airport')).not.toBeNull();});
  it('does not clear the draft or notify when order creation fails',async()=>{mount();fireEvent.click(await screen.findByRole('button',{name:/Book • Cash/}));await waitFor(()=>expect(f.create).toHaveBeenCalledTimes(1));expect(f.invoke).not.toHaveBeenCalled();expect(sessionStorage.getItem('booking_draft:transfer_airport')).not.toBeNull();});
  it('revalidates a tariff removed during the delayed auth resume',async()=>{f.user=null;const view=mount();fireEvent.click(await screen.findByRole('button',{name:/Book • Cash/}));await screen.findByRole('button',{name:'Synthetic sign in'});vi.useFakeTimers();fireEvent.click(screen.getByRole('button',{name:'Synthetic sign in'}));f.vehicles=[{...f.vehicles[0],base_price:0}];view.rerender(<MemoryRouter><AirportTransferBooking/></MemoryRouter>);await act(async()=>{vi.advanceTimersByTime(60);});expect(f.create).not.toHaveBeenCalled();expect(f.invoke).not.toHaveBeenCalled();expect(f.toast).toHaveBeenCalledWith('Price requires confirmation');});

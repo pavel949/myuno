@@ -58,6 +58,7 @@ interface SideRailProps {
 
 export function SideRail({ role, badges }: SideRailProps) {
   const location = useLocation();
+  const groupHintId = React.useId();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -131,9 +132,7 @@ export function SideRail({ role, badges }: SideRailProps) {
           const hasCurrent = groupHasActive(group);
           const open = (!group.mobileQuickLinks && hasCurrent) || group.defaultOpen || false;
           const groupLabel = labelOf(group);
-          const currentGroupLabel = isOwner && hasCurrent
-            ? `${groupLabel}. ${pickLang(language, { en: 'Contains current page', ru: 'Здесь текущая страница', th: 'มีหน้าปัจจุบัน' })}`
-            : undefined;
+          const currentGroup = isOwner && hasCurrent;
           return (
             <Collapsible key={`${group.labelEn}:${hasCurrent}:${isCollapsed}`} defaultOpen={isCollapsed || open}>
               <SidebarGroup>
@@ -146,9 +145,16 @@ export function SideRail({ role, badges }: SideRailProps) {
                         isOwner && hasCurrent && 'mc-rail-current-group',
                       )}
                     >
-                      <button type="button" aria-label={currentGroupLabel}>
+                      <button type="button" aria-describedby={currentGroup ? groupHintId : undefined}>
                         <span>{groupLabel}</span>
-                        {isOwner && hasCurrent && <span aria-hidden className="ml-auto size-2 shrink-0 rounded-full bg-sidebar-ring" />}
+                        {currentGroup && (
+                          <>
+                            <span aria-hidden className="ml-auto size-2 shrink-0 rounded-full bg-sidebar-ring" />
+                            <span id={groupHintId} hidden>
+                              {pickLang(language, { en: 'Contains current page', ru: 'Здесь текущая страница', th: 'มีหน้าปัจจุบัน' })}
+                            </span>
+                          </>
+                        )}
                         <ChevronDown aria-hidden className="mc-rail-chevron size-3.5 shrink-0 transition-transform" />
                       </button>
                     </SidebarGroupLabel>
