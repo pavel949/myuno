@@ -239,7 +239,7 @@ export function OperationsBookingsTab() {
                           {order.order_number || order.id.slice(0, 8)} · {order.order_type}
                         </span>
                       </span>
-                      <Badge className={`${style.bgColor} ${style.color} max-w-[45%] border-0 [overflow-wrap:anywhere]`}>
+                      <Badge className={`${style.bgColor} ${style.color} min-w-0 border-0 [overflow-wrap:anywhere]`}>
                         {t(`admin.orders.statusLabel.${status}`)}
                       </Badge>
                       <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0" />
