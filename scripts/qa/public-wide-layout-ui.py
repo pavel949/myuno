@@ -1,6 +1,6 @@
 """Remote-CI-only real public layout, default 100% CSS-pixel viewport geometry.
 
-Synthetic reads, map's real no-key fallback, no real transactions or live map.
+Synthetic reads and PMTiles archive, no real transactions or live map.
 """
 import asyncio
 import json
@@ -9,8 +9,11 @@ from pathlib import Path
 import sys
 from urllib.parse import urlencode, urlparse
 from playwright.async_api import async_playwright, expect
+from public_wide_map_fixture import build_archive, range_response
 
 OUTPUT = Path(sys.argv[1])
+ARCHIVE_PATH = json.loads((Path(__file__).resolve().parents[2] / 'src/assets/map/phuket.pmtiles.asset.json').read_text())['url']
+ARCHIVE, TILE_OFFSET = build_archive()
 WIDTHS = [320, 360, 768, 1024, 1440, 1920, 2560]
 # Independent pixel oracle for the approved public gutter scale at these viewports.
 HOUSING_GUTTERS = {320:16, 360:20, 768:20, 1024:32, 1440:48, 1920:80, 2560:80}
@@ -28,16 +31,28 @@ async def main():
         raise RuntimeError('Browser execution is remote GitHub CI-only')
     results = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=True, args=[
+            '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
+        ])
         for lang, width, surface, state, view in CASES:
             context = await browser.new_context(viewport={'width': width, 'height': 1000}, device_scale_factor=1, service_workers='block')
-            blocked, errors = [], []
+            blocked, errors, archive_ranges = [], [], []
             async def route(request):
                 parsed = urlparse(request.request.url)
                 name = 'fixture.html' if parsed.path == '/fixture' else parsed.path.lstrip('/')
                 types = {'fixture.html': 'text/html', 'fixture.js': 'text/javascript', 'fixture.css': 'text/css'}
                 if parsed.netloc == 'localhost:8080' and request.request.method == 'GET' and name in types:
                     await request.fulfill(path=str(OUTPUT / name), content_type=types[name])
+                elif (surface == 'housing' and view == 'map' and parsed.scheme == 'http'
+                      and parsed.netloc == 'localhost:8080' and parsed.path == ARCHIVE_PATH
+                      and not parsed.query and request.request.method == 'GET'):
+                    status, content_range, body = range_response(ARCHIVE, request.request.headers.get('range'))
+                    archive_ranges.append((status, content_range))
+                    await request.fulfill(status=status, headers={
+                        'content-range': content_range,
+                        'accept-ranges': 'bytes',
+                        'etag': '"synthetic-public-wide-map-v1"',
+                    }, content_type='application/octet-stream', body=body)
                 else:
                     blocked.append(request.request.url)
                     await request.abort()
@@ -120,6 +135,19 @@ async def main():
                         if width >= 1280:
                             assert map_rect['left'] >= list_rect['right']-1 or list_rect['left'] >= map_rect['right']-1, {'map': map_rect, 'list': list_rect}
                         row['map'] = map_rect
+                        map_view = page.locator('.property-discovery-map')
+                        await expect(map_view.locator('[data-map-render-state]')).to_have_attribute('data-map-render-state', 'ready')
+                        await expect(map_view.locator('.maplibregl-canvas')).to_be_visible()
+                        assert (206, f'bytes 0-{len(ARCHIVE)-1}/{len(ARCHIVE)}') in archive_ranges, archive_ranges
+                        assert (206, f'bytes {TILE_OFFSET}-{len(ARCHIVE)-1}/{len(ARCHIVE)}') in archive_ranges, archive_ranges
+                        row['syntheticMapRanges'] = archive_ranges
+                        marker = map_view.locator('[data-marker-id="synthetic-3"]')
+                        await expect(marker).to_be_visible()
+                        await marker.press('Enter')
+                        card = map_view.get_by_role('region', name='Объект на карте')
+                        await expect(card.get_by_role('heading', name='Тестовый объект 3')).to_be_visible()
+                        await card.get_by_role('button', name='Закрыть карточку').click()
+                        await expect(card).to_have_count(0)
                     # Full search remains operable with no dates; no calendar
                     # availability proof is claimed by this layout fixture.
                     criteria=page.locator('.premium-search-criteria')
