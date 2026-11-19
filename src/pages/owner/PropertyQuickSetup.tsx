@@ -238,16 +238,16 @@ export default function PropertyQuickSetup() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pricing" className="gap-1">
+        <TabsList className="grid h-auto w-full grid-cols-3 items-stretch">
+          <TabsTrigger value="pricing" className="min-h-11 gap-1 overflow-visible whitespace-normal px-2 leading-snug">
             <DollarSign className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Цены' : 'Pricing'}</span>
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="gap-1">
+          <TabsTrigger value="calendar" className="min-h-11 gap-1 overflow-visible whitespace-normal px-2 leading-snug">
             <CalendarDays className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Календарь' : 'Calendar'}</span>
           </TabsTrigger>
-          <TabsTrigger value="rules" className="gap-1">
+          <TabsTrigger value="rules" className="min-h-11 gap-1 overflow-visible whitespace-normal px-2 leading-snug">
             <Clock className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Правила' : 'Rules'}</span>
           </TabsTrigger>
@@ -498,11 +498,11 @@ export default function PropertyQuickSetup() {
       </Tabs>
 
       {/* Save buttons */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-pb">
-        <div className="max-w-lg mx-auto flex gap-3">
+      <div className="sticky bottom-[var(--bottom-nav-h)] z-20 mt-6 border-t bg-background py-3">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <Button
             variant="outline"
-            className="flex-1"
+            className="whitespace-normal leading-snug"
             onClick={handleSave}
             disabled={isSaving}
           >
@@ -510,7 +510,7 @@ export default function PropertyQuickSetup() {
             {isRu ? 'Сохранить' : 'Save'}
           </Button>
           <Button
-            className="flex-1"
+            className="whitespace-normal leading-snug"
             onClick={handleFinish}
             disabled={isSaving}
           >

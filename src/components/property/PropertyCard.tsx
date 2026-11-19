@@ -303,7 +303,7 @@ function ListVariant({
       isInactive && 'opacity-60'
     )}>
       <CardContent className="p-0">
-        <div className="flex">
+        <div className={cn("flex", mode === 'owner' && "flex-wrap lg:flex-nowrap")}>
           {/* Image */}
           <div 
             className="w-24 h-24 sm:w-28 sm:h-28 bg-muted flex-shrink-0 relative cursor-pointer"
@@ -341,8 +341,8 @@ function ListVariant({
           >
             <div className="min-w-0">
               {/* Title row with badges */}
-              <div className="flex items-start gap-2 mb-1">
-                <h3 className="font-semibold text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors flex-1">
+              <div className={cn("flex items-start gap-2 mb-1", mode === 'owner' && "flex-col lg:flex-row")}>
+                <h3 className={cn("font-semibold text-sm leading-snug group-hover:text-primary transition-colors flex-1", mode === 'owner' ? "break-words [overflow-wrap:anywhere]" : "line-clamp-2")}>
                   {cardProps.title || (isRu ? 'Без названия' : 'Untitled')}
                 </h3>
                 <div className="flex items-center gap-1 flex-shrink-0">
@@ -393,7 +393,7 @@ function ListVariant({
               {(cardProps.district || cardProps.address) && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                   <MapPin className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">{cardProps.district || cardProps.address}</span>
+                  <span className={mode === 'owner' ? "break-words [overflow-wrap:anywhere]" : "truncate"}>{cardProps.district || cardProps.address}</span>
                 </div>
               )}
 
@@ -442,23 +442,23 @@ function ListVariant({
           </div>
 
           {/* Actions */}
-          <div className="p-2 flex items-start flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className={cn("p-2 flex items-start shrink-0", mode === 'owner' && "w-full items-center justify-end gap-2 border-t lg:w-auto lg:items-start lg:border-t-0")} onClick={(e) => e.stopPropagation()}>
             {mode === 'owner' && onEdit && onView && (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-wrap gap-1 lg:flex-col">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-7 text-xs px-2 whitespace-nowrap"
+                  className="text-xs px-2"
                   onClick={() => onEdit(property.id)}
                   aria-label={isRu ? 'Редактировать' : 'Edit'}
                 >
                   <Pencil className="h-3 w-3" />
-                  <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : 'Edit'}</span>
+                  <span>{isRu ? 'Ред.' : 'Edit'}</span>
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="h-7 text-xs whitespace-nowrap"
+                  className="text-xs px-2"
                   onClick={() => onView(property.id)}
                 >
                   <Eye className="h-3 w-3 mr-1" />
