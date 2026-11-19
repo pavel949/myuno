@@ -40,24 +40,33 @@ try {
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
     const row = { viewport, outcome: 'FAIL', blocked: [], ranges: [], revision: process.env.GITHUB_SHA };
     const context = await browser.newContext({ viewport, locale: 'en-US', serviceWorkers: 'block' });
+    let closing = false;
     try {
       await context.route('**/*', async (route) => {
         const req = route.request(), url = new URL(req.url());
-        if (allowedRead(url, req)) {
-          // Playwright route.continue does not re-intercept redirected requests.
-          // Intercept 3xx here and stop instead of following outside the allowlist.
-          const response = await route.fetch({ maxRedirects: 0, timeout: 20000 });
-          if (response.status() < 300 || response.status() >= 400 || response.status() === 304) {
-            if (url.pathname === archivePath && originIsPublic(url) && response.status() === 206) {
-              row.ranges.push(response.headers()['content-range']);
+        try {
+          if (allowedRead(url, req)) {
+            // Playwright route.continue does not re-intercept redirected requests.
+            // Intercept 3xx here and stop instead of following outside the allowlist.
+            const response = await route.fetch({ maxRedirects: 0, timeout: 20000 });
+            if (response.status() < 300 || response.status() >= 400 || response.status() === 304) {
+              if (url.pathname === archivePath && originIsPublic(url) && response.status() === 206) {
+                row.ranges.push(response.headers()['content-range']);
+              }
+              await route.fulfill({ response });
+              return;
             }
-            await route.fulfill({ response });
-            return;
           }
+          // Only log method and pathname. No cookies, keys or query strings.
+          row.blocked.push([req.method(), url.origin, url.pathname]);
+          await route.abort('blockedbyclient');
+        } catch (error) {
+          // Keep routing installed until the context closes: unroute would
+          // briefly permit unchecked requests. In-flight reads may be cancelled.
+          if (closing) return;
+          (row.routeErrors ??= []).push([req.method(), url.origin, url.pathname, error.name]);
+          await route.abort('failed').catch(() => {});
         }
-        // Only log method and pathname. No cookies, keys or query strings.
-        row.blocked.push([req.method(), url.origin, url.pathname]);
-        await route.abort('blockedbyclient');
       });
       await context.routeWebSocket('**/*', (socket) => socket.close());
       const page = await context.newPage();
@@ -98,6 +107,7 @@ try {
     } finally {
       results.push(row);
       await writeFile(output + '/results.json', JSON.stringify(results, null, 2));
+      closing = true;
       await context.close();
     }
   }
