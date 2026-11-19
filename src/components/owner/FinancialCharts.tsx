@@ -36,20 +36,19 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
         return date >= monthStart && date <= monthEnd;
       });
 
-      const income = monthFinancials
-        .filter(f => f.transaction_type === 'income')
-        .reduce((sum, f) => sum + Number(f.amount), 0);
-
-      const expenses = monthFinancials
-        .filter(f => f.transaction_type === 'expense')
-        .reduce((sum, f) => sum + Number(f.amount), 0);
+      const incomeRows = monthFinancials.filter(f => f.transaction_type === 'income');
+      const expenseRows = monthFinancials.filter(f => f.transaction_type === 'expense');
+      const sum = (rows: PropertyFinancialFull[]) =>
+        rows.length ? rows.reduce((total, row) => total + row.amount, 0) : null;
+      const income = sum(incomeRows);
+      const expenses = sum(expenseRows);
 
       return {
         month: format(month, 'MMM', { locale: isRu ? ru : undefined }),
         fullMonth: format(month, 'MMMM yyyy', { locale: isRu ? ru : undefined }),
         income,
         expenses,
-        net: income - expenses,
+        net: income === null && expenses === null ? null : (income ?? 0) - (expenses ?? 0),
       };
     });
   }, [financials, isRu]);
@@ -244,12 +243,12 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
         )}
       </div>
 
-      {/* Net Profit Chart */}
+      {/* Difference in loaded records, not profit. */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4" />
-            {isRu ? 'Чистый доход по месяцам' : 'Monthly Net Income'}
+            {isRu ? 'Разница по записям за месяц' : 'Monthly difference in records'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -262,14 +261,14 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
                 <Tooltip content={<CustomTooltip />} />
                 <Bar 
                   dataKey="net" 
-                  name={isRu ? 'Чистый доход' : 'Net Income'}
+                  name={isRu ? 'Начисления минус расходы' : 'Recorded accruals less expenses'}
                   radius={CHART_THEME.bar.radius}
                   animationDuration={CHART_THEME.bar.animationDuration}
                 >
                   {monthlyData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={entry.net >= 0 ? CHART_THEME.colors.success : CHART_THEME.colors.destructive} 
+                      fill={entry.net !== null && entry.net < 0 ? CHART_THEME.colors.destructive : CHART_THEME.colors.success}
                     />
                   ))}
                 </Bar>
