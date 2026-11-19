@@ -26,6 +26,7 @@ export const INBOX_DETAIL_FIELDS: Record<InboxSource, readonly (readonly [string
 export async function fetchInboxRequest(source: InboxSource, id: string): Promise<Record<string, unknown> | null> {
   if (!isInboxSource(source) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid request selection');
   const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
+  if (source === 'consultation_requests') fields.push('vertical_metadata');
   const { data, error } = await supabase.from(source).select(fields.join(',')).eq('id', id).maybeSingle();
   if (error) throw error;
   const record: unknown = data;

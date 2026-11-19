@@ -1,6 +1,8 @@
 /** One pending nonce per mounted intent; session storage retains uncertain retries. */
 import { z } from 'zod';
 
+export const OFFPLAN_BUYER_ENTRY = 'offplan_buyer';
+
 class IntakeInputError extends Error {}
 class IntakeRecoveryError extends Error {}
 const contactSchema = z.object({

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationCity } from '@/contexts/LocationContext';
@@ -228,7 +228,9 @@ export default function PropertyConsultation() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { personas } = useUserPersonas();
-  const isDeveloperPersona = personas.includes('real_estate_developer');
+  const [entryParams] = useSearchParams();
+  const isNewbuildBuyer = entryParams.get('market') === 'newbuilds';
+  const isDeveloperPersona = !isNewbuildBuyer && personas.includes('real_estate_developer');
 
   const {
     requestPropertyConsultation,
@@ -238,7 +240,7 @@ export default function PropertyConsultation() {
     requestDeveloperPartnership,
   } = useConsultationRequests();
 
-  const [requestType, setRequestType] = useState<RequestType>('vacation_rental');
+  const [requestType, setRequestType] = useState<RequestType>(isNewbuildBuyer ? 'property_consultation' : 'vacation_rental');
   const [developerIntent, setDeveloperIntent] = useState(DEVELOPER_INTENTS[0].id);
   const [developerForm, setDeveloperForm] = useState({
     companyName: '',
@@ -252,6 +254,8 @@ export default function PropertyConsultation() {
   const [step, setStep] = useState<'type' | 'criteria' | 'contact'>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [submissionError, setSubmissionError] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -306,6 +310,7 @@ export default function PropertyConsultation() {
     if (!formData.name || !formData.phone) return;
 
     setIsSubmitting(true);
+    setSubmissionError(false);
     try {
       if (isDeveloperPersona) {
         const intentLabel =
@@ -368,6 +373,7 @@ export default function PropertyConsultation() {
       }
 
       const basePayload = {
+        ...(isNewbuildBuyer ? { vertical_id: 'properties', vertical_metadata: { marketplace: 'newbuilds', buyer_intent: requestType }, entry_point: '/property/offplan' } : {}),
         name: formData.name,
         email: formData.email || undefined,
         phone: formData.phone,
@@ -378,8 +384,9 @@ export default function PropertyConsultation() {
         notes: formData.notes || undefined,
       };
 
+      let receipt: { id: string } | undefined;
       if (requestType === 'vacation_rental') {
-        await requestVacationRental.mutateAsync({
+        receipt = await requestVacationRental.mutateAsync({
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
@@ -392,7 +399,7 @@ export default function PropertyConsultation() {
           children_count: formData.children_count,
         });
       } else if (requestType === 'property_consultation') {
-        await requestPropertyConsultation.mutateAsync({
+        receipt = await requestPropertyConsultation.mutateAsync({
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
@@ -403,9 +410,9 @@ export default function PropertyConsultation() {
           purpose: formData.purpose || undefined,
         });
       } else if (requestType === 'property_tour') {
-        await requestPropertyTour.mutateAsync(basePayload);
+        receipt = await requestPropertyTour.mutateAsync(basePayload);
       } else {
-        await requestInvestmentAdvice.mutateAsync({
+        receipt = await requestInvestmentAdvice.mutateAsync({
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
@@ -413,8 +420,11 @@ export default function PropertyConsultation() {
         });
       }
 
+      if (!receipt || typeof receipt.id !== 'string' || !receipt.id.trim()) throw new Error('Unconfirmed consultation receipt');
+      setSubmissionId(receipt.id);
       setIsSuccess(true);
     } catch {
+      setSubmissionError(true);
       // Mutations show toast on error
     } finally {
       setIsSubmitting(false);
@@ -438,7 +448,7 @@ export default function PropertyConsultation() {
     return (
         <PageContainer>
           <PageHeader 
-            title={isRu ? 'Заявка отправлена' : 'Request Sent'}
+            title={isNewbuildBuyer ? (isRu ? 'Заявка сохранена' : 'Request saved') : (isRu ? 'Заявка отправлена' : 'Request Sent')}
             showBack
             fallbackPath="/property"
           />
@@ -453,7 +463,9 @@ export default function PropertyConsultation() {
             </h2>
             
             <p className="text-muted-foreground mb-8 max-w-sm">
-              {isDeveloperPersona
+              {isNewbuildBuyer
+                ? (isRu ? 'Заявка сохранена. Ответ команды ожидается. Срок ответа не подтверждён.' : 'Request saved. A team reply is pending. A response time has not been confirmed.')
+                : isDeveloperPersona
                 ? (isRu
                     ? 'Менеджер по партнёрству застройщиков свяжется с вами и предложит следующий шаг: витрина, лиды или медиаплан.'
                     : 'Our developer partnerships lead will reach out with next steps: listing, lead flow, or media plan.')
@@ -466,6 +478,7 @@ export default function PropertyConsultation() {
                       : 'Our manager will contact you shortly to discuss your requirements.')}
             </p>
 
+            {submissionId && <p className="text-sm break-all mb-4">{isRu ? 'Номер заявки' : 'Request reference'}: <span>{submissionId}</span></p>}
             <div className="flex flex-col gap-3 w-full max-w-xs">
               {isDeveloperPersona ? (
                 <>
@@ -1112,6 +1125,7 @@ export default function PropertyConsultation() {
       {/* Step 3: Contact */}
       {step === 'contact' && (
         <div className="space-y-6">
+          {submissionError && <p role="alert" className="text-sm text-destructive">{isRu ? 'Сохранение заявки не подтверждено. Данные остались в форме; проверьте сообщение об ошибке.' : 'Saving the request was not confirmed. Your details remain in the form; check the error message.'}</p>}
           <h2 className="text-lg font-semibold">
             {isRu ? 'Контактные данные' : 'Contact Information'}
           </h2>

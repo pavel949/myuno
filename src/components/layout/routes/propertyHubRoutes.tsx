@@ -40,6 +40,20 @@ export const PropertyRentEntry = () => {
   return hasCriteria ? <PropertySearchRedirect defaults={{ mode: 'rent' }} /> : <LazyPage><Pages.PropertyLanding /></LazyPage>;
 };
 
+// Existing filtered bookmarks retain results; campaign keys preserve discovery.
+const offplanCriteria = ['q', 'district', 'developer', 'developerName', 'budget', 'sort', 'view', 'year', 'own', 'beach', 'rec', 'seg', 'risk', 'mgmt', 'focus'];
+export const PropertyOffplanEntry = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  return offplanCriteria.some(key => params.has(key))
+    ? <Navigate to={`${APP_ROUTES.OFFPLAN_SEARCH}${location.search}${location.hash}`} state={location.state} replace />
+    : <LazyPage><Pages.NewbuildLanding /></LazyPage>;
+};
+const PropertyProjectsRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`${APP_ROUTES.OFFPLAN}${location.search}${location.hash}`} state={location.state} replace />;
+};
+
 export const propertyHubRoutes = (
   <>
     <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
@@ -81,12 +95,13 @@ export const propertyHubRoutes = (
     <Route path="project/:id" element={<PropertyProjectRedirect />} />
 
     {/* Off-Plan & Developers (moved from /offplan, /developers, /complexes) */}
-    <Route path="offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
+    <Route path="offplan" element={<PropertyOffplanEntry />} />
+    <Route path="offplan/search" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
     <Route path="offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
     <Route path="developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
     <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
     {/* Legacy /property/projects → canonical /property/offplan */}
-    <Route path="projects" element={<Navigate to="/property/offplan" replace />} />
+    <Route path="projects" element={<PropertyProjectsRedirect />} />
 
     {/* Resale / Secondary Market */}
     <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
