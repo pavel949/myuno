@@ -9,7 +9,7 @@ import { PageShell } from '@/components/page/PageShell';
 import { Badge } from '@/components/ui/badge';
 import { 
   ClipboardList, ShieldCheck, MessageSquare, Users, 
-  Plus, Building2, Home, Package, FileText, ArrowRight,
+  Plus, Building2, Home, Package, FileText,
   RefreshCw, AlertTriangle, Wallet
 } from 'lucide-react';
 import { OperationsBookingsTab } from '@/components/admin/operations/OperationsBookingsTab';
@@ -166,20 +166,20 @@ export default function AdminOperations() {
       </Card>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next; })} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto h-auto gap-1 bg-muted/50 p-1 justify-start sm:flex-wrap">
+      <Tabs value={activeTab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next; })} className="w-full min-w-0">
+        <TabsList className="grid h-auto w-full grid-cols-2 items-stretch gap-1 bg-muted/50 p-1 sm:grid-cols-3 xl:grid-cols-6">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="gap-1.5 data-[state=active]:bg-background shrink-0 whitespace-nowrap"
+              className="min-h-11 justify-start gap-1.5 overflow-visible whitespace-normal px-2 text-left data-[state=active]:bg-background"
             >
               <tab.icon className="h-4 w-4 shrink-0" />
-              <span>{tab.label}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere]">{tab.label}</span>
               {tab.badge != null && tab.badge > 0 && (
                 <Badge
                   variant="destructive"
-                  className="h-5 min-w-[20px] px-1.5 text-xs font-bold"
+                  className="ml-auto min-w-5 shrink-0 justify-center px-1.5 text-xs font-semibold tabular-nums"
                 >
                   {tab.badge}
                 </Badge>
