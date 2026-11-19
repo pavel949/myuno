@@ -5,6 +5,8 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { SideRail } from '../SideRail';
 
 const media = vi.hoisted(() => ({ mobile: false }));
+const ownerRole = { role: 'owner' as const };
+const adminRole = { role: 'admin' as const };
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => media.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useBusinessRole', () => ({ useBusinessRole: () => ({ role: 'property_manager' }) }));
@@ -20,7 +22,7 @@ it('keeps current destination visible after collapse and opens the new active wo
   render(
     <MemoryRouter initialEntries={['/mc/finance']}>
       <SidebarProvider open>
-        <SideRail role="owner" />
+        <SideRail {...ownerRole} />
         <ExternalNavigation />
       </SidebarProvider>
     </MemoryRouter>,
@@ -46,7 +48,7 @@ it('shows the current mobile quick link without opening the duplicate list', asy
     <MemoryRouter initialEntries={['/mc/finance']}>
       <SidebarProvider>
         <SidebarTrigger />
-        <SideRail role="owner" />
+        <SideRail {...ownerRole} />
       </SidebarProvider>
     </MemoryRouter>,
   );
@@ -63,7 +65,7 @@ it('shows the current mobile quick link without opening the duplicate list', asy
 it('does not attach owner-specific workspace chrome to admin', () => {
   render(
     <MemoryRouter initialEntries={['/admin']}>
-      <SidebarProvider open><SideRail role="admin" /></SidebarProvider>
+      <SidebarProvider open><SideRail {...adminRole} /></SidebarProvider>
     </MemoryRouter>,
   );
   expect(screen.getByText('Navigation')).toBeVisible();
