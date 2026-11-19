@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import coast from '@/assets/hero-phuket-coast-editorial.webp';
-import transfer from '@/assets/solutions/transfer.webp';
+import coast from '../../assets/hero-phuket-coast-editorial.webp';
+import transfer from '../../assets/solutions/transfer.webp';
 
 interface AirportBookingLayoutProps {
   variant: 'transfer' | 'fast-track';
