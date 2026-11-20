@@ -13,7 +13,7 @@ Partial acceptance. This run passed 276 local checks. Authenticated production C
 | Existing managed complex publication | 75/75 | Disposable PostgreSQL 18.7, including candidate SQL, synthetic schema and identities |
 | New developer/project CRUD and relation acceptance | 8/8 | Disposable PostgreSQL 18.7, source DDL/policies, synthetic identities |
 | New test TypeScript | PASS | Focused compilation with NodeNext resolution |
-| Full project TypeScript | PENDING bounded retry | Initial 2 GiB heap exhausted; 8 GiB retry was killed by the environment |
+| Full project TypeScript | PASS | Bounded 3 GiB heap; initial 2 GiB heap exhausted and an 8 GiB retry was killed |
 | ESLint on new test | PASS | No errors or warnings |
 | Published `/admin/projects`, guest | Redirected to `/auth?redirect=%2Fadmin%2Fprojects` | Cloud browser, existing unsigned session |
 | Complex form/review browser fixture | 12/12 | RU/EN/TH at 375, 390, 430, 1280 px; 36 screenshots, synthetic writes only |
@@ -43,7 +43,7 @@ The new suite is diagnostic source-policy coverage. It adds no application featu
 
 1. Run the actual admin routes against a genuinely isolated clone of the deployed schema with test accounts for Admin, Superadmin as actually implemented, developer, ordinary user and guest. Verify full forms, reload/readback, files and parent deletion. The connected Supabase list did not expose this app's Lovable Cloud database or a named staging clone.
 2. Compare the live read-only policy/grant/function manifest with the tested SQL. In particular, preserve legitimate creator/developer permissions and test direct API denials with non-admin tokens. Neither a context switch in an admin session nor a mock rejection establishes server denial.
-3. Confirm the published commit identity and complete desktop/mobile RU/EN/TH editor screenshots and interactions in an authenticated session. The cloud browser reached sign-in, so no authenticated production acceptance was claimed.
+3. Confirm the published commit identity and complete desktop/mobile RU/EN/TH editor screenshots and interactions in an authenticated session. Google sign-in reached the Lovable callback, which returned `Authorization failed / State verification failed / invalid_request`. A fresh myuno.app admin tab still redirected to sign-in, so authenticated production acceptance remains blocked.
 
 ## Evidence in this run
 
@@ -52,3 +52,7 @@ Local execution logs were retained under `/tmp/myuno-admin-tests.log`, `/tmp/myu
 Existing corroborating CI for the earlier release candidate `27d0c9143c1b016e95fbbcc9f75897c1bf6b09b1` is at https://github.com/pavel949/myuno/actions/runs/44552644119. It is evidence for that earlier commit only.
 
 No production records, policies, migrations, grants or deployments were changed by this acceptance run.
+
+## CI follow-up
+
+On test commit `2b658da3a478ee273af41ea37f94d5fbaf1e027b`, Verify passed typecheck, the complete unit/PostgreSQL suite and lint: https://github.com/pavel949/myuno/actions/runs/44661268998. Connected-system verification, focused security, semantic and cleanup checks also passed. The design-system core browser job was still running at this observation; its discovery job had passed: https://github.com/pavel949/myuno/actions/runs/44661269264. The manually dispatched E2E workflow was skipped. This documentation-only follow-up preserves the tested application and test source.
