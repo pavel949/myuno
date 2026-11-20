@@ -1,0 +1,87 @@
+import { build } from 'esbuild';
+import postcss from 'postcss';
+import postcssImport from 'postcss-import';
+import tailwindcss from 'tailwindcss';
+import { createServer } from 'node:http';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { chromium } from '@playwright/test';
+
+const root = process.cwd();
+const out = path.resolve(process.env.MARKETPLACE_ENTRY_QA_OUTPUT ?? '/tmp/myuno-marketplace-entry');
+await mkdir(out, { recursive: true });
+await build({
+  stdin: { resolveDir: root, loader: 'tsx', contents: `
+    import React from 'react'; import {createRoot} from 'react-dom/client';
+    import {BrowserRouter,Route,Routes} from 'react-router-dom';
+    import {HomeHeroChoices} from '@/components/home/HomeHeroChoices';
+    import {MarketplaceEntry} from '@/components/landing/MarketplaceEntry';
+    import '@/styles/homepage-refinement.css';
+    const entries = [
+      ['/property/rent','rent'], ['/discover/buy','buy'],
+      ['/experiences','experiences'], ['/services','services'],
+    ];
+    createRoot(document.getElementById('root')).render(<BrowserRouter><main className="ds-frame ds-frame-catalogue">
+      <Routes><Route path="/" element={<div className="home-refined"><HomeHeroChoices/></div>}/>
+      {entries.map(([url,kind])=><Route key={url} path={url} element={<MarketplaceEntry kind={kind}/>}/>)}</Routes>
+    </main></BrowserRouter>);
+  `},
+  bundle: true, format: 'esm', jsx: 'automatic', outfile: path.join(out, 'fixture.js'),
+  loader: { '.webp': 'file' },
+  plugins: [{ name: 'synthetic-locale', setup(build) {
+    build.onResolve({ filter: /^@\/contexts\/LanguageContext$/ }, args => ({ path: args.path, namespace: 'isolated' }));
+    build.onLoad({ filter: /.*/, namespace: 'isolated' }, () => ({
+      contents: "export const useLanguage=()=>({language:sessionStorage.getItem('fixture-language')||'en'})",
+    }));
+  }}],
+});
+const css = await postcss([postcssImport(), tailwindcss(path.join(root, 'tailwind.config.ts'))])
+  .process(await readFile('src/index.css','utf8'), { from: path.join(root,'src/index.css') });
+await writeFile(path.join(out, 'base.css'), css.css);
+const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/base.css"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>';
+const server = createServer(async (req,res) => {
+  const file = path.basename(new URL(req.url, 'http://localhost').pathname);
+  if (!file.includes('.')) { res.setHeader('content-type','text/html; charset=utf-8'); res.end(html); return; }
+  try {
+    res.setHeader('content-type', file.endsWith('.css') ? 'text/css' : file.endsWith('.js') ? 'application/javascript' : 'image/webp');
+    res.end(await readFile(path.join(out,file)));
+  } catch { res.writeHead(404); res.end(); }
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const origin = `http://127.0.0.1:${server.address().port}`;
+let browser;
+const rows = [];
+try {
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
+  for (const language of ['ru','en','th']) for (const width of [375,390,768,1440]) {
+    const context = await browser.newContext({ viewport: {width,height: 850}, serviceWorkers: 'block' });
+    await context.addInitScript(value => sessionStorage.setItem('fixture-language', value), language);
+    const blocked = [], errors = [];
+    await context.route('**/*', route => route.request().url().startsWith(origin + '/')
+      ? route.continue() : (blocked.push(route.request().url()),route.abort()));
+    const page = await context.newPage();
+    page.on('pageerror', error => errors.push(error.message));
+    for (const [kind, href] of [['rent','/property/rent'],['buy','/discover/buy'],['experiences','/experiences'],['services','/services']]) {
+      await page.goto(origin);
+      const link = page.locator(`.home-hero-choice-grid a[href="${href}"]`);
+      await link.focus();
+      if (!(await link.evaluate(node => node.matches(':focus-visible')))) throw Error('Missing keyboard focus ' + href);
+      await page.keyboard.press('Enter');
+      await page.waitForURL(origin + href);
+      const intro = page.locator(`[data-marketplace-entry="${kind}"]`);
+      await intro.waitFor();
+      if (await page.locator('h1').count() !== 1 || !(await intro.innerText()).includes('myUNO')) throw Error('Missing managed marketplace heading ' + href);
+      if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw Error('Overflow ' + href + ' ' + language + ' ' + width);
+      if (width >= 768) await intro.locator('img').evaluate(async image => { await image.decode(); });
+      await intro.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
+      rows.push({language,width,kind,href,pass:true});
+    }
+    if (blocked.length || errors.length) throw Error(JSON.stringify({blocked,errors}));
+    await context.close();
+  }
+  await writeFile(path.join(out,'results.json'), JSON.stringify(rows,null,2));
+  console.log(`${rows.length} marketplace entry checks passed`);
+} finally {
+  await browser?.close();
+  server.close();
+}

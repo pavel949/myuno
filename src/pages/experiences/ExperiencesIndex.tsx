@@ -1,3 +1,4 @@
+import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
 import { EXPERIENCE_DURATIONS, matchesExperienceFilters, readExperienceFilters } from '@/lib/experiences/discoveryFilters';
 import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue, experienceCategoryLabel, populatedExperienceCategories } from '@/lib/taxonomies/experienceDiscovery';
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
@@ -139,6 +140,7 @@ export default function ExperiencesIndex() {
       : isLoading ? t('Загружаем предложения…', 'Loading offers…', 'กำลังโหลดข้อเสนอ…')
       : invalidFilters ? t('Проверьте выбранные фильтры', 'Check the selected filters', 'ตรวจสอบตัวกรองที่เลือก')
       : t(`Найдено: ${sorted.length}`, `${sorted.length} results`, `${sorted.length} รายการ`)}
+    marketplaceIntro={overview ? <MarketplaceEntry kind="experiences" /> : undefined}
     fallbackPath="/" showHero={false} showFilter compactMapToggle showCategories={false}
     searchValue={query} onSearchChange={value => update('q', value)} searchPlaceholder={t('Найти впечатление…', 'Search experiences…', 'ค้นหาประสบการณ์…')}
     mapMarkers={invalidFilters || error ? [] : vertRowsToMarkers(sorted, { titleFields: ['title_en', 'name_en'], titleRuFields: ['title_ru', 'name_ru'] })}

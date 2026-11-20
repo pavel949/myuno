@@ -150,6 +150,7 @@ jobs:
           npm ci
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
+          npx playwright install chromium
       - name: Yacht and flower native discovery journeys desktop and mobile
         run: node scripts/qa/yachts-flowers-ui.mjs
         env:
@@ -162,6 +163,11 @@ jobs:
         run: node scripts/qa/rental-landing-ui.mjs
         env:
           RENTAL_QA_OUTPUT: artifacts/design-system/rental-landing
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Four myUNO marketplace entry links and responsive mastheads
+        run: node scripts/qa/marketplace-entry-ui.mjs
+        env:
+          MARKETPLACE_ENTRY_QA_OUTPUT: artifacts/design-system/marketplace-entry
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Newbuild discovery evidence areas developers and project selection
         run: node scripts/qa/newbuild-landing-ui.mjs

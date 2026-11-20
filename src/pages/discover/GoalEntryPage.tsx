@@ -17,6 +17,8 @@ import '@/styles/cinematic-home.css';
 import { clearPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { cn } from '@/lib/utils';
 import ServicesIndex from '@/pages/services/ServicesIndex';
+import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 
 export default function GoalEntryPage({ goal }: { goal: string }) {
   const { language } = useLanguage();
@@ -65,36 +67,15 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   return (
     <AppLayout title={title} usePageContainer={false}>
       <SEOHead title={seoTitle} description={t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })} />
-      <div className="mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12">
-        {goal === 'buy' && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
-          {(['stay', 'buy'] as const).map((id) => {
-            const g = GOAL_ENTRIES[id];
-            const active = id === goal;
-            return (
-              <Link
-                key={id}
-                to={g.path}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  '-mb-px shrink-0 min-h-11 whitespace-nowrap border-b-2 px-3 py-2 text-sm',
-                  active ? 'border-accent font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
-                )}
-              >
-                {t({ en: g.en, ru: g.ru, th: g.th })}
-              </Link>
-            );
-          })}
-        </nav>}
-
-        <header className="mb-8">
+      <div className={goal === 'buy' ? `${PUBLIC_CONTENT_LAYOUT.catalogue} pb-8` : 'mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12'}>
+        {goal === 'buy' ? <MarketplaceEntry kind="buy" /> : <header className="mb-8">
           <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">myUNO · Phuket</p>
           <h1 className="font-serif text-4xl font-normal tracking-tight text-foreground sm:text-6xl">{title}</h1>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             {t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })}
           </p>
-        </header>
-
-        <section className={cn('grid gap-3', goal === 'buy' ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>
+        </header>}
+        <section className={cn('grid gap-3', goal === 'buy' ? 'mt-4 sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3')}>
           {entry.primary.map((l) => <Tile key={l.path} link={l} large />)}
         </section>
 
