@@ -23,3 +23,9 @@ Notification dispatch also needs a single verified event per persisted intake ID
 - Rollback/security: additive schema and explicit allowlist preserve legacy request rows and private-read boundaries.
 
 These SQL integration/negative actor tests and a migration implementation are not complete. No production migration or actual request test is authorized by this document. The current UI receipt behavior is narrower than full intake correctness; launch remains blocked on the repaired, isolated-tested contract and separate activation review.
+
+## Resale viewing admission
+
+The public resale card submits the existing `property_tour` request type through the shared consultation RPC. It identifies a resale listing using `vertical_metadata.resale_listing_id` and a canonical `entry_point`; it never treats a resale row ID as a physical property ID. The existing Consultation Inbox reads the resulting record, and the tracked listing path is included in the operator's notes. The guest sees a request reference only after an acknowledged receipt. This is a viewing enquiry, with no payment, reservation, or delivery promise.
+
+Read-only production inspection on 20 November 2026 confirmed that the guest writer accepts calls but does not read the retry key, and the private notification outbox is absent. Resale therefore blocks replay of an unconfirmed result in the same browser session, including after reopening the page. Definite validation rejections permit correction. No browser notification is sent. Server-side idempotency, outbound delivery and authenticated operational verification remain separate release gates.

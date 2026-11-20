@@ -18,7 +18,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 import { useResaleProperty } from '@/hooks/useResaleProperties';
-import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
+import { ResaleViewingForm } from '@/components/property/ResaleViewingForm';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { cn } from '@/lib/utils';
 import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 import { formatRecordedPrice } from '@/lib/format/price';
@@ -69,6 +70,7 @@ export default function ResaleDetail() {
     );
   }
 
+  const requestViewing = pickLang(language, { ru: 'Запросить показ', en: 'Request Viewing', th: 'ขอนัดชมอสังหาริมทรัพย์' });
   const title = (isRu && property.title_ru) ? property.title_ru : property.title;
   const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
   const recordedPrice = (amount: number | null | undefined) => formatRecordedPrice(amount, property.currency, { unknownLabel: priceOnRequest, formatTHB: formatPrice });
@@ -255,9 +257,9 @@ export default function ResaleDetail() {
           <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
           <p className="text-lg font-bold text-foreground">{askingPriceLabel}</p>
         </div>
-        <Button onClick={() => setShowLeadForm(true)} className="px-6">
+        <Button type="button" onClick={() => setShowLeadForm(true)} className="h-auto min-h-11 whitespace-normal px-4 text-center sm:px-6">
           <Phone className="w-4 h-4 mr-1" />
-          {isRu ? 'Запросить показ' : 'Request Viewing'}
+          {requestViewing}
         </Button>
       </div>
 
@@ -265,16 +267,14 @@ export default function ResaleDetail() {
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={isRu ? 'Запросить показ' : 'Request Viewing'}
+        title={requestViewing}
+        description={title}
         size="md"
       >
-        <UniversalLeadForm
-          verticalId="property"
-          leadSource="cta"
-          entryPoint={`resale_${property.id}`}
-          preselectedRequestType="property_viewing"
-          onSuccess={() => setShowLeadForm(false)}
-          onCancel={() => setShowLeadForm(false)}
+        <ResaleViewingForm
+          key={property.id}
+          listingId={property.id}
+          onClose={() => setShowLeadForm(false)}
         />
       </ResponsiveModal>
     </div>
