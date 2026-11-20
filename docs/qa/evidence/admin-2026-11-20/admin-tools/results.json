@@ -1,0 +1,58 @@
+[
+  {
+    "scenario": "settings en 390: labels, keyboard tabs, Maps targets, links, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "settings ru 390: labels, keyboard tabs, Maps targets, links, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "logs 390: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "audit 390: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "roles 390: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "audit 390: All filter opens, keyboard detail, Escape closes",
+    "result": "PASS"
+  },
+  {
+    "scenario": "control 390: compatible canonical links, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "settings en 1440: labels, keyboard tabs, Maps targets, links, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "settings ru 1440: labels, keyboard tabs, Maps targets, links, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "logs 1440: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "audit 1440: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "roles 1440: error distinct from empty/count, real query retry, no overflow",
+    "result": "PASS"
+  },
+  {
+    "scenario": "audit 1440: All filter opens, keyboard detail, Escape closes",
+    "result": "PASS"
+  },
+  {
+    "scenario": "control 1440: compatible canonical links, no overflow",
+    "result": "PASS"
+  }
+]
