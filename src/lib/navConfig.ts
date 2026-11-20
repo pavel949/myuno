@@ -89,7 +89,7 @@ export const GUEST_NAV_PRO_SHELL: NavItem[] = [
 ];
 
 export const OWNER_NAV: NavItem[] = [
-  { path: APP_ROUTES.MC_TODAY,      icon: Sun, labelEn: 'Today', labelRu: 'Сегодня', labelTh: 'วันนี้', exact: true },
+  { path: APP_ROUTES.MC_TODAY,      icon: Sun, labelEn: 'Today', labelRu: 'Сегодня', labelTh: 'วันนี้' },
   { path: APP_ROUTES.MC_CALENDAR,   icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь', labelTh: 'ปฏิทิน' },
   { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', labelTh: 'ทรัพย์สิน' },
   { path: APP_ROUTES.MC_MESSAGES,   icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения', labelTh: 'ข้อความ', mobileLabelRu: 'Чаты' },
