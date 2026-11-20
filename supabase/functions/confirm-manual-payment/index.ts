@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     const { data: mpr, error: mprErr } = await sb
       .from('manual_payment_requests')
       .select(`
-        id, order_id, user_id, status, amount_listing, currency_listing,
+        id, order_id, user_id, status, amount_listing, currency_listing, amount_rub_estimate,
         guest_name, guest_email,
         orders ( id, order_number, metadata, total_amount, currency )
       `)
@@ -93,6 +93,27 @@ Deno.serve(async (req) => {
 
     const orderId = (mpr as any).order_id as string;
     const orderNumber = (mpr as any).orders?.order_number as string;
+    const listingAmount = Number((mpr as any).amount_listing);
+    const listingCurrency = String((mpr as any).currency_listing || '').toUpperCase();
+    const rubEstimate = Number((mpr as any).amount_rub_estimate);
+    if (!Number.isFinite(listingAmount) || listingAmount <= 0 || !listingCurrency) {
+      return new Response(JSON.stringify({ error: 'Manual payment request has no trusted listing amount' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // The browser RUB estimate is informational only. Until an approved FX
+    // settlement contract exists, RUB confirmation cannot be converted into a
+    // THB ledger amount without inventing financial truth.
+    if (listingCurrency !== 'RUB') {
+      return new Response(JSON.stringify({ error: 'Manual settlement currency contract not approved' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (Math.abs(amount_rub_actual - listingAmount) > 0.01) {
+      return new Response(JSON.stringify({ error: 'Received amount does not match approved manual-payment amount' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // 1. Update the manual_payment_requests row
     const { error: updErr } = await sb
@@ -108,43 +129,53 @@ Deno.serve(async (req) => {
       .eq('id', request_id);
     if (updErr) throw updErr;
 
-    // 2. Flip the order to confirmed
+    // 2. Persist verified receipt evidence only. Do not mark the full order paid
+    // and do not call record_ledger_entries(order_id): that legacy RPC posts the
+    // full order total and would overstate a deposit/partial receipt.
+    const { error: intentErr } = await sb.from('payment_intents').insert({
+      order_id: orderId,
+      amount: amount_rub_actual,
+      currency: 'RUB',
+      method: payment_method,
+      status: 'succeeded',
+      provider_ref: `manual:${request_id}`,
+      metadata: {
+        manual_payment_request_id: request_id,
+        confirmed_by: callerId,
+        proof_file_path: proof_file_path ?? null,
+        amount_received: amount_rub_actual,
+        currency_received: 'RUB',
+      },
+    });
+    if (intentErr) throw intentErr;
+
+    // Order-level paid/confirmed state is deliberately not inferred from a
+    // receipt unless the verified received amount covers the order in the same
+    // accounting currency. RUB→THB conversion is blocked until approved FX
+    // snapshot/rounding rules exist.
     const orderMetaUpd = {
       ...((mpr as any).orders?.metadata || {}),
       payment_channel: 'rub_manual',
       manual_payment: {
         confirmed_at: new Date().toISOString(),
         confirmed_by: callerId,
-        amount_rub_actual,
+        amount_received: amount_rub_actual,
+        currency_received: 'RUB',
         payment_method,
         proof_file_path: proof_file_path ?? null,
+        settlement_state: 'receipt_verified_fx_pending',
       },
     };
-    await sb
-      .from('orders')
-      .update({
-        status: 'confirmed',
-        paid_at: new Date().toISOString(),
-        metadata: orderMetaUpd,
-      })
+    const { error: orderMetaErr } = await sb.from('orders')
+      .update({ metadata: orderMetaUpd })
       .eq('id', orderId);
-
-    // 2b. Record double-entry ledger so this manual (RUB) payment produces the
-    // same audit trail / platform-fee + vendor-payout entries as Stripe orders.
-    // Without this the order shows up as a discrepancy in reconciliation_alerts
-    // and no vendor payout is ever owed. RPC is idempotent (skips if exists).
-    try {
-      const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
-      if (ledgerErr) console.error('[confirm-manual-payment] record_ledger_entries failed (non-fatal):', ledgerErr);
-    } catch (e) {
-      console.error('[confirm-manual-payment] record_ledger_entries threw (non-fatal):', e);
-    }
+    if (orderMetaErr) throw orderMetaErr;
 
     // 3. Notify guest in-app
     await sb.from('notifications').insert({
       user_id: (mpr as any).user_id,
       title: 'Оплата подтверждена',
-      body: `Бронирование #${orderNumber} подтверждено.`,
+      body: `Оплата по заявке #${orderNumber} получена и ожидает финансовой сверки.`,
       type: 'booking',
       is_read: false,
       data: { order_id: orderId, order_number: orderNumber, channel: 'rub_manual' },
@@ -161,12 +192,12 @@ Deno.serve(async (req) => {
 <html><body style="font-family:Arial,sans-serif;line-height:1.5;color:#222;background:#fafafa;padding:24px">
   <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb">
     <div style="background:#10b981;padding:24px;color:#fff">
-      <h1 style="margin:0;font-size:20px">✓ Оплата подтверждена</h1>
+      <h1 style="margin:0;font-size:20px">✓ Оплата получена</h1>
       <p style="margin:6px 0 0;opacity:.9;font-size:14px">Booking #${orderNumber}</p>
     </div>
     <div style="padding:24px;font-size:14px">
       <p>Здравствуйте, ${guestName}!</p>
-      <p>Мы получили вашу оплату <strong>${amount_rub_actual.toLocaleString('ru-RU')} ₽</strong> и подтвердили бронирование.</p>
+      <p>Мы получили вашу оплату <strong>${amount_rub_actual.toLocaleString('ru-RU')} ₽</strong> и передали платёж на финансовую сверку. Подтверждение бронирования будет отдельным сообщением.</p>
       <p>Ваучер и детали будут направлены отдельным письмом / в личном кабинете.</p>
       <p style="margin-top:24px"><a href="https://myuno.app/bookings/${orderId}" style="display:inline-block;padding:10px 18px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">Открыть бронирование</a></p>
     </div>
@@ -175,7 +206,7 @@ Deno.serve(async (req) => {
         await resend.emails.send({
           from: 'myUNO <noreply@notify.myuno.app>',
           to: [guestEmail],
-          subject: `✓ Оплата подтверждена · Booking #${orderNumber}`,
+          subject: `✓ Оплата получена · Booking #${orderNumber}`,
           html,
         });
       } catch (e) {
