@@ -364,8 +364,8 @@ function MiniappMode({
         />
       )}
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
+      {marketplaceIntro && <div className={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER}>{marketplaceIntro}</div>}
       <div className="relative">
-        {marketplaceIntro && <div className={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER}>{marketplaceIntro}</div>}
         <UnifiedHeader
           hideHeading={Boolean(marketplaceIntro)}
           containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}

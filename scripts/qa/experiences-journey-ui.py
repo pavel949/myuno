@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import shutil
 import sys
-from urllib.parse import urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from playwright.async_api import async_playwright, expect
 
@@ -13,9 +13,9 @@ OUT = Path(sys.argv[1]).resolve()
 ROOT = Path.cwd()
 ORIGIN = 'http://127.0.0.1:8936'
 COPY = {
-    'en': {'title': 'Experiences', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_menu': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
-    'ru': {'title': 'Впечатления', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_menu': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все категории', 'menu': 'Открыть меню', 'services': 'Услуги'},
-    'th': {'title': 'ประสบการณ์', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_menu': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'ทุกหมวดหมู่', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
+    'en': {'title': 'Experiences', 'overview_title': 'Experiences in Phuket', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_menu': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
+    'ru': {'title': 'Впечатления', 'overview_title': 'Впечатления на Пхукете', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_menu': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все категории', 'menu': 'Открыть меню', 'services': 'Услуги'},
+    'th': {'title': 'ประสบการณ์', 'overview_title': 'ประสบการณ์ในภูเก็ต', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_menu': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'ทุกหมวดหมู่', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
 }
 
 
@@ -61,7 +61,13 @@ async def main():
                     if mode:
                         query['mode'] = mode
                     await page.goto(ORIGIN + '/fixture.html?' + urlencode(query), wait_until='networkidle')
-                    expected_title = ('Категории активностей' if lang == 'ru' else 'Experience Categories') if entry.startswith('/admin/') else c['title']
+                    if entry.startswith('/admin/'):
+                        expected_title = 'Категории активностей' if lang == 'ru' else 'Experience Categories'
+                    else:
+                        overview = not (set(parse_qs(urlparse(entry).query)) - {'ref'})
+                        expected_title = c['overview_title'] if overview else c['title']
+                        await expect(page.locator('[data-marketplace-entry="experiences"]')).to_have_count(1 if overview else 0)
+                        await expect(page.get_by_role('heading', level=1)).to_have_count(1)
                     await expect(page.get_by_role('heading', name=expected_title, exact=True, level=1)).to_be_visible()
                     await page.evaluate('document.fonts.ready')
 
