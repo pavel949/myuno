@@ -3,6 +3,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
+import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -119,7 +120,7 @@ export default function FlowersOrder() {
   const quote = order?.confirmed_quote ?? order?.estimate;
 
   return <AppLayout>
-    <main className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:px-6">
+    <PageContainer className="space-y-6">
       <BackButton fallbackPath="/flowers" />
       <h1 className="font-display text-2xl font-bold">{t('Доставка цветов', 'Flower delivery', 'บริการส่งดอกไม้')}</h1>
       {receipt ? <section className="space-y-3 border border-border p-4 sm:p-6">
@@ -169,6 +170,6 @@ export default function FlowersOrder() {
             : t('Войти и продолжить', 'Sign in to continue', 'เข้าสู่ระบบเพื่อดำเนินการต่อ')}</Button>
       </form>}
       <LoginRequiredModal open={showLoginModal} onOpenChange={setShowLoginModal} returnPath="/flowers/order" context="order" />
-    </main>
+    </PageContainer>
   </AppLayout>;
 }
