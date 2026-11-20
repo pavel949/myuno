@@ -302,7 +302,7 @@ export default function PropertyLanding() {
         })}
       >
         {rentalDurations.map((item) => (
-          <Link key={item.tenancy} to={`${rentSearch}&tenancy=${item.tenancy}`} state={item.tenancy === "short" ? { openRentalSearch: true } : undefined}>
+          <Link key={item.tenancy} to={`${rentSearch}&tenancy=${item.tenancy}`}>
             <h2>{t(item.title)}</h2>
             <p>{t(item.copy)}</p>
             <ArrowUpRight size={20} aria-hidden="true" />

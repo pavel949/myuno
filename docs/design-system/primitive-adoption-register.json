@@ -39982,7 +39982,7 @@
     },
     {
       "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "18ba104b3f459fea9f2da834b7f388ffd04e576902da4f14f929d0b06576ff47",
+      "sha256": "98ccb1324d8c65ecf8381fb75e4e90aa4d575427600dcfdaa1899c4ed0620325",
       "directRouteDeclarations": [
         {
           "id": "2492a5f81192388c",
@@ -40067,7 +40067,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "4b8315e20d8d4558a2d5634b66e8897caf12cc51f261000733b810bf531336d7",
+      "sha256": "a6838aba3e91bb1eaa0d47ddeac4b430acb4d9746e0df367fac2032c557f4ca7",
       "directRouteDeclarations": [
         {
           "id": "2394e6ffdd06a39f",
