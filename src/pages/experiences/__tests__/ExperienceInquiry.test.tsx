@@ -63,7 +63,7 @@ it('preserves the listing, preferred day and group size across sign-in without a
   expect(state.rpc).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Send request' }));
   expect(await screen.findByText('Request ID experience-test-receipt')).toBeVisible();
-  expect(state.rpc).toHaveBeenCalledExactlyOnceWith('submit_consultation_request', {
+  expect(state.rpc).toHaveBeenCalledExactlyOnceWith('submit_experience_inquiry', {
     payload: expect.objectContaining({
       request_type: 'tour_booking',
       vertical_id: 'tours',
@@ -82,7 +82,8 @@ it('keeps an independent selection for a different listing and uses Thai for the
   state.user = actor;
   state.language = 'th';
   sessionStorage.setItem('myuno:experience-inquiry:v1:island-a', JSON.stringify({ date: '2099-11-23', guests: 4 }));
-  state.rpc.mockResolvedValue({ data: null, error: new Error('Uncertain transport failure') });
+  state.rpc.mockResolvedValueOnce({ data: null, error: new Error('Uncertain transport failure') });
+  state.rpc.mockResolvedValueOnce({ data: 'recovered-receipt', error: null });
   screenFor('/experiences/island-b');
   expect(screen.getByLabelText('วันที่ต้องการ')).toHaveValue('');
   expect(screen.getByLabelText('จำนวนผู้เข้าร่วม')).toHaveValue(1);
@@ -91,7 +92,9 @@ it('keeps an independent selection for a different listing and uses Thai for the
   await screen.findByRole('alert');
   await waitFor(() => expect(screen.getByRole('button', { name: 'ส่งคำขอ' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'ส่งคำขอ' }));
-  await waitFor(() => expect(screen.getByRole('alert')).toBeVisible());
-  expect(state.rpc).toHaveBeenCalledExactlyOnceWith('submit_consultation_request', { payload: expect.objectContaining({ preferred_language: 'th', entry_point: '/experiences/island-b' }) });
-  expect(screen.queryByRole('status')).toBeNull();
+  expect(await screen.findByText(/recovered-receipt/)).toBeVisible();
+  expect(state.rpc).toHaveBeenCalledTimes(2);
+  const [first, second] = state.rpc.mock.calls;
+  expect(first).toEqual(second);
+  expect(first).toEqual(['submit_experience_inquiry', { payload: expect.objectContaining({ preferred_language: 'th', entry_point: '/experiences/island-b', intake_request_key: expect.any(String) }) }]);
 });

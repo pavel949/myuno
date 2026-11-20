@@ -19,6 +19,12 @@ const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const isPreferredDate = (date: string) => datePattern.test(date) && toBangkokDateKey(date) === date && date >= bangkokTodayISO();
 const isPartySize = (value: number) => Number.isInteger(value) && value >= 1 && value <= 50;
 
+type ExperienceRpc = (name: 'submit_experience_inquiry', args: { payload: never }) => PromiseLike<{ data: unknown; error: unknown }>;
+const experienceIntake = {
+  rpc: (_name: 'submit_consultation_request', args: { payload: never }) =>
+    (supabase.rpc as unknown as ExperienceRpc).call(supabase, 'submit_experience_inquiry', args),
+};
+
 function readSelection(key: string) {
   try {
     const value = JSON.parse(sessionStorage.getItem(key) ?? '{}');
@@ -57,7 +63,7 @@ function ExperienceInquiryDialog({ open, onOpenChange, listingId, listingTitle, 
   const [receipt, setReceipt] = useState<{ actor: string; id: string }>();
   const [submitting, setSubmitting] = useState(false);
   const sending = useRef(false);
-  const [intake] = useState(() => createConsultationIntakeAttempt({ allowUncertainRetry: false }));
+  const [intake] = useState(() => createConsultationIntakeAttempt());
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const currentReceipt = receipt?.actor === user?.id ? receipt : undefined;
   const userContact = contact?.actor === user?.id ? contact : undefined;
@@ -98,7 +104,7 @@ function ExperienceInquiryDialog({ open, onOpenChange, listingId, listingTitle, 
     sending.current = true;
     setSubmitting(true);
     try {
-      const result = await intake.submit(supabase, {
+      const result = await intake.submit(experienceIntake, {
         ...validated.data,
         request_type: 'tour_booking',
         vertical_id: 'tours',
@@ -114,7 +120,14 @@ function ExperienceInquiryDialog({ open, onOpenChange, listingId, listingTitle, 
       try { sessionStorage.removeItem(draftKey); } catch { /* The server receipt is already confirmed. */ }
       void queryClient.invalidateQueries({ queryKey: ['me-requests', user.id] });
     } catch (cause) {
-      setError(pickLang(language, consultationIntakeErrorCopy(cause)));
+      const code = typeof cause === 'object' && cause !== null && 'code' in cause ? cause.code : undefined;
+      setError(code === '42501' || code === 'PGRST202'
+        ? t('Сохранение этой заявки пока недоступно.', 'Saving this request is currently unavailable.', 'ยังไม่สามารถบันทึกคำขอนี้ได้')
+        : code === '22023' || code === '22P02' || code === '22008'
+          ? t('Проверьте дату и сведения. Возможно, предложение уже закрыто.', 'Check the date and details. The offer may no longer be open.', 'ตรวจสอบวันที่และรายละเอียด ข้อเสนอนี้อาจปิดแล้ว')
+          : code === '23505'
+            ? consultationIntakeErrorCopy(cause)[language]
+            : t('Ответ не получен. Повторите отправку с теми же данными, чтобы восстановить номер заявки.', 'No response received. Send the same details again to recover your request ID.', 'ยังไม่ได้รับการตอบกลับ ส่งรายละเอียดเดิมอีกครั้งเพื่อกู้คืนหมายเลขคำขอ'));
     } finally {
       sending.current = false;
       setSubmitting(false);

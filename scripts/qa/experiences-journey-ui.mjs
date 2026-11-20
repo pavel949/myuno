@@ -51,7 +51,7 @@ const virtual = {
   '@/hooks/useSoundEffects': `export const playSound=()=>{};export const isTypingKey=()=>false;`,
   '@/hooks/useFeedbackSettings': `export const getFeedbackSettings=()=>({});`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({
-    async rpc(name,args){if(name!=='submit_consultation_request')throw Error('Unexpected fixture RPC');window.fixtureInquiries.push(args.payload);return {data:'synthetic-experience-receipt',error:null};}
+    async rpc(name,args){if(name!=='submit_experience_inquiry')throw Error('Unexpected fixture RPC');window.fixtureInquiries.push(args.payload);return {data:'synthetic-experience-receipt',error:null};}
   },{get(target,key){if(key==='rpc')return target.rpc;throw Error('Hosted backend forbidden in experiences journey fixture')}});`,
 };
 const result = await build({
