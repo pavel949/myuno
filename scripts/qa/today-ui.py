@@ -127,6 +127,12 @@ async def main():
                     await region.screenshot(path=str(OUTPUT / f'{lang}-{width}-{name}.png'))
 
                 # Same synthetic ID in both canonical sources must stay unambiguous.
+                jump = page.locator('a[href$="#today-arrivals"]')
+                await jump.focus()
+                await jump.press('Enter')
+                await expect(page.locator('#today-arrivals')).to_be_focused()
+                await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/today?space=synthetic-space#today-arrivals')
+                await visit()
                 for index, source in enumerate(['ops', 'crm']):
                     if index:
                         await visit()

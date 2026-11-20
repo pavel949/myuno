@@ -11,7 +11,7 @@ import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
-  Briefcase, BedDouble, Wrench, Sun, Ellipsis,
+  Briefcase, BedDouble, Wrench, Sun, Menu,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -93,7 +93,7 @@ export const OWNER_NAV: NavItem[] = [
   { path: APP_ROUTES.MC_CALENDAR,   icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь', labelTh: 'ปฏิทิน' },
   { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', labelTh: 'ทรัพย์สิน' },
   { path: APP_ROUTES.MC_MESSAGES,   icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения', labelTh: 'ข้อความ', mobileLabelRu: 'Чаты' },
-  { path: '/mc/modules', icon: Ellipsis, labelEn: 'More', labelRu: 'Ещё', labelTh: 'เพิ่มเติม' },
+  { path: APP_ROUTES.MC_MODULES, icon: Menu, labelEn: 'Menu', labelRu: 'Меню', labelTh: 'เมนู' },
 ];
 
 export const VENDOR_NAV: NavItem[] = [

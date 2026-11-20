@@ -13,8 +13,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { AvailabilityStatus } from './AvailabilityStatus';
 import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
-import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
-import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
+import { usePropertyStayPreview } from '@/hooks/usePropertyStayPreview';
 import { GuestPriceProposal } from './GuestPriceProposal';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns';
@@ -89,7 +88,6 @@ export function PropertyBookingCard({
   const { isDesktop } = useBreakpoint();
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   
-  const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
   const availabilityQuery = usePropertyUnavailableDates(propertyId);
   const { data: unavailableDates } = availabilityQuery;
   const availabilityReady = availabilityQuery.isSuccess && !availabilityQuery.isError;
@@ -118,64 +116,16 @@ export function PropertyBookingCard({
     return differenceInDays(dateRange.to, dateRange.from);
   }, [dateRange]);
   
-  // Build pricing rules
-  const pricing = useMemo(() => {
-    let rules: PricingRules;
+  const { pricing, loading: quoteLoading, failed: quoteFailed, ready: quoteReady, retry: retryQuote } =
+    usePropertyStayPreview(propertyId, dateRange?.from, dateRange?.to, {
+      pricePerNight,
+      weeklyDiscount: rentalTerms?.weekly_discount,
+      monthlyDiscount: rentalTerms?.monthly_discount,
+      customLengthDiscounts,
+      earlyBookingDiscount, earlyBookingDays, lastMinuteDiscount, lastMinuteDays,
+      seasonalPricing, depositAmount, depositCurrency, paymentPolicy, prepayPercent,
+    });
 
-    if (rateSeasons && rateSeasons.length > 0) {
-      rules = buildPricingRulesFromSeasons(
-        {
-          price_per_night: pricePerNight,
-          weekly_discount: rentalTerms?.weekly_discount,
-          monthly_discount: rentalTerms?.monthly_discount,
-          early_booking_discount: earlyBookingDiscount,
-          early_booking_days: earlyBookingDays,
-          last_minute_discount: lastMinuteDiscount,
-          last_minute_days: lastMinuteDays,
-          custom_length_discounts: customLengthDiscounts,
-          deposit_amount: depositAmount,
-          deposit_currency: depositCurrency || 'USD',
-          payment_policy: paymentPolicy || 'prepay_10',
-          prepay_percent: prepayPercent,
-        },
-        rateSeasons
-      );
-    } else {
-      rules = {
-        pricePerNight,
-        weeklyDiscount: rentalTerms?.weekly_discount,
-        monthlyDiscount: rentalTerms?.monthly_discount,
-        customLengthDiscounts,
-        earlyBookingDiscount,
-        earlyBookingDays,
-        lastMinuteDiscount,
-        lastMinuteDays,
-        seasonalPricing,
-        depositAmount,
-        depositCurrency: depositCurrency || 'USD',
-        paymentPolicy: paymentPolicy || 'prepay_10',
-        prepayPercent,
-      };
-    }
-
-    if (!dateRange?.from || !dateRange?.to || nights <= 0) {
-      return {
-        ...rules,
-        subtotal: 0, total: 0, totalDiscount: 0, prepayAmount: 0, balanceAmount: 0,
-        lengthDiscountPercent: 0, lengthDiscount: 0,
-        earlyBirdPercent: 0, earlyBirdDiscount: 0,
-        lastMinutePercent: 0, lastMinuteDiscount: 0,
-        prepayPercent: prepayPercent ?? 10,
-        depositAmount: depositAmount || 0,
-        depositCurrency: depositCurrency || 'USD',
-        nights: 0, nightlyRate: pricePerNight, basePrice: pricePerNight,
-        seasonalAdjustment: 0,
-      };
-    }
-
-    return calculatePricing(rules, dateRange.from, dateRange.to);
-  }, [pricePerNight, nights, dateRange, rentalTerms, earlyBookingDiscount, earlyBookingDays, lastMinuteDiscount, lastMinuteDays, customLengthDiscounts, paymentPolicy, prepayPercent, depositAmount, depositCurrency, seasonalPricing, rateSeasons]);
-  
   // Validation
   const validationErrors = useMemo(() => {
     const errors: string[] = getStayRuleErrors(
@@ -197,7 +147,7 @@ export function PropertyBookingCard({
 
   
   const handleReserve = () => {
-    if (!availabilityReady) return;
+    if (!availabilityReady || !quoteReady) return;
     const params = new URLSearchParams(guestSearch);
     if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
@@ -224,7 +174,7 @@ export function PropertyBookingCard({
             <>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
-                  {formatPrice(pricing.total)}
+                  {quoteReady ? formatPrice(pricing.total) : "—"}
                 </span>
                 <span className="text-sm text-muted-foreground font-medium">
                   {isRu
@@ -232,9 +182,9 @@ export function PropertyBookingCard({
                     : `for ${nights} ${nights === 1 ? 'night' : 'nights'}`}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {quoteReady && <p className="text-xs text-muted-foreground mt-1">
                 {isRu ? 'Предварительный расчёт по тарифам объекта' : 'Estimate based on this home’s rates'}
-              </p>
+              </p>}
             </>
           ) : (
             <>
@@ -248,6 +198,14 @@ export function PropertyBookingCard({
           )}
         </div>
         
+        {quoteLoading && <p role="status" className="text-sm text-muted-foreground">
+          {pickLang(language, { ru: 'Проверяем цену для выбранных дат…', en: 'Checking the price for your selected dates…', th: 'กำลังตรวจสอบราคาสำหรับวันที่เลือก…' })}
+        </p>}
+        {quoteFailed && <div role="alert" className="space-y-2 text-sm">
+          <p>{pickLang(language, { ru: 'Не удалось загрузить цены для выбранных дат.', en: 'We could not load pricing for these dates.', th: 'ไม่สามารถโหลดราคาสำหรับวันที่เลือกได้' })}</p>
+          <Button type="button" variant="outline" size="sm" onClick={retryQuote}>{pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}</Button>
+        </div>}
+
         {/* Date Selection — Airbnb-style split input */}
         <AvailabilityStatus loading={!availabilityReady && !availabilityQuery.isError} error={availabilityQuery.isError} onRetry={() => { void availabilityQuery.refetch(); }} />
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -411,7 +369,7 @@ export function PropertyBookingCard({
           size="lg" 
           className="w-full min-h-12 h-auto py-3 whitespace-normal text-sm font-semibold"
           onClick={() => { if (!dateRange?.from || !dateRange?.to) setCalendarOpen(true); else handleReserve(); }}
-          disabled={!availabilityReady || validationErrors.length > 0}
+          disabled={!availabilityReady || validationErrors.length > 0 || (!!dateRange?.from && !!dateRange?.to && !quoteReady)}
         >
           {!dateRange?.from || !dateRange?.to ? (
             <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
@@ -428,7 +386,7 @@ export function PropertyBookingCard({
             : pickLang(language, { ru: 'myUNO проверит заявку. Сейчас оплаты нет.', en: 'myUNO will review your request. No payment is due now.', th: 'myUNO จะตรวจสอบคำขอ ยังไม่ต้องชำระเงินตอนนี้' })}
         </p>
 
-        {!nights ? null : (
+        {!quoteReady ? null : (
           <>
             <Separator />
             {/* Compact, Airbnb-style summary — no operational pricing details */}
@@ -516,7 +474,7 @@ export function PropertyBookingCard({
         )}
         
         {/* Negotiation button */}
-        {negotiationEnabled && nights > 0 && (
+        {negotiationEnabled && quoteReady && (
           <GuestPriceProposal
             propertyId={propertyId}
             pricePerNight={pricePerNight}

@@ -8,7 +8,7 @@ async def main():
     results=[]
     async with async_playwright() as p:
         browser=await p.chromium.launch(headless=True)
-        for lang,title,search,rates in [('en','All tools','Find a tool','Rates'),('ru','Все инструменты','Найти инструмент','Тарифы'),('th','เครื่องมือทั้งหมด','ค้นหาเครื่องมือ','ราคา')]:
+        for lang,title,search,rates,bookings in [('en','Menu','Find a tool','Rates','Bookings'),('ru','Меню','Найти инструмент','Тарифы','Бронирования'),('th','เมนู','ค้นหาเครื่องมือ','ราคา','การจอง')]:
             for width in [375,390,430,1280]:
                 context=await browser.new_context(viewport={'width':width,'height':1000},service_workers='block')
                 blocked=[];errors=[]
@@ -22,17 +22,20 @@ async def main():
                 await context.route('**/*',route)
                 page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
                 await page.goto(f'http://localhost:8080/fixture?lang={lang}',wait_until='networkidle')
-                await expect(page.get_by_role('heading',name=title,exact=True)).to_be_visible()
+                menu=page.get_by_role('main')
+                await expect(menu.get_by_role('heading',name=title,exact=True)).to_be_visible()
                 await page.screenshot(path=str(OUT/f'{lang}-{width}-tools.png'),full_page=True)
-                await page.get_by_role('textbox',name=search,exact=True).fill(rates)
-                await expect(page.get_by_role('button',name=rates,exact=True).last).to_be_visible()
-                await page.get_by_role('button',name=rates,exact=True).last.click()
+                await menu.get_by_role('button',name=bookings,exact=True).click()
+                await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/bookings-list')
+                await menu.get_by_role('textbox',name=search,exact=True).fill(rates)
+                await expect(menu.get_by_role('button',name=rates,exact=True).last).to_be_visible()
+                await menu.get_by_role('button',name=rates,exact=True).last.click()
                 await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/rates')
-                await page.get_by_role('textbox',name=search,exact=True).fill('')
+                await menu.get_by_role('textbox',name=search,exact=True).fill('')
                 # All tools remain present even when sections are collapsed.
-                assert await page.locator('details button').count()==29
+                assert await menu.locator('details button').count()==32
                 # Every native section control opens; keyboard selection is checked directly.
-                summaries=page.locator('summary')
+                summaries=menu.locator('summary')
                 assert await summaries.count()==4
                 for i in range(4):
                     summary=summaries.nth(i)
@@ -46,7 +49,7 @@ async def main():
                 await page.screenshot(path=str(OUT/f'{lang}-{width}-expanded.png'),full_page=True)
                 assert not blocked,blocked
                 assert not errors,errors
-                results.append({'language':lang,'width':width,'status':'passed','toolCount':29,'externalRequests':0})
+                results.append({'language':lang,'width':width,'status':'passed','toolCount':32,'externalRequests':0})
                 await context.close()
         await browser.close()
     (OUT/'results.json').write_text(json.dumps(results,indent=2))

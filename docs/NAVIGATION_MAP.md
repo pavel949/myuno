@@ -158,7 +158,7 @@ Fullscreen-префиксы (без шелла): `/auth`, `/checkout`, `/cart`, 
 
 #### 3.4.a MC Director (`owner` NavRoleKey, Workspace, `/mc/*`)
 
-**BottomBar (5):** Dashboard · Properties · Calendar · Finance · Messages.
+**BottomBar (5):** Today · Calendar · Properties · Messages · Menu.
 
 **SideRail (5 групп):**
 

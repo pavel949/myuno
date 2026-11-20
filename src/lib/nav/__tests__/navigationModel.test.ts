@@ -282,8 +282,11 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
   });
 
   it.each([
-    ['/mc', 'More'],
-    ['/mc/finance/transactions', 'More'],
+    ['/mc', 'Menu'],
+    ['/mc/finance/transactions', 'Menu'],
+    ['/mc/settings', 'Menu'],
+    ['/mc/listings/new', 'Properties'],
+    ['/mc/tasks', 'Today'],
     ['/mc/today', 'Today'],
     ['/mc/bookings-list', 'Today'],
     ['/mc/rates', 'Calendar'],

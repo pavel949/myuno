@@ -81,7 +81,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //                  (capital workflow first, browse second)
 //  mc_portal  → My Properties · Statements · Documents · Messages · Me
 //                  (read-only owner portal — finance + comms)
-//  owner      → Today · Calendar · Properties · Messages · More
+//  owner      → Today · Calendar · Properties · Messages · Menu
 //                  (operator workflow — daily PMS loop)
 //  vendor     → Dashboard · Services · Bookings · Payouts · Profile
 //                  (service-provider workflow — fulfilment + payouts)
@@ -135,9 +135,10 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
-  '/mc/today':    ['/mc/today', '/mc/bookings-list'],
+  '/mc/today':    ['/mc/today', '/mc/bookings-list', '/mc/bookings', '/mc/tasks', '/mc/operations'],
   '/mc/calendar': ['/mc/calendar', '/mc/rates'],
   '/mc/messages': ['/mc/messages', '/mc/chat'],
+  '/mc/properties': ['/mc/properties', '/mc/listings'],
   '/mc/modules':  ['/mc/modules', '/mc/finance'],
   '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
@@ -188,7 +189,11 @@ export function getActiveBottomBarItem(
   const matches = getBottomBarItems(role).filter((item) =>
     isBottomBarItemActive(item, pathname),
   );
-  if (matches.length === 0) return null;
+  if (matches.length === 0) {
+    return role === 'owner' && pathname.startsWith(`${APP_ROUTES.MC}/`)
+      ? getBottomBarItems(role).find(item => item.path === APP_ROUTES.MC_MODULES) ?? null
+      : null;
+  }
   return matches.reduce((best, candidate) =>
     candidate.path.length > best.path.length ? candidate : best,
   );

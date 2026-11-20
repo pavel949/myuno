@@ -3,7 +3,7 @@ import '@/styles/premium-workspace.css';
  * /mc/today — presentation of existing usePmsToday projections only.
  * Unit states are inferred signals, not verified readiness or inventory status.
  */
-import { lazy, Suspense, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageShell } from '@/components/page/PageShell';
 import { PageHeader } from '@/components/page/PageHeader';
@@ -46,6 +46,7 @@ const LABELS: Record<string, T> = {
   high: { en: 'High priority', ru: 'Высокий приоритет', th: 'ความสำคัญสูง' },
   urgent: { en: 'Urgent', ru: 'Срочно', th: 'เร่งด่วน' },
 };
+const todayJumpIds = new Set(['today-tasks', 'today-priority', 'today-arrivals', 'today-departures', 'today-in-house', 'today-requests']);
 const focusLink = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 export default function PmsTodayPage() {
@@ -57,6 +58,14 @@ export default function PmsTodayPage() {
   const complete = !d.isLoading && !d.error && !d.truncatedSources.length && !d.countUnavailableSources.length;
   const selectedBooking = complete && selectedBookingId
     ? [...d.arrivals, ...d.departures, ...d.inHouse].find(booking => booking.id === selectedBookingId) ?? null : null;
+  const stayOpen = Boolean(selectedBooking);
+  useEffect(() => {
+    const id = location.hash.slice(1);
+    if (location.pathname !== APP_ROUTES.MC_TODAY || !complete || !d.hasProperties || stayOpen || !todayJumpIds.has(id)) return;
+    const target = document.getElementById(id);
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView?.({ block: 'start' });
+  }, [location.hash, location.key, location.pathname, complete, d.hasProperties, stayOpen]);
   const dateLabel = new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
     timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long',
   });
@@ -67,6 +76,12 @@ export default function PmsTodayPage() {
   const cleaningUnits = d.units.filter(u => u.state === 'dirty');
   const label = (value: string) => LABELS[value] ? t(LABELS[value]) : value.replace(/_/g, ' ');
   const openProperty = t({ en: 'Open property', ru: 'Открыть объект', th: 'เปิดที่พัก' });
+
+  const arrivalsTitle = t({ en: 'Arrivals', ru: 'Заезды', th: 'เช็คอิน' });
+  const departuresTitle = t({ en: 'Departures', ru: 'Выезды', th: 'เช็คเอาท์' });
+  const inHouseTitle = t({ en: 'In-house', ru: 'Проживающие гости', th: 'กำลังเข้าพัก' });
+  const requestsTitle = t({ en: 'Guest requests', ru: 'Обращения гостей', th: 'คำขอของแขก' });
+  const taskTitle = t({ en: 'Tasks to act on', ru: 'Задачи к выполнению', th: 'งานที่ต้องดำเนินการ' });
 
   const BookingRow = ({ b, kind }: { b: TodayBooking; kind: 'in' | 'out' | 'stay' }) => {
     const guest = b.guest_name || t({ en: 'Guest', ru: 'Гость', th: 'ผู้เข้าพัก' });
@@ -146,16 +161,24 @@ export default function PmsTodayPage() {
     </Link>
   </li>;
 
-  const Flow = ({ icon: Icon, title, count, children }: { icon: typeof LogIn; title: string; count: number; children: ReactNode }) => <section className="min-w-0">
+  const Flow = ({ id, icon: Icon, title, count, children }: { id?: string; icon: typeof LogIn; title: string; count: number; children: ReactNode }) => <section aria-labelledby={id} className="min-w-0 rounded-lg border border-border bg-card p-3 sm:p-4">
     <header className="flex min-w-0 items-start gap-2 border-b border-border pb-3">
       <Icon aria-hidden className="mt-1 size-4 shrink-0 text-muted-foreground" />
-      <h3 className="min-w-0 flex-1 break-words font-medium">{title}</h3>
+      <h3 id={id} tabIndex={id ? -1 : undefined} className="min-w-0 flex-1 scroll-mt-28 break-words font-semibold [overflow-wrap:anywhere]">{title}</h3>
       <span className="shrink-0 font-mono tabular-nums text-muted-foreground">{count}</span>
     </header>
     {children}
   </section>;
   const Empty = ({ text }: { text: string }) => <p className="py-5 text-sm text-muted-foreground">{text}</p>;
   const attentionTitle = t({ en: 'Needs attention', ru: 'Требует внимания', th: 'ต้องดำเนินการ' });
+  const jumpLinks = [
+    { id: 'today-tasks', label: taskTitle, count: d.tasks.length },
+    { id: 'today-priority', label: t({ en: 'Priority requests', ru: 'Срочные обращения', th: 'คำขอเร่งด่วน' }), count: urgentRequests.length },
+    { id: 'today-arrivals', label: arrivalsTitle, count: d.arrivals.length },
+    { id: 'today-departures', label: departuresTitle, count: d.departures.length },
+    { id: 'today-in-house', label: inHouseTitle, count: d.inHouse.length },
+    { id: 'today-requests', label: t({ en: 'Other requests', ru: 'Другие обращения', th: 'คำขออื่น' }), count: routineRequests.length },
+  ];
   const todayTitle = t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' });
 
   return <PageShell width="wide" stack="default" className="mc-workspace-page mc-today-page text-foreground">
@@ -177,7 +200,8 @@ export default function PmsTodayPage() {
       <PropertyInquiriesWidget companyScope={{ id: d.companyId, propertyIds: d.propertyIds }} />
     </Suspense>}
     {d.error ? <div role="alert" className="border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
-      {t({ en: 'Could not load today’s data. Try refreshing.', ru: 'Не удалось загрузить сведения на сегодня. Обновите страницу.', th: 'โหลดข้อมูลไม่สำเร็จ ลองรีเฟรช' })}
+      <p>{t({ en: 'Could not load today’s data. No totals are shown.', ru: 'Не удалось загрузить сведения на сегодня. Счётчики скрыты.', th: 'โหลดข้อมูลวันนี้ไม่สำเร็จ จึงไม่แสดงจำนวน' })}</p>
+      <Button variant="outline" size="sm" className="mt-2 min-h-11" onClick={() => d.refetch()}>{t({ en: 'Retry loading', ru: 'Повторить загрузку', th: 'ลองโหลดอีกครั้ง' })}</Button>
     </div> : d.isLoading ? <div role="status" aria-label={t({ en: 'Loading today’s data', ru: 'Загрузка сведений на сегодня', th: 'กำลังโหลดข้อมูลวันนี้' })} className="space-y-6">
       <span className="sr-only">{t({ en: 'Loading today’s data', ru: 'Загрузка сведений на сегодня', th: 'กำลังโหลดข้อมูลวันนี้' })}</span>
       <Skeleton className="h-32 w-full" /><div className="grid gap-4 lg:grid-cols-3">{[0,1,2].map(i => <Skeleton key={i} className="h-48 w-full" />)}</div>
@@ -188,15 +212,26 @@ export default function PmsTodayPage() {
     </section> : (d.truncatedSources.length > 0 || d.countUnavailableSources.length > 0) ? <div role="alert" className="border border-accent bg-accent/10 p-4 text-sm">
       {t({ en: 'Today’s snapshot is incomplete: not all records are loaded, or completeness could not be verified. Counts and readiness signals are withheld. Open Tasks or Calendar to continue.', ru: 'Сводка на сегодня неполная: загружены не все записи или полноту данных не удалось проверить. Счётчики и признаки готовности скрыты. Продолжите в задачах или календаре.', th: 'สรุปวันนี้ไม่ครบถ้วน: โหลดข้อมูลไม่ครบหรือไม่สามารถตรวจสอบความครบถ้วนได้ จึงไม่แสดงจำนวนและสัญญาณความพร้อม โปรดเปิดงานหรือปฏิทินเพื่อดำเนินการต่อ' })}
     </div> : <>
+      <ul aria-label={t({ en: 'Jump to a work area', ru: 'Перейти к разделу', th: 'ไปที่ส่วนงาน' })} className="grid min-w-0 grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+        {jumpLinks.map(({ id, label: linkLabel, count }) => (
+          <li key={id} className="min-w-0">
+            <Link to={{ pathname: location.pathname, search: location.search, hash: `#${id}` }}
+              className={cn('flex min-h-11 min-w-0 items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm hover:bg-muted/50', focusLink)}>
+              <span className="min-w-0 font-medium [overflow-wrap:anywhere]">{linkLabel}</span>
+              <span className="shrink-0 tabular-nums text-muted-foreground">{count}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
       <section aria-labelledby="today-tasks" className="min-w-0">
-        <h2 id="today-tasks" className="flex items-start gap-2 font-display text-h3"><ListTodo aria-hidden className="mt-1 size-5 shrink-0" />{t({ en: 'Tasks to act on', ru: 'Задачи к выполнению', th: 'งานที่ต้องดำเนินการ' })}<span className="font-mono text-sm text-muted-foreground">{d.tasks.length}</span></h2>
+        <h2 id="today-tasks" tabIndex={-1} className="flex scroll-mt-28 items-start gap-2 font-display text-h3"><ListTodo aria-hidden className="mt-1 size-5 shrink-0" />{taskTitle}<span className="font-mono text-sm text-muted-foreground">{d.tasks.length}</span></h2>
         <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'Open property tasks due today, overdue or without a date. Includes recorded booking preparation.', ru: 'Открытые задачи по объектам на сегодня, просроченные и без даты. Включая отмеченную подготовку к бронированиям.', th: 'งานที่พักที่ครบกำหนดวันนี้ เกินกำหนด หรือไม่มีวันที่ รวมงานเตรียมการจองที่บันทึกไว้' })}</p>
         {d.tasks.length ? <ul className="mt-2">{d.tasks.map(task => <TaskRow key={`${task.source}:${task.id}`} task={task} />)}</ul> : <Empty text={t({ en: 'No open tasks due or undated in the loaded property scope', ru: 'В выбранных объектах нет открытых задач на сегодня, просроченных или без даты', th: 'ไม่มีงานที่ครบกำหนดหรือไม่ระบุวันที่ในขอบเขตที่พักที่โหลด' })} />}
       </section>
       <section aria-labelledby="today-attention" className="min-w-0 border-l-2 border-accent pl-4">
         <h2 id="today-attention" className="flex items-start gap-2 font-display text-h3"><AlertTriangle aria-hidden className="mt-1 size-5 shrink-0 text-accent" />{attentionTitle}</h2>
         <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-3">
-          <Flow icon={MessageSquare} title={t({ en: 'Priority guest requests', ru: 'Приоритетные обращения', th: 'คำขอเร่งด่วนของแขก' })} count={urgentRequests.length}>
+          <Flow id="today-priority" icon={MessageSquare} title={t({ en: 'Priority guest requests', ru: 'Приоритетные обращения', th: 'คำขอเร่งด่วนของแขก' })} count={urgentRequests.length}>
             {urgentRequests.length ? <ul>{urgentRequests.map(r => <RequestRow key={r.id} r={r} />)}</ul> : <Empty text={t({ en: 'No high-priority requests recorded', ru: 'Приоритетных обращений не отмечено', th: 'ไม่มีคำขอเร่งด่วนที่บันทึกไว้' })} />}
           </Flow>
           <Flow icon={AlertTriangle} title={t({ en: 'Maintenance', ru: 'Техническое обслуживание', th: 'ซ่อมบำรุง' })} count={maintenanceUnits.length}>
@@ -211,20 +246,20 @@ export default function PmsTodayPage() {
       <section aria-labelledby="today-flows" className="min-w-0 border-t border-border pt-5">
         <h2 id="today-flows" className="font-display text-h3">{t({ en: 'Today’s stays', ru: 'Заезды и проживание', th: 'การเข้าพักวันนี้' })}</h2>
         <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-3">
-          <Flow icon={LogIn} title={t({ en: 'Arrivals', ru: 'Заезды', th: 'เช็คอิน' })} count={d.arrivals.length}>
+          <Flow id="today-arrivals" icon={LogIn} title={arrivalsTitle} count={d.arrivals.length}>
             {d.arrivals.length ? <ul>{d.arrivals.map(b => <BookingRow key={b.id} b={b} kind="in" />)}</ul> : <Empty text={t({ en: 'No arrivals today', ru: 'Сегодня заездов нет', th: 'ไม่มีเช็คอินวันนี้' })} />}
           </Flow>
-          <Flow icon={LogOut} title={t({ en: 'Departures', ru: 'Выезды', th: 'เช็คเอาท์' })} count={d.departures.length}>
+          <Flow id="today-departures" icon={LogOut} title={departuresTitle} count={d.departures.length}>
             {d.departures.length ? <ul>{d.departures.map(b => <BookingRow key={b.id} b={b} kind="out" />)}</ul> : <Empty text={t({ en: 'No departures today', ru: 'Сегодня выездов нет', th: 'ไม่มีเช็คเอาท์วันนี้' })} />}
           </Flow>
-          <Flow icon={BedDouble} title={t({ en: 'In-house', ru: 'Проживающие гости', th: 'กำลังเข้าพัก' })} count={d.inHouse.length}>
+          <Flow id="today-in-house" icon={BedDouble} title={inHouseTitle} count={d.inHouse.length}>
             {d.inHouse.length ? <ul>{d.inHouse.map(b => <BookingRow key={b.id} b={b} kind="stay" />)}</ul> : <Empty text={t({ en: 'No guests in-house', ru: 'Проживающих гостей нет', th: 'ไม่มีผู้เข้าพัก' })} />}
           </Flow>
         </div>
       </section>
 
       <section aria-labelledby="today-requests" className="border-t border-border pt-5">
-        <h2 id="today-requests" className="flex items-start gap-2 font-display text-h3">{t({ en: 'Guest requests', ru: 'Обращения гостей', th: 'คำขอของแขก' })}<span className="font-mono text-sm text-muted-foreground">{d.guestRequests.length}</span></h2>
+        <h2 id="today-requests" tabIndex={-1} className="flex scroll-mt-28 items-start gap-2 font-display text-h3">{requestsTitle}<span className="font-mono text-sm text-muted-foreground">{d.guestRequests.length}</span></h2>
         {urgentRequests.length > 0 && <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'High-priority requests are listed above.', ru: 'Приоритетные обращения показаны выше.', th: 'คำขอเร่งด่วนแสดงอยู่ด้านบน' })}</p>}
         {routineRequests.length ? <ul className="mt-2">{routineRequests.map(r => <RequestRow key={r.id} r={r} />)}</ul> : <Empty text={t(d.guestRequests.length ? { en: 'No other open requests', ru: 'Других открытых обращений нет', th: 'ไม่มีคำขออื่นที่เปิดอยู่' } : { en: 'No open guest requests', ru: 'Нерассмотренных обращений нет', th: 'ไม่มีคำขอที่เปิดอยู่' })} />}
       </section>

@@ -12,7 +12,10 @@ vi.mock('@/hooks/useBookingStatusHistory', () => ({ useBookingStatusHistory: () 
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
-function Boundary() { return <output data-testid="route-boundary">{useLocation().pathname}</output>; }
+function Boundary() {
+  const { pathname, search, hash } = useLocation();
+  return <output data-testid="route-boundary">{pathname}{search}{hash}</output>;
+}
 function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
 afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
@@ -63,7 +66,9 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   });
   it('query failure suppresses stale projections and all-clear data', () => {
     mocks.scenario = 'error'; mount();
-    expect(screen.getByRole('alert')).toBeInTheDocument();
+    const alert = screen.getByRole('alert');
+    fireEvent.click(within(alert).getByRole('button', { name: /Retry loading|Повторить загрузку/ }));
+    expect(mocks.refetch).toHaveBeenCalledOnce();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
     expect(screen.queryByRole('region', { name: language === 'ru' ? 'Требует внимания' : 'Needs attention' })).not.toBeInTheDocument();
   });
@@ -81,6 +86,16 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
 
 describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => {
   beforeEach(() => { mocks.language = language; });
+  it('supports section jumping with focus and query preservation', () => {
+    const entry = '/mc/today?keep=yes';
+    mount(entry);
+    const labels = language === 'ru' ? ['Перейти к разделу', 'Заезды'] : language === 'th' ? ['ไปที่ส่วนงาน', 'เช็คอิน'] : ['Jump to a work area', 'Arrivals'];
+    const summary = screen.getByRole('list', { name: labels[0] });
+    expect(within(summary).getAllByRole('link')).toHaveLength(6);
+    fireEvent.click(within(summary).getByRole('link', { name: new RegExp(labels[1]) }));
+    expect(screen.getByRole('heading', { level: 3, name: labels[1] })).toHaveFocus();
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today?keep=yes#today-arrivals');
+  });
   it('routes preparation and CRM tasks with distinct source identity and exact return context', () => {
     const entry = '/mc/today?property=synthetic-property&keep=yes#work';
     mount(entry);
@@ -106,6 +121,7 @@ describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => 
     expect(screen.queryAllByRole('link', { name: /Open task|Открыть задачу|เปิดงาน/ })).toHaveLength(0);
     expect(screen.queryByText('Pre-arrival cleaning')).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: /Tasks to act on|Задачи к выполнению|งานที่ต้องดำเนินการ/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: /Jump to a work area|Перейти к разделу|ไปที่ส่วนงาน/ })).not.toBeInTheDocument();
     if (scenario === 'truncated' || scenario === 'unknown-count') expect(screen.getByRole('alert')).toHaveTextContent(language === 'ru' ? 'неполная' : language === 'th' ? 'ไม่ครบถ้วน' : 'incomplete');
   });
 });

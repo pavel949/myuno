@@ -52,11 +52,27 @@ async def run():
                 await page.screenshot(path=str(OUT / f"{language}-{width}.png"), full_page=True)
                 for day in (first, last):
                     await (day.tap() if touch else day.click())
+                if touch:
+                    trigger = page.get_by_role("button", name={
+                        "ru": "Изменить цену за ночь", "en": "Edit nightly price", "th": "แก้ไขราคาต่อคืน",
+                    }[language])
+                    await expect(page.get_by_role("dialog")).to_have_count(0)
+                    await trigger.tap()
+                    dialog = page.get_by_role("dialog", name={
+                        "ru": "Цена на выбранные даты", "en": "Price for selected dates", "th": "ราคาสำหรับวันที่เลือก",
+                    }[language])
+                    await expect(dialog).to_be_visible()
+                    await expect(dialog.get_by_role("heading")).to_be_focused()
+                    await page.screenshot(path=str(OUT / f"{language}-{width}-sheet.png"), full_page=True)
                 await expect(page.locator("#calendar-price-from")).to_have_value("2026-10-21")
                 await expect(page.locator("#calendar-price-through")).to_have_value("2026-10-24")
+                await expect(page.locator('a[href="/mc/calendar?property=fixture-property&date=2026-10-21&show=day"]')).to_be_visible()
                 await page.locator("#calendar-price-amount").fill("3400.50")
                 await page.locator("button[type=submit]").click()
                 await page.wait_for_function("Boolean(window.fixtureLastSave)")
+                if touch:
+                    await expect(dialog).not_to_be_visible()
+                    await expect(trigger).to_be_focused()
                 saved = await page.evaluate("window.fixtureLastSave")
                 assert saved["p_from"] == "2026-10-21", saved
                 assert saved["p_to"] == "2026-10-25", saved
