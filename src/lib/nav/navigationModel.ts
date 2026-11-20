@@ -81,7 +81,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //                  (capital workflow first, browse second)
 //  mc_portal  → My Properties · Statements · Documents · Messages · Me
 //                  (read-only owner portal — finance + comms)
-//  owner      → Dashboard · Properties · Calendar · Finance · Messages
+//  owner      → Today · Calendar · Properties · Messages · Menu
 //                  (operator workflow — daily PMS loop)
 //  vendor     → Dashboard · Services · Bookings · Payouts · Profile
 //                  (service-provider workflow — fulfilment + payouts)
@@ -144,6 +144,13 @@ const PATH_ALIASES: Record<string, string[]> = {
   ],
 };
 
+const OWNER_WORKSPACE_TAB_ALIASES: Record<string, string[]> = {
+  [APP_ROUTES.MC_TODAY]: [APP_ROUTES.MC_TODAY, APP_ROUTES.MC_TASKS, APP_ROUTES.MC_BOOKINGS_LIST, '/mc/bookings', '/mc/operations'],
+  [APP_ROUTES.MC_CALENDAR]: [APP_ROUTES.MC_CALENDAR, APP_ROUTES.MC_RATES],
+  [APP_ROUTES.MC_PROPERTIES]: [APP_ROUTES.MC_PROPERTIES, '/mc/listings'],
+  [APP_ROUTES.MC_MESSAGES]: [APP_ROUTES.MC_MESSAGES, '/mc/chat', '/mc/auto-messaging', '/mc/message-templates'],
+};
+
 /**
  * Decide if a bottom-bar item should render as active for the current
  * pathname. Rules:
@@ -180,10 +187,19 @@ export function getActiveBottomBarItem(
   role: NavRoleKey,
   pathname: string,
 ): NavItem | null {
-  const matches = getBottomBarItems(role).filter((item) =>
-    isBottomBarItemActive(item, pathname),
-  );
-  if (matches.length === 0) return null;
+  const path = pathname.replace(/\/+$/, '') || '/';
+  const items = getBottomBarItems(role);
+  const matches = items.filter((item) => {
+    const aliases = role === 'owner' ? OWNER_WORKSPACE_TAB_ALIASES[item.path] : undefined;
+    return aliases?.some(prefix => path === prefix || path.startsWith(`${prefix}/`))
+      ?? isBottomBarItemActive(item, path);
+  });
+  if (matches.length === 0) {
+    // Menu is the existing tools hub; its discovery does not grant access.
+    return role === 'owner' && (path === APP_ROUTES.MC || path.startsWith(`${APP_ROUTES.MC}/`))
+      ? items.find(item => item.path === APP_ROUTES.MC_MODULES) ?? null
+      : null;
+  }
   return matches.reduce((best, candidate) =>
     candidate.path.length > best.path.length ? candidate : best,
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { addDays, addMonths, endOfMonth, endOfWeek, eachDayOfInterval, startOfMonth, startOfWeek, format } from 'date-fns';
@@ -6,6 +6,7 @@ import { ru, enUS, th } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCalendarPrices } from '@/hooks/useCalendarPrices';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRoomCategories } from '@/hooks/useRoomCategories';
 import { useStaysUnifiedCalendar } from '@/hooks/useStaysUnifiedCalendar';
@@ -20,6 +21,7 @@ import { getEffectiveNightlyRate, type SeasonalPricingRule } from '@/lib/pricing
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 function readRange(from: string, through: string) {
   try { return inclusivePriceRange(from, through); } catch { return null; }
@@ -32,6 +34,7 @@ function readPrice(value: string) {
 /** Edits the existing dated price rows. Occupancy is read-only. */
 export function CalendarPriceEditor({ property }: { property: UnifiedProperty }) {
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
   const t = (en: string, russian: string, thai: string) => language === 'ru' ? russian : language === 'th' ? thai : en;
   const locale = language === 'ru' ? ru : language === 'th' ? th : enUS;
   const numberFormat = new Intl.NumberFormat(language, { maximumFractionDigits: 2 });
@@ -45,6 +48,9 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
   const [saving, setSaving] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const sheetTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { if (!isMobile) setSheetOpen(false); }, [isMobile]);
   const categories = useRoomCategories(property.property_id);
   const stays = useStaysUnifiedCalendar(property.property_id);
   const terms = useOwnerProperty(property.property_id);
@@ -103,6 +109,7 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       if (!data || typeof data !== 'object' || Array.isArray(data) || data.property_id !== property.property_id || data.category_id !== (category || null) || data.nights !== range.count || data.nightly_rate !== amount || data.currency !== currency) throw new Error('Unconfirmed calendar price write');
       await qc.invalidateQueries({ predicate: query => /pricing|availability|calendar|rate|property|properties|room-category/.test(String(query.queryKey[0])) });
       setPrice('');
+      setSheetOpen(false);
       toast.success(t('Prices saved', 'Цены сохранены', 'บันทึกราคาแล้ว'));
     } catch {
       toast.error(t('Could not save. Review the refreshed prices and try again.', 'Не удалось сохранить. Проверьте обновлённые цены и повторите.', 'บันทึกไม่สำเร็จ โปรดตรวจสอบราคาที่อัปเดตและลองอีกครั้ง'));
@@ -115,6 +122,48 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
   const selectionLabel = from && through ? from === through
     ? format(parseCivilDate(from), 'd MMM yyyy', { locale })
     : [from, through].map(date => format(parseCivilDate(date), 'd MMM yyyy', { locale })).join(' – ') : null;
+
+  const editorTitle = t('Price for selected dates', 'Цена на выбранные даты', 'ราคาสำหรับวันที่เลือก');
+  const rangeHelp = t('Tap one date, then another for a range.', 'Нажмите на дату, затем на вторую, чтобы выбрать период.', 'แตะวันที่หนึ่งและอีกวันที่เพื่อเลือกช่วง');
+  const periodLabel = range && selectionLabel
+    ? `${selectionLabel} · ${range.count} ${t('night(s)', 'ноч.', 'คืน')}`
+    : t('Choose your dates', 'Выберите даты', 'เลือกวันที่');
+  const priceForm =
+    <form onSubmit={save} className={cn('min-w-0 space-y-3', !isMobile && 'self-start border bg-card p-3 sm:p-4 lg:p-5')}>
+      {!isMobile && <div>
+        <h2 className="font-sans text-base font-semibold">{editorTitle}</h2>
+        <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">{periodLabel}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{rangeHelp}</p>
+      </div>}
+      <div className="flex flex-wrap gap-2">
+        <label htmlFor="calendar-price-from" className="min-w-36 flex-1 space-y-1 text-xs"><span>{t('From', 'С даты', 'จาก')}</span>
+          <Input id="calendar-price-from" className="h-11 w-full min-w-0 px-2" type="date" lang={language} value={from} disabled={saving} onChange={event => {
+            const day = toBangkokDateKey(event.target.value);
+            setFrom(day ?? '');
+            if (day && (!through || day > through)) setThrough(day);
+            if (day) setMonth(startOfMonth(parseCivilDate(day)));
+            setAnchor(null);
+            setPrice('');
+          }} />
+        </label>
+        <label htmlFor="calendar-price-through" className="min-w-36 flex-1 space-y-1 text-xs"><span>{t('Through (inclusive)', 'По дату (вкл.)', 'ถึง (รวมวันที่)')}</span>
+          <Input id="calendar-price-through" className="h-11 w-full min-w-0 px-2" type="date" lang={language} min={from} value={through} disabled={saving} onChange={event => { setThrough(toBangkokDateKey(event.target.value) ?? ''); setAnchor(null); setPrice(''); }} />
+        </label>
+      </div>
+      <label htmlFor="calendar-price-amount" className="block space-y-1 text-sm">
+        <span>{t('Per night', 'За ночь', 'ต่อคืน')} · {currency || '—'}</span>
+        <Input id="calendar-price-amount" className="h-11" inputMode="decimal" value={price} placeholder="0.00" disabled={saving} onChange={event => setPrice(event.target.value)} />
+      </label>
+      {!range && <p role="status" className="text-xs text-destructive">{t('Choose a period of 1–366 nights.', 'Выберите период от 1 до 366 ночей.', 'เลือกช่วง 1–366 คืน')}</p>}
+      {price && !amount && <p role="status" className="text-xs text-destructive">{t('Enter a positive price with up to two decimals.', 'Введите цену больше нуля, до двух знаков после запятой.', 'กรอกราคามากกว่าศูนย์และทศนิยมไม่เกินสองตำแหน่ง')}</p>}
+      {rows.isError && <p role="alert" className="text-sm">{t('Selected prices could not be loaded.', 'Не удалось загрузить цены выбранных дат.', 'โหลดราคาวันที่เลือกไม่สำเร็จ')} <Button type="button" variant="ghost" onClick={() => rows.refetch()}>{t('Retry', 'Повторить', 'ลองใหม่')}</Button></p>}
+      {!currency && <p role="alert" className="text-sm">{t('Set the property currency before editing prices.', 'Сначала задайте валюту объекта.', 'ตั้งค่าสกุลเงินก่อนแก้ไขราคา')}</p>}
+      <Button type="submit" className="min-h-11 w-full" disabled={!canSave}>{saving ? t('Saving…', 'Сохранение…', 'กำลังบันทึก…') : t('Apply nightly price', 'Сохранить цену за ночь', 'บันทึกราคาต่อคืน')}</Button>
+      <Link className="inline-flex min-h-10 items-center text-sm font-medium underline underline-offset-4"
+        to={`/mc/calendar?property=${encodeURIComponent(property.property_id)}${from ? `&date=${from}` : ''}`}>
+        {t('Open booking calendar', 'Календарь бронирований', 'ปฏิทินการจอง')}
+      </Link>
+    </form>;
 
   return <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]" aria-label={t('Calendar prices', 'Цены в календаре', 'ราคาในปฏิทิน')}>
     <div className="min-w-0 border bg-card p-2.5 sm:p-4 lg:p-5">
@@ -174,40 +223,28 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       </>}
     </div>
 
-    <form onSubmit={save} className="min-w-0 self-start space-y-3 border bg-card p-3 sm:p-4 lg:p-5">
-      <div>
-        <h2 className="font-sans text-base font-semibold">{t('Price for selected dates', 'Цена на выбранные даты', 'ราคาสำหรับวันที่เลือก')}</h2>
-        <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">{selectionLabel}{range && ` · ${range.count} ${t('night(s)', 'ноч.', 'คืน')}`}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t('Tap one date, then another for a range.', 'Нажмите на дату, затем на вторую, чтобы выбрать период.', 'แตะวันที่หนึ่งและอีกวันที่เพื่อเลือกช่วง')}</p>
+    {isMobile ? <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border bg-card p-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium" aria-live="polite">{periodLabel}</p>
+          <p className="text-xs text-muted-foreground">{rangeHelp}</p>
+        </div>
+        <SheetTrigger asChild>
+          <Button type="button" className="min-h-11 w-full">
+            {t('Edit nightly price', 'Изменить цену за ночь', 'แก้ไขราคาต่อคืน')}
+          </Button>
+        </SheetTrigger>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <label htmlFor="calendar-price-from" className="min-w-0 space-y-1 text-xs"><span>{t('From', 'С даты', 'จาก')}</span>
-          <Input id="calendar-price-from" className="h-11 min-w-0 px-2" type="date" value={from} disabled={saving} onChange={event => {
-            const day = toBangkokDateKey(event.target.value);
-            setFrom(day ?? '');
-            if (day && (!through || day > through)) setThrough(day);
-            if (day) setMonth(startOfMonth(parseCivilDate(day)));
-            setAnchor(null);
-            setPrice('');
-          }} />
-        </label>
-        <label htmlFor="calendar-price-through" className="min-w-0 space-y-1 text-xs"><span>{t('Through (inclusive)', 'По дату включительно', 'ถึง (รวมวันที่)')}</span>
-          <Input id="calendar-price-through" className="h-11 min-w-0 px-2" type="date" min={from} value={through} disabled={saving} onChange={event => { setThrough(toBangkokDateKey(event.target.value) ?? ''); setAnchor(null); setPrice(''); }} />
-        </label>
-      </div>
-      <label htmlFor="calendar-price-amount" className="block space-y-1 text-sm">
-        <span>{t('Per night', 'За ночь', 'ต่อคืน')} · {currency || '—'}</span>
-        <Input id="calendar-price-amount" className="h-11" inputMode="decimal" value={price} placeholder="0.00" disabled={saving} onChange={event => setPrice(event.target.value)} />
-      </label>
-      {!range && <p role="status" className="text-xs text-destructive">{t('Choose a period of 1–366 nights.', 'Выберите период от 1 до 366 ночей.', 'เลือกช่วง 1–366 คืน')}</p>}
-      {price && !amount && <p role="status" className="text-xs text-destructive">{t('Enter a positive price with up to two decimals.', 'Введите цену больше нуля, до двух знаков после запятой.', 'กรอกราคามากกว่าศูนย์และทศนิยมไม่เกินสองตำแหน่ง')}</p>}
-      {rows.isError && <p role="alert" className="text-sm">{t('Selected prices could not be loaded.', 'Не удалось загрузить цены выбранных дат.', 'โหลดราคาวันที่เลือกไม่สำเร็จ')} <Button type="button" variant="ghost" onClick={() => rows.refetch()}>{t('Retry', 'Повторить', 'ลองใหม่')}</Button></p>}
-      {!currency && <p role="alert" className="text-sm">{t('Set the property currency before editing prices.', 'Сначала задайте валюту объекта.', 'ตั้งค่าสกุลเงินก่อนแก้ไขราคา')}</p>}
-      <Button type="submit" className="min-h-11 w-full" disabled={!canSave}>{saving ? t('Saving…', 'Сохранение…', 'กำลังบันทึก…') : t('Apply nightly price', 'Сохранить цену за ночь', 'บันทึกราคาต่อคืน')}</Button>
-      <Link className="inline-flex min-h-10 items-center text-sm font-medium underline underline-offset-4"
-        to={`/mc/calendar?property=${encodeURIComponent(property.property_id)}${from ? `&date=${from}` : ''}`}>
-        {t('Open booking calendar', 'Календарь бронирований', 'ปฏิทินการจอง')}
-      </Link>
-    </form>
+      <SheetContent side="bottom" closeLabel={t('Close price editor', 'Закрыть редактор цены', 'ปิดตัวแก้ไขราคา')}
+        onOpenAutoFocus={event => {
+          if (sheetTitle.current) { event.preventDefault(); sheetTitle.current.focus(); }
+        }}>
+        <SheetHeader className="mb-4 text-start">
+          <SheetTitle ref={sheetTitle} tabIndex={-1}>{editorTitle}</SheetTitle>
+          <SheetDescription aria-live="polite">{periodLabel}</SheetDescription>
+        </SheetHeader>
+        {priceForm}
+      </SheetContent>
+    </Sheet> : priceForm}
   </section>;
 }

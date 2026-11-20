@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import PropertyInquiry from '../PropertyInquiry';
 
-const mocks = vi.hoisted(() => ({ rpc: vi.fn(), createOrder: vi.fn(), reads: 0, language: 'en' }));
+const mocks = vi.hoisted(() => ({ rpc: vi.fn(), createOrder: vi.fn(), reads: 0, language: 'en', seasonsPending: false, seasonsFailed: false, retrySeasons: vi.fn() }));
 const property = { id: 'unit', title_en: 'Synthetic home', listing_type: 'rent', listing_modes: ['rent'], tenancy_modes: ['short'], price_per_night: 1000, currency: 'THB', rentalTerms: { price_per_night: 1000, currency: 'THB', included_services: [], extra_services: [] } };
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: mocks.rpc } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => {
@@ -19,7 +19,7 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
 vi.mock('@/contexts/AuthSheetContext', () => ({ useAuthSheet: () => ({ openAuthSheet: vi.fn() }) }));
 vi.mock('@/hooks/useProfile', () => ({ useProfile: () => ({ profile: null }) }));
 vi.mock('@/hooks/useOrders', () => ({ useOrders: () => ({ createOrder: mocks.createOrder }) }));
-vi.mock('@/hooks/usePropertyRateSeasons', () => ({ usePropertyRateSeasons: () => ({ data: [] }) }));
+vi.mock('@/hooks/usePropertyRateSeasons', () => ({ usePropertyRateSeasons: () => ({ data: mocks.seasonsPending ? undefined : [], isError: mocks.seasonsFailed, refetch: mocks.retrySeasons }) }));
 vi.mock('@/hooks/useRareFindBadge', () => ({ useRareFindBadge: () => ({ data: false }) }));
 vi.mock('@/components/property/DepositPaymentOptions', () => ({ DepositPaymentOptions: () => null }));
 vi.mock('@/components/property/PayWhenSelector', () => ({ PayWhenSelector: () => null }));
@@ -38,7 +38,7 @@ function deferred() {
   const promise = new Promise<Parameters<typeof resolve>[0]>(r => { resolve = r; });
   return { promise, resolve };
 }
-beforeEach(() => { vi.clearAllMocks(); mocks.reads = 0; mocks.language = 'en'; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.reads = 0; mocks.language = 'en'; mocks.seasonsPending = false; mocks.seasonsFailed = false; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
 afterEach(() => { cleanup(); localStorage.clear(); });
 const loading = 'Checking the price for your selected dates…';
 
@@ -77,10 +77,26 @@ describe('inquiry date-price lifecycle', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Retry' })).toBeVisible());
     expect(mocks.rpc).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('THB 2000').length).toBeGreaterThan(0));
     expect(mocks.rpc).toHaveBeenCalledTimes(2);
     expect(screen.getAllByText('THB 2000').length).toBeGreaterThan(0);
     expect(mocks.createOrder).not.toHaveBeenCalled();
+  });
+  it('withholds a fallback quote until the season read succeeds', async () => {
+    mocks.seasonsPending = true;
+    const view = render(<Harness/>);
+    await act(async () => {});
+    expect(screen.getByText(loading)).toBeVisible();
+    expect(screen.queryByText('THB 2000')).not.toBeInTheDocument();
+    mocks.seasonsPending = false;
+    mocks.seasonsFailed = true;
+    view.rerender(<Harness/>);
+    expect(screen.queryByText('THB 2000')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(mocks.retrySeasons).toHaveBeenCalledTimes(1);
+    mocks.seasonsFailed = false;
+    view.rerender(<Harness/>);
+    await waitFor(() => expect(screen.getAllByText('THB 2000').length).toBeGreaterThan(0));
   });
   it('does not read prices without dates', () => {
     render(<Harness dates={false}/>);

@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate, useSearchParams } from 'react-router-dom';
 import { PropertyBookingCard } from '../PropertyBookingCard';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
+const datePriceRead = vi.hoisted(() => vi.fn());
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: datePriceRead } }));
 const availability = vi.hoisted(() => ({ isSuccess: false, isError: false, data: [], refetch: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -10,6 +12,7 @@ vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDa
 vi.mock('@/hooks/usePropertyRateSeasons', () => ({ usePropertyRateSeasons: () => ({ data: [] }) }));
 vi.mock('@/hooks/useBreakpoint', () => ({ useBreakpoint: () => ({ isDesktop: true }) }));
 vi.mock('../GuestPriceProposal', () => ({ GuestPriceProposal: () => null }));
+datePriceRead.mockResolvedValue({ data: [], error: null });
 afterEach(() => { cleanup(); availability.isSuccess = false; availability.isError = false; });
 const nextQuery = '?checkIn=2099-12-10&checkOut=2099-12-14&guests=2';
 function RoutedCard() {
@@ -52,10 +55,28 @@ describe('booking card initial guest context', () => {
   });
 });
 
-it('keeps validated intent on the existing desktop inquiry route', () => {
+it('keeps validated intent on the existing desktop inquiry route', async () => {
   availability.isSuccess = true;
   function Destination() { const [params] = useSearchParams(); return <output data-testid="inquiry-query">{params.toString()}</output>; }
   render(<MemoryRouter><PropertyBookingCard propertyId="home" pricePerNight={2000} initialGuestContext={context} guestSearch="mode=rent&tenancy=short&intent=holiday" /><Destination /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: 'Request direct booking' }));
+  const button = screen.getByRole('button', { name: 'Request direct booking' });
+  await waitFor(() => expect(button).toBeEnabled());
+  fireEvent.click(button);
   expect(Object.fromEntries(new URLSearchParams(screen.getByTestId('inquiry-query').textContent ?? ''))).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2099-12-01', checkOut: '2099-12-04', guests: '3' });
+});
+
+it('blocks a price and CTA when dates fail, then uses the confirmed nightly override on retry', async () => {
+  availability.isSuccess = true;
+  datePriceRead.mockResolvedValueOnce({ data: null, error: new Error('synthetic outage') })
+    .mockResolvedValueOnce({ data: [{ date: '2099-12-01', price_override: 3000 }], error: null });
+  render(<Card />);
+  const reserve = screen.getByRole('button', { name: 'Request direct booking' });
+  expect(screen.getByText('Checking the price for your selected dates…')).toBeVisible();
+  expect(reserve).toBeDisabled();
+  const retry = await screen.findByRole('button', { name: 'Retry' });
+  expect(screen.queryByText('6000')).not.toBeInTheDocument();
+  expect(reserve).toBeDisabled();
+  fireEvent.click(retry);
+  await waitFor(() => expect(reserve).toBeEnabled());
+  expect(screen.getAllByText('7000').length).toBeGreaterThan(0);
 });

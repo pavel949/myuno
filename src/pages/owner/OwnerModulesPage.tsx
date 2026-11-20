@@ -39,6 +39,7 @@ const MODULE_GROUPS: ModuleGroup[] = [
     modules: [
       { id: 'dashboard', path: '/mc', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', tint: 'bg-primary/12', textColor: 'text-primary' },
       { id: 'properties', path: '/mc/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', tint: 'bg-success/12', textColor: 'text-success', permModule: 'properties' },
+      { id: 'bookings', path: APP_ROUTES.MC_BOOKINGS_LIST, icon: Calendar, labelEn: 'Bookings', labelRu: 'Бронирования', tint: 'bg-info/12', textColor: 'text-info', permModule: 'bookings' },
       { id: 'calendar', path: '/mc/calendar', icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь', tint: 'bg-info/12', textColor: 'text-info', permModule: 'bookings' },
       { id: 'messages', path: '/mc/messages', icon: MessageSquare, labelEn: 'Messages', labelRu: 'Сообщения', tint: 'bg-accent-purple/12', textColor: 'text-accent-purple' },
     ],
@@ -88,6 +89,8 @@ const MODULE_GROUPS: ModuleGroup[] = [
     titleRu: 'Команда',
     modules: [
       { id: 'staff', path: '/mc/staff', icon: Users, labelEn: 'Staff', labelRu: 'Сотрудники', tint: 'bg-info/12', textColor: 'text-info', permModule: 'staff' },
+      { id: 'settings', path: APP_ROUTES.MC_SETTINGS, icon: Settings, labelEn: 'Settings', labelRu: 'Настройки', tint: 'bg-muted', textColor: 'text-muted-foreground' },
+      { id: 'help', path: APP_ROUTES.MC_HELP, icon: BookOpen, labelEn: 'Help', labelRu: 'Помощь', tint: 'bg-muted', textColor: 'text-muted-foreground' },
       { id: 'subscription', path: '/mc/subscription', icon: CreditCard, labelEn: 'Plan', labelRu: 'Подписка', tint: 'bg-accent-amber/12', textColor: 'text-accent-amber' },
       { id: 'guide', path: '/owner/guide', icon: BookOpen, labelEn: 'Guide', labelRu: 'Руководство', tint: 'bg-muted', textColor: 'text-muted-foreground' },
     ],
@@ -95,6 +98,7 @@ const MODULE_GROUPS: ModuleGroup[] = [
 ];
 
 const THAI_MODULE_LABELS: Record<string, string> = {
+  bookings: 'การจอง', settings: 'การตั้งค่า', help: 'ความช่วยเหลือ',
   dashboard: 'ภาพรวม', properties: 'ที่พัก', calendar: 'ปฏิทิน', messages: 'ข้อความ',
   crm: 'CRM', owners: 'เจ้าของที่พัก', contacts: 'ผู้ติดต่อ', sales: 'การขาย', reviews: 'รีวิว',
   marketing: 'การตลาด', sequences: 'ลำดับการติดตาม', quotes: 'ใบเสนอราคา', tasks: 'งาน',
@@ -106,10 +110,10 @@ const THAI_MODULE_LABELS: Record<string, string> = {
 };
 
 const MODULE_AREAS = [
-  { en: 'Daily work', ru: 'Ежедневная работа', th: 'งานประจำวัน', ids: ['dashboard', 'calendar', 'tasks', 'messages'] },
+  { en: 'Daily work', ru: 'Ежедневная работа', th: 'งานประจำวัน', ids: ['bookings', 'tasks', 'calendar', 'messages', 'dashboard'] },
   { en: 'Properties & rates', ru: 'Объекты и тарифы', th: 'ที่พักและราคา', ids: ['properties', 'rates', 'channels', 'inventory', 'vendors', 'insurance', 'documents'] },
   { en: 'Finance & sales', ru: 'Финансы и продажи', th: 'การเงินและการขาย', ids: ['finance', 'management-terms', 'transactions', 'analytics', 'reports', 'budget', 'invoices', 'crm', 'owners', 'contacts', 'sales', 'reviews', 'marketing', 'sequences', 'quotes'] },
-  { en: 'Team & settings', ru: 'Команда и настройки', th: 'ทีมงานและการตั้งค่า', ids: ['staff', 'subscription', 'plan', 'guide'] },
+  { en: 'Team & settings', ru: 'Команда и настройки', th: 'ทีมงานและการตั้งค่า', ids: ['settings', 'staff', 'help', 'subscription', 'plan', 'guide'] },
 ];
 
 export default function OwnerModulesPage() {
@@ -124,7 +128,7 @@ export default function OwnerModulesPage() {
   );
   return <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6 px-4 py-6 pb-24 md:px-6">
     <header>
-      <h1 className="font-display text-h2 text-foreground">{pickLang(language, {en:'All tools', ru:'Все инструменты', th:'เครื่องมือทั้งหมด'})}</h1>
+      <h1 className="font-display text-h2 text-foreground">{pickLang(language, {en:'Menu', ru:'Меню', th:'เมนู'})}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{pickLang(language, {en:'Choose the job you need to do.', ru:'Выберите задачу, которую нужно выполнить.', th:'เลือกงานที่ต้องการทำ'})}</p>
     </header>
     <label htmlFor={searchId} className="flex min-h-11 items-center gap-3 border border-border bg-card px-3">
@@ -134,7 +138,7 @@ export default function OwnerModulesPage() {
     </label>
     {visible.length === 0 && <p role="status" className="py-6 text-sm text-muted-foreground">{pickLang(language, {en:'No matching tools available.', ru:'Доступные инструменты не найдены.', th:'ไม่พบเครื่องมือที่ใช้งานได้'})}</p>}
     {MODULE_AREAS.map((area, index) => {
-      const modules = visible.filter(m => area.ids.includes(m.id));
+      const modules = area.ids.flatMap(id => visible.filter(module => module.id === id));
       if (!modules.length) return null;
       return <details key={`${area.en}:${Boolean(query.trim())}`} open={query.trim() ? true : index === 0} className="border border-border bg-card">
         <summary className="min-h-12 cursor-pointer px-4 py-4 font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, area)} <span className="ml-2 text-xs text-muted-foreground">{modules.length}</span></summary>
