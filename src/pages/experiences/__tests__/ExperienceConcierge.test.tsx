@@ -13,7 +13,7 @@ vi.mock('@/hooks/useExperiencePricing', () => ({ useExperiencePricing: () => ({ 
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children }: any) => <main>{children}</main> }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createTouristAttractionSchema: () => ({}) }));
 vi.mock('@/components/crosssell', () => ({ CrossSellSection: () => null, RelatedServicesSection: () => null }));
-vi.mock('@/components/vertical-wizard/InquiryForm', () => ({ InquiryForm: ({ open, listingId, entryPoint }: any) => open ? <div role="dialog">{listingId} {entryPoint}</div> : null }));
+vi.mock('@/components/experiences/ExperienceInquiry', () => ({ ExperienceInquiry: ({ open, listingId, entryPoint }: { open: boolean; listingId: string; entryPoint: string }) => open ? <div role="dialog">{listingId} {entryPoint}</div> : null }));
 afterEach(cleanup);
 function mount(url: string) { render(<MemoryRouter initialEntries={[url]}><Routes><Route path="/experiences/:id" element={<ExperienceDetail />} /><Route path="/experiences/:id/book" element={<ExperienceBooking />} /></Routes></MemoryRouter>); }
 describe('myUNO experience concierge', () => {

@@ -18,7 +18,7 @@ vi.mock('@/components/ui/optimized-image', () => ({ OptimizedImage: ({ src, alt 
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 vi.mock('@/components/crosssell', () => ({ CrossSellSection: () => null, RelatedServicesSection: () => null }));
 vi.mock('@/components/booking', () => ({}));
-vi.mock('@/components/vertical-wizard/InquiryForm', () => ({ InquiryForm: ({ open, listingId, entryPoint }: { open: boolean; listingId: string; entryPoint: string }) => open ? <div role="dialog" data-listing={listingId} data-entry={entryPoint}>myUNO inquiry</div> : null }));
+vi.mock('@/components/experiences/ExperienceInquiry', () => ({ ExperienceInquiry: ({ open, listingId, entryPoint }: { open: boolean; listingId: string; entryPoint: string }) => open ? <div role="dialog" data-listing={listingId} data-entry={entryPoint}>myUNO inquiry</div> : null }));
 beforeEach(() => { vi.clearAllMocks(); state.language = 'en'; state.source = 'https://operator.example/programme'; });
 afterEach(cleanup);
 it.each(['en', 'ru', 'th'])('shows editorial information and concierge inquiry in %s, without inherited tariff options', language => {

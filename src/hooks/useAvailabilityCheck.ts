@@ -98,8 +98,9 @@ export function useAvailabilityCheck() {
       // Parse the JSONB response
       const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
 
+      if (typeof jsonData?.available !== 'boolean') throw new Error('Availability response was not confirmed.');
       const result: AvailabilityResult = {
-        available: jsonData?.available ?? true,
+        available: jsonData.available,
         spots_remaining: jsonData?.spots_remaining,
       };
 

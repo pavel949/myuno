@@ -5,9 +5,21 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useMyRequests } from '../useMyRequests';
 const state = vi.hoisted(() => ({ replies: {} as Record<string, { data: unknown[] | null; error: unknown; throws?: boolean }>, filters: [] as unknown[][] }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-customer' } }) }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => ({ select: () => ({ eq: (...args: unknown[]) => { state.filters.push([table, ...args]); return { order: () => ({ limit: () => { const reply = state.replies[table]; if (reply.throws) throw new Error('synthetic thrown read'); return Promise.resolve(reply); } }) }; } }) }) } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => {
+ const query = {
+  select: () => query,
+  eq: (...args: unknown[]) => { state.filters.push([table, ...args]); return query; },
+  order: () => query,
+  limit: () => {
+   const reply = state.replies[table];
+   if (reply.throws) throw new Error('synthetic thrown read');
+   return Promise.resolve(reply);
+  },
+ };
+ return query;
+} } }));
 afterEach(cleanup);
-beforeEach(() => { state.filters = []; state.replies = Object.fromEntries(['concierge_sessions', 'visa_records', 'orders', 'help_requests'].map(table => [table, { data: [], error: null }])); });
+beforeEach(() => { state.filters = []; state.replies = Object.fromEntries(['concierge_sessions', 'visa_records', 'orders', 'help_requests', 'consultation_requests'].map(table => [table, { data: [], error: null }])); });
 const show = () => { const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } }); return renderHook(() => useMyRequests(), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> }); };
 it('preserves successful entries and exposes returned source errors', async () => {
  state.replies.visa_records = { data: null, error: new Error('synthetic denied') };
@@ -24,7 +36,16 @@ it('exposes every failed source, including thrown failures, without claiming com
  const { result } = show();
  await waitFor(() => expect(result.current.isSuccess).toBe(true));
  expect(result.current.data).toEqual([]);
- expect(result.current.failedSources).toEqual(['concierge', 'visa', 'order', 'help']);
+ expect(result.current.failedSources).toEqual(['concierge', 'visa', 'order', 'help', 'experience']);
+});
+it('reads only the customer’s experience enquiries and shows the same receipt with the current status', async () => {
+ state.replies.consultation_requests = { data: [{ id: 'receipt-one', vertical_metadata: { listing_title: 'Island outing' }, status: 'contacted', created_at: '2026-11-20T00:00:00Z' }], error: null };
+ const { result } = show();
+ await waitFor(() => expect(result.current.isSuccess).toBe(true));
+ expect(result.current.data).toEqual([expect.objectContaining({ id: 'experience-receipt-one', receipt: 'receipt-one', source: 'experience', title: 'Island outing', status: 'in_progress' })]);
+ expect(state.filters).toContainEqual(['consultation_requests', 'user_id', 'synthetic-customer']);
+ expect(state.filters).toContainEqual(['consultation_requests', 'request_type', 'tour_booking']);
+ expect(state.filters).toContainEqual(['consultation_requests', 'vertical_id', 'tours']);
 });
 it('distinguishes verified empty sources from failures', async () => {
  const { result } = show();

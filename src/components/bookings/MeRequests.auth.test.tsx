@@ -111,3 +111,11 @@ it('localizes Thai request columns and dates without translating authored user c
  expect(screen.getAllByText('ไม่มีรายการ')).toHaveLength(3);
  expect(screen.getByText('ความช่วยเหลือ myUNO')).toBeVisible();
 });
+it('shows the experience receipt and cancellation even in the completed column', () => {
+ state.user = { id: 'synthetic-experience-customer' };
+ state.data = [{ id: 'experience-sample', source: 'experience', status: 'done', title: 'Island outing', createdAt: '2026-11-20T00:00:00Z', receipt: 'sample', experienceStatus: 'cancelled' }];
+ show('/me/requests?source=experience#experience-sample');
+ expect(screen.getByText('Island outing')).toBeVisible();
+ expect(screen.getByText('Request ID sample')).toBeVisible();
+ expect(screen.getByText('Cancelled')).toBeVisible();
+});
