@@ -1,0 +1,302 @@
+[
+  {
+    "language": "en",
+    "width": 375,
+    "geometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "geometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "en",
+    "width": 430,
+    "geometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "en",
+    "width": 1280,
+    "geometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 669.3984375,
+      "footerTop": 669.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 561.3984375,
+      "footerTop": 561.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "ru",
+    "width": 375,
+    "geometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 581.3984375,
+      "footerTop": 581.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "ru",
+    "width": 390,
+    "geometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 581.3984375,
+      "footerTop": 581.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "ru",
+    "width": 430,
+    "geometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "ru",
+    "width": 1280,
+    "geometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 669.3984375,
+      "footerTop": 669.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 561.3984375,
+      "footerTop": 561.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "th",
+    "width": 375,
+    "geometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 375,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "th",
+    "width": 390,
+    "geometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 390,
+      "bodyBottom": 533.3984375,
+      "footerTop": 533.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "th",
+    "width": 430,
+    "geometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 637.3984375,
+      "footerTop": 637.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 430,
+      "bodyBottom": 585.3984375,
+      "footerTop": 585.3984375,
+      "footerBottom": 770.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  },
+  {
+    "language": "th",
+    "width": 1280,
+    "geometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 669.3984375,
+      "footerTop": 669.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "reviewGeometry": {
+      "scrollWidth": 1280,
+      "bodyBottom": 561.3984375,
+      "footerTop": 561.3984375,
+      "footerBottom": 746.3984375,
+      "dialogTop": 40.6015625,
+      "dialogBottom": 771.3984375,
+      "buttonTopmost": true
+    },
+    "syntheticWrites": 3,
+    "externalDataCalls": 0,
+    "runtimeErrors": []
+  }
+]

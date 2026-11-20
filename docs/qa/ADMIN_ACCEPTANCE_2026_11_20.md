@@ -47,7 +47,7 @@ The new suite is diagnostic source-policy coverage. It adds no application featu
 
 ## Evidence in this run
 
-Local execution logs were retained under `/tmp/myuno-admin-tests.log`, `/tmp/myuno-admin-postgres.log`, `/tmp/myuno-catalogue-pg.log`, `/tmp/myuno-admin-typecheck.log` and `/tmp/myuno-catalogue-lint.log`. These paths are temporary execution evidence. CI on this PR must rerun the committed Unix-socket version before integration.
+Local execution evidence is preserved in [the GitHub evidence directory](evidence/admin-2026-11-20/README.md). It contains all 50 synthetic browser screenshots, three result JSON files and six local test/typecheck/lint logs. The committed Unix-socket PostgreSQL test passed CI before PR #293 was merged.
 
 Existing corroborating CI for the earlier release candidate `27d0c9143c1b016e95fbbcc9f75897c1bf6b09b1` is at https://github.com/pavel949/myuno/actions/runs/44552644119. It is evidence for that earlier commit only.
 
@@ -56,3 +56,9 @@ No production records, policies, migrations, grants or deployments were changed 
 ## CI follow-up
 
 On test commit `2b658da3a478ee273af41ea37f94d5fbaf1e027b`, Verify passed typecheck, the complete unit/PostgreSQL suite and lint: https://github.com/pavel949/myuno/actions/runs/44661268998. Connected-system verification, focused security, semantic and cleanup checks also passed. The design-system core browser job was still running at this observation; its discovery job had passed: https://github.com/pavel949/myuno/actions/runs/44661269264. The manually dispatched E2E workflow was skipped. This documentation-only follow-up preserves the tested application and test source.
+
+## Accepted integration and continuation
+
+PR #293 was merged as `ba4a7b248c4a3c67f690fc803760490f733a0ae0` after all active gates passed on head `28489f0ddff79908cf9b456131cd539a0e38a713`. Verify, Connected system, Design system, Focused security, Semantic Core and cleanup succeeded. The manual E2E workflow was skipped. This integration adds tests and documentation. The main application also includes separately checked PR #289.
+
+[Issue #294](https://github.com/pavel949/myuno/issues/294) preserves the outstanding authenticated production acceptance, build identity and project deletion UX work. The owner authorized publishing the checked code and preserving completed work through GitHub PRs. Publication status is recorded in that issue and the evidence PR.
