@@ -1,0 +1,7 @@
+# Atomic Fast Track request writer
+
+Review candidate for #235. The function saves the existing airport booking and all passengers in one transaction. A receipt scoped by actor and request key returns the original booking ID on an unchanged retry. A changed retry is rejected, and retry after a deleted booking never silently creates another booking. The receipt has no raw personal fields.
+
+The server must obtain the actor from its verified session. The future Edge adapter must use a stable UUID for the original attempt, handle replay without resending external notices, and keep the current checked draft/receipt semantics during rollout. Only the service role can call this writer. The checked writer is disabled until explicitly installed and wired. It accepts existing draft price metadata for contract parity and confers no price authority, settlement, or booking confirmation.
+
+Production activation requires read-only schema and recipient verification, including the existing airport booking admin-notification trigger and effective staff scopes. Verify that the complete saved request is visible to the correct operator in CRM (including workflow/readback) and externally duplicated alerts are prevented. Deploy the coordinated client and Edge changes only after those checks. On rollback stop the new writer and preserve receipts and booking IDs. Do not silently send an unresolved attempt to the legacy writer or delete stored receipts.
