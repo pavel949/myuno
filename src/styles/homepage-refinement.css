@@ -7,16 +7,23 @@
 }
 /* A task-first front door. The editorial photograph supports the choices;
    it no longer controls the text contrast or the mobile fold. */
-.home-refined .home-hero {
+.cinematic-home.home-refined .home-hero {
+  /* Keep the canvas and inverse text paired regardless of route CSS order. */
+  --home-hero-ink: hsl(var(--media-foreground));
+  --home-hero-muted-ink: hsl(var(--media-foreground) / .82);
   height: auto;
   min-height: 0;
   padding-block-end: 2rem;
-  background: var(--home-surface);
-  color: hsl(var(--foreground));
+  background: var(--media-home-hero);
+  color: var(--home-hero-ink);
 }
 .home-refined .home-hero .consumer-header-overlay {
-  color: hsl(var(--foreground));
-  border-bottom: 1px solid var(--home-soft-border);
+  color: var(--home-hero-ink);
+  border-bottom: 1px solid hsl(var(--media-foreground) / .2);
+}
+.home-refined .home-hero .consumer-header-overlay .consumer-nav a[aria-current="page"],
+.home-refined .home-hero .consumer-header-overlay .consumer-partner-menu[open] summary {
+  color: var(--home-hero-ink);
 }
 .home-refined .home-hero-layout {
   display: grid;
@@ -33,14 +40,14 @@
   letter-spacing: -.02em;
   font-weight: 400;
   text-shadow: none;
-  color: hsl(var(--foreground));
+  color: var(--home-hero-ink);
 }
 .home-refined .home-hero .home-hero-copy > p {
   max-width: var(--public-width-summary);
   font-size: var(--public-body-size);
   line-height: 1.5;
   margin-top: .75rem;
-  color: hsl(var(--muted-foreground));
+  color: var(--home-hero-muted-ink);
   text-wrap: pretty;
 }
 .home-refined .home-hero-media {
@@ -186,7 +193,7 @@
 }
 @media(max-width:767px) {
   .home-refined { --home-search-overlap: 0rem; }
-  .home-refined .home-hero { padding-block-end: 1.5rem; }
+  .cinematic-home.home-refined .home-hero { padding-block-end: 1.5rem; }
   .home-refined .home-search-entry-button { min-height: 5.5rem; padding: 1rem; gap: .75rem; }
   .home-refined .home-search-symbol { display: none; }
   .home-refined .home-search-entry-copy strong { font-size: var(--public-body-size); line-height: 1.4; }
@@ -229,8 +236,8 @@
 }
 .home-refined .home-hero-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .home-refined .home-hero-primary:hover { background: hsl(var(--primary-hover)); }
-.home-refined .home-hero-secondary { border: 0; background: transparent; color: hsl(var(--primary)); padding: .25rem 0; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .25rem; justify-content: flex-start; }
-.home-refined .home-hero-secondary:hover { background: hsl(var(--primary) / .06); }
+.home-refined .home-hero-secondary { border: 0; background: transparent; color: var(--home-hero-ink); padding: .25rem 0; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .25rem; justify-content: flex-start; }
+.home-refined .home-hero-secondary:hover { background: hsl(var(--media-foreground) / .08); }
 .home-audience { padding-top: var(--public-section-gap); }
 .home-audience-grid {
   display: grid;
@@ -274,7 +281,7 @@
 
 /* First-screen conversion: make the next action explicit before broad discovery. */
 .home-refined .home-hero-choices { max-width: var(--public-width-hero); margin-top: 1.5rem; }
-.home-refined .home-hero-choices .home-hero-choices-label { margin: 0 0 .625rem; color: hsl(var(--muted-foreground)); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
+.home-refined .home-hero-choices .home-hero-choices-label { margin: 0 0 .625rem; color: var(--home-hero-muted-ink); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
 /* 2×2: the hero column is width-capped, so four columns leave ~170px cells
    that split RU labels ("недвижим|ость") at every desktop width. */
 .home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
@@ -285,8 +292,8 @@
 .home-refined .home-hero-choice-copy strong { hyphens: auto; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
 .home-refined .home-hero-choice-copy small { display: block; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); line-height: 1.35; }
 .home-refined .home-hero-choice > svg { flex: 0 0 auto; margin-top: .125rem; }
-.home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary)); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
-.home-refined .home-hero-help:hover { color: hsl(var(--primary-hover)); }
+.home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: var(--home-hero-ink); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
+.home-refined .home-hero-help:hover { color: var(--home-hero-muted-ink); }
 .home-life-group { display: grid; gap: 0; }
 .home-partners-group { margin-top: 3.5rem; padding-block: 3.5rem 1rem; background: var(--home-surface); }
 .home-group-heading { margin-bottom: 1.5rem; }

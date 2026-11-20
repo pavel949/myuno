@@ -6694,7 +6694,7 @@
     },
     {
       "file": "src/components/landing/MarketplaceEntry.tsx",
-      "sha256": "640b5a5b7469e180837b2d6033c073c0a00efff2cdf47c46f042919e33724344",
+      "sha256": "3eb7b288af704d9b3d189aaeed483d6167080df0bf65202ed7e8d04bcfe4c86a",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -40103,7 +40103,7 @@
     },
     {
       "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "a5599bcb66ee709a61e2672bb96910676710376fbc8027fb68a753ace12e2e1d",
+      "sha256": "267fe586ceeca4ec89392a9741a78a7362ba5c12e46eca6c51e4e72d54f39bbe",
       "directRouteDeclarations": [
         {
           "id": "2492a5f81192388c",

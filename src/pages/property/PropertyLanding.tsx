@@ -234,25 +234,18 @@ export default function PropertyLanding() {
       >
         <div className="rental-section-heading">
           <div>
-            <p className="rental-eyebrow">
-              {t({
-                ru: "От идеи — к выбору",
-                en: "From inspiration to a home",
-                th: "จากแรงบันดาลใจสู่ที่พัก",
-              })}
-            </p>
             <h2 id="rental-search-title">
               {t({
-                ru: "Теперь найдём ваш дом",
-                en: "Now, find your home",
-                th: "มาค้นหาที่พักของคุณ",
+                ru: "Поиск жилья",
+                en: "Find a home",
+                th: "ค้นหาที่พัก",
               })}
             </h2>
             <p>
               {t({
-                ru: "Выберите срок, район и даты. Условия и доступность уточняются для конкретного объекта.",
-                en: "Choose your duration, area and dates. Terms and availability are checked for each home.",
-                th: "เลือกระยะเวลา ย่าน และวันที่ เงื่อนไขและห้องว่างต้องตรวจสอบสำหรับที่พักแต่ละแห่ง",
+                ru: "Укажите срок, район и даты. Если ещё не определились, ищите без дат.",
+                en: "Choose a duration, area and dates. You can also search without dates.",
+                th: "เลือกระยะเวลา ย่าน และวันที่ หรือค้นหาโดยไม่ระบุวันที่ก็ได้",
               })}
             </p>
           </div>
