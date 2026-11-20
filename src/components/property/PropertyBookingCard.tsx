@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AvailabilityStatus } from './AvailabilityStatus';
 import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
@@ -32,6 +33,7 @@ interface PropertyBookingCardProps {
   guestSearch?: string;
   pricePerNight: number;
   rentalTerms?: PropertyRentalTerms | null;
+  instantBooking?: boolean;
   currency?: string;
   className?: string;
   earlyBookingDiscount?: number;
@@ -54,6 +56,7 @@ export function PropertyBookingCard({
   guestSearch,
   pricePerNight,
   rentalTerms,
+  instantBooking = rentalTerms?.instant_booking === true,
   currency = 'THB',
   className,
   earlyBookingDiscount,
@@ -413,11 +416,17 @@ export function PropertyBookingCard({
           {!dateRange?.from || !dateRange?.to ? (
             <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
           ) : (
-            isRu ? 'Запросить прямое бронирование' : 'Request direct booking'
+            instantBooking
+              ? pickLang(language, { ru: 'Продолжить к бронированию', en: 'Continue to booking', th: 'ดำเนินการจองต่อ' })
+              : pickLang(language, { ru: 'Запросить бронирование', en: 'Request to book', th: 'ส่งคำขอจอง' })
           )}
         </Button>
         
-        <p className="text-xs text-muted-foreground">{isRu ? 'Расчёт не подтверждает бронь. На следующем шаге проверьте условия; вопрос менеджеру можно задать без оплаты.' : 'This estimate does not confirm a booking. Review the terms on the next step; asking the manager requires no payment.'}</p>
+        <p className="text-xs text-muted-foreground">
+          {instantBooking
+            ? pickLang(language, { ru: 'Проверьте стоимость и условия перед подтверждением.', en: 'Review the price and terms before confirming.', th: 'ตรวจสอบราคาและเงื่อนไขก่อนยืนยัน' })
+            : pickLang(language, { ru: 'myUNO проверит заявку. Сейчас оплаты нет.', en: 'myUNO will review your request. No payment is due now.', th: 'myUNO จะตรวจสอบคำขอ ยังไม่ต้องชำระเงินตอนนี้' })}
+        </p>
 
         {!nights ? null : (
           <>
@@ -476,7 +485,7 @@ export function PropertyBookingCard({
               </div>
 
               {/* Payment Schedule — public-friendly: only prepay / balance, no deposit operational details */}
-              <div className="pt-2 mt-1 space-y-2 p-3 rounded-none bg-muted/40">
+              {instantBooking && <div className="pt-2 mt-1 space-y-2 p-3 rounded-none bg-muted/40">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
                     {isRu ? `Предоплата по условиям (${pricing.prepayPercent}%)` : `Prepayment under the terms (${pricing.prepayPercent}%)`}
@@ -493,7 +502,7 @@ export function PropertyBookingCard({
                     <span className="font-medium text-foreground">{formatPrice(pricing.balanceAmount)}</span>
                   </div>
                 )}
-              </div>
+              </div>}
 
               {/* Hint: extra fees (metered utilities, cleaning) live in their own
                   block below the card and are settled with the host on-site. */}

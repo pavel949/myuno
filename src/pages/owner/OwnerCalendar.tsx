@@ -47,6 +47,7 @@ export default function OwnerCalendar() {
     if (!allProperties.some(p => p.property_id === id)) return;
     const next = new URLSearchParams(params);
     next.set('property', id);
+    next.delete('show');
     setParams(next);
   };
   const { data: complexes } = usePropertyComplexes();
@@ -238,6 +239,7 @@ export default function OwnerCalendar() {
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">
             <div className="min-w-0 w-full space-y-4">
               <AirbnbCalendarGrid
+                key={`${selectedPropertyId}:${params.get('date') ?? ''}:${params.get('show') ?? ''}`}
                 propertyId={selectedPropertyId || undefined}
                 properties={propertyRefs}
               />

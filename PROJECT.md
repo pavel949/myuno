@@ -162,6 +162,10 @@ Trusted infrastructure, not noisy marketplace. Task first. One obvious primary a
 
 `/mc/rates` opens the selected property's price calendar. Two dates select an inclusive range in either order, while date fields support cross-month edits. Calendar cells show the nightly amount before discounts, fees and rate plan adjustments. Base rates, stay discounts, and seasons are accessible through price settings. The property selector uses the existing workspace access list. Calendar saves use the checked, price-only writer and never write occupancy or historical booking totals.
 
+### Short-stay journey
+
+Public search carries dates and guest count into the listing and booking entry. Request-to-book uses the existing enquiry and never claims a reservation or charge. Tracking links to the guest's trip only when an actor-bound read resolves the exact inventory record for a confirmed order. Today surfaces incoming enquiries and opens the exact existing inventory booking from arrivals, departures or current stays. The price editor hands off to the same property and Bangkok civil date for availability and booking details.
+
 ## 14. Engineering Rules
 Small reviewable tranches. Never combine auth cutover, schema redesign, money changes and broad UX redesign.
 

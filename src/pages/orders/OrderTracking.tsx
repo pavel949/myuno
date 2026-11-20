@@ -29,6 +29,9 @@ import { cn } from '@/lib/utils';
 import type { OrderStatus, OrderType } from '@/hooks/useOrders';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { toBangkokDateKey, parseCivilDate } from '@/lib/hotelDates';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const statusConfig: Record<OrderStatus, { 
   icon: typeof Clock; 
@@ -73,6 +76,7 @@ export default function OrderTracking() {
   
   const { 
     order, 
+    stayId,
     timeline, 
     isLoading,
     error, refetch, timelineError, timelineLoading, retryTimeline,
@@ -123,12 +127,18 @@ export default function OrderTracking() {
   const StatusIcon = config.icon;
   const progress = getProgressPercentage(status);
   const isPropertyOrder = order.order_type === 'property' || order.order_items?.some(item => item.item_type === 'property') === true;
+  const checkIn = isPropertyOrder ? toBangkokDateKey(order.start_at) : null;
+  const checkOut = isPropertyOrder ? toBangkokDateKey(order.end_at) : null;
+  const dateLabel = (day: string) => parseCivilDate(day).toLocaleDateString(language, {
+    day: 'numeric', month: 'short', year: 'numeric', calendar: 'gregory',
+  });
+  const tripTitle = pickLang(language, { ru: 'Поездка', en: 'Your stay', th: 'การเข้าพักของคุณ' });
 
   return (
     <AppLayout usePageContainer={false} title={isRu ? 'Отслеживание заказа' : 'Order Tracking'}>
       <PageContainer className={isPropertyOrder ? FLOATING_OFFSET.contentClearance : 'pb-24'}>
         <PageHeader 
-          title={isRu ? 'Отслеживание заказа' : 'Order Tracking'} 
+          title={isPropertyOrder ? tripTitle : isRu ? 'Отслеживание заказа' : 'Order Tracking'}
           showBack 
           fallbackPath="/me/bookings"
         />
@@ -140,8 +150,12 @@ export default function OrderTracking() {
                 <p className="text-sm text-muted-foreground">
                   {isRu ? 'Заказ' : 'Order'} #{order.order_number}
                 </p>
-                <h2 className="text-xl font-bold capitalize">
-                  {isPropertyOrder ? (isRu ? 'Бронирование жилья' : 'Property booking') : order.order_type?.replace(/_/g, ' ') || (isRu ? 'Заказ' : 'Order')}
+                <h2 className={cn("text-xl font-bold", !isPropertyOrder && "capitalize")}>
+                  {isPropertyOrder
+                    ? pickLang(language, status === 'pending'
+                        ? { ru: 'Запрос на бронирование', en: 'Booking request', th: 'คำขอจองที่พัก' }
+                        : { ru: 'Бронирование жилья', en: 'Property booking', th: 'การจองที่พัก' })
+                    : order.order_type?.replace(/_/g, ' ') || (isRu ? 'Заказ' : 'Order')}
                 </h2>
               </div>
               <Badge className={cn('shrink-0 whitespace-nowrap text-sm', config.color)}>
@@ -149,6 +163,20 @@ export default function OrderTracking() {
                 {isRu ? config.labelRu : config.labelEn}
               </Badge>
             </div>
+
+            {isPropertyOrder && <div className="space-y-3 border-t border-border pt-3">
+              {checkIn && checkOut && <p className="text-sm text-muted-foreground">
+                {dateLabel(checkIn)} – {dateLabel(checkOut)}
+              </p>}
+              {status === 'pending' && <p className="text-sm text-muted-foreground">
+                {pickLang(language, { ru: 'Команда myUNO проверит доступность и свяжется с вами по контактам из заявки.', en: 'myUNO will check availability and contact you using the details from your request.', th: 'myUNO จะตรวจสอบที่พักว่างและติดต่อคุณตามข้อมูลในคำขอ' })}
+              </p>}
+              {stayId && <Button asChild>
+                <Link to={APP_ROUTES.TRIP_DETAIL(stayId)}>
+                  {pickLang(language, { ru: 'Открыть детали проживания', en: 'Open stay details', th: 'เปิดรายละเอียดการเข้าพัก' })}
+                </Link>
+              </Button>}
+            </div>}
 
             {/* Generic service stages do not describe property inventory/payment lifecycles. */}
             {!isPropertyOrder && progress !== null && STATUS_SEQUENCE.includes(status) && (
@@ -178,7 +206,7 @@ export default function OrderTracking() {
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-lg">
-              {isRu ? 'История заказа' : 'Order Timeline'}
+              {isPropertyOrder ? pickLang(language, { ru: 'История бронирования', en: 'Booking timeline', th: 'ประวัติการจอง' }) : isRu ? 'История заказа' : 'Order Timeline'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -239,7 +267,7 @@ export default function OrderTracking() {
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-lg">
-              {isRu ? 'Детали заказа' : 'Order Details'}
+              {isPropertyOrder ? pickLang(language, { ru: 'Детали проживания', en: 'Stay details', th: 'รายละเอียดการเข้าพัก' }) : isRu ? 'Детали заказа' : 'Order Details'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -247,7 +275,7 @@ export default function OrderTracking() {
             {order.order_items && order.order_items.length > 0 && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {isRu ? 'Товары' : 'Items'}
+                  {isPropertyOrder ? tripTitle : isRu ? 'Товары' : 'Items'}
                 </p>
                 <div className="space-y-2">
                   {order.order_items.map((item) => (
@@ -281,7 +309,7 @@ export default function OrderTracking() {
             )}
 
             {/* Schedule */}
-            {order.start_at && (
+            {!isPropertyOrder && order.start_at && (
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
                   {isRu ? 'Дата и время' : 'Date & Time'}

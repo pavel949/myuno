@@ -2,10 +2,15 @@ import { renderHook, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { useOrderTracking } from '../useOrderTracking';
-const s=vi.hoisted(()=>({actor:'guest-a' as string|null,reads:0,rpcs:0,error:false,missing:false,timelinePending:false,resolveTimeline:null as null|((value:unknown)=>void),pending:false,resolveLate:null as null|((value:unknown)=>void)}));
+const s=vi.hoisted(()=>({actor:'guest-a' as string|null,reads:0,rpcs:0,stayFilters:[] as Array<[string,string]>,propertyStatus:null as string|null,stayMissing:false,error:false,missing:false,timelinePending:false,resolveTimeline:null as null|((value:unknown)=>void),pending:false,resolveLate:null as null|((value:unknown)=>void)}));
 vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:s.actor?{id:s.actor}:null,isLoading:false})}));
-vi.mock('@/integrations/supabase/client',()=>({supabase:{from:()=>{s.reads++;const actor=s.actor;const q={select:()=>q,eq:()=>q,abortSignal:()=>q,maybeSingle:()=>s.pending?new Promise(resolve=>{s.resolveLate=resolve}):Promise.resolve({data:s.missing?null:{id:'order-a',customer_user_id:actor,status:'pending'},error:s.error?Error('read failed'):null})};return q;},rpc:()=>{s.rpcs++;const r=s.timelinePending?new Promise(resolve=>{s.resolveTimeline=resolve}):Promise.resolve({data:[{status:s.actor==='guest-b'?'confirmed':'pending'}],error:null});return Object.assign(r,{abortSignal:()=>r});},channel:()=>{const c={on:()=>c,subscribe:()=>c};return c;},removeChannel:()=>{}}}));
-beforeEach(()=>{s.timelinePending=false;s.resolveTimeline=null;s.pending=false;s.resolveLate=null;s.actor='guest-a';s.reads=0;s.rpcs=0;s.error=false;s.missing=false;});afterEach(cleanup);
+vi.mock('@/integrations/supabase/client',()=>({supabase:{from:(table:string)=>{
+  if(table==='property_bookings'){
+    const q={select:()=>q,eq:(field:string,value:string)=>{s.stayFilters.push([field,value]);return q;},abortSignal:()=>q,maybeSingle:async()=>({data:s.stayMissing?null:{id:'stay-a'},error:null})};
+    return q;
+  }
+  s.reads++;const actor=s.actor;const q={select:()=>q,eq:()=>q,abortSignal:()=>q,maybeSingle:()=>s.pending?new Promise(resolve=>{s.resolveLate=resolve}):Promise.resolve({data:s.missing?null:{id:'order-a',customer_user_id:actor,status:s.propertyStatus??'pending',order_type:s.propertyStatus?'property':'service'},error:s.error?Error('read failed'):null})};return q;},rpc:()=>{s.rpcs++;const r=s.timelinePending?new Promise(resolve=>{s.resolveTimeline=resolve}):Promise.resolve({data:[{status:s.actor==='guest-b'?'confirmed':'pending'}],error:null});return Object.assign(r,{abortSignal:()=>r});},channel:()=>{const c={on:()=>c,subscribe:()=>c};return c;},removeChannel:()=>{}}}));
+beforeEach(()=>{s.timelinePending=false;s.resolveTimeline=null;s.pending=false;s.resolveLate=null;s.actor='guest-a';s.reads=0;s.rpcs=0;s.stayFilters=[];s.propertyStatus=null;s.stayMissing=false;s.error=false;s.missing=false;});afterEach(cleanup);
 function mount(){const client=new QueryClient({defaultOptions:{queries:{retry:false}}});return renderHook(()=>useOrderTracking('order-a'),{wrapper:({children})=><QueryClientProvider client={client}>{children}</QueryClientProvider>});}
 it('does not read order or timeline before authentication',()=>{s.actor=null;const {result}=mount();expect(result.current.order).toBeNull();expect(s.reads).toBe(0);expect(s.rpcs).toBe(0);});
 it('reads timeline only after a readable order and masks previous actor synchronously',async()=>{const{result,rerender}=mount();await waitFor(()=>expect(result.current.timeline).toHaveLength(1));s.actor='guest-b';rerender();expect(result.current.order).toBeNull();expect(result.current.timeline).toEqual([]);await waitFor(()=>expect(result.current.order?.customer_user_id).toBe('guest-b'));s.actor=null;rerender();expect(result.current.order).toBeNull();expect(result.current.timeline).toEqual([]);});
@@ -21,4 +26,25 @@ it.each(['checked_in', 'checked_out', 'deposit_paid', 'pending_deposit', 'future
   expect(result.current.getProgressPercentage(status as never)).toBeNull();
   expect(result.current.isStatusCompleted('pending', status as never)).toBe(false);
   expect(result.current.isStatusCompleted(status as never, 'confirmed')).toBe(false);
+});
+
+it('opens only the confirmed order’s recorded stay for the authenticated guest', async () => {
+  s.propertyStatus = 'confirmed';
+  const { result, rerender } = mount();
+  await waitFor(() => expect(result.current.stayId).toBe('stay-a'));
+  expect(s.stayFilters).toEqual([['order_id', 'order-a'], ['guest_id', 'guest-a']]);
+  s.actor = 'guest-b';
+  s.stayMissing = true;
+  rerender();
+  expect(result.current.stayId).toBeNull();
+  await waitFor(() => expect(s.stayFilters).toContainEqual(['guest_id', 'guest-b']));
+  expect(result.current.stayId).toBeNull();
+});
+
+it('does not look up a stay for a pending rental request', async () => {
+  s.propertyStatus = 'pending';
+  const { result } = mount();
+  await waitFor(() => expect(result.current.order?.order_type).toBe('property'));
+  expect(result.current.stayId).toBeNull();
+  expect(s.stayFilters).toEqual([]);
 });

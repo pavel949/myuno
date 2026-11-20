@@ -143,6 +143,7 @@ export default function PropertyDetail() {
   const property = sameRecordId(propertyData?.id, id) ? propertyData : undefined;
   const managementCompanyQuery = useManagementCompanyById(property?.management_company_id);
   const rentalTerms = property?.rentalTerms;
+  const instantBooking = Boolean(property?.instant_booking || rentalTerms?.instant_booking);
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
   const dateRange = editedDates?.id === id ? editedDates.value : initialGuestContext.dateRange;
@@ -478,7 +479,7 @@ export default function PropertyDetail() {
               <PropertyDetailHighlights
                 propertyType={property.property_type}
                 viewLabels={viewLabels}
-                instantBooking={rentalTerms?.instant_booking}
+                instantBooking={instantBooking}
                 project={property.project}
                 floor={property.floor}
                 unitNumber={property.unit_number}
@@ -821,6 +822,7 @@ export default function PropertyDetail() {
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight ?? 0}
                     rentalTerms={rentalTerms}
+                    instantBooking={instantBooking}
                     currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
                     earlyBookingDays={property?.early_booking_days ?? undefined}
@@ -868,7 +870,7 @@ export default function PropertyDetail() {
           titleEn={property.title_en}
           titleRu={property.title_ru}
           managerPhone={rentalTerms?.manager_phone}
-          instantBooking={rentalTerms?.instant_booking}
+          instantBooking={instantBooking}
           dateRange={dateRange}
           guestCount={guestCount}
           onOpenDatePicker={() => { if (pricing.canQuoteShortStay) setDateSheetOpen(true); }}

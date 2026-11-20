@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({ language: 'ru' as 'ru' | 'en' | 'th', scenario
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/hooks/usePmsToday', () => ({ usePmsToday: () => { const data = todayFixtures(mocks.language, mocks.scenario); if (mocks.unknownGuests) data.arrivals = data.arrivals.map(booking => ({...booking,guests_count:null})); return { ...data, refetch: mocks.refetch }; } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: new Proxy({}, { get: () => mocks.database() }) }));
+vi.mock('@/hooks/useBookingStatusHistory', () => ({ useBookingStatusHistory: () => ({ events: [], highlightIds: new Set() }) }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
@@ -18,9 +19,19 @@ afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
-  it('dispatches booking, request and unit links to the existing property boundary', () => {
+  it('opens the exact stay and its conversation from Today', () => {
     mount();
-    for (const element of [screen.getAllByText(todayFixtures(language).arrivals[0].guest_name ?? '', { selector: 'p' })[0], screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
+    fireEvent.click(screen.getAllByRole('button', { name: /Открыть бронирование|Open booking/ })[0]);
+    const booking = within(screen.getByRole('dialog'));
+    expect(booking.getByRole('link', { name: /переписку с гостем|guest conversation/ }))
+      .toHaveAttribute('href', '/mc/chat/booking/synthetic-booking');
+    expect(booking.getByRole('link', { name: /Календарь и задачи|Property calendar/ }))
+      .toHaveAttribute('href', '/mc/calendar?property=synthetic-property&date=2026-10-17');
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today');
+  });
+  it('keeps property destinations for request and unit rows', () => {
+    mount();
+    for (const element of [screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
       fireEvent.click(element);
       expect(screen.getByTestId('route-boundary')).toHaveTextContent(APP_ROUTES.MC_PROPERTY_DETAIL('synthetic-property'));
     }
@@ -41,7 +52,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
     expect(header).toHaveClass('ds-section');
     expect(within(header).getByText(/ · (Phuket|Пхукет)$/)).toBeVisible();
     const navigation = within(header).getByRole('navigation', { name: language === 'ru' ? 'Навигация по операциям' : 'Operational navigation' });
-    expect(within(navigation).getAllByRole('link')).toHaveLength(2);
+    expect(within(navigation).getAllByRole('link')).toHaveLength(3);
     fireEvent.click(within(navigation).getByRole('button', { name: language === 'ru' ? 'Обновить' : 'Refresh' }));
     expect(mocks.refetch).toHaveBeenCalledOnce();
   });
@@ -59,7 +70,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   it('empty fixture has no item destinations', () => {
     mocks.scenario = 'empty'; mount();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
-    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(2);
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
   });
   it('no-properties destination is the existing properties route', () => {
     mocks.scenario = 'no-properties'; mount();

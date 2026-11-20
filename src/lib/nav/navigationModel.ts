@@ -81,7 +81,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //                  (capital workflow first, browse second)
 //  mc_portal  → My Properties · Statements · Documents · Messages · Me
 //                  (read-only owner portal — finance + comms)
-//  owner      → Dashboard · Properties · Calendar · Finance · Messages
+//  owner      → Today · Calendar · Properties · Messages · More
 //                  (operator workflow — daily PMS loop)
 //  vendor     → Dashboard · Services · Bookings · Payouts · Profile
 //                  (service-provider workflow — fulfilment + payouts)
@@ -135,6 +135,10 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
+  '/mc/today':    ['/mc/today', '/mc/bookings-list'],
+  '/mc/calendar': ['/mc/calendar', '/mc/rates'],
+  '/mc/messages': ['/mc/messages', '/mc/chat'],
+  '/mc/modules':  ['/mc/modules', '/mc/finance'],
   '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
   '/my-property': [
@@ -157,6 +161,7 @@ const PATH_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === '/mc/modules' && pathname === APP_ROUTES.MC) return true;
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
