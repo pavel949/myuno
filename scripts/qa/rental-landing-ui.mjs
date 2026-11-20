@@ -89,9 +89,13 @@ const css = await postcss([
   from: path.join(root, "src/index.css"),
 });
 await writeFile(path.join(output, "fixture.css"), css.css + "\n" + routeCss);
+const fixtureHtml = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>';
+await writeFile(path.join(output, "fixture.html"), fixtureHtml);
+// First paint must already use the requested palette; toggling .dark after
+// mount mixes transitions from the old field surface with new placeholder ink.
 await writeFile(
-  path.join(output, "fixture.html"),
-  '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>',
+  path.join(output, "fixture-dark.html"),
+  fixtureHtml.replace("<html>", '<html class="dark">'),
 );
 const files = [
   "src/pages/property/PropertyLanding.tsx",

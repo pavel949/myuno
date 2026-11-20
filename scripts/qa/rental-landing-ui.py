@@ -46,11 +46,10 @@ async def main():
      else:blocked.append(r.request.url);await r.abort()
     await context.route('**/*',contrast_route)
     page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-    await page.goto(f'{base}/fixture.html?lang=en')
+    fixture='fixture-dark.html' if theme=='dark' else 'fixture.html'
+    await page.goto(f'{base}/{fixture}?lang=en')
     await expect(page.locator('#rental-title')).to_be_visible()
-    # The fixture preserves the actual rental route stylesheet order; the
-    # outer shell is isolated, so apply the real token selector explicitly.
-    await page.evaluate("(theme) => document.documentElement.classList.toggle('dark',theme==='dark')",theme)
+    assert await page.evaluate("document.documentElement.classList.contains('dark')")==(theme=='dark')
     measurements=await assert_computed_contrast(page,[
      ('#rental-search input[type="search"][placeholder]',1,'placeholder'),
      ('#rental-search input[type="number"][placeholder]',1,'placeholder'),
