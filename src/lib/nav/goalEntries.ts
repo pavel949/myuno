@@ -9,7 +9,7 @@
  */
 import {
   BedDouble, Home, Building2, Wrench, Plane, Car, Stethoscope, Scale,
-  KeyRound, Hammer, Map, Sparkles, ShieldCheck, Landmark, Truck, Users,
+  KeyRound, Hammer, Map, Sparkles, ShieldCheck, Landmark, Truck, Users, type LucideIcon,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -17,7 +17,7 @@ export type GoalId = 'stay' | 'live' | 'buy' | 'services';
 
 export interface GoalLink {
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   en: string;
   ru: string;
   th: string;

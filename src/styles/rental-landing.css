@@ -285,7 +285,8 @@
   box-shadow: none;
   margin-block-end: var(--section-content-gap);
 }
-.rental-search-section .home-search-duration button {
+.rental-search-section .home-search .home-search-duration button {
+  min-height: var(--touch-target);
   min-width: 0;
   white-space: nowrap;
   overflow-wrap: normal;
