@@ -18,6 +18,7 @@ import { OperationsLeadsTab } from '@/components/admin/operations/OperationsLead
 import { OperationsInquiriesTab } from '@/components/admin/operations/OperationsInquiriesTab';
 import { OperationsDisputesTab } from '@/components/admin/operations/OperationsDisputesTab';
 import { OperationsManualPaymentsTab } from '@/components/admin/operations/OperationsManualPaymentsTab';
+import { OperationsFlowerDeliveriesTab } from '@/components/admin/operations/OperationsFlowerDeliveriesTab';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { applyOrderQueue, applyTicketQueue } from '@/lib/adminDashboardQueues';
@@ -43,7 +44,7 @@ function useOperationsOverview() {
   });
 }
 
-const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 'manual-payments'] as const;
+const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes', 'manual-payments', 'flower-delivery'] as const;
 
 export default function AdminOperations() {
   const navigate = useNavigate();
@@ -87,6 +88,11 @@ export default function AdminOperations() {
       id: 'manual-payments',
       label: isRu ? 'Оплаты ₽' : 'RUB payments',
       icon: Wallet,
+    },
+    {
+      id: 'flower-delivery',
+      label: pickLang(language, { en: 'Flower delivery', ru: 'Доставка цветов', th: 'บริการส่งดอกไม้' }),
+      icon: ClipboardList,
     },
   ];
 
@@ -211,6 +217,9 @@ export default function AdminOperations() {
 
         <TabsContent value="manual-payments" className="mt-4">
           <OperationsManualPaymentsTab />
+        </TabsContent>
+        <TabsContent value="flower-delivery" className="mt-4">
+          <OperationsFlowerDeliveriesTab />
         </TabsContent>
       </Tabs>
     </PageShell>
