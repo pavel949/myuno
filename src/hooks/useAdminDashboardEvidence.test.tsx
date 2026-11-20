@@ -5,6 +5,7 @@ import { readAdminPlatformStatus, useAdminDashboardSnapshots, useAdminPlatformSt
 const state = vi.hoisted(() => ({
   user: { id: 'synthetic-admin' } as { id: string } | null, admin: true, checking: false,
   emailError: false, reconciliationError: false, count: 0 as number | null,
+  stripeError: false, stripe: { secret_key: 'live', webhook_secret: true } as { secret_key: string; webhook_secret: boolean },
   verticals: [{ value: '{"enabled":true}' }] as { value: string }[],
   queries: [] as { queryKey: unknown[]; enabled: boolean }[],
   filters: [] as unknown[][],
@@ -12,7 +13,7 @@ const state = vi.hoisted(() => ({
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.user }) }));
 vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: state.admin, isLoading: state.checking }) }));
 vi.mock('@tanstack/react-query', () => ({ useQuery: (options: { queryKey: unknown[]; enabled: boolean }) => { state.queries.push(options); return { data: undefined }; } }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => {
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: async () => state.stripeError ? { data: null, error: new Error('synthetic source failure') } : { data: { stripe: state.stripe }, error: null } }, from: (table: string) => {
   let key = '';
   let like = false;
   const response = () => table === 'reconciliation_alerts'
@@ -35,6 +36,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: str
 beforeEach(() => {
   state.user = { id: 'synthetic-admin' }; state.admin = true; state.checking = false;
   state.emailError = false; state.reconciliationError = false; state.count = 0;
+  state.stripeError = false; state.stripe = { secret_key: 'live', webhook_secret: true };
   state.verticals = [{ value: '{"enabled":true}' }]; state.queries = []; state.filters = [];
 });
 
@@ -42,13 +44,23 @@ describe('platform status reads', () => {
   it('preserves one-source errors as unknown without hiding other source evidence', async () => {
     state.emailError = true;
     expect(await readAdminPlatformStatus(new Date('2026-10-20T12:00:00Z'))).toEqual([
-      { key: 'stripe_mode', status: 'configured' }, { key: 'admin_emails', status: 'unknown' },
+      { key: 'stripe_mode', status: 'configured', detail: 'live_mode' }, { key: 'admin_emails', status: 'unknown' },
       { key: 'admin_whatsapp', status: 'configured' }, { key: 'reconciliation', status: 'verified' },
       { key: 'verticals', status: 'configured' },
     ]);
     expect(state.filters).toContainEqual(['reconciliation_alerts', 'gte', 'created_at', '2026-09-20T12:00:00.000Z']);
     expect(state.filters).toContainEqual(['reconciliation_alerts', 'lte', 'created_at', '2026-10-20T12:00:00.000Z']);
     expect(state.filters).toContainEqual(['reconciliation_alerts', 'is', 'resolved_at', null]);
+  });
+  it('reports card payments from the stored Stripe secrets, not from a switch', async () => {
+    state.stripe = { secret_key: 'missing', webhook_secret: true };
+    expect(await readAdminPlatformStatus()).toContainEqual({ key: 'stripe_mode', status: 'not_configured', detail: 'missing_secret_key' });
+    state.stripe = { secret_key: 'test', webhook_secret: false };
+    expect(await readAdminPlatformStatus()).toContainEqual({ key: 'stripe_mode', status: 'not_configured', detail: 'missing_webhook_secret' });
+    state.stripe = { secret_key: 'test', webhook_secret: true };
+    expect(await readAdminPlatformStatus()).toContainEqual({ key: 'stripe_mode', status: 'configured', detail: 'test_mode' });
+    state.stripeError = true;
+    expect(await readAdminPlatformStatus()).toContainEqual({ key: 'stripe_mode', status: 'unknown' });
   });
   it('never treats failed or missing reconciliation counts as clean', async () => {
     state.count = null;

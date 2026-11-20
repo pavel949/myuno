@@ -4,7 +4,7 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useAdminPlatformStatus } from '@/hooks/useAdminDashboardEvidence';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { PlatformStatus } from '@/lib/adminDashboardEvidence';
+import type { PlatformStatus, StripeStatusDetail } from '@/lib/adminDashboardEvidence';
 import { useDashboardClock } from '@/components/admin/dashboard/DashboardCount';
 
 const LABELS: Record<string, LangValues> = {
@@ -22,6 +22,13 @@ const STATES: Record<PlatformStatus, LangValues> = {
   unknown: { en: 'Unavailable', ru: 'Недоступно', th: 'ไม่มีข้อมูล' },
 };
 
+const DETAILS: Record<StripeStatusDetail, LangValues> = {
+  missing_secret_key: { en: 'Not configured · Stripe secret key is missing', ru: 'Не настроено · нет секретного ключа Stripe', th: 'ยังไม่ตั้งค่า · ไม่มี Stripe secret key' },
+  missing_webhook_secret: { en: 'Not configured · Stripe webhook secret is missing', ru: 'Не настроено · нет секрета вебхука Stripe', th: 'ยังไม่ตั้งค่า · ไม่มี Stripe webhook secret' },
+  test_mode: { en: 'Configured · test keys', ru: 'Настроено · тестовые ключи', th: 'ตั้งค่าแล้ว · คีย์ทดสอบ' },
+  live_mode: { en: 'Configured · live keys', ru: 'Настроено · боевые ключи', th: 'ตั้งค่าแล้ว · คีย์ใช้งานจริง' },
+};
+
 /** Existing export retained; configuration is not a launch/readiness certificate. */
 export function GoLiveChecklist() {
   const { language } = useLanguage();
@@ -37,7 +44,7 @@ export function GoLiveChecklist() {
       <dl className="divide-y divide-border">
         {rows.map(item => <div key={item.key} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2 text-sm">
           <dt className="min-w-0 flex-1">{pickLang(language, LABELS[item.key])}</dt>
-          <dd className={item.status === 'needs_review' ? 'text-warning' : 'text-muted-foreground'}>{isLoading ? '—' : pickLang(language, STATES[item.status])}</dd>
+          <dd className={item.status === 'needs_review' || item.status === 'not_configured' ? 'text-warning' : 'text-muted-foreground'}>{isLoading ? '—' : pickLang(language, item.detail ? DETAILS[item.detail] : STATES[item.status])}</dd>
         </div>)}
         <div className="flex flex-wrap justify-between gap-2 py-2 text-sm"><dt>{pickLang(language, { en: 'Payment and notification delivery', ru: 'Платежи и доставка уведомлений', th: 'การชำระเงินและการส่งแจ้งเตือน' })}</dt><dd className="text-muted-foreground">{pickLang(language, { en: 'Not verified end to end', ru: 'Полный цикл не проверен', th: 'ยังไม่ตรวจสอบครบวงจร' })}</dd></div>
       </dl>
