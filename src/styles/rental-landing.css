@@ -466,3 +466,20 @@
   display: block;
   max-width: 11ch;
 }
+
+/* Keep the mobile form close to the entry controls and make its labels legible. */
+@media (max-width: 639px) {
+  .rental-search-section {
+    padding-block: 1rem;
+  }
+  .rental-search-section .rental-section-heading {
+    margin-bottom: 1rem;
+  }
+  .rental-search-section .rental-section-heading h2 {
+    margin-block: 0 0.375rem;
+    font-size: var(--public-section-size);
+  }
+  .rental-search-section .home-field-label {
+    font-size: var(--public-caption-size);
+  }
+}

@@ -3,6 +3,7 @@ from pathlib import Path
 from functools import partial
 from http.server import ThreadingHTTPServer,SimpleHTTPRequestHandler
 from playwright.async_api import async_playwright,expect
+from computed_text_contrast import assert_computed_contrast
 out=Path(sys.argv[1]); rows=[]
 class Quiet(SimpleHTTPRequestHandler):
  def log_message(self,*args): pass
@@ -35,6 +36,28 @@ async def main():
     assert not blocked,blocked
     assert not errors,errors
     rows.append({'language':lang,'width':width,'status':'PASS','noExternalRequests':True,'sharedSearch':'PASS'})
+    await context.close()
+  for theme in ['light','dark']:
+   for width in [375,430,1440]:
+    blocked=[];errors=[]
+    context=await browser.new_context(viewport={'width':width,'height':900},color_scheme=theme,service_workers='block')
+    async def contrast_route(r):
+     if r.request.url.startswith(base+'/'):await r.continue_()
+     else:blocked.append(r.request.url);await r.abort()
+    await context.route('**/*',contrast_route)
+    page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
+    await page.goto(f'{base}/fixture.html?lang=en')
+    await expect(page.locator('#rental-title')).to_be_visible()
+    # The fixture preserves the actual rental route stylesheet order; the
+    # outer shell is isolated, so apply the real token selector explicitly.
+    await page.evaluate("(theme) => document.documentElement.classList.toggle('dark',theme==='dark')",theme)
+    measurements=await assert_computed_contrast(page,[
+     ('#rental-search input[type="search"][placeholder]',1,'placeholder'),
+     ('#rental-search input[type="number"][placeholder]',1,'placeholder'),
+    ])
+    assert not blocked,blocked
+    assert not errors,errors
+    rows.append({'theme':theme,'width':width,'status':'PASS','textContrast':measurements})
     await context.close()
   for state in ['loading','empty','error']:
    context=await browser.new_context(viewport={'width':375,'height':900},service_workers='block');page=await context.new_page()

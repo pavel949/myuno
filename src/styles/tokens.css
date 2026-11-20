@@ -376,6 +376,7 @@
   /* Media canvas stays inverse in both themes; never aliases a changing action foreground. */
   --media-canvas:     0 0% 0%;
   --media-foreground: 0 0% 100%;
+  --media-home-hero:   #163a41;  /* fixed Phuket homepage editorial teal */
 
   --overlay-dark:     0 0% 0% / 0.4;
   --overlay-darker:   0 0% 0% / 0.6;
