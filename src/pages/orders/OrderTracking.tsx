@@ -150,7 +150,7 @@ export default function OrderTracking() {
                 <p className="text-sm text-muted-foreground">
                   {isRu ? 'Заказ' : 'Order'} #{order.order_number}
                 </p>
-                <h2 className="text-xl font-bold capitalize">
+                <h2 className={cn("text-xl font-bold", !isPropertyOrder && "capitalize")}>
                   {isPropertyOrder
                     ? pickLang(language, status === 'pending'
                         ? { ru: 'Запрос на бронирование', en: 'Booking request', th: 'คำขอจองที่พัก' }
@@ -206,7 +206,7 @@ export default function OrderTracking() {
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-lg">
-              {isRu ? 'История заказа' : 'Order Timeline'}
+              {isPropertyOrder ? pickLang(language, { ru: 'История бронирования', en: 'Booking timeline', th: 'ประวัติการจอง' }) : isRu ? 'История заказа' : 'Order Timeline'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -267,7 +267,7 @@ export default function OrderTracking() {
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-lg">
-              {isRu ? 'Детали заказа' : 'Order Details'}
+              {isPropertyOrder ? pickLang(language, { ru: 'Детали проживания', en: 'Stay details', th: 'รายละเอียดการเข้าพัก' }) : isRu ? 'Детали заказа' : 'Order Details'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -275,7 +275,7 @@ export default function OrderTracking() {
             {order.order_items && order.order_items.length > 0 && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {isRu ? 'Товары' : 'Items'}
+                  {isPropertyOrder ? tripTitle : isRu ? 'Товары' : 'Items'}
                 </p>
                 <div className="space-y-2">
                   {order.order_items.map((item) => (
