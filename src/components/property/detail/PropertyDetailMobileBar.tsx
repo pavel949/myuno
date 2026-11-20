@@ -144,7 +144,11 @@ export function PropertyDetailMobileBar({
               onClick={handleReserve}
             >
               <CalendarIcon className="w-4 h-4 shrink-0" />
-              {dateRange?.from && dateRange?.to ? (isRu ? 'Расчёт и заявка' : 'Cost & booking request') : (isRu ? 'Рассчитать стоимость' : 'Calculate stay cost')}
+              {dateRange?.from && dateRange?.to
+                ? instantBooking
+                  ? pickLang(language, { ru: 'Проверить условия брони', en: 'Review booking', th: 'ตรวจสอบการจอง' })
+                  : pickLang(language, { ru: 'Расчёт и заявка', en: 'Cost & booking request', th: 'ราคาและคำขอจอง' })
+                : pickLang(language, { ru: 'Рассчитать стоимость', en: 'Calculate stay cost', th: 'คำนวณราคา' })}
             </Button>
             </div>
           </>

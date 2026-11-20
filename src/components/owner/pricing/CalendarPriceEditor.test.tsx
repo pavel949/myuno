@@ -48,7 +48,7 @@ describe('CalendarPriceEditor', () => {
   mount(); await screen.findByLabelText('2026-10-21 100 · Unavailable');
   fireEvent.click(screen.getByRole('button',{name:'2026-10-23 1500'}),{shiftKey:true});
   expect(screen.getByLabelText('Through (inclusive)')).toHaveValue('2026-10-23');
-  expect(screen.getByRole('link',{name:'Open booking calendar'})).toHaveAttribute('href','/mc/calendar?property=property&date=2026-10-21');
+  expect(screen.getByRole('link',{name:'Availability & bookings'})).toHaveAttribute('href','/mc/calendar?property=property&date=2026-10-21&show=day');
  });
  it('moves the displayed month when a distant date is typed, keeping reads bounded', async () => {
   mount(); await screen.findByLabelText('2026-10-21 100 · Unavailable');

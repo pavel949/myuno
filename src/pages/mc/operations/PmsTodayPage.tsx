@@ -3,7 +3,8 @@ import '@/styles/premium-workspace.css';
  * /mc/today — presentation of existing usePmsToday projections only.
  * Unit states are inferred signals, not verified readiness or inventory status.
  */
-import type { ReactNode } from 'react';
+import { lazy, Suspense, useState, type ReactNode } from 'react';
+import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageShell } from '@/components/page/PageShell';
 import { PageHeader } from '@/components/page/PageHeader';
 import { Link, useLocation } from 'react-router-dom';
@@ -18,6 +19,8 @@ import { cn } from '@/lib/utils';
 import { usePmsToday, type TodayBooking, type TodayRequest, type TodayTask, type TodayUnit, type UnitState } from '@/hooks/usePmsToday';
 
 import { toBangkokDateKey } from '@/lib/hotelDates';
+
+const PropertyInquiriesWidget = lazy(() => import('@/components/owner/dashboard/PropertyInquiriesWidget').then(m => ({ default: m.PropertyInquiriesWidget })));
 
 type T = { en: string; ru: string; th: string };
 const STATE_META: Record<UnitState, { label: T; cls: string }> = {
@@ -50,6 +53,10 @@ export default function PmsTodayPage() {
   const t = (v: T) => pickLang(language, v);
   const d = usePmsToday();
   const location = useLocation();
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const complete = !d.isLoading && !d.error && !d.truncatedSources.length && !d.countUnavailableSources.length;
+  const selectedBooking = complete && selectedBookingId
+    ? [...d.arrivals, ...d.departures, ...d.inHouse].find(booking => booking.id === selectedBookingId) ?? null : null;
   const dateLabel = new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
     timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long',
   });
@@ -65,7 +72,9 @@ export default function PmsTodayPage() {
     const guest = b.guest_name || t({ en: 'Guest', ru: 'Гость', th: 'ผู้เข้าพัก' });
     const property = d.titleOf(b.property_id);
     return <li className="flex min-w-0 items-start gap-2 border-b border-border last:border-0">
-      <Link to={APP_ROUTES.MC_PROPERTY_DETAIL(b.property_id)} aria-label={`${openProperty}: ${property} · ${guest}`} className={cn('min-h-11 min-w-0 flex-1 py-3 hover:bg-muted/50', focusLink)}>
+      <button type="button" onClick={() => setSelectedBookingId(b.id)}
+        aria-label={`${t({ en: 'Open booking', ru: 'Открыть бронирование', th: 'เปิดการจอง' })}: ${guest} · ${property}`}
+        className={cn('min-h-11 min-w-0 flex-1 py-3 text-left hover:bg-muted/50', focusLink)}>
         <p title={guest} className="break-words font-medium text-foreground [overflow-wrap:anywhere]">{guest}</p>
         <p title={property} className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{property}{typeof b.guests_count === 'number' && Number.isFinite(b.guests_count) && b.guests_count > 0 ? <> · {b.guests_count} {t({ en: 'guests', ru: 'чел.', th: 'คน' })}</> : null}</p>
         <p className="mt-1 break-words font-mono text-xs text-muted-foreground">
@@ -75,7 +84,7 @@ export default function PmsTodayPage() {
           {b.status && <Badge variant="secondary" title={b.status} className="max-w-full whitespace-normal break-words [overflow-wrap:anywhere]">{label(b.status)}</Badge>}
           {b.source && <Badge variant="outline" title={b.source} className="max-w-full whitespace-normal break-words font-mono text-xs [overflow-wrap:anywhere]">{b.source}</Badge>}
         </div>
-      </Link>
+      </button>
       {b.guest_phone && <Button asChild size="icon" variant="ghost" className="mt-2 shrink-0" aria-label={`${t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}: ${guest}`} title={t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}>
         <a href={`tel:${b.guest_phone}`} aria-label={`${t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}: ${guest}`}><Phone aria-hidden className="size-4" /></a>
       </Button>}
@@ -156,6 +165,7 @@ export default function PmsTodayPage() {
       className="border-b border-border pb-4"
       actions={
       <nav aria-label={t({ en: 'Operational navigation', ru: 'Навигация по операциям', th: 'การนำทางการดำเนินงาน' })} className="flex flex-wrap gap-1">
+        <Button asChild variant="outline" size="sm" className="min-h-11"><Link to={APP_ROUTES.MC_BOOKINGS_LIST}>{t({ en: 'Bookings', ru: 'Бронирования', th: 'การจอง' })}</Link></Button>
         <Button asChild variant="ghost" size="sm" className="min-h-11"><Link to={APP_ROUTES.MC_CALENDAR}><CalendarDays aria-hidden />{t({ en: 'Calendar', ru: 'Календарь', th: 'ปฏิทิน' })}</Link></Button>
         <Button asChild variant="ghost" size="sm" className="min-h-11"><Link to={APP_ROUTES.MC_TASKS}><ListTodo aria-hidden />{t({ en: 'Tasks', ru: 'Задачи', th: 'งาน' })}</Link></Button>
         <Button variant="ghost" size="sm" className="min-h-11" onClick={() => d.refetch()}><RefreshCw aria-hidden />{t({ en: 'Refresh', ru: 'Обновить', th: 'รีเฟรช' })}</Button>
@@ -163,6 +173,9 @@ export default function PmsTodayPage() {
       }
     />
 
+    {complete && !!d.companyId && !!d.propertyIds?.length && <Suspense fallback={<Skeleton className="h-24" />}>
+      <PropertyInquiriesWidget companyScope={{ id: d.companyId, propertyIds: d.propertyIds }} />
+    </Suspense>}
     {d.error ? <div role="alert" className="border border-destructive bg-destructive/10 p-4 text-sm text-destructive">
       {t({ en: 'Could not load today’s data. Try refreshing.', ru: 'Не удалось загрузить сведения на сегодня. Обновите страницу.', th: 'โหลดข้อมูลไม่สำเร็จ ลองรีเฟรช' })}
     </div> : d.isLoading ? <div role="status" aria-label={t({ en: 'Loading today’s data', ru: 'Загрузка сведений на сегодня', th: 'กำลังโหลดข้อมูลวันนี้' })} className="space-y-6">
@@ -225,5 +238,8 @@ export default function PmsTodayPage() {
         <ul className="mt-4 grid min-w-0 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">{d.units.map(u => <UnitRow key={u.property_id} u={u} />)}</ul>
       </section>
     </>}
+    {selectedBooking && <BookingDetailSheet open booking={selectedBooking}
+      inventoryBookingId={selectedBooking.canMessageGuest ? selectedBooking.id : undefined} propertyTitle={d.titleOf(selectedBooking.property_id)}
+      onOpenChange={open => { if (!open) setSelectedBookingId(null); }} />}
   </PageShell>;
 }

@@ -32,6 +32,8 @@ export interface TodayBooking {
   check_out: string;
   status: string | null;
   source: string | null;
+  order_id?: string | null;
+  canMessageGuest?: boolean;
 }
 
 export interface TodayRequest {
@@ -113,7 +115,7 @@ export function usePmsToday(date: Date = new Date()) {
       const [bk, req, crm, ops] = await Promise.all([
         supabase
           .from('property_bookings')
-          .select('id, property_id, guest_name, guest_phone, guests_count, check_in, check_out, status, source', { count: 'exact' })
+          .select('id, property_id, guest_name, guest_phone, guests_count, check_in, check_out, status, source, order_id, owner_id', { count: 'exact' })
           .in('property_id', ids)
           .lte('check_in', today)
           .gte('check_out', today)
@@ -164,7 +166,8 @@ export function usePmsToday(date: Date = new Date()) {
       ].filter(t => !isTaskClosedStatus(t.status) && (!day(t.due_date) || day(t.due_date)! <= today))
         .sort((a, b) => (day(a.due_date) ?? '9999').localeCompare(day(b.due_date) ?? '9999') || a.source.localeCompare(b.source) || a.id.localeCompare(b.id));
       return {
-        bookings: (bk.data ?? []).filter(b => ids.includes(b.property_id)) as TodayBooking[],
+        bookings: (bk.data ?? []).filter(b => ids.includes(b.property_id))
+          .map(({ owner_id, ...booking }) => ({ ...booking, canMessageGuest: owner_id === user.id })),
         requests: (req.data ?? []).filter(r => ids.includes(r.property_id)), tasks, truncatedSources, countUnavailableSources,
       };
     },
@@ -224,6 +227,7 @@ export function usePmsToday(date: Date = new Date()) {
       if (scopeReady && ids.length > 0) return query.refetch();
     },
     hasProperties: ids.length > 0,
+    propertyIds: ids,
     arrivals, departures, inHouse, guestRequests, units, tasks, titleOf,
   };
 }

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -30,34 +31,42 @@ const STATUS_CONFIG = {
 
 type StatusKey = keyof typeof STATUS_CONFIG;
 
-export function PropertyInquiriesWidget() {
+interface Props {
+  companyScope?: { id: string; propertyIds: string[] };
+}
+
+export function PropertyInquiriesWidget({ companyScope }: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { allProperties } = useMyProperties();
-  const propertyIds = allProperties.map(p => p.id);
+  const { user } = useAuth();
+  const propertyIds = companyScope?.propertyIds ?? [...new Set(allProperties.map(p => p.property_id || p.id))].sort();
+  const enabled = !!user?.id && propertyIds.length > 0;
   const [actingId, setActingId] = useState<string | null>(null);
+  const [openInquiryId, setOpenInquiryId] = useState<string | null>(null);
 
-  const { data: inquiries, isLoading } = useQuery({
-    queryKey: ['property-inquiries-widget', propertyIds],
+  const { data: inquiries, isLoading, isError } = useQuery({
+    queryKey: ['property-inquiries-widget', user?.id, companyScope?.id, propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
-      const { data, error } = await supabase
+      const query = supabase
         .from('property_inquiries')
         .select('*')
         .in('property_id', propertyIds)
         .order('created_at', { ascending: false })
         .limit(10);
+      const { data, error } = await (companyScope ? query.eq('status', 'pending') : query);
       if (error) throw error;
       return data || [];
     },
-    enabled: propertyIds.length > 0,
+    enabled,
   });
 
   // Also fetch recent property orders (booking requests) for visibility.
   const { data: bookingRequests } = useQuery({
-    queryKey: ['property-booking-requests-widget', propertyIds],
+    queryKey: ['property-booking-requests-widget', user?.id, propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
       const { data, error } = await supabase
@@ -73,7 +82,7 @@ export function PropertyInquiriesWidget() {
         return meta?.property_id && propertyIds.includes(meta.property_id);
       });
     },
-    enabled: propertyIds.length > 0,
+    enabled: enabled && !companyScope,
   });
 
   const updateInquiryStatus = async (
@@ -82,14 +91,19 @@ export function PropertyInquiriesWidget() {
   ) => {
     setActingId(inquiryId);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('property_inquiries')
         .update({ status: nextStatus })
-        .eq('id', inquiryId);
+        .eq('id', inquiryId)
+        .in('property_id', propertyIds)
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error(isRu ? 'Запрос уже обработан или недоступен' : 'This enquiry already changed or is unavailable');
       toast.success(
         nextStatus === 'accepted'
-          ? (isRu ? 'Запрос принят' : 'Inquiry accepted')
+          ? (isRu ? 'Запрос принят. Бронирование требует отдельного подтверждения.' : 'Enquiry accepted. Booking still requires confirmation.')
           : (isRu ? 'Запрос отклонён' : 'Inquiry rejected'),
       );
       await queryClient.invalidateQueries({ queryKey: ['property-inquiries-widget'] });
@@ -105,6 +119,8 @@ export function PropertyInquiriesWidget() {
       setActingId(null);
     }
   };
+
+  if (isError) return <p role="alert" className="text-sm text-destructive">{isRu ? 'Не удалось загрузить запросы на проживание.' : 'Could not load stay requests.'}</p>;
 
   if (isLoading) {
     return <Skeleton className="h-[180px] rounded-none" />;
@@ -148,7 +164,7 @@ export function PropertyInquiriesWidget() {
    .slice(0, 8);
 
   const newCount = allItems.filter(i => i.status === 'pending').length;
-  const propertyMap = new Map(allProperties.map(p => [p.id, p]));
+  const propertyMap = new Map(allProperties.map(p => [p.property_id || p.id, p]));
 
   if (allItems.length === 0) {
     return (
@@ -169,7 +185,7 @@ export function PropertyInquiriesWidget() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Bell className="h-4 w-4 text-primary" />
-            {isRu ? 'Обращения клиентов' : 'Client Enquiries'}
+            {isRu ? 'Запросы на проживание' : 'Stay requests'}
             {newCount > 0 && (
               <Badge className="text-[10px] px-1.5 py-0 bg-primary">
                 {newCount}
@@ -201,12 +217,15 @@ export function PropertyInquiriesWidget() {
             return (
               <div
                 key={`${item.type}-${item.id}`}
-                className="flex items-center gap-2.5 p-2 hover:bg-muted/50 transition-colors"
+                className="p-2 hover:bg-muted/50 transition-colors"
               >
+                <div className="flex items-center gap-2.5">
                 <button
+                  type="button"
+                  aria-expanded={item.type === 'inquiry' ? openInquiryId === item.id : undefined}
                   onClick={() => {
                     if (item.type === 'booking') navigate(`/bookings/${item.id}`);
-                    else navigate(`/mc/messages`);
+                    else setOpenInquiryId(current => current === item.id ? null : item.id);
                   }}
                   className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
                 >
@@ -228,8 +247,9 @@ export function PropertyInquiriesWidget() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">
-                      {propertyName || 'Property'}
+                      {propertyName || property?.title || (isRu ? 'Объект' : 'Property')}
                       {item.checkIn && ` · ${format(parseISO(item.checkIn), 'd MMM', { locale: isRu ? ru : undefined })}`}
+                      {item.checkOut && ` – ${format(parseISO(item.checkOut), 'd MMM', { locale: isRu ? ru : undefined })}`}
                       {item.guests && ` · ${item.guests} ${isRu ? 'гост.' : 'guests'}`}
                     </p>
                   </div>
@@ -256,12 +276,12 @@ export function PropertyInquiriesWidget() {
                       size="icon"
                       variant="ghost"
                       className="min-h-[44px] min-w-[44px] text-success hover:bg-success/10"
-                      disabled={isActing}
+                      disabled={actingId !== null}
                       onClick={(e) => {
                         e.stopPropagation();
                         updateInquiryStatus(item.id, 'accepted');
                       }}
-                      aria-label={isRu ? 'Принять' : 'Accept'}
+                      aria-label={isRu ? 'Принять запрос' : 'Accept request'}
                     >
                       {isActing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                     </Button>
@@ -269,15 +289,23 @@ export function PropertyInquiriesWidget() {
                       size="icon"
                       variant="ghost"
                       className="min-h-[44px] min-w-[44px] text-destructive hover:bg-destructive/10"
-                      disabled={isActing}
+                      disabled={actingId !== null}
                       onClick={(e) => {
                         e.stopPropagation();
                         updateInquiryStatus(item.id, 'rejected');
                       }}
-                      aria-label={isRu ? 'Отклонить' : 'Reject'}
+                      aria-label={isRu ? 'Отклонить запрос' : 'Decline request'}
                     >
                       <X className="h-3.5 w-3.5" />
                     </Button>
+                  </div>
+                )}
+                </div>
+                {item.type === 'inquiry' && openInquiryId === item.id && (
+                  <div className="mt-2 space-y-1 border-t border-border py-2 text-sm [overflow-wrap:anywhere]">
+                    {item.message && <p className="whitespace-pre-wrap">{item.message}</p>}
+                    {item.phone && <a className="block underline" href={`tel:${item.phone}`}>{item.phone}</a>}
+                    {item.email && <a className="block underline" href={`mailto:${item.email}`}>{item.email}</a>}
                   </div>
                 )}
               </div>

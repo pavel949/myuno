@@ -46,6 +46,22 @@ export function useOrderTracking(orderId: string | undefined) {
   });
   // No RPC is issued until this actor can read the authoritative order row.
   const authorizedOrder = actorId && !authLoading && !error ? order ?? null : null;
+  // A commercial order ID cannot be used as a stay ID. Resolve the guest's
+  // inventory row only after the matching order has passed its own read gate.
+  const canReadStay = !!authorizedOrder && authorizedOrder.customer_user_id === actorId
+    && authorizedOrder.order_type === 'property'
+    && ['confirmed', 'checked_in', 'checked_out', 'completed'].includes(authorizedOrder.status);
+  const stay = useQuery({
+    queryKey: ['order-tracking-stay', actorId, orderId],
+    enabled: canReadStay,
+    queryFn: async ({ signal }) => {
+      if (!canReadStay || !actorId || !orderId) return null;
+      const { data, error } = await supabase.from('property_bookings').select('id')
+        .eq('order_id', orderId).eq('guest_id', actorId).abortSignal(signal).maybeSingle();
+      if (error) throw error;
+      return data?.id ?? null;
+    },
+  });
   const { data: timeline, error: timelineError, isLoading: timelineLoading, refetch: fetchTimeline } = useQuery({
     queryKey: ['order-tracking-timeline', actorId, orderId],
     queryFn: async ({ signal }) => {
@@ -117,6 +133,7 @@ export function useOrderTracking(orderId: string | undefined) {
 
   return {
     order: authorizedOrder,
+    stayId: canReadStay && !stay.isError ? stay.data ?? null : null,
     timeline: authorizedOrder && !timelineError ? timeline ?? [] : [],
     timelineError: authorizedOrder ? timelineError : null,
     timelineLoading: !!authorizedOrder && timelineLoading,
