@@ -13,6 +13,8 @@ import {
 
 interface UnifiedHeaderProps {
   title: string;
+  /** The page owns an H1 when it renders an entry masthead. */
+  hideHeading?: boolean;
   subtitle?: string;
   badge?: ReactNode;
   showBack?: boolean;
@@ -32,6 +34,7 @@ interface UnifiedHeaderProps {
 
 export const UnifiedHeader = memo(function UnifiedHeader({
   title,
+  hideHeading = false,
   subtitle,
   badge,
   showBack = true,
@@ -64,10 +67,10 @@ export const UnifiedHeader = memo(function UnifiedHeader({
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className={ECOSYSTEM_HEADER_TITLE}>{title}</h1>
+              {!hideHeading && <h1 className={ECOSYSTEM_HEADER_TITLE}>{title}</h1>}
               {badge}
             </div>
-            {subtitle && (
+            {!hideHeading && subtitle && (
               <p className={ECOSYSTEM_HEADER_SUBTITLE}>{subtitle}</p>
             )}
           </div>

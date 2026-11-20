@@ -57,6 +57,8 @@ export interface QuickFilterSection {
 }
 
 export interface MiniAppLayoutProps {
+  /** Optional overview-only masthead; standard catalogue controls stay in the same flow. */
+  marketplaceIntro?: ReactNode;
   title: string;
   subtitle?: string;
   fallbackPath?: string;
@@ -148,6 +150,7 @@ function MiniappMode({
   heroGradientVia = 'via-primary/10',
   heroGradientTo = 'to-background',
   showHero = false,
+  marketplaceIntro,
   searchValue = '',
   onSearchChange,
   searchPlaceholder,
@@ -362,7 +365,9 @@ function MiniappMode({
       )}
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
       <div className="relative">
+        {marketplaceIntro && <div className={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER}>{marketplaceIntro}</div>}
         <UnifiedHeader
+          hideHeading={Boolean(marketplaceIntro)}
           containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}
           title={title}
           subtitle={subtitle}

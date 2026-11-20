@@ -1,3 +1,4 @@
+import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Search, Wrench, X } from 'lucide-react';
@@ -154,6 +155,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       </Tabs>
   </MarketplaceFilterSheet>;
   return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+    marketplaceIntro={!embedded && overview && !filtered ? <MarketplaceEntry kind="services" /> : undefined}
     title={t('Услуги', 'Services', 'บริการ')}
     subtitle={t('Выберите направление', 'Choose a category', 'เลือกหมวดหมู่')}
     fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}

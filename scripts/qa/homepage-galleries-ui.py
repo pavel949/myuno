@@ -144,7 +144,24 @@ async def main():
                     await expect(page.locator('.home-search-entry-button,.premium-plan-links')).to_have_count(0)
                     choices=page.locator('.home-hero-choice')
                     await expect(choices).to_have_count(4)
-                    destinations = ['/property/rent', '/discover/buy', '/experiences', '/discover/services']
+                    await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+                    hero_geometry = await page.evaluate("""
+                      () => {
+                        const keys = [...document.querySelectorAll('.home-hero-choice')].map(el => el.getBoundingClientRect().toJSON());
+                        const photo = document.querySelector('.home-hero-media').getBoundingClientRect().toJSON();
+                        return {keys, photo};
+                      }
+                    """)
+                    keys = hero_geometry['keys']
+                    photo = hero_geometry['photo']
+                    assert all(key['height'] >= 44 and key['bottom'] < 820 for key in keys), hero_geometry
+                    assert abs(keys[0]['top'] - keys[1]['top']) < 2 and abs(keys[2]['top'] - keys[3]['top']) < 2, hero_geometry
+                    if width < 900:
+                        assert photo['top'] > max(key['bottom'] for key in keys), hero_geometry
+                    else:
+                        assert photo['left'] >= max(key['right'] for key in keys) and photo['height'] > 200, hero_geometry
+
+                    destinations = ['/property/rent', '/discover/buy', '/experiences', '/services']
                     for index,destination in enumerate(destinations):
                         await expect(choices.nth(index)).to_have_attribute('href', destination)
                         await choices.nth(index).focus()

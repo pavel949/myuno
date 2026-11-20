@@ -28,7 +28,7 @@ import {
   rentalDurations,
   rentalChecklist,
 } from "@/content/property/rentalLanding";
-import hero from "@/assets/hero-phuket-coast-editorial.webp";
+import { MarketplaceEntry } from "@/components/landing/MarketplaceEntry";
 import "@/styles/cinematic-home.css";
 import "@/styles/rental-landing.css";
 
@@ -223,59 +223,51 @@ export default function PropertyLanding() {
           th: "ค้นหาย่านและรูปแบบชีวิตที่เหมาะกับคุณในภูเก็ต ดูโครงการ เปรียบเทียบระยะเวลาเช่า และเลือกที่พัก",
         })}
       />
-      <section className="rental-hero" aria-labelledby="rental-title">
-        <div className="rental-hero-copy">
-          <h1 id="rental-title">
-            <span className="rental-eyebrow rental-title-kicker">
-              myUNO /{" "}
+      <MarketplaceEntry kind="rent" headingId="rental-title" actions={[
+        { href: "#rental-search", label: { ru: "Найти жильё", en: "Find a home", th: "ค้นหาที่พัก" } },
+        { href: "#rental-areas", label: { ru: "Выбрать район", en: "Explore the areas", th: "สำรวจย่าน" } },
+      ]} />
+      <section
+        className="rental-section rental-search-section"
+        id="rental-search"
+        aria-labelledby="rental-search-title"
+      >
+        <div className="rental-section-heading">
+          <div>
+            <p className="rental-eyebrow">
               {t({
-                ru: "Аренда на Пхукете",
-                en: "Rent in Phuket",
-                th: "เช่าที่พักภูเก็ต",
+                ru: "От идеи — к выбору",
+                en: "From inspiration to a home",
+                th: "จากแรงบันดาลใจสู่ที่พัก",
               })}
-            </span>
-            <span className="rental-title-text">
+            </p>
+            <h2 id="rental-search-title">
               {t({
-                ru: "Найдите свой Пхукет.",
-                en: "Find your Phuket.",
-                th: "ค้นพบภูเก็ตในแบบคุณ",
+                ru: "Теперь найдём ваш дом",
+                en: "Now, find your home",
+                th: "มาค้นหาที่พักของคุณ",
               })}
-            </span>
-          </h1>
-          <p className="rental-hero-lead">
-            {t({
-              ru: "Не только дом. Район, в который хочется возвращаться. Место для ваших планов — на неделю, на сезон или надолго.",
-              en: "More than a home. A neighbourhood to return to. A place for your plans — for a week, a season, or a new chapter.",
-              th: "มากกว่าที่พัก คือย่านที่อยากกลับมา และสถานที่สำหรับแผนของคุณ ไม่ว่าจะหนึ่งสัปดาห์ หนึ่งฤดูกาล หรือระยะยาว",
-            })}
-          </p>
-          <div className="rental-hero-actions">
-            <Button asChild size="lg">
-              <a href="#rental-search">
-                {t({ ru: "Найти жильё", en: "Find a home", th: "ค้นหาที่พัก" })}
-                <ArrowRight aria-hidden="true" />
-              </a>
-            </Button>
-            <a className="rental-text-link" href="#rental-areas">
+            </h2>
+            <p>
               {t({
-                ru: "Сначала выбрать район",
-                en: "Explore the areas first",
-                th: "สำรวจย่านก่อน",
+                ru: "Выберите срок, район и даты. Условия и доступность уточняются для конкретного объекта.",
+                en: "Choose your duration, area and dates. Terms and availability are checked for each home.",
+                th: "เลือกระยะเวลา ย่าน และวันที่ เงื่อนไขและห้องว่างต้องตรวจสอบสำหรับที่พักแต่ละแห่ง",
               })}
-              <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+            </p>
           </div>
         </div>
-        <div className="rental-hero-art">
-          <img
-            src={hero}
-            alt=""
-            width="1672"
-            height="941"
-            fetchPriority="high"
-          />
-          <span>PHUKET / THAILAND</span>
+        <div className="journey-primary">
+          <HomeDiscoverySearch rentalOnly showGuestsInline catalogue />
         </div>
+        <Link className="rental-text-link" to={rentSearch}>
+          {t({
+            ru: "Смотреть каталог без дат",
+            en: "Browse without dates",
+            th: "ดูรายการโดยไม่ระบุวันที่",
+          })}
+          <ArrowRight size={18} aria-hidden="true" />
+        </Link>
       </section>
       <nav
         className="rental-chapters"
@@ -376,48 +368,6 @@ export default function PropertyLanding() {
         </div>
       </section>
       <RentalCommunities />
-      <section
-        className="rental-section rental-search-section"
-        id="rental-search"
-        aria-labelledby="rental-search-title"
-      >
-        <div className="rental-section-heading">
-          <div>
-            <p className="rental-eyebrow">
-              {t({
-                ru: "От идеи — к выбору",
-                en: "From inspiration to a home",
-                th: "จากแรงบันดาลใจสู่ที่พัก",
-              })}
-            </p>
-            <h2 id="rental-search-title">
-              {t({
-                ru: "Теперь найдём ваш дом",
-                en: "Now, find your home",
-                th: "มาค้นหาที่พักของคุณ",
-              })}
-            </h2>
-            <p>
-              {t({
-                ru: "Выберите срок, район и даты. Условия и доступность уточняются для конкретного объекта.",
-                en: "Choose your duration, area and dates. Terms and availability are checked for each home.",
-                th: "เลือกระยะเวลา ย่าน และวันที่ เงื่อนไขและห้องว่างต้องตรวจสอบสำหรับที่พักแต่ละแห่ง",
-              })}
-            </p>
-          </div>
-        </div>
-        <div className="journey-primary">
-          <HomeDiscoverySearch rentalOnly showGuestsInline catalogue />
-        </div>
-        <Link className="rental-text-link" to={rentSearch}>
-          {t({
-            ru: "Смотреть каталог без дат",
-            en: "Browse without dates",
-            th: "ดูรายการโดยไม่ระบุวันที่",
-          })}
-          <ArrowRight size={18} aria-hidden="true" />
-        </Link>
-      </section>
       <section
         className="rental-section"
         id="rental-guide"

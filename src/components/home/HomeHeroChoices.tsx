@@ -32,7 +32,7 @@ const choices: HeroChoice[] = [
   },
   {
     icon: Sparkles,
-    href: R.GOAL_SERVICES,
+    href: R.SERVICES,
     label: { ru: 'Найти услугу', en: 'Find a service', th: 'ค้นหาบริการ' },
     description: { ru: 'Трансфер, уборка, переезд и помощь', en: 'Transfers, cleaning, moving, and help', th: 'รถรับส่ง ทำความสะอาด ย้ายบ้าน และอื่น ๆ' },
   },
@@ -43,7 +43,7 @@ export function HomeHeroChoices() {
   const t = (value: LangValues) => pickLang(language, value);
 
   return (
-    <div className="home-hero-choices" aria-label={t({ ru: 'Выберите задачу', en: 'Choose your goal', th: 'เลือกเป้าหมาย' })}>
+    <div className="home-hero-choices" role="group" aria-label={t({ ru: 'Выберите задачу', en: 'Choose your goal', th: 'เลือกเป้าหมาย' })}>
       <p className="home-hero-choices-label">{t({ ru: 'С чего начнём?', en: 'Start here', th: 'เริ่มที่นี่' })}</p>
       <div className="home-hero-choice-grid">
         {choices.map(({ icon: Icon, href, label, description }) => (

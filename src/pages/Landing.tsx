@@ -37,18 +37,18 @@ export default function Landing() {
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <main id="home-main" tabIndex={-1} className="outline-none">
       <section className="home-hero" aria-labelledby="home-title">
-        <img
-          className="home-hero-image"
-          src={hero} alt="" loading="eager" width="1672" height="941"
-        />
-        <div className="home-hero-shade" aria-hidden="true" />
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
-        <div className="home-hero-copy home-container">
-          <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
-          <p>{t({ ru: 'Жильё, услуги и впечатления на Пхукете. Поможем выбрать и организовать.', en: 'Homes, services and experiences in Phuket. Find your next stay, plan your day, or get a helping hand.', th: 'ที่พัก บริการ และประสบการณ์ในภูเก็ต พร้อมทีมงานช่วยคุณเลือกและจัดการ' })}</p>
-          <HomeHeroChoices />
-          <div className="home-hero-actions">
-            <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
+        <div className="home-hero-layout home-container">
+          <div className="home-hero-copy">
+            <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
+            <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
+            <HomeHeroChoices />
+            <div className="home-hero-actions">
+              <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
+            </div>
+          </div>
+          <div className="home-hero-media" aria-hidden="true">
+            <img className="home-hero-image" src={hero} alt="" loading="eager" width="1672" height="941" />
           </div>
         </div>
       </section>
