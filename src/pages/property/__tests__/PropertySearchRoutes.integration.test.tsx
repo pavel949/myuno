@@ -54,13 +54,13 @@ beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = 
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
-  it('starts with a compact summary and opens the existing editor without inventing a guest filter', () => {
+  it('opens the undated holiday-search editor from the URL without inventing a guest filter', () => {
     render(<MemoryRouter initialEntries={['/property/search?mode=rent&tenancy=short']}><PropertySearchPage /></MemoryRouter>);
     const criteria = document.querySelector('.premium-search-criteria')!;
-    expect(criteria).not.toHaveAttribute('open');
+    expect(criteria).toHaveAttribute('open');
+    fireEvent.click(criteria.querySelector('summary')!);
     expect(screen.getByText('Change search')).toBeVisible();
     fireEvent.click(criteria.querySelector('summary')!);
-    expect(criteria).toHaveAttribute('open');
     const guests = screen.getByRole('spinbutton', { name: 'Number of guests' });
     expect(guests).toBeVisible();
     expect(guests).toHaveValue(null);
@@ -71,16 +71,16 @@ describe('one residential results surface', () => {
   });
 
   it.each([
-    ['mode=rent&tenancy=short', 'Holiday homes in Phuket'],
-    ['mode=rent&tenancy=medium', 'Monthly stays in Phuket'],
-    ['mode=rent&tenancy=long', 'Long-term homes in Phuket'],
-    ['mode=buy', 'Buy a home in Phuket'],
-    ['mode=all', 'Homes in Phuket'],
-  ])('shows category context and real query results before expanding %s', (query, title) => {
+    ['mode=rent&tenancy=short', 'Holiday homes in Phuket', true],
+    ['mode=rent&tenancy=medium', 'Monthly stays in Phuket', false],
+    ['mode=rent&tenancy=long', 'Long-term homes in Phuket', false],
+    ['mode=buy', 'Buy a home in Phuket', false],
+    ['mode=all', 'Homes in Phuket', false],
+  ])('shows category context and real query results for %s', (query, title, open) => {
     state.properties = [{ id: 'synthetic-entry-home', listing_type: 'rent', monthly_rent: 1000 }];
     render(<MemoryRouter initialEntries={[`/property/search?${query}`]}><PropertySearchPage /></MemoryRouter>);
     expect(screen.getByRole('heading', { level: 1, name: title })).toBeVisible();
-    expect(document.querySelector('.premium-search-criteria')).not.toHaveAttribute('open');
+    expect(document.querySelector('.premium-search-criteria')?.hasAttribute('open')).toBe(open);
     expect(screen.getByTestId('synthetic-property-card')).toBeVisible();
     expect(screen.getByRole('form', { hidden: true })).toBeInTheDocument();
   });
