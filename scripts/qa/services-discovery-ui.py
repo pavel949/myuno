@@ -72,7 +72,12 @@ async def main():
                     await search.press_sequentially('zz-no-match')
                     await expect(page.get_by_role('searchbox')).to_have_value('zz-no-match')
                     await expect(page.get_by_role('searchbox')).to_be_focused()
-                    await expect(page.get_by_test_id('location')).to_contain_text('q=zz-no-match')
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover/services?ref=fixture&q=zz-no-match')
+                    search=page.get_by_role('searchbox')
+                    await search.press_sequentially(' two words')
+                    await expect(search).to_have_value('zz-no-match two words')
+                    await expect(search).to_be_focused()
+                    await expect(page.get_by_test_id('location')).to_have_text('/discover/services?ref=fixture&q=zz-no-match+two+words')
                     await expect(page.locator('[data-marketplace-entry]')).to_have_count(0)
                     assert not errors,errors
                     results.append({'lang':lang,'width':width,'theme':appearance,'scenario':'marketplace-entry','passed':True})

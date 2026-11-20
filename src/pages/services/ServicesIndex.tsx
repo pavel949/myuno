@@ -1,4 +1,5 @@
 import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { useUrlSearchDraft } from '@/hooks/useUrlSearchDraft';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Search, Wrench, X } from 'lucide-react';
@@ -87,6 +88,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
   const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(pendingQuery.current.params, key, value, homeCategory), key === 'q');
+  const [searchDraft, updateSearch] = useUrlSearchDraft(filters.query, value => update('q', value));
   const clear = () => commit(clearServiceDiscoveryQuery(pendingQuery.current.params));
   const selectedCategory = categories.find(item => item.id === category);
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
@@ -158,7 +160,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     marketplaceIntro={!embedded && overview && !filtered ? <MarketplaceEntry kind="services" /> : undefined}
     title={t('Услуги', 'Services', 'บริการ')}
     subtitle={t('Выберите направление', 'Choose a category', 'เลือกหมวดหมู่')}
-    fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
+    fallbackPath="/" searchValue={searchDraft} onSearchChange={updateSearch}
     searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter filterButton={discoveryFilters} showEcosystemHint={false}>
     {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
 

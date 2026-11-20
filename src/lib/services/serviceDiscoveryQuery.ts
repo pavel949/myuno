@@ -13,7 +13,7 @@ export function readServiceDiscoveryQuery(params: URLSearchParams) {
 }
 export function updateServiceDiscoveryQuery(source: URLSearchParams, key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) {
   const next = new URLSearchParams(source);
-  if (value && value !== 'all') next.set(key, value); else next.delete(key);
+  if (value && (key === 'q' || value !== 'all')) next.set(key, value); else next.delete(key);
   if (key === 'category') {
     next.delete('type');
     if (homeCategory) next.set('home', homeCategory); else next.delete('home');

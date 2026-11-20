@@ -1,4 +1,5 @@
 import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { useUrlSearchDraft } from '@/hooks/useUrlSearchDraft';
 import { EXPERIENCE_DURATIONS, matchesExperienceFilters, readExperienceFilters } from '@/lib/experiences/discoveryFilters';
 import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue, experienceCategoryLabel, populatedExperienceCategories } from '@/lib/taxonomies/experienceDiscovery';
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
@@ -98,7 +99,7 @@ export default function ExperiencesIndex() {
   }, [experiences, sortKey, priceSortUnavailable, discovery]);
   const update = (key: 'type' | 'category' | 'sort' | 'q' | 'group' | 'place' | 'minPrice' | 'maxPrice' | 'duration', value: string) => {
     const next = new URLSearchParams(pendingQuery.current.params);
-    if (!value || value === 'all' || value === 'recommended') next.delete(key); else next.set(key, value);
+    if (!value || (key !== 'q' && (value === 'all' || value === 'recommended'))) next.delete(key); else next.set(key, value);
     if (key === 'group') next.delete('category');
     const currentCategory = next.get('category');
     if (key === 'type' && currentCategory && currentCategory !== 'all') {
@@ -106,8 +107,13 @@ export default function ExperiencesIndex() {
       if (selected && value !== 'all' && selected.experience_type !== 'all' && selected.experience_type !== value) next.delete('category');
     }
     pendingQuery.current.params = next;
-    setParams(next, { replace: key === 'q' || key === 'minPrice' || key === 'maxPrice' });
+    if (key === 'q') {
+      navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true, state: location.state });
+    } else {
+      setParams(next, { replace: key === 'minPrice' || key === 'maxPrice' });
+    }
   };
+  const [searchDraft, updateSearch] = useUrlSearchDraft(query, value => update('q', value));
   const clear = () => {
     const next = new URLSearchParams(pendingQuery.current.params);
     for (const key of ['type', 'category', 'sort', 'q', 'group', 'place', 'minPrice', 'maxPrice', 'duration']) next.delete(key);
@@ -142,7 +148,7 @@ export default function ExperiencesIndex() {
       : t(`Найдено: ${sorted.length}`, `${sorted.length} results`, `${sorted.length} รายการ`)}
     marketplaceIntro={overview ? <MarketplaceEntry kind="experiences" /> : undefined}
     fallbackPath="/" showHero={false} showFilter compactMapToggle showCategories={false}
-    searchValue={query} onSearchChange={value => update('q', value)} searchPlaceholder={t('Найти впечатление…', 'Search experiences…', 'ค้นหาประสบการณ์…')}
+    searchValue={searchDraft} onSearchChange={updateSearch} searchPlaceholder={t('Найти впечатление…', 'Search experiences…', 'ค้นหาประสบการณ์…')}
     mapMarkers={invalidFilters || error ? [] : vertRowsToMarkers(sorted, { titleFields: ['title_en', 'name_en'], titleRuFields: ['title_ru', 'name_ru'] })}
     onMapMarkerSelect={id => openExperience(`/experiences/${id}`)} mapIconChar="🧭"
     filterButton={<MarketplaceFilterSheet title={t('Фильтры впечатлений', 'Experience filters', 'ตัวกรองประสบการณ์')} activeCount={[selectedGroup !== 'all', venueOnly, viewType !== 'all', selectedCategory !== 'all', sortKey !== 'recommended', params.has('minPrice'), params.has('maxPrice'), Boolean(discovery.duration)].filter(Boolean).length}><div className="space-y-4">
