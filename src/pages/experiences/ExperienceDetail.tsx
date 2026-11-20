@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { formatRecordedPrice } from '@/lib/format/price';
-import { InquiryForm } from '@/components/vertical-wizard/InquiryForm';
+import { ExperienceInquiry } from '@/components/experiences/ExperienceInquiry';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { ExperienceDiscoveryDetail } from '@/components/experiences/ExperienceDiscoveryDetail';
 
@@ -484,8 +484,8 @@ export default function ExperienceDetail() {
           {t('Оставить заявку', 'Send inquiry', 'ส่งคำขอ')}
         </Button>
       </div>
-      <InquiryForm open={inquiryOpen} onOpenChange={setInquiryOpen} verticalId="tour"
-        listingId={experience.id} listingTitle={expTitle} entryPoint="experience_detail:concierge" />
+      <ExperienceInquiry open={inquiryOpen} onOpenChange={setInquiryOpen}
+        listingId={experience.id} listingTitle={expTitle || experience.title_en} entryPoint="experience_detail:concierge" />
     </MiniAppLayout>
   );
 }

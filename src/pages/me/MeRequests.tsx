@@ -8,7 +8,7 @@
  */
 import { useAuth } from '@/contexts/AuthContext';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
-import { pickLang } from '@/lib/i18n/pickLang';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { ClipboardList, ChevronRight, X } from 'lucide-react';
@@ -31,22 +31,41 @@ const SOURCE_LABEL: Record<RequestSource, { en: string; ru: string; th: string }
   visa: { en: 'Visa', ru: 'Виза', th: 'วีซ่า' },
   order: { en: 'Orders', ru: 'Заказы', th: 'คำสั่งซื้อ' },
   help: { en: 'myUNO Help', ru: 'Помощь myUNO', th: 'ความช่วยเหลือ myUNO' },
+  experience: { en: 'Experiences', ru: 'Впечатления', th: 'ประสบการณ์' },
 };
 
-const VALID_SOURCES: RequestSource[] = ['concierge', 'visa', 'order', 'help'];
+const VALID_SOURCES: RequestSource[] = ['concierge', 'visa', 'order', 'help', 'experience'];
+
+const EXPERIENCE_STATUS: Readonly<Record<string, LangValues>> = {
+  pending: { ru: 'Ожидает ответа', en: 'Awaiting reply', th: 'รอการตอบกลับ' },
+  contacted: { ru: 'Команда связалась с вами', en: 'The team contacted you', th: 'ทีมงานติดต่อคุณแล้ว' },
+  scheduled: { ru: 'Запланирована работа по заявке', en: 'Request follow-up scheduled', th: 'กำหนดเวลาติดตามคำขอแล้ว' },
+  in_progress: { ru: 'В работе', en: 'In progress', th: 'กำลังดำเนินการ' },
+  completed: { ru: 'Заявка рассмотрена', en: 'Request resolved', th: 'ดำเนินการคำขอแล้ว' },
+  cancelled: { ru: 'Отменена', en: 'Cancelled', th: 'ยกเลิกแล้ว' },
+};
 
 function RequestCard({ r }: { r: MyRequest }) {
   const { language } = useLanguage();
+  const status = r.experienceStatus && Object.prototype.hasOwnProperty.call(EXPERIENCE_STATUS, r.experienceStatus)
+    ? EXPERIENCE_STATUS[r.experienceStatus]
+    : null;
   const inner = (
     <Card variant={r.detailPath ? 'interactive' : 'content'}>
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium leading-snug line-clamp-2">{r.title}</p>
+            <p className="text-sm font-medium leading-snug line-clamp-2">{r.title || pickLang(language, SOURCE_LABEL[r.source])}</p>
             <p className="text-[11px] text-muted-foreground mt-1">
               {new Date(r.createdAt).toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { calendar: 'gregory' })}
               {r.subtitle ? ` · ${r.subtitle}` : ''}
             </p>
+            {r.receipt && <>
+              <p className="mt-1 text-xs">{pickLang(language, status ?? { ru: 'Статус уточняется', en: 'Status unavailable', th: 'ยังไม่ทราบสถานะ' })}</p>
+              <p className="mt-1 break-all text-xs text-muted-foreground">
+                {pickLang(language, { ru: 'Номер заявки', en: 'Request ID', th: 'หมายเลขคำขอ' })} {r.receipt}
+              </p>
+            </>}
           </div>
           {r.detailPath && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
         </div>
@@ -56,7 +75,7 @@ function RequestCard({ r }: { r: MyRequest }) {
       </CardContent>
     </Card>
   );
-  return r.detailPath ? <Link to={r.detailPath}>{inner}</Link> : inner;
+  return r.detailPath ? <Link to={r.detailPath}>{inner}</Link> : <div id={r.id}>{inner}</div>;
 }
 
 export default function MeRequests() {

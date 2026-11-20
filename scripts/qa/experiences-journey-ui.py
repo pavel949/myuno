@@ -1,4 +1,4 @@
-"""Actual experience catalogue and native controls; local synthetic reads only."""
+"""Actual experience catalogue and request form with an isolated data boundary."""
 import asyncio
 import json
 import os
@@ -16,6 +16,11 @@ COPY = {
     'en': {'title': 'Experiences', 'overview_title': 'Experiences in Phuket', 'types': 'Experience type', 'tour': 'Tours', 'activity': 'Activities', 'island': 'Islands', 'category_menu': 'What would you like to explore?', 'clear': 'Clear filters', 'search': 'Search experiences…', 'sort': 'Sort experiences', 'empty': 'No offers match these filters', 'unknown': 'Unknown filter', 'retry': 'Try again', 'retry_category': 'Retry categories', 'loading': 'Loading experiences', 'all_categories': 'All categories', 'menu': 'Open menu', 'services': 'Services'},
     'ru': {'title': 'Впечатления', 'overview_title': 'Впечатления на Пхукете', 'types': 'Тип впечатления', 'tour': 'Экскурсии', 'activity': 'Активный отдых', 'island': 'Острова', 'category_menu': 'Что вам интересно?', 'clear': 'Сбросить фильтры', 'search': 'Найти впечатление…', 'sort': 'Сортировка', 'empty': 'По этим условиям пока нет предложений', 'unknown': 'Неизвестный фильтр', 'retry': 'Повторить', 'retry_category': 'Повторить загрузку тем', 'loading': 'Загружаем впечатления', 'all_categories': 'Все категории', 'menu': 'Открыть меню', 'services': 'Услуги'},
     'th': {'title': 'ประสบการณ์', 'overview_title': 'ประสบการณ์ในภูเก็ต', 'types': 'ประเภทประสบการณ์', 'tour': 'ทัวร์', 'activity': 'กิจกรรม', 'island': 'Islands', 'category_menu': 'คุณสนใจอะไร?', 'clear': 'ล้างตัวกรอง', 'search': 'ค้นหาประสบการณ์…', 'sort': 'เรียงลำดับประสบการณ์', 'empty': 'ยังไม่มีข้อเสนอที่ตรงกับตัวกรอง', 'unknown': 'ไม่พบตัวกรอง', 'retry': 'ลองอีกครั้ง', 'retry_category': 'ลองโหลดหมวดหมู่อีกครั้ง', 'loading': 'กำลังโหลดประสบการณ์', 'all_categories': 'ทุกหมวดหมู่', 'menu': 'เปิดเมนู', 'services': 'บริการ'},
+}
+INQUIRY = {
+    'ru': {'title': 'Уточнить места у myUNO', 'date': 'Желаемая дата', 'guests': 'Гостей', 'sign_in': 'Войти и продолжить', 'send': 'Отправить заявку', 'tracker': 'Открыть мои заявки'},
+    'en': {'title': 'Ask myUNO about availability', 'date': 'Preferred date', 'guests': 'Guests', 'sign_in': 'Sign in to continue', 'send': 'Send request', 'tracker': 'View my requests'},
+    'th': {'title': 'สอบถามที่ว่างกับ myUNO', 'date': 'วันที่ต้องการ', 'guests': 'จำนวนผู้เข้าร่วม', 'sign_in': 'เข้าสู่ระบบเพื่อดำเนินการต่อ', 'send': 'ส่งคำขอ', 'tracker': 'ดูคำขอของฉัน'},
 }
 
 
@@ -270,6 +275,32 @@ async def main():
                     saved=await page.evaluate('window.fixturePreparedCategory')
                     assert saved['slug']=='waterpark' and saved['is_active'] is False, saved
                     row['checks'].append('Actual admin has eight groups and prepares hidden waterpark category through explicit Save; writes stubbed')
+
+                    inquiry = INQUIRY[lang]
+                    entry = '/experiences/island-tour/request-fixture?ref=synthetic'
+                    await page.goto(ORIGIN + '/fixture.html?' + urlencode({'lang': lang, 'entry': entry}), wait_until='networkidle')
+                    dialog = page.get_by_role('dialog', name=inquiry['title'], exact=True)
+                    await expect(dialog).to_be_visible()
+                    await dialog.get_by_label(inquiry['date'], exact=True).fill('2099-11-23')
+                    await dialog.get_by_label(inquiry['guests'], exact=True).fill('4')
+                    await dialog.get_by_role('button', name=inquiry['sign_in'], exact=True).click()
+                    assert await page.evaluate('window.fixtureInquiries.length') == 0
+                    await page.get_by_role('button', name='Complete synthetic sign-in', exact=True).click()
+                    await expect(dialog.get_by_label(inquiry['date'], exact=True)).to_have_value('2099-11-23')
+                    await expect(dialog.get_by_label(inquiry['guests'], exact=True)).to_have_value('4')
+                    await expect(page.get_by_test_id('fixture-location')).to_have_text(entry + '&inquiry=1')
+                    assert await page.evaluate('window.fixtureInquiries.length') == 0
+                    await geometry()
+                    assert await dialog.evaluate('(el) => el.scrollWidth <= el.clientWidth + 1'), 'Inquiry dialog overflow'
+                    await page.screenshot(path=str(OUT / f'{prefix}-10-request-review.png'), full_page=True)
+                    await dialog.get_by_role('button', name=inquiry['send'], exact=True).click()
+                    await expect(dialog.get_by_role('status')).to_contain_text('synthetic-experience-receipt')
+                    await expect(dialog.get_by_role('link', name=inquiry['tracker'], exact=True)).to_have_attribute('href', '/me/requests?source=experience#experience-synthetic-experience-receipt')
+                    submitted = await page.evaluate('window.fixtureInquiries')
+                    assert len(submitted) == 1 and submitted[0]['guests_count'] == 4 and submitted[0]['preferred_language'] == lang, submitted
+                    assert submitted[0]['vertical_metadata']['listing_id'] == 'island-tour', submitted
+                    assert submitted[0]['preferred_dates'] == [{'date': '2099-11-23', 'time': ''}], submitted
+                    row['checks'].append('Actual localized request holds date and party through synthetic sign-in, then displays the exact CRM receipt')
                     await geometry()
                     assert not errors, errors
                     assert not blocked, blocked
@@ -283,7 +314,7 @@ async def main():
         await browser.close()
     failed = [row for row in rows if row['outcome'] != 'PASS']
     result = {'cases': len(rows), 'passed': len(rows) - len(failed), 'failed': len(failed), 'results': rows,
-              'scope': 'Actual catalogue, shared category grid/sheets, public header, MiniAppLayout/FeatureLayout and native controls; synthetic reads/shell; detail is a named boundary, not detail acceptance.'}
+              'scope': 'Actual catalogue, shared category grid/sheets, public header, MiniAppLayout/FeatureLayout, native controls and experience request; synthetic reads/auth/receipt. Full detail layout is outside the fixture.'}
     (OUT / 'results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'cases': len(rows), 'passed': result['passed'], 'failed': result['failed']}))
     if len(rows) != 12 or failed:
