@@ -66,6 +66,7 @@ async def run():
                     await page.screenshot(path=str(OUT / f"{language}-{width}-sheet.png"), full_page=True)
                 await expect(page.locator("#calendar-price-from")).to_have_value("2026-10-21")
                 await expect(page.locator("#calendar-price-through")).to_have_value("2026-10-24")
+                await expect(page.locator('a[href="/mc/calendar?property=fixture-property&date=2026-10-21&show=day"]')).to_be_visible()
                 await page.locator("#calendar-price-amount").fill("3400.50")
                 await page.locator("button[type=submit]").click()
                 await page.wait_for_function("Boolean(window.fixtureLastSave)")

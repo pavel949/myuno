@@ -40,7 +40,7 @@ it('uses inventory history only for real inventory records', () => {
 });
 it('links the correct property and does not expose management shortcuts in owner surfaces', () => {
   mount();
-  expect(screen.getByRole('link', { name: 'Property calendar and tasks' })).toHaveAttribute('href', '/mc/calendar?property=home-a');
+  expect(screen.getByRole('link', { name: 'Property calendar and tasks' })).toHaveAttribute('href', '/mc/calendar?property=home-a&date=2030-01-10');
   expect(screen.getByRole('link', { name: 'Open property' })).toHaveAttribute('href', '/mc/properties/home-a');
   cleanup(); mount(booking, '/owner/calendar');
   expect(screen.queryByRole('link', { name: 'Open property' })).not.toBeInTheDocument();

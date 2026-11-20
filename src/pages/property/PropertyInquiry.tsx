@@ -489,7 +489,9 @@ export default function PropertyInquiry() {
               {rentalTerms?.deposit_amount && rentalTerms.deposit_amount > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>{isRu ? 'Залог (возвратный)' : 'Security deposit (refundable)'}</span>
-                  <span>{formatPrice(rentalTerms.deposit_amount)}</span>
+                  <span className="text-right tabular-nums">
+                    {rentalTerms.deposit_amount.toLocaleString(language)} {rentalTerms.deposit_currency || t({ ru: 'валюта уточняется', en: 'currency to be confirmed', th: 'โปรดยืนยันสกุลเงิน' })}
+                  </span>
                 </div>
               )}
             </div>}
@@ -498,10 +500,10 @@ export default function PropertyInquiry() {
 
             <div className="flex items-center justify-between font-semibold text-lg">
               <span className="flex items-center gap-1.5">
-                {isRu ? 'Итого' : 'Total'}
+                {isRu ? 'Стоимость проживания' : 'Stay total'}
                 {/* B2 — Currency popover so guests on RUB/THB presets understand
                     what bank actually charges. */}
-                <Popover>
+                {isInstantBooking && <Popover>
                   <PopoverTrigger asChild>
                     <button
                       type="button"
@@ -521,7 +523,7 @@ export default function PropertyInquiry() {
                         : 'Shown in your selected currency, but billed in the property currency. Your bank may apply an FX fee.'}
                     </p>
                   </PopoverContent>
-                </Popover>
+                </Popover>}
               </span>
               <span className="flex items-baseline gap-1">
                 {datePricingBlocked ? '—' : formatPrice(pricing.total)}

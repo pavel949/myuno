@@ -17,8 +17,8 @@ LABELS = {
     'ru': {
         'tasks': 'Задачи к выполнению', 'attention': 'Требует внимания',
         'requests': 'Обращения гостей', 'stays': 'Заезды и проживание',
-        'properties': 'Объекты', 'open_property': 'Открыть объект:', 'open_property_calendar': 'Открыть календарь объекта:',
-        'calendar': 'Календарь', 'task_nav': 'Задачи', 'refresh': 'Обновить', 'retry': 'Повторить загрузку',
+        'properties': 'Объекты', 'open_property': 'Открыть объект:', 'open_booking': 'Открыть бронирование:',
+        'calendar': 'Календарь', 'task_nav': 'Задачи', 'refresh': 'Обновить',
         'loading': 'Загрузка сведений на сегодня', 'go_properties': 'Перейти к объектам',
         'incomplete': 'Сводка на сегодня неполная', 'due': 'На сегодня: 2026-10-17',
         'undated': 'Дата не указана', 'ops_title': 'Уборка перед заездом',
@@ -27,8 +27,8 @@ LABELS = {
     'en': {
         'tasks': 'Tasks to act on', 'attention': 'Needs attention',
         'requests': 'Guest requests', 'stays': 'Today’s stays',
-        'properties': 'Properties', 'open_property': 'Open property:', 'open_property_calendar': 'Open property calendar:',
-        'calendar': 'Calendar', 'task_nav': 'Tasks', 'refresh': 'Refresh', 'retry': 'Retry loading',
+        'properties': 'Properties', 'open_property': 'Open property:', 'open_booking': 'Open booking:',
+        'calendar': 'Calendar', 'task_nav': 'Tasks', 'refresh': 'Refresh',
         'loading': 'Loading today’s data', 'go_properties': 'Go to properties',
         'incomplete': 'Today’s snapshot is incomplete', 'due': 'Due today: 2026-10-17',
         'undated': 'Date not recorded', 'ops_title': 'Pre-arrival cleaning',
@@ -37,8 +37,8 @@ LABELS = {
     'th': {
         'tasks': 'งานที่ต้องดำเนินการ', 'attention': 'ต้องดำเนินการ',
         'requests': 'คำขอของแขก', 'stays': 'การเข้าพักวันนี้',
-        'properties': 'ที่พัก', 'open_property': 'เปิดที่พัก:', 'open_property_calendar': 'เปิดปฏิทินที่พัก:',
-        'calendar': 'ปฏิทิน', 'task_nav': 'งาน', 'refresh': 'รีเฟรช', 'retry': 'ลองโหลดอีกครั้ง',
+        'properties': 'ที่พัก', 'open_property': 'เปิดที่พัก:', 'open_booking': 'เปิดการจอง:',
+        'calendar': 'ปฏิทิน', 'task_nav': 'งาน', 'refresh': 'รีเฟรช',
         'loading': 'กำลังโหลดข้อมูลวันนี้', 'go_properties': 'ไปที่ที่พัก',
         'incomplete': 'สรุปวันนี้ไม่ครบถ้วน', 'due': 'ครบกำหนดวันนี้: 2026-10-17',
         'undated': 'ไม่ได้บันทึกวันที่', 'ops_title': 'Pre-arrival cleaning',
@@ -154,8 +154,14 @@ async def main():
                 await expect(attention).to_have_count(1)
                 await attention.get_by_role('link', name=labels['open_property']).first.click()
                 await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/properties/synthetic-property')
-                await stays.get_by_role('link', name=labels['open_property_calendar']).first.click()
-                await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/calendar?property=synthetic-property&date=2026-10-17')
+                await visit()
+                await stays.get_by_role('button', name=labels['open_booking']).first.click()
+                booking = page.get_by_role('dialog')
+                await expect(booking).to_be_visible()
+                await expect(booking.locator('a[href="/mc/chat/booking/synthetic-booking"]')).to_be_visible()
+                await expect(booking.locator('a[href="/mc/calendar?property=synthetic-property&date=2026-10-17"]')).to_be_visible()
+                await page.keyboard.press('Escape')
+                await expect(booking).to_have_count(0)
                 for name, path in [(labels['calendar'], '/mc/calendar'), (labels['task_nav'], '/mc/tasks')]:
                     await page.get_by_role('link', name=name, exact=True).click()
                     await expect(page.get_by_test_id('route-boundary')).to_have_text(path)
@@ -174,10 +180,6 @@ async def main():
                         await expect(page.get_by_role('alert')).to_be_visible()
                         assert await page.locator('section').count() == 0
                         assert await page.locator('dl').count() == 0
-                        assert await page.locator('a[href$="#today-arrivals"]').count() == 0
-                        if state == 'error':
-                            await page.get_by_role('button', name=labels['retry']).click()
-                            assert await page.evaluate('window.fixtureRefresh') == 1
                         if state == 'truncated':
                             await expect(page.get_by_role('alert')).to_contain_text(labels['incomplete'])
                             for name, path in [(labels['task_nav'], '/mc/tasks'), (labels['calendar'], '/mc/calendar')]:

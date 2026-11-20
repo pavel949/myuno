@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { todayFixtures, type TodayScenario } from './today.fixtures';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -8,16 +8,13 @@ const mocks = vi.hoisted(() => ({ language: 'ru' as 'ru' | 'en' | 'th', scenario
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/hooks/usePmsToday', () => ({ usePmsToday: () => { const data = todayFixtures(mocks.language, mocks.scenario); if (mocks.unknownGuests) data.arrivals = data.arrivals.map(booking => ({...booking,guests_count:null})); return { ...data, refetch: mocks.refetch }; } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: new Proxy({}, { get: () => mocks.database() }) }));
+vi.mock('@/hooks/useBookingStatusHistory', () => ({ useBookingStatusHistory: () => ({ events: [], highlightIds: new Set() }) }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
 function Boundary() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  return <>
-    <output data-testid="route-boundary">{location.pathname}{location.search}{location.hash}</output>
-    <button type="button" onClick={() => navigate(-1)}>Back fixture</button>
-  </>;
+  const { pathname, search, hash } = useLocation();
+  return <output data-testid="route-boundary">{pathname}{search}{hash}</output>;
 }
 function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
@@ -25,7 +22,17 @@ afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
-  it('opens guest requests and units at the existing property boundary', () => {
+  it('opens the exact stay and its conversation from Today', () => {
+    mount();
+    fireEvent.click(screen.getAllByRole('button', { name: /Открыть бронирование|Open booking/ })[0]);
+    const booking = within(screen.getByRole('dialog'));
+    expect(booking.getByRole('link', { name: /переписку с гостем|guest conversation/ }))
+      .toHaveAttribute('href', '/mc/chat/booking/synthetic-booking');
+    expect(booking.getByRole('link', { name: /Календарь и задачи|Property calendar/ }))
+      .toHaveAttribute('href', '/mc/calendar?property=synthetic-property&date=2026-10-17');
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today');
+  });
+  it('keeps property destinations for request and unit rows', () => {
     mount();
     for (const element of [screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
       fireEvent.click(element);
@@ -48,7 +55,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
     expect(header).toHaveClass('ds-section');
     expect(within(header).getByText(/ · (Phuket|Пхукет)$/)).toBeVisible();
     const navigation = within(header).getByRole('navigation', { name: language === 'ru' ? 'Навигация по операциям' : 'Operational navigation' });
-    expect(within(navigation).getAllByRole('link')).toHaveLength(2);
+    expect(within(navigation).getAllByRole('link')).toHaveLength(3);
     fireEvent.click(within(navigation).getByRole('button', { name: language === 'ru' ? 'Обновить' : 'Refresh' }));
     expect(mocks.refetch).toHaveBeenCalledOnce();
   });
@@ -68,7 +75,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   it('empty fixture has no item destinations', () => {
     mocks.scenario = 'empty'; mount();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
-    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(2);
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
   });
   it('no-properties destination is the existing properties route', () => {
     mocks.scenario = 'no-properties'; mount();
@@ -79,17 +86,6 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
 
 describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => {
   beforeEach(() => { mocks.language = language; });
-  it('opens the authorized calendar selector with no fake booking-id and preserves exact Back context', () => {
-    const entry = '/mc/today?property=synthetic-property&keep=yes#work';
-    mount(entry);
-    const arrival = screen.getByRole('region', { name: language === 'ru' ? 'Заезды' : language === 'th' ? 'เช็คอิน' : 'Arrivals' });
-    const link = within(arrival).getByRole('link', { name: /Open property calendar|Открыть календарь объекта|เปิดปฏิทินที่พัก/ });
-    expect(link).toHaveAttribute('href', '/mc/calendar?property=synthetic-property&date=2026-10-17');
-    fireEvent.click(link);
-    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/calendar?property=synthetic-property&date=2026-10-17');
-    fireEvent.click(screen.getByRole('button', { name: 'Back fixture' }));
-    expect(screen.getByTestId('route-boundary')).toHaveTextContent(entry);
-  });
   it('supports section jumping with focus and query preservation', () => {
     const entry = '/mc/today?keep=yes';
     mount(entry);

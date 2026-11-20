@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useNavigate, useSearchParams } from 'react-router-dom';
 import { PropertyBookingCard } from '../PropertyBookingCard';
+import { format, addDays } from 'date-fns';
 import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
 const datePriceRead = vi.hoisted(() => vi.fn());
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: datePriceRead } }));
@@ -26,7 +27,7 @@ describe('booking card initial guest context', () => {
   it('hydrates both dates and party while keeping unknown availability blocked', () => {
     render(<Card />);
     expect(screen.getByText('3 guests')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Request direct booking' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Request to book' })).toBeDisabled();
     expect(screen.getByText('Checking availability…')).toBeInTheDocument();
   });
   it('updates untouched dates and guests on same-property URL navigation', () => {
@@ -41,7 +42,7 @@ describe('booking card initial guest context', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
     expect(screen.getByText('2 guests')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Request direct booking' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Request to book' })).not.toBeInTheDocument();
   });
   it('does not replace user edits when parent initial context changes', () => {
     mountRouted();
@@ -51,7 +52,7 @@ describe('booking card initial guest context', () => {
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
     expect(screen.getByText('4 guests')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Check-in.*10 Dec 2099.*Check-out.*14 Dec 2099/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Request direct booking' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Request to book' })).toBeDisabled();
   });
 });
 
@@ -59,7 +60,7 @@ it('keeps validated intent on the existing desktop inquiry route', async () => {
   availability.isSuccess = true;
   function Destination() { const [params] = useSearchParams(); return <output data-testid="inquiry-query">{params.toString()}</output>; }
   render(<MemoryRouter><PropertyBookingCard propertyId="home" pricePerNight={2000} initialGuestContext={context} guestSearch="mode=rent&tenancy=short&intent=holiday" /><Destination /></MemoryRouter>);
-  const button = screen.getByRole('button', { name: 'Request direct booking' });
+  const button = screen.getByRole('button', { name: 'Request to book' });
   await waitFor(() => expect(button).toBeEnabled());
   fireEvent.click(button);
   expect(Object.fromEntries(new URLSearchParams(screen.getByTestId('inquiry-query').textContent ?? ''))).toEqual({ mode: 'rent', tenancy: 'short', intent: 'holiday', checkIn: '2099-12-01', checkOut: '2099-12-04', guests: '3' });
@@ -70,7 +71,7 @@ it('blocks a price and CTA when dates fail, then uses the confirmed nightly over
   datePriceRead.mockResolvedValueOnce({ data: null, error: new Error('synthetic outage') })
     .mockResolvedValueOnce({ data: [{ date: '2099-12-01', price_override: 3000 }], error: null });
   render(<Card />);
-  const reserve = screen.getByRole('button', { name: 'Request direct booking' });
+  const reserve = screen.getByRole('button', { name: 'Request to book' });
   expect(screen.getByText('Checking the price for your selected dates…')).toBeVisible();
   expect(reserve).toBeDisabled();
   const retry = await screen.findByRole('button', { name: 'Retry' });
@@ -79,4 +80,30 @@ it('blocks a price and CTA when dates fail, then uses the confirmed nightly over
   fireEvent.click(retry);
   await waitFor(() => expect(reserve).toBeEnabled());
   expect(screen.getAllByText('7000').length).toBeGreaterThan(0);
+});
+
+it('lets a first-time guest choose two actual calendar dates before pricing is ready', async () => {
+  availability.isSuccess = true;
+  datePriceRead.mockClear();
+  render(<MemoryRouter><PropertyBookingCard propertyId="home" pricePerNight={2000} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Calculate stay cost' }));
+  const now = new Date();
+  const start = addDays(now, 2);
+  const end = addDays(now, 3);
+  // Both months are in view on desktop, including when today is at month end.
+  const day = (value: Date) => {
+    const key = format(value, 'yyyy-MM-dd');
+    return Array.from(document.querySelectorAll<HTMLElement>('td[data-day]'))
+      .find(cell => cell.dataset.day === key && !cell.hasAttribute('data-outside'))?.querySelector('button');
+  };
+  const first = day(start);
+  const second = day(end);
+  expect(first).toBeTruthy();
+  expect(second).toBeTruthy();
+  fireEvent.click(first!);
+  fireEvent.click(second!);
+  await waitFor(() => expect(datePriceRead).toHaveBeenCalledWith('get_property_date_prices', {
+    _property_id: 'home', _from: format(start, 'yyyy-MM-dd'), _to: format(end, 'yyyy-MM-dd'),
+  }));
+  expect(screen.getByRole('button', { name: 'Request to book' })).toBeEnabled();
 });

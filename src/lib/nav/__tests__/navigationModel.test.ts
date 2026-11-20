@@ -100,7 +100,7 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
       APP_ROUTES.MC_CALENDAR,
       APP_ROUTES.MC_PROPERTIES,
       APP_ROUTES.MC_MESSAGES,
-      APP_ROUTES.MC_MODULES,
+      '/mc/modules',
     ]);
   });
 
@@ -175,7 +175,6 @@ describe('getBottomBarItems — helper', () => {
 describe('isBottomBarRoute — membership check', () => {
   it('returns true for routes that belong to the role bar', () => {
     expect(isBottomBarRoute('owner', APP_ROUTES.MC_TODAY)).toBe(true);
-    expect(isBottomBarRoute('owner', APP_ROUTES.MC_MODULES)).toBe(true);
     expect(isBottomBarRoute('vendor', APP_ROUTES.VENDOR_PAYOUTS)).toBe(true);
     expect(isBottomBarRoute('guest', APP_ROUTES.BOOKINGS)).toBe(true);
   });
@@ -183,6 +182,7 @@ describe('isBottomBarRoute — membership check', () => {
   it('returns false for routes that are not in the role bar', () => {
     expect(isBottomBarRoute('guest', APP_ROUTES.MC_FINANCE)).toBe(false);
     expect(isBottomBarRoute('owner', APP_ROUTES.MARKET)).toBe(false);
+    expect(isBottomBarRoute('owner', APP_ROUTES.MC_FINANCE)).toBe(false);
     expect(isBottomBarRoute('admin', APP_ROUTES.VENDOR_PAYOUTS)).toBe(false);
   });
 });
@@ -228,7 +228,7 @@ describe('isBottomBarItemActive — exact-match items', () => {
 describe('isBottomBarItemActive — prefix items', () => {
   const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /bookings
   const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
-  const ownerProps = BOTTOM_BAR_BY_ROLE.owner.find(item => item.path === APP_ROUTES.MC_PROPERTIES)!;
+  const ownerProps = BOTTOM_BAR_BY_ROLE.owner[2]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
     expect(isBottomBarItemActive(market, '/bookings')).toBe(true);
@@ -281,10 +281,19 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(getActiveBottomBarItem('guest', '/profile/edit')?.path).toBe('/account');
   });
 
-  it('owner on /mc and finance highlights Menu while Today has its own tab', () => {
-    expect(getActiveBottomBarItem('owner', '/mc')?.labelEn).toBe('Menu');
-    expect(getActiveBottomBarItem('owner', '/mc/today')?.labelEn).toBe('Today');
-    expect(getActiveBottomBarItem('owner', '/mc/finance/transactions')?.labelEn).toBe('Menu');
+  it.each([
+    ['/mc', 'Menu'],
+    ['/mc/finance/transactions', 'Menu'],
+    ['/mc/settings', 'Menu'],
+    ['/mc/listings/new', 'Properties'],
+    ['/mc/tasks', 'Today'],
+    ['/mc/today', 'Today'],
+    ['/mc/bookings-list', 'Today'],
+    ['/mc/rates', 'Calendar'],
+    ['/mc/properties/p/terms', 'Properties'],
+    ['/mc/chat/booking/b', 'Messages'],
+  ])('highlights the owner tab for %s', (pathname, label) => {
+    expect(getActiveBottomBarItem('owner', pathname)?.labelEn).toBe(label);
   });
 
   it('mc_portal on /my-property/statements highlights Statements (longest prefix)', () => {

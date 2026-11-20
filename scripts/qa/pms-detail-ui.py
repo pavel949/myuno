@@ -45,9 +45,9 @@ async def main():
                     assert bounds['scroll'] <= bounds['width'] + 1, bounds
                     await page.screenshot(path=str(OUTPUT / f'{language}-{width}-{state}.png'))
                     link = dialog.get_by_role('link', name='Календарь и задачи объекта' if language == 'ru' else 'Property calendar and tasks')
-                    await expect(link).to_have_attribute('href', '/mc/calendar?property=synthetic-home')
+                    await expect(link).to_have_attribute('href', '/mc/calendar?property=synthetic-home&date=2030-01-10')
                     await link.click()
-                    await expect(page.get_by_test_id('destination')).to_have_text('/mc/calendar?property=synthetic-home')
+                    await expect(page.get_by_test_id('destination')).to_have_text('/mc/calendar?property=synthetic-home&date=2030-01-10')
                     await expect(dialog).to_have_count(0)
                     assert not errors, errors
                     assert not any('/rest/' in url or '/functions/' in url or 'supabase' in url for url in blocked), blocked

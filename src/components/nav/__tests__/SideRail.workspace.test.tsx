@@ -46,7 +46,7 @@ it('keeps current destination visible after collapse and opens the new active wo
 it('shows the current mobile quick link without opening the duplicate list', async () => {
   media.mobile = true;
   render(
-    <MemoryRouter initialEntries={['/mc/today']}>
+    <MemoryRouter initialEntries={['/mc/calendar']}>
       <SidebarProvider>
         <SidebarTrigger />
         <SideRail {...ownerRole} />
@@ -58,10 +58,10 @@ it('shows the current mobile quick link without opening the duplicate list', asy
   const quickLinks = within(drawer).getByRole('button', { name: 'Quick links' });
   expect(quickLinks).toHaveAttribute('aria-expanded', 'false');
   expect(quickLinks).toHaveAccessibleDescription('Contains current page');
-  expect(within(drawer).queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
-  expect(within(drawer).getByText('You are here:')).toHaveTextContent('Today');
+  expect(within(drawer).queryByRole('button', { name: 'Calendar' })).not.toBeInTheDocument();
+  expect(within(drawer).getByText('You are here:')).toHaveTextContent('Calendar');
   fireEvent.click(quickLinks);
-  expect(within(drawer).getAllByRole('button', { name: 'Today' })).toHaveLength(1);
+  expect(within(drawer).getAllByRole('button', { name: 'Calendar' })).toHaveLength(1);
 });
 
 it('does not attach owner-specific workspace chrome to admin', () => {

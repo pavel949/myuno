@@ -30,3 +30,13 @@ payments or real customer data.
 The frontend tranche retains the existing discount combination and existing
 payment behavior; host-policy and server parity beyond the above read path
 are not claimed.
+
+## Forward reconciliation against main 26fe374
+
+Retain main's instant/request button and explanation, instant-only payment
+preview and native-currency refundable deposit. The calendar must remain
+editable before a complete quote exists; only committing to the next step
+requires a ready, available stay estimate. Include a fresh guest beginning
+with no query dates in the calendar acceptance. Display-only cleaning and
+reference currency polish remains a separate follow-up; do not treat this
+patch as proof of an all-in or charge amount.

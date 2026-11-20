@@ -135,6 +135,11 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
+  '/mc/today':    ['/mc/today', '/mc/bookings-list', '/mc/bookings', '/mc/tasks', '/mc/operations'],
+  '/mc/calendar': ['/mc/calendar', '/mc/rates'],
+  '/mc/messages': ['/mc/messages', '/mc/chat'],
+  '/mc/properties': ['/mc/properties', '/mc/listings'],
+  '/mc/modules':  ['/mc/modules', '/mc/finance'],
   '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
   '/my-property': [
@@ -142,13 +147,6 @@ const PATH_ALIASES: Record<string, string[]> = {
     '/my-property/statements',
     '/my-property/signatures',
   ],
-};
-
-const OWNER_WORKSPACE_TAB_ALIASES: Record<string, string[]> = {
-  [APP_ROUTES.MC_TODAY]: [APP_ROUTES.MC_TODAY, APP_ROUTES.MC_TASKS, APP_ROUTES.MC_BOOKINGS_LIST, '/mc/bookings', '/mc/operations'],
-  [APP_ROUTES.MC_CALENDAR]: [APP_ROUTES.MC_CALENDAR, APP_ROUTES.MC_RATES],
-  [APP_ROUTES.MC_PROPERTIES]: [APP_ROUTES.MC_PROPERTIES, '/mc/listings'],
-  [APP_ROUTES.MC_MESSAGES]: [APP_ROUTES.MC_MESSAGES, '/mc/chat', '/mc/auto-messaging', '/mc/message-templates'],
 };
 
 /**
@@ -164,6 +162,7 @@ const OWNER_WORKSPACE_TAB_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === '/mc/modules' && pathname === APP_ROUTES.MC) return true;
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
@@ -187,17 +186,12 @@ export function getActiveBottomBarItem(
   role: NavRoleKey,
   pathname: string,
 ): NavItem | null {
-  const path = pathname.replace(/\/+$/, '') || '/';
-  const items = getBottomBarItems(role);
-  const matches = items.filter((item) => {
-    const aliases = role === 'owner' ? OWNER_WORKSPACE_TAB_ALIASES[item.path] : undefined;
-    return aliases?.some(prefix => path === prefix || path.startsWith(`${prefix}/`))
-      ?? isBottomBarItemActive(item, path);
-  });
+  const matches = getBottomBarItems(role).filter((item) =>
+    isBottomBarItemActive(item, pathname),
+  );
   if (matches.length === 0) {
-    // Menu is the existing tools hub; its discovery does not grant access.
-    return role === 'owner' && (path === APP_ROUTES.MC || path.startsWith(`${APP_ROUTES.MC}/`))
-      ? items.find(item => item.path === APP_ROUTES.MC_MODULES) ?? null
+    return role === 'owner' && pathname.startsWith(`${APP_ROUTES.MC}/`)
+      ? getBottomBarItems(role).find(item => item.path === APP_ROUTES.MC_MODULES) ?? null
       : null;
   }
   return matches.reduce((best, candidate) =>

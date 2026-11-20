@@ -160,8 +160,8 @@ export function CalendarPriceEditor({ property }: { property: UnifiedProperty })
       {!currency && <p role="alert" className="text-sm">{t('Set the property currency before editing prices.', 'Сначала задайте валюту объекта.', 'ตั้งค่าสกุลเงินก่อนแก้ไขราคา')}</p>}
       <Button type="submit" className="min-h-11 w-full" disabled={!canSave}>{saving ? t('Saving…', 'Сохранение…', 'กำลังบันทึก…') : t('Apply nightly price', 'Сохранить цену за ночь', 'บันทึกราคาต่อคืน')}</Button>
       <Link className="inline-flex min-h-10 items-center text-sm font-medium underline underline-offset-4"
-        to={`/mc/calendar?property=${encodeURIComponent(property.property_id)}${from ? `&date=${from}` : ''}`}>
-        {t('Open booking calendar', 'Календарь бронирований', 'ปฏิทินการจอง')}
+        to={`/mc/calendar?property=${encodeURIComponent(property.property_id)}${from ? `&date=${from}&show=day` : ''}`}>
+        {t('Availability & bookings', 'Доступность и брони', 'ห้องว่างและการจอง')}
       </Link>
     </form>;
 

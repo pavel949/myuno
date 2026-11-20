@@ -9,6 +9,7 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface MessageHostButtonProps {
   propertyId: string;
+  bookingId?: string;
   propertyTitle?: string;
   propertyTitleRu?: string;
   ownerName?: string;
@@ -25,6 +26,7 @@ interface MessageHostButtonProps {
 export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButtonProps>(
   function MessageHostButton({
     propertyId,
+    bookingId,
     propertyTitle,
     propertyTitleRu,
     ownerName,
@@ -83,6 +85,7 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
         <div className="min-h-[300px]">
           <GuestPropertyChat
             propertyId={propertyId}
+            bookingId={bookingId}
             propertyTitle={title}
             ownerName={ownerName}
             compact={false}

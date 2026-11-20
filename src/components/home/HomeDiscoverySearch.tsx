@@ -65,7 +65,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
 
   return (
     <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
-      {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Фильтр по названию — необязательно', en: 'Filter by name — optional', th: 'กรองตามชื่อ — ไม่บังคับ' })} /></label>}
+      {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} /></label>}
       {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {(catalogue ? ['all', 'rent', 'buy'] as const : ['rent', 'buy'] as const).map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>

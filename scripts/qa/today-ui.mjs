@@ -14,6 +14,9 @@ await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,
   '@/hooks/usePmsToday': `import {todayFixtures} from '${root}/src/pages/mc/operations/__tests__/today.fixtures.ts'; export const usePmsToday=()=>{const params=new URLSearchParams(location.search);const language=params.get('lang')||'ru';const state=params.get('state')||'populated';const d=todayFixtures(language,['truncated','long-tasks'].includes(state)?'populated':state);if(state==='truncated')d.truncatedSources=['ops'];if(state==='long-tasks')d.tasks=d.tasks.map(task=>({...task,title:task.title+' '+('LongUnbrokenSyntheticTaskTitle'.repeat(6)),title_ru:(task.title_ru||task.title)+' '+('ОченьДлинноеСинтетическоеНазваниеЗадачи'.repeat(6))}));return {...d,refetch:()=>{window.fixtureRefresh=(window.fixtureRefresh||0)+1;}}};`,
+  '@/contexts/AuthContext': `export const useAuth=()=>({user:{id:'fixture-operator'}});`,
+  '@/hooks/useMyProperties': `export const useMyProperties=()=>({allProperties:[]});`,
+  '@/hooks/useBookingStatusHistory': `export const useBookingStatusHistory=()=>({events:[],highlightIds:new Set()});`,
   '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Real database forbidden')}});`,
   '@/hooks/useHapticFeedback': `export const triggerHaptic=()=>{};`,
   '@/hooks/useSoundEffects': `export const playSound=()=>{};`,

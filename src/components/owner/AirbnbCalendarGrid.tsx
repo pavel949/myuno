@@ -41,8 +41,11 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
 
   const [params] = useSearchParams();
   const [currentMonth, setCurrentMonth] = useState(() => { const day = toBangkokDateKey(params.get('date')); return day ? parseCivilDate(day) : bangkokTodayDate(); });
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [showEventsSheet, setShowEventsSheet] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    const day = params.get('show') === 'day' && toBangkokDateKey(params.get('date'));
+    return day ? parseCivilDate(day) : null;
+  });
+  const [showEventsSheet, setShowEventsSheet] = useState(!!selectedDate);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   const [showBlockDatesDialog, setShowBlockDatesDialog] = useState(false);
