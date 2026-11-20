@@ -42,7 +42,7 @@
 .premium-service-request [role="heading"], .premium-service-request h2 { font-family: var(--font-display); font-weight: 400; }
 .premium-service-request :is(button,input,textarea) { min-height: 2.75rem; }
 
-.premium-services .ds-frame-catalogue {
+.premium-services:not(.premium-services--marketplace) .ds-frame-catalogue {
   width: calc(100% - var(--public-gutter) * 2);
   max-width: var(--public-width-wide);
   padding-inline: 0;

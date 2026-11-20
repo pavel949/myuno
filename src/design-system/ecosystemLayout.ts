@@ -21,7 +21,7 @@ export const PUBLIC_CONTENT_LAYOUT = {
 export function publicContentFrame(pathname: string): 'catalogue' | 'business' | 'default' {
   const path = pathname.replace(/\/$/, '');
   if (/^\/area\/[^/]+$/.test(path) || /^\/property\/[^/]+$/.test(path)) return 'catalogue';
-  if (path === '/discover/services' || path === '/services' || path === '/property/search') return 'catalogue';
+  if (['/discover/services', '/services', '/property/search', '/experiences', '/discover/buy'].includes(path)) return 'catalogue';
   if (path === '/for-business') return 'business';
   return 'default';
 }

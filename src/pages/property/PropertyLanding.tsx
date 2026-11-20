@@ -223,36 +223,16 @@ export default function PropertyLanding() {
           th: "ค้นหาย่านและรูปแบบชีวิตที่เหมาะกับคุณในภูเก็ต ดูโครงการ เปรียบเทียบระยะเวลาเช่า และเลือกที่พัก",
         })}
       />
-      <MarketplaceEntry kind="rent" headingId="rental-title" actions={[
-        { href: "#rental-search", label: { ru: "Найти жильё", en: "Find a home", th: "ค้นหาที่พัก" } },
-        { href: "#rental-areas", label: { ru: "Выбрать район", en: "Explore the areas", th: "สำรวจย่าน" } },
-      ]} />
+      <MarketplaceEntry kind="rent" headingId="rental-title" />
       <section
         className="rental-section rental-search-section"
         id="rental-search"
         aria-labelledby="rental-search-title"
       >
-        <div className="rental-section-heading">
-          <div>
-            <h2 id="rental-search-title">
-              {t({
-                ru: "Поиск жилья",
-                en: "Find a home",
-                th: "ค้นหาที่พัก",
-              })}
-            </h2>
-            <p>
-              {t({
-                ru: "Укажите срок, район и даты. Если ещё не определились, ищите без дат.",
-                en: "Choose a duration, area and dates. You can also search without dates.",
-                th: "เลือกระยะเวลา ย่าน และวันที่ หรือค้นหาโดยไม่ระบุวันที่ก็ได้",
-              })}
-            </p>
-          </div>
-        </div>
-        <div className="journey-primary">
-          <HomeDiscoverySearch rentalOnly showGuestsInline catalogue />
-        </div>
+        <h2 id="rental-search-title" className="sr-only">
+          {t({ ru: "Поиск жилья", en: "Find a home", th: "ค้นหาที่พัก" })}
+        </h2>
+        <HomeDiscoverySearch rentalOnly showGuestsInline catalogue />
         <Link className="rental-text-link" to={rentSearch}>
           {t({
             ru: "Смотреть каталог без дат",

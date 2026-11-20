@@ -124,6 +124,15 @@ async def main():
                     row['checks'].append('Recorded THB budget and duration combine, update in the actual sheet and reset without losing source context')
                     await goto()
                     await expect(cards()).to_have_count(4)
+                    toolbar = page.locator('[data-marketplace-toolbar]')
+                    search_box = await toolbar.get_by_role('searchbox').bounding_box()
+                    filter_box = await toolbar.get_by_role('button', name=filter_name, exact=True).bounding_box()
+                    h1_box = await page.get_by_role('heading', level=1).bounding_box()
+                    assert search_box and filter_box and h1_box
+                    assert abs(search_box['x'] - h1_box['x']) <= 2, ('Experience gutters', h1_box, search_box)
+                    assert abs((search_box['y'] + search_box['height']/2) - (filter_box['y'] + filter_box['height']/2)) <= 2
+                    assert search_box['x'] + search_box['width'] < filter_box['x']
+                    row['checks'].append('Overview search aligns with the title and filters share its row')
                     active = page.locator('.consumer-nav a[aria-current="page"]')
                     await expect(active).to_have_count(1)
                     await expect(active).to_have_attribute('href', '/experiences')

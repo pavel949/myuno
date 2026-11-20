@@ -6807,7 +6807,7 @@
     },
     {
       "file": "src/components/layout/FeatureLayout.tsx",
-      "sha256": "32e5b930da219d05e4f3108f349feb3c27de88af1ba3d19438974ef71dfcc492",
+      "sha256": "de03b389a4a1760211a1e063e484b2f91a5606d1c00196598ddc0af6f30f407b",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6823,10 +6823,10 @@
             284,
             299,
             325,
-            477,
-            523,
-            588,
-            603
+            478,
+            524,
+            589,
+            604
           ]
         },
         {
@@ -6834,8 +6834,8 @@
           "source": "@/components/page/EmptyState",
           "instances": 2,
           "lines": [
-            519,
-            529
+            520,
+            530
           ]
         },
         {
@@ -6843,7 +6843,7 @@
           "source": "@/components/uno/LoadingSpinner",
           "instances": 1,
           "lines": [
-            527
+            528
           ]
         }
       ]
@@ -17045,7 +17045,7 @@
     },
     {
       "file": "src/components/services/MarketplaceDiscoveryMenu.tsx",
-      "sha256": "69c6a422032a0cab95cb26aa80bcfe74b3fedfbc08c4597104e2a293663d6ef1",
+      "sha256": "153aae1db99ea9306b88b7db1c2a7ce50a49aa3872b42cca550abafe03e56505",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -17055,7 +17055,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            49
+            52
           ]
         },
         {
@@ -17063,7 +17063,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            48
+            51
           ]
         }
       ]
@@ -17333,7 +17333,7 @@
     },
     {
       "file": "src/components/shared/UnifiedHeader.tsx",
-      "sha256": "1ab5e0d2492360c1ac20c191296271b1840716636b03aaa71b04983197cb3580",
+      "sha256": "cf78379e07c1fc6719a73167d4191d54916152f6324e4dbafae27761c4494124",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -17343,7 +17343,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            84
+            76
           ]
         }
       ]
@@ -28573,7 +28573,7 @@
     },
     {
       "file": "src/pages/experiences/ExperiencesIndex.tsx",
-      "sha256": "21db14e5cf60c2da5b15b2f5a42cc2303e4a66d7cc7b0b66087ac8d9625c14c1",
+      "sha256": "a76dd5117d77d195477f54de20ae40886f62238c005554bda79f544d88852a4a",
       "directRouteDeclarations": [
         {
           "id": "adbdb71aca374db4",
@@ -40103,7 +40103,7 @@
     },
     {
       "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "267fe586ceeca4ec89392a9741a78a7362ba5c12e46eca6c51e4e72d54f39bbe",
+      "sha256": "b803a000f8025592f3bd0a8065a7046943cdb22059354a69427713cf8e9d0218",
       "directRouteDeclarations": [
         {
           "id": "2492a5f81192388c",
@@ -40775,7 +40775,7 @@
     },
     {
       "file": "src/pages/services/ServicesIndex.tsx",
-      "sha256": "779bc79fc633ea2e72dcae5a3c608e06e3999630078212a8d1f48fc9be9c9e4f",
+      "sha256": "59324db6a24a74ee7f3d4febc2c58c505e5bd4af4b70eef4595b5d9e1382fc68",
       "directRouteDeclarations": [
         {
           "id": "1dd848f291dbc440",

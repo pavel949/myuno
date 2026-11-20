@@ -154,7 +154,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       </TabsContent>
       </Tabs>
   </MarketplaceFilterSheet>;
-  return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+  return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName={overview && !filtered && !embedded ? "public-commerce public-commerce--services public-commerce--marketplace-overview" : "public-commerce public-commerce--services"}
     marketplaceIntro={!embedded && overview && !filtered ? <MarketplaceEntry kind="services" /> : undefined}
     title={t('Услуги', 'Services', 'บริการ')}
     subtitle={t('Выберите направление', 'Choose a category', 'เลือกหมวดหมู่')}

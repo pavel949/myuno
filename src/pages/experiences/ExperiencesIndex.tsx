@@ -135,7 +135,7 @@ export default function ExperiencesIndex() {
     ...(sortKey !== 'recommended' ? [{ key: 'sort' as const, label: pickLang(language, SORT_OPTIONS.find(item => item.id === sortKey)!) }] : []),
   ];
   const title = t('Впечатления', 'Experiences', 'ประสบการณ์');
-  return <MiniAppLayout pageWidth="catalogue" contentClassName="public-commerce public-commerce--experiences" title={title}
+  return <MiniAppLayout pageWidth="catalogue" contentClassName={overview ? "public-commerce public-commerce--experiences public-commerce--marketplace-overview" : "public-commerce public-commerce--experiences"} title={title}
     subtitle={error ? t('Каталог временно недоступен', 'Catalogue temporarily unavailable', 'รายการไม่พร้อมใช้งานชั่วคราว')
       : isLoading ? t('Загружаем предложения…', 'Loading offers…', 'กำลังโหลดข้อเสนอ…')
       : invalidFilters ? t('Проверьте выбранные фильтры', 'Check the selected filters', 'ตรวจสอบตัวกรองที่เลือก')

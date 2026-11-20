@@ -16,11 +16,12 @@ async def close_catalog_filters(page,lang):
 async def main():
     provider_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='provider'
     alias_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='home-aliases'
+    entry_only=os.environ.get('SERVICES_DISCOVERY_SCOPE')=='marketplace-entry'
     themes=os.environ.get('SERVICES_DISCOVERY_THEMES','light,dark').split(',')
     languages=os.environ.get('SERVICES_DISCOVERY_LANGUAGES','ru,en,th').split(',')
     widths=[int(value) for value in os.environ.get('SERVICES_DISCOVERY_WIDTHS','320,375,390,430,1440').split(',')]
     alias_cases=[('cat-home-living',lang,width) for lang in ['ru','th'] for width in [320,390,430]]+[('cat-home-living','en',1440),('home-services','en',390),('services','en',390)]
-    expected=len(alias_cases)+4 if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+10
+    expected=len(alias_cases)+4 if alias_only else 2 if provider_only else len(themes)*len(languages)*len(widths)+(0 if entry_only else 10)
     started=time.monotonic()
     results = []
     (OUTPUT/'results.json').unlink(missing_ok=True)
@@ -51,12 +52,32 @@ async def main():
                 await close_catalog_filters(page,lang)
                 menu=page.get_by_test_id('service-discovery-menu')
                 await expect(menu.locator('[data-category-id]')).to_have_count(6)
+                toolbar=page.locator('[data-marketplace-toolbar]')
+                search_box=await toolbar.get_by_role('searchbox').bounding_box()
+                filter_box=await toolbar.get_by_role('button').bounding_box()
+                title_box=await page.get_by_role('heading',level=1).bounding_box()
+                card_box=await menu.locator('[data-category-id]').first.bounding_box()
+                assert search_box and filter_box and title_box and card_box,(lang,width,'missing marketplace chrome')
+                assert abs(search_box['x']-title_box['x'])<=2 and abs(search_box['x']-card_box['x'])<=2,(lang,width,'service gutters',search_box,title_box,card_box)
+                assert abs((search_box['y']+search_box['height']/2)-(filter_box['y']+filter_box['height']/2))<=2,(lang,width,'tool row',search_box,filter_box)
+                assert search_box['x']+search_box['width']<filter_box['x'],(lang,width,'tool order')
                 for category_id in ['cat-business-legal','cat-health-wellness','cat-family-kids','cat-pet-services','cat-home-services']:
                     await expect(menu.locator(f'[data-category-id={category_id}]')).to_be_visible()
                 for target in await menu.locator('button,a').all():
                     box=await target.bounding_box()
                     assert box and box['width']>=44 and box['height']>=44,(lang,width,'menu touch target',box)
-                await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-catalogue.png'),full_page=True)
+                await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{appearance}-catalogue.png'),full_page=not entry_only)
+                if entry_only:
+                    search=toolbar.get_by_role('searchbox')
+                    await search.press_sequentially('zz-no-match')
+                    await expect(page.get_by_role('searchbox')).to_have_value('zz-no-match')
+                    await expect(page.get_by_role('searchbox')).to_be_focused()
+                    await expect(page.get_by_test_id('location')).to_contain_text('q=zz-no-match')
+                    await expect(page.locator('[data-marketplace-entry]')).to_have_count(0)
+                    assert not errors,errors
+                    results.append({'lang':lang,'width':width,'theme':appearance,'scenario':'marketplace-entry','passed':True})
+                    await context.close()
+                    return
                 await menu.get_by_role('button',name={'ru':'Все категории','en':'All categories','th':'ทุกหมวดหมู่'}[lang],exact=True).click()
                 chooser=page.get_by_role('dialog')
                 await expect(chooser.locator('[data-category-id]:not([data-category-id=cat-emergency])')).to_have_count(12)
@@ -146,6 +167,13 @@ async def main():
                 await context.close()
         if not provider_only and not alias_only:
             await asyncio.gather(*(run_case(theme,lang,width) for theme in themes for lang in languages for width in widths))
+        if entry_only:
+            await browser.close()
+            assert len(results)==expected
+            (OUTPUT/'results.json').write_text(json.dumps(results,indent=2))
+            print(json.dumps(results))
+            return
+        if not provider_only and not alias_only:
             # Distinct states must be real, not populated screenshots labelled loading.
             for phase in ['loading','error','empty']:
                 context=await browser.new_context(viewport={'width':390,'height':900},service_workers='block')
