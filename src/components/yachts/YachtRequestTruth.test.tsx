@@ -41,6 +41,28 @@ it('static planning guidance cannot masquerade as a current marine forecast or g
   expect(VERTICAL_CONTEXT_CONFIG.yacht?.titleEn).not.toMatch(/This Week/);
   expect(VERTICAL_CONTEXT_CONFIG.experience?.bodyEn).not.toMatch(/all tours running/);
 });
+it.each([
+  ['en', 'Preferred time in Phuket', 'The selected time needs myUNO confirmation.'],
+  ['ru', 'Желаемое время по Пхукету', 'Выбранное время требует подтверждения myUNO.'],
+  ['th', 'เวลาที่ต้องการในภูเก็ต', 'ทีม myUNO ต้องยืนยันเวลาที่เลือก'],
+])('labels unverified departure times as preferences in %s', (language, timeTitle, hint) => {
+  state.language = language;
+  render(<MemoryRouter><YachtBookingQuickSelect yacht={{ id: 'test', name_en: 'Test', name_ru: 'Тест', price_full_day: 1000, currency: 'THB', capacity: 4 } as Yacht} /></MemoryRouter>);
+  fireEvent.click(screen.getByText(language === 'ru' ? 'Выбрать дату' : 'Choose Date'));
+  fireEvent.click(screen.getByText(language === 'ru' ? 'Завтра' : 'Tomorrow'));
+  expect(screen.getByText(timeTitle)).toBeVisible();
+  expect(screen.getByText(hint)).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: '09:00' }));
+  expect(screen.getByRole('button', { name: '09:00' })).toHaveAttribute('aria-pressed', 'true');
+});
+it('does not offer fabricated hours for instant booking without a schedule', () => {
+  state.language = 'en';
+  render(<MemoryRouter><YachtBookingQuickSelect yacht={{ id: 'test', name_en: 'Test', price_full_day: 1000, booking_flow: 'instant', currency: 'THB', capacity: 4 } as Yacht} /></MemoryRouter>);
+  fireEvent.click(screen.getByText('Choose Date'));
+  fireEvent.click(screen.getByText('Tomorrow'));
+  expect(screen.getByText('This yacht has no configured schedule yet.')).toBeVisible();
+  expect(screen.queryByRole('button', { name: '09:00' })).toBeNull();
+});
 it('flower surfaces do not promise unconditional freshness or same-day delivery', () => {
   for (const file of ['FlowersIndex', 'BouquetDetail']) {
     const source = readFileSync(`src/pages/flowers/${file}.tsx`, 'utf8');
