@@ -1,6 +1,7 @@
 -- Review candidate. Run against an isolated PostgreSQL copy before production.
 BEGIN;
 SET LOCAL lock_timeout = '3s';
+LOCK TABLE public.consultation_requests IN ACCESS EXCLUSIVE MODE;
 DO $$
 DECLARE
   prior_rule text;
