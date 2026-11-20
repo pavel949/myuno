@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     const { data: mpr, error: mprErr } = await sb
       .from('manual_payment_requests')
       .select(`
-        id, order_id, user_id, status, amount_listing, currency_listing, amount_rub_estimate,
+        id, order_id, user_id, status, amount_listing, currency_listing, amount_rub_estimate, fx_rate_used,
         guest_name, guest_email,
         orders ( id, order_number, metadata, total_amount, currency )
       `)
@@ -96,21 +96,18 @@ Deno.serve(async (req) => {
     const listingAmount = Number((mpr as any).amount_listing);
     const listingCurrency = String((mpr as any).currency_listing || '').toUpperCase();
     const rubEstimate = Number((mpr as any).amount_rub_estimate);
+    const fxRateUsed = Number((mpr as any).fx_rate_used);
     if (!Number.isFinite(listingAmount) || listingAmount <= 0 || !listingCurrency) {
       return new Response(JSON.stringify({ error: 'Manual payment request has no trusted listing amount' }), {
         status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    // The browser RUB estimate is informational only. Until an approved FX
-    // settlement contract exists, RUB confirmation cannot be converted into a
-    // THB ledger amount without inventing financial truth.
-    if (listingCurrency !== 'RUB') {
-      return new Response(JSON.stringify({ error: 'Manual settlement currency contract not approved' }), {
-        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    if (Math.abs(amount_rub_actual - listingAmount) > 0.01) {
-      return new Response(JSON.stringify({ error: 'Received amount does not match approved manual-payment amount' }), {
+    // The RUB estimate/rate persisted by the browser is informational only.
+    // We can safely record the verified RUB receipt itself, but we must not
+    // translate it into THB ledger revenue until an approved server-side FX
+    // snapshot/rounding contract exists.
+    if (!Number.isFinite(rubEstimate) || rubEstimate <= 0 || !Number.isFinite(fxRateUsed) || fxRateUsed <= 0) {
+      return new Response(JSON.stringify({ error: 'Manual payment request has no informational RUB estimate' }), {
         status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -174,7 +171,7 @@ Deno.serve(async (req) => {
     // 3. Notify guest in-app
     await sb.from('notifications').insert({
       user_id: (mpr as any).user_id,
-      title: 'Оплата подтверждена',
+      title: 'Оплата получена',
       body: `Оплата по заявке #${orderNumber} получена и ожидает финансовой сверки.`,
       type: 'booking',
       is_read: false,
@@ -213,10 +210,6 @@ Deno.serve(async (req) => {
         console.error('[confirm-manual-payment] email error:', e);
       }
     }
-
-    // 5. Generate voucher (non-blocking)
-    sb.functions.invoke('generate-booking-voucher', { body: { order_id: orderId } })
-      .catch((e) => console.error('[confirm-manual-payment] voucher gen:', e));
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
