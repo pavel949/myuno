@@ -11,6 +11,9 @@ import { useCart, CartItem } from '@/contexts/CartContext';
 import { Yacht } from '@/hooks/useYachts';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { bangkokTodayDate, civilDateKey } from '@/lib/hotelDates';
+import { getYachtPreferredTimes } from '@/lib/yachtPreferredTimes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface YachtBookingQuickSelectProps {
   yacht: Yacht;
@@ -32,6 +35,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { addItem, items } = useCart();
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -62,16 +66,11 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   const selectedOption = charterOptions.find(o => o.type === charterType) || charterOptions[0];
   const basePrice = selectedOption?.price || 0;
 
-  const today = new Date();
+  const today = bangkokTodayDate();
   const tomorrow = addDays(today, 1);
 
-  const defaultTimes: Record<CharterType, string[]> = {
-    half_day: ['09:00', '14:00'],
-    full_day: ['08:00', '09:00', '10:00'],
-    sunset: ['16:00', '16:30', '17:00'],
-    overnight: ['10:00', '12:00'],
-  };
-  const availableTimes = yacht.departure_times?.length ? yacht.departure_times : (defaultTimes[charterType] || defaultTimes.full_day);
+  const suggestedTimes = getYachtPreferredTimes(yacht, charterType);
+  const canProceed = Boolean(selectedDate && suggestedTimes.includes(selectedTime));
 
   const totalPrice = basePrice;
   const currencySymbol = getCurrencySymbol(yacht.currency || 'THB');
@@ -90,7 +89,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   ];
 
   const handleAddToCart = () => {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDate || !canProceed) return;
     const cartItem: Omit<CartItem, 'quantity'> = {
       id: cartItemId!,
       type: 'yacht',
@@ -110,15 +109,13 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   };
 
   const handleBookNow = () => {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDate || !canProceed) return;
     const state = {
-      bookNowData: { date: selectedDate.toISOString(), time: selectedTime, guests, charterType },
+      bookNowData: { date: civilDateKey(selectedDate), time: selectedTime, guests, charterType },
     };
     navigate(`/yachts/${yacht.id}/booking?type=${charterType}`, { state });
     setIsOpen(false);
   };
-
-  const canProceed = selectedDate && selectedTime;
 
   // "From" price for bottom bar
   const fromPrice = Math.min(...charterOptions.map(o => o.price).filter(p => p > 0)) || 0;
@@ -269,12 +266,18 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
           <div>
             <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              {language === 'ru' ? 'Время отправления' : 'Departure Time'}
+              {t('Желаемое время по Пхукету', 'Preferred time in Phuket', 'เวลาที่ต้องการในภูเก็ต')}
             </h4>
+            <p className="mb-3 text-sm text-muted-foreground">
+              {suggestedTimes.length === 0
+                ? t('У яхты пока нет настроенного расписания.', 'This yacht has no configured schedule yet.', 'เรือลำนี้ยังไม่ได้ตั้งค่าตารางเวลา')
+                : t('Выбранное время требует подтверждения myUNO.', 'The selected time needs myUNO confirmation.', 'ทีม myUNO ต้องยืนยันเวลาที่เลือก')}
+            </p>
             <div className="flex gap-2 flex-wrap">
-              {availableTimes.map((time) => (
+              {suggestedTimes.map((time) => (
                 <button
                   key={time}
+                  aria-pressed={selectedTime === time}
                   onClick={() => setSelectedTime(time)}
                   className={cn(
                     "px-4 py-2 rounded-full border transition-all text-sm",
