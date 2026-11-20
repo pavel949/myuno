@@ -1,4 +1,5 @@
 BEGIN;
+SET LOCAL lock_timeout = '3s';
 CREATE SCHEMA IF NOT EXISTS private;
 
 CREATE TABLE public.flower_delivery_requests (
@@ -212,4 +213,37 @@ $$;
 REVOKE ALL ON FUNCTION public.get_flower_delivery(uuid) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.list_pending_flower_deliveries() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.get_flower_delivery(uuid),public.list_pending_flower_deliveries() TO authenticated;
+
+-- Protect the old checkout writer as well as the updated customer interface.
+CREATE FUNCTION private.require_confirmed_flower_order()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE
+  delivery public.flower_delivery_requests%ROWTYPE;
+  window_end time;
+BEGIN
+  SELECT * INTO delivery FROM public.flower_delivery_requests
+  WHERE id::text = NEW.metadata->>'flower_delivery_request_id'
+    AND customer_id = NEW.customer_user_id AND status = 'confirmed'
+  FOR KEY SHARE;
+  IF NOT FOUND OR delivery.confirmed_quote IS NULL THEN
+    RAISE EXCEPTION 'flower_delivery_review_required' USING ERRCODE='23514';
+  END IF;
+  window_end := CASE delivery.request->>'slot' WHEN 'morning' THEN '12:00'::time
+    WHEN 'afternoon' THEN '17:00'::time ELSE '21:00'::time END;
+  IF (delivery.request->>'date')::date + window_end <= (pg_catalog.now() AT TIME ZONE 'Asia/Bangkok')
+    OR NEW.currency IS DISTINCT FROM delivery.confirmed_quote->>'currency'
+    OR NEW.total_amount IS DISTINCT FROM (delivery.confirmed_quote->>'total')::numeric
+    OR NEW.metadata->>'delivery_date' IS DISTINCT FROM delivery.request->>'date'
+    OR NEW.metadata->>'delivery_slot' IS DISTINCT FROM delivery.request->>'slot'
+    OR NEW.metadata->>'delivery_address' IS DISTINCT FROM delivery.request->>'address' THEN
+    RAISE EXCEPTION 'flower_delivery_quote_mismatch' USING ERRCODE='23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION private.require_confirmed_flower_order() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER require_confirmed_flower_order BEFORE INSERT ON public.orders
+FOR EACH ROW WHEN (NEW.order_type = 'flowers') EXECUTE FUNCTION private.require_confirmed_flower_order();
+CREATE UNIQUE INDEX orders_confirmed_flower_delivery_once ON public.orders ((metadata->>'flower_delivery_request_id'))
+WHERE order_type='flowers' AND metadata ? 'flower_delivery_request_id';
 COMMIT;
