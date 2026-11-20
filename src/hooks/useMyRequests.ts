@@ -20,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type RequestStatus = 'new' | 'in_progress' | 'waiting' | 'done';
-export type RequestSource = 'concierge' | 'visa' | 'order' | 'help';
+export type RequestSource = 'concierge' | 'visa' | 'order' | 'help' | 'experience';
 
 export interface MyRequest {
   id: string;
@@ -30,6 +30,8 @@ export interface MyRequest {
   subtitle?: string;
   createdAt: string;
   detailPath?: string;
+  receipt?: string;
+  experienceStatus?: string;
 }
 
 function mapOrderStatus(s: string): RequestStatus {
@@ -169,6 +171,35 @@ async function fetchRequests(userId: string): Promise<{ requests: MyRequest[]; f
       });
     }
   } catch { failedSources.push('help'); }
+
+  try {
+    const { data, error } = await supabase
+      .from('consultation_requests')
+      .select('id, status, created_at, vertical_metadata')
+      .eq('user_id', userId)
+      .eq('request_type', 'tour_booking')
+      .eq('vertical_id', 'tours')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    if (error) throw error;
+    for (const row of data ?? []) {
+      const metadata = row.vertical_metadata;
+      const listingTitle = metadata && typeof metadata === 'object' && !Array.isArray(metadata) && typeof metadata.listing_title === 'string'
+        ? metadata.listing_title
+        : null;
+      const status: RequestStatus = row.status === 'completed' || row.status === 'cancelled' ? 'done'
+        : row.status === 'contacted' || row.status === 'scheduled' || row.status === 'in_progress' ? 'in_progress' : 'new';
+      out.push({
+        id: `experience-${row.id}`,
+        source: 'experience',
+        status,
+        title: listingTitle || '',
+        createdAt: row.created_at,
+        receipt: row.id,
+        experienceStatus: row.status ?? undefined,
+      });
+    }
+  } catch { failedSources.push('experience'); }
 
   out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   return { requests: out, failedSources };

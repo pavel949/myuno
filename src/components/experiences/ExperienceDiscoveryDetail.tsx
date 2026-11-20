@@ -4,7 +4,7 @@ import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { InquiryForm } from '@/components/vertical-wizard/InquiryForm';
+import { ExperienceInquiry } from '@/components/experiences/ExperienceInquiry';
 import type { Experience } from '@/hooks/useExperiences';
 
 /** Editorial information admits a concierge inquiry, never a booking, payment or asserted quote. */
@@ -31,9 +31,9 @@ export function ExperienceDiscoveryDetail({ experience, onBack, initialInquiryOp
       <div className="space-y-3 border border-border bg-muted/30 p-4">
         <h2 className="font-display text-h3">{t('Перед посещением', 'Before you visit', 'ก่อนเข้าชม')}</h2>
         <p>{t('Это идея для отдыха. Консьерж myUNO поможет уточнить программу, доступность и условия. Отправка запроса не подтверждает бронирование; онлайн-оплата для этой карточки недоступна.', 'An idea for your day. myUNO concierge can help check the programme, availability and conditions. An inquiry is not a confirmed booking; online payment is not available for this listing.', 'ไอเดียสำหรับวันพักผ่อน ติดต่อคอนเซียร์จ myUNO เพื่อสอบถามโปรแกรม ที่ว่าง และเงื่อนไข การส่งคำขอไม่ใช่การยืนยันการจอง และยังไม่เปิดให้ชำระเงินออนไลน์')}</p>
-        <Button onClick={() => setInquiryOpen(true)}>{t('Спросить консьержа myUNO', 'Ask myUNO concierge', 'สอบถามคอนเซียร์จ myUNO')}</Button>
+        <Button onClick={() => setInquiryOpen(true)} className="h-auto min-h-11 whitespace-normal">{t('Уточнить места у myUNO', 'Ask myUNO about availability', 'สอบถามที่ว่างกับ myUNO')}</Button>
       </div>
     </article>
-    <InquiryForm open={inquiryOpen} onOpenChange={setInquiryOpen} verticalId="tour" listingId={experience.id} listingTitle={title} entryPoint="experience_discovery:concierge" />
+    <ExperienceInquiry open={inquiryOpen} onOpenChange={setInquiryOpen} listingId={experience.id} listingTitle={title} entryPoint="experience_discovery:concierge" />
   </MiniAppLayout>;
 }
