@@ -18,6 +18,7 @@ import { clearPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { cn } from '@/lib/utils';
 import ServicesIndex from '@/pages/services/ServicesIndex';
 import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { MarketplaceDiscoveryMenu } from '@/components/services/MarketplaceDiscoveryMenu';
 import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 
 export default function GoalEntryPage({ goal }: { goal: string }) {
@@ -64,6 +65,8 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   };
   const seoTitle = seoTitles[goal] ? t(seoTitles[goal]) : title;
 
+  const buyHelp = goal === 'buy' ? entry.primary.find(link => link.path === APP_ROUTES.PROPERTY_CONSULTATION) : undefined;
+
   return (
     <AppLayout title={title} usePageContainer={false}>
       <SEOHead title={seoTitle} description={t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })} />
@@ -75,9 +78,20 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
             {t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })}
           </p>
         </header>}
-        <section className={cn('grid gap-3', goal === 'buy' ? 'mt-4 sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3')}>
+        {goal === 'buy' ? <div className="space-y-3 py-4">
+          <MarketplaceDiscoveryMenu
+            title={t({ en: 'What would you like to buy?', ru: 'Что хотите купить?', th: 'คุณอยากซื้ออะไร?' })}
+            testId="buy-discovery-menu"
+            items={entry.primary.filter(link => link.path !== APP_ROUTES.PROPERTY_CONSULTATION).map(link => ({
+              id: link.path, href: link.path, icon: link.icon, label: t(link),
+            }))}
+          />
+          {buyHelp && <Link to={buyHelp.path} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-foreground underline underline-offset-4">
+            {t(buyHelp)}<ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+          </Link>}
+        </div> : <section className="grid gap-3 sm:grid-cols-3">
           {entry.primary.map((l) => <Tile key={l.path} link={l} large />)}
-        </section>
+        </section>}
 
         <h2 className="mb-3 mt-10 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {t({ en: 'Also useful', ru: 'Также пригодится', th: 'ที่เป็นประโยชน์' })}

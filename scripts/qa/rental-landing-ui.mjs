@@ -23,7 +23,7 @@ const virtual = {
 };
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-wide"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-catalogue"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter>);`,
     loader: "tsx",
     resolveDir: root,
   },

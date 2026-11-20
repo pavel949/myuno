@@ -124,6 +124,23 @@ async def main():
                     row['checks'].append('Recorded THB budget and duration combine, update in the actual sheet and reset without losing source context')
                     await goto()
                     await expect(cards()).to_have_count(4)
+                    toolbar = page.locator('[data-marketplace-toolbar]')
+                    search_box = await toolbar.get_by_role('searchbox').bounding_box()
+                    filter_box = await toolbar.get_by_role('button', name=filter_name, exact=True).bounding_box()
+                    h1_box = await page.get_by_role('heading', level=1).bounding_box()
+                    assert search_box and filter_box and h1_box
+                    assert abs(search_box['x'] - h1_box['x']) <= 2, ('Experience gutters', h1_box, search_box)
+                    assert abs((search_box['y'] + search_box['height']/2) - (filter_box['y'] + filter_box['height']/2)) <= 2
+                    assert search_box['x'] + search_box['width'] < filter_box['x']
+                    row['checks'].append('Overview search aligns with the title and filters share its row')
+                    await toolbar.get_by_role('searchbox').press_sequentially('zz-no-match two words')
+                    search = page.get_by_role('searchbox')
+                    await expect(search).to_have_value('zz-no-match two words')
+                    await expect(search).to_be_focused()
+                    await expect(page.get_by_test_id('fixture-location')).to_have_text('/experiences?ref=synthetic&q=zz-no-match+two+words')
+                    await expect(page.locator('[data-marketplace-entry="experiences"]')).to_have_count(0)
+                    row['checks'].append('Uninterrupted typing keeps focus and the exact multiword URL')
+                    await goto()
                     active = page.locator('.consumer-nav a[aria-current="page"]')
                     await expect(active).to_have_count(1)
                     await expect(active).to_have_attribute('href', '/experiences')

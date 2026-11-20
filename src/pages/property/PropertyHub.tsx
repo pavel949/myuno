@@ -29,6 +29,7 @@ import { CompareProvider } from '@/components/property/PropertyCompare';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 
 interface TabConfig {
   id: string;
@@ -364,6 +365,7 @@ export default function PropertyHub() {
 
   const widePublicJourney = p === APP_ROUTES.PROPERTY_SEARCH || p === `${APP_ROUTES.PROPERTY_SEARCH}/` || p === APP_ROUTES.OFFPLAN || p.startsWith(`${APP_ROUTES.OFFPLAN}/`) || p.startsWith('/property/complex/');
 
+  const isRentalLanding = p === APP_ROUTES.PROPERTY_RENT || p === `${APP_ROUTES.PROPERTY_RENT}/`;
   const showBottomNav = !(
     p === APP_ROUTES.PROPERTY_DEPOSIT_SUCCESS ||
     p.includes('/inquiry') ||
@@ -375,10 +377,10 @@ export default function PropertyHub() {
       title={title}
       showHeader={!hideGlobalTopBar}
       showBottomNav={showBottomNav}
-      usePageContainer={!widePublicJourney}
+      usePageContainer={!widePublicJourney && !isRentalLanding}
     >
       <CompareProvider>
-        <div className={widePublicJourney ? "public-property-journey" : undefined}>
+        <div className={isRentalLanding ? PUBLIC_CONTENT_LAYOUT.catalogue : widePublicJourney ? "public-property-journey" : undefined}>
         {!hideOuterTabs && p !== APP_ROUTES.PROPERTY_SEARCH && <PropertyHubTabs />}
         <OffplanHubToolsStrip />
         <Outlet />

@@ -5,6 +5,11 @@ import { buildServiceCategoryUrl, clearServiceDiscoveryQuery, readServiceDiscove
 const categories = serviceDiscoveryCategories(CATEGORIES);
 const blank = { query: '', category: '', situation: '' };
 describe('canonical service projections and URL state', () => {
+  it('keeps literal search words separate from category reset tokens', () => {
+    const start = new URLSearchParams('ref=fixture&category=cat-home-services');
+    expect(updateServiceDiscoveryQuery(start, 'q', 'all').toString()).toBe('ref=fixture&category=cat-home-services&q=all');
+    expect(updateServiceDiscoveryQuery(start, 'category', 'all').toString()).toBe('ref=fixture');
+  });
   it('preserves service IDs and destinations across modes, deduplicated by ID', () => {
     const rows = projectServiceDiscovery(categories, blank);
     expect(new Set(rows.map(row => row.service.id)).size).toBe(rows.length);

@@ -121,3 +121,11 @@
 .public-complex-hero-content { min-height: inherit; }
 .public-commerce--projects :is(button,[role="combobox"]), .public-project-card a { min-height: 2.75rem; }
 .public-commerce--projects button { min-width: 2.75rem; }
+
+/* Keep the first category row equally close to the shared marketplace toolbar. */
+.public-commerce.public-commerce--marketplace-overview {
+  padding-block-start: var(--section-gap-tight);
+}
+.public-commerce.public-commerce--marketplace-overview > section:first-child {
+  margin-block-start: 0;
+}

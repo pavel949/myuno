@@ -3,6 +3,7 @@ import postcss from 'postcss';
 import postcssImport from 'postcss-import';
 import tailwindcss from 'tailwindcss';
 import { createServer } from 'node:http';
+import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from '@playwright/test';
@@ -16,23 +17,29 @@ await build({
     import {BrowserRouter,Route,Routes} from 'react-router-dom';
     import {HomeHeroChoices} from '@/components/home/HomeHeroChoices';
     import {MarketplaceEntry} from '@/components/landing/MarketplaceEntry';
+    import GoalEntryPage from '@/pages/discover/GoalEntryPage';
     import '@/styles/homepage-refinement.css';
     const entries = [
       ['/property/rent','rent'], ['/discover/buy','buy'],
       ['/experiences','experiences'], ['/services','services'],
     ];
-    createRoot(document.getElementById('root')).render(<BrowserRouter><main className="ds-frame ds-frame-catalogue">
-      <Routes><Route path="/" element={<div className="home-refined"><HomeHeroChoices/></div>}/>
-      {entries.map(([url,kind])=><Route key={url} path={url} element={<MarketplaceEntry kind={kind}/>}/>)}</Routes>
+    createRoot(document.getElementById('root')).render(<BrowserRouter><main>
+      <Routes><Route path="/" element={<div className="ds-frame ds-frame-catalogue home-refined"><HomeHeroChoices/></div>}/>
+      {entries.map(([url,kind])=><Route key={url} path={url} element={kind==="buy"?<GoalEntryPage goal="buy"/>:<div className="ds-frame ds-frame-catalogue"><MarketplaceEntry kind={kind}/></div>}/>)}</Routes>
     </main></BrowserRouter>);
   `},
   bundle: true, format: 'esm', jsx: 'automatic', outfile: path.join(out, 'fixture.js'),
-  loader: { '.webp': 'file' },
-  plugins: [{ name: 'synthetic-locale', setup(build) {
-    build.onResolve({ filter: /^@\/contexts\/LanguageContext$/ }, args => ({ path: args.path, namespace: 'isolated' }));
-    build.onLoad({ filter: /.*/, namespace: 'isolated' }, () => ({
-      contents: "export const useLanguage=()=>({language:sessionStorage.getItem('fixture-language')||'en'})",
-    }));
+  loader: { '.webp': 'file', '.svg': 'file', '.png': 'file' },
+  plugins: [{ name: 'isolated-buy-boundaries', setup(build) {
+    const isolated = {
+      '@/contexts/LanguageContext': "export const useLanguage=()=>({language:sessionStorage.getItem('fixture-language')||'en'})",
+      '@/components/layout/AppLayout': 'export const AppLayout=({children})=>children',
+      '@/components/seo/SEOHead': 'export const SEOHead=()=>null',
+      '@/pages/services/ServicesIndex': 'export default function(){throw Error("Unexpected Services in Buy fixture")}',
+      '@/components/property/PropertySearchRedirect': 'export default function(){throw Error("Unexpected search redirect in Buy fixture")}',
+    };
+    build.onResolve({ filter: /^@\// }, args => Object.hasOwn(isolated, args.path) ? ({ path: args.path, namespace: 'isolated' }) : undefined);
+    build.onLoad({ filter: /.*/, namespace: 'isolated' }, args => ({ contents: isolated[args.path] }));
   }}],
 });
 const css = await postcss([postcssImport(), tailwindcss(path.join(root, 'tailwind.config.ts'))])
@@ -53,7 +60,7 @@ let browser;
 const rows = [];
 try {
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
-  for (const language of ['ru','en','th']) for (const width of [375,390,768,1440]) {
+  for (const language of ['ru','en','th']) for (const width of [320,375,390,768,1440]) {
     const context = await browser.newContext({ viewport: {width,height: 850}, serviceWorkers: 'block' });
     await context.addInitScript(value => sessionStorage.setItem('fixture-language', value), language);
     const blocked = [], errors = [];
@@ -73,7 +80,22 @@ try {
       if (await page.locator('h1').count() !== 1 || !(await intro.innerText()).includes('myUNO')) throw Error('Missing managed marketplace heading ' + href);
       if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw Error('Overflow ' + href + ' ' + language + ' ' + width);
       if (width >= 768) await intro.locator('img').evaluate(async image => { await image.decode(); });
-      await intro.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
+      if (kind === 'buy') {
+        const menu = page.getByTestId('buy-discovery-menu');
+        const primary = ['/property/resale','/property/offplan','/property/search?mode=buy'];
+        const routes = await menu.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href')));
+        if (JSON.stringify(routes) !== JSON.stringify(primary)) throw Error('Buy primary routes changed: ' + JSON.stringify(routes));
+        for (const target of await menu.getByRole('link').all()) {
+          const box = await target.boundingBox();
+          if (!box || box.height < 44 || box.width < 44) throw Error('Buy card touch target is too small');
+        }
+        for (const secondary of ['/property/consultation','/invest']) {
+          if (await menu.locator(`a[href="${secondary}"]`).count() || !await page.locator(`a[href="${secondary}"]`).isVisible()) {
+            throw Error('Buy secondary route missing or promoted: ' + secondary);
+          }
+        }
+        await page.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
+      } else await intro.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
       rows.push({language,width,kind,href,pass:true});
     }
     if (blocked.length || errors.length) throw Error(JSON.stringify({blocked,errors}));
@@ -85,3 +107,13 @@ try {
   await browser?.close();
   server.close();
 }
+
+// The design gate already runs this suite. Verify the actual service overview
+// under the same isolated network boundary, not merely its shared masthead.
+const serviceEntry = spawnSync(process.execPath, ['scripts/qa/services-discovery-ui.mjs'], {
+  env: { ...process.env, SERVICES_DISCOVERY_OUTPUT: path.join(out, 'services-catalogue'),
+    SERVICES_DISCOVERY_SCOPE: 'marketplace-entry', SERVICES_DISCOVERY_WIDTHS: '320,390,1440',
+    SERVICES_DISCOVERY_THEMES: 'light,dark' },
+  stdio: 'inherit', timeout: 180_000,
+});
+if (serviceEntry.status !== 0) throw (serviceEntry.error ?? Error('Service marketplace entry verification failed'));

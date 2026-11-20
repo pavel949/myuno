@@ -13,7 +13,7 @@ async def main():
  async with async_playwright() as p:
   browser=await p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH'),headless=True,args=['--no-sandbox'])
   for lang in ['ru','en','th']:
-   for width in [375,768,1440]:
+   for width in [320,375,390,768,1440]:
     blocked=[];errors=[]
     context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
     async def route(r):
@@ -25,6 +25,15 @@ async def main():
     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {lang}/{width}'
     for id in ['rental-areas','rental-communities','rental-search','rental-guide','rental-life']:await expect(page.locator('#'+id)).to_have_count(1)
     await expect(page.locator('#rental-life a[href="/experiences"]')).to_have_count(1);await expect(page.locator('#rental-life a[href="/discover/services"]')).to_have_count(1)
+    periods=page.locator('#rental-search .home-search-duration button')
+    await expect(periods).to_have_count(3)
+    if width <= 390:
+     form=await page.locator('#rental-search form').bounding_box()
+     assert form and form['y'] < 480,(lang,width,'search should appear immediately after the marketplace introduction',form)
+    for period in await periods.all():
+     m=await period.evaluate('''node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);const lines=[...range.getClientRects()];return {width:box.width,height:box.height,clipped:lines.some(r=>r.x<box.x-1||r.right>box.right+1),lines:new Set(lines.filter(r=>r.width>0).map(r=>Math.round(r.y))).size}}''')
+     assert m['width']>=44 and m['height']>=44 and not m['clipped'],(lang,width,'rental period clipped or undersized',m)
+     if lang=='ru':assert m['lines']==1,(lang,width,'rental period label broke across lines',m)
     assert await page.evaluate('window.fixtureRentRead.filters.listingType')=='rent'
     assert await page.evaluate('window.fixtureProjectRead.ids')==['synthetic-community']
     await page.screenshot(path=str(out/f'{lang}-{width}.png'),full_page=True)
