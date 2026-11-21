@@ -82,7 +82,11 @@ it('shows the ordered public project gallery, selects a photo and opens only a s
 it('uses one tab row, preserves URL context, and shows only eligible document links', () => {
   state.project = { id: 'synthetic-project', nameEn: 'Synthetic project', district: 'Bang Tao', amenities: [] };
   state.media = { id: 'synthetic-project', description_en: 'Synthetic editorial overview.' };
+  const officialApproval = 'https://eia.onep.go.th/services/web//doc/download-eia-approval?id=12345';
   state.docs = [
+    { id: 'official', project_id: 'synthetic-project', is_current: true, title: 'Official environmental approval', category: 'permits', visibility: 'public', file_url: officialApproval, version: 1 },
+    { id: 'official-private', project_id: 'synthetic-project', is_current: true, title: 'Private permit record', category: 'permits', visibility: 'admin_only', file_url: officialApproval, version: 1 },
+    { id: 'official-other', project_id: 'other-project', is_current: true, title: 'Approval for a different project', category: 'permits', visibility: 'public', file_url: officialApproval, version: 1 },
     { id: 'pub', project_id: 'synthetic-project', is_current: true, title: 'Construction update', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/synthetic-project/construction/public-update.pdf?token=synthetic.test', version: 2 },
     { id: 'private', project_id: 'synthetic-project', is_current: true, title: 'Private document', category: 'contracts', visibility: 'kyc', file_url: '/restricted.pdf', version: 1 },
     { id: 'wrong-project', project_id: 'synthetic-project', is_current: true, title: 'Other project attachment', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/other-project/construction/update.pdf?token=synthetic.test', version: 1 },
@@ -99,6 +103,11 @@ it('uses one tab row, preserves URL context, and shows only eligible document li
   expect(screen.getByText('Synthetic editorial overview.')).toBeVisible();
   fireEvent.mouseDown(screen.getByRole('tab', { name: /^Docs/ }), { button: 0, ctrlKey: false });
   expect(screen.getByTestId('position')).toHaveTextContent(detail + '#project-documents');
+  const approvalLink = screen.getByRole('link', { name: /Official environmental approval/ });
+  expect(approvalLink).toHaveAttribute('href', officialApproval);
+  expect(approvalLink).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(screen.queryByText('Private permit record')).not.toBeInTheDocument();
+  expect(screen.queryByText('Approval for a different project')).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: /Construction update/ })).toHaveAttribute('href', 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/synthetic-project/construction/public-update.pdf?token=synthetic.test');
   expect(screen.getByRole('button', { name: 'Request document package' })).toBeVisible();
   expect(screen.queryByText('Private document')).not.toBeInTheDocument();
