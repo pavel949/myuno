@@ -253,7 +253,7 @@ function ConsultationCard({
                     </div>
                   </div>
 
-                  <BuyerRequestSummary metadata={consultation.vertical_metadata} />
+                  <BuyerRequestSummary metadata={consultation.vertical_metadata} detailOpen={isDetailsOpen} />
 
                   {/* Request details */}
                   <div>

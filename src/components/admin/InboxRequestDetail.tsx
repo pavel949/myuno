@@ -50,7 +50,7 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
                   return <div key={field} className="grid gap-1 sm:grid-cols-[10rem_1fr]"><dt className="text-sm text-muted-foreground">{isRu ? ru : en}</dt><dd className="whitespace-pre-wrap break-words text-sm">{value}</dd></div>;
                 })}
               </dl>
-              {buyerContext && <div className="mt-4"><BuyerRequestSummary metadata={buyerContext} /></div>}
+              {buyerContext && <div className="mt-4"><BuyerRequestSummary metadata={buyerContext} detailOpen={admitted && valid} /></div>}
             </>}
         </div>
       </SheetContent>
