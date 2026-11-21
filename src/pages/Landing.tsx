@@ -17,6 +17,8 @@ import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGr
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
+import homeArt from '@/assets/home-service-categories/home.svg';
+import arrivalArt from '@/assets/home-service-categories/arrival.svg';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
@@ -56,9 +58,9 @@ export default function Landing() {
       <nav className="home-container home-reference-directions" aria-label={t({ru:'Основные направления',en:'Explore myUNO',th:'สำรวจ myUNO'})}>
         {([
           {href:R.PROPERTY_RENT, icon:Home, image:hero, title:{ru:'Снять жильё',en:'Rent a home',th:'เช่าที่พัก'}, subtitle:{ru:'Виллы и апартаменты на любой срок',en:'Villas and apartments',th:'วิลล่าและอพาร์ตเมนต์'}},
-          {href:R.GOAL_BUY, icon:Building2, image:'/catalog/flowers/pink-garden-roses.webp', title:{ru:'Купить недвижимость',en:'Buy property',th:'ซื้ออสังหาริมทรัพย์'}, subtitle:{ru:'Готовые объекты и новостройки',en:'Homes and new developments',th:'บ้านและโครงการใหม่'}},
+          {href:R.GOAL_BUY, icon:Building2, image:homeArt, title:{ru:'Купить недвижимость',en:'Buy property',th:'ซื้ออสังหาริมทรัพย์'}, subtitle:{ru:'Готовые объекты и новостройки',en:'Homes and new developments',th:'บ้านและโครงการใหม่'}},
           {href:R.EXPERIENCES, icon:Compass, image:'/yachts/catamaran-53-1.webp', title:{ru:'Впечатления',en:'Experiences',th:'ประสบการณ์'}, subtitle:{ru:'Яхты, экскурсии и активный отдых',en:'Yachts and island activities',th:'กิจกรรมบนเกาะ'}},
-          {href:R.SERVICES, icon:Plane, image:'/catalog/flowers/pink-garden-roses.webp', title:{ru:'Услуги',en:'Services',th:'บริการ'}, subtitle:{ru:'Трансфер, Fast Track и помощь',en:'Transfers and assistance',th:'รถรับส่งและความช่วยเหลือ'}},
+          {href:R.SERVICES, icon:Plane, image:arrivalArt, title:{ru:'Услуги',en:'Services',th:'บริการ'}, subtitle:{ru:'Трансфер, Fast Track и помощь',en:'Transfers and assistance',th:'รถรับส่งและความช่วยเหลือ'}},
         ] as const).map(({href,icon:Icon,image,title,subtitle})=><Link key={href} to={href} className="home-reference-direction">
           <img src={image} alt="" loading="lazy" /><span className="home-reference-direction-shade" />
           <span className="home-reference-direction-content"><Icon size={25} aria-hidden="true"/><strong>{t(title)}</strong><small>{t(subtitle)}</small></span>
