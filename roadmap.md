@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-11-21 · Conversion homepage
+- [x] Audit current anonymous `/`, recent source, design tokens and canonical consultation intake at HEAD `9df52736a`; current real catalogue galleries and four working navigation entries confirmed without writes.
+- [x] Reproduce anonymous desktop 1440 and mobile 390 render with one main, zero horizontal overflow and no page errors; confirm duplicated `myUNO` SEO suffix and unverified response-time copy in the existing consultation success state.
+- [ ] BLOCKED by exhausted workspace credits before implementation: responsive RU/EN/TH search forms, CRM-prefilled quick matching, PII-safe events, sticky action, SEO/copy fixes and full width/E2E matrix.
+- [ ] No homepage source, backend, business data, RBAC or operational workflow changed; no PR, merge, deploy or publication. Existing automatic build was OK before the audit.
+
 ## 2026-11-16 · Functionality and latest design/UX rollout audit
 - [x] Confirm current source and fresh public version/entry-JS SHA parity at `be1224b5ed838bffebffddf12b127871adf41bad`; no deployment/publication performed.
 - [x] Fresh design gate: 3,945 retained findings, 0 new/structural; 205/206 targeted tests (obsolete Business top-menu assertion fails); 16 initial-render checks and 6/6 isolated intent scenarios. Evidence: `docs/qa/FUNCTIONALITY_DESIGN_ROLLOUT_2026_11_16.md`.
