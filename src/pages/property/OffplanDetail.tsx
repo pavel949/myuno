@@ -134,6 +134,8 @@ export default function OffplanDetail() {
   });
   const photo = selectedPhoto?.projectId === project.id && gallery.includes(selectedPhoto.url) ? selectedPhoto.url : gallery[0];
   const video = publicProjectMediaUrl(mediaProject?.video_url, 'video');
+  const developerPricing = project.sourceUrl === 'https://www.sudaraphuket.com/pricing' ? project.sourceUrl : null;
+  const hasSudaraRenderings = gallery.some(url => url.startsWith('/catalog/sudara/'));
   const description = (isRu ? mediaProject?.description_ru || mediaProject?.description_en
     : mediaProject?.description_en || mediaProject?.description_ru) || project.descriptionSummary;
   const photoLabel = (index: number) => pickLang(language, {
@@ -222,6 +224,11 @@ export default function OffplanDetail() {
                 {pickLang(language, { ru: 'Видео проекта (новая вкладка)', en: 'Project video (opens in new tab)', th: 'วิดีโอโครงการ (เปิดในแท็บใหม่)' })}
               </a>
             </Button>}
+            {hasSudaraRenderings && <p className="text-xs text-muted-foreground">{pickLang(language, {
+              ru: 'В галерее показаны визуализации проекта от застройщика.',
+              en: 'The gallery includes developer renderings of the project.',
+              th: 'แกลเลอรีมีภาพจำลองโครงการจากผู้พัฒนา',
+            })}</p>}
           </section>
         )}
 
@@ -242,6 +249,14 @@ export default function OffplanDetail() {
           <p className="text-sm text-muted-foreground">
             {pickLang(language, { ru: 'Цену, наличие и условия покупки уточнит команда myUNO. Запрос не бронирует объект.', en: 'The myUNO team will confirm price, availability and purchase terms. An enquiry does not reserve a unit.', th: 'ทีม myUNO จะยืนยันราคา ยูนิตว่าง และเงื่อนไขการซื้อ การสอบถามไม่ใช่การจองยูนิต' })}
           </p>
+          {developerPricing && <a href={developerPricing} target="_blank" rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline underline-offset-4">
+            {pickLang(language, {
+              ru: 'Прайс застройщика (новая вкладка)',
+              en: 'Developer’s live pricing (opens in new tab)',
+              th: 'ราคาล่าสุดจากผู้พัฒนา (เปิดในแท็บใหม่)',
+            })}
+          </a>}
         </div>
 
         {/* Tabs */}
