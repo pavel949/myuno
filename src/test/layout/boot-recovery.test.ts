@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { assetCacheWillUpdate } from '../../../scripts/asset-cache-response-guard';
+import { assetCacheWillUpdate, catalogStaticAssetNavigation } from '../../../scripts/asset-cache-response-guard';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
@@ -108,5 +108,23 @@ describe('asset response cache admission', () => {
   it.each(['text/javascript', 'application/javascript', 'text/css'])('retains valid %s assets', async contentType => {
     const response = { status: 200, headers: new Headers({ 'content-type': contentType }) } as Response;
     expect(await assetCacheWillUpdate({ response })).toBe(response);
+  });
+});
+
+describe('catalogue media navigation', () => {
+  it.each([
+    '/catalog/sudara/floor-plans/masterplan.webp',
+    '/catalog/sudara/floor-plans/one-bed.pdf?source=card',
+    '/catalog/sudara/sudara-show-unit-2br-garden.webp',
+    '/catalog/other-project/floor-plans/site-plan.AVIF',
+  ])('leaves static media at the origin: %s', pathAndSearch => {
+    expect(catalogStaticAssetNavigation.test(pathAndSearch)).toBe(true);
+  });
+
+  it.each([
+    '/catalog/sudara', '/catalog/sudara?feature=plan.webp',
+    '/property/offplan/abc?source=card', '/catalog/sudara/file.webp/extra',
+  ])('preserves SPA navigation: %s', pathAndSearch => {
+    expect(catalogStaticAssetNavigation.test(pathAndSearch)).toBe(false);
   });
 });

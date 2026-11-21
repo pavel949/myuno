@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { themeBootstrapPlugin } from "./scripts/vite-theme-bootstrap";
 import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
-import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
+import { assetCacheWillUpdate, catalogStaticAssetNavigation } from "./scripts/asset-cache-response-guard";
 import { radixOverlayAliases } from "./scripts/radix-overlay-resolution.mjs";
 import { version } from "./package.json";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
@@ -210,6 +210,8 @@ export default defineConfig(({ mode, command }) => {
             // shell instead, Google sign-in dies with a client-side 404.
             /^\/~oauth(\/|$)/,
             /\/version\.json$/,
+            // Full-size catalog media opens as a navigation, not an image subrequest.
+            catalogStaticAssetNavigation,
           ],
 
           runtimeCaching: [

@@ -6,3 +6,7 @@ export async function assetCacheWillUpdate({ response }: { response: Response })
   const contentType = response.headers.get('content-type') || '';
   return /^\s*(?:text\/html|application\/xhtml\+xml)(?:\s*;|\s*$)/i.test(contentType) ? null : response;
 }
+
+// Workbox tests pathname + search for top-level navigations. Static catalogue
+// media must reach the origin instead of being interpreted as an SPA route.
+export const catalogStaticAssetNavigation = /^\/catalog\/(?:[a-z0-9-]+\/)+[a-z0-9-]+\.(?:avif|jpe?g|pdf|png|webp)(?:\?|$)/i;
