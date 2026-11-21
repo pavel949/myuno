@@ -1,0 +1,142 @@
+/* Reference design implementation, isolated from existing DS and marketplaces. */
+.cinematic-home.home-refined { overflow-x: clip; background: #faf8f5; }
+.cinematic-home.home-refined .home-hero {
+  --home-hero-ink: #fff; --home-hero-muted-ink: rgba(255,255,255,.92);
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 0; height: auto; padding-bottom: 36px;
+  color: #fff; background: #0b2947;
+}
+.cinematic-home.home-refined .home-hero-layout {
+  position: relative; display: block; padding-block: 50px 20px;
+}
+.cinematic-home.home-refined .home-hero-media {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  aspect-ratio: auto; border: 0; border-radius: 0; overflow: hidden;
+  z-index: -1; pointer-events: none;
+}
+.cinematic-home.home-refined .home-hero-media .home-hero-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center 55%; transform: none;
+  z-index: 0;
+}
+.cinematic-home.home-refined .home-hero-media::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg,rgba(4,25,49,.9),rgba(4,25,49,.62) 54%,rgba(4,25,49,.22));
+}
+.cinematic-home.home-refined .home-hero-copy { max-width: 900px; padding: 0; }
+.cinematic-home.home-refined .home-hero-copy h1 {
+  max-width: 740px; font-size: clamp(38px,5.1vw,72px);
+  line-height: 1.07; font-weight: 500; letter-spacing: -.035em; color: #fff;
+}
+.cinematic-home.home-refined .home-hero-copy > p {
+  max-width: 680px; color: #fff; font-size: clamp(16px,1.6vw,20px);
+  line-height: 1.5; margin: 20px 0 0;
+}
+.cinematic-home.home-refined .home-hero .consumer-header-overlay { color: #fff; }
+.cinematic-home.home-refined .home-reference-search {
+  max-width: 850px; margin-top: 28px; padding: 20px;
+  background: #fff; color: #0c2948; border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.16);
+}
+.cinematic-home.home-refined .home-reference-search .home-search {
+  padding: 0; min-height: 0; background: #fff; color: #0c2948;
+  box-shadow: none;
+}
+.cinematic-home.home-refined .home-reference-search .home-search-submit {
+  min-height: 48px; background: #0c2948; color: #fff; border-radius: 10px;
+}
+.cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed=true] {
+  background: #0c2948; color: #fff;
+}
+.cinematic-home.home-refined .home-hero-secondary { color: #fff; }
+.cinematic-home.home-refined .home-reference-directions {
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 16px; padding-block: 30px 10px;
+}
+.cinematic-home.home-refined .home-reference-direction {
+  position: relative; isolation: isolate; display: block;
+  min-width: 0; aspect-ratio: 1 / 1.05; overflow: hidden;
+  border-radius: 16px; background: #133b5b; color: #fff;
+}
+.cinematic-home.home-refined .home-reference-direction > img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -2;
+}
+.cinematic-home.home-refined .home-reference-direction-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg,rgba(6,30,54,.06) 15%,rgba(6,30,54,.94) 100%);
+}
+.cinematic-home.home-refined .home-reference-direction-content {
+  display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: flex-end; gap: 7px; height: 100%; padding: 18px;
+}
+.cinematic-home.home-refined .home-reference-direction-content strong {
+  font-size: clamp(16px,1.8vw,22px); font-weight: 650; line-height: 1.22; color: #fff;
+}
+.cinematic-home.home-refined .home-reference-direction-content small {
+  font-size: 13px; line-height: 1.4; color: #fff;
+}
+.cinematic-home.home-refined .home-locations .home-area-cover { display: block; }
+.cinematic-home.home-refined .home-locations .home-guide-card {
+  border: 0; background: transparent;
+}
+.cinematic-home.home-refined .home-locations .home-area-guide-link {
+  position: relative; display: block;
+}
+.cinematic-home.home-refined .home-locations .home-area-cover {
+  position: relative; aspect-ratio: 1.5; overflow: hidden; border-radius: 14px;
+}
+.cinematic-home.home-refined .home-locations .home-area-cover img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.cinematic-home.home-refined .home-locations .home-guide-copy { padding: 12px 0; }
+.cinematic-home.home-refined .home-locations .home-rail-viewport {
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px;
+}
+.cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: 22px; }
+.cinematic-home.home-refined .home-rail-viewport { min-width: 0; }
+.cinematic-home.home-refined .home-rail-controls { position: static; }
+@media(max-width: 900px) {
+  .cinematic-home.home-refined .home-reference-directions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width: 767px) {
+  .cinematic-home.home-refined { padding-bottom: calc(92px + env(safe-area-inset-bottom,0px)); }
+  .cinematic-home.home-refined .home-container { width: calc(100% - 32px); max-width: 100%; }
+  .cinematic-home.home-refined .home-hero { padding-bottom: 22px; }
+  .cinematic-home.home-refined .home-hero-layout { padding-block: 38px 12px; }
+  .cinematic-home.home-refined .home-hero-copy h1 { font-size: clamp(34px,9vw,46px); line-height: 1.12; }
+  .cinematic-home.home-refined .home-hero-copy > p { font-size: 15px; line-height: 1.5; }
+  .cinematic-home.home-refined .home-hero-media::after {
+    background: linear-gradient(180deg,rgba(4,25,49,.82),rgba(4,25,49,.62));
+  }
+  .cinematic-home.home-refined .home-reference-search { margin-top: 22px; padding: 14px; border-radius: 12px; }
+  .cinematic-home.home-refined .home-reference-search .home-search {
+    display: flex; flex-direction: column; align-items: stretch; gap: 12px;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search > * {
+    width: 100%; max-width: 100%; min-width: 0;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-duration {
+    display: grid; grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-duration button {
+    min-width: 0; white-space: normal; font-size: 13px;
+  }
+  .cinematic-home.home-refined .home-reference-directions { gap: 10px; padding-top: 18px; }
+  .cinematic-home.home-refined .home-reference-direction { border-radius: 12px; aspect-ratio: 1 / 1.18; }
+  .cinematic-home.home-refined .home-reference-direction-content { padding: 12px; gap: 5px; }
+  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: 16px; overflow-wrap: anywhere; }
+  .cinematic-home.home-refined .home-reference-direction-content small { font-size: 12px; }
+  .cinematic-home.home-refined .home-reference-direction-content svg { width: 21px; height: 21px; }
+  .cinematic-home.home-refined .home-section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .cinematic-home.home-refined .home-section-heading h2 { font-size: clamp(27px,7vw,36px); }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport { gap: 10px; }
+  .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: 18px; }
+  .cinematic-home.home-refined .home-locations .home-guide-copy { padding: 10px 0; }
+  .cinematic-home.home-refined .home-services .home-rail-viewport { display: grid; grid-template-columns: minmax(0,1fr); }
+}
+@media(max-width: 360px) {
+  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: 14px; }
+  .cinematic-home.home-refined .home-reference-direction-content small { font-size: 11px; }
+}

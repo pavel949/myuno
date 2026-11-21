@@ -1,7 +1,7 @@
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, LifeBuoy } from 'lucide-react';
+import { ArrowRight, LifeBuoy, Home, Building2, Compass, Plane } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
@@ -14,12 +14,15 @@ import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
-import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
+import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
+import homeArt from '@/assets/home-service-categories/home.svg';
+import arrivalArt from '@/assets/home-service-categories/arrival.svg';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
+import '@/styles/home-reference.css';
 
 const publicNavigationRole = 'guest' as const;
 
@@ -42,7 +45,7 @@ export default function Landing() {
           <div className="home-hero-copy">
             <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
             <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
-            <HomeHeroChoices />
+            <div className="home-reference-search"><HomeDiscoverySearch showGuestsInline progressive /></div>
             <div className="home-hero-actions">
               <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
             </div>
@@ -52,6 +55,17 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <nav className="home-container home-reference-directions" aria-label={t({ru:'Основные направления',en:'Explore myUNO',th:'สำรวจ myUNO'})}>
+        {([
+          {href:R.PROPERTY_RENT, icon:Home, image:hero, title:{ru:'Снять жильё',en:'Rent a home',th:'เช่าที่พัก'}, subtitle:{ru:'Виллы и апартаменты на любой срок',en:'Villas and apartments',th:'วิลล่าและอพาร์ตเมนต์'}},
+          {href:R.GOAL_BUY, icon:Building2, image:homeArt, title:{ru:'Купить недвижимость',en:'Buy property',th:'ซื้ออสังหาริมทรัพย์'}, subtitle:{ru:'Готовые объекты и новостройки',en:'Homes and new developments',th:'บ้านและโครงการใหม่'}},
+          {href:R.EXPERIENCES, icon:Compass, image:'/yachts/catamaran-53-1.webp', title:{ru:'Впечатления',en:'Experiences',th:'ประสบการณ์'}, subtitle:{ru:'Яхты, экскурсии и активный отдых',en:'Yachts and island activities',th:'กิจกรรมบนเกาะ'}},
+          {href:R.SERVICES, icon:Plane, image:arrivalArt, title:{ru:'Услуги',en:'Services',th:'บริการ'}, subtitle:{ru:'Трансфер, Fast Track и помощь',en:'Transfers and assistance',th:'รถรับส่งและความช่วยเหลือ'}},
+        ] as const).map(({href,icon:Icon,image,title,subtitle})=><Link key={href} to={href} className="home-reference-direction">
+          <img src={image} alt="" loading="lazy" /><span className="home-reference-direction-shade" />
+          <span className="home-reference-direction-content"><Icon size={25} aria-hidden="true"/><strong>{t(title)}</strong><small>{t(subtitle)}</small></span>
+        </Link>)}
+      </nav>
       <HomeHousingPreview />
       <HomeNewbuildsPreview />
       <div className="home-life-group">
