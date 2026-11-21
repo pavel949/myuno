@@ -143,6 +143,7 @@ Deno.serve(async (req) => {
     });
   }
 
+  let crmRouted = false;
   // Route every public intake to the explicitly named Ignatev Estate company.
   // Never fall back to a different tenant when the company cannot be identified.
   // The help request remains durable if CRM enrichment needs operator retry.
@@ -203,6 +204,7 @@ Deno.serve(async (req) => {
     const { error: taskLinkError } = await sb.from("help_requests")
       .update({ crm_task_id: task.id, assigned_to: operatorId }).eq("id", hr.id);
     if (taskLinkError) throw taskLinkError;
+    crmRouted = true;
   } catch (crmError) {
     console.error("[submit-help-request] CRM routing requires operator attention:", hr.id, crmError);
   }
@@ -212,6 +214,7 @@ Deno.serve(async (req) => {
     const adminWa = await getAdminWhatsApp();
     const waBody = [
       `${URGENCY_EMOJI[input.urgency]} *myUNO Help Request*`,
+      crmRouted ? "CRM: Ignatev Estate ✓" : "⚠️ CRM: НЕ СВЯЗАНА, нужна ручная обработка",
       `Тема: *${TOPIC_LABEL_RU[input.topic]}*`,
       input.subject ? `Заголовок: ${input.subject}` : null,
       `Срочность: ${input.urgency}`,
@@ -254,6 +257,7 @@ Deno.serve(async (req) => {
 
       const html = `
         <h2>Новая заявка myUNO Help (${TOPIC_LABEL_RU[input.topic]})</h2>
+        <p><strong>CRM Ignatev Estate:</strong> ${crmRouted ? "Связана" : "ТРЕБУЕТ РУЧНОЙ ОБРАБОТКИ"}</p>
         <p><strong>Срочность:</strong> ${input.urgency}</p>
         <p><strong>Канал связи:</strong> ${input.preferred_channel}</p>
         ${finalEmail ? `<p><strong>Email:</strong> ${escapeHtml(finalEmail)}</p>` : ""}
@@ -285,7 +289,7 @@ Deno.serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ success: true, request_id: hr.id, created_at: hr.created_at }),
+    JSON.stringify({ success: true, request_id: hr.id, created_at: hr.created_at, crm_routed: crmRouted }),
     { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
   );
 });
