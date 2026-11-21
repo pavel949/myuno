@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
       contact_id: contactId,
       title: `myUNO: ${input.subject || TOPIC_LABEL_RU[input.topic]}`,
       description: `Help request ${hr.id}\\n${input.message}`,
-      priority: input.urgency === "urgent" ? "high" : "normal",
+      priority: input.urgency === "urgent" || input.urgency === "high" ? "high" : "medium",
       status: "pending",
       created_by: operatorId,
       assigned_to: operatorId,
