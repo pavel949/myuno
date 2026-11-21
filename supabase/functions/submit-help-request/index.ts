@@ -143,9 +143,69 @@ Deno.serve(async (req) => {
     });
   }
 
-  // CRM auto-routing is multi-tenant (company_id required) and handled by
-  // a separate workflow. For now we only persist help_requests + alert admins;
-  // /admin/help-requests dashboard converts to CRM tasks manually.
+  // Route every public intake to the explicitly named Ignatev Estate company.
+  // Never fall back to a different tenant when the company cannot be identified.
+  // The help request remains durable if CRM enrichment needs operator retry.
+  try {
+    const { data: companies, error: companyError } = await sb
+      .from("management_companies")
+      .select("id, name")
+      .ilike("name", "Ignatev Estate")
+      .limit(2);
+    if (companyError) throw companyError;
+    if (!companies || companies.length !== 1) {
+      throw new Error("ignatev_estate_company_not_unique_or_missing");
+    }
+    const companyId = companies[0].id;
+    let contactId: string | null = null;
+    if (finalEmail) {
+      const { data: existing, error: lookupError } = await sb.from("crm_contacts")
+        .select("id").eq("company_id", companyId).ilike("email", finalEmail).limit(2);
+      if (lookupError) throw lookupError;
+      if (existing && existing.length > 1) throw new Error("ambiguous_crm_contact");
+      contactId = existing?.[0]?.id ?? null;
+    }
+    if (!contactId) {
+      const { data: contact, error: contactError } = await sb.from("crm_contacts")
+        .insert({
+          company_id: companyId,
+          first_name: userName?.trim().split(/\\s+/)[0] || "myUNO",
+          last_name: userName?.trim().split(/\\s+/).slice(1).join(" ") || "Lead",
+          email: finalEmail || null,
+          phone: finalPhone || null,
+          contact_type: input.topic === "invest" ? "investor" : input.topic === "property" ? "buyer" : "other",
+          source: "myuno_help_request",
+        }).select("id").single();
+      if (contactError || !contact) throw contactError ?? new Error("crm_contact_create_failed");
+      contactId = contact.id;
+    }
+    const { error: linkError } = await sb.from("help_requests")
+      .update({ crm_contact_id: contactId }).eq("id", hr.id);
+    if (linkError) throw linkError;
+    // CRM tasks require a valid company member as creator; use an active
+    // Estate operator rather than assigning work to an unrelated tenant.
+    const { data: members, error: memberError } = await sb.from("management_company_members")
+      .select("user_id").eq("company_id", companyId).eq("is_active", true).limit(1);
+    if (memberError) throw memberError;
+    const operatorId = members?.[0]?.user_id;
+    if (!operatorId) throw new Error("ignatev_estate_operator_missing");
+    const { data: task, error: taskError } = await sb.from("crm_tasks").insert({
+      company_id: companyId,
+      contact_id: contactId,
+      title: `myUNO: ${input.subject || TOPIC_LABEL_RU[input.topic]}`,
+      description: `Help request ${hr.id}\\n${input.message}`,
+      priority: input.urgency === "urgent" ? "high" : "normal",
+      status: "pending",
+      created_by: operatorId,
+      assigned_to: operatorId,
+    }).select("id").single();
+    if (taskError || !task) throw taskError ?? new Error("crm_task_create_failed");
+    const { error: taskLinkError } = await sb.from("help_requests")
+      .update({ crm_task_id: task.id, assigned_to: operatorId }).eq("id", hr.id);
+    if (taskLinkError) throw taskLinkError;
+  } catch (crmError) {
+    console.error("[submit-help-request] CRM routing requires operator attention:", hr.id, crmError);
+  }
 
   // 4) Notify admins — WhatsApp + email (fire and forget)
   try {
