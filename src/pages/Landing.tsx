@@ -59,6 +59,32 @@ export default function Landing() {
         <HomeServiceGallery />
       </div>
       <HomeLocationGallery />
+      {/* Conversion entry points reuse the existing concierge intake and CRM workflow.
+          No parallel lead storage or unverified promises are introduced. */}
+      <section className="home-container py-12 sm:py-20" aria-labelledby="home-guided-title" data-testid="home-guided-intake">
+        <div className="home-group-heading">
+          <p className="home-group-eyebrow">{t({ ru: 'Подбор с командой myUNO', en: 'Personal assistance', th: 'ให้ทีม myUNO ช่วยเลือก' })}</p>
+          <h2 id="home-guided-title">{t({ ru: 'Расскажите, что ищете. Поможем найти подходящее.', en: 'Tell us what you need. We will help you find it.', th: 'บอกสิ่งที่คุณกำลังมองหา เราจะช่วยคุณค้นหา' })}</h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">{t({ ru: 'Не нужно просматривать сотни вариантов. Выберите задачу и отправьте запрос команде.', en: 'Skip the endless browsing. Choose a goal and send your request to the team.', th: 'ไม่ต้องค้นหาหลายร้อยรายการ เลือกสิ่งที่ต้องการแล้วส่งคำขอถึงทีมงาน' })}</p>
+        </div>
+        <div className="mt-7 grid gap-4 md:grid-cols-3">
+          {([
+            { key: 'buy', title: { ru: 'Подобрать недвижимость', en: 'Find a property', th: 'ค้นหาอสังหาริมทรัพย์' }, detail: { ru: 'Покупка, инвестиции и новостройки', en: 'Buying, investing and new developments', th: 'ซื้อ ลงทุน และโครงการใหม่' }, subject: { ru: 'Подбор недвижимости: цель, бюджет, район и сроки', en: 'Property search: goal, budget, area and timing', th: 'ค้นหาอสังหาริมทรัพย์: วัตถุประสงค์ งบประมาณ พื้นที่ และเวลา' } },
+            { key: 'rent', title: { ru: 'Найти жильё', en: 'Find a place to stay', th: 'ค้นหาที่พัก' }, detail: { ru: 'Виллы и квартиры на нужные даты', en: 'Villas and condos for your dates', th: 'วิลล่าและคอนโดตามวันที่ต้องการ' }, subject: { ru: 'Подбор аренды: даты, гости, район и бюджет', en: 'Rental search: dates, guests, area and budget', th: 'ค้นหาที่พัก: วันที่ ผู้เข้าพัก พื้นที่ และงบประมาณ' } },
+            { key: 'service', title: { ru: 'Организовать услуги', en: 'Arrange a service', th: 'จัดหาบริการ' }, detail: { ru: 'Трансфер, впечатления и помощь', en: 'Transfers, experiences and assistance', th: 'รถรับส่ง กิจกรรม และความช่วยเหลือ' }, subject: { ru: 'Запрос услуг: что требуется и когда', en: 'Service request: what is needed and when', th: 'คำขอบริการ: สิ่งที่ต้องการและเวลา' } },
+          ] as const).map((item) => (
+            <article key={item.key} className="flex min-w-0 flex-col justify-between gap-6 border border-border bg-card p-6 sm:p-7">
+              <div>
+                <h3 className="font-display text-xl text-foreground">{t(item.title)}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{t(item.detail)}</p>
+              </div>
+              <button type="button" className="inline-flex min-h-11 items-center justify-between gap-3 border-b border-foreground pb-2 text-left font-semibold text-foreground transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => { setRequestSubject(t(item.subject)); setRequestOpen(true); }}>
+                {t({ ru: 'Оставить запрос', en: 'Send a request', th: 'ส่งคำขอ' })}<ArrowRight size={18} aria-hidden="true" />
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
       <section className="home-partners-group" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
           <p className="home-group-eyebrow">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</p>
