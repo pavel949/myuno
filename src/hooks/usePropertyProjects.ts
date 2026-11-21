@@ -32,6 +32,7 @@ export interface PropertyProject {
   total_units?: number;
   cover_image?: string;
   images?: string[];
+  gallery_urls?: string[] | null;
   video_url?: string;
   amenities?: string[];
   infrastructure?: string[];
@@ -73,6 +74,7 @@ export interface CreatePropertyProjectData {
   total_units?: number;
   cover_image?: string;
   images?: string[];
+  gallery_urls?: string[] | null;
   video_url?: string;
   amenities?: string[];
   infrastructure?: string[];

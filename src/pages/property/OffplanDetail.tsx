@@ -1,3 +1,4 @@
+import { projectEditorialImages, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { useLocation as useJourneyLocation, useNavigate as useJourneyNavigate } from 'react-router-dom';
 import { publicJourneyReturn, publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { QueryRecovery } from '@/components/shared/QueryRecovery';
@@ -99,6 +100,7 @@ export default function OffplanDetail() {
   const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ projectId: string; url: string } | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
   const [enquiryIntent, setEnquiryIntent] = useState<'consultation' | 'documents'>('consultation');
   useEffect(() => {
@@ -159,7 +161,18 @@ export default function OffplanDetail() {
   const seoDescription = isRu
     ? `${name} — ${project.district || 'Пхукет'}. ${status ? status.label.ru + '.' : ''} Начальная цена требует уточнения.`.trim()
     : `${name} — ${project.district || 'Phuket'}. ${status ? status.label.en + '.' : ''} Starting price requires confirmation.`.trim();
-  const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
+  const mediaProject = nbProject?.id === project.id ? nbProject : null;
+  const gallery = projectEditorialImages({
+    cover_image: mediaProject?.cover_image || project.coverImage,
+    images: mediaProject?.images,
+    gallery_urls: mediaProject?.gallery_urls,
+  });
+  const photo = selectedPhoto?.projectId === project.id && gallery.includes(selectedPhoto.url) ? selectedPhoto.url : gallery[0];
+  const video = publicProjectMediaUrl(mediaProject?.video_url, 'video');
+  const photoLabel = (index: number) => pickLang(language, {
+    ru: `Фото ${index + 1} из ${gallery.length}`, en: `Photo ${index + 1} of ${gallery.length}`, th: `รูปที่ ${index + 1} จาก ${gallery.length}`,
+  });
+  const seoImage = gallery[0] || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
@@ -195,10 +208,10 @@ export default function OffplanDetail() {
       />
       {/* Hero Image */}
       <div className="public-project-hero relative bg-muted">
-        {project.coverImage ? (
+        {photo ? (
           <img
-            src={project.coverImage}
-            alt={name}
+            src={photo}
+            alt={gallery.length > 1 ? `${name} · ${photoLabel(gallery.indexOf(photo))}` : name}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -233,6 +246,28 @@ export default function OffplanDetail() {
       </div>
 
       <div className={`public-project-content space-y-8 ${FLOATING_OFFSET.contentClearance}`}>
+        {(gallery.length > 1 || video?.startsWith('https:')) && (
+          <section aria-label={pickLang(language, { ru: 'Фото и видео проекта', en: 'Project photos and video', th: 'รูปภาพและวิดีโอโครงการ' })} className="space-y-3">
+            {gallery.length > 1 && <>
+              <div className="flex gap-2 overflow-x-auto p-1">
+                {gallery.map((url, index) => (
+                  <Button key={url} type="button" variant={photo === url ? 'default' : 'outline'}
+                    className="h-14 w-20 shrink-0 p-1" aria-pressed={photo === url} aria-label={photoLabel(index)}
+                    onClick={() => setSelectedPhoto({ projectId: project.id, url })}>
+                    <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  </Button>
+                ))}
+              </div>
+              <span className="sr-only" role="status">{photoLabel(gallery.indexOf(photo))}</span>
+            </>}
+            {video?.startsWith('https:') && <Button variant="outline" asChild>
+              <a href={video} target="_blank" rel="noopener noreferrer">
+                {pickLang(language, { ru: 'Видео проекта (новая вкладка)', en: 'Project video (opens in new tab)', th: 'วิดีโอโครงการ (เปิดในแท็บใหม่)' })}
+              </a>
+            </Button>}
+          </section>
+        )}
+
         {/* Published report is the sole public assessment source. */}
         <div id="clearview-report" className="scroll-mt-24">
           <p className="text-sm text-muted-foreground">{pickLang(language, {"ru": "Условия проекта — по запросу.", "en": "Project terms are available on request.", "th": "สอบถามเงื่อนไขโครงการได้"})}</p>

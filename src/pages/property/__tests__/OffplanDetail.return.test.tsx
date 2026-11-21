@@ -2,13 +2,14 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import OffplanDetail from '../OffplanDetail';
-const state = vi.hoisted(() => ({ isLoading: false, isError: false, retry: vi.fn(), project: null as Record<string, unknown> | null }));
+const state = vi.hoisted(() => ({ isLoading: false, isError: false, retry: vi.fn(), media: null as Record<string, unknown> | null, project: null as Record<string, unknown> | null }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => `THB ${n}` }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'THB' } }) }));
 vi.mock('@/hooks/useOffplanProjects', () => ({ useOffplanProject: () => ({ data: state.project, ...state, refetch: state.retry }) }));
 vi.mock('@/hooks/useDevelopers', () => ({ useDeveloper: () => ({ data: null }) }));
-vi.mock('@/hooks/useNewbuildProjects', () => ({ useNewbuildProject: () => ({ data: null }) }));
+vi.mock('@/hooks/useNewbuildProjects', () => ({ useNewbuildProject: () => ({ data: state.media }) }));
+vi.mock('@/components/newbuilds/NewbuildProjectDeepTabs', () => ({ NewbuildProjectDeepTabs: () => null }));
 vi.mock('@/hooks/useProjectDocuments', () => ({ useProjectDocuments: () => ({ data: [] }), DOCUMENT_CATEGORIES: [] }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: new Proxy({}, { get() { throw new Error('Hosted data forbidden in isolated detail QA'); } }) }));
 function Position() { const l = useLocation(); return <output data-testid="position">{l.pathname + l.search}</output>; }
@@ -16,7 +17,7 @@ vi.mock('@/components/property/DevelopmentUnitsSection', () => ({ DevelopmentUni
 vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: ({ open, onOpenChange, children }: { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode }) => open ? <div><button onClick={() => onOpenChange(false)}>Close enquiry</button>{children}</div> : null }));
 vi.mock('@/components/landings/LandingLeadForm', () => ({ LandingLeadForm: ({ contextMetadata, universalRequestType }: { contextMetadata: unknown; universalRequestType: string }) => <output data-testid="enquiry-context" data-request-type={universalRequestType}>{JSON.stringify(contextMetadata)}</output> }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}), createBreadcrumbSchema: () => ({}) }));
-beforeEach(() => { state.project = null; state.isLoading = false; state.isError = false; state.retry.mockClear(); });
+beforeEach(() => { state.media = null; state.project = null; state.isLoading = false; state.isError = false; state.retry.mockClear(); });
 afterEach(cleanup);
 describe('newbuild detail keeps the complete public catalogue return in every read state', () => {
   it.each(['loading', 'error', 'missing'])('returns from %s to the original budget/search URL', mode => {
@@ -63,4 +64,16 @@ it('keeps document requests explicit and clears a previous unit context', () => 
  fireEvent.mouseDown(screen.getByRole('tab',{name:'Docs'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Request document package'}));
  const context=JSON.parse(screen.getByTestId('enquiry-context').textContent!);expect(context).toMatchObject({project_id:'synthetic-project',intent:'documents',request_only:true});expect(context).not.toHaveProperty('unit_id');
  expect(screen.getByTestId('enquiry-context')).toHaveAttribute('data-request-type','property_consultation');
+});
+
+it('shows the ordered public project gallery, selects a photo and opens only a safe video link', () => {
+  state.project = { id: 'synthetic-project', nameEn: 'Synthetic project', district: 'Bang Tao', amenities: [], coverImage: '/cover.jpg' };
+  state.media = { id: 'synthetic-project', gallery_urls: ['/second.jpg', '/third.jpg', '/cover.jpg'], video_url: 'https://youtu.be/abcdefghijk' };
+  render(<MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>);
+  const secondPhoto = screen.getByRole('button', { name: 'Photo 2 of 3' });
+  expect(screen.getByRole('img', { name: 'Synthetic project · Photo 1 of 3' })).toHaveAttribute('src', '/cover.jpg');
+  fireEvent.click(secondPhoto);
+  expect(secondPhoto).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('img', { name: 'Synthetic project · Photo 2 of 3' })).toHaveAttribute('src', '/second.jpg');
+  expect(screen.getByRole('link', { name: 'Project video (opens in new tab)' })).toHaveAttribute('href', 'https://youtu.be/abcdefghijk');
 });
