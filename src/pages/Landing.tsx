@@ -15,6 +15,7 @@ import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/Home
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
+import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { trackEvent } from '@/lib/analytics/track';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
@@ -54,6 +55,9 @@ export default function Landing() {
             <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
             <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
             <HomeHeroChoices />
+            <div className="home-hero-live-search" aria-label={t({ ru: 'Поиск недвижимости с параметрами', en: 'Property search with filters', th: 'ค้นหาอสังหาริมทรัพย์พร้อมตัวกรอง' })}>
+              <HomeDiscoverySearch showGuestsInline progressive />
+            </div>
             <div className="home-hero-actions">
               <Link className="home-hero-secondary" to={R.FOR_OWNERS}>{t({ ru: 'У меня есть недвижимость', en: 'I own property', th: 'ฉันเป็นเจ้าของอสังหาริมทรัพย์' })}<ArrowRight size={17} aria-hidden="true" /></Link>
             </div>
