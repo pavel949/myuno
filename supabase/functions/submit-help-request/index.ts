@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
       "",
       `ID: ${hr.id}`,
     ].filter(Boolean).join("\n");
-    sendWhatsApp({ to: adminWa, body: waBody }).catch((e) => console.warn("[submit-help-request] wa send failed:", e));
+    await sendWhatsApp({ to: adminWa, body: waBody });
   } catch (e) {
     console.warn("[submit-help-request] whatsapp prep failed:", e);
   }
@@ -193,16 +193,16 @@ Deno.serve(async (req) => {
         <h2>Новая заявка myUNO Help (${TOPIC_LABEL_RU[input.topic]})</h2>
         <p><strong>Срочность:</strong> ${input.urgency}</p>
         <p><strong>Канал связи:</strong> ${input.preferred_channel}</p>
-        ${finalEmail ? `<p><strong>Email:</strong> ${finalEmail}</p>` : ""}
-        ${finalPhone ? `<p><strong>Phone:</strong> ${finalPhone}</p>` : ""}
-        ${input.source_route ? `<p><strong>Откуда:</strong> ${input.source_route}</p>` : ""}
+        ${finalEmail ? `<p><strong>Email:</strong> ${escapeHtml(finalEmail)}</p>` : ""}
+        ${finalPhone ? `<p><strong>Phone:</strong> ${escapeHtml(finalPhone)}</p>` : ""}
+        ${input.source_route ? `<p><strong>Откуда:</strong> ${escapeHtml(input.source_route)}</p>` : ""}
         <hr/>
         <pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(input.message)}</pre>
         <hr/>
         <p style="color:#666;font-size:12px">ID: ${hr.id}</p>
       `;
 
-      fetch(url, {
+      const emailResponse = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -212,7 +212,10 @@ Deno.serve(async (req) => {
           html,
           reply_to: finalEmail ?? undefined,
         }),
-      }).catch((e) => console.warn("[submit-help-request] email send failed:", e));
+      });
+      if (!emailResponse.ok) {
+        console.warn("[submit-help-request] email provider rejected notification:", emailResponse.status);
+      }
     }
   } catch (e) {
     console.warn("[submit-help-request] email prep failed:", e);
