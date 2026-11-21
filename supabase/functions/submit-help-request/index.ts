@@ -9,8 +9,6 @@
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { getAdminEmails, getAdminWhatsApp, getMailFrom } from "../_shared/admin-config.ts";
-import { sendWhatsApp } from "../_shared/whatsapp.ts";
 
 const BodySchema = z.object({
   topic: z.enum(["visa", "invest", "business", "relocation", "property", "legal", "finance", "general"]),
@@ -38,13 +36,6 @@ const TOPIC_LABEL_RU: Record<string, string> = {
   legal: "Юридические вопросы",
   finance: "Финансы",
   general: "Общий вопрос",
-};
-
-const URGENCY_EMOJI: Record<string, string> = {
-  low: "🟢",
-  normal: "🔵",
-  high: "🟠",
-  urgent: "🔴",
 };
 
 Deno.serve(async (req) => {
@@ -209,108 +200,14 @@ Deno.serve(async (req) => {
     console.error("[submit-help-request] CRM routing requires operator attention:", hr.id, crmError);
   }
 
-  // 4) Notify admins — WhatsApp + email (bounded provider retries)
-  try {
-    const adminWa = await getAdminWhatsApp();
-    const waBody = [
-      `${URGENCY_EMOJI[input.urgency]} *myUNO Help Request*`,
-      crmRouted ? "CRM: Ignatev Estate ✓" : "⚠️ CRM: НЕ СВЯЗАНА, нужна ручная обработка",
-      `Тема: *${TOPIC_LABEL_RU[input.topic]}*`,
-      input.subject ? `Заголовок: ${input.subject}` : null,
-      `Срочность: ${input.urgency}`,
-      `Канал: ${input.preferred_channel}`,
-      finalEmail ? `Email: ${finalEmail}` : null,
-      finalPhone ? `Phone: ${finalPhone}` : null,
-      input.source_route ? `Откуда: ${input.source_route}` : null,
-      "",
-      input.message.slice(0, 600),
-      "",
-      `ID: ${hr.id}`,
-    ].filter(Boolean).join("\n");
-    await retryNotification(async () => {
-      const accepted = await sendWhatsApp({ to: adminWa, body: waBody });
-      if (!accepted) throw new Error("whatsapp_provider_not_accepted");
-    }, "whatsapp");
-  } catch (e) {
-    console.warn("[submit-help-request] whatsapp prep failed:", e);
-  }
-
-  try {
-    const adminEmails = await getAdminEmails();
-    const mailFrom = await getMailFrom();
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-
-    if (resendKey && adminEmails.length > 0) {
-      const url = lovableKey
-        ? "https://connector-gateway.lovable.dev/resend/emails"
-        : "https://api.resend.com/emails";
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (lovableKey) {
-        headers["Authorization"] = `Bearer ${lovableKey}`;
-        headers["X-Connection-Api-Key"] = resendKey;
-      } else {
-        headers["Authorization"] = `Bearer ${resendKey}`;
-      }
-
-      const html = `
-        <h2>Новая заявка myUNO Help (${TOPIC_LABEL_RU[input.topic]})</h2>
-        <p><strong>CRM Ignatev Estate:</strong> ${crmRouted ? "Связана" : "ТРЕБУЕТ РУЧНОЙ ОБРАБОТКИ"}</p>
-        <p><strong>Срочность:</strong> ${input.urgency}</p>
-        <p><strong>Канал связи:</strong> ${input.preferred_channel}</p>
-        ${finalEmail ? `<p><strong>Email:</strong> ${escapeHtml(finalEmail)}</p>` : ""}
-        ${finalPhone ? `<p><strong>Phone:</strong> ${escapeHtml(finalPhone)}</p>` : ""}
-        ${input.source_route ? `<p><strong>Откуда:</strong> ${escapeHtml(input.source_route)}</p>` : ""}
-        <hr/>
-        <pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(input.message)}</pre>
-        <hr/>
-        <p style="color:#666;font-size:12px">ID: ${hr.id}</p>
-      `;
-
-      await retryNotification(async () => {
-        const emailResponse = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          from: mailFrom,
-          to: adminEmails,
-          subject: `[myUNO Help · ${TOPIC_LABEL_RU[input.topic]}] ${input.subject ?? input.message.slice(0, 60)}`,
-          html,
-          reply_to: finalEmail ?? undefined,
-        }),
-      });
-        if (!emailResponse.ok) throw new Error(`email_provider_http_${emailResponse.status}`);
-      }, "email");
-    }
-  } catch (e) {
-    console.warn("[submit-help-request] email prep failed:", e);
-  }
+  // Durable notification queue. Worker sends asynchronously and records provider acceptance.
+  // If queue setup fails, the saved help_request remains visible to operators.
+  const { error: queueError } = await sb.rpc("enqueue_help_notification", { p_request_id: hr.id });
+  if (queueError) console.error("[submit-help-request] notification enqueue failed:", hr.id, queueError);
 
   return new Response(
-    JSON.stringify({ success: true, request_id: hr.id, created_at: hr.created_at, crm_routed: crmRouted }),
+    JSON.stringify({ success: true, request_id: hr.id, created_at: hr.created_at, crm_routed: crmRouted, notification_queued: !queueError }),
     { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
   );
 });
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!)
-  );
-}
-
-/** Bounded transient retry. Provider acceptance is not proof of final delivery. */
-async function retryNotification(action: () => Promise<unknown>, channel: string): Promise<void> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      await action();
-      return;
-    } catch (error) {
-      lastError = error;
-      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, attempt * 300));
-    }
-  }
-  throw new Error(`notification_${channel}_failed_after_retries`, { cause: lastError });
-}
