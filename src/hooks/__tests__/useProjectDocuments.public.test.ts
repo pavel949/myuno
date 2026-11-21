@@ -26,10 +26,10 @@ type Options = { enabled: boolean; queryKey: unknown[]; queryFn: () => Promise<u
 beforeEach(() => { read.filters.length = 0; read.columns = ''; read.execute.mockClear(); });
 
 it('requests only current public fields by canonical project and uses an independent cache key', async () => {
-  const query = useProjectDocuments('project-a', { publicOnly: true, onlyCurrent: false }) as unknown as Options;
+  const query = useProjectDocuments('project-a', { publicOnly: true }) as unknown as Options;
   expect(query.enabled).toBe(true);
   await expect(query.queryFn()).resolves.toEqual([]);
-  expect(read.filters).toEqual([['project_id', 'project-a'], ['is_current', true], ['visibility', 'public']]);
+  expect(read.filters).toEqual([['visibility', 'public'], ['project_id', 'project-a'], ['is_current', true]]);
   expect(read.columns).toBe('id, project_id, category, title, file_url, visibility, version, is_current');
   const adminQuery = useProjectDocuments('project-a', { onlyCurrent: false }) as unknown as Options;
   expect(adminQuery.queryKey).not.toEqual(query.queryKey);

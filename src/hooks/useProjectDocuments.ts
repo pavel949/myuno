@@ -60,14 +60,14 @@ export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: b
     queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true, opts?.publicOnly ?? false],
     queryFn: async (): Promise<PublicProjectDocument[]> => {
       if (!projectId) return [];
-      let q = supabase
-        .from('project_documents')
-        .select(opts?.publicOnly ? PUBLIC_PROJECT_DOCUMENT_FIELDS : '*')
-        .eq('project_id', projectId)
+      const documents = supabase.from('project_documents');
+      const projection = opts?.publicOnly
+        ? documents.select(PUBLIC_PROJECT_DOCUMENT_FIELDS).eq('visibility', 'public')
+        : documents.select('*');
+      let q = projection.eq('project_id', projectId)
         .order('category', { ascending: true })
         .order('uploaded_at', { ascending: false });
       if (opts?.publicOnly || opts?.onlyCurrent !== false) q = q.eq('is_current', true);
-      if (opts?.publicOnly) q = q.eq('visibility', 'public');
       const { data, error } = await q;
       if (error) throw error;
       return (data || []) as PublicProjectDocument[];
