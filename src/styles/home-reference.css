@@ -140,3 +140,198 @@
   .cinematic-home.home-refined .home-reference-direction-content strong { font-size: 14px; }
   .cinematic-home.home-refined .home-reference-direction-content small { font-size: 11px; }
 }
+
+/* Mobile visual acceptance pass: desktop rules remain unchanged.
+   One predictable phone composition for 320–767px instead of competing rails. */
+@media (max-width: 767px) {
+  .cinematic-home.home-refined {
+    --home-gallery-gap: 36px;
+    --public-section-gap: 36px;
+    overflow-x: clip;
+    padding-bottom: calc(var(--bottom-nav-h, 72px) + 28px + env(safe-area-inset-bottom, 0px));
+  }
+  .cinematic-home.home-refined .home-hero {
+    min-height: 0;
+    height: auto;
+    padding-bottom: 20px;
+  }
+  .cinematic-home.home-refined .home-hero-layout {
+    padding-top: 24px;
+    padding-bottom: 8px;
+  }
+  .cinematic-home.home-refined .home-hero-copy h1 {
+    font-size: clamp(32px, 8.4vw, 42px);
+    line-height: 1.08;
+    letter-spacing: -.035em;
+    max-width: 100%;
+    text-wrap: balance;
+  }
+  .cinematic-home.home-refined .home-hero-copy > p {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    max-width: 38ch;
+  }
+  .cinematic-home.home-refined .home-reference-search {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search {
+    gap: 10px;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-submit {
+    min-height: 48px;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-directions {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+    padding-block: 16px 4px;
+  }
+  .cinematic-home.home-refined .home-reference-direction {
+    aspect-ratio: 1 / 1.02;
+    min-height: 0;
+    border-radius: 12px;
+  }
+  .cinematic-home.home-refined .home-reference-direction-content {
+    padding: 12px;
+    gap: 4px;
+  }
+  .cinematic-home.home-refined .home-reference-direction-content strong {
+    font-size: clamp(14px, 3.8vw, 17px);
+    line-height: 1.17;
+    overflow-wrap: break-word;
+  }
+  .cinematic-home.home-refined .home-reference-direction-content small {
+    font-size: 11px;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .cinematic-home.home-refined .home-gallery {
+    padding-top: 36px;
+    min-width: 0;
+  }
+  .cinematic-home.home-refined .home-section-heading,
+  .cinematic-home.home-refined .home-gallery-heading {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .cinematic-home.home-refined .home-section-heading h2,
+  .cinematic-home.home-refined .home-gallery-heading h2 {
+    font-size: clamp(25px, 6.8vw, 33px);
+    line-height: 1.14;
+    letter-spacing: -.025em;
+  }
+  .cinematic-home.home-refined .home-section-lead {
+    font-size: 14px;
+    line-height: 1.45;
+    margin-top: 6px;
+  }
+  .cinematic-home.home-refined .home-gallery .home-rail {
+    min-width: 0;
+    margin-top: 10px;
+  }
+  .cinematic-home.home-refined .home-gallery .home-rail-controls {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 8px;
+    gap: 8px;
+  }
+  .cinematic-home.home-refined .home-gallery .home-rail-controls[hidden] {
+    display: none;
+  }
+  .cinematic-home.home-refined .home-gallery .home-rail-viewport {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    min-width: 0;
+    gap: 12px;
+    padding: 2px 0 12px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+    overscroll-behavior-inline: contain;
+  }
+  .cinematic-home.home-refined .home-gallery .home-rail-viewport > * {
+    flex: 0 0 88%;
+    width: 88%;
+    max-width: 88%;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .cinematic-home.home-refined .home-gallery .home-listing-copy,
+  .cinematic-home.home-refined .home-gallery .premium-project-copy {
+    min-height: 0;
+    padding-top: 12px;
+  }
+  .cinematic-home.home-refined .home-gallery .home-listing h3,
+  .cinematic-home.home-refined .home-gallery .premium-project-copy h3 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  .cinematic-home.home-refined .home-gallery .home-listing-photo,
+  .cinematic-home.home-refined .home-gallery .premium-project-photo {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    overflow: visible;
+    gap: 10px;
+    padding: 0;
+  }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport > * {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+  }
+  .cinematic-home.home-refined .home-locations .home-rail-controls {
+    display: none;
+  }
+  .cinematic-home.home-refined .home-locations .home-area-cover {
+    aspect-ratio: 1.12;
+    border-radius: 12px;
+  }
+  .cinematic-home.home-refined .home-locations .home-guide-copy {
+    padding: 7px 0 0;
+  }
+  .cinematic-home.home-refined .home-locations .home-guide-copy p,
+  .cinematic-home.home-refined .home-locations .home-guide-copy span {
+    display: none;
+  }
+  .cinematic-home.home-refined .home-locations .home-guide-card h3 {
+    font-size: 16px;
+    line-height: 1.25;
+    margin: 0;
+  }
+  .cinematic-home.home-refined .home-services .home-rail-viewport {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    overflow: visible;
+    gap: 10px;
+  }
+  .cinematic-home.home-refined .home-services .home-rail-viewport > * {
+    width: auto;
+    max-width: none;
+  }
+  .cinematic-home.home-refined .home-services .home-rail-controls {
+    display: none;
+  }
+  .cinematic-home.home-refined .home-closing {
+    margin-top: 36px !important;
+  }
+}
+@media (max-width: 360px) {
+  .cinematic-home.home-refined .home-reference-direction-content {
+    padding: 10px;
+  }
+  .cinematic-home.home-refined .home-reference-direction-content strong {
+    font-size: 13px;
+  }
+}
