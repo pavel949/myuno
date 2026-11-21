@@ -20,7 +20,7 @@ function fixture(bytes = encode(sample)) {
     physicalRows: [{ id: id(6), project_id: scope.projectId }],
   };
   const version = (overrides = {}) => ({ id: id(8), import_job_id: scope.jobId, project_id: scope.projectId,
-    source_id: scope.sourceId, content_sha256: binding.approvedSha256, parser_version: binding.parserVersion, ...overrides });
+    source_id: scope.sourceId, content_sha256: binding.approvedSha256, parser_version: binding.parserVersion, status: 'pending_review', ...overrides });
   const item = { version_id: id(8), unit_code: 'LAB-0007', unit_type: '2BR', price: 2468100.25, currency: 'THB', status: 'unknown', needs_review: true, raw_record: { price_unit: 'total' } };
   const state = { calls: [], admissions: 0, loads: 0, opened: 0, prior: null, items: [item] };
   const ports = {
@@ -105,6 +105,15 @@ test('identical saved job is read only; known mismatch refuses replay before RPC
   f.state.prior = f.version({ content_sha256: 'a'.repeat(64) });
   assert.deepEqual(await f.run(), { ok: false, code: 'stage_conflict' });
   assert.equal(f.state.calls.length, 0);
+});
+
+test('terminal versions cannot be presented as pending review or replayed', async () => {
+  for (const status of ['approved', 'discarded', undefined]) {
+    const f = fixture();
+    f.state.prior = f.version({ status });
+    assert.deepEqual(await f.run(), { ok: false, code: 'stage_conflict' });
+    assert.equal(f.state.calls.length, 0);
+  }
 });
 
 test('wrong concurrent version, unconfirmed item, and changed canonical link never acknowledge receipt', async () => {

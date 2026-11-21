@@ -55,7 +55,7 @@ function linkedUnit(binding, scope, code) {
 function confirmedVersion(row, scope, hash, parserVersion) {
   return isUuid(row?.id) && sameId(row.import_job_id, scope.jobId) &&
     sameId(row.project_id, scope.projectId) && sameId(row.source_id, scope.sourceId) &&
-    row.content_sha256 === hash && row.parser_version === parserVersion;
+    row.content_sha256 === hash && row.parser_version === parserVersion && row.status === 'pending_review';
 }
 
 /**
