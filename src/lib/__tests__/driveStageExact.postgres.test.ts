@@ -18,7 +18,8 @@ const adminId = uid(6);
 const parser = 'fixture-normalized-v1';
 const rpcSignature = 'public.stage_drive_import_version(uuid,jsonb,jsonb,jsonb,text,text)';
 const record = { unit_code: 'LAB-0007', unit_type: '2BR', amount: '2468100.25', currency: 'THB', price_unit: 'total', status: 'unknown' };
-const encode = (value: typeof record) => new TextEncoder().encode(JSON.stringify(value));
+// Vitest's jsdom TextEncoder can return a native array from a different realm.
+const encode = (value: typeof record) => Uint8Array.from(new TextEncoder().encode(JSON.stringify(value)));
 const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 const approved = encode(record);
 const changed = encode({ ...record, amount: '2468200.25' });
@@ -160,8 +161,8 @@ describe('review-only Drive stage — deployed SQL on disposable PostgreSQL', ()
     const before = await snapshot();
     const a = adapter(uid(30));
     const result = await a.run();
-    expect(result).toMatchObject({ ok: true, status: 'staged_for_review', unitId: saleUnitId, propertyId: physicalId, publicationEnabled: false });
     if (result.ok === false) throw Error(result.code);
+    expect(result).toMatchObject({ ok: true, status: 'staged_for_review', unitId: saleUnitId, propertyId: physicalId, publicationEnabled: false });
     const [version] = await sql`SELECT * FROM project_price_list_versions WHERE id=${result.versionId}`;
     expect(version).toMatchObject({ status: 'pending_review', content_sha256: sha(approved), parser_version: parser,
       rows_total: 1, rows_needing_review: 1, project_id: base.projectId, source_id: base.sourceId, import_job_id: uid(30) });
@@ -178,8 +179,8 @@ describe('review-only Drive stage — deployed SQL on disposable PostgreSQL', ()
   it('returns identical prior receipt without replay and refuses hash or parser conflicts the raw job-only RPC would accept', async () => {
     const a = adapter(uid(31));
     const initial = await a.run();
-    expect(initial.ok).toBe(true);
     if (initial.ok === false) throw Error(initial.code);
+    expect(initial.ok).toBe(true);
     expect(await a.run()).toEqual(initial);
     expect(a.calls().writes).toBe(1);
     const hashMismatch = adapter(uid(31), changed);
