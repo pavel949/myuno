@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { INSTALLMENT_MILESTONES, projectInstallmentDraftExport, readProjectInstallmentTemplate, type InstallmentDraftStep, type InstallmentEvent } from '@/lib/real-estate/projectInstallmentTemplate';
+import { INSTALLMENT_CURRENCIES, INSTALLMENT_MILESTONES, projectInstallmentDraftExport, readProjectInstallmentTemplate, type InstallmentDraftStep, type InstallmentEvent } from '@/lib/real-estate/projectInstallmentTemplate';
 
 type Copy = { en: string; ru: string; th: string };
 const events: Record<InstallmentEvent, Copy> = {
   reservation: { en: 'Reservation', ru: 'Резервирование', th: 'การจอง' },
   contract: { en: 'Contract signing', ru: 'Подписание договора', th: 'ลงนามสัญญา' },
   construction: { en: 'Construction milestone', ru: 'Этап строительства', th: 'ขั้นตอนการก่อสร้าง' },
+  main_construction: { en: 'Main construction complete', ru: 'Завершение основных строительных работ', th: 'งานก่อสร้างหลักแล้วเสร็จ' },
+  roof: { en: 'Roof complete', ru: 'Завершение кровли', th: 'หลังคาแล้วเสร็จ' },
+  after_deposit: { en: 'After initial deposit', ru: 'После первоначального взноса', th: 'หลังชำระเงินงวดแรก' },
   handover: { en: 'Handover', ru: 'Передача объекта', th: 'ส่งมอบ' },
   date: { en: 'Specific date', ru: 'Конкретная дата', th: 'วันที่ระบุ' },
 };
@@ -27,8 +30,11 @@ export function ProjectInstallmentDraft({ language, projectId, currentTemplate }
   const result = projectInstallmentDraftExport(steps, projectId);
   const error = result.ok === true ? null : {
     step_count: t({ en: 'Enter 1–12 installments.', ru: 'Добавьте от 1 до 12 взносов.', th: 'ระบุงวดชำระ 1–12 งวด' }),
-    invalid_step: t({ en: 'Check the percentage and date in the highlighted installment.', ru: 'Проверьте процент и дату в выделенном взносе.', th: 'ตรวจสอบเปอร์เซ็นต์และวันที่ในงวดที่ระบุ' }),
+    invalid_step: t({ en: 'Check the percentage and timing in the highlighted installment.', ru: 'Проверьте процент и срок в выделенном взносе.', th: 'ตรวจสอบเปอร์เซ็นต์และวันที่ในงวดที่ระบุ' }),
     invalid_total: t({ en: 'Installments must add up to exactly 100%.', ru: 'Сумма взносов должна быть ровно 100%.', th: 'ยอดรวมทุกงวดต้องเท่ากับ 100%' }),
+    credit: t({ en: 'Enter one fixed reservation credit and its currency. Do not also enter a separate reservation percentage.',
+      ru: 'Укажите один фиксированный платёж за резервирование и его валюту. Не добавляйте отдельный процент за резервирование.',
+      th: 'ระบุเงินจองคงที่และสกุลเงินหนึ่งรายการ ไม่ต้องเพิ่มเปอร์เซ็นต์เงินจองแยกต่างหาก' }),
     date_order: t({ en: 'Put dated installments in chronological order.', ru: 'Расположите взносы с датами в хронологическом порядке.', th: 'เรียงงวดชำระที่มีวันที่ตามลำดับเวลา' }),
   }[result.code];
   const invalidRow = attempted && result.ok === false ? result.row : undefined;
@@ -73,8 +79,8 @@ export function ProjectInstallmentDraft({ language, projectId, currentTemplate }
           <div className="min-w-0 space-y-1">
             <Label htmlFor={`${id}-event`}>{t({ en: 'When due', ru: 'Срок', th: 'กำหนดชำระ' })}</Label>
             <select id={`${id}-event`} value={step.event} className="min-h-11 w-full min-w-0 border border-input bg-background px-2 text-sm"
-              onChange={event => update(step.key, { event: event.target.value as InstallmentEvent, date: '' })}>
-              {[...INSTALLMENT_MILESTONES, 'date' as const].map(value => <option key={value} value={value}>{t(events[value])}</option>)}
+              onChange={event => update(step.key, { event: event.target.value as InstallmentEvent, date: '', offset: undefined, offsetUnit: undefined })}>
+              {[...INSTALLMENT_MILESTONES, 'date' as const, 'after_deposit' as const].map(value => <option key={value} value={value}>{t(events[value])}</option>)}
             </select>
           </div>
           <div className="min-w-0 space-y-1">
@@ -87,7 +93,49 @@ export function ProjectInstallmentDraft({ language, projectId, currentTemplate }
             <Input id={`${id}-date`} type="date" value={step.date} className="min-h-11"
               aria-invalid={invalidRow === index || undefined} onChange={event => update(step.key, { date: event.target.value })} />
           </div>}
+          {step.event === 'after_deposit' && <>
+            <div className="min-w-0 space-y-1">
+              <Label htmlFor={`${id}-offset`}>{t({ en: 'Number of days or months', ru: 'Количество дней или месяцев', th: 'จำนวนวันหรือเดือน' })}</Label>
+              <Input id={`${id}-offset`} inputMode="numeric" maxLength={4} value={step.offset ?? ''} className="min-h-11"
+                aria-invalid={invalidRow === index || undefined} onChange={event => update(step.key, { offset: event.target.value })} />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <Label htmlFor={`${id}-offset-unit`}>{t({ en: 'Time unit', ru: 'Единица срока', th: 'หน่วยเวลา' })}</Label>
+              <select id={`${id}-offset-unit`} className="min-h-11 w-full min-w-0 border border-input bg-background px-2 text-sm"
+                value={step.offsetUnit ?? ''} onChange={event => update(step.key, { offsetUnit: (event.target.value || undefined) as InstallmentDraftStep['offsetUnit'] })}>
+                <option value="">{t({ en: 'Select unit', ru: 'Выберите единицу', th: 'เลือกหน่วย' })}</option>
+                <option value="days">{t({ en: 'Days', ru: 'Дни', th: 'วัน' })}</option>
+                <option value="months">{t({ en: 'Months', ru: 'Месяцы', th: 'เดือน' })}</option>
+              </select>
+            </div>
+          </>}
         </div>
+        <label className="flex min-h-11 items-center gap-2 text-sm">
+          <input type="checkbox" aria-labelledby={`${id}-credit-label`} checked={step.creditAmount !== undefined} onChange={event => update(step.key, {
+            creditAmount: event.target.checked ? '' : undefined, creditCurrency: undefined,
+          })} />
+          <span id={`${id}-credit-label`}>{t({ en: 'Credit a fixed reservation payment to this installment', ru: 'Зачесть фиксированный платёж за резервирование в этот взнос', th: 'หักเงินจองคงที่จากงวดนี้' })}</span>
+        </label>
+        {step.creditAmount !== undefined && <div className="grid gap-3 sm:grid-cols-2">
+          <div className="min-w-0 space-y-1">
+            <Label htmlFor={`${id}-credit`}>{t({ en: 'Reservation credit amount', ru: 'Сумма зачёта за резервирование', th: 'ยอดเงินจองที่นำมาหัก' })}</Label>
+            <Input id={`${id}-credit`} inputMode="decimal" maxLength={15} value={step.creditAmount} className="min-h-11"
+              aria-invalid={invalidRow === index || undefined} onChange={event => update(step.key, { creditAmount: event.target.value })} />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <Label htmlFor={`${id}-credit-currency`}>{t({ en: 'Reservation credit currency', ru: 'Валюта зачёта', th: 'สกุลเงินของยอดหัก' })}</Label>
+            <select id={`${id}-credit-currency`} className="min-h-11 w-full min-w-0 border border-input bg-background px-2 text-sm"
+              value={step.creditCurrency ?? ''} onChange={event => update(step.key, { creditCurrency: (event.target.value || undefined) as InstallmentDraftStep['creditCurrency'] })}>
+              <option value="">{t({ en: 'Select currency', ru: 'Выберите валюту', th: 'เลือกสกุลเงิน' })}</option>
+              {INSTALLMENT_CURRENCIES.map(currency => <option key={currency} value={currency}>{currency}</option>)}
+            </select>
+          </div>
+          <p className="text-sm text-muted-foreground sm:col-span-2">{t({
+            en: 'The fixed credit is included in this share, not added to the 100% total.',
+            ru: 'Фиксированная сумма входит в этот взнос и не прибавляется к общим 100%.',
+            th: 'ยอดคงที่นี้รวมอยู่ในงวดดังกล่าว ไม่ได้บวกเพิ่มจากยอดรวม 100%',
+          })}</p>
+        </div>}
         <Button type="button" variant="outline" disabled={steps.length === 1} onClick={() => setSteps(list => list.filter(item => item.key !== step.key))}>
           {t({ en: 'Remove installment', ru: 'Убрать взнос', th: 'ลบงวดชำระ' })} {index + 1}
         </Button>

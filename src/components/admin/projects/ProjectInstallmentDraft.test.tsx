@@ -34,3 +34,17 @@ it('prepares the exact dated commercial draft with no remote write', () => {
   expect(download).toHaveBeenCalledOnce();
   expect(screen.queryByRole('alert')).toBeNull();
 });
+
+it('makes credit and relative due an explicit operator choice without prefilled currency or units', () => {
+  render(<ProjectInstallmentDraft language="en" />);
+  fireEvent.change(screen.getByLabelText('When due'), { target: { value: 'after_deposit' } });
+  expect(screen.queryByLabelText('Due date')).toBeNull();
+  expect(screen.getByLabelText('Time unit')).toHaveValue('');
+  expect(screen.getByRole('option', { name: 'Main construction complete' })).toBeInTheDocument();
+  expect(screen.getByRole('option', { name: 'Roof complete' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('checkbox', { name: /Credit a fixed reservation payment/ }));
+  expect(screen.getByLabelText('Reservation credit currency')).toHaveValue('');
+  expect(screen.getByText(/not added to the 100% total/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Download draft' }));
+  expect(screen.getByRole('alert')).toBeVisible();
+});

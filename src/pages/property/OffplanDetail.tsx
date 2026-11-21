@@ -86,7 +86,7 @@ export default function OffplanDetail() {
   }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
-  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(loadedProjectId, { publicOnly: true });
+  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(activeTab === 'documents' ? loadedProjectId : undefined, { publicOnly: true });
   const publicDocs = allDocs.flatMap(doc => {
     if (!loadedProjectId || doc.project_id !== loadedProjectId || !doc.is_current || doc.visibility !== 'public') return [];
     const url = projectPublicDocumentUrl(doc.file_url, { projectId: loadedProjectId, category: doc.category });
