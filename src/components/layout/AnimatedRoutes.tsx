@@ -39,12 +39,6 @@ import { mcRoutes } from './routes/mcRoutes';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { propertyHubRoutes } from './routes/propertyHubRoutes';
 
-const NewbuildsContextOutlet = () => (
-  <NbCompareProvider>
-    <Outlet />
-  </NbCompareProvider>
-);
-
 // Alias: /life-flow/:code → /life/:code (preserves deep-link compatibility)
 const LifeFlowAlias = () => {
   const { code } = useParams();
@@ -198,6 +192,7 @@ export const AnimatedRoutes: React.FC = () => {
   return (
     <>
       <ScrollToTop />
+      <NbCompareProvider>
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location}>
         {/* ── Core ── */}
@@ -400,14 +395,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
         <Route path={APP_ROUTES.NEWBUILDS_DEVELOPERS} element={<CanonicalPublicRedirect to={APP_ROUTES.DEVELOPERS} />} />
         <Route path="/newbuilds/developers/:slug" element={<NewbuildDeveloperToHubRedirect />} />
-        <Route element={<NewbuildsContextOutlet />}>
-          <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<LazyPage><Pages.NewbuildsMap /></LazyPage>} />
-          <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
-          <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
-          <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
-          <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
-          <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
-        </Route>
+        <Route path={APP_ROUTES.NEWBUILDS_MAP} element={<CanonicalPublicRedirect to={`${APP_ROUTES.OFFPLAN_SEARCH}?view=map`} />} />
+        <Route path={APP_ROUTES.NEWBUILDS_CALCULATOR} element={<LazyPage><Pages.NewbuildsCalculator /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_COMPARE} element={<LazyPage><Pages.NewbuildsCompare /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_AREAS} element={<LazyPage><Pages.NewbuildsAreaGuides /></LazyPage>} />
+        <Route path="/newbuilds/areas/:slug" element={<LazyPage><Pages.NewbuildsAreaDetail /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_DUE_DILIGENCE} element={<LazyPage><Pages.NewbuildsDueDiligence /></LazyPage>} />
 
         {/* ── Developer Portal ── */}
         <Route path="/developer-portal" element={<AuthGuard><PageTransition><Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense></PageTransition></AuthGuard>}>
@@ -862,6 +855,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
+    </NbCompareProvider>
     </>
   );
 };

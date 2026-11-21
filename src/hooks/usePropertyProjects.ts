@@ -58,6 +58,7 @@ export interface PropertyProject {
   // Admin moderation fields
   needs_review?: boolean;
   is_approved?: boolean;
+  public_listing_enabled?: boolean | null;
 }
 
 export interface CreatePropertyProjectData {

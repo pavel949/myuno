@@ -41,6 +41,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOffplanProjects, useProjectDistricts } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
+import { ProjectCompareSelection } from '@/components/newbuilds/ProjectCompareAction';
 import { CopyPublicSearchLink } from '@/components/property/CopyPublicSearchLink';
 import {
   applyOffplanUiFilters,
@@ -301,6 +302,8 @@ export default function OffplanIndex() {
           </Select>
 
         </div>
+
+        <ProjectCompareSelection />
 
         {queryIssue ? <PublicAssetFilterNotice issue={queryIssue} onReset={clearAll} /> : isLoading ? (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

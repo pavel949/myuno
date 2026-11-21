@@ -648,6 +648,13 @@ export default function AdminProjects() {
                       </Badge>
                     )}
                   </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {project.is_active === false || project.is_approved === false || project.public_listing_enabled === false
+                      ? pickLang(language, { en: 'Newbuilds catalogue: not listed', ru: 'Каталог новостроек: не опубликован', th: 'แค็ตตาล็อกโครงการใหม่: ยังไม่เผยแพร่' })
+                      : project.is_active === true && project.is_approved === true && project.public_listing_enabled === true
+                        ? pickLang(language, { en: 'Newbuilds catalogue: eligible', ru: 'Каталог новостроек: допущен к показу', th: 'แค็ตตาล็อกโครงการใหม่: แสดงได้' })
+                        : pickLang(language, { en: 'Newbuilds catalogue: visibility unknown', ru: 'Каталог новостроек: видимость неизвестна', th: 'แค็ตตาล็อกโครงการใหม่: ไม่ทราบสถานะ' })}
+                  </p>
                 </CardContent>
                 <div className="flex flex-wrap gap-2 border-t p-3">
                   <Button asChild size="sm" variant="ghost" className="flex-1" onClick={(e) => e.stopPropagation()}>

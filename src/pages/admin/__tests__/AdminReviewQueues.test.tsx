@@ -87,6 +87,18 @@ describe('AdminProperties review views', () => {
 });
 
 describe('AdminProjects review views', () => {
+  it('distinguishes explicit off-plan eligibility from approval and unknown visibility', () => {
+    mocks.projects = [
+      { ...approvedProject, name_en: 'Approved but not listed', public_listing_enabled: false },
+      { ...approvedProject, id: 'listed', name_en: 'Eligible', public_listing_enabled: true },
+      { ...approvedProject, id: 'unknown', name_en: 'Visibility unknown' },
+    ];
+    renderPage('projects', ['/admin/projects']);
+    expect(screen.getByText('Newbuilds catalogue: not listed')).toBeVisible();
+    expect(screen.getByText('Newbuilds catalogue: eligible')).toBeVisible();
+    expect(screen.getByText('Newbuilds catalogue: visibility unknown')).toBeVisible();
+  });
+
   it.each([false, true])('refreshes committed project catalogue rows with partial response = %s', async partial => {
     const client = new QueryClient();
     const updatedKeys = [

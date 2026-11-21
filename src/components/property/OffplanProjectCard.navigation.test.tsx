@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { OffplanProjectCard } from './OffplanProjectCard';
+import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
 import type { OffplanProject } from '@/hooks/useOffplanProjects';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => String(n) }) }));
@@ -21,6 +22,16 @@ describe('project card independent actions', () => {
   const favourite = screen.getByRole('button', { name: 'Add to favourites' });
   expect(favourite.closest('a')).toBeNull();
   fireEvent.click(favourite);
+  expect(toggle).not.toHaveBeenCalled();
+ });
+ it('selects a public project from the actual grid card without logging in or leaving the page', () => {
+  localStorage.removeItem('myuno_compare_newbuilds');
+  render(<MemoryRouter><NbCompareProvider><OffplanProjectCard project={project} variant="grid" /></NbCompareProvider></MemoryRouter>);
+  const compare = screen.getByRole('button', { name: `Compare project ${project.nameEn}` });
+  expect(compare.closest('a')).toBeNull();
+  fireEvent.click(compare);
+  expect(compare).toHaveAttribute('aria-pressed', 'true');
+  expect(JSON.parse(localStorage.getItem('myuno_compare_newbuilds')!)).toEqual([{ id: project.id }]);
   expect(toggle).not.toHaveBeenCalled();
  });
 });

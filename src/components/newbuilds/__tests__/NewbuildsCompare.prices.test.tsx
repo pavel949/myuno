@@ -21,3 +21,11 @@ it('refreshes persisted comparison prices from canonical IDs, including an edito
   expect(screen.getByText('Цена уточняется')).toBeVisible();
   expect(screen.queryByText(/9\s100\s000 THB/)).toBeNull();
 });
+
+it('never restores a withdrawn comparison project from its old browser snapshot', () => {
+  state.projects = [];
+  render(<MemoryRouter><NewbuildsCompare /></MemoryRouter>);
+  expect(screen.getByText(/Выбранные проекты больше не опубликованы/)).toBeVisible();
+  expect(screen.queryByText('Stored project')).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'К каталогу' })).toHaveAttribute('href', '/property/offplan/search');
+});

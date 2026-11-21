@@ -8,7 +8,7 @@ import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
 import { LeadAIInsights } from '@/components/admin/leads/LeadAIInsights';
 import { FollowUpGenerator } from '@/components/admin/leads/FollowUpGenerator';
 import { BatchScoreButton } from '@/components/admin/leads/BatchScoreButton';
-import { ConvertLeadToDealButton } from '@/components/crm/ConvertLeadToDealButton';
+import { ConsultationDealAction } from '@/components/admin/ConsultationDealAction';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -361,8 +361,9 @@ function ConsultationCard({
             )}
 
             {/* Lead → deal bridge */}
-            <ConvertLeadToDealButton
-              leadId={consultation.id}
+            <ConsultationDealAction
+              id={consultation.id}
+              entryPoint={consultation.entry_point}
               convertedDealId={consultation.converted_deal_id}
             />
           </div>
