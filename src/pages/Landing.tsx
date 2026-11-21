@@ -1,7 +1,7 @@
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, LifeBuoy } from 'lucide-react';
+import { ArrowRight, LifeBuoy, Plane, CarFront, Ship, Flower2, KeyRound } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
@@ -50,6 +50,7 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-layout home-container">
           <div className="home-hero-copy">
+            <span className="home-hero-eyebrow">{t({ ru: 'ПХУКЕТ · ВСЁ В ОДНОМ МЕСТЕ', en: 'PHUKET · ALL IN ONE PLACE', th: 'ภูเก็ต · ครบในที่เดียว' })}</span>
             <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
             <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
             <HomeHeroChoices />
@@ -62,6 +63,19 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      <nav className="home-container home-quick-links" aria-label={t({ ru: 'Популярные услуги', en: 'Popular services', th: 'บริการยอดนิยม' })}>
+        {([
+          { icon: Plane, href: R.AIRPORT_TRANSFER, text: { ru: 'Трансфер из аэропорта', en: 'Airport transfer', th: 'รถรับส่งสนามบิน' } },
+          { icon: CarFront, href: R.TRANSPORT, text: { ru: 'Аренда транспорта', en: 'Vehicle rental', th: 'เช่ารถ' } },
+          { icon: Ship, href: R.YACHTS, text: { ru: 'Яхты и катера', en: 'Yachts and boats', th: 'เรือยอชต์และเรือ' } },
+          { icon: Flower2, href: R.FLOWERS, text: { ru: 'Цветы и подарки', en: 'Flowers and gifts', th: 'ดอกไม้และของขวัญ' } },
+          { icon: KeyRound, href: R.FOR_OWNERS, text: { ru: 'Управление недвижимостью', en: 'Property management', th: 'บริหารอสังหาริมทรัพย์' } },
+        ] as const).map(({ icon: Icon, href, text }) => (
+          <Link key={href} to={href} className="home-quick-link" onClick={() => trackEvent('homepage_quick_link', { destination: href })}>
+            <Icon size={17} aria-hidden="true" />{t(text)}
+          </Link>
+        ))}
+      </nav>
       <HomeHousingPreview />
       <HomeNewbuildsPreview />
       <div className="home-life-group">
