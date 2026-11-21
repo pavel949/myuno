@@ -78,6 +78,19 @@ it('shows the ordered public project gallery, selects a photo and opens only a s
   expect(screen.getByRole('link', { name: 'Project video (opens in new tab)' })).toHaveAttribute('href', 'https://youtu.be/abcdefghijk');
 });
 
+it('opens only the verified developer price source and labels the official renderings', () => {
+  state.project = { id: 'synthetic-project', nameEn: 'Synthetic project', district: 'Bang Tao', amenities: [], coverImage: '/cover.jpg', sourceUrl: 'https://www.sudaraphuket.com/pricing' };
+  state.media = { id: 'synthetic-project', images: ['/catalog/sudara/main-pool.webp'] };
+  const app = () => <MemoryRouter initialEntries={['/property/offplan/synthetic-project']}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail />} /></Routes></MemoryRouter>;
+  const view = render(app());
+  const pricing = screen.getByRole('link', { name: /Developer’s live pricing/ });
+  expect(pricing).toHaveAttribute('href', 'https://www.sudaraphuket.com/pricing');
+  expect(pricing).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(screen.getByText('The gallery includes developer renderings of the project.')).toBeVisible();
+  state.project.sourceUrl = 'https://www.sudaraphuket.com.invalid/pricing';
+  view.rerender(app());
+  expect(screen.queryByRole('link', { name: /Developer’s live pricing/ })).not.toBeInTheDocument();
+});
 
 it('uses one tab row, preserves URL context, and shows only eligible document links', () => {
   state.project = { id: 'synthetic-project', nameEn: 'Synthetic project', district: 'Bang Tao', amenities: [] };
