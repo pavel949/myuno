@@ -172,8 +172,8 @@ try {
       await expect(page.getByRole('heading', { name: canonicalProject.nameEn, level: 1 })).toBeVisible();
       const detail = await fit('detail');
       assert.equal(await page.evaluate(() => window.fixtureDocumentReads.length), 0, 'Documents fetched before opening tab');
-      await page.getByRole('tab', { name: /Documents/ }).click();
-      await expect(page.getByRole('tab', { name: /Documents/ })).toHaveAttribute('aria-selected', 'true');
+      await page.getByRole('tab', { name: /^Docs/ }).click();
+      await expect(page.getByRole('tab', { name: /^Docs/ })).toHaveAttribute('aria-selected', 'true');
       await expect(page.getByRole('link', { name: /Synthetic public brochure/ })).toHaveAttribute('href', doc.file_url);
       for (const title of ['Private fixture', 'Historic fixture', 'Other project fixture']) await expect(page.getByText(title)).toHaveCount(0);
       const reads = await page.evaluate(() => window.fixtureDocumentReads);
