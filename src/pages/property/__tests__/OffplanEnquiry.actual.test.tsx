@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import OffplanDetail from '../OffplanDetail';
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', unit='22222222-2222-4222-8222-222222222222', property='33333333-3333-4333-8333-333333333333';
-const state=vi.hoisted(()=>({desktop:true,rpc:vi.fn(),invoke:vi.fn()}));
+const state=vi.hoisted(()=>({desktop:true,propertyId:'33333333-3333-4333-8333-333333333333' as string|null,rpc:vi.fn(),invoke:vi.fn()}));
 vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
 vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:null})}));
 vi.mock('@/contexts/CurrencyContext',()=>({useCurrency:()=>({formatPrice:(value:number)=>`THB ${value}`})}));
@@ -15,16 +15,57 @@ vi.mock('@/hooks/useOffplanProjects',()=>({useOffplanProject:(id:string)=>({data
 vi.mock('@/hooks/useDevelopers',()=>({useDeveloper:()=>({data:null})}));
 vi.mock('@/hooks/useNewbuildProjects',()=>({useNewbuildProject:()=>({data:null})}));
 vi.mock('@/hooks/useProjectDocuments',()=>({useProjectDocuments:()=>({data:[]}),DOCUMENT_CATEGORIES:[]}));
-vi.mock('@/hooks/useProjectUnits',()=>({useProjectUnits:()=>({data:[{id:'22222222-2222-4222-8222-222222222222',property_id:'33333333-3333-4333-8333-333333333333',name:'Synthetic unit',unit_type:'condo',area_sqm:50,bedrooms:1,bathrooms:1,views:[]}],isLoading:false})}));
+vi.mock('@/hooks/useProjectUnits',()=>({useProjectUnits:()=>({data:[{id:'22222222-2222-4222-8222-222222222222',property_id:state.propertyId,name:'Synthetic unit',unit_type:'condo',area_sqm:50,bedrooms:1,bathrooms:1,views:[]}],isLoading:false})}));
 vi.mock('@/hooks/useCapitalIntroRequest',()=>({useCapitalIntroRequest:()=>({isPending:false,mutateAsync:()=>{throw Error('Capital writer excluded');}})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:(...args:unknown[])=>state.rpc(...args),functions:{invoke:(...args:unknown[])=>state.invoke(...args)},from:()=>{throw Error('Direct table writes/reads excluded from actual-form fixture');}}}));
 vi.mock('@/components/seo',()=>({SEOHead:()=>null,createRealEstateListingSchema:()=>({}),createBreadcrumbSchema:()=>({})}));
 const records=new Map<string,{id:string,payload:Record<string,unknown>}>();let client:QueryClient;
-beforeEach(()=>{vi.clearAllMocks();sessionStorage.clear();vi.stubGlobal('crypto',webcrypto);records.clear();state.desktop=true;state.invoke.mockResolvedValue({data:null,error:new Error('Synthetic notification not accepted')});state.rpc.mockImplementation(async(name:string,args:{payload:Record<string,unknown>})=>{expect(name).toBe('submit_consultation_request');const key=String(args.payload.intake_request_key);if(!records.has(key))records.set(key,{id:'synthetic-confirmed-request',payload:args.payload});return{data:records.get(key)!.id,error:null};});client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});});
-afterEach(()=>{cleanup();client.clear();vi.unstubAllGlobals();});
+beforeEach(()=>{vi.clearAllMocks();sessionStorage.clear();vi.stubGlobal('crypto',webcrypto);records.clear();state.desktop=true;state.propertyId=property;vi.stubEnv('VITE_ENABLE_OFFPLAN_SAFE_INTAKE','true');state.invoke.mockResolvedValue({data:null,error:new Error('Synthetic notification not accepted')});state.rpc.mockImplementation(async(name:string,args:{payload:Record<string,unknown>})=>{expect(name).toBe('submit_offplan_consultation_request');const key=String(args.payload.intake_request_key);if(!records.has(key))records.set(key,{id:'synthetic-confirmed-request',payload:args.payload});return{data:records.get(key)!.id,error:null};});client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});});
+afterEach(()=>{cleanup();client.clear();vi.unstubAllGlobals();vi.unstubAllEnvs();});
 function show(){render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/property/offplan/${a}`]}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail/>}/></Routes></MemoryRouter></QueryClientProvider>);}
 async function fill(){const dialog=await screen.findByRole('dialog');fireEvent.change(within(dialog).getByLabelText(/Name/),{target:{value:'Synthetic buyer'}});fireEvent.change(within(dialog).getByLabelText(/Phone/),{target:{value:'+66000000000'}});fireEvent.change(within(dialog).getByLabelText('Message'),{target:{value:'Synthetic question'}});return within(dialog).getByRole('button',{name:'Submit request'}).closest('form')!;}
-it.each([true,false])('actual unit card → adaptive modal → shared form → receipt in desktop=%s',async desktop=>{state.desktop=desktop;show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(state.rpc).toHaveBeenCalledTimes(1);expect(records.size).toBe(1);expect(state.invoke.mock.calls.map(([name]) => name)).not.toContain('notify-admin-order');const record=[...records.values()][0];expect(record.payload).toMatchObject({request_type:'property_consultation',vertical_id:'properties',entry_point:'offplan_buyer',vertical_metadata:{schema_version:1,project_id:a,unit_id:unit,property_id:property,intent:'consultation',request_only:true,offer_id:null}});expect(screen.getByText(/A team reply is pending/)).toBeVisible();});
-it('preserves actual unit context and inputs after a lost response, and retries the same operation key',async()=>{let lost=true;const normal=state.rpc.getMockImplementation()!;state.rpc.mockImplementation(async(...args:unknown[])=>{const result=await normal(...args);if(lost){lost=false;throw Error('Synthetic response lost after persistence');}return result;});show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);await screen.findByRole('alert');expect(screen.queryByText('synthetic-confirmed-request')).toBeNull();expect(screen.getByLabelText('Message')).toHaveValue('Synthetic question');fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(records.size).toBe(1);expect(state.rpc.mock.calls[0][1].payload.intake_request_key).toBe(state.rpc.mock.calls[1][1].payload.intake_request_key);});
+it.each([true,false])('actual unit card → adaptive modal → shared form → receipt in desktop=%s',async desktop=>{state.desktop=desktop;show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(state.rpc).toHaveBeenCalledTimes(1);expect(records.size).toBe(1);expect(state.invoke).not.toHaveBeenCalled();const record=[...records.values()][0];expect(record.payload).toMatchObject({request_type:'property_consultation',vertical_id:'properties',entry_point:'offplan_buyer',vertical_metadata:{schema_version:1,project_id:a,unit_id:unit,property_id:property,intent:'consultation',request_only:true,offer_id:null}});expect(screen.getByText(/A team reply is pending/)).toBeVisible();});
+it('preserves actual unit context and inputs after a lost response, and retries the same operation key',async()=>{let lost=true;const normal=state.rpc.getMockImplementation()!;state.rpc.mockImplementation(async(...args:unknown[])=>{const result=await normal(...args);if(lost){lost=false;throw Error('Synthetic response lost after persistence');}return result;});show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);await screen.findByRole('alert');expect(screen.queryByText('synthetic-confirmed-request')).toBeNull();expect(screen.getByLabelText('Message')).toHaveValue('Synthetic question');fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(records.size).toBe(1);expect(state.invoke).not.toHaveBeenCalled();expect(state.rpc.mock.calls[0][1].payload.intake_request_key).toBe(state.rpc.mock.calls[1][1].payload.intake_request_key);});
 it('actual documents action keeps request-only intent and no stale selected unit',async()=>{show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));await fill();fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Close'}));fireEvent.mouseDown(screen.getByRole('tab',{name:'Docs'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Request document package'}));fireEvent.submit(await fill());expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();const metadata=[...records.values()][0].payload.vertical_metadata as Record<string,unknown>;expect(metadata).toMatchObject({project_id:a,intent:'documents',request_only:true});expect(metadata).not.toHaveProperty('unit_id');expect(metadata).not.toHaveProperty('property_id');});
 it('missing acknowledgement never renders a saved reference and can recover unchanged details',async()=>{state.rpc.mockResolvedValueOnce({data:null,error:null});show();fireEvent.click(screen.getByRole('button',{name:'Discuss this project'}));const form=await fill();fireEvent.submit(form);await screen.findByRole('alert');expect(screen.queryByText('Request saved')).toBeNull();expect(screen.getByLabelText(/Name/)).toHaveValue('Synthetic buyer');fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(state.rpc.mock.calls[0][1].payload.intake_request_key).toBe(state.rpc.mock.calls[1][1].payload.intake_request_key);});
+
+it('never replays a lost legacy response or silently switches writers',async()=>{
+  vi.stubEnv('VITE_ENABLE_OFFPLAN_SAFE_INTAKE','false');
+  state.rpc.mockRejectedValue(Error('Legacy response lost'));
+  show();
+  fireEvent.click(screen.getByRole('button',{name:'Discuss this project'}));
+  const form=await fill();fireEvent.submit(form);
+  await screen.findByRole('alert');fireEvent.submit(form);
+  await screen.findByRole('alert');
+  expect(state.rpc).toHaveBeenCalledTimes(1);
+  expect(state.rpc.mock.calls[0][0]).toBe('submit_consultation_request');
+  cleanup();
+  vi.stubEnv('VITE_ENABLE_OFFPLAN_SAFE_INTAKE','true');
+  show();fireEvent.click(screen.getByRole('button',{name:'Discuss this project'}));
+  fireEvent.submit(await fill());await screen.findByRole('alert');
+  expect(state.rpc).toHaveBeenCalledTimes(1);
+});
+
+it('does not fall back if the scoped backend is unavailable',async()=>{
+  state.rpc.mockResolvedValue({data:null,error:{code:'PGRST202',message:'not available'}});
+  show();fireEvent.click(screen.getByRole('button',{name:'Discuss this project'}));
+  fireEvent.submit(await fill());await screen.findByRole('alert');
+  expect(state.rpc.mock.calls.map(([name])=>name)).toEqual(['submit_offplan_consultation_request']);
+  expect(state.invoke).not.toHaveBeenCalled();
+});
+
+it('asks for an explicit project-only enquiry when a unit lacks a physical link',async()=>{
+  state.propertyId=null;show();
+  fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});
+  fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));
+  expect(await screen.findByText(/can’t verify this unit/)).toBeVisible();
+  expect(screen.queryByRole('button',{name:'Submit request'})).toBeNull();
+  expect(state.rpc).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button',{name:'Continue with a project enquiry'}));
+  fireEvent.submit(await fill());
+  expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();
+  const metadata=state.rpc.mock.calls[0][1].payload.vertical_metadata;
+  expect(metadata).toMatchObject({project_id:a,intent:'consultation',request_only:true});
+  expect(metadata).not.toHaveProperty('unit_id');
+  expect(metadata).not.toHaveProperty('property_id');
+});

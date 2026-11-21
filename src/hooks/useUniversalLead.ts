@@ -1,8 +1,9 @@
 import { observeLeadNotification } from '@/lib/leadNotification';
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
+import { createConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY, OFFPLAN_CONSULTATION_RPC, offplanScopedWriterEnabled } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { untypedRpc } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -50,6 +51,12 @@ export function useUniversalLead() {
   const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
   if (!intake.current) intake.current = createConsultationIntakeAttempt();
 
+  const offplanIntake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
+  const scopedOffplan = offplanScopedWriterEnabled();
+  if (!offplanIntake.current) offplanIntake.current = scopedOffplan
+    ? createConsultationIntakeAttempt({ writer: OFFPLAN_CONSULTATION_RPC })
+    : createConsultationIntakeAttempt({ allowUncertainRetry: false });
+
   const submitLead = useMutation({
     mutationFn: async (input: UniversalLeadInput) => {
       const vertical = getLeadVerticalById(input.vertical_id);
@@ -88,9 +95,9 @@ export function useUniversalLead() {
 
       // Guests cannot read consultation_requests (PII), so insert through the
       // security-definer RPC which returns only the new lead id.
-      const attempt = intake.current;
+      const attempt = input.entry_point === OFFPLAN_BUYER_ENTRY ? offplanIntake.current : intake.current;
       if (!attempt) throw new Error('Intake recovery is unavailable.');
-      const receipt = await attempt.submit(supabase, payload, user?.id);
+      const receipt = await attempt.submit(supabase, payload, user?.id, body => untypedRpc(OFFPLAN_CONSULTATION_RPC, { payload: body }));
       const data = { id: receipt.id };
       const sendFromBrowser = receipt.shouldDispatch && input.entry_point !== OFFPLAN_BUYER_ENTRY;
 
@@ -125,8 +132,9 @@ export function useUniversalLead() {
         }
       }
 
-      // Trigger auto lead scoring (non-blocking, logged on failure).
-      if (receipt.shouldDispatch && data) {
+      // The legacy scorer may send a bulk alert. Do not run any browser
+      // follow-up after a scoped receipt; its two channels belong to the outbox.
+      if (receipt.shouldDispatch && !(scopedOffplan && input.entry_point === OFFPLAN_BUYER_ENTRY)) {
         supabase.functions.invoke('auto-lead-scoring', {
           body: { leadId: data.id },
         }).catch((e) => logger.error(`[useUniversalLead] auto-lead-scoring failed for lead ${data.id}:`, e));
