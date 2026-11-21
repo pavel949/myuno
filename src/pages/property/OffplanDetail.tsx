@@ -6,6 +6,8 @@ import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
+import { ProjectTypePlans } from '@/components/newbuilds/ProjectTypePlans';
+import { isHostedProjectPlan } from '@/lib/real-estate/projectHostedPlans';
 import '@/styles/public-commerce.css';
 import { projectFeatureLabel } from '@/lib/offplan/presentation';
 import { OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
@@ -86,12 +88,17 @@ export default function OffplanDetail() {
   }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
-  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(activeTab === 'documents' ? loadedProjectId : undefined, { publicOnly: true });
+  const showMaterials = activeTab === 'documents' || activeTab === 'units';
+  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(
+    showMaterials ? loadedProjectId : undefined, { publicOnly: true },
+  );
   const publicDocs = allDocs.flatMap(doc => {
     if (!loadedProjectId || doc.project_id !== loadedProjectId || !doc.is_current || doc.visibility !== 'public') return [];
     const url = projectPublicDocumentUrl(doc.file_url, { projectId: loadedProjectId, category: doc.category });
     return url ? [{ ...doc, file_url: url }] : [];
   });
+  const publicPlanDocs = publicDocs.filter(isHostedProjectPlan);
+  const otherPublicDocs = publicDocs.filter(doc => !isHostedProjectPlan(doc));
 
   if (isLoading) {
     return (
@@ -135,7 +142,14 @@ export default function OffplanDetail() {
   const photo = selectedPhoto?.projectId === project.id && gallery.includes(selectedPhoto.url) ? selectedPhoto.url : gallery[0];
   const video = publicProjectMediaUrl(mediaProject?.video_url, 'video');
   const developerPricing = project.sourceUrl === 'https://www.sudaraphuket.com/pricing' ? project.sourceUrl : null;
-  const hasSudaraRenderings = gallery.some(url => url.startsWith('/catalog/sudara/'));
+  const sudaraShowUnit = '/catalog/sudara/sudara-show-unit-2br-garden.webp';
+  const hasSudaraRenderings = gallery.some(url => url.startsWith('/catalog/sudara/') && url !== sudaraShowUnit);
+  const showUnitSelected = photo === sudaraShowUnit;
+  const showUnitLabel = pickLang(language, {
+    ru: 'Фото шоу-квартиры Sudara: 2 спальни и сад. Это не фотография конкретной квартиры в продаже.',
+    en: 'Photo of the Sudara two-bedroom garden show unit. This is not a photo of a specific home for sale.',
+    th: 'ภาพถ่ายห้องตัวอย่าง 2 ห้องนอนพร้อมสวนของ Sudara ไม่ใช่ภาพของยูนิตที่ประกาศขาย',
+  });
   const description = (isRu ? mediaProject?.description_ru || mediaProject?.description_en
     : mediaProject?.description_en || mediaProject?.description_ru) || project.descriptionSummary;
   const photoLabel = (index: number) => pickLang(language, {
@@ -224,7 +238,8 @@ export default function OffplanDetail() {
                 {pickLang(language, { ru: 'Видео проекта (новая вкладка)', en: 'Project video (opens in new tab)', th: 'วิดีโอโครงการ (เปิดในแท็บใหม่)' })}
               </a>
             </Button>}
-            {hasSudaraRenderings && <p className="text-xs text-muted-foreground">{pickLang(language, {
+            {showUnitSelected && <p className="text-sm text-foreground" role="status">{showUnitLabel}</p>}
+            {!showUnitSelected && hasSudaraRenderings && <p className="text-sm text-muted-foreground">{pickLang(language, {
               ru: 'В галерее показаны визуализации проекта от застройщика.',
               en: 'The gallery includes developer renderings of the project.',
               th: 'แกลเลอรีมีภาพจำลองโครงการจากผู้พัฒนา',
@@ -268,8 +283,8 @@ export default function OffplanDetail() {
             </TabsTrigger>
             <TabsTrigger className="min-h-11 whitespace-normal" value="documents">
               {pickLang(language, {"ru": "Документы", "en": "Docs", "th": "เอกสาร"})}
-              {publicDocs.length > 0 && (
-                <span className="ml-1 text-[10px] opacity-70">({publicDocs.length})</span>
+              {otherPublicDocs.length > 0 && (
+                <span className="ml-1 text-[10px] opacity-70">({otherPublicDocs.length})</span>
               )}
             </TabsTrigger>
             <TabsTrigger className="min-h-11 whitespace-normal" value="developer">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</TabsTrigger>
@@ -295,17 +310,23 @@ export default function OffplanDetail() {
           </TabsContent>
 
           <TabsContent value="units" className="pt-4">
-            <div id="project-units" className="scroll-mt-28">
-              <DevelopmentUnitsSection developmentId={project.id} onSelectUnit={(unit) => {
-                setEnquiryIntent('consultation');
-                setSelectedUnit(unit);
-                setShowLeadForm(true);
-              }} />
+            <div id="project-units" className="scroll-mt-28 space-y-6">
+              <ProjectTypePlans key={project.id} docs={publicPlanDocs} isLoading={docsLoading} isError={docsError} onRetry={retryDocs} />
+              <section aria-labelledby="project-exact-units-title" className="space-y-2 border-t border-border pt-4">
+                <h3 id="project-exact-units-title" className="text-lg font-semibold">
+                  {pickLang(language, { en: 'Individual units', ru: 'Конкретные объекты', th: 'ยูนิตรายห้อง' })}
+                </h3>
+                <DevelopmentUnitsSection developmentId={project.id} onSelectUnit={(unit) => {
+                  setEnquiryIntent('consultation');
+                  setSelectedUnit(unit);
+                  setShowLeadForm(true);
+                }} />
+              </section>
             </div>
           </TabsContent>
 
           <TabsContent value="documents" className="pt-4 space-y-4">
-            {docsLoading ? <Skeleton className="h-24" /> : docsError ? <QueryRecovery onRetry={retryDocs} /> : publicDocs.length > 0 ? (
+            {docsLoading ? <Skeleton className="h-24" /> : docsError ? <QueryRecovery onRetry={retryDocs} /> : otherPublicDocs.length > 0 ? (
               <>
                 <p className="text-xs text-muted-foreground">
                   {isRu
@@ -313,7 +334,7 @@ export default function OffplanDetail() {
                     : 'Publicly disclosed project documents. Contact myUNO to ask about documents that require access.'}
                 </p>
                 <div className="space-y-2">
-                  {publicDocs.map((doc) => {
+                  {otherPublicDocs.map((doc) => {
                     const cat = DOCUMENT_CATEGORIES.find((c) => c.value === doc.category);
                     return (
                       <a
@@ -339,7 +360,7 @@ export default function OffplanDetail() {
                   })}
                 </div>
               </>
-            ) : (
+            ) : publicPlanDocs.length === 0 ? (
               <div className="text-center py-8 space-y-3">
                 <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
                 <p className="text-muted-foreground text-sm">
@@ -348,6 +369,17 @@ export default function OffplanDetail() {
                     : 'No public documents have been published yet.'}
                 </p>
               </div>
+            ) : null}
+            {!docsLoading && !docsError && publicPlanDocs.length > 0 && (
+              <Button asChild variant="link" className="min-h-11 px-0">
+                <a href={TAB_HASHES.units} onClick={event => {
+                  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault();
+                  changeTab('units');
+                }}>
+                  {pickLang(language, { en: 'See project plans', ru: 'Смотреть планировки проекта', th: 'ดูแปลนโครงการ' })}
+                </a>
+              </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => openProjectEnquiry('documents')} className="min-h-11 gap-2">
               <FileSearch className="w-4 h-4" />

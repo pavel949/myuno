@@ -38,7 +38,7 @@ export function DevelopmentUnitsSection({ developmentId, onSelectUnit }: Develop
 
   if (!units || units.length === 0) return (
     <p className="py-3 text-sm text-muted-foreground">
-      {pickLang(language, { ru: 'Объекты и планы пока не опубликованы.', en: 'No units or plans have been published yet.', th: 'ยังไม่มีการเผยแพร่ยูนิตหรือแปลน' })}
+      {pickLang(language, { ru: 'Конкретные объекты пока не опубликованы.', en: 'No individual units have been published yet.', th: 'ยังไม่มีการเผยแพร่ยูนิตรายห้อง' })}
     </p>
   );
 
