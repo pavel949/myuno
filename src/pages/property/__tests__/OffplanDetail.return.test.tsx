@@ -83,10 +83,12 @@ it('uses one tab row, preserves URL context, and shows only eligible document li
   state.project = { id: 'synthetic-project', nameEn: 'Synthetic project', district: 'Bang Tao', amenities: [] };
   state.media = { id: 'synthetic-project', description_en: 'Synthetic editorial overview.' };
   state.docs = [
-    { id: 'pub', title: 'Construction update', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/synthetic-project/construction/public-update.pdf?token=synthetic.test', version: 2 },
-    { id: 'private', title: 'Private document', category: 'contracts', visibility: 'kyc', file_url: '/restricted.pdf', version: 1 },
-    { id: 'wrong-project', title: 'Other project attachment', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/other-project/construction/update.pdf?token=synthetic.test', version: 1 },
-    { id: 'bad', title: 'Unsafe URL', category: 'other', visibility: 'public', file_url: 'javascript:alert(1)', version: 1 },
+    { id: 'pub', project_id: 'synthetic-project', is_current: true, title: 'Construction update', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/synthetic-project/construction/public-update.pdf?token=synthetic.test', version: 2 },
+    { id: 'private', project_id: 'synthetic-project', is_current: true, title: 'Private document', category: 'contracts', visibility: 'kyc', file_url: '/restricted.pdf', version: 1 },
+    { id: 'wrong-project', project_id: 'synthetic-project', is_current: true, title: 'Other project attachment', category: 'construction', visibility: 'public', file_url: 'https://synthetic.supabase.co/storage/v1/object/sign/project-documents/other-project/construction/update.pdf?token=synthetic.test', version: 1 },
+    { id: 'archive', project_id: 'synthetic-project', is_current: false, title: 'Superseded file', category: 'construction', visibility: 'public', file_url: '/assets/old.pdf', version: 1 },
+    { id: 'misfiled', project_id: 'other-project', is_current: true, title: 'Misfiled public row', category: 'construction', visibility: 'public', file_url: '/assets/misfiled.pdf', version: 1 },
+    { id: 'bad', project_id: 'synthetic-project', is_current: true, title: 'Unsafe URL', category: 'other', visibility: 'public', file_url: 'javascript:alert(1)', version: 1 },
   ];
   const catalogue = '/property/offplan/search?budget=5to10';
   const detail = '/property/offplan/synthetic-project?ref=fixture';
@@ -101,6 +103,8 @@ it('uses one tab row, preserves URL context, and shows only eligible document li
   expect(screen.getByRole('button', { name: 'Request document package' })).toBeVisible();
   expect(screen.queryByText('Private document')).not.toBeInTheDocument();
   expect(screen.queryByText('Unsafe URL')).not.toBeInTheDocument();
+  expect(screen.queryByText('Superseded file')).not.toBeInTheDocument();
+  expect(screen.queryByText('Misfiled public row')).not.toBeInTheDocument();
   expect(screen.queryByText('Other project attachment')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Go back' }));
   expect(screen.getByTestId('position')).toHaveTextContent(catalogue);

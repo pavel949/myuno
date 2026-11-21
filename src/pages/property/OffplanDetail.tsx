@@ -11,7 +11,7 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
 import { OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 /**
  * OffplanDetail - Detailed view of an off-plan project
- * Shows gallery, developer info, myUNO scoring, investment metrics
+ * Shows public gallery, units, documents and developer information
  */
 
 import { useEffect, useState } from 'react';
@@ -75,7 +75,7 @@ export default function OffplanDetail() {
   const activeTab = (Object.keys(TAB_HASHES) as ProjectTab[])
     .find(key => TAB_HASHES[key] === journeyLocation.hash) ?? 'overview';
   const changeTab = (value: string) => {
-    if (!Object.hasOwn(TAB_HASHES, value)) return;
+    if (!Object.prototype.hasOwnProperty.call(TAB_HASHES, value)) return;
     journeyNavigate({ pathname: journeyLocation.pathname, search: journeyLocation.search, hash: TAB_HASHES[value as ProjectTab] },
       { replace: true, state: journeyLocation.state });
   };
@@ -86,9 +86,9 @@ export default function OffplanDetail() {
   }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
-  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(id);
+  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(loadedProjectId, { publicOnly: true });
   const publicDocs = allDocs.flatMap(doc => {
-    if (!loadedProjectId || doc.visibility !== 'public') return [];
+    if (!loadedProjectId || doc.project_id !== loadedProjectId || !doc.is_current || doc.visibility !== 'public') return [];
     const url = projectPublicDocumentUrl(doc.file_url, { projectId: loadedProjectId, category: doc.category });
     return url ? [{ ...doc, file_url: url }] : [];
   });

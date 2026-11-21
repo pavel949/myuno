@@ -49,9 +49,9 @@ export const DOCUMENT_CATEGORIES: { value: DocumentCategory; label_en: string; l
   { value: 'other', label_en: 'Other', label_ru: 'Прочее' },
 ];
 
-export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean }) {
+export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: boolean }) {
   return useQuery({
-    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true],
+    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true, opts?.publicOnly ?? false],
     queryFn: async (): Promise<ProjectDocument[]> => {
       if (!projectId) return [];
       let q = supabase
@@ -61,6 +61,7 @@ export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: b
         .order('category', { ascending: true })
         .order('uploaded_at', { ascending: false });
       if (opts?.onlyCurrent !== false) q = q.eq('is_current', true);
+      if (opts?.publicOnly) q = q.eq('visibility', 'public');
       const { data, error } = await q;
       if (error) throw error;
       return (data || []) as ProjectDocument[];

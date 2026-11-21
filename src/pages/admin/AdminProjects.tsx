@@ -1,3 +1,4 @@
+import { ProjectInstallmentDraft } from '@/components/admin/projects/ProjectInstallmentDraft';
 import { ProjectGalleryOrder } from '@/components/property/ProjectGalleryOrder';
 import { projectGalleryField, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { assertAdminRows } from '@/lib/assertAdminRows';
@@ -679,7 +680,7 @@ export default function AdminProjects() {
             </SheetHeader>
 
             <Tabs defaultValue="basic" className="p-4 sm:p-6">
-              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-5">
+              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-3">
                 <TabsTrigger value="basic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Основное' : 'Basic'}
                 </TabsTrigger>
@@ -691,6 +692,9 @@ export default function AdminProjects() {
                 </TabsTrigger>
                 <TabsTrigger value="amenities" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Удобства' : 'Amenities'}
+                </TabsTrigger>
+                <TabsTrigger value="installments" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
+                  {pickLang(language, { en: 'Installments', ru: 'Рассрочка', th: 'ผ่อนชำระ' })}
                 </TabsTrigger>
                 <TabsTrigger value="juristic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'УК' : 'Mgmt'}
@@ -881,6 +885,11 @@ export default function AdminProjects() {
                     {isRu ? 'Через запятую' : 'Comma-separated'}
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="installments" className="mt-4 data-[state=inactive]:hidden" forceMount>
+                <ProjectInstallmentDraft key={isFormOpen ? editingProject?.id ?? 'new-project' : 'closed'} language={language}
+                  projectId={editingProject?.id} currentTemplate={editingProject && 'payment_plan_template' in editingProject ? editingProject.payment_plan_template : undefined} />
               </TabsContent>
 
               {/* Juristic / Management Tab */}

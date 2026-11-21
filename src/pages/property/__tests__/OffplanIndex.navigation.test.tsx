@@ -71,7 +71,7 @@ const offplanFixtures = [
 it('draws only located filtered results and restores pin, filters and viewport on detail back', async () => {
  state.projects = offplanFixtures;
  mount('/property/offplan?q=Ocean&district=Bang+Tao&ref=fixture');
- fireEvent.click(screen.getByRole('button', { name: 'Map', exact: true }));
+ fireEvent.click(screen.getByRole('button', { name: 'Map' }));
  const pin = await screen.findByRole('button', { name: 'Pin: Ocean Suites' });
  expect(screen.queryByRole('button', { name: 'Pin: Lagoon Villas' })).not.toBeInTheDocument();
  expect(screen.queryByRole('button', { name: 'Pin: Ocean Residence' })).not.toBeInTheDocument();
@@ -93,7 +93,7 @@ it('draws only located filtered results and restores pin, filters and viewport o
  expect(query.get('view')).toBe('map');
  expect(query.get('ref')).toBe('fixture');
  expect(query.get('mapViewport')).toBe('8.00000,98.34000,13.00');
- fireEvent.click(screen.getByRole('button', { name: 'List', exact: true }));
+ fireEvent.click(screen.getByRole('button', { name: 'List' }));
  expect(screen.queryByRole('region', { name: 'Project map' })).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button', { name: 'History back' }));
  expect(await screen.findByRole('region', { name: 'Project map' })).toBeVisible();

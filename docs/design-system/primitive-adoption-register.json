@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 905,
-      "sourceInstances": 2985
+      "directConsumerFiles": 906,
+      "sourceInstances": 2988
     },
     "Card": {
       "directConsumerFiles": 532,
@@ -55,8 +55,8 @@
       "sourceInstances": 68
     },
     "Input": {
-      "directConsumerFiles": 404,
-      "sourceInstances": 1563
+      "directConsumerFiles": 405,
+      "sourceInstances": 1565
     },
     "SelectTrigger": {
       "directConsumerFiles": 232,
@@ -3888,6 +3888,34 @@
           "instances": 1,
           "lines": [
             130
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/projects/ProjectInstallmentDraft.tsx",
+      "sha256": "dd38c20e4185af677326666210bc6f685dd8f547717a6c5193caed53befb5dad",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 3,
+          "lines": [
+            91,
+            98,
+            101
+          ]
+        },
+        {
+          "name": "Input",
+          "source": "@/components/ui/input",
+          "instances": 2,
+          "lines": [
+            82,
+            87
           ]
         }
       ]
@@ -24085,7 +24113,7 @@
     },
     {
       "file": "src/pages/admin/AdminProjects.tsx",
-      "sha256": "0683e95e99b9b6006f339ce78cbfc5a0e5a891171716d78a2e27c7f11049bc1f",
+      "sha256": "83fd4f80ae98c8d5e16646c11578bb3e24156a640b6a7f6ed399738292180565",
       "directRouteDeclarations": [
         {
           "id": "3bc95514306401ef",
@@ -24102,21 +24130,21 @@
           "source": "@/components/ui/button",
           "instances": 15,
           "lines": [
-            448,
-            452,
-            456,
-            480,
-            503,
-            525,
-            529,
-            533,
-            550,
-            652,
-            658,
-            703,
-            832,
-            1078,
-            1081
+            449,
+            453,
+            457,
+            481,
+            504,
+            526,
+            530,
+            534,
+            551,
+            653,
+            659,
+            707,
+            836,
+            1087,
+            1090
           ]
         },
         {
@@ -24124,13 +24152,13 @@
           "source": "@/components/ui/card",
           "instances": 7,
           "lines": [
-            509,
-            548,
-            553,
-            570,
-            888,
-            985,
-            1029
+            510,
+            549,
+            554,
+            571,
+            897,
+            994,
+            1038
           ]
         },
         {
@@ -24138,29 +24166,29 @@
           "source": "@/components/ui/input",
           "instances": 23,
           "lines": [
-            468,
-            735,
-            743,
-            760,
-            768,
-            777,
-            788,
-            875,
-            915,
-            925,
-            935,
-            942,
+            469,
+            739,
+            747,
+            764,
+            772,
+            781,
+            792,
+            879,
+            924,
+            934,
+            944,
             951,
             960,
-            967,
+            969,
             976,
-            996,
-            1003,
-            1013,
-            1020,
-            1040,
+            985,
+            1005,
+            1012,
+            1022,
+            1029,
             1049,
-            1062
+            1058,
+            1071
           ]
         },
         {
@@ -24168,9 +24196,9 @@
           "source": "@/components/uno/PageContainer",
           "instances": 3,
           "lines": [
-            417,
-            429,
-            442
+            418,
+            430,
+            443
           ]
         },
         {
@@ -24178,7 +24206,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            443
+            444
           ]
         },
         {
@@ -24186,8 +24214,8 @@
           "source": "@/components/ui/select",
           "instances": 2,
           "lines": [
-            490,
-            516
+            491,
+            517
           ]
         },
         {
@@ -24195,7 +24223,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            669
+            670
           ]
         },
         {
@@ -24203,7 +24231,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            681
+            682
           ]
         }
       ]
@@ -39772,7 +39800,7 @@
     },
     {
       "file": "src/pages/property/OffplanDetail.tsx",
-      "sha256": "912df7d0e2caca1556e07d891df4cee5a766d5f7493e2dcbc710d9fbbb99efb8",
+      "sha256": "60a82efac5302661b026bfb404682126cedf7e20fe54250cd0af35fb6abbdc42",
       "directRouteDeclarations": [
         {
           "id": "78467c65281fe5f7",
