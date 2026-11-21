@@ -1,7 +1,7 @@
 /**
  * Hook for project_documents — admin & developer document vault.
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -49,21 +49,28 @@ export const DOCUMENT_CATEGORIES: { value: DocumentCategory; label_en: string; l
   { value: 'other', label_en: 'Other', label_ru: 'Прочее' },
 ];
 
-export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean }) {
+const PUBLIC_PROJECT_DOCUMENT_FIELDS = 'id, project_id, category, title, file_url, visibility, version, is_current' as const;
+type PublicProjectDocument = Pick<ProjectDocument,
+  'id' | 'project_id' | 'category' | 'title' | 'file_url' | 'visibility' | 'version' | 'is_current'>;
+
+export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: false }): UseQueryResult<ProjectDocument[]>;
+export function useProjectDocuments(projectId: string | undefined, opts: { publicOnly: true }): UseQueryResult<PublicProjectDocument[]>;
+export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: boolean }) {
   return useQuery({
-    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true],
-    queryFn: async (): Promise<ProjectDocument[]> => {
+    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true, opts?.publicOnly ?? false],
+    queryFn: async (): Promise<PublicProjectDocument[]> => {
       if (!projectId) return [];
-      let q = supabase
-        .from('project_documents')
-        .select('*')
-        .eq('project_id', projectId)
+      const documents = supabase.from('project_documents');
+      const projection = opts?.publicOnly
+        ? documents.select(PUBLIC_PROJECT_DOCUMENT_FIELDS).eq('visibility', 'public')
+        : documents.select('*');
+      let q = projection.eq('project_id', projectId)
         .order('category', { ascending: true })
         .order('uploaded_at', { ascending: false });
-      if (opts?.onlyCurrent !== false) q = q.eq('is_current', true);
+      if (opts?.publicOnly || opts?.onlyCurrent !== false) q = q.eq('is_current', true);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as ProjectDocument[];
+      return (data || []) as PublicProjectDocument[];
     },
     enabled: !!projectId,
   });

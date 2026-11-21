@@ -120,6 +120,8 @@ function isWithinCoverage(lat: number, lng: number, bounds?: MapCoverageBounds) 
   ));
 }
 
+export interface MapViewport { lat: number; lng: number; zoom: number }
+
 export interface MapLibreMapProps {
   center: { lat: number; lng: number };
   zoom?: number;
@@ -127,6 +129,8 @@ export interface MapLibreMapProps {
   coverageBounds?: MapCoverageBounds;
   markers?: MapMarker[];
   onMarkerClick?: (marker: MapMarker) => void;
+  /** Report finished user gestures, not initial fitting or programmatic motion. */
+  onUserViewportChange?: (viewport: MapViewport) => void;
   /** Fit bounds to markers when they change. Default true. */
   fitToMarkers?: boolean;
   className?: string;
@@ -151,6 +155,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     zoom = 11,
     markers = [],
     onMarkerClick,
+    onUserViewportChange,
     fitToMarkers = true,
     className,
     minimal = false,
@@ -166,6 +171,8 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
   const [mapState, setMapState] = useState<'loading' | 'ready' | 'error' | 'unsupported'>('loading');
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [retry, setRetry] = useState(0);
+  const viewportCallback = useRef(onUserViewportChange);
+  useEffect(() => { viewportCallback.current = onUserViewportChange; }, [onUserViewportChange]);
   const fittedPositionsRef = useRef('');
   const validMarkers = useMemo(() => markers.filter((m) => isWithinCoverage(m.lat, m.lng, coverageBounds)), [markers, coverageBounds]);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -305,6 +312,14 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     map.on('load', onReady);
     map.on('idle', onReady);
     map.on('error', onError);
+    const onMoveEnd = (event: { originalEvent?: unknown }) => {
+      if (!event.originalEvent || !viewportCallback.current) return;
+      const position = map.getCenter();
+      if (isWithinCoverage(position.lat, position.lng, coverageBounds)) {
+        viewportCallback.current({ lat: position.lat, lng: position.lng, zoom: map.getZoom() });
+      }
+    };
+    map.on('moveend', onMoveEnd);
 
     if (!minimal) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right');
@@ -319,6 +334,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       map.off('load', onReady);
       map.off('idle', onReady);
       map.off('error', onError);
+      map.off('moveend', onMoveEnd);
       fittedPositionsRef.current = '';
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];

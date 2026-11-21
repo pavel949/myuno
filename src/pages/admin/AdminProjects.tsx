@@ -1,3 +1,6 @@
+import { ProjectInstallmentDraft } from '@/components/admin/projects/ProjectInstallmentDraft';
+import { ProjectGalleryOrder } from '@/components/property/ProjectGalleryOrder';
+import { projectGalleryField, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { assertAdminRows } from '@/lib/assertAdminRows';
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo } from 'react';
@@ -290,6 +293,7 @@ export default function AdminProjects() {
       total_units: project.total_units,
       cover_image: project.cover_image || '',
       images: project.images || [],
+      gallery_urls: project.gallery_urls,
       video_url: project.video_url || '',
       amenities: project.amenities || [],
       infrastructure: project.infrastructure || [],
@@ -343,12 +347,22 @@ export default function AdminProjects() {
       return;
     }
 
+    if (formData.video_url?.trim() && !publicProjectMediaUrl(formData.video_url, 'video') && formData.video_url !== editingProject?.video_url) {
+      toast.error(pickLang(language, { ru: 'Укажите публичную ссылку YouTube или Vimeo', en: 'Enter a public YouTube or Vimeo link', th: 'ใส่ลิงก์สาธารณะของ YouTube หรือ Vimeo' }));
+      return;
+    }
     const payload = {
       ...formData,
       ...juristicData,
       cam_fee_per_sqm: juristicData.cam_fee_per_sqm ? parseFloat(juristicData.cam_fee_per_sqm) : null,
       cam_payment_day: juristicData.cam_payment_day ? parseInt(juristicData.cam_payment_day) : null,
     };
+    if (editingProject) {
+      if ((payload.cover_image ?? '') === (editingProject.cover_image ?? '')) delete payload.cover_image;
+      if ((payload.video_url ?? '') === (editingProject.video_url ?? '')) delete payload.video_url;
+      if (JSON.stringify(payload.images ?? []) === JSON.stringify(editingProject.images ?? [])) delete payload.images;
+      if (JSON.stringify(payload.gallery_urls ?? null) === JSON.stringify(editingProject.gallery_urls ?? null)) delete payload.gallery_urls;
+    }
 
     try {
       if (editingProject) {
@@ -387,6 +401,15 @@ export default function AdminProjects() {
 
   const updateFormField = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const galleryField = projectGalleryField(editingProject ?? {});
+  const gallery = formData[galleryField] ?? [];
+  const updateGallery = (images: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      [galleryField]: images,
+    }));
   };
 
   if (adminLoading) {
@@ -657,7 +680,7 @@ export default function AdminProjects() {
             </SheetHeader>
 
             <Tabs defaultValue="basic" className="p-4 sm:p-6">
-              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-5">
+              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-3">
                 <TabsTrigger value="basic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Основное' : 'Basic'}
                 </TabsTrigger>
@@ -669,6 +692,9 @@ export default function AdminProjects() {
                 </TabsTrigger>
                 <TabsTrigger value="amenities" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Удобства' : 'Amenities'}
+                </TabsTrigger>
+                <TabsTrigger value="installments" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
+                  {pickLang(language, { en: 'Installments', ru: 'Рассрочка', th: 'ผ่อนชำระ' })}
                 </TabsTrigger>
                 <TabsTrigger value="juristic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'УК' : 'Mgmt'}
@@ -762,8 +788,9 @@ export default function AdminProjects() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{isRu ? 'Видео URL' : 'Video URL'}</Label>
+                  <Label htmlFor="project-video-url">{pickLang(language, { ru: 'Ссылка на видео', en: 'Video URL', th: 'ลิงก์วิดีโอ' })}</Label>
                   <Input
+                    id="project-video-url"
                     value={formData.video_url || ''}
                     onChange={(e) => updateFormField('video_url', e.target.value)}
                     placeholder="https://youtube.com/..."
@@ -797,12 +824,21 @@ export default function AdminProjects() {
                 <div className="space-y-2">
                   <Label>{isRu ? 'Галерея' : 'Gallery'}</Label>
                   <AirbnbStyleImageUpload
-                    value={formData.images || []}
-                    onChange={(imgs) => updateFormField('images', imgs)}
+                    value={gallery}
+                    onChange={updateGallery}
                     maxImages={20}
                     folder="projects"
                   />
+                  <ProjectGalleryOrder images={gallery} cover={formData.cover_image} language={language}
+                    onChange={updateGallery} onCover={(image) => updateFormField('cover_image', image)} />
                 </div>
+                {editingProject && (
+                  <Button variant="outline" asChild>
+                    <Link to={`/admin/newbuilds/projects/${editingProject.id}/documents`} target="_blank" rel="noopener noreferrer">
+                      {pickLang(language, { ru: 'Документы и источники (новая вкладка)', en: 'Documents and sources (opens in new tab)', th: 'เอกสารและแหล่งข้อมูล (เปิดในแท็บใหม่)' })}
+                    </Link>
+                  </Button>
+                )}
               </TabsContent>
 
               {/* Amenities Tab */}
@@ -849,6 +885,11 @@ export default function AdminProjects() {
                     {isRu ? 'Через запятую' : 'Comma-separated'}
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="installments" className="mt-4 data-[state=inactive]:hidden" forceMount>
+                <ProjectInstallmentDraft key={isFormOpen ? editingProject?.id ?? 'new-project' : 'closed'} language={language}
+                  projectId={editingProject?.id} currentTemplate={editingProject && 'payment_plan_template' in editingProject ? editingProject.payment_plan_template : undefined} />
               </TabsContent>
 
               {/* Juristic / Management Tab */}

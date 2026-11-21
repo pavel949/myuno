@@ -10,7 +10,8 @@ const mock = vi.hoisted(() => ({
   fly: vi.fn(),
   setStyle: vi.fn(),
   options: [] as Array<Record<string, unknown>>,
-  events: {} as Record<string, () => void>,
+  events: {} as Record<string, (event?: { originalEvent?: Event }) => void>,
+  off: vi.fn(),
   elements: [] as HTMLElement[],
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
@@ -20,8 +21,8 @@ vi.mock('maplibre-gl', () => ({ default: {
       mock.options.push(options);
       if (mock.fail) { (options.container as HTMLElement).appendChild(document.createElement('canvas')); throw new Error('WebGL unavailable'); }
     }
-    on(name: string, handler: () => void) { mock.events[name] = handler; }
-    off() {}
+    on(name: string, handler: (event?: { originalEvent?: Event }) => void) { mock.events[name] = handler; }
+    off = mock.off;
     remove() {}
     addControl() {}
     loaded() { return true; }
@@ -30,6 +31,7 @@ vi.mock('maplibre-gl', () => ({ default: {
     fitBounds = mock.fit;
     flyTo = mock.fly;
     getZoom() { return 11; }
+    getCenter() { return { lat: 8.01, lng: 98.35 }; }
   },
   Marker: class {
     constructor({ element }: { element: HTMLElement }) { mock.elements.push(element); }
@@ -50,7 +52,7 @@ const markers = [
 ];
 beforeEach(() => {
   mock.fail = false;
-  mock.fit.mockClear(); mock.fly.mockClear(); mock.setStyle.mockClear();
+  mock.fit.mockClear(); mock.fly.mockClear(); mock.setStyle.mockClear(); mock.off.mockClear();
   mock.options.length = 0; mock.elements.length = 0;
   mock.events = {};
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
@@ -85,6 +87,21 @@ describe('MapLibreMap safe baseline', () => {
     expect(mock.options).toHaveLength(3);
     act(() => mock.events.load());
     expect(screen.getByText('Карта онлайн')).toBeInTheDocument();
+  });
+  it('reports finished user gestures only and updates the callback without recreating the map', () => {
+    const initial = vi.fn();
+    const next = vi.fn();
+    const { rerender, unmount } = render(<MapLibreMap center={center} onUserViewportChange={initial} />);
+    const callback = mock.events.moveend;
+    act(() => callback({}));
+    expect(initial).not.toHaveBeenCalled();
+    rerender(<MapLibreMap center={center} onUserViewportChange={next} />);
+    act(() => callback({ originalEvent: new Event('wheel') }));
+    expect(initial).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledExactlyOnceWith({ lat: 8.01, lng: 98.35, zoom: 11 });
+    expect(mock.options).toHaveLength(1);
+    unmount();
+    expect(mock.off).toHaveBeenCalledWith('moveend', callback);
   });
   it('does not refit bounds when a marker is selected', () => {
     const { rerender } = render(<MapLibreMap center={center} markers={markers} />);

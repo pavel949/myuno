@@ -1,3 +1,5 @@
+import { projectPublicDocumentUrl } from '@/lib/real-estate/projectPublicDocumentUrl';
+import { projectEditorialImages, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { useLocation as useJourneyLocation, useNavigate as useJourneyNavigate } from 'react-router-dom';
 import { publicJourneyReturn, publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { QueryRecovery } from '@/components/shared/QueryRecovery';
@@ -9,82 +11,39 @@ import { projectFeatureLabel } from '@/lib/offplan/presentation';
 import { OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 /**
  * OffplanDetail - Detailed view of an off-plan project
- * Shows gallery, developer info, myUNO scoring, investment metrics
+ * Shows public gallery, units, documents and developer information
  */
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  Building2,
-  MapPin,
-  Calendar,
-  TrendingUp,
-  Users,
-  CheckCircle2,
-  HardHat,
-  ChevronLeft,
-  Share2,
-  Heart,
-  Phone,
-  MessageCircle,
-  ExternalLink,
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  AlertTriangle,
-  FileSearch,
-  FileText,
-  Download,
-  Info
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Building2, MapPin, CheckCircle2, MessageCircle, ExternalLink, FileSearch, FileText, Download } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationCity } from '@/contexts/LocationContext';
 
-import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useOffplanProject } from '@/hooks/useOffplanProjects';
 import type { ProjectUnit } from '@/hooks/useProjectUnits';
 import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
-import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { FundingProgress } from '@/components/invest/FundingProgress';
-import { DeveloperBadge } from '@/components/property/DeveloperBadge';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
-import { ClearViewReport } from '@/components/newbuilds/ClearViewReport';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
-import { cn } from '@/lib/utils';
 
-const STATUS_CONFIG: Record<ProjectStatus, {
-  label: { en: string; ru: string };
-  icon: React.ElementType;
-  color: string;
-}> = {
-  offplan: {
-    label: { en: 'Off-Plan', ru: 'Новостройка' },
-    icon: Building2,
-    color: 'bg-info/10 text-info',
-  },
-  under_construction: {
-    label: { en: 'Under Construction', ru: 'Строится' },
-    icon: HardHat,
-    color: 'bg-warning/10 text-warning',
-  },
-  completed: {
-    label: { en: 'Completed', ru: 'Готово' },
-    icon: CheckCircle2,
-    color: 'bg-success/10 text-success',
-  },
-};
+const TAB_HASHES = {
+  overview: '#project-overview',
+  units: '#project-units',
+  documents: '#project-documents',
+  developer: '#project-developer',
+} as const;
+type ProjectTab = keyof typeof TAB_HASHES;
 
 export default function OffplanDetail() {
   const { id } = useParams<{ id: string }>();
@@ -93,12 +52,11 @@ export default function OffplanDetail() {
   const returnToCatalogue = () => { const plan = publicJourneyReturn(journeyLocation, '/property/offplan'); if ('delta' in plan) journeyNavigate(plan.delta); else journeyNavigate(plan.href, { replace: plan.replace, state: plan.state }); };
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
-  const assessmentLabel = pickLang(language, { ru: 'Отчёт ClearView', en: 'ClearView report', th: 'รายงาน ClearView' });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ projectId: string; url: string } | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<ProjectUnit | null>(null);
   const [enquiryIntent, setEnquiryIntent] = useState<'consultation' | 'documents'>('consultation');
   useEffect(() => {
@@ -114,15 +72,26 @@ export default function OffplanDetail() {
   const { data: sourceProject, isLoading, isError, refetch } = useOffplanProject(id);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const loadedProjectId = sourceProject?.id;
+  const activeTab = (Object.keys(TAB_HASHES) as ProjectTab[])
+    .find(key => TAB_HASHES[key] === journeyLocation.hash) ?? 'overview';
+  const changeTab = (value: string) => {
+    if (!Object.prototype.hasOwnProperty.call(TAB_HASHES, value)) return;
+    journeyNavigate({ pathname: journeyLocation.pathname, search: journeyLocation.search, hash: TAB_HASHES[value as ProjectTab] },
+      { replace: true, state: journeyLocation.state });
+  };
   useEffect(() => {
     if (!loadedProjectId || journeyLocation.hash !== '#project-units') return;
-    const frame = requestAnimationFrame(() => document.getElementById('project-units')?.scrollIntoView({ block: 'start' }));
+    const frame = requestAnimationFrame(() => document.getElementById('project-units')?.scrollIntoView?.({ block: 'start' }));
     return () => cancelAnimationFrame(frame);
   }, [loadedProjectId, journeyLocation.hash]);
   const { data: developer } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
-  const { data: allDocs = [] } = useProjectDocuments(id);
-  const publicDocs = allDocs.filter((d) => d.visibility === 'public');
+  const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(activeTab === 'documents' ? loadedProjectId : undefined, { publicOnly: true });
+  const publicDocs = allDocs.flatMap(doc => {
+    if (!loadedProjectId || doc.project_id !== loadedProjectId || !doc.is_current || doc.visibility !== 'public') return [];
+    const url = projectPublicDocumentUrl(doc.file_url, { projectId: loadedProjectId, category: doc.category });
+    return url ? [{ ...doc, file_url: url }] : [];
+  });
 
   if (isLoading) {
     return (
@@ -151,15 +120,26 @@ export default function OffplanDetail() {
     );
   }
 
-  const name = isRu ? project.nameRu : project.nameEn;
-  const status = project.projectStatus ? STATUS_CONFIG[project.projectStatus] : null;
-  const StatusIcon = status?.icon ?? Building2;
+  const name = (isRu ? project.nameRu : project.nameEn) || project.nameEn || project.nameRu;
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status ? status.label.ru + '.' : ''} Начальная цена требует уточнения.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status ? status.label.en + '.' : ''} Starting price requires confirmation.`.trim();
-  const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
+    ? `${name} — ${project.district || 'Пхукет'}. Начальная цена требует уточнения.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. Starting price requires confirmation.`.trim();
+  const mediaProject = nbProject?.id === project.id ? nbProject : null;
+  const gallery = projectEditorialImages({
+    cover_image: mediaProject?.cover_image || project.coverImage,
+    images: mediaProject?.images,
+    gallery_urls: mediaProject?.gallery_urls,
+  });
+  const photo = selectedPhoto?.projectId === project.id && gallery.includes(selectedPhoto.url) ? selectedPhoto.url : gallery[0];
+  const video = publicProjectMediaUrl(mediaProject?.video_url, 'video');
+  const description = (isRu ? mediaProject?.description_ru || mediaProject?.description_en
+    : mediaProject?.description_en || mediaProject?.description_ru) || project.descriptionSummary;
+  const photoLabel = (index: number) => pickLang(language, {
+    ru: `Фото ${index + 1} из ${gallery.length}`, en: `Photo ${index + 1} of ${gallery.length}`, th: `รูปที่ ${index + 1} จาก ${gallery.length}`,
+  });
+  const seoImage = gallery[0] || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
@@ -176,12 +156,6 @@ export default function OffplanDetail() {
     { name, url: canonicalUrl },
   ]);
 
-  const formatCompletionDate = (date: string | null) => {
-    if (!date) return null;
-    const d = new Date(date);
-    const quarter = Math.ceil((d.getMonth() + 1) / 3);
-    return `Q${quarter} ${d.getFullYear()}`;
-  };
 
   return (
     <div className="public-commerce public-commerce--project">
@@ -195,10 +169,10 @@ export default function OffplanDetail() {
       />
       {/* Hero Image */}
       <div className="public-project-hero relative bg-muted">
-        {project.coverImage ? (
+        {photo ? (
           <img
-            src={project.coverImage}
-            alt={name}
+            src={photo}
+            alt={gallery.length > 1 ? `${name} · ${photoLabel(gallery.indexOf(photo))}` : name}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -218,10 +192,6 @@ export default function OffplanDetail() {
 
         {/* Bottom info */}
         <div className="absolute bottom-4 left-4 right-4">
-          {status && <Badge className={cn("mb-2 gap-1", status.color)}>
-            <StatusIcon className="w-3 h-3" />
-            {isRu ? status.label.ru : status.label.en}
-          </Badge>}
           <h1 className="public-commerce-title text-white mb-1">{name}</h1>
           {project.district && (
             <div className="flex items-center gap-1 text-white/80 text-sm">
@@ -233,10 +203,27 @@ export default function OffplanDetail() {
       </div>
 
       <div className={`public-project-content space-y-8 ${FLOATING_OFFSET.contentClearance}`}>
-        {/* Published report is the sole public assessment source. */}
-        <div id="clearview-report" className="scroll-mt-24">
-          <p className="text-sm text-muted-foreground">{pickLang(language, {"ru": "Условия проекта — по запросу.", "en": "Project terms are available on request.", "th": "สอบถามเงื่อนไขโครงการได้"})}</p>
-        </div>
+        {(gallery.length > 1 || video?.startsWith('https:')) && (
+          <section aria-label={pickLang(language, { ru: 'Фото и видео проекта', en: 'Project photos and video', th: 'รูปภาพและวิดีโอโครงการ' })} className="space-y-3">
+            {gallery.length > 1 && <>
+              <div className="flex gap-2 overflow-x-auto p-1">
+                {gallery.map((url, index) => (
+                  <Button key={url} type="button" variant={photo === url ? 'default' : 'outline'}
+                    className="h-14 w-20 shrink-0 p-1" aria-pressed={photo === url} aria-label={photoLabel(index)}
+                    onClick={() => setSelectedPhoto({ projectId: project.id, url })}>
+                    <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  </Button>
+                ))}
+              </div>
+              <span className="sr-only" role="status">{photoLabel(gallery.indexOf(photo))}</span>
+            </>}
+            {video?.startsWith('https:') && <Button variant="outline" asChild>
+              <a href={video} target="_blank" rel="noopener noreferrer">
+                {pickLang(language, { ru: 'Видео проекта (новая вкладка)', en: 'Project video (opens in new tab)', th: 'วิดีโอโครงการ (เปิดในแท็บใหม่)' })}
+              </a>
+            </Button>}
+          </section>
+        )}
 
         {/* Price & Units */}
         <div className="rounded-none border bg-card p-4 space-y-3">
@@ -252,78 +239,31 @@ export default function OffplanDetail() {
             <MessageCircle className="w-5 h-5" />
             {pickLang(language, { ru: 'Обсудить проект', en: 'Discuss this project', th: 'สอบถามโครงการนี้' })}
           </Button>
-          {project.minInvestment && (
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                {pickLang(language, {"ru": "Мин. инвестиция", "en": "Min. investment", "th": "เงินลงทุนขั้นต่ำ"})}
-              </span>
-              <span className="font-semibold">
-                {formatPrice(project.minInvestment)}
-              </span>
-            </div>
-          )}
-          {project.unitsAvailable != null && project.unitsAvailable > 0 && (
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-muted-foreground">
-                {pickLang(language, {"ru": "Доступно юнитов", "en": "Units available", "th": "ยูนิตที่มี"})}
-              </span>
-              <Badge variant="secondary">
-                {project.unitsAvailable}{project.unitsSold != null ? ` / ${project.unitsAvailable + project.unitsSold}` : ''}
-              </Badge>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground">
+            {pickLang(language, { ru: 'Цену, наличие и условия покупки уточнит команда myUNO. Запрос не бронирует объект.', en: 'The myUNO team will confirm price, availability and purchase terms. An enquiry does not reserve a unit.', th: 'ทีม myUNO จะยืนยันราคา ยูนิตว่าง และเงื่อนไขการซื้อ การสอบถามไม่ใช่การจองยูนิต' })}
+          </p>
         </div>
 
-        {/* Construction Progress */}
-        {project.projectStatus !== 'completed' && project.constructionProgress != null && (
-          <div className="rounded-none border bg-card p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">
-                {pickLang(language, {"ru": "Прогресс строительства", "en": "Construction Progress", "th": "ความคืบหน้าการก่อสร้าง"})}
-              </span>
-              <span className="text-lg font-bold">{project.constructionProgress}%</span>
-            </div>
-            <Progress value={project.constructionProgress} className="h-2" />
-            {project.completionDate && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {pickLang(language, {"ru": "Ожидаемая сдача:", "en": "Expected completion:", "th": "กำหนดแล้วเสร็จ:"})}{' '}
-                  {formatCompletionDate(project.completionDate)}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Investment Funding Progress */}
-        {project.investmentEnabled && project.fundingGoal && project.amountRaised != null && (
-          <div className="rounded-none border bg-card p-4">
-            <FundingProgress
-              amountRaised={project.amountRaised}
-              fundingGoal={project.fundingGoal}
-              investorsCount={0}
-            />
-          </div>
-        )}
-
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="overview">{pickLang(language, {"ru": "Обзор", "en": "Overview", "th": "ภาพรวม"})}</TabsTrigger>
-            <TabsTrigger value="documents">
+        <Tabs value={activeTab} onValueChange={changeTab} className="w-full">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+            <TabsTrigger className="min-h-11 whitespace-normal" value="overview">{pickLang(language, {"ru": "Обзор", "en": "Overview", "th": "ภาพรวม"})}</TabsTrigger>
+            <TabsTrigger className="min-h-11 whitespace-normal" value="units">
+              {pickLang(language, { ru: 'Объекты и планы', en: 'Units and plans', th: 'ยูนิตและแปลน' })}
+            </TabsTrigger>
+            <TabsTrigger className="min-h-11 whitespace-normal" value="documents">
               {pickLang(language, {"ru": "Документы", "en": "Docs", "th": "เอกสาร"})}
               {publicDocs.length > 0 && (
                 <span className="ml-1 text-[10px] opacity-70">({publicDocs.length})</span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="developer">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</TabsTrigger>
+            <TabsTrigger className="min-h-11 whitespace-normal" value="developer">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 pt-4">
-            {/* Development Units / Floor Plans */}
-            <div id="project-units" className="scroll-mt-28">{id && <DevelopmentUnitsSection developmentId={id} onSelectUnit={(unit) => { setEnquiryIntent('consultation'); setSelectedUnit(unit); setShowLeadForm(true); }} />}</div>
-
+            <div id="project-overview">
+              {description && <p className="whitespace-pre-wrap text-sm leading-relaxed">{description}</p>}
+            </div>
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
               <div>
@@ -339,15 +279,23 @@ export default function OffplanDetail() {
 
           </TabsContent>
 
-
+          <TabsContent value="units" className="pt-4">
+            <div id="project-units" className="scroll-mt-28">
+              <DevelopmentUnitsSection developmentId={project.id} onSelectUnit={(unit) => {
+                setEnquiryIntent('consultation');
+                setSelectedUnit(unit);
+                setShowLeadForm(true);
+              }} />
+            </div>
+          </TabsContent>
 
           <TabsContent value="documents" className="pt-4 space-y-4">
-            {publicDocs.length > 0 ? (
+            {docsLoading ? <Skeleton className="h-24" /> : docsError ? <QueryRecovery onRetry={retryDocs} /> : publicDocs.length > 0 ? (
               <>
                 <p className="text-xs text-muted-foreground">
                   {isRu
-                    ? 'Публичные документы проекта. Полный пакет (KYC/закрытые) — после запроса консультации.'
-                    : 'Publicly disclosed project documents. Full package (KYC/restricted) is available after consultation request.'}
+                    ? 'Публичные документы проекта. Чтобы уточнить доступ к закрытым документам, обратитесь в myUNO.'
+                    : 'Publicly disclosed project documents. Contact myUNO to ask about documents that require access.'}
                 </p>
                 <div className="space-y-2">
                   {publicDocs.map((doc) => {
@@ -384,12 +332,12 @@ export default function OffplanDetail() {
                     ? 'Публичные документы пока не опубликованы.'
                     : 'No public documents have been published yet.'}
                 </p>
-                <Button variant="outline" size="sm" onClick={() => openProjectEnquiry('documents')} className="gap-2">
-                  <FileSearch className="w-4 h-4" />
-                  {pickLang(language, {"ru": "Запросить пакет документов", "en": "Request document package", "th": "ขอเอกสารโครงการ"})}
-                </Button>
               </div>
             )}
+            <Button variant="outline" size="sm" onClick={() => openProjectEnquiry('documents')} className="min-h-11 gap-2">
+              <FileSearch className="w-4 h-4" />
+              {pickLang(language, { ru: 'Запросить пакет документов', en: 'Request document package', th: 'ขอเอกสารโครงการ' })}
+            </Button>
           </TabsContent>
 
           <TabsContent value="developer" className="pt-4">
@@ -440,15 +388,6 @@ export default function OffplanDetail() {
             )}
           </TabsContent>
         </Tabs>
-
-        {nbProject && (
-          <section
-            className="rounded-none border overflow-hidden bg-card"
-            aria-label={pickLang(language, {"ru": "Расширенные данные проекта", "en": "Extended project data", "th": "ข้อมูลโครงการเพิ่มเติม"})}
-          >
-            <NewbuildProjectDeepTabs project={nbProject} variant="embedded" />
-          </section>
-        )}
       </div>
 
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}

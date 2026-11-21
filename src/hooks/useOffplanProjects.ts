@@ -19,6 +19,8 @@ export interface OffplanProject {
   nameRu: string;
   coverImage: string | null;
   district: string | null;
+  lat?: number | null;
+  lng?: number | null;
   isFeatured: boolean;
   isActive: boolean;
   developerId: string | null;
@@ -88,6 +90,8 @@ type ProjectRow = Record<string, unknown> & {
   name_en: string;
   name_ru: string;
   district: string | null;
+  lat?: number | null;
+  lng?: number | null;
   is_active?: boolean | null;
   developer_id?: string | null;
   developer_name?: string | null;
@@ -149,6 +153,8 @@ export function useOffplanProjects(filters?: OffplanFilters) {
         nameRu: p.name_ru,
         coverImage: null,
         district: p.district,
+        lat: p.lat ?? null,
+        lng: p.lng ?? null,
         isFeatured: false,
         isActive: p.is_active || false,
         developerId: null,
@@ -207,6 +213,8 @@ export function useOffplanProjects(filters?: OffplanFilters) {
           name_ru,
           cover_image,
           district,
+          lat,
+          lng,
           is_featured,
           is_active,
           developer_id,
