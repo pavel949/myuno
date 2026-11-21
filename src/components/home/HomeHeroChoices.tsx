@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
+import { trackEvent } from '@/lib/analytics/track';
 
 type HeroChoice = {
   icon: typeof Home;
@@ -47,14 +48,14 @@ export function HomeHeroChoices() {
       <p className="home-hero-choices-label">{t({ ru: 'С чего начнём?', en: 'Start here', th: 'เริ่มที่นี่' })}</p>
       <div className="home-hero-choice-grid">
         {choices.map(({ icon: Icon, href, label, description }) => (
-          <Link key={href} className="home-hero-choice" to={href}>
+          <Link key={href} className="home-hero-choice" to={href} onClick={() => trackEvent("homepage_intent_selected", { destination: href })}>
             <span className="home-hero-choice-icon"><Icon size={19} aria-hidden="true" /></span>
             <span className="home-hero-choice-copy"><strong>{t(label)}</strong><small>{t(description)}</small></span>
             <ArrowRight size={18} aria-hidden="true" />
           </Link>
         ))}
       </div>
-      <Link className="home-hero-help" to={R.DISCOVER}>
+      <Link className="home-hero-help" to={R.DISCOVER} onClick={() => trackEvent("homepage_help_selected", { destination: R.DISCOVER })}>
         {t({ ru: 'Не уверены, что выбрать? Поможем разобраться', en: 'Not sure what you need? We’ll help you choose', th: 'ไม่แน่ใจว่าจะเลือกอะไร ให้เราช่วยแนะนำ' })}
         <ArrowRight size={16} aria-hidden="true" />
       </Link>
