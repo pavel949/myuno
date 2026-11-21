@@ -20,6 +20,7 @@ create table if not exists private.help_notification_outbox (
 create index if not exists help_outbox_due on private.help_notification_outbox(next_attempt_at) where state='pending';
 alter table private.help_notification_outbox enable row level security;
 revoke all on private.help_notification_outbox from public,anon,authenticated;
+grant usage on schema private to service_role;
 grant select,insert,update on private.help_notification_outbox to service_role;
 
 create or replace function public.enqueue_help_notification(p_request_id uuid)
@@ -76,3 +77,18 @@ begin
 end $$;
 revoke all on function public.finish_help_notification(uuid,uuid,text,text) from public,anon,authenticated;
 grant execute on function public.finish_help_notification(uuid,uuid,text,text) to service_role;
+
+-- Enqueue in the same database transaction as the lead insert. A failed
+-- queue insert aborts the lead insert rather than silently losing an alert.
+-- Existing historical help requests are intentionally not replayed.
+create or replace function private.help_notification_insert_trigger()
+returns trigger language plpgsql security definer set search_path='' as $$
+begin
+ insert into private.help_notification_outbox(request_id,channel)
+ values(new.id,'email'),(new.id,'whatsapp')
+ on conflict(request_id,channel) do nothing;
+ return new;
+end $$;
+drop trigger if exists help_notification_enqueue on public.help_requests;
+create trigger help_notification_enqueue after insert on public.help_requests
+for each row execute function private.help_notification_insert_trigger();
