@@ -30,6 +30,14 @@ export default function Landing() {
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
   const [requestSubject, setRequestSubject] = useState<string | undefined>();
+  const [requestTopic, setRequestTopic] = useState<'property' | 'general' | 'invest'>('property');
+  const [requestVersion, setRequestVersion] = useState(0);
+  const openRequest = (subject?: string, topic: 'property' | 'general' | 'invest' = 'property') => {
+    setRequestSubject(subject);
+    setRequestTopic(topic);
+    setRequestVersion((version) => version + 1);
+    setRequestOpen(true);
+  };
 
   return (
     <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home">
@@ -78,7 +86,7 @@ export default function Landing() {
                 <h3 className="font-display text-xl text-foreground">{t(item.title)}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{t(item.detail)}</p>
               </div>
-              <button type="button" className="inline-flex min-h-11 items-center justify-between gap-3 border-b border-foreground pb-2 text-left font-semibold text-foreground transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => { setRequestSubject(t(item.subject)); setRequestOpen(true); }}>
+              <button type="button" className="inline-flex min-h-11 items-center justify-between gap-3 border-b border-foreground pb-2 text-left font-semibold text-foreground transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => openRequest(t(item.subject), item.key === 'service' ? 'general' : item.key === 'buy' ? 'invest' : 'property')}>
                 {t({ ru: 'Оставить запрос', en: 'Send a request', th: 'ส่งคำขอ' })}<ArrowRight size={18} aria-hidden="true" />
               </button>
             </article>
@@ -93,7 +101,7 @@ export default function Landing() {
         <HomeAudienceGrid />
         <HomeTrustBar />
       </section>
-      <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
+      <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => openRequest()}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       </main>
       <footer className="home-footer home-container">
         <div className="mb-6 flex justify-center lg:justify-start"><FooterSocialLinks /></div>
@@ -104,7 +112,7 @@ export default function Landing() {
         </nav><LegalCopyright />
       </footer>
       <BottomBar role={publicNavigationRole} aria-label={t({ ru: 'Основная навигация', en: 'Main navigation', th: 'เมนูหลัก' })} />
-      <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="property" initialSubject={requestSubject} />
+      <ConciergeHelpSheet key={requestVersion} open={requestOpen} onOpenChange={setRequestOpen} topic={requestTopic} initialSubject={requestSubject} sourceData={{ source: 'homepage_guided_intake' }} />
     </div>
   );
 }
