@@ -2,11 +2,15 @@ import { publicProjectMediaUrl } from './projectEditorialMedia';
 
 const publicFile = /\.(?:pdf|avif|gif|jpe?g|png|webp|docx|xlsx|pptx)$/i;
 const firstPartyPath = /^\/(?:assets|images|catalog)\/[a-z0-9._/-]+$/i;
+const onepEiaApprovalPdf = /^https:\/\/eia\.onep\.go\.th\/services\/web\/\/doc\/download-eia-approval\?id=[1-9][0-9]{0,8}$/;
 
 /** This only validates the renderable URL. Document visibility is checked separately. */
 export function projectPublicDocumentUrl(value: string | null | undefined, publicDoc?: { projectId: string; category: string }): string | null {
   const url = value?.trim();
   if (!url || url.includes('\\') || url.includes('..') || Array.from(url).some(char => char.charCodeAt(0) <= 32)) return null;
+  // ONEP's public approval PDF is served via an extensionless official endpoint.
+  // Limit this exception to vetted permit records, never floor-plan/media URLs.
+  if (publicDoc?.projectId && publicDoc.category === 'permits' && onepEiaApprovalPdf.test(url)) return url;
   if (firstPartyPath.test(url) && publicFile.test(url)) return url;
   const image = publicProjectMediaUrl(url);
   if (image) return image;
