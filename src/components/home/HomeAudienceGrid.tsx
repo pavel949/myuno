@@ -14,27 +14,6 @@ type AudienceCard = {
 
 const audiences: AudienceCard[] = [
   {
-    icon: Home,
-    href: R.PROPERTY_RENT,
-    title: { ru: 'Я гость или арендатор', en: 'I am a guest or renter', th: 'ฉันเป็นผู้เข้าพักหรือผู้เช่า' },
-    description: { ru: 'Найдите жильё на отпуск или длительный срок и отправьте запрос по подходящему объекту.', en: 'Explore holiday and long-term homes and enquire about the right place.', th: 'ค้นหาที่พักระยะสั้นหรือระยะยาวและสอบถามรายการที่เหมาะสม' },
-    action: { ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' },
-  },
-  {
-    icon: Building2,
-    href: R.GOAL_BUY,
-    title: { ru: 'Я покупатель или инвестор', en: 'I am a buyer or investor', th: 'ฉันเป็นผู้ซื้อหรือนักลงทุน' },
-    description: { ru: 'Изучайте недвижимость и новостройки, сравнивайте варианты и обращайтесь за подбором.', en: 'Explore homes and new developments, compare options and request assistance.', th: 'สำรวจอสังหาริมทรัพย์และโครงการใหม่ เปรียบเทียบตัวเลือกและขอคำแนะนำ' },
-    action: { ru: 'Смотреть недвижимость', en: 'Explore properties', th: 'ดูอสังหาริมทรัพย์' },
-  },
-  {
-    icon: Sparkles,
-    href: R.EXPERIENCES,
-    title: { ru: 'Я ищу впечатления', en: 'I am exploring experiences', th: 'ฉันกำลังมองหากิจกรรม' },
-    description: { ru: 'Откройте занятия и впечатления на острове.', en: 'Discover activities and experiences across the island.', th: 'ค้นหากิจกรรมและประสบการณ์บนเกาะ' },
-    action: { ru: 'Смотреть впечатления', en: 'Explore experiences', th: 'ดูกิจกรรม' },
-  },
-  {
     icon: Building2,
     href: R.FOR_OWNERS,
     title: { ru: 'У меня есть недвижимость', en: 'I own property', th: 'มีอสังหาริมทรัพย์' },
