@@ -8666,6 +8666,45 @@ export type Database = {
         }
         Relationships: []
       }
+      flower_delivery_requests: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          confirmed_quote: Json | null
+          created_at: string
+          customer_id: string | null
+          estimate: Json | null
+          id: string
+          request: Json
+          request_key: string
+          status: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_quote?: Json | null
+          created_at?: string
+          customer_id?: string | null
+          estimate?: Json | null
+          id?: string
+          request: Json
+          request_key: string
+          status?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_quote?: Json | null
+          created_at?: string
+          customer_id?: string | null
+          estimate?: Json | null
+          id?: string
+          request?: Json
+          request_key?: string
+          status?: string
+        }
+        Relationships: []
+      }
       flower_shops: {
         Row: {
           address: string | null
@@ -37317,6 +37356,7 @@ export type Database = {
         Args: { p_base?: string; p_target?: string }
         Returns: number
       }
+      get_flower_delivery: { Args: { p_id: string }; Returns: Json }
       get_management_company_sensitive: {
         Args: { _company_id: string }
         Returns: {
@@ -37516,6 +37556,7 @@ export type Database = {
         Args: { p_score: number }
         Returns: string
       }
+      list_pending_flower_deliveries: { Args: never; Returns: Json }
       match_ai_knowledge: {
         Args: {
           filter_lang?: string
@@ -37655,6 +37696,7 @@ export type Database = {
         Args: { p_count: number; p_event_id: string }
         Returns: undefined
       }
+      request_flower_delivery: { Args: { payload: Json }; Returns: string }
       reserve_event_spots: {
         Args: { p_count: number; p_event_id: string }
         Returns: boolean
@@ -37687,6 +37729,10 @@ export type Database = {
       }
       resolve_user_context: {
         Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }
+        Returns: Json
+      }
+      review_flower_delivery: {
+        Args: { p_confirm: boolean; p_expected_quote?: Json; p_id: string }
         Returns: Json
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
@@ -37734,6 +37780,7 @@ export type Database = {
         Returns: string
       }
       submit_consultation_request: { Args: { payload: Json }; Returns: string }
+      submit_experience_inquiry: { Args: { payload: Json }; Returns: string }
       sync_properties_clearview_for_project: {
         Args: { _project_id: string }
         Returns: undefined
