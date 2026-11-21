@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
       "",
       `ID: ${hr.id}`,
     ].filter(Boolean).join("\n");
-    await sendWhatsApp({ to: adminWa, body: waBody });
+    await retryNotification(() => sendWhatsApp({ to: adminWa, body: waBody }), "whatsapp");
   } catch (e) {
     console.warn("[submit-help-request] whatsapp prep failed:", e);
   }
@@ -202,7 +202,8 @@ Deno.serve(async (req) => {
         <p style="color:#666;font-size:12px">ID: ${hr.id}</p>
       `;
 
-      const emailResponse = await fetch(url, {
+      await retryNotification(async () => {
+        const emailResponse = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -213,9 +214,8 @@ Deno.serve(async (req) => {
           reply_to: finalEmail ?? undefined,
         }),
       });
-      if (!emailResponse.ok) {
-        console.warn("[submit-help-request] email provider rejected notification:", emailResponse.status);
-      }
+        if (!emailResponse.ok) throw new Error(`email_provider_http_${emailResponse.status}`);
+      }, "email");
     }
   } catch (e) {
     console.warn("[submit-help-request] email prep failed:", e);
@@ -231,4 +231,19 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!)
   );
+}
+
+/** Bounded transient retry. Provider acceptance is not proof of final delivery. */
+async function retryNotification(action: () => Promise<unknown>, channel: string): Promise<void> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await action();
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, attempt * 300));
+    }
+  }
+  throw new Error(`notification_${channel}_failed_after_retries`, { cause: lastError });
 }
