@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ProjectUnitsTab } from './ProjectUnitsTab';
 const state = vi.hoisted(() => ({ error: null as null | Error, inserted: null as null | Record<string, unknown>, writes: 0, confirmError: null as null | Error }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'operator' } }) }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: ({ open, children, footer }: any) => open ? <div role="dialog">{children}{footer}</div> : null }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => {
