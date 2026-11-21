@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { ProjectStartingPrice } from '@/components/newbuilds/ProjectStartingPrice';
+import { ProjectCompareAction } from '@/components/newbuilds/ProjectCompareAction';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * OffplanProjectCard - Premium card for off-plan property projects
@@ -244,7 +245,7 @@ export function OffplanProjectCard({
           {pickLang(language, { ru: 'Условия проекта — по запросу', en: 'Project terms on request', th: 'สอบถามเงื่อนไขโครงการ' })}
         </p>
 
-
+        {!isCarousel && <ProjectCompareAction id={project.id} name={name} />}
       </div>
     </div>
   );
