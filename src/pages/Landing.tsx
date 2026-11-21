@@ -15,6 +15,7 @@ import { HomeHousingPreview, HomeNewbuildsPreview } from '@/components/home/Home
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeHeroChoices } from '@/components/home/HomeHeroChoices';
+import { trackEvent } from '@/lib/analytics/track';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
@@ -33,6 +34,7 @@ export default function Landing() {
   const [requestTopic, setRequestTopic] = useState<'property' | 'general' | 'invest'>('property');
   const [requestVersion, setRequestVersion] = useState(0);
   const openRequest = (subject?: string, topic: 'property' | 'general' | 'invest' = 'property') => {
+    trackEvent('homepage_lead_intent', { topic, source: 'guided_intake' });
     setRequestSubject(subject);
     setRequestTopic(topic);
     setRequestVersion((version) => version + 1);
@@ -112,7 +114,7 @@ export default function Landing() {
         </nav><LegalCopyright />
       </footer>
       <BottomBar role={publicNavigationRole} aria-label={t({ ru: 'Основная навигация', en: 'Main navigation', th: 'เมนูหลัก' })} />
-      <ConciergeHelpSheet key={requestVersion} open={requestOpen} onOpenChange={setRequestOpen} topic={requestTopic} initialSubject={requestSubject} sourceData={{ source: 'homepage_guided_intake' }} />
+      <ConciergeHelpSheet key={requestVersion} open={requestOpen} onOpenChange={setRequestOpen} topic={requestTopic} initialSubject={requestSubject} sourceData={{ source: 'homepage_guided_intake', intent: requestTopic }} />
     </div>
   );
 }
