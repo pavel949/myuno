@@ -164,7 +164,10 @@ Deno.serve(async (req) => {
       "",
       `ID: ${hr.id}`,
     ].filter(Boolean).join("\n");
-    await retryNotification(() => sendWhatsApp({ to: adminWa, body: waBody }), "whatsapp");
+    await retryNotification(async () => {
+      const accepted = await sendWhatsApp({ to: adminWa, body: waBody });
+      if (!accepted) throw new Error("whatsapp_provider_not_accepted");
+    }, "whatsapp");
   } catch (e) {
     console.warn("[submit-help-request] whatsapp prep failed:", e);
   }
