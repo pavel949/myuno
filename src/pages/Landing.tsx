@@ -20,6 +20,7 @@ import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
+import '@/styles/home-mobile-redesign.css';
 
 const publicNavigationRole = 'guest' as const;
 
