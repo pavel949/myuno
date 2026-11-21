@@ -226,3 +226,88 @@
   .cinematic-home.home-refined .home-hero-copy h1 { font-size: 32px; }
   .cinematic-home.home-refined .home-hero-choice { padding: 12px; gap: 9px; }
 }
+
+/* Real canonical search and real service routes, not decorative mock controls. */
+.home-refined .home-hero-live-search {
+  margin-top: 18px;
+  padding: 16px;
+  background: #fff;
+  color: #102c4b;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.12);
+}
+.home-refined .home-hero-live-search .home-search {
+  background: #fff;
+  color: #102c4b;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+}
+.home-refined .home-hero-live-search .home-search-submit {
+  min-height: 48px;
+  background: #102c4b;
+  color: #fff;
+  border-radius: 8px;
+}
+.home-refined .home-hero-live-search .home-search-modes button[aria-pressed=true] {
+  color: #fff;
+  background: #102c4b;
+}
+.home-refined .home-quick-links {
+  display: flex;
+  gap: 10px;
+  padding-block: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.home-refined .home-quick-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 10px 15px;
+  border-radius: 999px;
+  background: #e9edf0;
+  color: #102c4b;
+  font-size: 14px;
+  font-weight: 600;
+  scroll-snap-align: start;
+}
+@media (max-width:767px) {
+  .cinematic-home.home-refined .home-hero-live-search {
+    padding: 14px;
+    margin-top: 16px;
+  }
+  .cinematic-home.home-refined .home-hero-live-search .home-search {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cinematic-home.home-refined .home-hero-live-search .home-search > * {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .cinematic-home.home-refined .home-hero-live-search .home-search-dates {
+    padding: 12px 0;
+  }
+  .cinematic-home.home-refined .home-hero-live-search .home-search-duration {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 5px;
+  }
+  .cinematic-home.home-refined .home-hero-live-search .home-search-duration button {
+    font-size: 13px;
+    white-space: normal;
+  }
+  .cinematic-home.home-refined .home-quick-links {
+    width: 100%;
+    padding-inline: 20px;
+    scroll-padding-inline: 20px;
+  }
+  .cinematic-home.home-refined .home-quick-link {
+    white-space: nowrap;
+  }
+}
