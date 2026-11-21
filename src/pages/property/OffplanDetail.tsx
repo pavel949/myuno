@@ -412,7 +412,20 @@ export default function OffplanDetail() {
         title={pickLang(language, { ru: selectedUnit ? 'Запросить информацию о юните' : 'Обсудить проект', en: selectedUnit ? 'Ask about this unit' : 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
-        <LandingLeadForm
+        {selectedUnit && !selectedUnit.property_id ? (
+          <div className="space-y-4">
+            <p>{pickLang(language, {
+              ru: 'Пока не можем подтвердить номер этого объекта в каталоге. Вы можете отправить запрос по проекту без привязки к квартире.',
+              en: 'We can’t verify this unit in the catalogue yet. You can send an enquiry about the project without selecting a unit.',
+              th: 'เรายังตรวจสอบยูนิตนี้ในแค็ตตาล็อกไม่ได้ คุณสามารถสอบถามเกี่ยวกับโครงการโดยไม่ระบุยูนิต',
+            })}</p>
+            <Button type="button" onClick={() => openProjectEnquiry()}>{pickLang(language, {
+              ru: 'Продолжить с запросом по проекту',
+              en: 'Continue with a project enquiry',
+              th: 'ดำเนินการสอบถามเกี่ยวกับโครงการ',
+            })}</Button>
+          </div>
+        ) : <LandingLeadForm
           key={`${project.id}:${selectedUnit?.id ?? "project"}:${enquiryIntent}`}
           variant="universal"
           verticalId="properties"
@@ -427,7 +440,7 @@ export default function OffplanDetail() {
             offer_id: null,
             ...(selectedUnit ? { unit_id: selectedUnit.id, property_id: selectedUnit.property_id } : {}),
           }}
-        />
+        />}
       </ResponsiveModal>
     </div>
   );

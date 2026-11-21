@@ -2,6 +2,14 @@
 import { z } from 'zod';
 
 export const OFFPLAN_BUYER_ENTRY = 'offplan_buyer';
+export const LEGACY_CONSULTATION_RPC = 'submit_consultation_request';
+export const OFFPLAN_CONSULTATION_RPC = 'submit_offplan_consultation_request';
+type ConsultationWriter = typeof LEGACY_CONSULTATION_RPC | typeof OFFPLAN_CONSULTATION_RPC;
+
+export function offplanScopedWriterEnabled() {
+  // Activate only after the scoped SQL and monitored notification worker are ready.
+  return import.meta.env.VITE_ENABLE_OFFPLAN_SAFE_INTAKE === 'true';
+}
 
 class IntakeInputError extends Error {}
 class IntakeRecoveryError extends Error {}
@@ -32,15 +40,20 @@ export function consultationIntakeErrorCopy(error: unknown) {
 }
 
 type IntakePayload = Record<string, unknown>;
-type RpcClient = { rpc(name: 'submit_consultation_request', args: { payload: never }): PromiseLike<{ data: unknown; error: unknown }> };
+type RpcClient = { rpc(name: typeof LEGACY_CONSULTATION_RPC, args: { payload: never }): PromiseLike<{ data: unknown; error: unknown }> };
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
-type Pending = { key: string; fingerprint: string; receipt?: string; storageKey: string };
+type Pending = { key: string; fingerprint: string; writer?: ConsultationWriter; receipt?: string; storageKey: string };
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? '[' + value.map(stable).join(',') + ']' : '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stable((value as IntakePayload)[key])).join(',') + '}';
-export function createConsultationIntakeAttempt(options: { storage?: Store; crypto?: Crypto; allowUncertainRetry?: boolean } = {}) {
+export function createConsultationIntakeAttempt(options: { storage?: Store; crypto?: Crypto; allowUncertainRetry?: boolean; writer?: ConsultationWriter } = {}) {
+  const writer = options.writer ?? LEGACY_CONSULTATION_RPC;
   let pending: Pending | undefined;
   let inFlight: Promise<{ id: string; shouldDispatch: boolean }> | undefined;
   return {
-    async submit(client: RpcClient, payload: IntakePayload, actorId?: string | null) {
+    async submit(client: RpcClient, payload: IntakePayload, actorId?: string | null, submitScoped?: (payload: never) => ReturnType<RpcClient['rpc']>) {
+      const write = writer === OFFPLAN_CONSULTATION_RPC
+        ? payload.entry_point === OFFPLAN_BUYER_ENTRY ? submitScoped : undefined
+        : (body: never) => client.rpc(LEGACY_CONSULTATION_RPC, { payload: body });
+      if (!write) throw new IntakeRecoveryError('Scoped intake is unavailable.');
       const cryptoApi = options.crypto || globalThis.crypto;
       const storage = options.storage || globalThis.sessionStorage;
       if (!cryptoApi?.subtle || !cryptoApi.randomUUID || !storage) throw new Error('Secure intake recovery is unavailable.');
@@ -62,6 +75,9 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
         // Legacy writers do not recognize the nonce. Do not replay an uncertain insert.
         if (options.allowUncertainRetry === false) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
         const parsed = JSON.parse(saved) as Pending;
+        // A legacy proof-less receipt cannot be replayed via the new writer.
+        // Same storage key across rollout and rollback prevents duplicate inserts.
+        if ((parsed.writer ?? LEGACY_CONSULTATION_RPC) !== writer) throw new IntakeRecoveryError('The previous intake writer has changed.');
         if (parsed.fingerprint !== fingerprint) throw new IntakeRecoveryError('The previous request outcome is uncertain; retry its original details.');
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parsed.key)) throw new Error('The pending intake recovery record is invalid.');
         pending = { key: parsed.key, fingerprint, storageKey };
@@ -70,9 +86,10 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
       }
       const attempt = pending;
       if (!attempt) throw new Error('Intake recovery is unavailable.');
-      storage.setItem(storageKey, JSON.stringify({ key: attempt.key, fingerprint })); // No contact payload is persisted.
+      storage.setItem(storageKey, JSON.stringify({ key: attempt.key, fingerprint, writer })); // No contact payload is persisted.
       inFlight = (async () => {
-        const { data, error } = await client.rpc('submit_consultation_request', { payload: { ...clean, intake_request_key: attempt.key, intake_actor_hint: actorId || 'guest' } as never });
+        const rpcPayload = { ...clean, intake_request_key: attempt.key, intake_actor_hint: actorId || 'guest' } as never;
+        const { data, error } = await write(rpcPayload);
         if (error) {
           // Deterministic input validation failures prove these exact details were rejected.
           // Actor/access changes, key conflicts and transport uncertainty retain recovery state.
