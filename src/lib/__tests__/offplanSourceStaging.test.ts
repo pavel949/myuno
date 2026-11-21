@@ -6,6 +6,7 @@ it('runs the local offplan source and purchase-offer contract in repo verify', (
     '--test', '--test-reporter=tap',
     'scripts/lib/offplan-staging.test.mjs',
     'scripts/lib/offplan-source-preview.test.mjs',
+    'scripts/lib/offplan-drive-stage-adapter.test.mjs',
     'scripts/lib/offplan-purchase-offer-preview.test.mjs',
   ], { cwd: process.cwd(), encoding: 'utf8', timeout: 25_000 });
   expect(result.error?.message, result.stdout + result.stderr).toBeUndefined();

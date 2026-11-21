@@ -8,6 +8,11 @@ on:
       - 'src/hooks/useExploreLayers*'
       - 'src/lib/map/**'
       - 'scripts/qa/map-ui*'
+      - 'scripts/qa/offplan-catalogue-map-ui.mjs'
+      - 'src/pages/property/OffplanIndex.tsx'
+      - 'src/pages/property/OffplanDetail.tsx'
+      - 'src/components/property/OffplanProjectMap.tsx'
+      - 'src/hooks/useProjectDocuments.ts'
       - '.github/workflows/map-ui.yml'
   workflow_dispatch:
 permissions:
@@ -36,6 +41,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Verify map desktop and mobile with isolated fixtures
         run: node scripts/qa/map-ui.mjs
+      - name: Check newbuild catalogue map, project and return journey
+        run: node scripts/qa/offplan-catalogue-map-ui.mjs
       - name: Upload exact-head map evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
