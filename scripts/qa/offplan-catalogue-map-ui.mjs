@@ -14,6 +14,9 @@ import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 
 const root = process.cwd();
+const origin = 'http://offplan-fixture.invalid';
+// Wide enough to include place labels in the short, mobile catalogue map.
+const initialCamera = '7.98,98.31,11';
 const mapOutput = process.env.MAP_UI_OUTPUT || '/tmp/browser/map-isolated';
 const output = path.join(mapOutput, 'offplan-catalogue');
 mkdirSync(output, { recursive: true });
@@ -56,7 +59,7 @@ const entry = `import React from'react';import{createRoot}from'react-dom/client'
 const result = await build({
   stdin: { contents: entry, loader: 'tsx', resolveDir: root },
   outfile: path.join(output, 'fixture.js'), bundle: true, format: 'esm', jsx: 'automatic', metafile: true,
-  define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.VITE_PHUKET_PMTILES_URL': '"/phuket.pmtiles"', 'import.meta.env.DEV': 'false' },
+  define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.VITE_PHUKET_PMTILES_URL': JSON.stringify(origin + '/phuket.pmtiles'), 'import.meta.env.DEV': 'false' },
   loader: { '.svg': 'file', '.png': 'file', '.webp': 'file' },
   plugins: [{ name: 'offplan-browser-synthetic', setup(bundle) {
     bundle.onResolve({ filter: /^@\// }, ({ path: spec }) => {
@@ -95,7 +98,6 @@ const archive = await readFile(path.join(mapOutput, 'phuket.pmtiles'));
 const archiveProof = JSON.parse(await readFile(path.join(mapOutput, 'basemap-source.json'), 'utf8'));
 assert.equal(hash(archive), archiveProof.sha256, 'Existing map asset receipt mismatch');
 assert.equal(archive.length, archiveProof.bytes);
-const origin = 'http://offplan-fixture.invalid';
 const html = '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Newbuild QA only</title><link rel="stylesheet" href="/fixture.css"><div id="root"></div><script type="module" src="/fixture.js"></script></html>';
 const cover = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350"><rect width="600" height="350" fill="#a7b2bd"/><text x="40" y="50" fill="#222">SYNTHETIC PROJECT</text></svg>';
 const routes = ['/property/offplan/search', '/property/offplan/' + canonicalProject.id];
@@ -142,7 +144,8 @@ try {
       return dimensions;
     };
     try {
-      await page.goto(origin + '/property/offplan/search?q=Ocean&district=Bang+Tao&ref=synthetic');
+      const query = new URLSearchParams({ q: 'Ocean', district: 'Bang Tao', ref: 'synthetic', mapViewport: initialCamera });
+      await page.goto(origin + '/property/offplan/search?' + query);
       await expect(page.getByRole('heading', { name: 'Phuket New Developments' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'List', exact: true })).toHaveAttribute('aria-pressed', 'true');
       const list = await fit('list');
@@ -154,13 +157,22 @@ try {
       await expect(canvas).toBeVisible();
       const webgl = await canvas.evaluate(element => !!(element.getContext('webgl2') || element.getContext('webgl')));
       assert(webgl, 'No actual WebGL drawing context');
-      await page.waitForFunction(() => Number(document.querySelector('[data-map-label-count]')?.getAttribute('data-map-label-count')) > 0, null, { timeout: 60_000 });
+      try {
+        await page.waitForFunction(() => Number(document.querySelector('[data-map-label-count]')?.getAttribute('data-map-label-count')) > 0, null, { timeout: 60_000 });
+      } catch (error) {
+        console.error('Offplan label evidence:', JSON.stringify({
+          viewport, labels: await region.locator('[data-map-render-state]').getAttribute('data-map-label-count'),
+          archiveRequests, blocked, pageErrors, url: page.url(),
+        }));
+        await screenshot('map-label-failure').catch(() => {});
+        throw error;
+      }
       await expect(region.locator('[data-marker-id]')).toHaveCount(1);
       await expect(region.locator('[data-marker-id="synthetic-ocean"]')).toBeVisible();
       await expect(page.getByText('Projects without map locations are still available in the list below.')).toBeVisible();
       await expect(page.getByRole('link', { name: 'Synthetic Ocean without map coordinates' })).toBeVisible();
       await region.getByRole('button', { name: 'Zoom in' }).click();
-      await page.waitForURL(url => url.searchParams.has('mapViewport'));
+      await page.waitForURL(url => url.searchParams.has('mapViewport') && url.searchParams.get('mapViewport') !== initialCamera);
       const camera = new URL(page.url()).searchParams.get('mapViewport');
       await region.locator('[data-marker-id="synthetic-ocean"]').click();
       const markerLink = region.getByRole('link', { name: canonicalProject.nameEn });
