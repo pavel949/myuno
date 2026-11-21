@@ -169,8 +169,8 @@ Deno.serve(async (req) => {
       const { data: contact, error: contactError } = await sb.from("crm_contacts")
         .insert({
           company_id: companyId,
-          first_name: userName?.trim().split(/\\s+/)[0] || "myUNO",
-          last_name: userName?.trim().split(/\\s+/).slice(1).join(" ") || "Lead",
+          first_name: userName?.trim().split(/\s+/)[0] || "myUNO",
+          last_name: userName?.trim().split(/\s+/).slice(1).join(" ") || "Lead",
           email: finalEmail || null,
           phone: finalPhone || null,
           contact_type: input.topic === "invest" ? "investor" : input.topic === "property" ? "buyer" : "other",
@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
     console.error("[submit-help-request] CRM routing requires operator attention:", hr.id, crmError);
   }
 
-  // 4) Notify admins — WhatsApp + email (fire and forget)
+  // 4) Notify admins — WhatsApp + email (bounded provider retries)
   try {
     const adminWa = await getAdminWhatsApp();
     const waBody = [
