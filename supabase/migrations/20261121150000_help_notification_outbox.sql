@@ -22,7 +22,7 @@ alter table private.help_notification_outbox enable row level security;
 revoke all on private.help_notification_outbox from public,anon,authenticated;
 grant select,insert,update on private.help_notification_outbox to service_role;
 
-create or replace function private.enqueue_help_notification(p_request_id uuid)
+create or replace function public.enqueue_help_notification(p_request_id uuid)
 returns void language plpgsql security definer set search_path='' as $$
 begin
  if not exists (select 1 from public.help_requests where id=p_request_id) then
@@ -32,10 +32,10 @@ begin
  values(p_request_id,'email'),(p_request_id,'whatsapp')
  on conflict(request_id,channel) do nothing;
 end $$;
-revoke all on function private.enqueue_help_notification(uuid) from public,anon,authenticated;
-grant execute on function private.enqueue_help_notification(uuid) to service_role;
+revoke all on function public.enqueue_help_notification(uuid) from public,anon,authenticated;
+grant execute on function public.enqueue_help_notification(uuid) to service_role;
 
-create or replace function private.claim_help_notifications()
+create or replace function public.claim_help_notifications()
 returns table(job_id uuid,request_id uuid,channel text,lease_token uuid,attempts integer)
 language plpgsql security definer set search_path='' as $$
 begin
@@ -56,10 +56,10 @@ begin
  )
  select c.id,c.request_id,c.channel,c.lease_token,c.attempts from claimed c;
 end $$;
-revoke all on function private.claim_help_notifications() from public,anon,authenticated;
-grant execute on function private.claim_help_notifications() to service_role;
+revoke all on function public.claim_help_notifications() from public,anon,authenticated;
+grant execute on function public.claim_help_notifications() to service_role;
 
-create or replace function private.finish_help_notification(p_id uuid,p_token uuid,p_outcome text,p_reference text default null)
+create or replace function public.finish_help_notification(p_id uuid,p_token uuid,p_outcome text,p_reference text default null)
 returns boolean language plpgsql security definer set search_path='' as $$
 declare changed integer;
 begin
@@ -74,5 +74,5 @@ begin
  get diagnostics changed=row_count;
  return changed=1;
 end $$;
-revoke all on function private.finish_help_notification(uuid,uuid,text,text) from public,anon,authenticated;
-grant execute on function private.finish_help_notification(uuid,uuid,text,text) to service_role;
+revoke all on function public.finish_help_notification(uuid,uuid,text,text) from public,anon,authenticated;
+grant execute on function public.finish_help_notification(uuid,uuid,text,text) to service_role;
