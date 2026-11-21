@@ -150,8 +150,8 @@ Deno.serve(async (req) => {
   try {
     const { data: companies, error: companyError } = await sb
       .from("management_companies")
-      .select("id, name")
-      .ilike("name", "Ignatev Estate")
+      .select("id, slug")
+      .eq("slug", "ignatev-estate-co-ltd-")
       .limit(2);
     if (companyError) throw companyError;
     if (!companies || companies.length !== 1) {
