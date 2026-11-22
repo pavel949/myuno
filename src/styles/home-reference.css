@@ -101,44 +101,78 @@
   .cinematic-home.home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media(max-width: 767px) {
-  .cinematic-home.home-refined { padding-bottom: calc(92px + env(safe-area-inset-bottom,0px)); }
-  .cinematic-home.home-refined .home-container { width: calc(100% - 32px); max-width: 100%; }
-  .cinematic-home.home-refined .home-hero { padding-bottom: 22px; }
-  .cinematic-home.home-refined .home-hero-layout { padding-block: 38px 12px; }
-  .cinematic-home.home-refined .home-hero-copy h1 { font-size: var(--home-ui-display-tablet); line-height: 1.12; }
-  .cinematic-home.home-refined .home-hero-copy > p { font-size: var(--home-ui-body); line-height: 1.5; }
+  .cinematic-home.home-refined {
+ }
+  .cinematic-home.home-refined .home-container {
+
+ }
+  .cinematic-home.home-refined .home-hero {
+ }
+  .cinematic-home.home-refined .home-hero-layout {
+ }
+  .cinematic-home.home-refined .home-hero-copy h1 {
+
+ }
+  .cinematic-home.home-refined .home-hero-copy > p {
+
+ }
   .cinematic-home.home-refined .home-hero-media::after {
     background: linear-gradient(180deg,hsl(var(--home-ui-overlay-ink) / .82),hsl(var(--home-ui-overlay-ink) / .62));
   }
-  .cinematic-home.home-refined .home-reference-search { margin-top: 22px; padding: 14px; border-radius: 12px; }
+  .cinematic-home.home-refined .home-reference-search {
+
+
+ }
   .cinematic-home.home-refined .home-reference-search .home-search {
-    display: flex; flex-direction: column; align-items: stretch; gap: 12px;
+    display: flex; flex-direction: column; align-items: stretch;
+
   }
   .cinematic-home.home-refined .home-reference-search .home-search > * {
     width: 100%; max-width: 100%; min-width: 0;
   }
   .cinematic-home.home-refined .home-reference-search .home-search-duration {
-    display: grid; grid-template-columns: repeat(3,minmax(0,1fr));
+
+
   }
   .cinematic-home.home-refined .home-reference-search .home-search-duration button {
-    min-width: 0; white-space: normal; font-size: var(--home-ui-caption);
+    min-width: 0;
+
+
   }
-  .cinematic-home.home-refined .home-reference-directions { gap: 10px; padding-top: 18px; }
-  .cinematic-home.home-refined .home-reference-direction { border-radius: 12px; aspect-ratio: 1 / 1.18; }
-  .cinematic-home.home-refined .home-reference-direction-content { padding: 12px; gap: 5px; }
-  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: var(--home-ui-body-medium); overflow-wrap: anywhere; }
-  .cinematic-home.home-refined .home-reference-direction-content small { font-size: var(--home-ui-caption-small); }
-  .cinematic-home.home-refined .home-reference-direction-content svg { width: 21px; height: 21px; }
+  .cinematic-home.home-refined .home-reference-directions {
+
+ }
+  .cinematic-home.home-refined .home-reference-direction {
+
+ }
+  .cinematic-home.home-refined .home-reference-direction-content {
+
+ }
+  .cinematic-home.home-refined .home-reference-direction-content strong {
+
+ }
+  .cinematic-home.home-refined .home-reference-direction-content small {
+ }
+  .cinematic-home.home-refined .home-reference-direction-content svg {
+
+ }
   .cinematic-home.home-refined .home-section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
   .cinematic-home.home-refined .home-section-heading h2 { font-size: var(--home-ui-section-tablet); }
-  .cinematic-home.home-refined .home-locations .home-rail-viewport { gap: 10px; }
-  .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: var(--home-ui-body-large); }
-  .cinematic-home.home-refined .home-locations .home-guide-copy { padding: 10px 0; }
-  .cinematic-home.home-refined .home-services .home-rail-viewport { display: grid; grid-template-columns: minmax(0,1fr); }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport {
+ }
+  .cinematic-home.home-refined .home-locations .home-guide-card h3 {
+ }
+  .cinematic-home.home-refined .home-locations .home-guide-copy {
+ }
+  .cinematic-home.home-refined .home-services .home-rail-viewport {
+
+ }
 }
 @media(max-width: 360px) {
-  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: var(--home-ui-body-small); }
-  .cinematic-home.home-refined .home-reference-direction-content small { font-size: var(--home-ui-caption-tiny); }
+  .cinematic-home.home-refined .home-reference-direction-content strong {
+ }
+  .cinematic-home.home-refined .home-reference-direction-content small {
+ }
 }
 
 /* Mobile visual acceptance pass: desktop rules remain unchanged.
