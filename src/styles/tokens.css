@@ -10,6 +10,49 @@
  */
 
 :root {
+  /* Approved public-home editorial palette and type scale. Consolidated CSS. */
+  --home-ui-canvas: 36 33.3333% 97.0588%;
+  --home-ui-white: 0 0% 100%;
+  --home-ui-hero-navy: 210 73.1707% 16.0784%;
+  --home-ui-overlay-ink: 212 84.9057% 10.3922%;
+  --home-ui-control-navy: 211 71.4286% 16.4706%;
+  --home-ui-shadow-ink: 0 0% 0%;
+  --home-ui-direction-navy: 206.6667 65.4545% 21.5686%;
+  --home-ui-card-overlay: 210 80% 11.7647%;
+  --home-ui-display-desktop: clamp(38px,5.1vw,72px);
+  --home-ui-lead-fluid: clamp(16px,1.6vw,20px);
+  --home-ui-direction-fluid: clamp(16px,1.8vw,22px);
+  --home-ui-caption: 13px;
+  --home-ui-tile-title-large: 22px;
+  --home-ui-display-tablet: clamp(34px,9vw,46px);
+  --home-ui-body: 15px;
+  --home-ui-body-medium: 16px;
+  --home-ui-caption-small: 12px;
+  --home-ui-section-tablet: clamp(27px,7vw,36px);
+  --home-ui-body-large: 18px;
+  --home-ui-body-small: 14px;
+  --home-ui-caption-tiny: 11px;
+  --home-ui-section-mobile-wide: clamp(25px, 6.8vw, 33px);
+  --home-ui-copy-max: 900px;
+  --home-ui-headline-max: 740px;
+  --home-ui-lead-max: 680px;
+  --home-ui-search-max: 850px;
+  --home-ui-shadow-deep: 210 86.9565% 9.0196%;
+  --home-ui-input-border: 212.3077 22.0339% 88.4314%;
+  --home-ui-shadow-card: 210 71.4286% 13.7255%;
+  --home-ui-icon-navy: 208.2857 66.0377% 20.7843%;
+  --home-ui-icon-surface: 200 27.2727% 95.6863%;
+  --home-ui-icon-surface-deep: 205 28.5714% 91.7647%;
+  --home-ui-area-border: 202.5 14.8148% 89.4118%;
+  --home-ui-area-surface: 192 20% 95.098%;
+  --home-ui-area-ink: 209.4737 64.0449% 17.451%;
+  --home-ui-service-border: 205.7143 13.2075% 89.6078%;
+  --home-ui-direction-mobile: clamp(14px,3.9vw,17px);
+  --home-ui-section-mobile: clamp(25px,6.8vw,31px);
+  --home-ui-display-mobile: clamp(31px,8.2vw,39px);
+  --home-ui-title-medium: 19px;
+  --home-ui-title-large: 21px;
+
   color-scheme: light;
 
   /* ═══════════════════════════════════════════════════════════
