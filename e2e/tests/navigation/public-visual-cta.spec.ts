@@ -64,3 +64,48 @@ test('desktop does not suppress the chat launcher', async ({ page }) => {
   await page.goto('/property/rent', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('[data-global-chat-launcher]')).toBeVisible();
 });
+
+
+test.describe('mobile homepage visual contract', () => {
+  for (const width of [320, 390, 430]) {
+    test(`complete cards and readable service/district grid at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('[data-home-visual="mobile-grid-20261122"]')).toBeVisible();
+      const dimensions = await page.evaluate(() => ({
+        viewport: innerWidth,
+        page: document.documentElement.scrollWidth,
+      }));
+      expect(dimensions.page).toBeLessThanOrEqual(dimensions.viewport + 1);
+
+      const rail = page.locator('.home-properties .home-rail-viewport');
+      const firstCard = rail.locator(':scope > *').first();
+      if (await firstCard.count()) {
+        const widths = await firstCard.evaluate((card) => ({
+          card: card.getBoundingClientRect().width,
+          rail: card.parentElement!.getBoundingClientRect().width,
+        }));
+        // No clipped next-card names/prices on mobile.
+        expect(Math.abs(widths.card - widths.rail)).toBeLessThanOrEqual(2);
+      }
+
+      await expect(page.locator('.home-locations .home-guide-pin').first()).toBeVisible();
+      const serviceCards = page.locator('.home-services .home-service-category-card');
+      if (await serviceCards.count() && width >= 351) {
+        const columns = await page.locator('.home-services .home-rail-viewport')
+          .evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length);
+        expect(columns).toBe(2);
+      }
+    });
+  }
+
+  test('buy tab and primary search open the real property catalogue', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('.home-reference-search .home-search-modes button').last().click();
+    await expect(page.locator('.home-reference-search .home-search-modes button').last())
+      .toHaveAttribute('aria-pressed', 'true');
+    await page.locator('.home-reference-search .home-search-submit').click();
+    await expect(page).toHaveURL(/\\/property\\/search\\?.*mode=buy/);
+  });
+});
