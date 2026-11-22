@@ -195,3 +195,28 @@
 @media (prefers-reduced-motion: reduce) {
   .cinematic-home.home-refined .home-reference-direction { transition: none; }
 }
+
+/* Uniform Lucide treatment for live service categories, on mobile and desktop. */
+.cinematic-home.home-refined .home-service-lucide-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 124px;
+  color: #123758;
+  background: linear-gradient(145deg, #f1f5f7, #e4ebf0);
+}
+.cinematic-home.home-refined .home-service-lucide-symbol svg {
+  width: 38px;
+  height: 38px;
+  stroke-width: 1.7;
+}
+.cinematic-home.home-refined .home-service-category-art:has(.home-service-lucide-symbol) {
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+}
+@media(max-width:767px) {
+  .cinematic-home.home-refined .home-service-lucide-symbol { min-height: 100px; }
+  .cinematic-home.home-refined .home-service-lucide-symbol svg { width: 32px; height: 32px; }
+}
