@@ -90,6 +90,13 @@ test.describe('mobile homepage visual contract', () => {
       }
 
       await expect(page.locator('.home-locations .home-guide-pin').first()).toBeVisible();
+      const areaAlign = await page.locator('.home-locations .home-guide-card').first()
+        .evaluate((card) => {
+          const icon = card.querySelector('.home-guide-pin')!;
+          return icon.getBoundingClientRect().left - card.getBoundingClientRect().left;
+        });
+      expect(areaAlign).toBeGreaterThan(0);
+      expect(areaAlign).toBeLessThan(32);
       const serviceCards = page.locator('.home-services .home-service-category-card');
       if (await serviceCards.count() && width >= 351) {
         const columns = await page.locator('.home-services .home-rail-viewport')
