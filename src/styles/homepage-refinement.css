@@ -8,14 +8,13 @@
 /* A task-first front door. The editorial photograph supports the choices;
    it no longer controls the text contrast or the mobile fold. */
 .cinematic-home.home-refined .home-hero {
-  /* Keep the canvas and inverse text paired regardless of route CSS order. */
-  --home-hero-ink: hsl(var(--media-foreground));
-  --home-hero-muted-ink: hsl(var(--media-foreground) / .82);
-  height: auto;
-  min-height: 0;
+
+
+
+
   padding-block-end: 2rem;
-  background: var(--media-home-hero);
-  color: var(--home-hero-ink);
+
+
 }
 .home-refined .home-hero .consumer-header-overlay {
   color: var(--home-hero-ink);

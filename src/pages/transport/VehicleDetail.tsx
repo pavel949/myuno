@@ -339,7 +339,7 @@ export default function VehicleDetail() {
         </div>
 
         {/* Sticky Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t border-border/50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
+        <div data-chat-occlusion-target className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t border-border/50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
           <div className="max-w-3xl mx-auto flex items-center gap-3 px-4 py-3">
             <div className="flex-1 min-w-0">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{isRu ? 'От' : 'From'}</p>

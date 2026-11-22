@@ -124,7 +124,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         </Select>
       </div>
       </>}
-      <button type="submit" className="home-search-submit">{t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}<ArrowRight size={18} aria-hidden="true" /></button>
+      <button type="submit" data-chat-occlusion-target className="home-search-submit">{t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}<ArrowRight size={18} aria-hidden="true" /></button>
       {progressive && <button type="button" className="home-search-refine" aria-expanded={showRefinements} onClick={() => setShowRefinements(value => !value)}>{t({ ru: showRefinements ? 'Скрыть уточнения' : 'Уточнить поиск', en: showRefinements ? 'Hide refinements' : 'Refine search', th: showRefinements ? 'ซ่อนตัวกรอง' : 'ปรับการค้นหา' })}</button>}
 
       {showRefinements && (!catalogue || (mode === 'rent' && !showGuestsInline)) && <details className="home-search-secondary">

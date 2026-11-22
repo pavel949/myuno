@@ -69,6 +69,56 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
   const [isOpen, setIsOpen] = useState(false);
   const [activeView, setActiveView] = useState<ActiveView>('menu');
 
+  // A primary booking/search action must win the mobile thumb zone.
+  // The launcher is temporarily hidden only while the action is actually
+  // visible, then returns as soon as the user scrolls away from it.
+  const [primaryActionVisible, setPrimaryActionVisible] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') return;
+    let intersection: IntersectionObserver | null = null;
+    let mutation: MutationObserver | null = null;
+    const visible = new Set<Element>();
+    const refresh = () => {
+      intersection?.disconnect();
+      visible.clear();
+      if (window.innerWidth >= 768) {
+        setPrimaryActionVisible(false);
+        return;
+      }
+      const targets = document.querySelectorAll<HTMLElement>('[data-chat-occlusion-target]');
+      if (!targets.length) {
+        setPrimaryActionVisible(false);
+        return;
+      }
+      intersection = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        }
+        setPrimaryActionVisible(visible.size > 0);
+      }, { rootMargin: '0px 0px -64px 0px', threshold: 0.01 });
+      targets.forEach((target) => intersection?.observe(target));
+    };
+    refresh();
+    if (typeof MutationObserver !== 'undefined') {
+      mutation = new MutationObserver((records) => {
+        const newTarget = records.some((record) =>
+          Array.from(record.addedNodes).some((node) => node.nodeType === 1 &&
+            ((node as Element).matches('[data-chat-occlusion-target]') ||
+              Boolean((node as Element).querySelector('[data-chat-occlusion-target]')))));
+        if (newTarget) refresh();
+      });
+      mutation.observe(document.body, { childList: true, subtree: true });
+    }
+    window.addEventListener('resize', refresh);
+    return () => {
+      intersection?.disconnect();
+      mutation?.disconnect();
+      window.removeEventListener('resize', refresh);
+    };
+  }, [location.pathname]);
+
+
   // AI Chat state — restored from localStorage so the conversation persists across sessions.
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -506,6 +556,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
       </Drawer>
 
       {/* Single global FAB — Sparkles signals "AI", green dot signals "live". */}
+      {(!primaryActionVisible || isOpen) && (
       <button
         data-global-chat-launcher
         onClick={() => setIsOpen(true)}
@@ -526,6 +577,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
         <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
         <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-background" />
       </button>
+      )}
     </>
   );
 };

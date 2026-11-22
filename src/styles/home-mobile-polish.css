@@ -1,9 +1,9 @@
 /* myUNO mobile polish v1: scoped only to public homepage, no desktop changes. */
 @media (max-width: 767px) {
   .cinematic-home.home-refined {
-    --home-gallery-gap: 32px;
-    --public-section-gap: 32px;
-    font-size: 15px;
+
+
+    font-size: var(--home-ui-body);
     -webkit-font-smoothing: antialiased;
   }
   .cinematic-home.home-refined .home-container {
@@ -15,28 +15,28 @@
     padding-block: 20px 8px;
   }
   .cinematic-home.home-refined .home-hero-copy h1 {
-    font-size: clamp(32px, 8.6vw, 40px);
-    line-height: 1.1;
+
+
     letter-spacing: -.028em;
     font-weight: 500;
     text-wrap: balance;
   }
   .cinematic-home.home-refined .home-hero-copy > p {
-    margin-top: 12px;
-    font-size: 14px;
-    line-height: 1.52;
+
+
+
     letter-spacing: 0;
     max-width: 40ch;
   }
   .cinematic-home.home-refined .home-reference-search {
-    margin-top: 18px;
-    padding: 14px;
-    border: 1px solid rgba(12,41,72,.08);
+
+
+    border: 1px solid hsl(var(--home-ui-control-navy) / .08);
     border-radius: 16px;
-    box-shadow: 0 14px 36px rgba(3,23,43,.14);
+    box-shadow: 0 14px 36px hsl(var(--home-ui-shadow-deep) / .14);
   }
   .cinematic-home.home-refined .home-reference-search .home-search {
-    gap: 12px;
+
   }
   .cinematic-home.home-refined .home-reference-search .home-search-modes {
     display: grid;
@@ -48,16 +48,16 @@
   .cinematic-home.home-refined .home-reference-search .home-search-modes button {
     min-height: 44px;
     padding: 8px 12px;
-    border: 1px solid #dbe1e8;
+    border: 1px solid hsl(var(--home-ui-input-border));
     border-radius: 9px;
-    font-size: 14px;
+    font-size: var(--home-ui-body-small);
     font-weight: 600;
-    color: #0c2948;
+    color: hsl(var(--home-ui-control-navy));
   }
   .cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed=true] {
-    background: #0c2948;
-    border-color: #0c2948;
-    color: #fff;
+    background: hsl(var(--home-ui-control-navy));
+    border-color: hsl(var(--home-ui-control-navy));
+    color: hsl(var(--home-ui-white));
   }
   .cinematic-home.home-refined .home-reference-search .home-search-duration {
     display: grid;
@@ -68,7 +68,7 @@
   .cinematic-home.home-refined .home-reference-search .home-search-duration button {
     min-height: 44px;
     padding: 7px 4px;
-    font-size: 12px;
+    font-size: var(--home-ui-caption-small);
     line-height: 1.3;
     white-space: normal;
     border-radius: 8px;
@@ -78,33 +78,33 @@
     min-width: 0;
   }
   .cinematic-home.home-refined .home-reference-search .home-field-label {
-    font-size: 12px;
+    font-size: var(--home-ui-caption-small);
     line-height: 1.4;
     margin-bottom: 5px;
   }
   .cinematic-home.home-refined .home-reference-search .home-search-date-trigger {
     min-height: 52px;
     gap: 8px;
-    font-size: 13px;
+    font-size: var(--home-ui-caption);
   }
   .cinematic-home.home-refined .home-reference-search .home-search-submit {
-    min-height: 50px;
+
     width: 100%;
     border-radius: 10px;
-    font-size: 15px;
+    font-size: var(--home-ui-body);
     font-weight: 650;
   }
   .cinematic-home.home-refined .home-reference-directions {
-    gap: 10px;
+
     padding-block: 18px 4px;
   }
   .cinematic-home.home-refined .home-reference-direction {
-    aspect-ratio: 1 / 1.12;
+
     border-radius: 14px;
-    box-shadow: 0 4px 14px rgba(10,35,60,.08);
+    box-shadow: 0 4px 14px hsl(var(--home-ui-shadow-card) / .08);
   }
   .cinematic-home.home-refined .home-reference-direction-content {
-    padding: 13px;
+
     gap: 6px;
   }
   .cinematic-home.home-refined .home-reference-direction-content svg {
@@ -114,46 +114,46 @@
     flex-shrink: 0;
   }
   .cinematic-home.home-refined .home-reference-direction-content strong {
-    font-size: clamp(14px,3.9vw,17px);
+    font-size: var(--home-ui-direction-mobile);
     line-height: 1.19;
     font-weight: 650;
     letter-spacing: -.012em;
-    color: #fff;
+    color: hsl(var(--home-ui-white));
   }
   .cinematic-home.home-refined .home-reference-direction-content small {
-    font-size: 12px;
+    font-size: var(--home-ui-caption-small);
     line-height: 1.35;
-    color: rgba(255,255,255,.93);
+    color: hsl(var(--home-ui-white) / .93);
     -webkit-line-clamp: 2;
   }
   .cinematic-home.home-refined .home-gallery {
-    padding-top: 32px;
+
   }
   .cinematic-home.home-refined .home-gallery-heading {
     gap: 8px;
-    margin-bottom: 14px;
+
   }
   .cinematic-home.home-refined .home-gallery-heading h2 {
-    font-size: clamp(25px,6.8vw,31px);
+    font-size: var(--home-ui-section-mobile);
     font-weight: 500;
     line-height: 1.17;
     letter-spacing: -.025em;
     text-wrap: balance;
   }
   .cinematic-home.home-refined .home-section-lead {
-    font-size: 14px;
+    font-size: var(--home-ui-body-small);
     line-height: 1.48;
   }
   .cinematic-home.home-refined .home-gallery .home-rail-controls {
     gap: 4px;
-    margin-bottom: 8px;
+
   }
   .cinematic-home.home-refined .home-gallery .home-rail-controls button {
     width: 44px;
     height: 44px;
   }
   .cinematic-home.home-refined .home-gallery .home-rail-viewport {
-    gap: 12px;
+
     padding-bottom: 10px;
   }
   .cinematic-home.home-refined .home-gallery .home-listing-copy,
@@ -162,15 +162,15 @@
   }
   .cinematic-home.home-refined .home-gallery .home-listing h3,
   .cinematic-home.home-refined .home-gallery .premium-project-copy h3 {
-    font-size: 20px;
-    line-height: 1.28;
+
+
     letter-spacing: -.012em;
   }
   .cinematic-home.home-refined .home-locations .home-rail-viewport {
-    gap: 12px;
+
   }
   .cinematic-home.home-refined .home-locations .home-guide-card h3 {
-    font-size: 16px;
+
     font-weight: 600;
     line-height: 1.25;
   }
@@ -178,8 +178,8 @@
     border-radius: 12px;
   }
   .cinematic-home.home-refined .home-partners-group {
-    margin-top: 32px;
-    padding-block: 32px;
+
+
   }
   .cinematic-home.home-refined .home-closing {
     margin-top: 32px !important;
@@ -189,8 +189,8 @@
 @media (max-width: 360px) {
   .cinematic-home.home-refined .home-container { width: calc(100% - 28px); }
   .cinematic-home.home-refined .home-reference-direction-content { padding: 10px; }
-  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: 13px; }
-  .cinematic-home.home-refined .home-reference-direction-content small { font-size: 11px; }
+  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: var(--home-ui-caption); }
+  .cinematic-home.home-refined .home-reference-direction-content small { font-size: var(--home-ui-caption-tiny); }
 }
 @media (prefers-reduced-motion: reduce) {
   .cinematic-home.home-refined .home-reference-direction { transition: none; }
@@ -203,8 +203,8 @@
   justify-content: center;
   width: 100%;
   min-height: 124px;
-  color: #123758;
-  background: linear-gradient(145deg, #f1f5f7, #e4ebf0);
+  color: hsl(var(--home-ui-icon-navy));
+  background: linear-gradient(145deg, hsl(var(--home-ui-icon-surface)), hsl(var(--home-ui-icon-surface-deep)));
 }
 .cinematic-home.home-refined .home-service-lucide-symbol svg {
   width: 38px;
@@ -225,8 +225,8 @@
 @media (max-width: 767px) {
   .cinematic-home.home-refined { --home-gallery-gap: 28px; --public-section-gap: 28px; }
   .cinematic-home.home-refined .home-hero-layout { padding-top: 16px; }
-  .cinematic-home.home-refined .home-hero-copy h1 { font-size: clamp(31px,8.2vw,39px); line-height: 1.08; }
-  .cinematic-home.home-refined .home-hero-copy > p { margin-top: 10px; font-size: 14px; line-height: 1.45; }
+  .cinematic-home.home-refined .home-hero-copy h1 { font-size: var(--home-ui-display-mobile); line-height: 1.08; }
+  .cinematic-home.home-refined .home-hero-copy > p { margin-top: 10px; font-size: var(--home-ui-body-small); line-height: 1.45; }
   .cinematic-home.home-refined .home-reference-search { margin-top: 14px; padding: 12px; }
   .cinematic-home.home-refined .home-reference-search .home-search { gap: 9px; }
   .cinematic-home.home-refined .home-reference-search .home-search-modes button,
@@ -243,31 +243,31 @@
   .cinematic-home.home-refined .home-gallery .home-rail-viewport > * { flex-basis: 92%; width: 92%; max-width: 92%; }
   .cinematic-home.home-refined .home-gallery .home-rail-viewport { gap: 10px; }
   .cinematic-home.home-refined .home-gallery .home-listing h3,
-  .cinematic-home.home-refined .home-gallery .premium-project-copy h3 { font-size: 19px; line-height: 1.24; }
+  .cinematic-home.home-refined .home-gallery .premium-project-copy h3 { font-size: var(--home-ui-title-medium); line-height: 1.24; }
   .cinematic-home.home-refined .home-locations .home-rail-viewport { gap: 10px; }
   .cinematic-home.home-refined .home-locations .home-rail-viewport > * { width: auto; max-width: none; }
   /* Repeated generic beach art must not pretend to depict four different districts. */
   .cinematic-home.home-refined .home-locations .home-area-cover { display: none; }
   .cinematic-home.home-refined .home-locations .home-guide-card {
-    border: 1px solid #e0e5e8; border-radius: 12px;
-    background: #f0f4f5; min-height: 104px;
+    border: 1px solid hsl(var(--home-ui-area-border)); border-radius: 12px;
+    background: hsl(var(--home-ui-area-surface)); min-height: 104px;
   }
   .cinematic-home.home-refined .home-locations .home-area-guide-link { min-height: 104px; display: flex; align-items: flex-end; }
   .cinematic-home.home-refined .home-locations .home-guide-copy { padding: 16px; }
-  .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: 19px; color: #102d49; }
+  .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: var(--home-ui-title-medium); color: hsl(var(--home-ui-area-ink)); }
   .cinematic-home.home-refined .home-services .home-rail-viewport { gap: 10px; }
   .cinematic-home.home-refined .home-services .home-service-category-card {
-    border: 1px solid #e1e5e8; border-radius: 12px;
-    overflow: hidden; background: #fff;
+    border: 1px solid hsl(var(--home-ui-service-border)); border-radius: 12px;
+    overflow: hidden; background: hsl(var(--home-ui-white));
   }
   .cinematic-home.home-refined .home-services .home-service-category-copy { padding: 14px 16px; }
-  .cinematic-home.home-refined .home-services .home-service-category-copy h3 { font-size: 21px; line-height: 1.2; }
-  .cinematic-home.home-refined .home-services .home-service-category-copy p { font-size: 13px; line-height: 1.45; }
+  .cinematic-home.home-refined .home-services .home-service-category-copy h3 { font-size: var(--home-ui-title-large); line-height: 1.2; }
+  .cinematic-home.home-refined .home-services .home-service-category-copy p { font-size: var(--home-ui-caption); line-height: 1.45; }
   .cinematic-home.home-refined .home-services .home-service-category-art { max-height: 170px; overflow: hidden; }
   .cinematic-home.home-refined .home-services .home-service-category-art img { max-height: 170px; object-fit: cover; }
   .cinematic-home.home-refined .home-services .home-service-lucide-symbol { min-height: 96px; }
   .cinematic-home.home-refined .home-partners-group { margin-top: 28px; padding-block: 28px; }
   .cinematic-home.home-refined .home-audience-card { min-height: 0; padding: 18px; }
-  .cinematic-home.home-refined .home-audience-card h3 { font-size: 21px; line-height: 1.25; }
-  .cinematic-home.home-refined .home-audience-card p { font-size: 14px; line-height: 1.45; }
+  .cinematic-home.home-refined .home-audience-card h3 { font-size: var(--home-ui-title-large); line-height: 1.25; }
+  .cinematic-home.home-refined .home-audience-card p { font-size: var(--home-ui-body-small); line-height: 1.45; }
 }
