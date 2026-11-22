@@ -220,3 +220,54 @@
   .cinematic-home.home-refined .home-service-lucide-symbol { min-height: 100px; }
   .cinematic-home.home-refined .home-service-lucide-symbol svg { width: 32px; height: 32px; }
 }
+
+/* Screenshot-driven mobile QA: coherent section rhythm and non-obstructed content. */
+@media (max-width: 767px) {
+  .cinematic-home.home-refined { --home-gallery-gap: 28px; --public-section-gap: 28px; }
+  .cinematic-home.home-refined .home-hero-layout { padding-top: 16px; }
+  .cinematic-home.home-refined .home-hero-copy h1 { font-size: clamp(31px,8.2vw,39px); line-height: 1.08; }
+  .cinematic-home.home-refined .home-hero-copy > p { margin-top: 10px; font-size: 14px; line-height: 1.45; }
+  .cinematic-home.home-refined .home-reference-search { margin-top: 14px; padding: 12px; }
+  .cinematic-home.home-refined .home-reference-search .home-search { gap: 9px; }
+  .cinematic-home.home-refined .home-reference-search .home-search-modes button,
+  .cinematic-home.home-refined .home-reference-search .home-search-duration button { min-height: 42px; }
+  .cinematic-home.home-refined .home-reference-search .home-search-submit { min-height: 48px; }
+  .cinematic-home.home-refined .home-reference-directions { gap: 10px; padding-top: 14px; }
+  .cinematic-home.home-refined .home-reference-direction { aspect-ratio: 1 / 1.02; }
+  .cinematic-home.home-refined .home-reference-direction > img[src$=".svg"] { opacity: .12; object-fit: contain; padding: 18px; }
+  .cinematic-home.home-refined .home-reference-direction-content { padding: 12px; }
+  .cinematic-home.home-refined .home-gallery { padding-top: 28px; }
+  .cinematic-home.home-refined .home-gallery-heading { margin-bottom: 10px; }
+  .cinematic-home.home-refined .home-gallery .home-rail { margin-top: 6px; }
+  .cinematic-home.home-refined .home-gallery .home-rail-controls { margin-bottom: 2px; }
+  .cinematic-home.home-refined .home-gallery .home-rail-viewport > * { flex-basis: 92%; width: 92%; max-width: 92%; }
+  .cinematic-home.home-refined .home-gallery .home-rail-viewport { gap: 10px; }
+  .cinematic-home.home-refined .home-gallery .home-listing h3,
+  .cinematic-home.home-refined .home-gallery .premium-project-copy h3 { font-size: 19px; line-height: 1.24; }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport { gap: 10px; }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport > * { width: auto; max-width: none; }
+  /* Repeated generic beach art must not pretend to depict four different districts. */
+  .cinematic-home.home-refined .home-locations .home-area-cover { display: none; }
+  .cinematic-home.home-refined .home-locations .home-guide-card {
+    border: 1px solid #e0e5e8; border-radius: 12px;
+    background: #f0f4f5; min-height: 104px;
+  }
+  .cinematic-home.home-refined .home-locations .home-area-guide-link { min-height: 104px; display: flex; align-items: flex-end; }
+  .cinematic-home.home-refined .home-locations .home-guide-copy { padding: 16px; }
+  .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: 19px; color: #102d49; }
+  .cinematic-home.home-refined .home-services .home-rail-viewport { gap: 10px; }
+  .cinematic-home.home-refined .home-services .home-service-category-card {
+    border: 1px solid #e1e5e8; border-radius: 12px;
+    overflow: hidden; background: #fff;
+  }
+  .cinematic-home.home-refined .home-services .home-service-category-copy { padding: 14px 16px; }
+  .cinematic-home.home-refined .home-services .home-service-category-copy h3 { font-size: 21px; line-height: 1.2; }
+  .cinematic-home.home-refined .home-services .home-service-category-copy p { font-size: 13px; line-height: 1.45; }
+  .cinematic-home.home-refined .home-services .home-service-category-art { max-height: 170px; overflow: hidden; }
+  .cinematic-home.home-refined .home-services .home-service-category-art img { max-height: 170px; object-fit: cover; }
+  .cinematic-home.home-refined .home-services .home-service-lucide-symbol { min-height: 96px; }
+  .cinematic-home.home-refined .home-partners-group { margin-top: 28px; padding-block: 28px; }
+  .cinematic-home.home-refined .home-audience-card { min-height: 0; padding: 18px; }
+  .cinematic-home.home-refined .home-audience-card h3 { font-size: 21px; line-height: 1.25; }
+  .cinematic-home.home-refined .home-audience-card p { font-size: 14px; line-height: 1.45; }
+}
