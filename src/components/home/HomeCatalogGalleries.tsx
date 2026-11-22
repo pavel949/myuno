@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, ImageOff, Flower2, PlaneLanding, CarFront, House, Sailboat } from 'lucide-react';
+import { ArrowRight, Compass, ImageOff, MapPin, Flower2, PlaneLanding, CarFront, House, Sailboat } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
@@ -93,7 +93,7 @@ export function HomeLocationGallery() {
     href={R.AREA_INDEX} linkLabel={t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}>
     {AREA_GUIDES.map(area => { const cover = homeAreaCover(area.slug); return <article className="home-guide-card" key={area.slug}><Link className="home-area-guide-link" to={R.AREA_DETAIL(area.slug)}>
       <div className="home-area-cover"><img src={cover.src} alt={t(area.name)} width="640" height="360" loading="lazy" decoding="async" />{cover.kind === 'illustration' && <span className="home-area-cover-label">{t({ ru: 'Иллюстрация', en: 'Illustration', th: 'ภาพประกอบ' })}</span>}</div>
-      <div className="home-guide-copy"><h3>{t(area.name)}</h3><p>{t({ ru: 'Знакомство с районом', en: 'Explore the area guide', th: 'ทำความรู้จักย่าน' })}</p>
+      <div className="home-guide-copy"><MapPin className="home-guide-pin" size={22} aria-hidden="true" /><h3>{t(area.name)}</h3><p>{t({ ru: 'Знакомство с районом', en: 'Explore the area guide', th: 'ทำความรู้จักย่าน' })}</p>
       <span>{t({ ru: 'О районе', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
     </Link></article>; })}
   </HomeGallery>;
@@ -173,7 +173,7 @@ export function HomeServiceGallery() {
       {categories.map(category => <article className={`home-service-category-card${category.path === R.FLOWERS || category.path === R.YACHTS ? ' home-service-category-card--photo' : ''}`} key={category.id}>
         <Link to={category.path}>
           <ServiceCategoryArt categoryId={category.id} categoryPath={category.path} image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
-          <div className="home-service-category-copy">{(category.path === R.FLOWERS || category.path === R.YACHTS) && <p className="home-category-photo-note">{t({ ru: 'Фото для вдохновения. Предложения — в каталоге.', en: 'Inspiration photo. Explore current offers in the catalogue.', th: 'ภาพเพื่อเป็นแรงบันดาลใจ ดูข้อเสนอในหมวดหมู่' })}</p>}<h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
+          <div className="home-service-category-copy">{(category.path === R.FLOWERS || category.path === R.YACHTS) && <p className="home-category-photo-note">{t({ ru: 'Иллюстративное фото. Условия в каталоге.', en: 'Illustrative photo. Offers in the catalogue.', th: 'ภาพประกอบ ดูข้อเสนอในหมวดหมู่' })}</p>}<h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
             <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>
         </Link>
