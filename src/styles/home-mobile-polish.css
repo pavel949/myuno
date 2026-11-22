@@ -335,7 +335,7 @@
   .cinematic-home.home-refined .home-services .home-service-category-copy h3 {
     min-height: 0;
     margin: 0;
-    font-size: 17px;
+    font-size: var(--home-ui-direction-mobile);
     font-weight: 550;
     line-height: 1.2;
     letter-spacing: -.012em;
@@ -447,8 +447,8 @@
 @media (max-width: 350px) {
   .cinematic-home.home-refined .home-container { width: calc(100% - 28px); }
   .cinematic-home.home-refined .home-reference-direction-content { padding: 10px; }
-  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: 13px; }
-  .cinematic-home.home-refined .home-reference-direction-content small { font-size: 11px; }
+  .cinematic-home.home-refined .home-reference-direction-content strong { font-size: var(--home-ui-caption); }
+  .cinematic-home.home-refined .home-reference-direction-content small { font-size: var(--home-ui-caption-tiny); }
   .cinematic-home.home-refined .home-services .home-rail-viewport { grid-template-columns: minmax(0,1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
