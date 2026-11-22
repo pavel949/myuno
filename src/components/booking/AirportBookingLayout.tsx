@@ -30,7 +30,7 @@ export function AirportBookingLayout({ variant, title, airport, back, progress, 
           <div className="airport-booking__progress">{progress}</div>
           <div className="airport-booking__fields">{children}</div>
         </div>
-        <div className="airport-booking__summary">{summary}</div>
+        <div className="airport-booking__summary" data-chat-occlusion-target>{summary}</div>
       </div>
     </div>
   );
