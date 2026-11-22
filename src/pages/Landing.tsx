@@ -23,7 +23,6 @@ import '@/styles/cinematic-home.css';
 import '@/styles/premium-public.css';
 import '@/styles/homepage-refinement.css';
 import '@/styles/home-reference.css';
-import '@/styles/home-mobile-polish.css';
 
 const publicNavigationRole = 'guest' as const;
 
