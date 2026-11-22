@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, ImageOff } from 'lucide-react';
+import { ArrowRight, Compass, ImageOff, Flower2, PlaneLanding, CarFront, House, Sailboat } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
@@ -146,10 +146,12 @@ export function HomeExperienceGallery() {
   </HomeGallery>;
 }
 
-function ServiceCategoryArt({ image, alt }: { image: string; alt: string }) {
+function ServiceCategoryArt({ image, alt, categoryId }: { image: string; alt: string; categoryId: string }) {
+  const Icon = categoryId === 'flowers' ? Flower2 : categoryId === 'arrival' ? PlaneLanding : categoryId === 'vehicle' ? CarFront : categoryId === 'home' ? House : categoryId === 'yacht' ? Sailboat : Compass;
+  const photo = categoryId === 'flowers' || categoryId === 'yacht';
   const [failed, setFailed] = useState(false);
   return <div className="home-service-category-art">
-    {failed ? <ImageOff size={36} aria-hidden="true" /> : <img src={image} alt={alt} width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} />}
+    {photo && image && !failed ? <img src={image} alt={alt} width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} /> : <span className="home-service-lucide-symbol"><Icon size={34} strokeWidth={1.7} aria-hidden="true" /></span>}
   </div>;
 }
 
@@ -170,7 +172,7 @@ export function HomeServiceGallery() {
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
       {categories.map(category => <article className={`home-service-category-card${category.path === R.FLOWERS || category.path === R.YACHTS ? ' home-service-category-card--photo' : ''}`} key={category.id}>
         <Link to={category.path}>
-          <ServiceCategoryArt image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
+          <ServiceCategoryArt categoryId={category.id} image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
           <div className="home-service-category-copy">{(category.path === R.FLOWERS || category.path === R.YACHTS) && <p className="home-category-photo-note">{t({ ru: 'Фото для вдохновения. Предложения — в каталоге.', en: 'Inspiration photo. Explore current offers in the catalogue.', th: 'ภาพเพื่อเป็นแรงบันดาลใจ ดูข้อเสนอในหมวดหมู่' })}</p>}<h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
             <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
           </div>
