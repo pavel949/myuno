@@ -44,7 +44,7 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-layout home-container">
           <div className="home-hero-copy">
-            <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
+            <h1 id="home-title"><span>{t(copy.place)}</span>{" "}<span>{t(copy.headline)}</span></h1>
             <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
             <div className="home-reference-search"><HomeDiscoverySearch showGuestsInline progressive /></div>
             <div className="home-hero-actions">
