@@ -5571,7 +5571,7 @@
     },
     {
       "file": "src/components/chat/UnifiedChatFAB.tsx",
-      "sha256": "dd85b67657f838bad0c9e8e487748d1785500a76b7090b71d2383e4b29507322",
+      "sha256": "567604ac3b2d3a6d3f42c24f809e41dd4b78ab62ac3ddd30fb778d8ef78729cd",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -5581,9 +5581,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            383,
-            405,
-            493
+            433,
+            455,
+            543
           ]
         },
         {
@@ -5591,7 +5591,7 @@
           "source": "@/components/ui/drawer",
           "instances": 1,
           "lines": [
-            264
+            314
           ]
         },
         {
@@ -5599,7 +5599,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            484
+            534
           ]
         }
       ]
@@ -6278,7 +6278,7 @@
     },
     {
       "file": "src/components/home/HomeDiscoverySearch.tsx",
-      "sha256": "e6c0cf334cfcc457be536857567bb04093b13898d5148e376346b5cdbab3ca92",
+      "sha256": "f4f01a0e0ae2b6d59f5ff39208406e5dc878843a148c5c84c373f52f6b3af8a3",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -28789,7 +28789,7 @@
     },
     {
       "file": "src/pages/flowers/BouquetDetail.tsx",
-      "sha256": "60c6842cdd7790b46d6561b452b77b540eaa85a386c6f796c4648ee705f55d49",
+      "sha256": "9290bce0eb49023408001dec967ca54aec4cb8ed55fdfa7b12c965bbcc39c023",
       "directRouteDeclarations": [
         {
           "id": "e4d97f9c6a57d8e2",
@@ -41892,7 +41892,7 @@
     },
     {
       "file": "src/pages/transport/VehicleDetail.tsx",
-      "sha256": "fc056980c22fd938556a1c11a9360312025a169c283518d2cc753e0591080eef",
+      "sha256": "f481f1974ef8a4be71b5477d7ba443e24bafa55ec0d30c41a38e0055972fdb74",
       "directRouteDeclarations": [
         {
           "id": "363a43fc59b8cb25",
