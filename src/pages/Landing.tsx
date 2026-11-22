@@ -36,7 +36,7 @@ export default function Landing() {
   const [requestSubject, setRequestSubject] = useState<string | undefined>();
 
   return (
-    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home">
+    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-visual="mobile-grid-20261122">
       <SEOHead title={t({ ru: 'Ваш дом и жизнь на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <main id="home-main" tabIndex={-1} className="outline-none">
