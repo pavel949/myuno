@@ -36,7 +36,7 @@ export default function Landing() {
   const [requestSubject, setRequestSubject] = useState<string | undefined>();
 
   return (
-    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home">
+    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-visual="mobile-grid-20261122">
       <SEOHead title={t({ ru: 'Ваш дом и жизнь на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <main id="home-main" tabIndex={-1} className="outline-none">
@@ -44,7 +44,7 @@ export default function Landing() {
         <ConsumerHeader overlay onSearch={() => navigate(R.SEARCH)} />
         <div className="home-hero-layout home-container">
           <div className="home-hero-copy">
-            <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
+            <h1 id="home-title"><span>{t(copy.place)}</span>{" "}<span>{t(copy.headline)}</span></h1>
             <p>{t({ ru: 'Аренда и покупка жилья, впечатления и услуги на Пхукете. Команда myUNO поможет выбрать и всё организовать.', en: 'Rent or buy a home, discover experiences, or find a service in Phuket. The myUNO team can help you choose and make arrangements.', th: 'เช่าหรือซื้อที่พัก ค้นหาประสบการณ์และบริการในภูเก็ต ทีม myUNO ช่วยคุณเลือกและจัดการ' })}</p>
             <div className="home-reference-search"><HomeDiscoverySearch showGuestsInline progressive /></div>
             <div className="home-hero-actions">

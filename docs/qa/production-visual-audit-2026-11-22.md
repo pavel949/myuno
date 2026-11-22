@@ -81,3 +81,38 @@ For visual acceptance, capture 320/390/768/1440px screenshots of the **exact
 release commit** and verify hierarchy, typography, sticky controls, cards,
 images, navigation and error/loading states. Do not replace actual images
 with fabricated inventory or hide unknown errors.
+
+
+## Follow-up: public build refreshed, mobile visual evidence
+
+On 22 November a second cache-busted public check returned
+`buildTime: 2026-11-22T02:23:01.285Z`, `version: 3.55.5`,
+`branch: master`, but **no `commit` field**. The live homepage then showed
+the new Rent/Buy property search and four navigation tiles, confirming that
+the public bundle changed. However its exact Git commit remains **unverified**
+by `version.json`. Do not infer a commit from the editor's SHA.
+
+Fresh browser screenshots at 390px identified three independently visible
+issues with actual listings:
+1. Rental/newbuild/experience rails exposed the next card's clipped title and
+   price, not a clean full card.
+2. Five service categories occupied approximately **1,910px** in one column
+   on mobile and repeated redundant catalogue navigation.
+3. Four district cards contained no verified location photos and looked
+   like blank placeholders (the single generic beach illustration had already
+   been intentionally suppressed).
+
+The companion patch consolidates homepage mobile CSS, gives rail cards their
+entire viewport width, uses compact two-column live service categories,
+and adds Lucide navigation cues to district tiles. A static attribute
+`data-home-visual="mobile-grid-20261122"` is included for independent
+post-deploy visual smoke verification. This marker **proves only that the
+targeted UI patch reached the browser**, not that every production component
+matches GitHub main.
+
+A read-only browser overlay of the candidate CSS against live data at
+390px showed the rental card width equal to the rail width (339px) and the
+service list switching to two columns (164px each). At 320px it correctly
+became one column, while 768px and 1440px retained their prior layout.
+Browser overlay evidence is **not** a substitute for testing the deployed
+compiled branch, running Playwright or inspecting authenticated scenarios.
