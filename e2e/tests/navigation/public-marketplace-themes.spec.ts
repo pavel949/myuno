@@ -107,3 +107,42 @@ for (const theme of ['light', 'dark'] as const) {
     });
   });
 }
+
+
+test('dark homepage search, services and districts use readable dark surfaces', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem('myuno-theme', 'dark'));
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('html')).toHaveAttribute('data-theme-ready', 'dark');
+  const result = await page.locator('.home-reference-search').evaluate((card) => {
+    const parse = (css: string): number[] => css.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0];
+    const lum = (rgb: number[]) => rgb.slice(0, 3)
+      .map((value) => {
+        const x = value / 255;
+        return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+      }).reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i], 0);
+    const ratio = (foreground: string, background: string) => {
+      const a = lum(parse(foreground)), b = lum(parse(background));
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    };
+    const panel = getComputedStyle(card).backgroundColor;
+    const label = getComputedStyle(card.querySelector('.home-field-label')!).color;
+    const guestInput = getComputedStyle(card.querySelector('.home-search-guests input')!);
+    const submit = getComputedStyle(card.querySelector('.home-search-submit')!);
+    const inactive = getComputedStyle(card.querySelector('.home-search-modes button[aria-pressed="false"]')!);
+    const canvas = getComputedStyle(card.closest('.cinematic-home')!).backgroundColor;
+    return {
+      canvasBrightness: lum(parse(canvas)),
+      panelBrightness: lum(parse(panel)),
+      labelContrast: ratio(label, panel),
+      guestContrast: ratio(guestInput.color, panel),
+      inactiveContrast: ratio(inactive.color, panel),
+      submitContrast: ratio(submit.color, submit.backgroundColor),
+    };
+  });
+  // Dark mode must not leave the old white-on-white hero search.
+  expect(result.canvasBrightness).toBeLessThan(0.20);
+  expect(result.panelBrightness).toBeLessThan(0.20);
+  for (const key of ['labelContrast', 'guestContrast', 'inactiveContrast', 'submitContrast'] as const)
+    expect(result[key], key).toBeGreaterThanOrEqual(4.5);
+});
