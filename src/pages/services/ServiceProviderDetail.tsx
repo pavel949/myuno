@@ -1,3 +1,4 @@
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import '@/styles/premium-services.css';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { servicePriceLabel } from '@/lib/services/servicePresentation';
@@ -129,7 +130,7 @@ const ServiceProviderDetail = () => {
   if (isLoading) {
     return (
       <AppLayout usePageContainer={false}>
-        <div className="premium-service-provider p-4 space-y-4" role="status" aria-label={text("Загружаем специалиста", "Loading provider", "กำลังโหลดผู้ให้บริการ")}>
+        <div className={`${PUBLIC_CONTENT_LAYOUT.detail} premium-service-provider p-4 space-y-4`} role="status" aria-label={text("Загружаем специалиста", "Loading provider", "กำลังโหลดผู้ให้บริการ")}>
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-24 w-24 rounded-full" />
           <Skeleton className="h-6 w-48" />
@@ -144,12 +145,12 @@ const ServiceProviderDetail = () => {
     );
   }
 
-  if (error) return <AppLayout usePageContainer={false}><div className="premium-service-provider space-y-4" role="alert"><h1 className="service-provider-title">{text('Не удалось загрузить специалиста', 'Could not load this provider', 'ไม่สามารถโหลดผู้ให้บริการได้')}</h1><p>{text('Попробуйте ещё раз. Параметры каталога сохранены.', 'Please try again. Your catalogue choices are kept.', 'กรุณาลองอีกครั้ง ระบบเก็บตัวเลือกการค้นหาไว้แล้ว')}</p><Button onClick={() => refetch()}>{text('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button><Button variant="outline" onClick={() => navigate(returnTo)}>{text('К услугам', 'Back to services', 'กลับไปยังบริการ')}</Button></div></AppLayout>;
+  if (error) return <AppLayout usePageContainer={false}><div className={`${PUBLIC_CONTENT_LAYOUT.detail} premium-service-provider space-y-4`} role="alert"><h1 className="service-provider-title">{text('Не удалось загрузить специалиста', 'Could not load this provider', 'ไม่สามารถโหลดผู้ให้บริการได้')}</h1><p>{text('Попробуйте ещё раз. Параметры каталога сохранены.', 'Please try again. Your catalogue choices are kept.', 'กรุณาลองอีกครั้ง ระบบเก็บตัวเลือกการค้นหาไว้แล้ว')}</p><Button onClick={() => refetch()}>{text('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button><Button variant="outline" onClick={() => navigate(returnTo)}>{text('К услугам', 'Back to services', 'กลับไปยังบริการ')}</Button></div></AppLayout>;
 
   if (!provider) {
     return (
       <AppLayout usePageContainer={false}>
-        <div className="premium-service-provider p-6 text-center space-y-3">
+        <div className={`${PUBLIC_CONTENT_LAYOUT.detail} premium-service-provider p-6 text-center space-y-3`}>
           <BackButton fallbackPath={returnTo} />
           <h1 className="service-provider-title">{pickLang(language, {"ru": "Мастер не найден", "en": "Provider not found", "th": "ไม่พบผู้ให้บริการ"})}</h1>
           <p className="text-sm text-muted-foreground">
@@ -167,7 +168,7 @@ const ServiceProviderDetail = () => {
 
   return (
     <AppLayout usePageContainer={false}>
-      <div className="premium-service-provider">
+      <div className={`${PUBLIC_CONTENT_LAYOUT.detail} premium-service-provider`}>
         {/* Header */}
         <div className="relative">
           <BackButton fallbackPath={returnTo} variant="overlay" className="absolute top-4 left-4 z-10" />
