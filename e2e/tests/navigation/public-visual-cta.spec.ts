@@ -119,7 +119,7 @@ test.describe('mobile homepage visual contract', () => {
 
 
 test.describe('homepage premium category gateway', () => {
-  for (const width of [390, 1440, 1915]) {
+  for (const width of [320, 390, 768, 1440, 1915]) {
     test(`all four categories use real photos and readable Lucide icons at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/', { waitUntil: 'domcontentloaded' });
