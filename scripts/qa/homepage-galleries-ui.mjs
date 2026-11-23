@@ -1,6 +1,6 @@
 // Real anonymous Landing, public navigation, search and cards. Synthetic data only; no backend.
 import { build } from 'esbuild';
-import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, rm, copyFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -10,6 +10,13 @@ const output =
   process.env.HOME_GALLERY_OUTPUT || '/tmp/browser/homepage-galleries-isolated';
 await mkdir(output, { recursive: true });
 await writeFile(path.join(output, 'fixture-home.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"><rect width="640" height="480" fill="#dce5e3"/><path d="M80 340V190L320 70l240 120v150" fill="#a7bab5"/><text x="48" y="430" font-size="24" fill="#203333">SYNTHETIC HOME / QA ONLY</text></svg>');
+// Static public assets referenced by absolute path from homepage components
+// (e.g. homeServiceCategories yacht art). The QA browser only serves files in
+// the output folder and aborts everything else, so mirror them here.
+for (const asset of ['yachts/catamaran-53-1.webp']) {
+  await mkdir(path.join(output, path.dirname(asset)), { recursive: true });
+  await copyFile(path.join(root, 'public', asset), path.join(output, asset));
+}
 await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
   '@/hooks/usePlatformSocialLinks': `export const usePlatformSocialLinks=()=>({data:{}});`,
