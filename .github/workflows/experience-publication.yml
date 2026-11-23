@@ -8,6 +8,8 @@ on:
       - 'src/hooks/useExperiences.ts'
       - 'src/lib/taxonomies/experienceDiscovery.ts'
       - 'src/lib/__tests__/experiencePublication.postgres.test.ts'
+      - 'src/lib/__tests__/experienceRepairSqlParity.test.ts'
+      - 'docs/hardening/operational-repairs/experience-publication-20261118/**'
       - 'scripts/qa/fixtures/experience-security/**'
       - 'scripts/qa/experiences-journey-ui.*'
       - '.github/workflows/experience-publication.yml'
@@ -44,7 +46,7 @@ jobs:
           python3 -m pip install playwright
           python3 -m playwright install --with-deps chromium
       - name: Verify real PostgreSQL roles against synthetic records
-        run: npx vitest run src/lib/__tests__/experiencePublication.postgres.test.ts
+        run: npx vitest run src/lib/__tests__/experiencePublication.postgres.test.ts src/lib/__tests__/experienceRepairSqlParity.test.ts
       - name: Verify catalogue and actual admin desktop and mobile
         if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
         run: node scripts/qa/experiences-journey-ui.mjs
