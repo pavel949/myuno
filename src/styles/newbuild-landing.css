@@ -202,7 +202,7 @@
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
-.newbuild-trust .rental-section-heading p,
+.newbuild-landing .newbuild-trust .rental-section-heading p:not(.rental-eyebrow),
 .newbuild-trust .newbuild-three p,
 .newbuild-trust .newbuild-method p {
   color: hsl(var(--primary-foreground) / 0.85);
