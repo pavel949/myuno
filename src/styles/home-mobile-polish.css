@@ -171,14 +171,14 @@
     background: hsl(var(--home-ui-direction-navy));
     box-shadow: 0 4px 14px hsl(var(--home-ui-shadow-card) / .08);
   }
-  .cinematic-home.home-refined .home-reference-direction > img[src$=".svg"] {
-    object-fit: contain;
-    padding: 18px;
-    opacity: .11;
-  }
   .cinematic-home.home-refined .home-reference-direction-content {
     padding: 12px;
     gap: 5px;
+  }
+  .cinematic-home.home-refined .home-reference-direction-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
   }
   .cinematic-home.home-refined .home-reference-direction-content svg {
     width: 23px; height: 23px;
