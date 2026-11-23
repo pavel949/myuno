@@ -281,6 +281,13 @@
       "when": 1794971473362,
       "tag": "0039_public_org_social_links",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795426850387,
+      "tag": "0040_restrict_thai_business_reviews_select",
+      "breakpoints": true
     }
   ]
 }
