@@ -64,7 +64,7 @@ export default function Landing() {
           {href:R.SERVICES, icon:PlaneTakeoff, image:transferPhoto, title:{ru:'Услуги',en:'Services',th:'บริการ'}, subtitle:{ru:'Трансфер, Fast Track и помощь',en:'Transfers and assistance',th:'รถรับส่งและความช่วยเหลือ'}},
         ] as const).map(({href,icon:Icon,image,title,subtitle})=><Link key={href} to={href} className="home-reference-direction">
           <img src={image} alt="" loading="lazy" decoding="async" /><span className="home-reference-direction-shade" />
-          <span className="home-reference-direction-content"><Icon size={25} aria-hidden="true"/><strong>{t(title)}</strong><small>{t(subtitle)}</small></span>
+          <span className="home-reference-direction-content"><span className="home-reference-direction-icon"><Icon size={23} strokeWidth={1.8} aria-hidden="true" /></span><strong>{t(title)}</strong><small>{t(subtitle)}</small></span>
         </Link>)}
       </nav>
       <HomeHousingPreview />
