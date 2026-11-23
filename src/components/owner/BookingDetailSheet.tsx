@@ -144,7 +144,9 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle,
       {isManagement && booking.property_id && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {inventoryBookingId && <Button className="min-h-11 h-auto whitespace-normal sm:col-span-2" asChild>
-            <Link to={`/mc/chat/booking/${encodeURIComponent(inventoryBookingId)}`} onClick={() => onOpenChange(false)}>
+            <Link to={`/mc/chat/booking/${encodeURIComponent(inventoryBookingId)}`}
+              state={location.pathname === '/mc/today' ? { bookingChatReturnTo: location.pathname + location.search + location.hash } : undefined}
+              onClick={() => onOpenChange(false)}>
               {isRu ? 'Открыть переписку с гостем' : 'Open guest conversation'}
             </Link>
           </Button>}
