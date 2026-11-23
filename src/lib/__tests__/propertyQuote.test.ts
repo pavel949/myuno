@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow } from '../../../supabase/functions/_shared/property-quote';
 
+import { validateCheckoutPayment } from '../../../supabase/functions/_shared/checkout-payment-guard';
+
 const prop = (o: Partial<PropertyPricingRow> = {}): PropertyPricingRow => ({
   price_per_night: 3000, price: null, price_period: 'night', cleaning_fee: 500, extra_cleaning_price: null,
   currency: 'THB', is_active: true, status: 'verified', max_guests: 4, min_stay_nights: 2,
@@ -78,6 +80,18 @@ describe('booking page contract', () => {
 });
 
 describe('Stripe deposit allocation', () => {
+  it('reconciles the amount generated from the server quote with the recorded deposit', () => {
+    const quote = quotePropertyStay(prop(), base);
+    if (!quote.ok) throw new Error('Expected a valid property quote');
+
+    const { rental, cleaning } = splitDepositMinorUnits(quote.deposit, quote.cleaningFee);
+    const session = { id: 'cs_quote', payment_status: 'paid', amount_total: rental + cleaning, currency: 'thb', payment_intent: 'pi_quote' };
+    const deposit = { amount: quote.deposit, currency: quote.currency, provider_ref: session.id, status: 'pending' };
+
+    expect(validateCheckoutPayment(session, deposit)).toBeNull();
+    expect(validateCheckoutPayment({ ...session, amount_total: rental }, deposit)).toBe('amount_mismatch');
+    expect(validateCheckoutPayment(session, { ...deposit, status: 'cancelled' })).toBe('payment_not_payable');
+  });
   it('preserves the exact deposit with fractional cleaning amounts', () => {
     for (const cleaningFee of [0, 500, 505, 505.55]) {
       const split = splitDepositMinorUnits(950, cleaningFee);
