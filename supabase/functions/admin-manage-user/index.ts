@@ -20,7 +20,6 @@ Deno.serve(async (req) => {
     const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
     if (guard) return guard;
     const admin = createServiceClient();
-    const isAdmin = true;
 
     const { action, user_id, role, hard_delete } = await req.json();
 
@@ -37,6 +36,39 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Forbidden", message: "Cannot perform this action on yourself" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Platform-admin protection. add_role already refuses to mint admins here;
+    // the reverse must hold too, otherwise one admin can lock out every other
+    // admin (suspend/deactivate/delete them, or strip their admin role) — or
+    // lock themselves out by removing their own admin role.
+    const PROTECTED_ROLES = ["admin", "uno_team"];
+    if (action === "remove_role" && callerId === user_id && PROTECTED_ROLES.includes(role)) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden", message: "Cannot remove your own platform role" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const targetsPlatformAdmin =
+      ["suspend", "deactivate", "delete"].includes(action) ||
+      (action === "remove_role" && role === "admin");
+    if (targetsPlatformAdmin) {
+      const { data: targetAdminRole, error: roleLookupErr } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user_id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (roleLookupErr) throw roleLookupErr;
+      if (targetAdminRole) {
+        return new Response(
+          JSON.stringify({
+            error: "Forbidden",
+            message: "Platform admins cannot be suspended, deleted or demoted via this endpoint",
+          }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     let result: Record<string, unknown> = {};

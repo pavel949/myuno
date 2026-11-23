@@ -238,7 +238,12 @@ export function useUpdateProspect() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; status?: string; notes?: string; assigned_to?: string; next_followup_at?: string; contact_count?: number; last_contact_at?: string; outreach_channel?: string }) => {
+    mutationFn: async ({ id, previous_status, ...updates }: { id: string; previous_status?: string; status?: string; notes?: string; assigned_to?: string; next_followup_at?: string; contact_count?: number; last_contact_at?: string; outreach_channel?: string }) => {
+      // No-op drag (dropped on the same column) — don't write or log anything.
+      if (updates.status && previous_status === updates.status && Object.keys(updates).length === 1) {
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('vendor_prospects')
         .update(updates)
@@ -247,11 +252,32 @@ export function useUpdateProspect() {
         .single();
 
       if (error) throw error;
+
+      // There is no DB trigger for status history, so record it here; otherwise the
+      // CRM activity feed only ever shows notes and the pipeline has no audit trail.
+      if (updates.status && previous_status !== updates.status) {
+        const { data: auth } = await supabase.auth.getUser();
+        const { error: logError } = await supabase.from('vendor_prospect_activity').insert({
+          prospect_id: id,
+          activity_type: 'status_change',
+          old_value: previous_status ?? null,
+          new_value: updates.status,
+          performed_by: auth.user?.id ?? null,
+        });
+        // The status itself was saved; a missing history row must not fail the move.
+        if (logError) toast.error('Status saved, but history was not recorded');
+      }
+
       return data as VendorProspect;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, vars) => {
       queryClient.invalidateQueries({ queryKey: ['vendor-prospects'] });
-      queryClient.invalidateQueries({ queryKey: ['vendor-prospect', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['vendor-prospect', vars.id] });
+      queryClient.invalidateQueries({ queryKey: ['prospect-activity', vars.id] });
+      queryClient.invalidateQueries({ queryKey: ['prospect-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-crm-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-crm-activity'] });
+      return data;
     },
     onError: () => {
       toast.error('Ошибка обновления');
@@ -373,6 +399,10 @@ export function useLogActivity() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['prospect-activity', data.prospect_id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-crm-activity'] });
+    },
+    onError: () => {
+      toast.error('Ошибка сохранения заметки / Failed to save note');
     },
   });
 }
