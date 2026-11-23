@@ -193,3 +193,37 @@
 .dark .cinematic-home.home-refined .home-locations .home-guide-pin {
   color: hsl(var(--foreground));
 }
+
+/* Desktop landing search: dates, guests and CTA share one purposeful row. */
+@media (min-width: 1024px) {
+  .cinematic-home.home-refined .home-reference-search .home-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, .75fr) minmax(0, .85fr);
+    gap: 12px 14px;
+    align-items: center;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-modes,
+  .cinematic-home.home-refined .home-reference-search .home-search-duration,
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    grid-column: 1 / -1;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-dates {
+    grid-column: 1;
+    width: 100%;
+    max-width: none;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-guests-inline {
+    grid-column: 2;
+    min-width: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-submit {
+    grid-column: 3;
+    min-height: 52px;
+    margin: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    justify-self: start;
+  }
+}
