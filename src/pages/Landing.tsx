@@ -56,7 +56,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
-      <nav className="home-container home-reference-directions" aria-label={t({ru:'Основные направления',en:'Explore myUNO',th:'สำรวจ myUNO'})}>
+      <nav className="home-container home-reference-directions" data-home-gateway="photo-lucide-20261123" aria-label={t({ru:'Основные направления',en:'Explore myUNO',th:'สำรวจ myUNO'})}>
         {([
           {href:R.PROPERTY_RENT, icon:House, image:hero, title:{ru:'Снять жильё',en:'Rent a home',th:'เช่าที่พัก'}, subtitle:{ru:'Виллы и апартаменты на любой срок',en:'Villas and apartments',th:'วิลล่าและอพาร์ตเมนต์'}},
           {href:R.GOAL_BUY, icon:Building2, image:propertyPhoto, title:{ru:'Купить недвижимость',en:'Buy property',th:'ซื้ออสังหาริมทรัพย์'}, subtitle:{ru:'Готовые объекты и новостройки',en:'Homes and new developments',th:'บ้านและโครงการใหม่'}},
