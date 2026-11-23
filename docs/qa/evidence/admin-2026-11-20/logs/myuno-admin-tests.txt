@@ -1,0 +1,80 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v3.2.6 /tmp/myuno-admin-acceptance
+
+stderr | src/components/auth/RoleGuard.verification.test.tsx > actual resolved-context query verification boundary > preserves a same-identity draft across repeated successful checks while never exposing it pending
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/auth/RoleGuard.verification.test.tsx (18 tests) 1256ms
+   ✓ actual resolved-context query verification boundary > preserves a same-identity draft across repeated successful checks while never exposing it pending  469ms
+stderr | src/pages/admin/__tests__/AdminProperties.editor.test.tsx > contained admin property editor > creates with explicit separate monthly, nightly and sale values and currencies
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/admin/__tests__/NewbuildPriceEditing.test.tsx > existing CMS → canonical public starting price > saves a THB starting price, refreshes card/detail/home, and respects a cleared price
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/admin/__tests__/NewbuildPriceEditing.test.tsx > existing CMS → canonical public starting price > saves a THB starting price, refreshes card/detail/home, and respects a cleared price
+Web Audio API not supported
+Web Audio API not supported
+
+stderr | src/pages/admin/__tests__/NewbuildPriceEditing.test.tsx > existing CMS → canonical public starting price > saves a THB starting price, refreshes card/detail/home, and respects a cleared price
+Web Audio API not supported
+Web Audio API not supported
+
+stderr | src/pages/admin/__tests__/NewbuildPriceEditing.test.tsx > existing CMS → canonical public starting price > saves a THB starting price, refreshes card/detail/home, and respects a cleared price
+Web Audio API not supported
+Web Audio API not supported
+
+ ✓ src/pages/admin/__tests__/NewbuildPriceEditing.test.tsx (1 test) 1503ms
+   ✓ existing CMS → canonical public starting price > saves a THB starting price, refreshes card/detail/home, and respects a cleared price  1502ms
+ ✓ src/hooks/__tests__/useIsAdmin.actor.test.tsx (9 tests) 456ms
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > confirms a complete bulk link, refreshes actual data and clears selection
+Web Audio API not supported
+
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > retains selection and reports unconfirmed zero bulk writes
+Web Audio API not supported
+
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > retains selection and reports unconfirmed partial bulk writes
+Web Audio API not supported
+
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > retains selection and reports unconfirmed inconsistent bulk writes
+Web Audio API not supported
+
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > retains selection and reports unconfirmed error bulk writes
+Web Audio API not supported
+
+stderr | src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx > does not report all properties linked when the source query fails, and retries reads only
+Web Audio API not supported
+
+ ✓ src/components/admin/PropertyProjectBulkLinkPanel.integration.test.tsx (6 tests) 782ms
+   ✓ confirms a complete bulk link, refreshes actual data and clears selection  318ms
+ ✓ src/hooks/__tests__/useAdminProperties.write.test.tsx (10 tests) 573ms
+ ✓ src/hooks/__tests__/useAdminDevelopers.cache.test.tsx (5 tests) 96ms
+ ✓ src/pages/admin/__tests__/AdminProperties.editor.test.tsx (24 tests) 12500ms
+   ✓ contained admin property editor > preserves the complete 'monthly' commercial record on an unrelated edit  765ms
+   ✓ contained admin property editor > explicitly clears the last gallery photo and cover without deleting storage  654ms
+   ✓ contained admin property editor > creates with explicit separate monthly, nightly and sale values and currencies  437ms
+   ✓ contained admin property editor > owns one scrolling body with a protected footer and accessible tab labels  896ms
+   ✓ contained admin property editor > clears edit and preserves filters after cancel dismissal  527ms
+   ✓ contained admin property editor > clears edit and preserves filters after close dismissal  558ms
+   ✓ contained admin property editor > clears edit and preserves filters after escape dismissal  611ms
+   ✓ contained admin property editor > shows honest cloud help above the sheet and opens the URL importer in en  1299ms
+   ✓ contained admin property editor > shows honest cloud help above the sheet and opens the URL importer in ru  1334ms
+   ✓ contained admin property editor > opens the photo editor above the sheet and cancels without changing the form  1504ms
+   ✓ contained admin property editor > keeps the originally reviewed revision after a background list refresh  501ms
+   ✓ contained admin property editor > keeps unsaved edits visible and explains an unconfirmed save without closing  489ms
+ ✓ src/lib/propertyWriteReceipt.test.ts (6 tests) 6ms
+stderr | src/components/admin/__tests__/ProviderSelector.layering.test.tsx > provider picker inside the property editor sheet > opens above the editor window and registers the chosen provider
+Web Audio API not supported
+
+ ✓ src/components/admin/__tests__/ProviderSelector.layering.test.tsx (1 test) 889ms
+   ✓ provider picker inside the property editor sheet > opens above the editor window and registers the chosen provider  883ms
+
+ Test Files  9 passed (9)
+      Tests  80 passed (80)
+   Start at  09:20:06
+   Duration  18.16s (transform 2.23s, setup 646ms, collect 6.55s, tests 18.06s, environment 5.79s, prepare 985ms)
+
