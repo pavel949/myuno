@@ -88,9 +88,9 @@ export default function CrmDashboardPage() {
       result = result.filter(d => d.agent_id === agentFilter);
     }
     if (search.trim()) {
-      const q = search.toLowerCase();
+      const q = search.trim().toLowerCase();
       result = result.filter(d =>
-        d.client_name.toLowerCase().includes(q) ||
+        d.client_name?.toLowerCase().includes(q) ||
         d.client_phone?.toLowerCase().includes(q) ||
         d.client_email?.toLowerCase().includes(q) ||
         d.notes?.toLowerCase().includes(q)
@@ -149,8 +149,8 @@ export default function CrmDashboardPage() {
   return (
     <div className="p-4 md:p-6 space-y-4 w-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-bold">CRM</h1>
           {/* Side filter — drives both pipeline list & deal list */}
           <div className="inline-flex border border-border bg-card">
@@ -162,7 +162,9 @@ export default function CrmDashboardPage() {
               <button
                 key={String(opt.v)}
                 type="button"
+                aria-pressed={sideFilter === opt.v}
                 onClick={() => {
+                  if (sideFilter === opt.v) return;
                   setSideFilter(opt.v);
                   // Clear pipeline selection so the default pipeline for the new side is picked.
                   setSelectedPipelineId(null);
@@ -238,6 +240,8 @@ export default function CrmDashboardPage() {
         {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
           <button
             key={s}
+            type="button"
+            aria-pressed={filterStatus === s}
             onClick={() => setFilterStatus(s)}
             className={cn(
               'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
@@ -253,6 +257,8 @@ export default function CrmDashboardPage() {
             {(['all', ...DEAL_TYPES] as const).map(t => (
               <button
                 key={t}
+                type="button"
+                aria-pressed={filterType === t}
                 onClick={() => setFilterType(t === 'all' ? 'all' : t)}
                 className={cn(
                   'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
