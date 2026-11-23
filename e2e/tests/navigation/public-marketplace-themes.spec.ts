@@ -146,3 +146,26 @@ test('dark homepage search, services and districts use readable dark surfaces', 
   for (const key of ['labelContrast', 'guestContrast', 'inactiveContrast', 'submitContrast'] as const)
     expect(result[key], key).toBeGreaterThanOrEqual(4.5);
 });
+
+
+test('desktop homepage dates, guests and primary CTA occupy the same row', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => localStorage.setItem('myuno-theme', 'dark'));
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  const search = page.locator('.home-reference-search');
+  await expect(search).toBeVisible();
+  const boxes = await search.evaluate((root) => {
+    const query = (selector: string) => root.querySelector(selector)!.getBoundingClientRect();
+    const dates = query('.home-search-dates');
+    const guests = query('.home-search-guests');
+    const button = query('.home-search-submit');
+    return {
+      dates: dates.top, guests: guests.top, button: button.top,
+      guestsWidth: guests.width, ctaWidth: button.width,
+    };
+  });
+  expect(Math.abs(boxes.dates - boxes.guests)).toBeLessThanOrEqual(4);
+  expect(Math.abs(boxes.dates - boxes.button)).toBeLessThanOrEqual(4);
+  expect(boxes.guestsWidth).toBeGreaterThanOrEqual(150);
+  expect(boxes.ctaWidth).toBeGreaterThanOrEqual(175);
+});
