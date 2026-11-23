@@ -35,7 +35,6 @@
     font-size: var(--home-ui-section-mobile);
   }
   .cinematic-home.home-refined {
-    --home-gallery-gap: 32px;
     --public-section-gap: 32px;
     overflow-x: clip;
     font-size: var(--home-ui-body);
@@ -43,7 +42,8 @@
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   }
   .cinematic-home.home-refined .home-container {
-    width: calc(100% - 36px);
+    --home-mobile-gutter: 18px;
+    width: calc(100% - 2 * var(--home-mobile-gutter) * var(--layout-inset-scale));
     max-width: none;
     margin-inline: auto;
     min-width: 0;
@@ -204,7 +204,12 @@
 
   /* Editorial headings and product rails. One *complete* card per screen.
      The former 92% rail exposed cut-off names and prices of the next property. */
-  .cinematic-home.home-refined .home-gallery { padding-top: 32px; min-width: 0; }
+  .cinematic-home.home-refined .home-gallery {
+    /* Preserve 32px at the default scale while honoring global section spacing. */
+    --home-gallery-gap: calc(2rem * var(--section-space-scale));
+    padding-top: var(--home-gallery-gap);
+    min-width: 0;
+  }
   .cinematic-home.home-refined .home-gallery-heading {
     gap: 8px;
     margin-bottom: 13px;
@@ -445,7 +450,7 @@
   .cinematic-home.home-refined .home-closing { margin-top: 32px !important; padding-block: 24px; }
 }
 @media (max-width: 350px) {
-  .cinematic-home.home-refined .home-container { width: calc(100% - 28px); }
+  .cinematic-home.home-refined .home-container { --home-mobile-gutter: 14px; }
   .cinematic-home.home-refined .home-reference-direction-content { padding: 10px; }
   .cinematic-home.home-refined .home-reference-direction-content strong { font-size: var(--home-ui-caption); }
   .cinematic-home.home-refined .home-reference-direction-content small { font-size: var(--home-ui-caption-tiny); }

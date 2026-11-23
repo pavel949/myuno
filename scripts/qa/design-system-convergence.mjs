@@ -14,6 +14,13 @@ import autoprefixer from 'autoprefixer';
 
 const root = process.cwd();
 const output = path.resolve(process.argv[2]);
+const homeStyles = [
+  'src/styles/cinematic-home.css',
+  'src/styles/premium-public.css',
+  'src/styles/homepage-refinement.css',
+  'src/styles/home-reference.css',
+  'src/styles/home-mobile-polish.css',
+];
 const baseline = process.argv.includes('--baseline');
 const tokensPath = path.join(root, 'src/styles/tokens.css');
 const originalTokens = await readFile(tokensPath, 'utf8');
@@ -45,7 +52,7 @@ const cssServer = createServer((req, res) => {
   if (req.method !== 'GET') { res.writeHead(405); res.end(); return; }
   const file = req.url.split('?')[0];
   if (file === '/src/index.css') { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(cssByVariant.normal); }
-  else if (['/src/styles/cinematic-home.css','/src/styles/premium-public.css','/src/styles/homepage-refinement.css'].includes(file)) readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
+  else if (homeStyles.includes(file.slice(1))) readFile(path.join(root, file.slice(1)), 'utf8').then(css => { res.writeHead(200, { 'Content-Type': 'text/css' }); res.end(css); });
   else { res.writeHead(404); res.end(); }
 });
 await new Promise(resolve => cssServer.listen(0, '127.0.0.1', resolve));
@@ -73,13 +80,13 @@ for (const role of ['public', 'pms', 'admin']) {
   const folder = path.join(output, role); await mkdir(folder, { recursive: true });
   await cp(path.join(output, 'probes.js'), path.join(folder, 'probes.js'));
   for (const variant of variants) {
-    const extra = role === 'public' ? (await Promise.all(['src/styles/cinematic-home.css','src/styles/premium-public.css','src/styles/homepage-refinement.css'].map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
+    const extra = role === 'public' ? (await Promise.all(homeStyles.map(file=>readFile(path.join(root,file),'utf8')))).join('\n') : role === 'admin' ? workspaceCss : '';
     await writeFile(path.join(folder, `${variant}.css`), cssByVariant[variant] + '\n' + extra);
   }
   await writeFile(path.join(folder, 'fixture.html'), '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/variant.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script><script type="module" src="/probes.js"></script></body></html>');
 }
 const changed = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(file => /^(src\/|tailwind.config|index.html)/.test(file));
-const sourceInputs = [...new Set([...changed, 'src/pages/Landing.tsx', 'src/pages/mc/operations/PmsTodayPage.tsx', 'src/pages/admin/AdminDashboard.tsx', 'src/contexts/ThemeContext.tsx', 'src/components/ui/button.tsx', 'src/components/ui/input.tsx', 'src/components/ui/status-pill.tsx'])];
+const sourceInputs = [...new Set([...changed, ...homeStyles, 'src/pages/Landing.tsx', 'src/pages/mc/operations/PmsTodayPage.tsx', 'src/pages/admin/AdminDashboard.tsx', 'src/contexts/ThemeContext.tsx', 'src/components/ui/button.tsx', 'src/components/ui/input.tsx', 'src/components/ui/status-pill.tsx'])];
 const hashes = Object.fromEntries(await Promise.all(sourceInputs.map(async file => [file, createHash('sha256').update(await readFile(path.join(root, file))).digest('hex')])));
 await writeFile(path.join(output, 'source-provenance.json'), JSON.stringify({ root, baseline, canonicalTokenSHA256: createHash('sha256').update(originalTokens).digest('hex'), sourceInputs: hashes, variants, mutationSource: 'only src/styles/tokens.css loaded by PostCSS; no page edits', realComponents: ['Landing', 'PmsTodayPage', 'AdminDashboard', 'ThemeProvider', 'Button', 'Input', 'StatusPill'], boundaries: ['synthetic catalog/read/auth hooks', 'admin sidebar frame', 'no real transport'], liveFontsVerified: false }, null, 2));
 console.log(`Built isolated design acceptance assets at ${output}; no browser acceptance claimed yet.`);
