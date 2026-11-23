@@ -1,8 +1,11 @@
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
-import { fetchInboxRequest, INBOX_DETAIL_FIELDS, isInboxSource } from '@/lib/adminInbox';
+import { fetchInboxRequest, INBOX_DETAIL_FIELDS, isInboxRequestId, isInboxSource } from '@/lib/adminInbox';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -13,7 +16,7 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
   const { isAdmin, isLoading: checking, error: accessError } = useIsAdmin();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const valid = isInboxSource(source) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId);
+  const valid = isInboxSource(source) && isInboxRequestId(requestId);
   const admitted = !!user?.id && isAdmin && !checking && !accessError;
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-inbox-request', user?.id, source, requestId],
@@ -51,6 +54,13 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
                 })}
               </dl>
               {buyerContext && <div className="mt-4"><BuyerRequestSummary metadata={buyerContext} detailOpen={admitted && valid} /></div>}
+              {buyerContext?.request_only === true && isInboxRequestId(buyerContext.project_id) && (
+                <Button asChild variant="outline" className="mt-4">
+                  <Link to={{ pathname: APP_ROUTES.ADMIN_CONSULTATIONS, search: new URLSearchParams({ request: requestId }).toString() }}>
+                    {pickLang(language, { ru: 'Обработать заявку', en: 'Handle this request', th: 'ดำเนินการตามคำขอนี้' })}
+                  </Link>
+                </Button>
+              )}
             </>}
         </div>
       </SheetContent>
