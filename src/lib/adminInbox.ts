@@ -10,6 +10,9 @@ export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'l
 export function isInboxSource(value: string | null): value is InboxSource {
   return INBOX_SOURCES.some(source => source === value);
 }
+export function isInboxRequestId(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
 export function inboxRequestHref(source: InboxSource, id: string) {
   return `${APP_ROUTES.ADMIN_INBOX}?${new URLSearchParams({ source, request: id })}`;
 }
@@ -24,7 +27,7 @@ export const INBOX_DETAIL_FIELDS: Record<InboxSource, readonly (readonly [string
   property_inquiries: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['property_id', 'Property ID', 'ID объекта'], ['check_in', 'Check-in', 'Заезд'], ['check_out', 'Check-out', 'Выезд'], ['guests', 'Guests', 'Гости'], ['message', 'Message', 'Сообщение']],
 };
 export async function fetchInboxRequest(source: InboxSource, id: string): Promise<Record<string, unknown> | null> {
-  if (!isInboxSource(source) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid request selection');
+  if (!isInboxSource(source) || !isInboxRequestId(id)) throw new Error('Invalid request selection');
   const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
   if (source === 'consultation_requests') fields.push('vertical_metadata');
   const { data, error } = await supabase.from(source).select(fields.join(',')).eq('id', id).maybeSingle();
