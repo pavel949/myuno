@@ -213,7 +213,7 @@ export default function NewbuildLanding() {
           <h1 id="newbuild-title">
             <span className="rental-eyebrow rental-title-kicker">
               myUNO / {t(copy.eyebrow)}
-            </span>
+            </span>{" "}
             <span className="rental-title-text">{t(copy.headline)}</span>
           </h1>
           <p className="rental-hero-lead">{t(copy.lead)}</p>

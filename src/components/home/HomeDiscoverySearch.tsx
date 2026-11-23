@@ -96,7 +96,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         <label className="home-search-guests home-search-guests-inline" htmlFor={guestsId}>
           <Users size={18} aria-hidden="true" /><span>
             <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
-            <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое количество', en: 'Any number', th: 'ไม่จำกัด' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+            <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое число', en: 'Any number', th: 'ไม่จำกัด' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
           </span>
         </label>
       )}

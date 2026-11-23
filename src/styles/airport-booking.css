@@ -9,7 +9,7 @@
   position: relative;
   isolation: isolate;
   background-color: hsl(var(--brand-navy-900));
-  color: hsl(var(--surface-white));
+  color: hsl(var(--media-foreground));
 }
 
 .airport-booking__image,
@@ -71,16 +71,16 @@
 }
 
 .airport-booking__back button {
-  border: 1px solid hsl(var(--surface-white) / 0.42);
+  border: 1px solid hsl(var(--media-foreground) / 0.42);
   border-radius: var(--radius);
   background: hsl(var(--brand-navy-900) / 0.6);
-  color: hsl(var(--surface-white));
+  color: hsl(var(--media-foreground));
   min-height: 2.75rem;
   padding-inline: var(--section-content-gap);
 }
 
 .airport-booking__back button:not(:disabled):hover {
-  background: hsl(var(--surface-white));
+  background: hsl(var(--media-foreground));
   color: hsl(var(--brand-navy-900));
 }
 

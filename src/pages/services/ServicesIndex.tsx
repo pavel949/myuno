@@ -13,12 +13,6 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
 import { MarketplaceDiscoveryMenu } from '@/components/services/MarketplaceDiscoveryMenu';
 import { MarketplaceFilterSheet } from '@/components/services/MarketplaceFilterSheet';
-import cleaningImage from '@/assets/solutions/cleaning.webp';
-import transferImage from '@/assets/solutions/transfer.webp';
-import legalImage from '@/assets/solutions/legal.webp';
-import healthImage from '@/assets/solutions/massage.webp';
-import familyImage from '@/assets/solutions/pediatr.webp';
-import foodImage from '@/assets/solutions/restaurant.webp';
 import { ServiceFunctionCard } from '@/components/services';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -118,10 +112,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       focusResults.current = false;
     }
   }, [category, filters.situation]);
-  const categoryImage = (id: string) => isHomeServiceCategoryId(id) ? cleaningImage : ({
-    'cat-transport': transferImage, 'cat-business-legal': legalImage, 'cat-health-wellness': healthImage,
-    'cat-family-kids': familyImage, 'cat-food-delivery': foodImage,
-  } as Record<string, string>)[id];
   const discoveryFilters = <MarketplaceFilterSheet title={t('Категории и ситуации', 'Categories and situations', 'หมวดหมู่และสถานการณ์')} activeCount={[Boolean(filters.category), Boolean(filters.situation)].filter(Boolean).length}>
 
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
@@ -179,7 +169,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       title={filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}
       allLabel={filters.view === 'situations' ? t('Все ситуации', 'All situations', 'ทุกสถานการณ์') : undefined} headingId="service-menu-title" itemAttribute={filters.view === 'categories' ? 'data-category-id' : 'data-situation-code'} testId={filters.view === 'categories' ? 'service-discovery-menu' : 'service-situation-menu'}
       items={filters.view === 'categories'
-        ? [...[...menu.primary, ...menu.more].map(item => ({ id: item.id, label: label(item), icon: item.icon, image: categoryImage(item.id) })), ...(menu.yacht ? [{ id: 'dedicated-yacht-catalogue', label: label(menu.yacht), icon: menu.yacht.icon, href: menu.yacht.path, navigationState: { returnTo } }] : [])]
+        ? [...[...menu.primary, ...menu.more].map(item => ({ id: item.id, label: label(item), icon: item.icon })), ...(menu.yacht ? [{ id: 'dedicated-yacht-catalogue', label: label(menu.yacht), icon: menu.yacht.icon, href: menu.yacht.path, navigationState: { returnTo } }] : [])]
         : situations.map(item => ({ id: item.code, label: pickLang(language, { ru: item.titleRu, en: item.titleEn }) }))}
       onSelect={id => { focusResults.current = true; update(filters.view === 'categories' ? 'category' : 'situation', id); }}
     />}

@@ -125,3 +125,105 @@
 }
 
 /* Mobile styling is owned exclusively by home-mobile-polish.css. */
+
+/*
+ * Dark public-home surfaces must follow semantic theme tokens. The photographic
+ * hero and photo overlays remain dark in both modes; search and catalogue
+ * surfaces follow the selected theme instead of mixing white cards and cream text.
+ */
+.dark .cinematic-home.home-refined {
+  background: hsl(var(--background));
+}
+.dark .cinematic-home.home-refined .home-reference-search,
+.dark .cinematic-home.home-refined .home-reference-search .home-search {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search {
+  --home-navy: hsl(var(--foreground));
+  --home-ink: hsl(var(--foreground));
+  --home-muted: hsl(var(--muted-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search {
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-field-label {
+  color: hsl(var(--muted-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search :is(input, select, [role="combobox"], .home-search-date-trigger, .home-search-secondary summary) {
+  color: hsl(var(--foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-modes button,
+.dark .cinematic-home.home-refined .home-reference-search .home-search-duration button {
+  border-color: hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed="true"],
+.dark .cinematic-home.home-refined .home-reference-search .home-search-duration button[aria-pressed="true"],
+.dark .cinematic-home.home-refined .home-reference-search .home-search-submit {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-submit:hover {
+  background: hsl(var(--primary-hover));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-category-card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-category-copy h3 {
+  color: hsl(var(--card-foreground));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-lucide-symbol {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
+}
+.dark .cinematic-home.home-refined .home-locations .home-guide-card {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-locations .home-guide-card h3,
+.dark .cinematic-home.home-refined .home-locations .home-guide-pin {
+  color: hsl(var(--foreground));
+}
+
+/* Desktop landing search: dates, guests and CTA share one purposeful row. */
+@media (min-width: 1024px) {
+  .cinematic-home.home-refined .home-reference-search .home-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, .75fr) minmax(0, .85fr);
+    gap: 12px 14px;
+    align-items: center;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-modes,
+  .cinematic-home.home-refined .home-reference-search .home-search-duration,
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    grid-column: 1 / -1;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-dates {
+    grid-column: 1;
+    width: 100%;
+    max-width: none;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-guests-inline {
+    grid-column: 2;
+    min-width: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-submit {
+    grid-column: 3;
+    min-height: 52px;
+    margin: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    justify-self: start;
+  }
+}
