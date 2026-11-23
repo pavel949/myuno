@@ -24,13 +24,12 @@ for (const theme of ['light', 'dark'] as const) {
     test.describe(`${theme} theme public marketplace at ${width}px`, () => {
       test.use({ viewport: { width, height: 900 } });
 
-      test('all main catalogues load without horizontal overflow or theme reversal', async ({ page }) => {
-        await page.addInitScript(({ theme }) => {
-          localStorage.setItem('myuno-theme', theme);
-          localStorage.setItem('myuno-language', 'en');
-        }, { theme });
-
-        for (const route of marketplaces) {
+      for (const route of marketplaces) {
+        test(`${route} loads without overflow or theme reversal`, async ({ page }) => {
+          await page.addInitScript(({ theme }) => {
+            localStorage.setItem('myuno-theme', theme);
+            localStorage.setItem('myuno-language', 'en');
+          }, { theme });
           const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
           expect(response?.status(), route).toBeLessThan(400);
           await expect(page.locator('html')).toHaveAttribute('data-theme-ready', theme, { timeout: 12000 });
@@ -41,8 +40,8 @@ for (const theme of ['light', 'dark'] as const) {
           }));
           expect(size.document, `Horizontal overflow on ${route}`)
             .toBeLessThanOrEqual(size.viewport + 1);
-        }
-      });
+        });
+      }
     });
   }
 }
