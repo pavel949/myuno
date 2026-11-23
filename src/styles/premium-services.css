@@ -14,11 +14,7 @@
 .premium-service-offer > img { height: auto; }
 .premium-service-offer > div { padding: 1.25rem; }
 .premium-service-provider {
-  width: calc(100% - var(--public-gutter) * 2);
-  max-width: var(--public-width-detail);
-  margin-inline: auto;
   padding-block: var(--public-detail-gap);
-  padding-bottom: var(--public-detail-gap);
 }
 .premium-service-provider [role="tablist"] { flex-wrap: wrap; gap: .5rem; }
 .premium-service-provider :is(button,[role="tab"]) { min-height: 2.75rem; }

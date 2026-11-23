@@ -137,12 +137,12 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
 
   return (
     <>
-      {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t p-4 z-40">
-        <div className="flex items-center justify-between gap-4">
+      {/* One trigger for both the fixed mobile bar and the desktop booking rail. */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t p-4 z-40 lg:static lg:border lg:bg-card lg:p-5 lg:shadow-sm">
+        <div className="flex items-center justify-between gap-4 lg:flex-col lg:items-stretch">
           <div>
             <p className="text-xs text-muted-foreground">{language === 'ru' ? 'от' : 'from'}</p>
-            <p className="text-xl font-bold text-primary">
+            <p className="text-xl font-bold text-primary lg:text-2xl lg:break-words">
               {currencySymbol}{fromPrice.toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -154,7 +154,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
             <Button variant="outline" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Корзина' : 'Cart'}>
               <ShoppingCart className="w-4 h-4" />
             </Button>
-            <Button className="gap-2" onClick={() => setIsOpen(true)}>
+            <Button className="gap-2 lg:flex-1 lg:min-h-11 lg:h-auto lg:whitespace-normal lg:py-2" onClick={() => setIsOpen(true)}>
               <Zap className="w-4 h-4" />
               {language === 'ru' ? 'Выбрать дату' : 'Choose Date'}
             </Button>

@@ -97,127 +97,133 @@ export default function Profile() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer className="premium-account-frame">
-        {/* Profile header */}
-        <SectionCard className="space-y-3">
-          {/* Profile header row */}
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shrink-0">
-              {profile?.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt="Avatar" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-xl sm:text-2xl font-bold text-primary-foreground">
-                  {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-semibold truncate">
-                  {profile?.full_name || user.email}
-                </h2>
-                <ActiveRoleBadge />
+    <AppLayout usePageContainer={false}>
+      <PageContainer>
+        <div className="grid min-w-0 gap-4 md:gap-6 lg:grid-cols-2 lg:items-start" data-profile-dashboard>
+          <div className="min-w-0 space-y-4 md:space-y-6" data-profile-column="identity">
+            {/* Profile header */}
+            <SectionCard className="space-y-3">
+              {/* Profile header row */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shrink-0">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xl sm:text-2xl font-bold text-primary-foreground">
+                      {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base sm:text-lg font-semibold truncate">
+                      {profile?.full_name || user.email}
+                    </h2>
+                    <ActiveRoleBadge />
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                    {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
+                  </p>
+                  {activeCompany && (
+                    <p className="text-xs text-muted-foreground/80 flex items-center gap-1 mt-0.5">
+                      <Building2 className="w-3 h-3" />
+                      {language === 'ru' ? activeCompany.name_ru : activeCompany.name_en}
+                    </p>
+                  )}
+                </div>
+                <PremiumButton variant="outline" size="sm" onClick={() => navigate(APP_ROUTES.PROFILE_EDIT)} className="shrink-0">
+                  {t('action.edit')}
+                </PremiumButton>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
-              </p>
-              {activeCompany && (
-                <p className="text-xs text-muted-foreground/80 flex items-center gap-1 mt-0.5">
-                  <Building2 className="w-3 h-3" />
-                  {language === 'ru' ? activeCompany.name_ru : activeCompany.name_en}
-                </p>
-              )}
-            </div>
-            <PremiumButton variant="outline" size="sm" onClick={() => navigate(APP_ROUTES.PROFILE_EDIT)} className="shrink-0">
-              {t('action.edit')}
-            </PremiumButton>
+              {/* Verification badge - separate row */}
+              <EmailVerificationBadge variant="inline" />
+            </SectionCard>
+
+            {/* CTA to become owner/vendor for regular users */}
+            <BecomePartnerCTA />
+
+            {/* User roles and permissions (read-only) */}
+            <UserRolesPermissions />
+
+            {/* Referral program */}
+            <ReferralCard variant="compact" />
+
           </div>
-          {/* Verification badge - separate row */}
-          <EmailVerificationBadge variant="inline" />
-        </SectionCard>
-
-        {/* CTA to become owner/vendor for regular users */}
-        <BecomePartnerCTA />
-
-        {/* User roles and permissions (read-only) */}
-        <UserRolesPermissions />
-
-        {/* Referral program */}
-        <ReferralCard variant="compact" />
-
-        {/* Account Menu items */}
-        <SectionCard noPadding className="overflow-hidden divide-y divide-border">
-          {menuItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.onClick}
-              aria-label={item.label}
-              className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
-            >
-              <item.icon className="w-5 h-5 text-muted-foreground" />
-              <span className="flex-1 text-left">{item.label}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-          ))}
-        </SectionCard>
-
-        {/* Admin Menu - only visible for admins */}
-        {isAdmin && (
-          <>
-            <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3" />
-              {language === 'ru' ? 'Администрирование' : 'Administration'}
-            </div>
-            <SectionCard noPadding className="overflow-hidden divide-y divide-border border-primary/30">
-              {adminItems.map((item, index) => (
+          <div className="min-w-0 space-y-4 md:space-y-6" data-profile-column="actions">
+            {/* Account Menu items */}
+            <SectionCard noPadding className="overflow-hidden divide-y divide-border">
+              {menuItems.map((item, index) => (
                 <button
                   key={index}
                   onClick={item.onClick}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-primary/10 transition-colors"
+                  aria-label={item.label}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
                 >
-                  <item.icon className="w-5 h-5 text-primary" />
-                  <span className="flex-1 text-left font-medium">{item.label}</span>
-                  <ChevronRight className="w-5 h-5 text-primary" />
+                  <item.icon className="w-5 h-5 text-muted-foreground" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </button>
               ))}
             </SectionCard>
-          </>
-        )}
 
-        {/* Info & Support */}
-        <div className="text-xs font-medium text-muted-foreground mb-2 mt-4">
-          {language === 'ru' ? 'Информация' : 'Information'}
-        </div>
-        <SectionCard noPadding className="overflow-hidden divide-y divide-border">
-          {infoItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.onClick}
-              className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
+            {/* Admin Menu - only visible for admins */}
+            {isAdmin && (
+              <>
+                <div className="text-xs font-medium text-muted-foreground mb-2 mt-4 flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3" />
+                  {language === 'ru' ? 'Администрирование' : 'Administration'}
+                </div>
+                <SectionCard noPadding className="overflow-hidden divide-y divide-border border-primary/30">
+                  {adminItems.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={item.onClick}
+                      className="w-full flex items-center gap-3 p-4 hover:bg-primary/10 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5 text-primary" />
+                      <span className="flex-1 text-left font-medium">{item.label}</span>
+                      <ChevronRight className="w-5 h-5 text-primary" />
+                    </button>
+                  ))}
+                </SectionCard>
+              </>
+            )}
+
+            {/* Info & Support */}
+            <div className="text-xs font-medium text-muted-foreground mb-2 mt-4">
+              {language === 'ru' ? 'Информация' : 'Information'}
+            </div>
+            <SectionCard noPadding className="overflow-hidden divide-y divide-border">
+              {infoItems.map((item, index) => (
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors"
+                >
+                  <item.icon className="w-5 h-5 text-muted-foreground" />
+                  <span className="flex-1 text-left text-sm">{item.label}</span>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </button>
+              ))}
+            </SectionCard>
+
+            {/* Logout button */}
+            <PremiumButton
+              variant="ghost"
+              className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              aria-label={language === 'ru' ? 'Выйти из аккаунта' : 'Log out'}
             >
-              <item.icon className="w-5 h-5 text-muted-foreground" />
-              <span className="flex-1 text-left text-sm">{item.label}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-          ))}
-        </SectionCard>
-
-        {/* Logout button */}
-        <PremiumButton
-          variant="ghost"
-          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          aria-label={language === 'ru' ? 'Выйти из аккаунта' : 'Log out'}
-        >
-          <LogOut className="w-5 h-5 mr-2" />
-          {isLoggingOut ? (language === 'ru' ? 'Выход...' : 'Logging out...') : t('auth.logout')}
-        </PremiumButton>
+              <LogOut className="w-5 h-5 mr-2" />
+              {isLoggingOut ? (language === 'ru' ? 'Выход...' : 'Logging out...') : t('auth.logout')}
+            </PremiumButton>
+          </div>
+        </div>
       </PageContainer>
     </AppLayout>
   );
