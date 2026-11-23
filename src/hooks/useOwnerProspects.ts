@@ -29,6 +29,8 @@ export function useCreateOwnerProspect() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-prospects'] });
+      qc.invalidateQueries({ queryKey: ['admin-crm-stats'] });
+      qc.invalidateQueries({ queryKey: ['admin-crm-activity'] });
       toast.success('Owner prospect added');
     },
     onError: () => toast.error('Error creating prospect'),
@@ -45,6 +47,8 @@ export function useUpdateOwnerProspect() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-prospects'] });
+      qc.invalidateQueries({ queryKey: ['admin-crm-stats'] });
+      qc.invalidateQueries({ queryKey: ['admin-crm-activity'] });
     },
     onError: () => toast.error('Error updating prospect'),
   });

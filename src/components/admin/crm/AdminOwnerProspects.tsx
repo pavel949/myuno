@@ -27,7 +27,9 @@ export function AdminOwnerProspects() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const { data: prospects, isLoading, refetch } = useOwnerProspects(statusFilter || undefined);
+  // "all" is the Select's reset value — it must not reach the query as status='all'.
+  const effectiveStatus = statusFilter && statusFilter !== 'all' ? statusFilter : undefined;
+  const { data: prospects, isLoading, isError, refetch } = useOwnerProspects(effectiveStatus);
   const updateMutation = useUpdateOwnerProspect();
   const createMutation = useCreateOwnerProspect();
   const [addOpen, setAddOpen] = useState(false);
@@ -36,18 +38,27 @@ export function AdminOwnerProspects() {
   const [newEmail, setNewEmail] = useState('');
 
   const handleStatusChange = (id: string, status: string) => {
-    updateMutation.mutate({ id, status } as any);
+    updateMutation.mutate({ id, status: status as OwnerProspect['status'] });
   };
 
   const handleAdd = () => {
     if (!newName.trim()) return;
-    createMutation.mutate({ owner_name: newName, phone: newPhone || null, email: newEmail || null, status: 'new' as const }, {
+    createMutation.mutate({ owner_name: newName.trim(), phone: newPhone.trim() || null, email: newEmail.trim() || null, status: 'new' as const }, {
       onSuccess: () => { setAddOpen(false); setNewName(''); setNewPhone(''); setNewEmail(''); },
     });
   };
 
   if (isLoading) {
     return <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12" />)}</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="py-8 text-center space-y-3">
+        <p className="text-sm text-destructive">{isRu ? 'Не удалось загрузить собственников' : 'Could not load owner prospects'}</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>
+    );
   }
 
   return (
@@ -78,7 +89,7 @@ export function AdminOwnerProspects() {
               <div><Label>{isRu ? 'Имя' : 'Name'}</Label><Input value={newName} onChange={e => setNewName(e.target.value)} /></div>
               <div><Label>Email</Label><Input value={newEmail} onChange={e => setNewEmail(e.target.value)} /></div>
               <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={newPhone} onChange={e => setNewPhone(e.target.value)} /></div>
-              <Button onClick={handleAdd} disabled={!newName.trim()}>{isRu ? 'Создать' : 'Create'}</Button>
+              <Button onClick={handleAdd} disabled={!newName.trim() || createMutation.isPending}>{isRu ? 'Создать' : 'Create'}</Button>
             </div>
           </DialogContent>
         </Dialog>

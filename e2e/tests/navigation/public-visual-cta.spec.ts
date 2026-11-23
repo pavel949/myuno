@@ -113,6 +113,6 @@ test.describe('mobile homepage visual contract', () => {
     await expect(page.locator('.home-reference-search .home-search-modes button').last())
       .toHaveAttribute('aria-pressed', 'true');
     await page.locator('.home-reference-search .home-search-submit').click();
-    await expect(page).toHaveURL(/\\/property\\/search\\?.*mode=buy/);
+    await expect(page).toHaveURL(/\/property\/search\?.*mode=buy/);
   });
 });

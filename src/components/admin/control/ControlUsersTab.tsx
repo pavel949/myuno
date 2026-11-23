@@ -59,11 +59,24 @@ export function ControlUsersTab() {
   const invokeAction = async (action: string, userId: string, extra: Record<string, unknown> = {}) => {
     setLoadingAction(`${action}-${userId}`);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke('admin-manage-user', {
         body: { action, user_id: userId, ...extra },
       });
-      if (res.error) throw new Error(res.error.message || 'Function error');
+      if (res.error) {
+        // invoke() reports any non-2xx as a generic "non-2xx status code" error;
+        // read the function's JSON body so the admin sees the real reason (403 etc.).
+        let serverMessage: string | undefined;
+        const ctx = (res.error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === 'function') {
+          try {
+            const body = await ctx.json();
+            serverMessage = body?.message || body?.error;
+          } catch {
+            /* non-JSON body — fall back to the generic message */
+          }
+        }
+        throw new Error(serverMessage || res.error.message || 'Function error');
+      }
       if (res.data?.error) throw new Error(res.data.message || res.data.error);
       toast.success(t('admin.users.toast.actionDone'));
       queryClient.invalidateQueries({ queryKey: ['admin-profiles-with-roles'] });
@@ -246,7 +259,7 @@ export function ControlUsersTab() {
                                 {t('admin.users.actions.activate')}
                               </Button>
                             )}
-                            {profile.status !== 'suspended' && !isSelf(profile.id) && (
+                            {profile.status !== 'suspended' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -258,7 +271,7 @@ export function ControlUsersTab() {
                                 {t('admin.users.actions.suspend')}
                               </Button>
                             )}
-                            {profile.status !== 'deactivated' && !isSelf(profile.id) && (
+                            {profile.status !== 'deactivated' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -281,7 +294,7 @@ export function ControlUsersTab() {
                               {t('admin.users.actions.resetPassword')}
                             </Button>
 
-                            {!isSelf(profile.id) && (
+                            {!isSelf(profile.id) && !profile.roles.includes('admin') && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button
@@ -326,6 +339,13 @@ export function ControlUsersTab() {
                             <div className="flex flex-wrap gap-1">
                               {ALL_ROLES.map(role => {
                                 const hasRole = profile.roles.includes(role);
+                                // Mirrors admin-manage-user: platform roles can't be granted here,
+                                // can't be removed from yourself, and admin can't be stripped from another admin.
+                                const isPlatformRole = role === 'admin' || role === 'uno_team';
+                                const blocked =
+                                  (isPlatformRole && !hasRole) ||
+                                  (isPlatformRole && isSelf(profile.id)) ||
+                                  (role === 'admin' && hasRole);
                                 return (
                                   <Button
                                     key={role}
@@ -335,7 +355,7 @@ export function ControlUsersTab() {
                                       'h-6 text-[10px] gap-1 px-2',
                                       hasRole && 'bg-primary/80'
                                     )}
-                                    disabled={!!loadingAction || (role === 'admin' && isSelf(profile.id))}
+                                    disabled={!!loadingAction || blocked}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       invokeAction(hasRole ? 'remove_role' : 'add_role', profile.id, { role });

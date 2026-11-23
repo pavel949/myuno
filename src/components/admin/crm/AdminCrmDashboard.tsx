@@ -3,13 +3,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCrmStats } from '@/hooks/useAdminCrmStats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Users, Target, Building2, TrendingUp, Activity, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export function AdminCrmDashboard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: stats, isLoading } = useAdminCrmStats();
+  const { data: stats, isLoading, isError, refetch } = useAdminCrmStats();
 
   if (isLoading) {
     return (
@@ -19,13 +20,20 @@ export function AdminCrmDashboard() {
     );
   }
 
-  if (!stats) return null;
+  if (isError || !stats) {
+    return (
+      <div className="py-8 text-center space-y-3">
+        <p className="text-sm text-destructive">{isRu ? 'Не удалось загрузить показатели CRM' : 'Could not load CRM metrics'}</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>
+    );
+  }
 
   const kpis = [
     { label: isRu ? 'Всего лидов' : 'Total Leads', value: stats.totalLeads, icon: Users, color: 'text-primary' },
     { label: isRu ? 'В работе' : 'Active', value: stats.activeLeads, icon: Activity, color: 'text-warning' },
     { label: isRu ? 'Конверсия' : 'Conversion', value: `${stats.overallConversion}%`, icon: TrendingUp, color: 'text-success' },
-    { label: isRu ? 'Вендоры (B2B)' : 'Vendors (B2B)', value: stats.vendors.total, icon: Target, sub: `Won: ${stats.vendors.won}` },
+    { label: isRu ? 'Вендоры (B2B)' : 'Vendors (B2B)', value: stats.vendors.total, icon: Target, sub: isRu ? `Выиграно: ${stats.vendors.won}` : `Won: ${stats.vendors.won}` },
     { label: isRu ? 'Собственники' : 'Owners', value: stats.owners.total, icon: Building2, sub: isRu ? `Интерес: ${stats.owners.interested}` : `Interested: ${stats.owners.interested}` },
   ];
 
