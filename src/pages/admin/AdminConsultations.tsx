@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { isInboxRequestId } from '@/lib/adminInbox';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminConsultations, type ConsultationFilters } from '@/hooks/useAdminConsultations';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from '@/hooks/useConsultationRequests';
@@ -361,10 +365,7 @@ function ConsultationCard({
             )}
 
             {/* Lead → deal bridge */}
-            <ConvertLeadToDealButton
-              leadId={consultation.id}
-              convertedDealId={consultation.converted_deal_id}
-            />
+            <ConvertLeadToDealButton convertedDealId={consultation.converted_deal_id} />
           </div>
         </div>
       </CardContent>
@@ -375,6 +376,13 @@ function ConsultationCard({
 export default function AdminConsultations() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const { user } = useAuth();
+  const [params] = useSearchParams();
+  const requestId = params.get('request')?.toLowerCase() ?? null;
+  const exact = requestId !== null;
+  const validSelection = isInboxRequestId(requestId);
+
   
   const [filters, setFilters] = useState<ConsultationFilters>({
     status: 'all',
@@ -386,13 +394,15 @@ export default function AdminConsultations() {
 
   const { 
     consultations, 
-    isLoading, 
+    isLoading,
+    isError,
+    refetch,
     updateStatus, 
     updateNotes,
     pendingCount,
     inProgressCount,
     completedCount,
-  } = useAdminConsultations(filters);
+  } = useAdminConsultations(filters, exact ? { requestId, actorId: user?.id } : undefined);
 
   const handleStatusChange = (id: string, status: ConsultationStatus, notes?: string) => {
     updateStatus.mutate({ id, status, admin_notes: notes });
@@ -411,7 +421,7 @@ export default function AdminConsultations() {
         subtitle={isRu ? 'Управление заявками на аренду и покупку' : 'Manage rental and purchase inquiries'}
         showBack
         fallbackPath="/admin"
-        actions={
+        actions={!exact && (
           <div className="flex gap-2">
             <BatchScoreButton />
             <Button variant="outline" onClick={() => navigate('/admin/leads')} className="gap-2">
@@ -419,9 +429,15 @@ export default function AdminConsultations() {
               {isRu ? 'Аналитика' : 'Analytics'}
             </Button>
           </div>
-        }
+        )}
       />
 
+      {exact ? (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          {validSelection && <p className="break-all text-sm">{t('Номер заявки', 'Request reference', 'เลขที่คำขอ')}: <span className="font-mono">{requestId}</span></p>}
+          <Button asChild variant="outline"><Link to={APP_ROUTES.ADMIN_CONSULTATIONS}>{t('Все заявки', 'All requests', 'คำขอทั้งหมด')}</Link></Button>
+        </div>
+      ) : <>
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Card className="bg-warning/10 border-warning/30">
@@ -531,11 +547,22 @@ export default function AdminConsultations() {
         </div>
       </div>
 
+      </>}
+
       {/* Consultations list */}
       <div className="space-y-3">
-        {isLoading ? (
+        {exact && !validSelection ? (
+          <p role="alert">{t('Неверный номер заявки.', 'Invalid request reference.', 'เลขที่คำขอไม่ถูกต้อง')}</p>
+        ) : exact && !user?.id ? (
+          <p role="alert">{t('Нет подтверждённого доступа к заявке.', 'Request access is not authorized.', 'ไม่มีสิทธิ์เข้าถึงคำขอนี้')}</p>
+        ) : isLoading ? (
           <div className="text-center py-8 text-muted-foreground">
             {isRu ? 'Загрузка...' : 'Loading...'}
+          </div>
+        ) : isError ? (
+          <div role="alert" className="flex flex-wrap items-center gap-3">
+            <p>{t('Не удалось загрузить заявки.', 'Could not load requests.', 'โหลดคำขอไม่สำเร็จ')}</p>
+            <Button variant="outline" onClick={() => void refetch()}>{t('Повторить', 'Retry', 'ลองอีกครั้ง')}</Button>
           </div>
         ) : consultations && consultations.length > 0 ? (
           consultations.map((consultation) => (
@@ -549,7 +576,7 @@ export default function AdminConsultations() {
           ))
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            {isRu ? 'Заявок пока нет' : 'No requests yet'}
+            {exact ? t('Заявка не найдена или недоступна.', 'Request not found or unavailable.', 'ไม่พบคำขอหรือไม่สามารถเข้าถึงได้') : isRu ? 'Заявок пока нет' : 'No requests yet'}
           </div>
         )}
       </div>

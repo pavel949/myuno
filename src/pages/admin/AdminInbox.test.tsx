@@ -4,6 +4,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import AdminInbox from './AdminInbox';
 const read = vi.hoisted(() => vi.fn());
+const access = vi.hoisted(() => ({ admin: true }));
+vi.mock('@/hooks/useIsAdmin', () => ({ useIsAdmin: () => ({ isAdmin: access.admin, isLoading: false, error: null }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
@@ -12,13 +14,13 @@ vi.mock('@/lib/adminInbox', async importOriginal => ({ ...await importOriginal<t
 vi.mock('@/components/admin/InboxRequestDetail', () => ({ InboxRequestDetail: () => null }));
 const clients: QueryClient[] = [];
 const mount = () => { const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); clients.push(client); render(<QueryClientProvider client={client}><MemoryRouter><AdminInbox /></MemoryRouter></QueryClientProvider>); };
-beforeEach(() => { read.mockReset(); read.mockResolvedValue({ items: [], total: 501 }); });
+beforeEach(() => { access.admin = true; read.mockReset(); read.mockResolvedValue({ items: [], total: 501 }); });
 afterEach(() => { cleanup(); clients.splice(0).forEach(client => client.clear()); });
 it('keeps each application source on its own server-filtered page', async () => {
-  mount(); await waitFor(() => expect(read).toHaveBeenCalledWith('partner_applications', 0, 'new', ''));
+  mount(); await waitFor(() => expect(read).toHaveBeenCalledWith('help_requests', 0, 'new', ''));
   await waitFor(() => expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-  await waitFor(() => expect(read).toHaveBeenCalledWith('partner_applications', 1, 'new', ''));
+  await waitFor(() => expect(read).toHaveBeenCalledWith('help_requests', 1, 'new', ''));
   fireEvent.click(screen.getByRole('button', { name: 'Consults' }));
   await waitFor(() => expect(read).toHaveBeenCalledWith('consultation_requests', 0, 'new', ''));
   fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Alice' } });
@@ -35,9 +37,12 @@ it('shows source read failure and retry rather than false zero or empty', async 
 it('labels domain statuses under All and advertises only source-supported search fields', async () => {
   read.mockImplementation(async (_source, _page, status) => ({ total: status === 'all' ? 1 : 0, items: status === 'all' ? [{ id: 'one', source: 'partner_applications', status: 'other', rawStatus: 'approved', createdAt: '2026-01-01T00:00:00Z', title: 'Approved partner', contact: null, subtitle: null, href: '/admin/partner-applications' }] : [] }));
   mount();
+  fireEvent.click(screen.getByRole('button', { name: 'Partners' }));
   expect(screen.getByRole('searchbox')).toHaveAttribute('placeholder', 'Business, name, email, category');
   fireEvent.click(screen.getByRole('tab', { name: /^All/ }));
   expect(await screen.findByText('Other status: approved')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Newbuilds' }));
   expect(screen.getByRole('searchbox')).toHaveAttribute('placeholder', 'Name, email, phone');
 });
+
+it('never reads the queue without the admitted administrator role', () => { access.admin = false; mount(); expect(read).not.toHaveBeenCalled(); });

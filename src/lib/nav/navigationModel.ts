@@ -135,6 +135,9 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
+  '/admin/inbox': ['/admin/inbox', '/admin/consultations', '/admin/tickets', '/admin/disputes', '/admin/nb-leads'],
+  '/admin/catalog': ['/admin/catalog', '/admin/review', '/admin/properties', '/admin/newbuilds', '/admin/add'],
+  '/admin/users': ['/admin/users', '/admin/crm', '/admin/providers', '/admin/partner-applications', '/admin/vendor-prospects', '/admin/pm-companies'],
   '/mc/today':    ['/mc/today', '/mc/bookings-list', '/mc/bookings', '/mc/tasks', '/mc/operations'],
   '/mc/calendar': ['/mc/calendar', '/mc/rates'],
   '/mc/messages': ['/mc/messages', '/mc/chat'],
@@ -414,17 +417,11 @@ export function getOwnerSidebarForRole(
  */
 const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
-    labelEn: 'Requests & review', labelRu: 'Заявки и проверка',
+    labelEn: 'Customer requests', labelRu: 'Обращения клиентов',
     items: [
-      { path: '/admin/inbox', labelEn: 'Inbox', labelRu: 'Входящие', icon: MessageSquare, badgeKey: 'pendingContent' },
       { path: '/admin/consultations', labelEn: 'Consultations', labelRu: 'Консультации', icon: MessageCircle },
       { path: '/admin/tickets', labelEn: 'Support tickets', labelRu: 'Тикеты', icon: MessageSquare },
       { path: '/admin/disputes', labelEn: 'Disputes', labelRu: 'Споры', icon: AlertTriangle },
-      { path: '/admin/crm', labelEn: 'CRM', labelRu: 'CRM', icon: UserCheck },
-      { path: '/admin/partner-applications', labelEn: 'Partner applications', labelRu: 'Заявки партнёров', icon: FileCheck },
-      { path: '/admin/vendor-prospects', labelEn: 'Vendor prospects', labelRu: 'Кандидаты в партнёры', icon: Target },
-      { path: '/admin/claims', labelEn: 'POI claims', labelRu: 'Заявки на места', icon: MapPin },
-      { path: '/admin/thai-business', labelEn: 'Thai business moderation', labelRu: 'Модерация тайского бизнеса', icon: ShieldCheck },
     ],
   },
   {
@@ -440,9 +437,17 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     ],
   },
   {
-    labelEn: 'Partners & transport', labelRu: 'Партнёры и транспорт',
+    labelEn: 'Participants & acquisition', labelRu: 'Участники и привлечение',
     items: [
+      { path: '/admin/crm', labelEn: 'Partner and owner acquisition', labelRu: 'Привлечение партнёров и собственников', labelTh: 'การหาพาร์ทเนอร์และเจ้าของ', icon: UserCheck },
       { path: '/admin/providers', labelEn: 'Partners', labelRu: 'Партнёры', icon: Building2, badgeKey: 'pendingProviders' },
+      { path: '/admin/partner-applications', labelEn: 'Partner applications', labelRu: 'Заявки партнёров', icon: FileCheck },
+      { path: '/admin/vendor-prospects', labelEn: 'Vendor prospects', labelRu: 'Кандидаты в партнёры', icon: Target },
+    ],
+  },
+  {
+    labelEn: 'Transport operations', labelRu: 'Управление транспортом',
+    items: [
       { path: '/admin/transfers', labelEn: 'Transfers', labelRu: 'Трансферы', icon: ArrowLeftRight },
     ],
   },
@@ -511,22 +516,24 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   },
 ];
 
-// Keep the same five everyday destinations across desktop rail and mobile bar.
-// Specialist routes remain reachable below without competing with daily work.
-const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({
-  ...item,
-  ...(item.path === APP_ROUTES.ADMIN_OPERATIONS
-    ? { labelEn: 'Requests & orders', labelRu: 'Заявки и заказы', labelTh: 'คำขอและคำสั่งซื้อ' } : {}),
-  ...(item.path === '/admin/review' ? { badgeKey: 'pendingContent' as const } : {}),
-}));
-const adminSecondary: SidebarNavItem[] = [
+// The same primary destinations and labels drive both the desktop rail and mobile bar.
+const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({ ...item }));
+const adminCatalogueReview: SidebarNavItem[] = [
+  { path: '/admin/review', labelEn: 'Review', labelRu: 'На проверке', labelTh: 'รอตรวจสอบ', icon: FileCheck, badgeKey: 'pendingContent' },
+  { path: '/admin/claims', labelEn: 'POI claims', labelRu: 'Заявки на места', icon: MapPin },
+  { path: '/admin/thai-business', labelEn: 'Thai business moderation', labelRu: 'Модерация тайского бизнеса', icon: ShieldCheck },
+];
+const adminFinance: SidebarNavItem[] = [
   { path: '/admin/finance', labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', icon: BarChart3 },
+];
+const adminSettings: SidebarNavItem[] = [
   { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
 ];
 const adminGroupThai: Record<string, string> = {
-  'Requests & review': 'คำขอและการตรวจสอบ',
+  'Customer requests': 'คำขอจากลูกค้า',
   'Real estate': 'อสังหาริมทรัพย์',
-  'Partners & transport': 'พาร์ทเนอร์และการขนส่ง',
+  'Participants & acquisition': 'ผู้เข้าร่วมและการสรรหา',
+  'Transport operations': 'การจัดการขนส่ง',
   Verticals: 'ประเภทบริการ',
   'Content & data': 'เนื้อหาและข้อมูล',
   'Growth & analytics': 'การเติบโตและการวิเคราะห์',
@@ -535,12 +542,14 @@ const adminGroupThai: Record<string, string> = {
 };
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
-  { labelEn: 'Finance & settings', labelRu: 'Финансы и настройки', labelTh: 'การเงินและการตั้งค่า', defaultOpen: true, items: adminSecondary },
+  { labelEn: 'Catalog review', labelRu: 'Проверка каталога', labelTh: 'การตรวจสอบแคตตาล็อก', defaultOpen: true, items: adminCatalogueReview },
+  { labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', defaultOpen: true, items: adminFinance },
+  { labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', defaultOpen: false, items: adminSettings },
   ...ADMIN_SIDEBAR_SOURCE.map(group => ({
     ...group,
     labelTh: adminGroupThai[group.labelEn] ?? group.labelTh,
     defaultOpen: false,
-    items: group.items.filter(item => ![...adminDaily, ...adminSecondary].some(primary => primary.path === item.path)),
+    items: group.items.filter(item => ![...adminDaily, ...adminCatalogueReview, ...adminFinance, ...adminSettings].some(primary => primary.path === item.path)),
   })).filter(group => group.items.length > 0),
 ];
 

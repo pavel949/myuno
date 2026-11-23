@@ -119,8 +119,8 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.admin.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.ADMIN,
+      APP_ROUTES.ADMIN_INBOX,
       APP_ROUTES.ADMIN_OPERATIONS,
-      '/admin/review',
       APP_ROUTES.ADMIN_CATALOG,
       APP_ROUTES.ADMIN_USERS,
     ]);
@@ -301,8 +301,9 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(item?.path).toBe('/my-property/statements');
   });
 
-  it('admin on /admin/crm/123 highlights CRM', () => {
-    expect(getActiveBottomBarItem('admin', '/admin/review')?.labelEn).toBe('Review');
+  it('admin review stays in the Catalog lane and acquisition stays in Participants', () => {
+    expect(getActiveBottomBarItem('admin', '/admin/review')?.labelEn).toBe('Catalog');
+    expect(getActiveBottomBarItem('admin', '/admin/crm/123')?.labelEn).toBe('Participants');
   });
 
   it('vendor on /vendor highlights Dashboard (exact match)', () => {

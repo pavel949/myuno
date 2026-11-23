@@ -2,6 +2,7 @@
  * Admin Inbox — единая очередь всех входящих заявок и сигналов.
  *
  * Источники:
+ *   • help_requests           — обращения в помощь myUNO
  *   • partner_applications     — заявки от потенциальных партнёров
  *   • listing_applications     — заявки на размещение листингов
  *   • consultation_requests    — заявки на консультации (legal, visa, real estate, ...)
@@ -14,6 +15,7 @@
  */
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Inbox, Search, Filter, ExternalLink, AlertCircle, MessageSquare, Building2, Briefcase, Sparkles, Home } from 'lucide-react';
@@ -28,6 +30,7 @@ import { fetchInbox, isInboxSource, type InboxSource, type InboxStatus } from '@
 import { InboxRequestDetail } from '@/components/admin/InboxRequestDetail';
 
 const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
+  help_requests:         { labelRu: 'Помощь myUNO', labelEn: 'myUNO Help', icon: MessageSquare, color: 'hsl(var(--cluster-legal))' },
   partner_applications:  { labelRu: 'Партнёры',     labelEn: 'Partners',     icon: Briefcase,     color: 'hsl(var(--cluster-build))' },
   listing_applications:  { labelRu: 'Листинги',     labelEn: 'Listings',     icon: Building2,     color: 'hsl(var(--cluster-manage))' },
   consultation_requests: { labelRu: 'Консультации', labelEn: 'Consults',     icon: MessageSquare, color: 'hsl(var(--cluster-legal))' },
@@ -43,6 +46,7 @@ const TABS: { id: InboxStatus | 'all'; labelRu: string; labelEn: string }[] = [
   { id: 'closed',      labelRu: 'Закрытые',    labelEn: 'Closed' },
 ];
 const SEARCH_HINTS: Record<InboxSource, [string, string]> = {
+  help_requests: ['Reference, subject, email or phone', 'Номер, тема, email или телефон'],
   partner_applications: ['Business, name, email, category', 'Компания, имя, email, категория'],
   listing_applications: ['Name, email, exact type, category', 'Имя, email, точный тип, категория'],
   consultation_requests: ['Name, email, request type, vertical', 'Имя, email, тип запроса, направление'],
@@ -53,12 +57,14 @@ const SEARCH_HINTS: Record<InboxSource, [string, string]> = {
 export default function AdminInbox() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess, error: accessError } = useIsAdmin();
+  const admitted = !!user?.id && isAdmin && !checkingAccess && !accessError;
   const isRu = language === 'ru';
   const [params, setParams] = useSearchParams();
   const rawTab = params.get('status');
   const tab = TABS.find(candidate => candidate.id === rawTab)?.id ?? 'new';
   const selectedSource = params.get('source');
-  const sourceFilter: InboxSource = isInboxSource(selectedSource) ? selectedSource : 'partner_applications';
+  const sourceFilter: InboxSource = isInboxSource(selectedSource) ? selectedSource : 'help_requests';
   const query = params.get('q') ?? '';
   const rawPage = Number(params.get('page') ?? 0);
   const page = Number.isSafeInteger(rawPage) && rawPage >= 0 ? rawPage : 0;
@@ -70,13 +76,13 @@ export default function AdminInbox() {
   const setPage = (value: number | ((previous: number) => number)) => updateQueue({ page: String(typeof value === 'function' ? value(page) : value) });
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ['admin-inbox', user?.id, sourceFilter, page, tab, query], enabled: !!user,
+    queryKey: ['admin-inbox', user?.id, sourceFilter, page, tab, query], enabled: admitted,
     queryFn: () => fetchInbox(sourceFilter, page, tab, query),
     staleTime: 60_000,
-    refetchInterval: 90_000,
+    refetchInterval: admitted ? 90_000 : false,
   });
 
-  const items = data?.items;
+  const items = admitted ? data?.items : undefined;
   const filtered = items ?? [];
 
   return (
@@ -90,12 +96,12 @@ export default function AdminInbox() {
             </p>
             <h1 className="text-[26px] sm:text-[32px] font-serif font-semibold leading-tight tracking-[-0.02em] text-foreground flex items-center gap-3">
               <Inbox className="w-7 h-7 text-primary" strokeWidth={1.5} />
-              {isRu ? 'Единая очередь заявок' : 'Unified application queue'}
+              {isRu ? 'Входящие обращения' : 'Incoming requests'}
             </h1>
             <p className="mt-2 text-[13px] text-muted-foreground max-w-2xl">
               {isRu
-                ? 'Партнёры, листинги, консультации, лиды по новостройкам и Property — в одном списке.'
-                : 'Partners, listings, consultations, newbuild leads and property inquiries — in separate source queues.'}
+                ? 'Начните с новых обращений клиентов. Другие источники можно открыть отдельно.'
+                : 'Start with new customer requests. Other sources have separate queues.'}
             </p>
           </div>
         </header>
@@ -104,7 +110,7 @@ export default function AdminInbox() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar border-b border-border mb-4" role="tablist">
           {TABS.map((t) => {
             const isActive = tab === t.id;
-            const count = t.id === tab && !isError ? data?.total : null;
+            const count = admitted && t.id === tab && !isError ? data?.total : null;
             return (
               <button
                 key={t.id}
@@ -135,6 +141,7 @@ export default function AdminInbox() {
                 <button
                   key={src}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => updateQueue({ source: src, request: '', page: '0' })}
                   className={cn(
                     'px-2.5 py-1 text-[11px] font-medium border whitespace-nowrap',
@@ -163,20 +170,21 @@ export default function AdminInbox() {
         </div>
 
         <nav aria-label="Application source pages" className="mb-4 flex items-center gap-3 text-sm">
-          <button className="min-h-11 underline disabled:opacity-40" disabled={page === 0 || isFetching} onClick={() => setPage(value => value - 1)}>{isRu ? 'Назад' : 'Previous'}</button>
-          <span>{page + 1} · {isError ? '—' : data?.total ?? '—'}</span>
-          <button className="min-h-11 underline disabled:opacity-40" disabled={isFetching || isError || !data || (page + 1) * 50 >= data.total} onClick={() => setPage(value => value + 1)}>{isRu ? 'Далее' : 'Next'}</button>
+          <button className="min-h-11 underline disabled:opacity-40" disabled={!admitted || page === 0 || isFetching} onClick={() => setPage(value => value - 1)}>{isRu ? 'Назад' : 'Previous'}</button>
+          <span>{page + 1} · {!admitted || isError ? '—' : data?.total ?? '—'}</span>
+          <button className="min-h-11 underline disabled:opacity-40" disabled={!admitted || isFetching || isError || !data || (page + 1) * 50 >= data.total} onClick={() => setPage(value => value + 1)}>{isRu ? 'Далее' : 'Next'}</button>
           <span>{isRu ? 'Отдельная страница и количество для выбранного источника. Поиск и фильтры применяются на сервере.' : 'Separate page and count for the selected source. Filters and search apply on the server.'}</span>
         </nav>
         <p className="mb-4 text-xs text-muted-foreground">{isRu ? 'Фильтры используют точные сохранённые статусы. Остальные статусы доступны во вкладке «Все» с исходным названием.' : 'Filters match stored statuses exactly. Other statuses remain under All with their original label.'}</p>
         {/* List */}
-        {isLoading && (
+        {(checkingAccess || (admitted && isLoading)) && (
           <div className="space-y-2">
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-none" />)}
           </div>
         )}
 
-        {isError && (
+        {!checkingAccess && !admitted && <p role="alert">{isRu ? 'Доступ к очереди не подтверждён.' : 'Inbox access is not authorized.'}</p>}
+        {admitted && isError && (
           <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             {isRu ? 'Не удалось загрузить инбокс. ' : 'Failed to load inbox. '}
@@ -184,7 +192,7 @@ export default function AdminInbox() {
           </div>
         )}
 
-        {!isLoading && !isError && filtered.length === 0 && (
+        {admitted && !isLoading && !isError && filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground text-sm border border-dashed border-border">
             {isRu ? 'Здесь пусто — нет заявок по выбранным фильтрам.' : 'Nothing here — no items match the filters.'}
           </div>

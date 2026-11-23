@@ -1,75 +1,28 @@
 /**
- * ConvertLeadToDealButton — turns a platform inbound lead (consultation_requests
- * row) into an MC agent_deal via the convert_lead_to_deal RPC, then opens the deal.
- *
- * Reused across the acquisition surfaces: /admin/consultations, AdminInbox, nb_leads.
- *
- * - If the lead already has a converted deal, shows "Open deal" instead.
- * - Routes the deal into the user's active company (useMyCompanyId). When the user
- *   has no company yet (admin without a house MC), the button is disabled with a hint.
+ * Open an existing canonical deal link. Do not call the historical converter:
+ * the live platform does not expose it and an unverified company destination
+ * must not receive client data. Any future conversion needs a checked writer.
  */
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ArrowRightLeft, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useConvertLeadToDeal } from '@/hooks/useConvertLeadToDeal';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface Props {
-  leadId: string;
   convertedDealId?: string | null;
-  /** Pre-select a deal type when known from the lead context. Defaults to 'sale'. */
-  defaultDealType?: string;
-  size?: 'sm' | 'default';
-  variant?: 'default' | 'outline' | 'secondary';
 }
 
-export function ConvertLeadToDealButton({
-  leadId,
-  convertedDealId,
-  defaultDealType = 'sale',
-  size = 'sm',
-  variant = 'outline',
-}: Props) {
+export function ConvertLeadToDealButton({ convertedDealId }: Props) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const navigate = useNavigate();
-  const { data: company } = useMyCompanyId();
-  const convert = useConvertLeadToDeal();
-
-  if (convertedDealId) {
-    return (
-      <Button
-        size={size}
-        variant="secondary"
-        className="gap-1.5"
-        onClick={() => navigate(`/mc/sales/${convertedDealId}`)}
-      >
-        <ExternalLink className="w-3.5 h-3.5" />
-        {isRu ? 'Открыть сделку' : 'Open deal'}
-      </Button>
-    );
-  }
-
-  const companyId = company?.company_id;
+  if (!convertedDealId || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(convertedDealId)) return null;
 
   return (
-    <Button
-      size={size}
-      variant={variant}
-      className="gap-1.5"
-      disabled={!companyId || convert.isPending}
-      title={!companyId ? (isRu ? 'Сначала выберите компанию' : 'Select a company first') : undefined}
-      onClick={() => {
-        if (!companyId) return;
-        convert.mutate(
-          { leadId, companyId, dealType: defaultDealType },
-          { onSuccess: (dealId) => { if (dealId) navigate(`/mc/sales/${dealId}`); } },
-        );
-      }}
-    >
-      <ArrowRightLeft className="w-3.5 h-3.5" />
-      {convert.isPending ? (isRu ? 'Создаю…' : 'Converting…') : (isRu ? 'В сделку' : 'To deal')}
+    <Button asChild size="sm" variant="secondary">
+      <Link to={`/mc/sales/${convertedDealId}`}>
+        <ExternalLink className="size-4" aria-hidden="true" />
+        {pickLang(language, { ru: 'Открыть связанную сделку', en: 'Open linked deal', th: 'เปิดดีลที่เชื่อมโยง' })}
+      </Link>
     </Button>
   );
 }
