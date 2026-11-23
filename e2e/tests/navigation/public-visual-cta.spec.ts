@@ -116,3 +116,42 @@ test.describe('mobile homepage visual contract', () => {
     await expect(page).toHaveURL(/\/property\/search\?.*mode=buy/);
   });
 });
+
+
+test.describe('homepage premium category gateway', () => {
+  for (const width of [320, 390, 768, 1440, 1915]) {
+    test(`all four categories use real photos and readable Lucide icons at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+      const cards = page.locator('.home-reference-directions .home-reference-direction');
+      await expect(cards).toHaveCount(4);
+      await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>('.home-reference-direction > img')]
+        .every((img) => img.complete));
+
+      const appearance = await cards.evaluateAll((elements) => elements.map((card) => {
+        const picture = card.querySelector<HTMLImageElement>(':scope > img')!;
+        const heading = card.querySelector<HTMLElement>('strong')!;
+        const note = card.querySelector<HTMLElement>('small')!;
+        return {
+          photoLoaded: picture.naturalWidth > 0,
+          vectorArt: picture.src.toLowerCase().includes('.svg') || picture.src.startsWith('data:image/svg'),
+          hasIconBadge: Boolean(card.querySelector('.home-reference-direction-icon svg')),
+          clipped: heading.scrollHeight > heading.clientHeight + 2 ||
+            note.scrollHeight > note.clientHeight + 2,
+          height: card.getBoundingClientRect().height,
+        };
+      }));
+
+      for (const card of appearance) {
+        expect(card.photoLoaded).toBe(true);
+        expect(card.vectorArt).toBe(false);
+        expect(card.hasIconBadge).toBe(true);
+        expect(card.clipped).toBe(false);
+        if (width >= 768) expect(card.height).toBeLessThanOrEqual(341);
+      }
+      expect(Math.max(...appearance.map((card) => card.height)) -
+        Math.min(...appearance.map((card) => card.height))).toBeLessThanOrEqual(2);
+    });
+  }
+});

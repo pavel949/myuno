@@ -55,12 +55,22 @@
 }
 .cinematic-home.home-refined .home-reference-direction {
   position: relative; isolation: isolate; display: block;
-  min-width: 0; aspect-ratio: 1 / 1.05; overflow: hidden;
+  min-width: 0; aspect-ratio: 1.35 / 1; overflow: hidden;
   border-radius: 16px; background: hsl(var(--home-ui-direction-navy)); color: hsl(var(--home-ui-white));
 }
 .cinematic-home.home-refined .home-reference-direction > img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; z-index: -2;
+  object-fit: cover; object-position: center; z-index: -2;
+  transition: transform var(--public-motion);
+}
+@media (min-width: 768px) {
+  .cinematic-home.home-refined .home-reference-direction {
+    max-height: 340px;
+    min-height: 215px;
+  }
+  .cinematic-home.home-refined .home-reference-direction:hover > img {
+    transform: scale(1.045);
+  }
 }
 .cinematic-home.home-refined .home-reference-direction-shade {
   position: absolute; inset: 0; z-index: -1;
@@ -68,13 +78,26 @@
 }
 .cinematic-home.home-refined .home-reference-direction-content {
   display: flex; flex-direction: column; align-items: flex-start;
-  justify-content: flex-end; gap: 7px; height: 100%; padding: 18px;
+  justify-content: flex-end; gap: 9px; height: 100%; padding: clamp(16px, 1.6vw, 24px);
+}
+.cinematic-home.home-refined .home-reference-direction-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1px solid hsl(var(--home-ui-white) / .24);
+  border-radius: 11px;
+  background: hsl(var(--home-ui-white) / .13);
+  color: hsl(var(--home-ui-white));
+  backdrop-filter: blur(4px);
 }
 .cinematic-home.home-refined .home-reference-direction-content strong {
-  font-size: var(--home-ui-direction-fluid); font-weight: 650; line-height: 1.22; color: hsl(var(--home-ui-white));
+  font-size: var(--home-ui-tile-title-large); font-weight: 650; line-height: 1.18; color: hsl(var(--home-ui-white));
 }
 .cinematic-home.home-refined .home-reference-direction-content small {
-  font-size: var(--home-ui-caption); line-height: 1.4; color: hsl(var(--home-ui-white));
+  font-size: var(--home-ui-body); line-height: 1.4; color: hsl(var(--home-ui-white));
 }
 .cinematic-home.home-refined .home-locations .home-area-cover { display: block; }
 .cinematic-home.home-refined .home-locations .home-guide-card {
@@ -96,7 +119,7 @@
 .cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: var(--home-ui-tile-title-large); }
 .cinematic-home.home-refined .home-rail-viewport { min-width: 0; }
 .cinematic-home.home-refined .home-rail-controls { position: static; }
-@media(max-width: 900px) {
+@media(max-width: 1199px) {
   .cinematic-home.home-refined .home-reference-directions { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .cinematic-home.home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
