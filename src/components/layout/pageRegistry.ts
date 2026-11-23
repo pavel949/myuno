@@ -53,7 +53,6 @@ export const GuestComplexDetail = lazy(() => import('@/pages/property/GuestCompl
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 export const ManualPaymentPending = lazy(() => import('@/pages/property/ManualPaymentPending'));
-export const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
 export const PropertyDepositSuccess = lazy(() => import('@/pages/property/PropertyDepositSuccess'));
 // ProjectsIndex/ProjectDetail removed — canonical catalog is OffplanIndex/OffplanDetail at /property/offplan
 export const NewbuildLanding = lazy(() => import('@/pages/property/NewbuildLanding'));
@@ -179,7 +178,6 @@ export const AirportFastTrackPage = lazy(() => import('@/pages/transport/Airport
 export const AirportTransferLanding = lazy(() => import('@/pages/landings/legacy/AirportTransferLanding'));
 export const FlowerDeliveryLanding = lazy(() => import('@/pages/landings/legacy/FlowerDeliveryLanding'));
 export const RentalLanding = lazy(() => import('@/pages/landings/legacy/RentalLanding'));
-export const NewDevelopmentsLanding = lazy(() => import('@/pages/landings/legacy/NewDevelopmentsLanding'));
 
 // ── Fitness ──
 export const FitnessIndex = lazy(() => import('@/pages/fitness/FitnessIndex'));

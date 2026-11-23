@@ -75,7 +75,7 @@ export function useTickets() {
 const queryClient = useQueryClient();
 
   // Main tickets query with React Query
-  const { data: tickets = [], isLoading, refetch } = useQuery({
+  const { data: tickets = [], isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['user-tickets', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -203,6 +203,8 @@ const queryClient = useQueryClient();
   return {
     tickets,
     isLoading,
+    isError,
+    isFetching,
     createTicket,
     getTicket,
     getTicketMessages,

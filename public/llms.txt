@@ -8,7 +8,7 @@ myUNO is a Russian-speaking super-app for foreigners in Phuket, Thailand. The pl
 
 - [Home](/): Super-app entry point with personalized recommendations.
 - [Property](/property): Buy, rent, or browse new builds in Phuket.
-- [New Builds](/newbuilds): Off-plan developments rated by ClearView™ (AAA–CCC).
+- [New Builds](/property/offplan): Browse new developments in Phuket and explore projects, units and buyer guidance.
 - [Invest](/invest): Real estate and business investment opportunities for capital clients.
 - [Capital](/capital): Concierge advisory for investors $2M+.
 - [Legal](/legal): Visas, taxes, company formation, contracts.
