@@ -4,8 +4,25 @@
  */
 export const ECOSYSTEM_SHELL = "min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip overflow-y-auto";
 
+/** Width profiles reuse existing DS tokens. Only the outer frame owns gutters. */
+export const PAGE_WIDTH_CLASS = {
+  narrow: 'ds-frame-article',
+  form: 'ds-frame-form',
+  default: 'ds-frame-content',
+  wide: 'ds-frame-wide',
+  detail: 'ds-frame-detail',
+  workspace: 'ds-frame-workspace',
+  catalogue: 'ds-frame-catalogue',
+  full: 'ds-frame-full',
+} as const;
+export type PageWidth = keyof typeof PAGE_WIDTH_CLASS;
+
+export function pageFrameClass(width: PageWidth) {
+  return `ds-frame ${PAGE_WIDTH_CLASS[width]}`;
+}
+
 /** Single source for horizontal bounds: main column + AppHeader row (same grid = no “double frame”). */
-export const ECOSYSTEM_PAGE_CONTAINER = "ds-frame ds-frame-wide";
+export const ECOSYSTEM_PAGE_CONTAINER = pageFrameClass("wide");
 
 /** Use for sticky app chrome so header content aligns with `<main>` below. */
 export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
@@ -13,21 +30,24 @@ export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
 /** Opt-in marketing frame aligned with public chrome; catalog/form bounds stay domain-owned. */
 export const PUBLIC_CONTENT_LAYOUT = {
   marketing: ECOSYSTEM_PAGE_CONTAINER,
-  catalogue: 'ds-frame ds-frame-catalogue',
-  business: 'ds-frame ds-frame-workspace',
+  catalogue: pageFrameClass('catalogue'),
+  detail: pageFrameClass('detail'),
+  business: pageFrameClass('workspace'),
 } as const;
 
-/** Opt-in public page types; article, details, form and wizard frames stay unchanged. */
-export function publicContentFrame(pathname: string): 'catalogue' | 'business' | 'default' {
+/** Align desktop chrome only with these opted-in consumers, never booking forms. */
+export function publicContentFrame(pathname: string): 'catalogue' | 'detail' | 'business' | 'default' {
   const path = pathname.replace(/\/$/, '');
   if (/^\/area\/[^/]+$/.test(path) || /^\/property\/[^/]+$/.test(path)) return 'catalogue';
   if (['/discover/services', '/services', '/property/search', '/experiences', '/discover/buy'].includes(path)) return 'catalogue';
+  if (/^\/(?:yachts|experiences|transport\/vehicle|services\/provider)\/[^/]+$/.test(path)) return 'detail';
   if (path === '/for-business') return 'business';
   return 'default';
 }
 export const PUBLIC_CONTENT_WIDTH = {
   default: 'var(--layout-width-wide)',
   catalogue: 'var(--layout-width-catalogue)',
+  detail: 'var(--public-width-detail)',
   business: 'var(--layout-width-workspace)',
 } as const;
 /** Actual cards and skeletons must occupy the same columns. */
