@@ -7,6 +7,7 @@ import { supportCopy } from '@/lib/support/supportCopy';
 
 const state = vi.hoisted(() => ({ language: 'en', openWhatsApp: vi.fn(), startSupportChat: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => state }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null, isLoading: false }) }));
 vi.mock('@/hooks/useChat', () => ({ useSupportChat: () => state }));
 vi.mock('@/components/layout/AppLayout', () => ({ AppLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main> }));
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: ({ title }: { title: string }) => <h1>{title}</h1> }));

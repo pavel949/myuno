@@ -35,6 +35,9 @@ import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-
 import { useSupportChat, UNO_WHATSAPP } from '@/hooks/useChat';
 import { COMPANY_CONTACTS } from '@/lib/config';
 import { supportCopy } from '@/lib/support/supportCopy';
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 // WhatsApp icon component - wrapped in forwardRef for PremiumButton compatibility
 const WhatsAppIcon = React.forwardRef<SVGSVGElement, { className?: string }>(
@@ -49,6 +52,7 @@ WhatsAppIcon.displayName = 'WhatsAppIcon';
 export default function Support() {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
   const { startSupportChat, openWhatsApp } = useSupportChat();
   const [quickMessage, setQuickMessage] = useState('');
   const isRu = language === 'ru';
@@ -192,6 +196,17 @@ export default function Support() {
             {COMPANY_CONTACTS.phone.display}
           </p>
         </SectionCard>
+
+        {!authLoading && user && (
+          <div className="mb-4">
+            <PremiumButton asChild variant="outline">
+              <Link to={APP_ROUTES.SUPPORT_TICKETS}>
+                <Ticket aria-hidden />
+                {pickLang(language, { ru: 'Мои обращения', en: 'My support tickets', th: 'คำร้องขอความช่วยเหลือของฉัน' })}
+              </Link>
+            </PremiumButton>
+          </div>
+        )}
 
         {/* Personal Concierge Section */}
         <SectionCard className="bg-card border-border">
