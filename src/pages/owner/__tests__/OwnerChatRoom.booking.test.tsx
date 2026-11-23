@@ -1,16 +1,17 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import OwnerChatRoom from '../OwnerChatRoom';
 
 const fixture = vi.hoisted(() => ({
+  actorId: 'actor-a',
   result: vi.fn(),
   eq: vi.fn(),
   from: vi.fn(),
   chat: vi.fn(),
 }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'actor-a' } }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: fixture.actorId } }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/usePropertyCare', () => ({ useOwnerProperty: () => ({ data: undefined }) }));
 vi.mock('@/components/owner/PropertyChatWindow', () => ({
@@ -27,19 +28,27 @@ const booking = {
   currency: 'THB', status: 'confirmed', properties: { title: 'Synthetic home' },
 };
 
+function TodayDestination() {
+  const { pathname, search, hash } = useLocation();
+  return <output aria-label="Today return">{pathname}{search}{hash}</output>;
+}
+
 function openChat(pathname: string, state?: { bookingChatReturnTo: string }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[{ pathname, state }]}>
+  const tree = () => <QueryClientProvider client={client}><MemoryRouter initialEntries={[{ pathname, state }]}>
     <Routes>
       <Route path="/mc/chat/:type/:id?" element={<OwnerChatRoom />} />
       <Route path="/mc/messages" element={<p>Inbox destination</p>} />
-      <Route path="/mc/today" element={<p>Today destination</p>} />
+      <Route path="/mc/today" element={<TodayDestination />} />
     </Routes>
-  </MemoryRouter></QueryClientProvider>);
+  </MemoryRouter></QueryClientProvider>;
+  const view = render(tree());
+  return { refresh: () => view.rerender(tree()) };
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
+  fixture.actorId = 'actor-a';
   const builder = { select: vi.fn(), eq: fixture.eq, maybeSingle: fixture.result };
   builder.select.mockReturnValue(builder);
   fixture.eq.mockReturnValue(builder);
@@ -59,7 +68,7 @@ describe('MC booking conversation (no outbound transport)', () => {
     expect(screen.getByText('Confirmed')).toBeVisible();
     expect(screen.getByText(/Booking total/)).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    expect(await screen.findByText('Today destination')).toBeVisible();
+    expect(await screen.findByLabelText('Today return')).toHaveTextContent('/mc/today?keep=yes#today-arrivals');
   });
 
   it.each([undefined, { bookingChatReturnTo: '//example.test' }, { bookingChatReturnTo: '/mc/today-other' }])(
@@ -81,6 +90,25 @@ describe('MC booking conversation (no outbound transport)', () => {
     fixture.result.mockResolvedValue(result);
     openChat('/mc/chat/booking/inventory-a');
     expect(await screen.findByRole('alert')).toHaveTextContent('Booking conversation unavailable');
+    expect(fixture.chat).not.toHaveBeenCalled();
+  });
+
+  it('unmounts the prior composer immediately when the actor changes at the same URL', async () => {
+    const { refresh } = openChat('/mc/chat/booking/inventory-a');
+    await screen.findByRole('region', { name: 'Synthetic composer' });
+    let deny: (result: { data: null; error: null }) => void = () => {};
+    fixture.result.mockImplementationOnce(() => new Promise(resolve => { deny = resolve; }));
+    fixture.chat.mockClear();
+
+    fixture.actorId = 'actor-b';
+    refresh();
+    expect(screen.queryByRole('region', { name: 'Synthetic composer' })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Checking booking access');
+    expect(fixture.eq.mock.calls.slice(-2)).toEqual([['id', 'inventory-a'], ['owner_id', 'actor-b']]);
+
+    await act(async () => { deny({ data: null, error: null }); });
+    expect(await screen.findByRole('alert')).toHaveTextContent('Booking conversation unavailable');
+    expect(screen.queryByText('Synthetic guest')).not.toBeInTheDocument();
     expect(fixture.chat).not.toHaveBeenCalled();
   });
 
