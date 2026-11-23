@@ -5,6 +5,7 @@ import {
   Check, X, AlertTriangle, Info, ExternalLink, Truck
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ export default function ExperienceDetail() {
 
   if (isLoading) {
     return (
-      <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
+      <MiniAppLayout pageWidth="detail" title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
         <div className="space-y-4 animate-pulse">
           <div className="h-64 bg-muted rounded-none" />
           <div className="h-8 bg-muted rounded-none w-3/4" />
@@ -54,7 +55,7 @@ export default function ExperienceDetail() {
   }
 
   if (error) {
-    return <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
+    return <MiniAppLayout pageWidth="detail" title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
       <div role="alert" className="space-y-4 border border-border p-6">
         <h2 className="font-display text-h3">{t('Не удалось загрузить предложение', 'The experience could not be loaded', 'ไม่สามารถโหลดประสบการณ์ได้')}</h2>
         <p className="text-muted-foreground">{t('Попробуйте ещё раз или вернитесь к выбранным предложениям.', 'Try again or return to your selected offers.', 'ลองอีกครั้งหรือกลับไปยังข้อเสนอที่เลือก')}</p>
@@ -65,7 +66,7 @@ export default function ExperienceDetail() {
 
   if (!experience) {
     return (
-      <MiniAppLayout title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
+      <MiniAppLayout pageWidth="detail" title="" fallbackPath="/experiences" onBack={returnToCatalogue} showHero={false} showFilter={false} showCategories={false}>
         <div className="text-center py-12">
           <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h3 className="font-semibold text-lg mb-2">
@@ -91,6 +92,7 @@ export default function ExperienceDetail() {
 
   return (
     <MiniAppLayout
+      pageWidth="detail"
       title={expTitle}
       fallbackPath="/experiences" onBack={returnToCatalogue}
       showHero={false}
@@ -468,21 +470,23 @@ export default function ExperienceDetail() {
       </div>
 
       {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 border-t p-4 flex items-center justify-between gap-4 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {isRu ? 'Цена от' : 'From'}
-          </p>
-          <p className="text-xl font-bold text-primary">
-            {pricingOptions.length > 0 ? priceLabel(pricingOptions[0].price_thb, 'THB') : priceLabel(experience.price, experience.currency)}
-          </p>
+      <div className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 bg-background/95 border-t py-4 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+        <div className={`${PUBLIC_CONTENT_LAYOUT.detail} flex items-center justify-between gap-4`}>
+          <div>
+            <p className="text-sm text-muted-foreground">
+              {isRu ? 'Цена от' : 'From'}
+            </p>
+            <p className="text-xl font-bold text-primary">
+              {pricingOptions.length > 0 ? priceLabel(pricingOptions[0].price_thb, 'THB') : priceLabel(experience.price, experience.currency)}
+            </p>
+          </div>
+          <Button
+            onClick={() => setInquiryOpen(true)}
+            className="gap-2"
+          >
+            {t('Оставить заявку', 'Send inquiry', 'ส่งคำขอ')}
+          </Button>
         </div>
-        <Button 
-          onClick={() => setInquiryOpen(true)}
-          className="gap-2"
-        >
-          {t('Оставить заявку', 'Send inquiry', 'ส่งคำขอ')}
-        </Button>
       </div>
       <ExperienceInquiry open={inquiryOpen} onOpenChange={setInquiryOpen}
         listingId={experience.id} listingTitle={expTitle || experience.title_en} entryPoint="experience_detail:concierge" />

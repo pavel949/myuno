@@ -7,6 +7,8 @@
  *
  * Width modes:
  *  - 'narrow'  → article token   (forms, settings, single-column reads)
+ *  - 'form' → form token for transactional or account forms
+ *  - 'detail' / 'catalogue' → public presentation profiles
  *  - 'default' → content token   (dashboards, lists)
  *  - 'wide'    → wide token   (data tables, multi-column workspaces)
  *  - 'workspace' → named workspace width (operator dashboards)
@@ -15,7 +17,9 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-export type PageWidth = 'narrow' | 'default' | 'wide' | 'workspace' | 'full';
+import { pageFrameClass, type PageWidth } from '@/design-system/ecosystemLayout';
+
+export type { PageWidth } from '@/design-system/ecosystemLayout';
 
 interface PageShellProps {
   children: ReactNode;
@@ -26,14 +30,6 @@ interface PageShellProps {
   /** Remove the default bottom-nav clearance (use when page renders its own footer/CTA bar) */
   noBottomPad?: boolean;
 }
-
-const widthClass: Record<PageWidth, string> = {
-  narrow: 'ds-frame-article',
-  default: 'ds-frame-content',
-  wide: 'ds-frame-wide',
-  workspace: 'ds-frame-workspace',
-  full: 'ds-frame-full',
-};
 
 export function PageShell({
   children,
@@ -46,12 +42,11 @@ export function PageShell({
     <div
       className={cn(
         // horizontal padding tracks --page-padding-x token
-        'ds-frame',
+        pageFrameClass(width),
         // vertical rhythm
         'ds-page',
         // bottom-nav clearance on mobile
         !noBottomPad && 'ds-page-with-navigation',
-        widthClass[width],
         stack && 'ds-section-stack',
         stack === 'compact' && 'ds-section-stack--compact',
         'min-w-0 overflow-x-hidden',

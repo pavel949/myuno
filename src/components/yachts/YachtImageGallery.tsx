@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PUBLIC_LISTING_DETAIL_MEDIA } from '@/components/layout/publicListingDetail';
+import { cn } from '@/lib/utils';
 
 interface YachtImageGalleryProps {
   images: string[];
@@ -30,7 +32,7 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
   }, [emblaApi, onSelect]);
 
   return (
-    <div className="relative h-72 md:h-96">
+    <div className={cn("relative h-72 md:h-96", PUBLIC_LISTING_DETAIL_MEDIA)} data-listing-media>
       <div className="overflow-hidden h-full" ref={emblaRef}>
         <div className="flex h-full">
           {images.map((img, idx) => (

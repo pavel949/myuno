@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Anchor, Star, Users, MapPin, Clock, Ruler, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageContainer } from '@/components/uno/PageContainer';
+import { PUBLIC_LISTING_DETAIL_FRAME, PUBLIC_LISTING_DETAIL_GRID, PUBLIC_LISTING_DETAIL_RAIL } from '@/components/layout/publicListingDetail';
+import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,13 +29,14 @@ export default function YachtDetail() {
   const { yachts: allYachts } = useYachts();
 
   if (isLoading) {
-    return <AppLayout><DetailPageSkeleton /></AppLayout>;
+    return <AppLayout usePageContainer={false}><div className={PUBLIC_LISTING_DETAIL_FRAME}><DetailPageSkeleton /></div></AppLayout>;
   }
 
   if (!yacht) {
     return (
-      <AppLayout>
-        <PageContainer className="py-20 text-center">
+      <AppLayout usePageContainer={false}>
+        <div className={PUBLIC_LISTING_DETAIL_FRAME}>
+          <section className="py-20 text-center">
           <Anchor className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
             {language === 'ru' ? 'Яхта не найдена' : 'Yacht not found'}
@@ -42,7 +44,8 @@ export default function YachtDetail() {
           <Button onClick={() => navigate('/yachts')}>
             {language === 'ru' ? 'К списку яхт' : 'Back to yachts'}
           </Button>
-        </PageContainer>
+          </section>
+        </div>
       </AppLayout>
     );
   }
@@ -61,7 +64,7 @@ export default function YachtDetail() {
   const addons = yacht.addons as Array<{ name_en?: string; name_ru?: string; price?: number; unit?: string }> | null;
 
   return (
-    <AppLayout>
+    <AppLayout usePageContainer={false}>
       <SEOHead
         title={name}
         description={(description || '').slice(0, 160)}
@@ -77,6 +80,7 @@ export default function YachtDetail() {
           image: coverImage,
         })}
       />
+      <div className={PUBLIC_LISTING_DETAIL_FRAME} data-listing-detail="yacht">
       <YachtImageGallery
         images={images}
         name={name}
@@ -84,7 +88,8 @@ export default function YachtDetail() {
         isFeatured={yacht.is_featured}
       />
 
-      <PageContainer className="-mt-4 relative z-10 bg-background rounded-none pt-6">
+      <div className={cn(PUBLIC_LISTING_DETAIL_GRID, "lg:mt-6")}>
+      <div className="min-w-0 space-y-4 md:space-y-6 -mt-4 relative z-10 bg-background pt-6 lg:mt-0 lg:pt-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -92,11 +97,11 @@ export default function YachtDetail() {
           transition={{ duration: 0.35, delay: 0.1 }}
           className="mb-4"
         >
-          <div className="flex items-start justify-between">
-            <h1 className="text-2xl font-bold">{name}</h1>
+          <div className="flex items-start justify-between lg:flex-wrap lg:gap-3">
+            <h1 className="text-2xl font-bold lg:min-w-0 lg:break-words lg:text-3xl">{name}</h1>
             <Badge variant="secondary" className="capitalize">{yacht.yacht_type?.replace('_', ' ')}</Badge>
           </div>
-          <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground lg:flex-wrap">
             <div className="flex items-center gap-1">
               <MapPin className="w-4 h-4" /><span>{location || 'Phuket'}</span>
             </div>
@@ -127,7 +132,7 @@ export default function YachtDetail() {
         </motion.div>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="mb-32">
+        <Tabs defaultValue="overview" className="mb-32 lg:mb-10">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="overview">{language === 'ru' ? 'Обзор' : 'Overview'}</TabsTrigger>
             <TabsTrigger value="specs">{language === 'ru' ? 'Характеристики' : 'Specs'}</TabsTrigger>
@@ -139,7 +144,7 @@ export default function YachtDetail() {
             {description && (
               <div>
                 <h3 className="font-semibold mb-2">{language === 'ru' ? 'Описание' : 'Description'}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed ds-reading-copy lg:text-base lg:break-words">{description}</p>
               </div>
             )}
 
@@ -209,9 +214,13 @@ export default function YachtDetail() {
 
         {/* Similar Yachts */}
         <YachtSimilarSection currentYacht={yacht} allYachts={allYachts || []} />
-      </PageContainer>
+      </div>
 
-      <YachtBookingQuickSelect yacht={yacht} />
+      <div className={PUBLIC_LISTING_DETAIL_RAIL} data-listing-booking-rail>
+        <YachtBookingQuickSelect yacht={yacht} />
+      </div>
+      </div>
+      </div>
     </AppLayout>
   );
 }
