@@ -92,10 +92,10 @@ async def main():
      boxes=[c['rect'] for c in hero['cards']]
      columns=2 if width<1200 else 4
      for i, box in enumerate(boxes):
-      row, column=divmod(i,columns)
-      assert abs(box['top']-boxes[row*columns]['top'])<2 and abs(box['left']-boxes[column]['left'])<2,{'directionGrid':hero}
+      grid_row, column=divmod(i,columns)
+      assert abs(box['top']-boxes[grid_row*columns]['top'])<2 and abs(box['left']-boxes[column]['left'])<2,{'directionGrid':hero}
       if column:assert boxes[i-1]['right']<=box['left'],{'directionOverlap':hero}
-      if row:assert boxes[i-columns]['bottom']<=box['top'],{'directionOverlap':hero}
+      if grid_row:assert boxes[i-columns]['bottom']<=box['top'],{'directionOverlap':hero}
     if role in ['pms','admin']:
      h1token=await page.evaluate('parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--type-h1-size"))*parseFloat(getComputedStyle(document.documentElement).fontSize)')
      assert abs(metrics['heading']['fontSize']-h1token)<.1,{'canonicalH1':h1token,'actual':metrics['heading']}
