@@ -35,7 +35,6 @@
     font-size: var(--home-ui-section-mobile);
   }
   .cinematic-home.home-refined {
-    --home-gallery-gap: 32px;
     --public-section-gap: 32px;
     overflow-x: clip;
     font-size: var(--home-ui-body);
@@ -204,7 +203,12 @@
 
   /* Editorial headings and product rails. One *complete* card per screen.
      The former 92% rail exposed cut-off names and prices of the next property. */
-  .cinematic-home.home-refined .home-gallery { padding-top: 32px; min-width: 0; }
+  .cinematic-home.home-refined .home-gallery {
+    /* Preserve 32px at the default scale while honoring global section spacing. */
+    --home-gallery-gap: calc(2rem * var(--section-space-scale));
+    padding-top: var(--home-gallery-gap);
+    min-width: 0;
+  }
   .cinematic-home.home-refined .home-gallery-heading {
     gap: 8px;
     margin-bottom: 13px;
