@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { YachtPolicies } from './YachtPolicies';
 import { YachtBookingQuickSelect } from './YachtBookingQuickSelect';
 import type { Yacht } from '@/hooks/useYachts';
@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 const state = vi.hoisted(() => ({ language: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => state }));
 vi.mock('@/contexts/CartContext', () => ({ useCart: () => ({ addItem: vi.fn(), items: [] }) }));
-vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: ({ open, children }: { open: boolean; children: React.ReactNode }) => open ? <div>{children}</div> : null }));
+vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: ({ open, children, footer }: { open: boolean; children: React.ReactNode; footer: React.ReactNode }) => open ? <div>{children}{footer}</div> : null }));
 afterEach(cleanup);
 
 describe.each(['en', 'ru'])('Yacht request truth (%s)', (language) => {
@@ -68,4 +68,31 @@ it('flower surfaces do not promise unconditional freshness or same-day delivery'
     const source = readFileSync(`src/pages/flowers/${file}.tsx`, 'utf8');
     expect(source).not.toMatch(/5-day freshness|Свежесть 5 дней|Гарантия свежести 5 дней|доставим сегодня|1-3 hours|1-3 часа/);
   }
+});
+
+it('one selector keeps the exact charter request after the layout change', () => {
+  function BookingTarget() {
+    const location = useLocation();
+    return <output aria-label="booking target">{JSON.stringify({ path: location.pathname + location.search, state: location.state })}</output>;
+  }
+  state.language = 'en';
+  render(
+    <MemoryRouter initialEntries={['/yachts/test']}>
+      <Routes>
+        <Route path="/yachts/:id" element={<YachtBookingQuickSelect yacht={{ id: 'test', name_en: 'Test', price_full_day: 1000, currency: 'THB', capacity: 4 } as Yacht} />} />
+        <Route path="/yachts/:id/booking" element={<BookingTarget />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  const trigger = screen.getByRole('button', { name: 'Choose Date' });
+  fireEvent.click(trigger);
+  expect(screen.getByRole('button', { name: 'Send Request' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Tomorrow' }));
+  fireEvent.click(screen.getByRole('button', { name: '09:00' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Send Request' }));
+  const target = JSON.parse(screen.getByLabelText('booking target').textContent || '{}');
+  expect(target).toEqual({
+    path: '/yachts/test/booking?type=full_day',
+    state: { bookNowData: { date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), time: '09:00', guests: 2, charterType: 'full_day' } },
+  });
 });

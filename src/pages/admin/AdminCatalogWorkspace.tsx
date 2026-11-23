@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
+import { PageShell } from '@/components/page/PageShell';
+import { PageHeader } from '@/components/page/PageHeader';
 import { AdminCatalogHub } from '@/components/admin/AdminCatalogHub';
 import { AdminTabbedWorkspace } from '@/components/admin/AdminTabbedWorkspace';
 import AdminUnifiedCatalog from './AdminUnifiedCatalog';
@@ -17,7 +17,7 @@ export default function AdminCatalogWorkspace() {
   const legacyTabs = ['catalog', 'categories', 'taxonomy', 'lookups', 'services'];
   if (!legacyTabs.includes(params.get('tab') ?? '')) {
     return (
-      <PageContainer>
+      <PageShell width="workspace" stack="default">
         <PageHeader title={isRu ? 'Каталоги' : 'Catalogs'} subtitle={isRu ? 'Что хотите добавить или обновить?' : 'What would you like to add or update?'} />
         <AdminCatalogHub />
         <details className="rounded-lg border p-4">
@@ -34,7 +34,7 @@ export default function AdminCatalogWorkspace() {
             </Link>
           </nav>
         </details>
-      </PageContainer>
+      </PageShell>
     );
   }
   return (

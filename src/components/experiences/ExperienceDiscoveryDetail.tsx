@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PUBLIC_LISTING_DETAIL_GRID, PUBLIC_LISTING_DETAIL_RAIL } from '@/components/layout/publicListingDetail';
+import { cn } from '@/lib/utils';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -16,10 +18,11 @@ export function ExperienceDiscoveryDetail({ experience, onBack, initialInquiryOp
   const [inquiryOpen, setInquiryOpen] = useState(initialInquiryOpen);
   const [activeImage, setActiveImage] = useState(0);
   const images = [experience.cover_image, ...(experience.images || [])].filter((image): image is string => Boolean(image));
-  return <MiniAppLayout title={title} fallbackPath="/experiences" onBack={onBack} showHero={false} showFilter={false} showCategories={false}>
-    <article className="space-y-4">
+  return <MiniAppLayout pageWidth="detail" title={title} fallbackPath="/experiences" onBack={onBack} showHero={false} showFilter={false} showCategories={false}>
+    <article className={cn("grid gap-4 lg:items-start", PUBLIC_LISTING_DETAIL_GRID)}>
+      <div className="min-w-0 space-y-4">
       {images.length > 0 && <div className="space-y-2">
-        <OptimizedImage src={images[activeImage] || images[0]} alt={title} width={800} height={450} className="aspect-video w-full" />
+        <OptimizedImage src={images[activeImage] || images[0]} alt={title} width={800} height={450} sizes="(min-width: 1536px) 960px, (min-width: 1024px) 64vw, 100vw" priority className="aspect-video w-full" />
         {images.length > 1 && <div className="flex gap-2 overflow-x-auto" aria-label={t('Фотографии', 'Photos', 'รูปภาพ')}>
           {images.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`${t('Фото', 'Photo', 'รูปภาพ')} ${index + 1}`} aria-pressed={activeImage === index} className="h-16 w-20 shrink-0 overflow-hidden border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
             <img src={image} alt="" className="h-full w-full object-cover" />
@@ -27,12 +30,13 @@ export function ExperienceDiscoveryDetail({ experience, onBack, initialInquiryOp
         </div>}
       </div>}
       {experience.location_name && <p className="text-sm text-muted-foreground">{experience.location_name}</p>}
-      <p>{description}</p>
-      <div className="space-y-3 border border-border bg-muted/30 p-4">
+      <p className="ds-reading-copy">{description}</p>
+      </div>
+      <aside className={cn("min-w-0 space-y-3 border border-border bg-muted/30 p-4 lg:p-6", PUBLIC_LISTING_DETAIL_RAIL)}>
         <h2 className="font-display text-h3">{t('Перед посещением', 'Before you visit', 'ก่อนเข้าชม')}</h2>
         <p>{t('Это идея для отдыха. Консьерж myUNO поможет уточнить программу, доступность и условия. Отправка запроса не подтверждает бронирование; онлайн-оплата для этой карточки недоступна.', 'An idea for your day. myUNO concierge can help check the programme, availability and conditions. An inquiry is not a confirmed booking; online payment is not available for this listing.', 'ไอเดียสำหรับวันพักผ่อน ติดต่อคอนเซียร์จ myUNO เพื่อสอบถามโปรแกรม ที่ว่าง และเงื่อนไข การส่งคำขอไม่ใช่การยืนยันการจอง และยังไม่เปิดให้ชำระเงินออนไลน์')}</p>
         <Button onClick={() => setInquiryOpen(true)} className="h-auto min-h-11 whitespace-normal">{t('Уточнить места у myUNO', 'Ask myUNO about availability', 'สอบถามที่ว่างกับ myUNO')}</Button>
-      </div>
+      </aside>
     </article>
     <ExperienceInquiry open={inquiryOpen} onOpenChange={setInquiryOpen} listingId={experience.id} listingTitle={title} entryPoint="experience_discovery:concierge" />
   </MiniAppLayout>;

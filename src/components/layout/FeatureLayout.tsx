@@ -109,7 +109,7 @@ export interface MiniAppLayoutProps {
   children: ReactNode;
   showBottomNav?: boolean;
   contentClassName?: string;
-  pageWidth?: 'default' | 'catalogue';
+  pageWidth?: 'default' | 'catalogue' | 'detail';
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
   showEcosystemHint?: boolean;
@@ -364,12 +364,12 @@ function MiniappMode({
         />
       )}
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
-      {marketplaceIntro && <div className={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER}>{marketplaceIntro}</div>}
+      {marketplaceIntro && <div className={pageWidth === 'default' ? ECOSYSTEM_PAGE_CONTAINER : PUBLIC_CONTENT_LAYOUT[pageWidth]}>{marketplaceIntro}</div>}
       <div className="relative">
         <UnifiedHeader
           compactOverview={Boolean(marketplaceIntro)}
           hideHeading={Boolean(marketplaceIntro)}
-          containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}
+          containerClassName={pageWidth === 'default' ? undefined : PUBLIC_CONTENT_LAYOUT[pageWidth]}
           title={title}
           subtitle={subtitle}
           showBack
@@ -425,7 +425,7 @@ function MiniappMode({
 
       <div
         className={cn(
-          pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER,
+          pageWidth === 'default' ? ECOSYSTEM_PAGE_CONTAINER : PUBLIC_CONTENT_LAYOUT[pageWidth],
           'pb-4 md:pb-8',
           ECOSYSTEM_MAIN_SPACING,
           showBottomNav && 'pb-24 md:pb-8',

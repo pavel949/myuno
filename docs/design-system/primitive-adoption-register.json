@@ -39,8 +39,8 @@
       "sourceInstances": 295
     },
     "PageContainer": {
-      "directConsumerFiles": 175,
-      "sourceInstances": 316
+      "directConsumerFiles": 173,
+      "sourceInstances": 313
     },
     "PageHeader": {
       "directConsumerFiles": 138,
@@ -95,8 +95,8 @@
       "sourceInstances": 45
     },
     "PageShell": {
-      "directConsumerFiles": 42,
-      "sourceInstances": 49
+      "directConsumerFiles": 43,
+      "sourceInstances": 50
     },
     "UnifiedSectionHeader": {
       "directConsumerFiles": 7,
@@ -5970,7 +5970,7 @@
     },
     {
       "file": "src/components/experiences/ExperienceDiscoveryDetail.tsx",
-      "sha256": "645d6e1cd56040199308be9d5fa567a6c34168a1e2679a27131c3fa740f84d8b",
+      "sha256": "f8342c6c7440f39d0a53efa3caa5ea7a56b92f837cff8b8c692c0da44fae36cc",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -5980,7 +5980,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            34
+            38
           ]
         }
       ]
@@ -6873,7 +6873,7 @@
     },
     {
       "file": "src/components/layout/FeatureLayout.tsx",
-      "sha256": "de03b389a4a1760211a1e063e484b2f91a5606d1c00196598ddc0af6f30f407b",
+      "sha256": "e0160a9b6fb550d7e5bfd1704d75fd1b3fe03fe2e24f133c5c01e95998e89443",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -19608,7 +19608,7 @@
     },
     {
       "file": "src/components/yachts/YachtBookingQuickSelect.tsx",
-      "sha256": "8ea8ede03e7f3bb26b48d1dcb911a52a7c89b5539506d5c28070e7e3ba06ad1b",
+      "sha256": "1c9d42536b4efb2b156e90851b3782de06529b94aeec08b3e894cfec3a4ff8a8",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -20365,7 +20365,7 @@
     },
     {
       "file": "src/pages/Profile.tsx",
-      "sha256": "e917205707eab48ea253237bacba9241b0d3b6fb51f17baf6ff51aec6124cc19",
+      "sha256": "8cfd81a82fc9974a90ef6c8344aa2c894937cd6208be52c9cd871b9596da9532",
       "directRouteDeclarations": [
         {
           "id": "2455a1d87952d23e",
@@ -20390,10 +20390,10 @@
           "source": "@/components/uno/SectionCard",
           "instances": 4,
           "lines": [
-            103,
-            154,
-            176,
-            196
+            105,
+            158,
+            180,
+            200
           ]
         }
       ]
@@ -21719,7 +21719,7 @@
     },
     {
       "file": "src/pages/admin/AdminCatalogWorkspace.tsx",
-      "sha256": "3ee65bbe916e04fc81fc156568b9ee1485440d17f895bdcafb72de6124f3d1e2",
+      "sha256": "d43d4458e604d9ebb71a4b0c93b823d4c56493c6958e5a56ec82af522955cf22",
       "directRouteDeclarations": [
         {
           "id": "aa796c171476640b",
@@ -21732,19 +21732,19 @@
       "visual": "NOTTESTED",
       "primitiveImports": [
         {
-          "name": "PageContainer",
-          "source": "@/components/uno/PageContainer",
-          "instances": 1,
-          "lines": [
-            20
-          ]
-        },
-        {
           "name": "PageHeader",
-          "source": "@/components/uno/PageHeader",
+          "source": "@/components/page/PageHeader",
           "instances": 1,
           "lines": [
             21
+          ]
+        },
+        {
+          "name": "PageShell",
+          "source": "@/components/page/PageShell",
+          "instances": 1,
+          "lines": [
+            20
           ]
         }
       ]
@@ -28658,7 +28658,7 @@
     },
     {
       "file": "src/pages/experiences/ExperienceDetail.tsx",
-      "sha256": "9989bf6ec0cde11ea319ccbbbe89f9a9487346a315a87c1e82ca08242db31c80",
+      "sha256": "d9dd7d89fa78b08076599e23749b9e4148d7d5d3a8be679cf756466cd14ca36a",
       "directRouteDeclarations": [
         {
           "id": "d7297c8e1aa48a4a",
@@ -28675,11 +28675,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            61,
-            61,
-            74,
-            270,
-            480
+            62,
+            62,
+            75,
+            272,
+            483
           ]
         },
         {
@@ -28687,17 +28687,17 @@
           "source": "@/components/ui/card",
           "instances": 11,
           "lines": [
-            204,
-            216,
-            230,
-            280,
-            298,
-            318,
-            357,
-            378,
-            396,
-            416,
-            431
+            206,
+            218,
+            232,
+            282,
+            300,
+            320,
+            359,
+            380,
+            398,
+            418,
+            433
           ]
         }
       ]
@@ -40873,7 +40873,7 @@
     },
     {
       "file": "src/pages/services/ServiceProviderDetail.tsx",
-      "sha256": "91444cce84d22454fe4545ecc494f238c9d8099b6956bab5282f292417ace197",
+      "sha256": "59f588c979b1a9c6005def5eab57b5d8cc9c1b169d94a0ccf1f44857354458a9",
       "directRouteDeclarations": [
         {
           "id": "b07488ca2a1848a3",
@@ -40890,15 +40890,15 @@
           "source": "@/components/ui/button",
           "instances": 9,
           "lines": [
-            147,
-            147,
-            160,
-            250,
-            316,
-            325,
-            335,
-            448,
-            457
+            148,
+            148,
+            161,
+            251,
+            317,
+            326,
+            336,
+            449,
+            458
           ]
         },
         {
@@ -40906,7 +40906,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            262
+            263
           ]
         }
       ]
@@ -41938,7 +41938,7 @@
     },
     {
       "file": "src/pages/transport/VehicleDetail.tsx",
-      "sha256": "f481f1974ef8a4be71b5477d7ba443e24bafa55ec0d30c41a38e0055972fdb74",
+      "sha256": "856296200af3be64475b1013055bd119df3a560a5e9d1023fab2d8635baa762b",
       "directRouteDeclarations": [
         {
           "id": "363a43fc59b8cb25",
@@ -41955,11 +41955,11 @@
           "source": "@/components/ui/button",
           "instances": 5,
           "lines": [
-            70,
-            120,
-            351,
-            354,
-            357
+            72,
+            123,
+            360,
+            363,
+            366
           ]
         }
       ]
@@ -44608,7 +44608,7 @@
     },
     {
       "file": "src/pages/yachts/YachtDetail.tsx",
-      "sha256": "95e1aa9b53a5b4417bd4670973964e292a6613437b6ea07bca16a5d02b32fd16",
+      "sha256": "0307dec116f5f0c21506c7f6da686c3d2c7d1c7a2dbc2646d3134f2124c48588",
       "directRouteDeclarations": [
         {
           "id": "ba803a3c7ebb5ff6",
@@ -44625,16 +44625,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            42
-          ]
-        },
-        {
-          "name": "PageContainer",
-          "source": "@/components/uno/PageContainer",
-          "instances": 2,
-          "lines": [
-            37,
-            87
+            44
           ]
         },
         {
@@ -44642,7 +44633,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            130
+            135
           ]
         }
       ]
