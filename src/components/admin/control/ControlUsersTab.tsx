@@ -17,6 +17,7 @@ import { ru, th as thLocale } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { verifyActivePlatformAdmin } from '@/lib/adminTeamMembership';
 
 interface ProfileWithRoles {
   id: string;
@@ -57,6 +58,7 @@ export function ControlUsersTab() {
   const [loadingAction, setLoadingAction] = React.useState<string | null>(null);
 
   const invokeAction = async (action: string, userId: string, extra: Record<string, unknown> = {}) => {
+    if (!currentUser?.id || isError || isLoading || isFetching || !profiles) return;
     setLoadingAction(`${action}-${userId}`);
     try {
       const res = await supabase.functions.invoke('admin-manage-user', {
@@ -71,17 +73,23 @@ export function ControlUsersTab() {
           try {
             const body = await ctx.json();
             serverMessage = body?.message || body?.error;
+            if (serverMessage && typeof body?.operation_id === 'string') serverMessage += ' (' + body.operation_id + ')';
           } catch {
             /* non-JSON body — fall back to the generic message */
           }
         }
         throw new Error(serverMessage || res.error.message || 'Function error');
       }
-      if (res.data?.error) throw new Error(res.data.message || res.data.error);
+      if (res.data?.success !== true || res.data?.error) throw new Error(res.data?.message || res.data?.error || 'Action not confirmed');
       toast.success(t('admin.users.toast.actionDone'));
-      queryClient.invalidateQueries({ queryKey: ['admin-profiles-with-roles'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-profiles-with-roles'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-roles', userId] }),
+        queryClient.invalidateQueries({ queryKey: ['user-active-context', userId] }),
+      ]);
     } catch (e: any) {
       toast.error(e.message || t('admin.crud.error'));
+      await queryClient.invalidateQueries({ queryKey: ['admin-profiles-with-roles'] });
     } finally {
       setLoadingAction(null);
     }
@@ -106,9 +114,11 @@ export function ControlUsersTab() {
     }
   };
 
-  const { data: profiles, isLoading } = useQuery({
-    queryKey: ['admin-profiles-with-roles', searchQuery],
+  const { data: profiles, isLoading, isFetching, isError, refetch } = useQuery({
+    queryKey: ['admin-profiles-with-roles', currentUser?.id, searchQuery],
+    enabled: !!currentUser?.id,
     queryFn: async (): Promise<ProfileWithRoles[]> => {
+      await verifyActivePlatformAdmin();
       let query = (supabase as any)
         .from('profiles')
         .select('id, full_name, email, phone, created_at, status')
@@ -125,17 +135,17 @@ export function ControlUsersTab() {
       if (!profilesData || profilesData.length === 0) return [];
 
       const ids = profilesData.map((p: any) => p.id);
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .in('user_id', ids);
-
       const rolesMap = new Map<string, string[]>();
-      rolesData?.forEach(r => {
-        const existing = rolesMap.get(r.user_id) || [];
-        existing.push(r.role);
-        rolesMap.set(r.user_id, existing);
-      });
+      for (let offset = 0; offset < ids.length; offset += 20) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles').select('user_id, role').in('user_id', ids.slice(offset, offset + 20));
+        if (rolesError || !rolesData) throw rolesError || new Error('Role data unavailable');
+        rolesData.forEach(r => {
+          const existing = rolesMap.get(r.user_id) || [];
+          existing.push(r.role);
+          rolesMap.set(r.user_id, existing);
+        });
+      }
 
       return profilesData.map((p: any) => ({
         ...p,
@@ -158,7 +168,7 @@ export function ControlUsersTab() {
               {t('admin.users.title')}
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {profiles?.length || 0}
+              {isError ? '—' : profiles?.length ?? '—'}
             </Badge>
           </div>
         </CardHeader>
@@ -174,9 +184,16 @@ export function ControlUsersTab() {
               />
             </div>
 
-            {isLoading ? (
+            {!currentUser?.id || isLoading || isFetching ? (
               <div className="text-center py-6 text-muted-foreground text-sm">
                 {t('admin.users.loading')}
+              </div>
+            ) : isError ? (
+              <div role="alert" className="text-center py-6 text-sm">
+                {t('admin.crud.error')}{' '}
+                <Button variant="outline" size="sm" onClick={() => void refetch()}>
+                  {language === 'ru' ? 'Повторить' : language === 'th' ? 'ลองอีกครั้ง' : 'Retry'}
+                </Button>
               </div>
             ) : (
               <div className="space-y-1">
@@ -247,7 +264,7 @@ export function ControlUsersTab() {
 
                           {/* Status Actions */}
                           <div className="flex flex-wrap gap-1.5">
-                            {profile.status !== 'active' && (
+                            {profile.status !== 'active' && !profile.roles.includes('admin') && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -305,25 +322,25 @@ export function ControlUsersTab() {
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <Trash2 className="h-3 w-3" />
-                                    {t('admin.users.actions.delete')}
+                                    {language === 'ru' ? 'Архивировать' : language === 'th' ? 'เก็บถาวร' : 'Archive'}
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      {t('admin.users.delete.title')}
+                                      {language === 'ru' ? 'Архивировать аккаунт?' : language === 'th' ? 'เก็บบัญชีถาวรหรือไม่' : 'Archive this account?'}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      {`${profile.full_name || profile.email} ${t('admin.users.delete.descSuffix')}`}
+                                      {language === 'ru' ? 'Вход будет заблокирован. Данные сохранятся.' : language === 'th' ? 'การเข้าสู่ระบบจะถูกปิดใช้งานและข้อมูลจะถูกเก็บไว้' : 'Sign-in will be disabled. Account data will be retained.'}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>{t('admin.users.actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      onClick={() => invokeAction('delete', profile.id, { hard_delete: true })}
+                                      onClick={() => invokeAction('delete', profile.id, { hard_delete: false })}
                                     >
-                                      {t('admin.users.actions.delete')}
+                                      {language === 'ru' ? 'Архивировать' : language === 'th' ? 'เก็บถาวร' : 'Archive'}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -339,13 +356,8 @@ export function ControlUsersTab() {
                             <div className="flex flex-wrap gap-1">
                               {ALL_ROLES.map(role => {
                                 const hasRole = profile.roles.includes(role);
-                                // Mirrors admin-manage-user: platform roles can't be granted here,
-                                // can't be removed from yourself, and admin can't be stripped from another admin.
-                                const isPlatformRole = role === 'admin' || role === 'uno_team';
-                                const blocked =
-                                  (isPlatformRole && !hasRole) ||
-                                  (isPlatformRole && isSelf(profile.id)) ||
-                                  (role === 'admin' && hasRole);
+                                // Protected roles are not managed through this generic endpoint.
+                                const blocked = role === 'admin' || role === 'uno_team';
                                 return (
                                   <Button
                                     key={role}

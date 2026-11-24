@@ -1,0 +1,26 @@
+-- Synthetic schema only, matching the observed 24 Nov role/audit/profile policies.
+CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS;
+CREATE SCHEMA auth; GRANT USAGE ON SCHEMA auth,public TO anon,authenticated,service_role;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+CREATE TYPE public.app_role AS ENUM ('user','admin','uno_team','owner','vendor');
+CREATE TABLE public.profiles(id uuid PRIMARY KEY,status text NOT NULL DEFAULT 'active',user_type public.app_role,suspended_at timestamptz,deactivated_at timestamptz,status_changed_by uuid,full_name text);
+CREATE TABLE public.user_roles(user_id uuid NOT NULL REFERENCES public.profiles(id),role public.app_role NOT NULL,UNIQUE(user_id,role));
+CREATE TABLE public.uno_team_permissions(user_id uuid NOT NULL);
+CREATE TABLE public.admin_audit_logs(id bigint GENERATED ALWAYS AS IDENTITY,admin_id uuid NOT NULL,action text NOT NULL,entity_type text,entity_id text,old_data jsonb,new_data jsonb);
+GRANT ALL ON public.profiles,public.user_roles,public.admin_audit_logs,public.uno_team_permissions TO anon,authenticated,service_role;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
+CREATE FUNCTION public.has_role(p_user uuid,p_role public.app_role) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=p_user AND role=p_role)$$;
+CREATE FUNCTION public.actor_has_platform_admin() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$SELECT public.has_role(auth.uid(),'admin')$$;
+REVOKE ALL ON FUNCTION public.actor_has_platform_admin() FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.actor_has_platform_admin() TO authenticated,service_role;
+CREATE POLICY "Admins can manage all roles" ON public.user_roles FOR ALL TO authenticated USING(public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Users can view their own roles" ON public.user_roles FOR SELECT TO authenticated USING(auth.uid()=user_id);
+CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT TO authenticated USING(public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Admins can update any profile" ON public.profiles FOR UPDATE TO authenticated USING(public.has_role(auth.uid(),'admin')) WITH CHECK(public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Users can view their own profile only" ON public.profiles FOR SELECT TO authenticated USING(auth.uid()=id);
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING(auth.uid()=id);
+CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK(auth.uid()=id);
+CREATE POLICY audit_logs_admin_only ON public.admin_audit_logs FOR ALL TO authenticated USING(public.has_role(auth.uid(),'admin')) WITH CHECK(public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Only service role can create audit logs" ON public.admin_audit_logs FOR INSERT WITH CHECK(false);

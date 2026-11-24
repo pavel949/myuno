@@ -29,6 +29,6 @@ for(const name of entries){
  const req=(headers={Authorization:'Bearer synthetic-user'})=>new Request('http://localhost',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
  service=0;const anon=await globalThis.__handler(req({}));assert.equal(anon.status,401,`${name} anon`);assert.equal(service,0,`${name} anonymous service`);count++;
  service=0;reads=0;const denied=await globalThis.__handler(req());assert.equal(denied.status,403,`${name} uno_team`);assert.equal(service,0,`${name} denied service`);assert.equal(reads,0);count++;
- allowed=true;roles=['admin'];service=0;reads=0;const granted=await globalThis.__handler(req());assert.notEqual(granted.status,403,`${name} authorized gate`);if(name!=='publish-telegram-post')assert.ok(service>0,`${name} authorized service`);count++;
+ allowed=true;roles=['admin'];service=0;reads=0;const granted=await globalThis.__handler(req());assert.notEqual(granted.status,403,`${name} authorized gate`);if(name==='admin-manage-user'){assert.equal(granted.status,400);assert.equal(service,0,'invalid admin mutation does not create service client');}else if(name!=='publish-telegram-post')assert.ok(service>0,`${name} authorized service`);count++;
 }
 console.log(`${count}/${count} actual entrypoint authorization cases; SDK/rate-limit synthetic, all external requests forbidden`);
