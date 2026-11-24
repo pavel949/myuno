@@ -178,6 +178,11 @@ jobs:
         run: DESIGN_ROLLOUT_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/rollout-surfaces" node scripts/qa/design-rollout-surfaces.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Verify isolated signed-in settings layout and controls
+        env:
+          PROFILE_SETTINGS_QA_OUTPUT: artifacts/design-system/profile-settings
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+        run: timeout 90s node scripts/qa/profile-settings-ui.cjs
       - name: Retain synthetic UI evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

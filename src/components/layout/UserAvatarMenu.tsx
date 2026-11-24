@@ -8,9 +8,10 @@ import {
   Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
   Menu, Bell, CreditCard, Briefcase, Construction, Crown,
-  LineChart, Eye, Zap,
+  LineChart, Eye, Zap, X,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -135,6 +136,8 @@ export function UserAvatarMenu({ compact = false, consumerHeader = false }: {
   consumerHeader?: boolean;
 }) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const prioritizePersonal = consumerHeader && isMobile;
   const { language } = useLanguage();
   const { user } = useAuth();
   const signOut = useUiSignOut();
@@ -298,6 +301,34 @@ export function UserAvatarMenu({ compact = false, consumerHeader = false }: {
     { icon: HelpCircle, labelEn: 'Help Center', labelRu: 'Центр помощи', labelTh: 'ศูนย์ช่วยเหลือ', path: '/support' },
   ];
 
+  const renderPersonalItem = (item: (typeof primaryItems)[number] | (typeof secondaryItems)[number]) => {
+    const Icon = item.icon;
+    const isPrimary = primaryItems.some(primary => primary.path === item.path);
+    return (
+      <DropdownMenuItem
+        key={item.path}
+        onClick={() => navigate(item.path)}
+        className={cn(
+          "flex items-center gap-3 px-4 cursor-pointer focus:bg-muted/50",
+          isPrimary ? "py-3" : "py-2.5"
+        )}
+      >
+        <Icon aria-hidden="true" className={cn("flex-shrink-0", isPrimary ? "w-5 h-5 text-foreground/70" : "w-4 h-4 text-muted-foreground")} />
+        <span className={cn("text-sm", isPrimary ? "font-medium text-foreground flex-1" : "text-foreground/80")}>
+          {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
+        </span>
+        {'badge' in item && item.badge && (
+          <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
+            {item.badge}
+          </span>
+        )}
+      </DropdownMenuItem>
+    );
+  };
+
+  // Change DOM order, not visual order alone: arrow-key navigation follows the same priority.
+  const mobilePersonalItems = [primaryItems[3], secondaryItems[0], primaryItems[1], primaryItems[0], primaryItems[2]];
+
   return (
     <>
     <DropdownMenu>
@@ -330,9 +361,26 @@ export function UserAvatarMenu({ compact = false, consumerHeader = false }: {
 
       <DropdownMenuContent
         align="end"
-        className={cn("w-72 p-0 rounded-none shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden", consumerHeader && "consumer-account-menu")}
+        className={cn(
+          "w-72 p-0 rounded-none shadow-xl border border-border/50 max-h-[min(85vh,560px,var(--radix-dropdown-menu-content-available-height,85vh))] overflow-y-auto overflow-x-hidden",
+          consumerHeader && "consumer-account-menu",
+          prioritizePersonal && "scroll-pt-11"
+        )}
       >
-        {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
+        {prioritizePersonal && (
+          <>
+            <DropdownMenuItem className="sticky top-0 z-10 gap-2 border-b border-border bg-popover px-4">
+              <X className="h-4 w-4" aria-hidden="true" />
+              {pickLang(language, { ru: 'Закрыть меню аккаунта', en: 'Close account menu', th: 'ปิดเมนูบัญชี' })}
+            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              {mobilePersonalItems.map(renderPersonalItem)}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator className="my-0" />
+          </>
+        )}
+
+        {/* Desktop retains its role-first order; mobile exposes personal destinations above. */}
         <DropdownMenuGroup>
             {quickOperateRole && ROLE_SWITCH_CONFIG[quickOperateRole] && (() => {
               const cfg = roleConfig(quickOperateRole)!;
@@ -425,47 +473,14 @@ export function UserAvatarMenu({ compact = false, consumerHeader = false }: {
             <DropdownMenuSeparator className="my-0" />
         </DropdownMenuGroup>
 
-        {/* Primary navigation */}
-        {primaryItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <DropdownMenuItem
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-muted/50"
-            >
-              <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
-              <span className="text-sm font-medium text-foreground flex-1">
-                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
-              </span>
-              {'badge' in item && item.badge && (
-                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
-                  {item.badge}
-                </span>
-              )}
-            </DropdownMenuItem>
-          );
-        })}
+        {!prioritizePersonal && (
+          <>
+            {primaryItems.map(renderPersonalItem)}
+            <DropdownMenuSeparator className="my-0" />
+          </>
+        )}
 
-        <DropdownMenuSeparator className="my-0" />
-
-        {/* Secondary navigation */}
-        {secondaryItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <DropdownMenuItem
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer focus:bg-muted/50"
-            >
-              <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              <span className="text-sm text-foreground/80">
-                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
-              </span>
-            </DropdownMenuItem>
-          );
-        })}
-
+        {secondaryItems.filter(item => !prioritizePersonal || item.path !== '/profile/settings').map(renderPersonalItem)}
         <DropdownMenuSeparator className="my-0" />
 
         {/* Referral CTA */}

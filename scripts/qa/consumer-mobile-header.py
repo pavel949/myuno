@@ -12,7 +12,9 @@ async def main():
   cases += [(390,'en','dark','no'),(390,'en','dark','yes'),(1440,'en','dark','no'),(1440,'en','dark','yes')] if not BASELINE else []
   for index,(width,lang,theme,auth) in enumerate(cases):
    overlay=not BASELINE and index>=72
-   context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block');blocked=[];errors=[]
+   crowded=not BASELINE and auth=='yes' and width in (320,390)
+   height={320:568,390:620}.get(width,900) if crowded else 900
+   context=await browser.new_context(viewport={'width':width,'height':height},service_workers='block');blocked=[];errors=[]
    async def route(r):
     u=urlparse(r.request.url);name=u.path.lstrip('/')
     if u.netloc=='fixture.invalid' and r.request.method=='GET' and name in ['app.js','theme.css']:
@@ -21,7 +23,7 @@ async def main():
     else:blocked.append(r.request.url);await r.abort()
    await context.route('**/*',route);page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));prefix=f'{width}-{lang}-{theme}-{auth}'+('-overlay' if overlay else '');row={'case':prefix,'outcome':'FAIL'}
    try:
-    await page.goto('http://fixture.invalid/discover/services?'+urlencode({'lang':lang,'theme':theme,'auth':auth,'overlay':'yes' if overlay else 'no'})+'#offers',wait_until='domcontentloaded');header=page.locator('.consumer-header');await header.get_by_role('link',name='myUNO',exact=True).wait_for();await page.evaluate('document.fonts.ready')
+    await page.goto('http://fixture.invalid/discover/services?'+urlencode({'lang':lang,'theme':theme,'auth':auth,'overlay':'yes' if overlay else 'no','roles':'crowded' if crowded else 'owner'})+'#offers',wait_until='domcontentloaded');header=page.locator('.consumer-header');await header.get_by_role('link',name='myUNO',exact=True).wait_for();await page.evaluate('document.fonts.ready')
     row['headerBox']=await header.bounding_box();row['triggers']=await header.locator('button[aria-haspopup]').evaluate_all('(es)=>es.filter(e=>e.getClientRects().length).map(e=>({name:e.getAttribute("aria-label"),box:{x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}}))')
     await page.screenshot(path=str(OUT/f'{prefix}-closed.png'))
     if BASELINE:row['outcome']='OBSERVED';continue
@@ -59,6 +61,29 @@ async def main():
       await expect(menu.get_by_role('menuitem',name=cart,exact=True)).to_have_count(0)
       await page.screenshot(path=str(OUT/f'{prefix}-account-open.png'))
       await page.keyboard.press('Escape');await expect(menu).not_to_be_visible();await expect(account).to_be_focused()
+      if crowded:
+       await account.click();await expect(menu).to_be_visible()
+       await page.wait_for_function('(e)=>getComputedStyle(e).opacity==="1" && !e.getAnimations().some(a=>a.playState==="running")',arg=await menu.element_handle())
+       settings_item=menu.get_by_role('menuitem',name=settings,exact=True)
+       profile=menu.get_by_role('menuitem',name={'ru':'Профиль','en':'Profile','th':'โปรไฟล์'}[lang],exact=True)
+       close_account=menu.get_by_role('menuitem',name={'ru':'Закрыть меню аккаунта','en':'Close account menu','th':'ปิดเมนูบัญชี'}[lang],exact=True)
+       logout=menu.get_by_role('menuitem',name={'ru':'Выйти','en':'Log out','th':'ออกจากระบบ'}[lang],exact=True)
+       await expect(menu.get_by_text(owner,exact=True)).to_have_count(1)
+       # Bounding boxes, not Playwright visibility, prove we can actually see/click these first rows.
+       menu_box=await menu.bounding_box();account_box=await account.bounding_box()
+       assert menu_box and account_box and menu_box['x']>=0 and menu_box['x']+menu_box['width']<=width+1,menu_box
+       assert menu_box['y']>=-1 and menu_box['y']+menu_box['height']<=height+1,menu_box
+       assert menu_box['y']>=account_box['y']+account_box['height']-1 or menu_box['y']+menu_box['height']<=account_box['y']+1,(menu_box,account_box)
+       assert await menu.evaluate('(e)=>e.scrollTop===0 && e.scrollHeight>e.clientHeight'), 'Not a real scroll fixture'
+       for item in [profile,settings_item,close_account]:
+        box=await item.bounding_box();assert box and box['y']>=menu_box['y'] and box['y']+box['height']<=menu_box['y']+menu_box['height']+1,box
+       await logout.scroll_into_view_if_needed()
+       box=await logout.bounding_box();assert box and box['y']+box['height']<=menu_box['y']+menu_box['height']+1,box
+       close_box=await close_account.bounding_box();assert close_box and abs(close_box['y']-menu_box['y'])<=2,close_box
+       await close_account.click();await expect(menu).not_to_be_visible();await expect(account).to_be_focused()
+       await account.click();await settings_item.click();await expect(page.locator('#route')).to_have_text('/profile/settings')
+       await page.go_back(wait_until='domcontentloaded');await expect(trigger).to_be_visible()
+       row['crowdedAccount']={'height':height,'settingsBeforeScroll':True,'logoutReachable':True,'explicitClose':True}
      await trigger.click();await expect(surface).to_be_visible();await expect(page.get_by_role('menu')).not_to_be_visible()
      await expect(surface.get_by_role('link',name=service,exact=True)).to_be_visible()
      await expect(surface.get_by_role('link',name=cart,exact=True)).to_be_visible()
@@ -72,7 +97,7 @@ async def main():
      await page.keyboard.press('Enter');await expect(partners).not_to_have_attribute('open','')
      close=surface.get_by_role('button',name={'ru':'Закрыть меню','en':'Close menu','th':'ปิดเมนู'}[lang],exact=True)
      body=surface.locator('.consumer-task-menu-body');await body.evaluate('(e)=>e.scrollTop=e.scrollHeight')
-     closeBox=await close.bounding_box();assert closeBox and closeBox['y']>=0 and closeBox['y']+closeBox['height']<=900,closeBox
+     closeBox=await close.bounding_box();assert closeBox and closeBox['y']>=0 and closeBox['y']+closeBox['height']<=height,closeBox
      await body.evaluate('(e)=>e.scrollTop=0')
      sign=surface.get_by_role('link',name={'ru':'Войти','en':'Sign in','th':'เข้าสู่ระบบ'}[lang],exact=True)
      if auth=='no':

@@ -1,14 +1,10 @@
-import { ProfileCountrySelect } from '@/components/profile/ProfileCountrySelect';
-import '@/styles/premium-account.css';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  User, MapPin, Lock, Heart, AlertTriangle, Save, 
-  Palette, ShieldCheck, Shield, MessageCircle
-} from 'lucide-react';
+import { useState, useEffect, useRef, type FormEvent, type ReactNode } from 'react';
+import { ArrowDown, Bell, LockKeyhole, Palette, Save, Shield, User, type LucideIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
-import { SectionCard, SectionTitle } from '@/components/uno/SectionCard';
+import { PageHeader } from '@/components/page/PageHeader';
+import { SectionHeader } from '@/components/ds/SectionHeader';
+import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,410 +13,231 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
-import { useProfileDetails, UpdateProfileDetailsData } from '@/hooks/useProfileDetails';
+import { useProfileDetails, type UpdateProfileDetailsData } from '@/hooks/useProfileDetails';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { LocationSwitcher } from '@/components/uno/LocationSwitcher';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useNavigate } from 'react-router-dom';
 import { SecuritySettingsSection } from '@/components/profile/SecuritySettingsSection';
 import { ConnectedAccountsSection } from '@/components/profile/ConnectedAccountsSection';
-import { ProfileCompletionCard } from '@/components/profile/ProfileCompletionCard';
+import { ProfileCountrySelect } from '@/components/profile/ProfileCountrySelect';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { PUBLIC_CONTENT_ANCHOR } from '@/design-system/ecosystemLayout';
+import { FLOATING_OFFSET } from '@/lib/nav/floatingStack';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { cn } from '@/lib/utils';
+import '@/styles/premium-account.css';
 
 const GENDERS = [
-  { value: 'male', labelEn: 'Male', labelRu: 'Мужской' },
-  { value: 'female', labelEn: 'Female', labelRu: 'Женский' },
-  { value: 'other', labelEn: 'Prefer not to say', labelRu: 'Не указывать' },
+  { value: 'male', labelEn: 'Male', labelRu: 'Мужской', labelTh: 'ชาย' },
+  { value: 'female', labelEn: 'Female', labelRu: 'Женский', labelTh: 'หญิง' },
+  { value: 'other', labelEn: 'Prefer not to say', labelRu: 'Не указывать', labelTh: 'ไม่ระบุ' },
 ];
 
 const RELATIONS = [
-  { value: 'spouse', labelEn: 'Spouse', labelRu: 'Супруг(а)' },
-  { value: 'parent', labelEn: 'Parent', labelRu: 'Родитель' },
-  { value: 'child', labelEn: 'Child', labelRu: 'Ребёнок' },
-  { value: 'sibling', labelEn: 'Sibling', labelRu: 'Брат/Сестра' },
-  { value: 'friend', labelEn: 'Friend', labelRu: 'Друг' },
-  { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
+  { value: 'spouse', labelEn: 'Spouse', labelRu: 'Супруг(а)', labelTh: 'คู่สมรส' },
+  { value: 'parent', labelEn: 'Parent', labelRu: 'Родитель', labelTh: 'บิดาหรือมารดา' },
+  { value: 'child', labelEn: 'Child', labelRu: 'Ребёнок', labelTh: 'บุตร' },
+  { value: 'sibling', labelEn: 'Sibling', labelRu: 'Брат/Сестра', labelTh: 'พี่น้อง' },
+  { value: 'friend', labelEn: 'Friend', labelRu: 'Друг', labelTh: 'เพื่อน' },
+  { value: 'other', labelEn: 'Other', labelRu: 'Другое', labelTh: 'อื่น ๆ' },
 ];
 
+type EditableField = 'date_of_birth' | 'gender' | 'nationality' | 'address_line1' | 'city' | 'country'
+  | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relationship' | 'medical_conditions';
+type DetailsDraft = Pick<UpdateProfileDetailsData, EditableField>;
+
+function SettingsSection({ id, title, subtitle, icon, children }: {
+  id: string; title: string; subtitle?: string; icon: LucideIcon; children: ReactNode;
+}) {
+  return <section id={id} aria-labelledby={`${id}-title`} className={cn(PUBLIC_CONTENT_ANCHOR, 'min-w-0 space-y-3')} tabIndex={-1}>
+    <SectionHeader headingId={`${id}-title`} title={title} subtitle={subtitle} icon={icon} density="workspace" size="lg" />
+    {children}
+  </section>;
+}
+
 export default function ProfileSettings() {
-  const { language } = useLanguage();
-  const { user, isLoading: authLoading } = useAuth();
-  const { profile, isLoading: profileLoading } = useProfile();
-  const { details, isLoading: detailsLoading, updateDetails, isUpdating } = useProfileDetails();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
-  const isRu = language === 'ru';
-
-  const [formData, setFormData] = useState<UpdateProfileDetailsData>({});
-
   useEffect(() => {
-    if (!authLoading && !user) {
-      redirectToAuth(navigate);
-    }
-  }, [user, authLoading, navigate]);
+    if (!isLoading && !user) redirectToAuth(navigate);
+  }, [user, isLoading, navigate]);
 
-  useEffect(() => {
-    if (details) {
-      setFormData({
-        date_of_birth: details.date_of_birth,
-        gender: details.gender,
-        nationality: details.nationality,
-        address_line1: details.address_line1,
-        address_line2: details.address_line2,
-        city: details.city,
-        state_province: details.state_province,
-        postal_code: details.postal_code,
-        country: details.country,
-        emergency_contact_name: details.emergency_contact_name,
-        emergency_contact_phone: details.emergency_contact_phone,
-        emergency_contact_relation: details.emergency_contact_relation,
-        medical_conditions: details.medical_conditions,
-      });
-    }
-  }, [details]);
+  if (isLoading) return <AppLayout><div className="flex justify-center py-12"><LoadingSpinner /></div></AppLayout>;
+  if (!user) return null;
+  // A different signed-in actor must never inherit the previous editor's draft.
+  return <SettingsForUser key={user.id} actorId={user.id} email={user.email} />;
+}
 
-  const handleChange = (field: keyof UpdateProfileDetailsData, value: string | null) => {
-    setFormData(prev => ({ ...prev, [field]: value || null }));
+function SettingsForUser({ actorId, email }: { actorId: string; email?: string }) {
+  const { language } = useLanguage();
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const { profile, isLoading: profileLoading } = useProfile();
+  const { details, dataUpdatedAt, error, isLoading, isUpdating, updateDetailsAsync } = useProfileDetails();
+  const ownedDetails = details?.id === actorId ? details : null;
+  const ownedProfile = profile?.id === actorId ? profile : null;
+  const [draft, setDraft] = useState<DetailsDraft>({});
+  const [recentSave, setRecentSave] = useState<{ sourceUpdatedAt: number; values: DetailsDraft }>();
+  const [status, setStatus] = useState<'saved' | 'error'>();
+  const saving = useRef(false);
+  // Bridge the invalidation gap only. Any later successful query result is
+  // authoritative, even when the server legitimately returns a former value.
+  const submitted = recentSave?.sourceUpdatedAt === dataUpdatedAt ? recentSave?.values : undefined;
+  const baseline = { ...ownedDetails, ...submitted };
+  const value = (key: EditableField) => String((Object.prototype.hasOwnProperty.call(draft, key) ? draft[key] : baseline[key]) ?? '');
+  const dirty = Object.keys(draft).length > 0;
+  const handleChange = (key: EditableField, input: string) => {
+    const parsed = input || null;
+    setStatus(undefined);
+    setDraft(previous => {
+      const next = { ...previous };
+      if (parsed === (baseline[key] ?? null)) delete next[key];
+      else next[key] = parsed;
+      return next;
+    });
   };
 
-  const handleSave = () => updateDetails(formData);
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (saving.current || !dirty || !ownedDetails || error) return;
+    saving.current = true;
+    try {
+      await updateDetailsAsync(draft);
+      setRecentSave({ sourceUpdatedAt: dataUpdatedAt, values: { ...submitted, ...draft } });
+      setDraft({});
+      setStatus('saved');
+    } catch {
+      setStatus('error');
+    } finally {
+      saving.current = false;
+    }
+  };
 
-  const isLoading = authLoading || profileLoading || detailsLoading;
+  const title = t('Настройки профиля', 'Profile settings', 'การตั้งค่าโปรไฟล์');
+  const sections = [
+    { id: 'preferences', title: t('Предпочтения', 'Preferences', 'ค่ากำหนด'), icon: Palette },
+    { id: 'personal-details', title: t('Личные данные', 'Personal details', 'ข้อมูลส่วนตัว'), icon: User },
+    { id: 'sign-in-security', title: t('Вход и безопасность', 'Sign-in and security', 'การเข้าสู่ระบบและความปลอดภัย'), icon: Shield },
+    { id: 'account-actions', title: t('Действия с аккаунтом', 'Account actions', 'การจัดการบัญชี'), icon: LockKeyhole },
+  ] as const;
+  const switcher = 'min-h-11 min-w-11 px-3 whitespace-nowrap';
+  const preferences = [
+    { label: t('Тема', 'Theme', 'ธีม'), control: <ThemeSwitcher variant="dropdown" className={switcher} /> },
+    { label: t('Язык', 'Language', 'ภาษา'), control: <LanguageSwitcher className={switcher} /> },
+    { label: t('Валюта', 'Currency', 'สกุลเงิน'), control: <CurrencySwitcher className={switcher} /> },
+    { label: t('Регион', 'Region', 'ภูมิภาค'), control: <LocationSwitcher /> },
+  ];
+  const identity = [
+    { label: t('Полное имя', 'Full name', 'ชื่อ-นามสกุล'), value: ownedProfile?.full_name },
+    { label: t('Электронная почта', 'Email', 'อีเมล'), value: ownedProfile?.email || email },
+    { label: t('Телефон', 'Phone', 'โทรศัพท์'), value: ownedProfile?.phone },
+  ];
 
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <PageContainer className="premium-account-frame">
-          <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack />
-          <div className="flex justify-center py-12"><LoadingSpinner /></div>
-        </PageContainer>
-      </AppLayout>
-    );
-  }
+  return <AppLayout usePageContainer={false}><PageContainer width="default" className={cn("profile-settings", FLOATING_OFFSET.contentClearance)}>
+    <PageHeader title={title} showBack fallbackPath={APP_ROUTES.PROFILE} className="profile-settings-header" />
+    <div className="profile-settings-layout">
+      <nav aria-label={t('Разделы настроек', 'Settings sections', 'หมวดการตั้งค่า')} className="profile-settings-navigation">
+        {sections.map(({ id, title, icon: Icon }) => <a key={id} href={`#${id}`} className="profile-settings-jump">
+          <Icon aria-hidden className="size-4 shrink-0 text-primary" /><span>{title}</span><ArrowDown aria-hidden className="size-3.5 shrink-0 text-muted-foreground" />
+        </a>)}
+      </nav>
+      <div className="min-w-0 space-y-8">
+        <SettingsSection {...sections[0]} subtitle={t('Эти настройки применяются сразу.', 'These settings apply immediately.', 'การตั้งค่าเหล่านี้มีผลทันที')}>
+          <SectionCard noPadding className="divide-y divide-border">
+            {preferences.map(({ label, control }) => <div key={label} className="profile-settings-row"><span className="min-w-0 font-medium">{label}</span>{control}</div>)}
+            <Link to={APP_ROUTES.NOTIFICATION_SETTINGS} className="profile-settings-row hover:bg-muted/50">
+              <span className="flex min-w-0 items-center gap-2"><Bell aria-hidden className="size-4 shrink-0 text-primary" />{t('Уведомления', 'Notifications', 'การแจ้งเตือน')}</span>
+              <span className="text-primary">{t('Настроить', 'Manage', 'ตั้งค่า')}</span>
+            </Link>
+          </SectionCard>
+        </SettingsSection>
 
-  if (!user) return null;
-
-  return (
-    <AppLayout>
-      <PageContainer className="premium-account-frame">
-        <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack fallbackPath="/profile" />
-
-        <div className="space-y-6 pb-24 [&_label]:text-foreground/80 [&_input]:text-foreground [&_input]:bg-secondary/50 [&_input:disabled]:bg-muted/80 [&_input:disabled]:text-foreground/60 [&_input:disabled]:opacity-100 [&_textarea]:text-foreground [&_textarea]:bg-secondary/50 [&_.text-sm]:text-foreground/90">
-          {/* Profile Completion Progress */}
-          <ProfileCompletionCard />
-
-          {/* Trust Ecosystem Banner */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <SectionCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">
-                    {isRu ? 'Экосистема доверия myUNO' : 'myUNO Trust Ecosystem'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {isRu 
-                      ? 'Заполнение профиля помогает нам обеспечить вашу безопасность и предложить персонализированный сервис. Ваши данные защищены и используются только для верификации и улучшения качества услуг.'
-                      : 'Completing your profile helps us ensure your safety and provide personalized service. Your data is protected and used only for verification and service quality improvement.'}
-                  </p>
-                </div>
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Interface Settings */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
-              <Palette className="w-4 h-4" />
-              {isRu ? 'Настройки интерфейса' : 'Interface Settings'}
-            </div>
-            <SectionCard>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">{isRu ? 'Тема' : 'Theme'}</span>
-                  <ThemeSwitcher variant="cards" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">{isRu ? 'Язык' : 'Language'}</span>
-                  <LanguageSwitcher variant="toggle" size="sm" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">{isRu ? 'Валюта' : 'Currency'}</span>
-                  <CurrencySwitcher size="sm" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">{isRu ? 'Город' : 'Location'}</span>
-                  <LocationSwitcher />
-                </div>
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Personal Information */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
-              <User className="w-4 h-4" />
-              {isRu ? 'Личные данные' : 'Personal Information'}
-            </div>
-            <SectionCard className="space-y-4">
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">
-                {isRu 
-                  ? 'Эти данные используются для персонализации сервиса и верификации вашей личности при бронировании премиальных услуг.'
-                  : 'This information is used to personalize services and verify your identity when booking premium services.'}
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-xs">{isRu ? 'Дата рождения' : 'Date of Birth'}</Label>
-                  <Input 
-                    type="date" 
-                    value={formData.date_of_birth || ''} 
-                    onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">{isRu ? 'Пол' : 'Gender'}</Label>
-                  <Select value={formData.gender || ''} onValueChange={(v) => handleChange('gender', v)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={isRu ? 'Выбрать' : 'Select'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GENDERS.map(g => (
-                        <SelectItem key={g.value} value={g.value}>
-                          {isRu ? g.labelRu : g.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="settings-nationality" className="text-xs">{isRu ? 'Гражданство' : 'Nationality'}</Label>
-                <ProfileCountrySelect id="settings-nationality" value={formData.nationality || ''} onChange={value => handleChange('nationality', value)} className="mt-1" />
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Verified Identity Data */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
-              <Shield className="w-4 h-4" />
-              {isRu ? 'Верифицированные данные' : 'Verified Identity'}
-            </div>
-            <SectionCard className="space-y-4 border-primary/20">
-              <div className="flex items-start gap-3 p-3 rounded-none bg-primary/5 -mt-2 mb-2">
-                <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {isRu 
-                    ? 'Эти данные являются частью вашей верифицированной личности и защищены от изменений. Для обновления обратитесь в службу поддержки.'
-                    : 'This data is part of your verified identity and protected from changes. Contact support to update.'}
-                </p>
-              </div>
-              
-              <div>
-                <Label className="text-xs flex items-center gap-1">
-                  {isRu ? 'Полное имя' : 'Full Name'}
-                  <ShieldCheck className="w-3 h-3 text-primary" />
-                </Label>
-                <Input 
-                  value={profile?.full_name || ''} 
-                  disabled 
-                  className="mt-1 bg-muted"
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs flex items-center gap-1">
-                  Email
-                  <ShieldCheck className="w-3 h-3 text-primary" />
-                </Label>
-                <Input 
-                  value={profile?.email || user?.email || ''} 
-                  disabled 
-                  className="mt-1 bg-muted"
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs flex items-center gap-1">
-                  {isRu ? 'Телефон' : 'Phone'}
-                  <ShieldCheck className="w-3 h-3 text-primary" />
-                </Label>
-                <Input 
-                  value={profile?.phone || (isRu ? 'Не указан' : 'Not provided')} 
-                  disabled 
-                  className="mt-1 bg-muted"
-                />
-              </div>
-
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full text-xs"
-                onClick={() => navigate('/support')}
-              >
-                <MessageCircle className="w-3 h-3 mr-1" />
-                {isRu ? 'Запросить изменение данных' : 'Request Data Change'}
-              </Button>
-            </SectionCard>
-          </motion.div>
-
-          {/* Address */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
-              <MapPin className="w-4 h-4" />
-              {isRu ? 'Адрес проживания' : 'Residential Address'}
-            </div>
-            <SectionCard className="space-y-4">
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">
-                {isRu 
-                  ? 'Адрес может потребоваться для доставки документов или трансферов.'
-                  : 'Address may be required for document delivery or transfers.'}
-              </p>
-              
-              <div>
-                <Label className="text-xs">{isRu ? 'Адрес' : 'Address'}</Label>
-                <Input 
-                  value={formData.address_line1 || ''} 
-                  onChange={(e) => handleChange('address_line1', e.target.value)}
-                  placeholder={isRu ? 'Улица, дом, квартира' : 'Street, building, apt'}
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-xs">{isRu ? 'Город' : 'City'}</Label>
-                  <Input 
-                    value={formData.city || ''} 
-                    onChange={(e) => handleChange('city', e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="settings-country" className="text-xs">{isRu ? 'Страна' : 'Country'}</Label>
-                  <ProfileCountrySelect id="settings-country" value={formData.country || ''} onChange={value => handleChange('country', value)} className="mt-1" />
-                </div>
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Emergency Contact */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-accent">
-              <AlertTriangle className="w-4 h-4" />
-              {isRu ? 'Экстренный контакт' : 'Emergency Contact'}
-            </div>
-            <SectionCard className="space-y-4 border-accent/40">
-              <p className="text-xs text-muted-foreground -mt-2 mb-2">
-                {isRu 
-                  ? 'Этот контакт будет использован в экстренных ситуациях во время вашего путешествия.'
-                  : 'This contact will be used in emergency situations during your trip.'}
-              </p>
-              
-              <div>
-                <Label className="text-xs">{isRu ? 'Имя контакта' : 'Contact Name'}</Label>
-                <Input 
-                  value={formData.emergency_contact_name || ''} 
-                  onChange={(e) => handleChange('emergency_contact_name', e.target.value)}
-                  placeholder={isRu ? 'Иван Иванов' : 'John Doe'}
-                  className="mt-1"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-xs">{isRu ? 'Телефон' : 'Phone'}</Label>
-                  <Input 
-                    type="tel"
-                    value={formData.emergency_contact_phone || ''} 
-                    onChange={(e) => handleChange('emergency_contact_phone', e.target.value)}
-                    placeholder="+7 999 123-45-67"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">{isRu ? 'Кем приходится' : 'Relationship'}</Label>
-                  <Select value={formData.emergency_contact_relation || ''} onValueChange={(v) => handleChange('emergency_contact_relation', v)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={isRu ? 'Выбрать' : 'Select'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RELATIONS.map(r => (
-                        <SelectItem key={r.value} value={r.value}>
-                          {isRu ? r.labelRu : r.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Medical Info */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-destructive">
-              <Heart className="w-4 h-4" />
-              {isRu ? 'Медицинская информация' : 'Medical Information'}
-            </div>
-            <SectionCard className="border-destructive/20">
-              <p className="text-xs text-muted-foreground mb-3">
-                {isRu 
-                  ? 'Эта информация строго конфиденциальна и будет использована только в экстренных медицинских ситуациях.'
-                  : 'This information is strictly confidential and will only be used in medical emergencies.'}
-              </p>
-              <Textarea 
-                value={formData.medical_conditions || ''} 
-                onChange={(e) => handleChange('medical_conditions', e.target.value)}
-                placeholder={isRu ? 'Аллергии, хронические заболевания, принимаемые лекарства...' : 'Allergies, chronic conditions, medications...'}
-                rows={3}
-              />
-            </SectionCard>
-          </motion.div>
-
-          {/* Data Protection Notice */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-            <SectionCard className="bg-muted/50">
-              <div className="flex items-start gap-3">
-                <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {isRu 
-                      ? 'Все данные хранятся в зашифрованном виде и соответствуют требованиям GDPR и PDPA. Мы никогда не передаём ваши персональные данные третьим лицам без вашего согласия.'
-                      : 'All data is stored encrypted and complies with GDPR and PDPA requirements. We never share your personal data with third parties without your consent.'}
-                  </p>
-                </div>
-              </div>
-            </SectionCard>
-          </motion.div>
-
-          {/* Security Settings */}
-          <SecuritySettingsSection />
-
-          {/* Connected Accounts */}
-          <ConnectedAccountsSection />
-
-          {/* Save Button */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            <Button 
-              className="w-full gap-2" 
-              size="lg" 
-              onClick={handleSave} 
-              disabled={isUpdating}
-            >
-              {isUpdating ? <LoadingSpinner size="sm" /> : <Save className="w-5 h-5" />}
-              {isRu ? 'Сохранить изменения' : 'Save Changes'}
+        <SettingsSection {...sections[1]}>
+          <SectionCard className="space-y-3">
+            <h3 className="text-base font-semibold">{t('Основные сведения', 'Basic information', 'ข้อมูลพื้นฐาน')}</h3>
+            {profileLoading ? <LoadingSpinner size="sm" /> : <dl className="profile-settings-identity">
+              {identity.map(item => <div key={item.label} className="min-w-0"><dt className="text-sm text-muted-foreground">{item.label}</dt>
+                <dd className="break-words text-sm font-medium">{item.value || t('Не указано', 'Not provided', 'ไม่ได้ระบุ')}</dd></div>)}
+            </dl>}
+            <Button asChild variant="outline" className="min-h-11 max-w-full whitespace-normal">
+              <Link to={APP_ROUTES.SUPPORT}>{t('Запросить изменение данных', 'Request a change', 'ขอแก้ไขข้อมูล')}</Link>
             </Button>
-          </motion.div>
-        </div>
-      </PageContainer>
-    </AppLayout>
-  );
+          </SectionCard>
+
+          {isLoading ? <SectionCard><LoadingSpinner size="sm" /></SectionCard> : !ownedDetails || error ? (
+            <SectionCard><p role="status" className="text-sm">{t('Не удалось загрузить данные для редактирования. Обновите страницу и попробуйте снова.', 'Details could not be loaded for editing. Refresh the page and try again.', 'โหลดข้อมูลเพื่อแก้ไขไม่สำเร็จ โปรดรีเฟรชและลองอีกครั้ง')}</p></SectionCard>
+          ) : (
+            <form onSubmit={handleSave} aria-label={t('Дополнительные сведения', 'Additional details', 'ข้อมูลเพิ่มเติม')}>
+              <fieldset className="min-w-0" disabled={isUpdating}>
+                <SectionCard className="space-y-5">
+                  <h3 className="text-base font-semibold">{t('Дополнительные сведения', 'Additional details', 'ข้อมูลเพิ่มเติม')}</h3>
+                  <div className="profile-settings-fields">
+                    <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-date_of_birth">{t('Дата рождения', 'Date of birth', 'วันเกิด')}</Label><Input id="settings-date_of_birth" className="min-w-0" value={value('date_of_birth')} onChange={(e) => handleChange('date_of_birth', e.target.value)} type="date" /></div>
+                    <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-gender">{t('Пол', 'Gender', 'เพศ')}</Label><Select value={value('gender')} onValueChange={(v) => handleChange('gender', v)}>
+                      <SelectTrigger id="settings-gender" className="min-w-0 w-full"><SelectValue placeholder={t('Выбрать', 'Select', 'เลือก')} /></SelectTrigger>
+                      <SelectContent>{GENDERS.map(option => <SelectItem key={option.value} value={option.value}>{t(option.labelRu, option.labelEn, option.labelTh)}</SelectItem>)}</SelectContent>
+                    </Select></div>
+                    <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-nationality">{t('Гражданство', 'Nationality', 'สัญชาติ')}</Label><ProfileCountrySelect id="settings-nationality" className="min-w-0" value={value('nationality')} onChange={(v) => handleChange('nationality', v)} /></div>
+                  </div>
+                  <h3 className="border-t border-border pt-4 text-base font-semibold">{t('Адрес проживания', 'Residential address', 'ที่อยู่ปัจจุบัน')}</h3>
+                  <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-address_line1">{t('Улица, дом, квартира', 'Street, building, apartment', 'ถนน อาคาร ห้อง')}</Label><Input id="settings-address_line1" className="min-w-0" value={value('address_line1')} onChange={(e) => handleChange('address_line1', e.target.value)} autoComplete="address-line1" /></div>
+                  <div className="profile-settings-fields">
+                    <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-city">{t('Город', 'City', 'เมือง')}</Label><Input id="settings-city" className="min-w-0" value={value('city')} onChange={(e) => handleChange('city', e.target.value)} autoComplete="address-level2" /></div>
+                    <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-country">{t('Страна', 'Country', 'ประเทศ')}</Label><ProfileCountrySelect id="settings-country" className="min-w-0" value={value('country')} onChange={(v) => handleChange('country', v)} /></div>
+                  </div>
+                  <details className="border-t border-border pt-3">
+                    <summary className="min-h-11 cursor-pointer py-2 font-medium">{t('Экстренный контакт и медицинская информация', 'Emergency contact and medical information', 'ผู้ติดต่อฉุกเฉินและข้อมูลสุขภาพ')}</summary>
+                    <p className="mb-4 text-sm text-muted-foreground">{t('Эти сведения необязательны. Укажите только то, чем готовы поделиться.', 'These details are optional. Only share what you are comfortable providing.', 'คุณไม่จำเป็นต้องกรอกข้อมูลส่วนนี้ ระบุเฉพาะข้อมูลที่ยินดีเปิดเผย')}</p>
+                    <div className="profile-settings-fields">
+                      <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-emergency_contact_name">{t('Имя контакта', 'Contact name', 'ชื่อผู้ติดต่อ')}</Label><Input id="settings-emergency_contact_name" className="min-w-0" value={value('emergency_contact_name')} onChange={(e) => handleChange('emergency_contact_name', e.target.value)} autoComplete="off" /></div>
+                      <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-emergency_contact_phone">{t('Телефон контакта', 'Contact phone', 'เบอร์โทรผู้ติดต่อ')}</Label><Input id="settings-emergency_contact_phone" className="min-w-0" value={value('emergency_contact_phone')} onChange={(e) => handleChange('emergency_contact_phone', e.target.value)} type="tel" autoComplete="off" /></div>
+                      <div className="min-w-0 space-y-1.5"><Label htmlFor="settings-emergency_contact_relationship">{t('Кем приходится', 'Relationship', 'ความสัมพันธ์')}</Label><Select value={value('emergency_contact_relationship')} onValueChange={(v) => handleChange('emergency_contact_relationship', v)}>
+                      <SelectTrigger id="settings-emergency_contact_relationship" className="min-w-0 w-full"><SelectValue placeholder={t('Выбрать', 'Select', 'เลือก')} /></SelectTrigger>
+                      <SelectContent>{RELATIONS.map(option => <SelectItem key={option.value} value={option.value}>{t(option.labelRu, option.labelEn, option.labelTh)}</SelectItem>)}</SelectContent>
+                    </Select></div>
+                    </div>
+                    <div className="mt-4"><div className="min-w-0 space-y-1.5"><Label htmlFor="settings-medical_conditions">{t('Что важно знать', 'What to know', 'ข้อมูลที่ควรทราบ')}</Label><Textarea id="settings-medical_conditions" className="min-w-0" value={value('medical_conditions')} onChange={(e) => handleChange('medical_conditions', e.target.value)} rows={3} /></div></div>
+                  </details>
+                  <div className="profile-settings-save">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">{t('Кнопка сохраняет только дополнительные сведения, адрес и данные для экстренных случаев.', 'This saves only additional details, address and emergency information.', 'ปุ่มนี้บันทึกเฉพาะข้อมูลเพิ่มเติม ที่อยู่ และข้อมูลฉุกเฉิน')}</p>
+                      {status === 'saved' && <p role="status" className="text-sm font-medium text-success">{t('Изменения сохранены', 'Changes saved', 'บันทึกแล้ว')}</p>}
+                      {status === 'error' && <p role="alert" className="text-sm font-medium text-destructive">{t('Не удалось сохранить. Попробуйте ещё раз.', 'Could not save. Please try again.', 'บันทึกไม่สำเร็จ โปรดลองอีกครั้ง')}</p>}
+                    </div>
+                    <Button type="submit" disabled={!dirty || isUpdating} className="min-h-11 gap-2 whitespace-normal">
+                      {isUpdating ? <LoadingSpinner size="sm" /> : <Save className="size-4 shrink-0" aria-hidden />}
+                      {t('Сохранить изменения', 'Save changes', 'บันทึกการเปลี่ยนแปลง')}
+                    </Button>
+                  </div>
+                </SectionCard>
+              </fieldset>
+            </form>
+          )}
+        </SettingsSection>
+
+        <SettingsSection {...sections[2]}>
+          <SecuritySettingsSection />
+          <ConnectedAccountsSection />
+        </SettingsSection>
+
+        <SettingsSection {...sections[3]}>
+          <SectionCard className="space-y-4">
+            <Button asChild variant="outline" className="min-h-11 whitespace-normal">
+              <Link to={APP_ROUTES.PRIVACY}>{t('Политика конфиденциальности', 'Privacy policy', 'นโยบายความเป็นส่วนตัว')}</Link>
+            </Button>
+            <div className="space-y-2 border-t border-border pt-4">
+              <h3 className="text-base font-semibold text-foreground">{t('Удаление аккаунта', 'Account deletion', 'การลบบัญชี')}</h3>
+              <p className="text-sm text-muted-foreground">{t('Если вы хотите удалить аккаунт, обратитесь в поддержку myUNO.', 'To delete your account, contact myUNO support.', 'หากต้องการลบบัญชี โปรดติดต่อฝ่ายช่วยเหลือ myUNO')}</p>
+              <Button asChild variant="outline" className="min-h-11 whitespace-normal">
+                <Link to={APP_ROUTES.SUPPORT}>{t('Обратиться в поддержку', 'Contact support', 'ติดต่อฝ่ายช่วยเหลือ')}</Link>
+              </Button>
+            </div>
+          </SectionCard>
+        </SettingsSection>
+      </div>
+    </div>
+  </PageContainer></AppLayout>;
 }
