@@ -217,3 +217,7 @@ Passing tests is evidence, **not automatic approval**. Never start the next crit
 
 ### Service navigation situation mapping (2026-11-18)
 Public service situation filters consume `catalog_life_map` service identities and active `life_situations` through `useCatalogFromDB`. Existing generated deterministic service UUIDs remain canonical; explicit slug aliases do not create duplicate entities. Admin LifeOS mapping edits invalidate catalogue caches. A successful empty mapping is authoritative; static situation tags are degraded loading/error fallback only. Menu parent placement is edited in Master Catalogue; this is distinct from property/project relations and experience topics.
+
+### Concierge request delivery contract (approved target; activation pending)
+
+Submitted human concierge inquiries retain `help_requests` authority and link an idempotent, explicitly company-scoped CRM task. Administrative WhatsApp copies go to both owner-approved recipients with independent acceptance/uncertainty records; language capabilities do not suppress either copy. Contact links alone never establish saved CRM intake or automatic notification delivery. AI onboarding classification alone is not a submitted human inquiry. See [review candidate and coordinated activation](docs/hardening/concierge-crm-routing/README.md); this target is not evidence of production activation.
