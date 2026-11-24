@@ -22,7 +22,7 @@ CREATE FUNCTION public.fixture_ledger_mirror() RETURNS trigger LANGUAGE plpgsql 
 BEGIN
   INSERT INTO public.fixture_ledger VALUES(NEW.id, NEW.amount, NEW.currency);
   RETURN NEW;
-END
+END;
 $$;
 CREATE TRIGGER trg_sync_financial_to_ledger AFTER INSERT ON public.property_financials
 FOR EACH ROW EXECUTE FUNCTION public.fixture_ledger_mirror();
@@ -33,7 +33,7 @@ CREATE FUNCTION public.fixture_booking_audit_log() RETURNS trigger LANGUAGE plpg
 BEGIN
   INSERT INTO public.fixture_booking_audit VALUES(NEW.id,TG_NAME);
   RETURN NEW;
-END
+END;
 $$;
 CREATE TRIGGER log_property_bookings_activity AFTER INSERT OR UPDATE ON public.property_bookings
 FOR EACH ROW EXECUTE FUNCTION public.fixture_booking_audit_log();

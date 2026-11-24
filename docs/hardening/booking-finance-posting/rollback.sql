@@ -17,7 +17,7 @@ BEGIN
   ) <> 2 THEN
     RAISE EXCEPTION 'Rollback preflight failed; inspect booking audit and current writer';
   END IF;
-END
+END;
 $preflight$;
 CREATE OR REPLACE FUNCTION public.create_financial_from_booking()
 RETURNS trigger
@@ -28,6 +28,6 @@ AS $safe_rollback$
 BEGIN
   -- Keep false posting disabled. Other booking audit triggers remain enabled.
   RETURN NEW;
-END
+END;
 $safe_rollback$;
 COMMIT;

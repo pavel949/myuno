@@ -18,7 +18,7 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Booking finance predecessor or trigger has changed; re-review';
   END IF;
-END
+END;
 $preflight$;
 
 -- Confirmation is an operational event, not settlement. The existing
@@ -57,6 +57,6 @@ BEGIN
     );
   END IF;
   RETURN NEW;
-END
+END;
 $booking_finance$;
 COMMIT;
