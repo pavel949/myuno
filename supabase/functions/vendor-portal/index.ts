@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       return_url: `${origin}/vendor/subscription`,
     });
 
-    logStep("Portal session created", { url: portalSession.url });
+    logStep("Portal session created", { id: portalSession.id });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

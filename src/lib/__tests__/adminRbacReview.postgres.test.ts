@@ -17,7 +17,7 @@ beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-admin-rbac-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale']);
  run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55453 -c listen_addresses='' -c jit=off`,'-w','start']);started=true;
- sql=postgres({host:directory,port:55453,database:'postgres',username:owner,password:'',max:2,onnotice:()=>{}});
+ sql=postgres({host:directory,port:55453,database:'postgres',username:owner,password:'',max:1,onnotice:()=>{}});
  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/admin-rbac-review-base.sql','utf8'));
  await sql`INSERT INTO profiles(id,status) VALUES(${A},'active'),(${B},'active'),(${T},'active'),(${U},'active'),(${S},'suspended')`;
  await sql`INSERT INTO user_roles(user_id,role) VALUES(${A},'admin'),(${B},'admin'),(${T},'uno_team'),(${U},'user'),(${S},'admin')`;

@@ -5,6 +5,7 @@
  * Stores enriched prospects in vendor_prospects with full contact data.
  */
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -124,6 +125,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  { const gate = await requireInternalOrStaff(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   const startTime = Date.now();
 

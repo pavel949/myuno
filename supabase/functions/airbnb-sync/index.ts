@@ -421,6 +421,18 @@ Deno.serve(async (req) => {
       console.error('Error creating sync log:', logError);
     }
 
+    // Only Airbnb listing pages may be scraped with the platform's Firecrawl key.
+    try {
+      const u = new URL(String(url));
+      const host = u.hostname.toLowerCase();
+      const isAirbnb = u.protocol === 'https:' && (/^([a-z0-9-]+\.)*airbnb\.[a-z.]{2,10}$/.test(host));
+      if (!isAirbnb) throw new Error('bad host');
+    } catch {
+      return new Response(JSON.stringify({ error: 'Only Airbnb listing URLs are supported' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Scrape the Airbnb listing using Firecrawl
     console.info('Calling Firecrawl API...');
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {

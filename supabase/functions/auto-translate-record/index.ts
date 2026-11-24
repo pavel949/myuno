@@ -3,6 +3,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { createActorClient } from "../_shared/operating-space-auth.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const ALLOWED_TABLES = new Set(["listings", "providers", "marketplace_products", "services", "bouquets"]);
@@ -41,6 +42,13 @@ Deno.serve(async (req) => {
     }
     if (!id || !source_lang || !LANGS.includes(source_lang) || !fields || typeof fields !== "object") {
       return new Response(JSON.stringify({ error: "invalid payload" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    {
+      const { data: visible } = await createActorClient(req).from(table).select("id").eq("id", id).maybeSingle();
+      if (!visible) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     const entries = Object.entries(fields).filter(([_, v]) => typeof v === "string" && v.trim());
@@ -115,11 +123,17 @@ ${JSON.stringify(Object.fromEntries(entries), null, 2)}`;
       _translated_at: new Date().toISOString(),
     };
 
-    const { error: updateErr } = await supabase
+    // Write through the caller's own session so the record's row-level edit
+    // rules decide whether this user may change it.
+    const { data: updatedRows, error: updateErr } = await createActorClient(req)
       .from(table)
       .update({ i18n: merged })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
     if (updateErr) throw updateErr;
+    if (!updatedRows || updatedRows.length === 0) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     return new Response(JSON.stringify({ ok: true, i18n: merged }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

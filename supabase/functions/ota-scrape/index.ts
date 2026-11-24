@@ -1,4 +1,6 @@
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
 import { createClient } from '../_shared/supabase.ts';
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -451,6 +453,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  { const gate = await requireInternalOrStaff(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   try {
     const { url, platform, platform_name } = await req.json();
@@ -475,6 +478,12 @@ Deno.serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
+    if (!validateExternalUrlForSSRF(formattedUrl).allowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'URL not allowed' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     console.info(`Scraping ${platform_name || platform} listing: ${formattedUrl}`);
 
     // Scrape the page

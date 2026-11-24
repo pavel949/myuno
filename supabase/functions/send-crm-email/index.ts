@@ -15,6 +15,7 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { forbidden, requireCompanyMember } from "../_shared/authz.ts";
 import { requireInternalSecret } from "../_shared/internal-secret.ts";
 import {
   buildMimeMessage,
@@ -317,6 +318,13 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // The caller must be the draft's author or an active member of its company.
+    if (email.sent_by !== authResult.user.id) {
+      if (!email.company_id) return forbidden(corsHeaders);
+      const denied = await requireCompanyMember(supabase, authResult.user.id, email.company_id, corsHeaders);
+      if (denied) return denied;
     }
 
     // Use sent_by from row, or fall back to authenticated user.

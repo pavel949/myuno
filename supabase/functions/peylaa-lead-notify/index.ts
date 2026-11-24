@@ -128,7 +128,7 @@ serve(async (req) => {
       );
     }
 
-    console.info(`[PEYLAA] New lead: ${lead.full_name} (${lead.phone})`);
+    console.info(`[PEYLAA] New lead: ${lead.id}`);
 
     // Send both notifications in parallel
     const [adminSent, welcomeSent] = await Promise.all([

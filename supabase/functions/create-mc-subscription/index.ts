@@ -1,6 +1,6 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, getAllowedOrigin } from "../_shared/cors.ts";
 
 
 const MC_SLOT_PRICE_ID = "price_1T5gU5CHg9N6Yle1cghVJcy9";
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     }
 
     // Create checkout session for new subscription
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+    const origin = getAllowedOrigin(req.headers.get("origin"));
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",

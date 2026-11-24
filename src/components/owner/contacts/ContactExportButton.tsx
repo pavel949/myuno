@@ -1,3 +1,4 @@
+import { neutralizeCsvRow } from '@/lib/export/csvSafe';
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -126,7 +127,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
       return;
     }
     await logExport();
-    const rows = contacts.map(c => contactToOdooRow(c));
+    const rows = contacts.map(c => neutralizeCsvRow(contactToOdooRow(c)));
     const csv = Papa.unparse(rows);
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

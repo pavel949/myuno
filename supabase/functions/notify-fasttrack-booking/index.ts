@@ -59,8 +59,7 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
 
 🔗 ID: ${bookingId}`;
 
-    console.info('[WhatsApp] Fast Track notification for:', adminWhatsApp);
-    console.info('[WhatsApp] Message:', message);
+    console.info('[WhatsApp] Fast Track notification prepared');
 
     // Try UltraMsg if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -84,6 +83,10 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
   } catch (error) {
     console.error('[WhatsApp] Error:', error);
   }
+}
+
+function escHtml(v: unknown): string {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }
 
 Deno.serve(async (req) => {
@@ -192,10 +195,10 @@ Deno.serve(async (req) => {
         const dirLabel = payload.direction === 'arrival' ? '✈️ Arrival' : '🛫 Departure';
         const passengerRows = payload.passengers.map(p =>
           `<tr>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${p.first_name} ${p.last_name}</td>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${p.passport_number}</td>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${p.nationality}</td>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${p.date_of_birth}</td>
+            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.first_name)} ${escHtml(p.last_name)}</td>
+            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.passport_number)}</td>
+            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.nationality)}</td>
+            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.date_of_birth)}</td>
           </tr>`
         ).join('');
 
@@ -214,18 +217,18 @@ Deno.serve(async (req) => {
           <div class="c">
             <div class="h">
               <h1 style="margin:0">✈️ Fast Track Booking</h1>
-              <p style="margin:4px 0 0;opacity:.9">${dirLabel} · ${payload.flight_number}</p>
+              <p style="margin:4px 0 0;opacity:.9">${dirLabel} · ${escHtml(payload.flight_number)}</p>
             </div>
             <div class="b">
               <div class="d">
                 <div class="l">Flight</div>
-                <div style="font-size:18px;font-weight:bold">${payload.flight_number}${payload.airline ? ` — ${payload.airline}` : ''}</div>
-                <div>📅 ${payload.flight_date} at ${payload.flight_time}${payload.is_night_flight ? ' 🌙 Night' : ''}</div>
+                <div style="font-size:18px;font-weight:bold">${escHtml(payload.flight_number)}${payload.airline ? ` — ${escHtml(payload.airline)}` : ''}</div>
+                <div>📅 ${escHtml(payload.flight_date)} at ${escHtml(payload.flight_time)}${payload.is_night_flight ? ' 🌙 Night' : ''}</div>
               </div>
               <div class="d">
                 <div class="l">Service</div>
-                <div style="font-size:16px;font-weight:600">${payload.service_name}</div>
-                <div class="t">${payload.currency} ${payload.total_price.toLocaleString()}</div>
+                <div style="font-size:16px;font-weight:600">${escHtml(payload.service_name)}</div>
+                <div class="t">${escHtml(payload.currency)} ${payload.total_price.toLocaleString()}</div>
               </div>
               <div class="d">
                 <div class="l">Passengers (${payload.passengers.length})</div>
@@ -236,9 +239,9 @@ Deno.serve(async (req) => {
               </div>
               <div class="d">
                 <div class="l">Contact</div>
-                <div>📱 ${payload.contact_whatsapp || '—'} · 📧 ${payload.contact_email || '—'}</div>
-                <div>🌐 Language: ${payload.preferred_language}</div>
-                ${bookingNotes ? `<div>📝 ${bookingNotes.replace(/\n/g, '<br>')}</div>` : ''}
+                <div>📱 ${escHtml(payload.contact_whatsapp || '—')} · 📧 ${escHtml(payload.contact_email || '—')}</div>
+                <div>🌐 Language: ${escHtml(payload.preferred_language)}</div>
+                ${bookingNotes ? `<div>📝 ${escHtml(bookingNotes).replace(/\n/g, '<br>')}</div>` : ''}
               </div>
               <div class="d">
                 <div class="l">Booking ID</div>

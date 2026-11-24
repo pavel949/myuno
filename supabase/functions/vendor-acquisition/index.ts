@@ -3,6 +3,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 
 // Interfaces
@@ -54,6 +55,8 @@ Deno.serve(async (req) => {
   const authResult = await requireAuth(req, corsHeaders);
   if (authResult instanceof Response) return authResult;
   const userId = authResult.user.id;
+  const staffGate = await requireInternalOrStaff(req, corsHeaders);
+  if (staffGate instanceof Response) return staffGate;
 
   const url = new URL(req.url);
   const path = url.pathname.split('/').pop();

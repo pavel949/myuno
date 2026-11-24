@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingLead) {
-      console.info(`[WhatsApp Incoming] Duplicate within 24h for ${phone}, skipping lead creation`);
+      console.info(`[WhatsApp Incoming] Duplicate within 24h, skipping lead creation`);
       // Still notify admin about the follow-up message
       await sendWhatsApp({
         to: ADMIN_PHONE,
@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.info(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
+    console.info(`[WhatsApp Incoming] Lead created: ${lead.id}`);
 
     // Notify Pavel immediately
     const adminMessage = `📩 *НОВЫЙ ЛИД ИЗ WHATSAPP*
@@ -198,7 +198,7 @@ ${messageBody.slice(0, 500)}
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}`,
+          Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: messageBody.slice(0, 2000) }],

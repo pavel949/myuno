@@ -57,12 +57,14 @@ Deno.serve(async (req) => {
       .from("deposit_vaults")
       .select("*")
       .eq("id", pack.vault_id)
+      .eq("user_id", user.id)
       .maybeSingle();
+    if (!vault) return json({ error: "Vault not found" }, 404);
 
     const { data: photos } = await admin
       .from("deposit_vault_photos")
       .select("phase, label, taken_at, lat, lng")
-      .eq("vault_id", pack.vault_id)
+      .eq("vault_id", vault.id)
       .order("taken_at");
 
     const isRu = (pack.language ?? "ru") === "ru";

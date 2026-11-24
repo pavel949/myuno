@@ -188,11 +188,15 @@ Deno.serve(async (req) => {
     
     // Add persona context
     let personaContext = "";
-    if (personas.length > 0) {
+    // Only known persona identifiers may reach the system prompt.
+    const safePersonas = (Array.isArray(personas) ? personas : [])
+      .filter((p: unknown): p is string => typeof p === "string" && /^[a-z0-9_]{1,40}$/i.test(p))
+      .slice(0, 5);
+    if (safePersonas.length > 0) {
       if (language === "ru") {
-        personaContext = `\n\nКОНТЕКСТ ПОЛЬЗОВАТЕЛЯ: ${personas.join(", ")}. Учитывай это при рекомендациях.`;
+        personaContext = `\n\nКОНТЕКСТ ПОЛЬЗОВАТЕЛЯ: ${safePersonas.join(", ")}. Учитывай это при рекомендациях.`;
       } else {
-        personaContext = `\n\nUSER CONTEXT: ${personas.join(", ")}. Consider this when making recommendations.`;
+        personaContext = `\n\nUSER CONTEXT: ${safePersonas.join(", ")}. Consider this when making recommendations.`;
       }
     }
 
@@ -206,7 +210,7 @@ Deno.serve(async (req) => {
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt + personaContext },
-          { role: "user", content: query }
+          { role: "user", content: String(query ?? "").slice(0, 1000) }
         ],
         temperature: 0.7,
         max_tokens: 500,

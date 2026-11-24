@@ -6,6 +6,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
+import { requireServiceCaller } from '../_shared/internal-secret.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 async function sendEmail(
   templateName: string,
@@ -153,6 +155,26 @@ Deno.serve(async (req) => {
 
   try {
     const p: TransferNotifyPayload = await req.json();
+    // Only a verified service caller or the signed-in customer who owns this
+    // transfer order may dispatch notifications / enrich the order.
+    {
+      const isService = (await requireServiceCaller(req, corsHeaders)) === null;
+      if (!isService) {
+        const auth = await requireAuth(req, corsHeaders);
+        if (auth instanceof Response) return auth;
+        const { data: own } = await sb()
+          .from('orders')
+          .select('id, customer_user_id, order_number')
+          .eq('id', p?.order_id ?? '')
+          .maybeSingle();
+        if (!own || own.customer_user_id !== auth.user.id ) {
+          return new Response(JSON.stringify({ error: 'Forbidden' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        p.order_number = own.order_number ?? p.order_number;
+      }
+    }
     const customerLang = transferReceiptLanguage(p.customer_language);
     console.info('[Transfer] notify', p.order_number, 'lang=', customerLang);
 

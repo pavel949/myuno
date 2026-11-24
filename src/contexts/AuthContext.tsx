@@ -27,6 +27,8 @@ interface SignUpData {
   password: string;
   fullName?: string;
   phone?: string;
+  /** Referral code declared at signup; the server only applies a matching code. */
+  referralCode?: string;
   /**
    * Optional override. If omitted, signUp() reads the id from localStorage
    * (`myuno-anon-session-id`). Passed through to `auth.signUp({ options.data })`
@@ -173,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [clearStoredAuthSession]);
 
-  const signUp = useCallback(async ({ email, password, fullName, phone, anonSessionId }: SignUpData): Promise<SignUpResult> => {
+  const signUp = useCallback(async ({ email, password, fullName, phone, referralCode, anonSessionId }: SignUpData): Promise<SignUpResult> => {
     const redirectUrl = `${window.location.origin}/`;
 
     // M5 H.2 — read anon onboarding session id so handle_new_user() can
@@ -189,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           full_name: fullName || '',
           phone: phone || '',
           ...(resolvedAnonId ? { anon_session_id: resolvedAnonId } : {}),
+          ...(referralCode ? { referral_code: referralCode.trim().toUpperCase() } : {}),
         },
       },
     });

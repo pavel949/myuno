@@ -2,6 +2,7 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -286,6 +287,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   try {
     const { propertyId, action, rejectionReason }: PropertyModerationRequest = await req.json();

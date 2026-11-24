@@ -122,7 +122,9 @@ Deno.serve(async (req) => {
     }
 
     const phoneNoPlus = phone.startsWith('+') ? phone.slice(1) : phone;
-    if (!userRes.user.phone || userRes.user.phone !== phoneNoPlus) {
+    // Only attach a phone to an account that has none. Never replace an
+    // existing (possibly verified) phone from an unauthenticated request.
+    if (!userRes.user.phone) {
       const { error: updErr } = await supabase.auth.admin.updateUserById(profile.id, {
         phone: phoneNoPlus,
         phone_confirm: false, // OTP will confirm

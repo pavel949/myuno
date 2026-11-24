@@ -18,7 +18,9 @@ function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return '';
   const headers = Object.keys(rows[0]);
   const escape = (v: unknown): string => {
-    const s = v === null || v === undefined ? '' : String(v);
+    const raw = v === null || v === undefined ? '' : String(v);
+    // Neutralize spreadsheet formulas (= + - @ tab CR) before quoting.
+    const s = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
     return s.includes(',') || s.includes('"') || s.includes('\n')
       ? `"${s.replace(/"/g, '""')}"`
       : s;

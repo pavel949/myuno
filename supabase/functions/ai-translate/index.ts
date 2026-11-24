@@ -2,6 +2,7 @@
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrUser } from "../_shared/authz.ts";
 
 
 const AGENT_SLUG = 'ai-translate';
@@ -13,6 +14,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  { const gate = await requireInternalOrUser(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   const startTime = Date.now();
 

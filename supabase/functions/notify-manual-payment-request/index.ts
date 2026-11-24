@@ -22,8 +22,7 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
   const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
   const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
   if (!ultraMsgInstance || !ultraMsgToken) {
-    console.info('[WA] UltraMsg not configured, message would be sent to', toPhone);
-    console.info(message);
+    console.info('[WA] UltraMsg not configured; message not sent');
     return;
   }
   try {
@@ -37,10 +36,14 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
       }),
     });
     const out = await r.json();
-    console.info('[WA] sent to', toPhone, out);
+    console.info('[WA] sent', out?.sent ?? out?.id ?? 'ok');
   } catch (err) {
     console.error('[WA] error:', err);
   }
+}
+
+function escHtml(v: unknown): string {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }
 
 Deno.serve(async (req) => {
@@ -143,22 +146,22 @@ Deno.serve(async (req) => {
   <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb">
     <div style="background:#fde68a;padding:20px 24px;border-bottom:3px solid #f59e0b">
       <h1 style="margin:0;font-size:18px;color:#7c2d12">🇷🇺 RUB Payment Request — Action Required</h1>
-      <p style="margin:6px 0 0;color:#7c2d12;opacity:.9;font-size:13px">#${orderNumber}</p>
+      <p style="margin:6px 0 0;color:#7c2d12;opacity:.9;font-size:13px">#${escHtml(orderNumber)}</p>
     </div>
     <div style="padding:24px">
       <h2 style="margin:0 0 12px;font-size:15px">Booking</h2>
       <table style="width:100%;font-size:14px;border-collapse:collapse">
-        <tr><td style="padding:6px 0;color:#6b7280">Property</td><td style="padding:6px 0;text-align:right;font-weight:600">${propertyTitle}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Dates</td><td style="padding:6px 0;text-align:right">${checkIn} → ${checkOut}${nights ? ` (${nights}n)` : ''}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Guests</td><td style="padding:6px 0;text-align:right">${guests}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Property</td><td style="padding:6px 0;text-align:right;font-weight:600">${escHtml(propertyTitle)}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Dates</td><td style="padding:6px 0;text-align:right">${escHtml(checkIn)} → ${escHtml(checkOut)}${nights ? ` (${escHtml(nights)}n)` : ''}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Guests</td><td style="padding:6px 0;text-align:right">${escHtml(guests)}</td></tr>
         <tr><td style="padding:6px 0;color:#6b7280">Total</td><td style="padding:6px 0;text-align:right;font-weight:700">≈ ${amountRubEstimate ? amountRubEstimate.toLocaleString('ru-RU') + ' ₽' : '—'} <span style="color:#9ca3af;font-weight:400">(${currencyListing} ${amountListing.toLocaleString()})</span></td></tr>
       </table>
 
       <h2 style="margin:20px 0 12px;font-size:15px">Guest</h2>
       <table style="width:100%;font-size:14px;border-collapse:collapse">
-        <tr><td style="padding:6px 0;color:#6b7280">Name</td><td style="padding:6px 0;text-align:right">${guestName}</td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Phone</td><td style="padding:6px 0;text-align:right"><a href="tel:${guestPhone}" style="color:#2563eb">${guestPhone}</a> · <a href="https://wa.me/${guestPhone.replace(/[^0-9]/g, '')}" style="color:#16a34a">WhatsApp</a></td></tr>
-        <tr><td style="padding:6px 0;color:#6b7280">Email</td><td style="padding:6px 0;text-align:right"><a href="mailto:${guestEmail}" style="color:#2563eb">${guestEmail}</a></td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Name</td><td style="padding:6px 0;text-align:right">${escHtml(guestName)}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Phone</td><td style="padding:6px 0;text-align:right"><a href="tel:${escHtml(guestPhone)}" style="color:#2563eb">${escHtml(guestPhone)}</a> · <a href="https://wa.me/${escHtml(guestPhone).replace(/[^0-9]/g, '')}" style="color:#16a34a">WhatsApp</a></td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Email</td><td style="padding:6px 0;text-align:right"><a href="mailto:${escHtml(guestEmail)}" style="color:#2563eb">${escHtml(guestEmail)}</a></td></tr>
       </table>
 
       <div style="margin:20px 0;padding:12px;background:#fef3c7;border-radius:8px;font-size:13px;color:#7c2d12">
@@ -166,7 +169,7 @@ Deno.serve(async (req) => {
       </div>
 
       <div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap">
-        <a href="https://wa.me/${guestPhone.replace(/[^0-9]/g, '')}" style="display:inline-block;padding:10px 18px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px">💬 WhatsApp guest</a>
+        <a href="https://wa.me/${escHtml(guestPhone).replace(/[^0-9]/g, '')}" style="display:inline-block;padding:10px 18px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px">💬 WhatsApp guest</a>
         <a href="https://myuno.app/admin/operations?tab=manual-payments" style="display:inline-block;padding:10px 18px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px">🔗 Open in admin</a>
       </div>
     </div>
