@@ -34,9 +34,17 @@ export function consultationIntakeErrorCopy(error: unknown) {
 type IntakePayload = Record<string, unknown>;
 type RpcClient = { rpc(name: 'submit_consultation_request', args: { payload: never }): PromiseLike<{ data: unknown; error: unknown }> };
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
-type Pending = { key: string; fingerprint: string; receipt?: string; storageKey: string };
+type Pending = { key: string; fingerprint: string; receipt?: string; storageKey: string; protocol?: 'legacy' | 'durable' };
+type IntakeOptions = { storage?: Store; crypto?: Crypto; allowUncertainRetry?: boolean; durable?: boolean };
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? '[' + value.map(stable).join(',') + ']' : '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stable((value as IntakePayload)[key])).join(',') + '}';
-export function createConsultationIntakeAttempt(options: { storage?: Store; crypto?: Crypto; allowUncertainRetry?: boolean } = {}) {
+/** General writer uses an explicit, default-off protocol. Never fall back to
+ * the legacy writer when the durable endpoint is absent or times out. */
+export function createGeneralConsultationIntakeAttempt() {
+  const durable = import.meta.env.VITE_CONSULTATION_DURABLE_INTAKE === 'true';
+  return createConsultationIntakeAttempt({ durable, allowUncertainRetry: durable });
+}
+
+export function createConsultationIntakeAttempt(options: IntakeOptions = {}) {
   let pending: Pending | undefined;
   let inFlight: Promise<{ id: string; shouldDispatch: boolean }> | undefined;
   return {
@@ -60,19 +68,26 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
       const saved = storage.getItem(storageKey);
       if (saved) {
         // Legacy writers do not recognize the nonce. Do not replay an uncertain insert.
-        if (options.allowUncertainRetry === false) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
+        if (options.allowUncertainRetry !== true) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
         const parsed = JSON.parse(saved) as Pending;
+        if (options.durable && parsed.protocol !== 'durable') throw new IntakeRecoveryError('The previous legacy request outcome is uncertain.');
+        if (!options.durable && parsed.protocol === 'durable') throw new IntakeRecoveryError('The previous durable request outcome is uncertain.');
         if (parsed.fingerprint !== fingerprint) throw new IntakeRecoveryError('The previous request outcome is uncertain; retry its original details.');
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parsed.key)) throw new Error('The pending intake recovery record is invalid.');
-        pending = { key: parsed.key, fingerprint, storageKey };
+        pending = { key: parsed.key, fingerprint, storageKey, protocol: parsed.protocol };
       } else if (!pending || pending.storageKey !== storageKey || pending.fingerprint !== fingerprint) {
-        pending = { key: cryptoApi.randomUUID(), fingerprint, storageKey };
+        pending = { key: cryptoApi.randomUUID(), fingerprint, storageKey, protocol: options.durable ? 'durable' : 'legacy' };
       }
       const attempt = pending;
       if (!attempt) throw new Error('Intake recovery is unavailable.');
-      storage.setItem(storageKey, JSON.stringify({ key: attempt.key, fingerprint })); // No contact payload is persisted.
+      storage.setItem(storageKey, JSON.stringify({ key: attempt.key, fingerprint, protocol: attempt.protocol })); // No contact payload is persisted.
       inFlight = (async () => {
-        const { data, error } = await client.rpc('submit_consultation_request', { payload: { ...clean, intake_request_key: attempt.key, intake_actor_hint: actorId || 'guest' } as never });
+        const args = { payload: { ...clean, intake_request_key: attempt.key, intake_actor_hint: actorId || 'guest' } as never };
+        // The managed generated DB types do not expose the review-only RPC yet.
+        const durableRpc = client.rpc.bind(client) as unknown as (name: 'submit_consultation_request_durable', args: { payload: never }) => PromiseLike<{ data: unknown; error: unknown }>;
+        const { data, error } = options.durable
+          ? await durableRpc('submit_consultation_request_durable', args)
+          : await client.rpc('submit_consultation_request', args);
         if (error) {
           // Deterministic input validation failures prove these exact details were rejected.
           // Actor/access changes, key conflicts and transport uncertainty retain recovery state.
@@ -82,7 +97,7 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
         if (typeof data !== 'string' || !data.trim()) throw new Error('Consultation request receipt was not confirmed.');
         attempt.receipt = data;
         try { storage.removeItem(storageKey); } catch { /* Durable receipt wins over optional local cleanup. */ }
-        return { id: data, shouldDispatch: true };
+        return { id: data, shouldDispatch: !options.durable }; // The durable writer already queued both channels.
       })();
       try { return await inFlight; } finally { inFlight = undefined; }
     },

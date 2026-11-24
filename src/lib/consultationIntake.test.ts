@@ -2,8 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import { createConsultationIntakeAttempt } from './consultationIntake';
 const body={name:'Synthetic Buyer',phone:'+66000000000',request_type:'property_consultation',entry_point:'synthetic-fixture'};
-function fixture(){const records=new Map<string,string>();const storage={getItem:(k:string)=>records.get(k)||null,setItem:(k:string,v:string)=>{records.set(k,v);},removeItem:(k:string)=>{records.delete(k);}};return {records,storage,make:()=>createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto})};}
+function fixture(){const records=new Map<string,string>();const storage={getItem:(k:string)=>records.get(k)||null,setItem:(k:string,v:string)=>{records.set(k,v);},removeItem:(k:string)=>{records.delete(k);}};return {records,storage,make:()=>createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true})};}
 describe('pending consultation nonce recovery',()=>{
+ it.each([undefined,false])('fails closed on uncertain legacy replay (opt-in %s), including after remount',async allowUncertainRetry=>{
+   const f=fixture();const rpc=vi.fn().mockRejectedValueOnce(new Error('lost response')).mockResolvedValue({data:'unexpected-second-insert',error:null});
+   const make=()=>createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry});
+   await expect(make().submit({rpc},body)).rejects.toThrow('lost response');
+   await expect(make().submit({rpc},body)).rejects.toThrow('outcome is uncertain');
+   await expect(make().submit({rpc},{...body,name:'Changed buyer'})).rejects.toThrow('outcome is uncertain');
+   expect(rpc).toHaveBeenCalledOnce();expect(f.records.size).toBe(1);
+ });
  it.each(['name_required','phone_required','request_type_required'])('allows edited details after legacy P0001 %s rejection across remount',async message=>{
    const f=fixture();const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'P0001',message}}).mockResolvedValue({data:'corrected-receipt',error:null});
    await expect(f.make().submit({rpc},body)).rejects.toMatchObject({code:'P0001',message});
@@ -39,4 +47,31 @@ describe('pending consultation nonce recovery',()=>{
    expect(rpc.mock.calls[0][1].payload.intake_actor_hint).toBe('actor-a');
  });
 
+});
+
+describe('versioned durable general intake protocol',()=>{
+  it('uses only the durable RPC, retains its nonce after lost response, and suppresses browser dispatch',async()=>{
+    const f=fixture();
+    const rpc=vi.fn().mockRejectedValueOnce(new Error('response lost')).mockResolvedValue({data:'synthetic-durable-receipt',error:null});
+    const make=()=>createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(make().submit({rpc},body)).rejects.toThrow('response lost');
+    const result=await make().submit({rpc},body);
+    expect(result).toEqual({id:'synthetic-durable-receipt',shouldDispatch:false});
+    expect(rpc).toHaveBeenCalledTimes(2);
+    expect(rpc.mock.calls.every(c=>c[0]==='submit_consultation_request_durable')).toBe(true);
+    expect(rpc.mock.calls[0][1].payload.intake_request_key).toBe(rpc.mock.calls[1][1].payload.intake_request_key);
+  });
+  it('does not replay an uncertain legacy request through the new writer',async()=>{
+    const f=fixture(),rpc=vi.fn().mockRejectedValue(new Error('response lost'));
+    await expect(f.make().submit({rpc},body)).rejects.toThrow('response lost');
+    const durable=createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(durable.submit({rpc},body)).rejects.toThrow('legacy request outcome is uncertain');
+    expect(rpc).toHaveBeenCalledOnce();
+  });
+  it('does not fall back to the old writer on a missing durable RPC',async()=>{
+    const f=fixture(),rpc=vi.fn().mockResolvedValue({data:null,error:{code:'PGRST202'}});
+    const durable=createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(durable.submit({rpc},body)).rejects.toMatchObject({code:'PGRST202'});
+    expect(rpc).toHaveBeenCalledOnce();expect(rpc.mock.calls[0][0]).toBe('submit_consultation_request_durable');
+  });
 });

@@ -1,13 +1,13 @@
 import { observeLeadNotification } from '@/lib/leadNotification';
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
+import { createGeneralConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { LeadSource, getLeadVerticalById } from '@/lib/leadVerticalConfig';
+import { LeadSource } from '@/lib/leadVerticalConfig';
 import { logger } from '@/lib/logger';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -47,13 +47,11 @@ export function useUniversalLead() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
-  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
-  if (!intake.current) intake.current = createConsultationIntakeAttempt();
+  const intake = useRef<ReturnType<typeof createGeneralConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createGeneralConsultationIntakeAttempt();
 
   const submitLead = useMutation({
     mutationFn: async (input: UniversalLeadInput) => {
-      const vertical = getLeadVerticalById(input.vertical_id);
-      
       const payload = {
         // Map to consultation_requests columns
         user_id: user?.id || null,
@@ -71,14 +69,14 @@ export function useUniversalLead() {
         preferred_contact_method: input.preferred_contact_method || 'whatsapp',
         
         // Optional fields
-        budget_min: input.budget_min || null,
-        budget_max: input.budget_max || null,
+        budget_min: input.budget_min ?? null,
+        budget_max: input.budget_max ?? null,
         currency: input.currency || 'THB',
         property_types: input.property_types || null,
         districts: input.districts || null,
         preferred_dates: input.preferred_dates || null,
         guests_count: input.guests_count || null,
-        children_count: input.children_count || null,
+        children_count: input.children_count ?? null,
         notes: input.notes || null,
         
         // Default status
@@ -135,9 +133,11 @@ export function useUniversalLead() {
       return data;
 
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-inbox'] });
+      if (user?.id) queryClient.invalidateQueries({ queryKey: ['me-requests', user.id] });
       
       toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
     },

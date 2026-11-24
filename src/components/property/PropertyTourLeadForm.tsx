@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Users, Phone, User, CheckCircle, MapPin, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
+import { createGeneralConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
@@ -24,8 +24,8 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
   const isRu = language === 'ru';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
-  if (!intake.current) intake.current = createConsultationIntakeAttempt();
+  const intake = useRef<ReturnType<typeof createGeneralConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createGeneralConsultationIntakeAttempt();
 
   const [formData, setFormData] = useState({
     name: '',

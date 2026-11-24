@@ -63,7 +63,7 @@ function ExperienceInquiryDialog({ open, onOpenChange, listingId, listingTitle, 
   const [receipt, setReceipt] = useState<{ actor: string; id: string }>();
   const [submitting, setSubmitting] = useState(false);
   const sending = useRef(false);
-  const [intake] = useState(() => createConsultationIntakeAttempt());
+  const [intake] = useState(() => createConsultationIntakeAttempt({ allowUncertainRetry: true })); // Dedicated, receipt-backed experience RPC.
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const currentReceipt = receipt?.actor === user?.id ? receipt : undefined;
   const userContact = contact?.actor === user?.id ? contact : undefined;

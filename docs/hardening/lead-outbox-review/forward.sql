@@ -59,6 +59,29 @@ END $$;
 REVOKE ALL ON FUNCTION public.submit_consultation_request(jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.submit_consultation_request(jsonb) TO anon,authenticated,service_role;
 
+-- Explicit new protocol: no fallback to the old RPC after an uncertain result.
+-- A new request and its two delivery jobs commit together. Same-mode recovery
+-- cannot recreate an old notification; cross-mode nonce reuse conflicts.
+CREATE FUNCTION public.submit_consultation_request_durable(payload jsonb)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE receipt uuid; already_exists boolean;
+BEGIN
+ SELECT EXISTS(SELECT 1 FROM public.consultation_requests r
+   WHERE r.intake_actor_key=coalesce(auth.uid()::text,'guest')
+   AND r.intake_request_key=nullif(payload->>'intake_request_key','')::uuid)
+ INTO already_exists;
+ receipt := private.checked_consultation_intake(payload,'durable');
+ IF receipt IS NULL THEN RAISE EXCEPTION 'missing_intake_receipt'; END IF;
+ IF NOT already_exists THEN
+   INSERT INTO private.consultation_notification_outbox(request_id,channel)
+   VALUES(receipt,'email'),(receipt,'whatsapp') ON CONFLICT(request_id,channel) DO NOTHING;
+ END IF;
+ RETURN receipt;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.submit_consultation_request_durable(jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.submit_consultation_request_durable(jsonb) TO anon,authenticated,service_role;
+
 -- Only the separately authenticated scheduler worker may invoke these RPCs.
 -- No request-id filter, no guest lookup and no caller-provided notification body.
 CREATE FUNCTION public.claim_consultation_notifications()
