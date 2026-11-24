@@ -144,9 +144,9 @@ REVOKE ALL ON FUNCTION private.checked_consultation_intake(jsonb,text) FROM PUBL
 -- Retain the existing private signature used by the legacy wrapper. The
 -- mode is selected here, never by a client-provided field.
 CREATE OR REPLACE FUNCTION private.checked_consultation_intake(payload jsonb)
-RETURNS uuid LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $
+RETURNS uuid LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
   SELECT private.checked_consultation_intake(payload,'legacy');
-$;
+$$;
 REVOKE ALL ON FUNCTION private.checked_consultation_intake(jsonb) FROM PUBLIC,anon,authenticated,service_role;
 
 CREATE OR REPLACE FUNCTION public.submit_consultation_request(payload jsonb)

@@ -63,7 +63,7 @@ GRANT EXECUTE ON FUNCTION public.submit_consultation_request(jsonb) TO anon,auth
 -- A new request and its two delivery jobs commit together. Same-mode recovery
 -- cannot recreate an old notification; cross-mode nonce reuse conflicts.
 CREATE FUNCTION public.submit_consultation_request_durable(payload jsonb)
-RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE receipt uuid; already_exists boolean;
 BEGIN
  SELECT EXISTS(SELECT 1 FROM public.consultation_requests r
@@ -78,7 +78,7 @@ BEGIN
  END IF;
  RETURN receipt;
 END;
-$;
+$$;
 REVOKE ALL ON FUNCTION public.submit_consultation_request_durable(jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.submit_consultation_request_durable(jsonb) TO anon,authenticated,service_role;
 
