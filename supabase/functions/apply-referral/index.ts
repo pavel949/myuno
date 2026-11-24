@@ -64,7 +64,10 @@ Deno.serve(async (req: Request) => {
       if (u) {
         const createdAt = new Date(u.created_at).getTime();
         const ageMs = Date.now() - createdAt;
-        if (!u.email_confirmed_at && ageMs < 10 * 60 * 1000) authorised = true;
+        // Session-less window only applies the code the new user declared
+        // during their own signup; a third party cannot attach a different one.
+        const declared = String((u.user_metadata as Record<string, unknown> | null)?.referral_code ?? "").toUpperCase();
+        if (!u.email_confirmed_at && ageMs < 10 * 60 * 1000 && declared && declared === code) authorised = true;
       }
     }
 

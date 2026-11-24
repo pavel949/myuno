@@ -1,3 +1,4 @@
+import { requireServiceCaller } from "./internal-secret.ts";
 /**
  * Shared notification utilities for Edge Functions.
  *
@@ -139,10 +140,18 @@ export type NotifyHandler = (body: Record<string, unknown>) => Promise<{ success
  * Create a Deno.serve handler for a notification function.
  * Handles CORS, JSON parsing, error catching.
  */
-export function createNotifyHandler(name: string, handler: NotifyHandler) {
+export function createNotifyHandler(
+  name: string,
+  handler: NotifyHandler,
+  opts: { serviceOnly?: boolean } = {},
+) {
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") {
       return new Response(null, { headers: NOTIFY_CORS });
+    }
+    if (opts.serviceOnly) {
+      const denied = await requireServiceCaller(req, NOTIFY_CORS);
+      if (denied) return denied;
     }
     try {
       const body = await req.json();

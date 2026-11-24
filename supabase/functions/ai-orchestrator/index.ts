@@ -1,3 +1,4 @@
+import { sanitizeChatMessages, promptSafe } from "../_shared/chat-messages.ts";
 // myUNO AI Orchestrator (Wave 1)
 // Single entrypoint for all client-facing AI:
 //   - POST { messages, pageContext }        → streaming SSE chat (default concierge)
@@ -327,7 +328,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const ctxLine = `\n\n[User context]\nlocale: ${ctx.locale}\nprimary_role: ${ctx.primaryRole ?? "guest"}\nactive_mode: ${ctx.activeMode ?? "user"}\npage: ${body.pageContext?.path ?? "/"} (${body.pageContext?.title ?? ""})`;
+  const ctxLine = `\n\n[User context]\nlocale: ${ctx.locale}\nprimary_role: ${ctx.primaryRole ?? "guest"}\nactive_mode: ${ctx.activeMode ?? "user"}\npage: ${promptSafe(body.pageContext?.path ?? "/", 200)} (${promptSafe(body.pageContext?.title ?? "", 120)})`;
   const systemPrompt = `${TONE_PREAMBLE}\n${agent.systemPrompt}${ctxLine}`;
 
   const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -337,7 +338,7 @@ Deno.serve(async (req) => {
       model: agent.model,
       temperature: Number(agent.temperature ?? 0.5),
       max_tokens: agent.max_tokens ?? 1500,
-      messages: [{ role: "system", content: systemPrompt }, ...body.messages],
+      messages: [{ role: "system", content: systemPrompt }, ...sanitizeChatMessages(body.messages)],
       stream: true,
     }),
   });

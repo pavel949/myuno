@@ -1,3 +1,4 @@
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 /**
  * Listing Quality Analyzer
  * AUTH_REQUIRED: Analyzes listing quality with AI. Requires authentication.
@@ -301,6 +302,9 @@ Deno.serve(async (req) => {
   // Auth required
   const authResult = await requireAuth(req, corsHeaders);
   if (authResult instanceof Response) return authResult;
+  // Quality verdicts are admin moderation artifacts.
+  const staffGate = await requireInternalOrStaff(req, corsHeaders);
+  if (staffGate instanceof Response) return staffGate;
 
   const startTime = Date.now();
   let correlationId = "";
@@ -308,6 +312,14 @@ Deno.serve(async (req) => {
   try {
     const { entityType, entityId, entityData, correlationId: reqCorrelationId } = await req.json() as AnalysisRequest;
     correlationId = reqCorrelationId || generateCorrelationId();
+
+    const ALLOWED_ENTITY_TYPES = ["properties", "listings", "services", "business_listings", "marketplace_products"];
+    if (entityType && !ALLOWED_ENTITY_TYPES.includes(String(entityType))) {
+      return new Response(
+        JSON.stringify({ error: "Unsupported entityType" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!entityType || !entityId) {
       return new Response(

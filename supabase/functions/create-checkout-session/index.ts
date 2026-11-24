@@ -44,10 +44,24 @@ Deno.serve(async (req) => {
     );
     if (rateLimitResponse) return rateLimitResponse;
 
-    console.info("Authenticated user:", user.id, user.email);
+    console.info("Authenticated user:", user.id);
 
     // Parse request body
-    const { amount, currency = "rub" } = await req.json();
+    const body = await req.json();
+    const amount = Number(body?.amount);
+    // Wallet balances are held in one currency; top-ups are only accepted in
+    // the wallet's own currency so cheaper currencies cannot buy extra credit.
+    const supabaseAdminForWallet = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: walletRow } = await supabaseAdminForWallet
+      .from("wallets").select("currency").eq("user_id", user.id).maybeSingle();
+    const currency = String(walletRow?.currency || "RUB").toLowerCase();
+    if (body?.currency && String(body.currency).toLowerCase() !== currency) {
+      throw new Error("Unsupported currency for this wallet");
+    }
+    if (!Number.isInteger(amount)) throw new Error("Invalid amount");
     
     if (!amount || amount < 100) {
       console.error("Invalid amount:", amount);

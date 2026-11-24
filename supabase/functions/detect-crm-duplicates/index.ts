@@ -1,5 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from '../_shared/auth-guard.ts';
+import { createActorClient } from '../_shared/operating-space-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,7 +63,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createServiceClient();
+    // Read through the caller's own session so CRM row-level access applies;
+    // a foreign company_id yields no contacts instead of another company's data.
+    const supabase = createActorClient(req);
     const { data: contacts, error } = await supabase
       .from('crm_contacts')
       .select('id, first_name, last_name, email, phone, company_name')

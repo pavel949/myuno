@@ -1,3 +1,4 @@
+import { requireInternalOrUser } from "../_shared/authz.ts";
 /**
  * concierge-route — AI-driven router for /start onboarding (Phase A3+).
  *
@@ -197,6 +198,7 @@ Recommend 3-5 routes from the whitelist. First = primary CTA.`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+  { const gate = await requireInternalOrUser(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   try {
     const body = await req.json();

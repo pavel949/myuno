@@ -1,3 +1,4 @@
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 /**
  * notify-rln — Registered Lead Notice notification
  *
@@ -68,9 +69,19 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const gate = await requireInternalOrStaff(req, corsHeaders, ["admin", "broker", "sales"]);
+  if (gate instanceof Response) return gate;
+
   try {
     const payload = (await req.json()) as RlnPayload;
-    const { rln_number, project_name, developer_name, developer_email, lead_email, lead_phone } = payload;
+    const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+    const rln_number = esc(payload.rln_number);
+    const project_name = esc(payload.project_name);
+    const developer_name = payload.developer_name ? esc(payload.developer_name) : null;
+    // Recipient is never caller-controlled: notices go to the broker mailbox.
+    const developer_email: string | null = null;
+    const lead_email = payload.lead_email ? esc(payload.lead_email) : null;
+    const lead_phone = payload.lead_phone ? esc(payload.lead_phone) : null;
 
     const leadInfo = [
       lead_email ? `📧 ${lead_email}` : null,

@@ -7,6 +7,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
 import { getAdminEmails, getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 const sb = () => createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -32,6 +33,7 @@ async function sendWA(to: string, body: string) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   const cutoff = new Date(Date.now() - ESCALATE_AFTER_MIN * 60 * 1000).toISOString();
   try {

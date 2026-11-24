@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
             });
             emailsSent++;
           } catch (emailErr) {
-            console.error(`Email error for ${profile.email}:`, emailErr);
+            console.error("Promotion email error:", emailErr instanceof Error ? emailErr.message : "unknown");
           }
         }
       }
