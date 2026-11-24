@@ -30,33 +30,57 @@ async def main():
      await expect(header.get_by_role('button',name='Pause motion',exact=True)).to_be_visible()
     if width<=820:
      assert row['headerBox']['height']<=73,row['headerBox']
-     assert len(row['triggers'])==1,row['triggers']
-     box=row['triggers'][0]['box'];assert box['width']>=44 and box['height']>=44,box
-     brand=await header.get_by_role('link',name='myUNO',exact=True).bounding_box();assert abs((brand['y']+brand['height']/2)-(box['y']+box['height']/2))<2,'Second row'
-    label={'ru':'Меню аккаунта' if auth=='yes' else 'Открыть меню','en':'Account menu' if auth=='yes' else 'Open menu','th':'เมนูบัญชี' if auth=='yes' else 'เปิดเมนู'}[lang]
-    trigger=header.get_by_role('button',name=label,exact=True)
-    if width<=820:
-     await trigger.click();surface=page.get_by_role('menu') if auth=='yes' else page.get_by_role('dialog',name='myUNO',exact=True);await expect(surface).to_be_visible();await page.wait_for_function('(e)=>getComputedStyle(e).opacity===\"1\" && !e.getAnimations().some(a=>a.playState===\"running\")',arg=await surface.element_handle())
-     service={'ru':'Услуги','en':'Services','th':'บริการ'}[lang];role='menuitem' if auth=='yes' else 'link';await expect(surface.get_by_role(role,name=service,exact=True)).to_be_visible()
-     cart={'ru':'Корзина','en':'Cart','th':'ตะกร้า'}[lang];await expect(surface.get_by_role(role,name=cart,exact=True)).to_be_visible()
+     public_label={'ru':'Открыть меню','en':'Open menu','th':'เปิดเมนู'}[lang]
+     account_label={'ru':'Меню аккаунта','en':'Account menu','th':'เมนูบัญชี'}[lang]
+     service={'ru':'Услуги','en':'Services','th':'บริการ'}[lang]
+     cart={'ru':'Корзина','en':'Cart','th':'ตะกร้า'}[lang]
+     assert sorted(t['name'] for t in row['triggers'])==sorted([public_label]+([account_label] if auth=='yes' else [])),row['triggers']
+     brand=await header.get_by_role('link',name='myUNO',exact=True).bounding_box()
+     boxes=[brand,*[t['box'] for t in row['triggers']]]
+     for box in boxes[1:]:
+      assert box['width']>=44 and box['height']>=44,box
+      assert abs((brand['y']+brand['height']/2)-(box['y']+box['height']/2))<2,'Second row'
+     ordered=sorted(boxes,key=lambda b:b['x'])
+     assert all(left['x']+left['width']<=right['x'] for left,right in zip(ordered,ordered[1:])),'Header controls overlap'
+     trigger=header.get_by_role('button',name=public_label,exact=True)
+     surface=page.get_by_role('dialog',name='myUNO',exact=True)
      if auth=='yes':
-      row['menuTargetMetrics']=await surface.locator('[role=menuitem]').evaluate_all('(es)=>es.map(e=>({height:e.getBoundingClientRect().height,minHeight:getComputedStyle(e).minHeight}))');assert all(e['height']>=44 for e in row['menuTargetMetrics']), row['menuTargetMetrics']
-      await expect(surface.get_by_role('menuitem',name={'ru':'Настройки','en':'Settings','th':'การตั้งค่า'}[lang],exact=True)).to_be_visible();await expect(surface.get_by_text({'ru':'Кабинет собственника','en':'Owner portal','th':'พอร์ทัลเจ้าของ'}[lang],exact=True)).to_be_visible()
+      account=header.get_by_role('button',name=account_label,exact=True)
+      await account.focus();await page.keyboard.press('Enter');menu=page.get_by_role('menu');await expect(menu).to_be_visible()
+      await page.wait_for_function('(e)=>getComputedStyle(e).opacity==="1" && !e.getAnimations().some(a=>a.playState==="running")',arg=await menu.element_handle())
+      await page.keyboard.press('ArrowDown');assert await menu.evaluate('(e)=>e.contains(document.activeElement)'), 'Keyboard focus left account menu'
+      await expect(surface).not_to_be_visible()
+      row['menuTargetMetrics']=await menu.locator('[role=menuitem]').evaluate_all('(es)=>es.map(e=>({height:e.getBoundingClientRect().height,minHeight:getComputedStyle(e).minHeight}))');assert all(e['height']>=44 for e in row['menuTargetMetrics']), row['menuTargetMetrics']
+      settings={'ru':'Настройки','en':'Settings','th':'การตั้งค่า'}[lang]
+      owner={'ru':'Кабинет собственника','en':'Owner portal','th':'พอร์ทัลเจ้าของ'}[lang]
+      await expect(menu.get_by_role('menuitem',name=settings,exact=True)).to_be_visible()
+      await expect(menu.get_by_text(owner,exact=True)).to_be_visible()
+      await expect(menu.get_by_role('menuitem',name=service,exact=True)).to_have_count(0)
+      await expect(menu.get_by_role('menuitem',name=cart,exact=True)).to_have_count(0)
+      await page.screenshot(path=str(OUT/f'{prefix}-account-open.png'))
+      await page.keyboard.press('Escape');await expect(menu).not_to_be_visible();await expect(account).to_be_focused()
+     await trigger.click();await expect(surface).to_be_visible();await expect(page.get_by_role('menu')).not_to_be_visible()
+     await expect(surface.get_by_role('link',name=service,exact=True)).to_be_visible()
+     await expect(surface.get_by_role('link',name=cart,exact=True)).to_be_visible()
+     prefs=surface.get_by_test_id('global-preferences-controls');await expect(prefs).to_be_visible();assert await prefs.locator('button').count()==3
+     holiday=surface.locator('a[href="/property/search?mode=rent&tenancy=short"]');await expect(holiday).to_be_visible()
+     await expect(surface.locator('a[href="/property/search?mode=buy"]')).to_be_visible()
+     partners=surface.locator('details.consumer-task-partners');await expect(partners).not_to_have_attribute('open','')
+     await partners.locator('summary').focus();await page.keyboard.press('Enter');await expect(partners).to_have_attribute('open','')
+     assert await partners.locator('a').count()==5
+     await expect(partners.locator('a[href="/for-owners"]')).to_be_visible()
+     await page.keyboard.press('Enter');await expect(partners).not_to_have_attribute('open','')
+     close=surface.get_by_role('button',name={'ru':'Закрыть меню','en':'Close menu','th':'ปิดเมนู'}[lang],exact=True)
+     body=surface.locator('.consumer-task-menu-body');await body.evaluate('(e)=>e.scrollTop=e.scrollHeight')
+     closeBox=await close.bounding_box();assert closeBox and closeBox['y']>=0 and closeBox['y']+closeBox['height']<=900,closeBox
+     await body.evaluate('(e)=>e.scrollTop=0')
+     sign=surface.get_by_role('link',name={'ru':'Войти','en':'Sign in','th':'เข้าสู่ระบบ'}[lang],exact=True)
+     if auth=='no':
+      href=await sign.get_attribute('href');assert 'redirect=' in href and '%23offers' in href,href
      else:
-      prefs=surface.get_by_test_id('global-preferences-controls');await expect(prefs).to_be_visible();assert await prefs.locator('button').count()==3
-      holiday=surface.locator('a[href="/property/search?mode=rent&tenancy=short"]');await expect(holiday).to_be_visible()
-      await expect(surface.locator('a[href="/property/search?mode=buy"]')).to_be_visible()
-      partners=surface.locator('details.consumer-task-partners');await expect(partners).not_to_have_attribute('open','')
-      await partners.locator('summary').focus();await page.keyboard.press('Enter');await expect(partners).to_have_attribute('open','')
-      assert await partners.locator('a').count()==5
-      await expect(partners.locator('a[href="/for-owners"]')).to_be_visible()
-      await page.keyboard.press('Enter');await expect(partners).not_to_have_attribute('open','')
-      close=surface.get_by_role('button',name={'ru':'Закрыть меню','en':'Close menu','th':'ปิดเมนู'}[lang],exact=True)
-      body=surface.locator('.consumer-task-menu-body');await body.evaluate('(e)=>e.scrollTop=e.scrollHeight')
-      closeBox=await close.bounding_box();assert closeBox and closeBox['y']>=0 and closeBox['y']+closeBox['height']<=900,closeBox
-      await body.evaluate('(e)=>e.scrollTop=0')
-
-      sign=surface.get_by_role('link',name={'ru':'Войти','en':'Sign in','th':'เข้าสู่ระบบ'}[lang],exact=True);href=await sign.get_attribute('href');assert 'redirect=' in href and '%23offers' in href,href
+      await expect(sign).to_have_count(0)
+      await expect(surface.get_by_role('link',name=settings,exact=True)).to_have_count(0)
+      await expect(surface.get_by_text(owner,exact=True)).to_have_count(0)
      await page.wait_for_function('(e)=>getComputedStyle(e).opacity===\"1\" && !e.getAnimations().some(a=>a.playState===\"running\")',arg=await surface.element_handle());await page.screenshot(path=str(OUT/f'{prefix}-open.png'))
      if auth=='no' and width==390:
       prefs=surface.get_by_test_id('global-preferences-controls');controls=prefs.locator('button')
@@ -67,7 +91,7 @@ async def main():
       await currency.click();await expect(surface).to_be_visible();row['preferences']=await page.evaluate('window.fixturePreferences');assert len(row['preferences'])==3,row['preferences'];await page.screenshot(path=str(OUT/f'{prefix}-preferences-updated.png'))
      await page.keyboard.press('Escape');await expect(surface).not_to_be_visible();await expect(trigger).to_be_focused()
      # Reopen with keyboard, navigate cart via real menu/link without invoking any writer.
-     await page.keyboard.press('Enter');surface=page.get_by_role('menu') if auth=='yes' else page.get_by_role('dialog',name='myUNO',exact=True);await expect(surface).to_be_visible();await page.keyboard.press('ArrowDown' if auth=='yes' else 'Tab');assert await surface.evaluate('(e)=>e.contains(document.activeElement)'), 'Keyboard focus left menu';await surface.get_by_role(role,name=cart,exact=True).click();await expect(page.locator('#route')).to_have_text('/cart')
+     await page.keyboard.press('Enter');await expect(surface).to_be_visible();await page.keyboard.press('Tab');assert await surface.evaluate('(e)=>e.contains(document.activeElement)'), 'Keyboard focus left public navigation';await surface.get_by_role('link',name=cart,exact=True).click();await expect(page.locator('#route')).to_have_text('/cart')
     else:
      await expect(header.locator('.consumer-nav')).to_be_visible();await expect(header.get_by_test_id('global-preferences-controls')).to_be_visible()
      if lang=='en' and not overlay:

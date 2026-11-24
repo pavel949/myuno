@@ -4,10 +4,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import YachtsIndex from '../YachtsIndex';
 import FlowersIndex from '../../flowers/FlowersIndex';
+import RestaurantsIndex from '../../restaurants/RestaurantsIndex';
+vi.mock('@/hooks/useRestaurants', () => ({ useRestaurants: () => ({ restaurants: [{ id: 'pad-thai', name_en: 'Pad Thai Place', cuisine: 'thai' }], isLoading: false, error: state.error ? Error('Synthetic') : null, refetch: state.retry }) }));
 const state = vi.hoisted(() => ({ error: false, retry: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CartContext', () => ({ useCart: () => ({ getItemsByType: () => [] }) }));
-vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (x: unknown) => x }) }));
 vi.mock('@/hooks/useDebouncedValue', () => ({ useDebouncedValue: (x: unknown) => x }));
 vi.mock('@/hooks/useYachts', () => ({ useYachts: () => ({ yachts: [{ id: 'boat', name_en: 'Boat', capacity: 8, price_full_day: 100, currency: 'THB' }], isLoading: false, error: state.error ? Error('Synthetic') : null, refetch: state.retry }) }));
 vi.mock('@/hooks/useBouquets', () => ({ useBouquets: () => ({ bouquets: [{ id: 'rose', name_en: 'Rose', price: 1200, colors: ['red'] }], isLoading: false, error: state.error ? Error('Synthetic') : null, refetch: state.retry }) }));
@@ -24,7 +25,7 @@ vi.mock('@/components/vertical/VerticalContextBanner', () => ({ VerticalContextB
 vi.mock('@/components/vertical/VerticalInsightPanel', () => ({ VerticalInsightPanel: () => null }));
 function Journey() {
  const location = useLocation(), navigate = useNavigate();
- return <><Routes><Route path="/yachts" element={<YachtsIndex />} /><Route path="/flowers" element={<FlowersIndex />} /><Route path="*" element={<p>Detail</p>} /></Routes><output data-testid="url">{location.pathname + location.search}</output><button onClick={() => navigate(-1)}>Back</button><button onClick={() => navigate(1)}>Forward</button></>;
+ return <><Routes><Route path="/yachts" element={<YachtsIndex />} /><Route path="/flowers" element={<FlowersIndex />} /><Route path="/restaurants" element={<RestaurantsIndex />} /><Route path="*" element={<p>Detail</p>} /></Routes><output data-testid="url">{location.pathname + location.search}</output><button onClick={() => navigate(-1)}>Back</button><button onClick={() => navigate(1)}>Forward</button></>;
 }
 const mount = (url: string) => render(<MemoryRouter initialEntries={[url]}><Journey /></MemoryRouter>);
 beforeEach(() => { state.error = false; state.retry.mockClear(); });
@@ -52,6 +53,17 @@ describe('yacht and flower discovery journeys', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/flowers?utm_source=test');
   expect(screen.getByRole('link', { name: 'Rose' })).toBeInTheDocument();
+ });
+ it.each([
+  ['/flowers?persona=family&q=Rose', 'Rose', 'No bouquets match'],
+  ['/restaurants?persona=family&ref=fixture', 'Pad Thai Place', 'No restaurants match'],
+ ])('shows a true no-match state in %s and clears only the scenario', (url, name, noMatch) => {
+  mount(url);
+  expect(screen.getByText(new RegExp(noMatch))).toBeVisible();
+  expect(screen.queryByText(name)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Search without scenario' }));
+  expect(screen.getByTestId('url')).toHaveTextContent(url.replace('persona=family&', ''));
+  expect(screen.getByText(name)).toBeVisible();
  });
  it('updates yacht sorting and restores it through history', () => {
   mount('/yachts');

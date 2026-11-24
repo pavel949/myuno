@@ -27,7 +27,7 @@ export function OperationsInquiriesTab() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Fetch inquiries from support_tickets or contact forms
-  const { data: inquiries, isLoading } = useQuery({
+  const { data: inquiries, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-inquiries', statusFilter],
     queryFn: async () => {
       let query = supabase
@@ -78,7 +78,7 @@ export function OperationsInquiriesTab() {
           <CardContent className="p-4 flex items-center gap-3">
             <MessageSquare className="h-8 w-8 text-info" />
             <div>
-              <p className="text-2xl font-bold">{stats.open}</p>
+              <p className="text-2xl font-bold">{!inquiries || isError ? '—' : stats.open}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Открытые' : 'Open'}</p>
             </div>
           </CardContent>
@@ -87,7 +87,7 @@ export function OperationsInquiriesTab() {
           <CardContent className="p-4 flex items-center gap-3">
             <Clock className="h-8 w-8 text-warning" />
             <div>
-              <p className="text-2xl font-bold">{stats.pending}</p>
+              <p className="text-2xl font-bold">{!inquiries || isError ? '—' : stats.pending}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'В работе' : 'In Progress'}</p>
             </div>
           </CardContent>
@@ -96,7 +96,7 @@ export function OperationsInquiriesTab() {
           <CardContent className="p-4 flex items-center gap-3">
             <CheckCircle className="h-8 w-8 text-success" />
             <div>
-              <p className="text-2xl font-bold">{stats.resolved}</p>
+              <p className="text-2xl font-bold">{!inquiries || isError ? '—' : stats.resolved}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Решено' : 'Resolved'}</p>
             </div>
           </CardContent>
@@ -105,8 +105,8 @@ export function OperationsInquiriesTab() {
           <CardContent className="p-4 flex items-center gap-3">
             <MessageSquare className="h-8 w-8 text-accent-purple" />
             <div>
-              <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Всего' : 'Total'}</p>
+              <p className="text-2xl font-bold">{!inquiries || isError ? '—' : stats.total}</p>
+              <p className="text-sm text-muted-foreground">{isRussian ? 'Загружено' : 'Loaded'}</p>
             </div>
           </CardContent>
         </Card>
@@ -125,14 +125,18 @@ export function OperationsInquiriesTab() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isRussian ? 'Поиск...' : 'Search...'}
+                type="search"
+                aria-label={isRussian ? 'Поиск по загруженным заявкам' : 'Search loaded inquiries'}
+                aria-describedby="operations-inquiries-search-scope"
+                autoComplete="off"
+                placeholder={isRussian ? 'Тема или номер' : 'Subject or ticket number'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger aria-label={isRussian ? 'Статус заявки' : 'Inquiry status'} className="w-full sm:w-[180px]">
                 <SelectValue placeholder={isRussian ? 'Статус' : 'Status'} />
               </SelectTrigger>
               <SelectContent>
@@ -145,7 +149,15 @@ export function OperationsInquiriesTab() {
             </Select>
           </div>
 
-          {isLoading ? (
+          <p id="operations-inquiries-search-scope" className="mb-3 text-xs text-muted-foreground">
+            {isRussian ? 'Поиск и счётчики по последним 100 загруженным заявкам выбранного статуса.' : 'Search and counts cover up to the latest 100 loaded inquiries in the selected status.'}
+          </p>
+          {isError ? (
+            <p role="alert" className="text-sm text-destructive">
+              {isRussian ? 'Не удалось загрузить заявки. ' : 'Could not load inquiries. '}
+              <button type="button" className="underline" onClick={() => void refetch()}>{isRussian ? 'Повторить' : 'Retry'}</button>
+            </p>
+          ) : isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               {isRussian ? 'Загрузка...' : 'Loading...'}
             </div>

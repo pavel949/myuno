@@ -61,6 +61,23 @@ it('names the supported fields and does not offer withheld facets in the public 
  mount(); fireEvent.click(screen.getByRole('button',{name:'Filters'})); expect(screen.getByRole('combobox',{name:'District'})).toBeVisible(); expect(screen.getByRole('combobox',{name:'Developer'})).toBeVisible(); expect(screen.getByRole('combobox',{name:'Budget'})).toBeVisible(); expect(screen.queryByText('Completion')).toBeNull(); expect(screen.queryByText('Ownership')).toBeNull();
 });
 
+it('edits a legacy developer in one field, cancels without rewriting it, then applies exactly once', () => {
+  mount('/property/offplan?developer=known-id&ref=campaign');
+  fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+  expect(screen.getByRole('combobox', { name: 'Developer' })).toHaveValue('Developer from link');
+  fireEvent.change(screen.getByRole('combobox', { name: 'Developer' }), { target: { value: 'Ocean' } });
+  expect(screen.getByTestId('url')).toHaveTextContent('developer=known-id');
+  fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('developer=known-id');
+  fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+  fireEvent.change(screen.getByRole('combobox', { name: 'Developer' }), { target: { value: 'Lagoon' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Show projects' }));
+  const url = screen.getByTestId('url').textContent!;
+  expect(url).toBe('?ref=campaign&developerName=Lagoon');
+  fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('developer=known-id');
+});
+
 
 const offplanFixtures = [
  { id: 'ocean', nameEn: 'Ocean Suites', nameRu: 'Ocean Suites', district: 'Bang Tao', lat: 8.01, lng: 98.3 },

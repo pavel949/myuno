@@ -17,6 +17,8 @@ import { withGeoSection } from '@/components/filters';
 import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
 import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
+import { Button } from '@/components/ui/button';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { cn } from '@/lib/utils';
@@ -58,9 +60,9 @@ export default function RestaurantsIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
 
-  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+  const { applyFilter: applyPersonaFilter, personaTags, clearPersona } = usePersonaFilter();
 
-  const { restaurants, isLoading } = useRestaurants({
+  const { restaurants, isLoading, error, refetch } = useRestaurants({
     cuisine: selectedCuisine === 'all' ? undefined : selectedCuisine,
     district: selectedArea || undefined,
   });
@@ -126,7 +128,7 @@ export default function RestaurantsIndex() {
       const dietary = (raw.dietary_options as string[] | null) ?? [];
       const features = r.features ?? [];
       return [...cuisineTags, ...dietary, ...features, r.cuisine].filter(Boolean) as string[];
-    });
+    }, { strict: true });
 
     return result;
   }, [restaurants, searchQuery, filterValues, sortBy, applyPersonaFilter]);
@@ -138,7 +140,7 @@ export default function RestaurantsIndex() {
   return (
     <MiniAppLayout
       title={isRu ? 'Рестораны' : 'Restaurants'}
-      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
+      subtitle={error ? pickLang(language, { ru: 'Каталог недоступен', en: 'Catalogue unavailable', th: 'ไม่สามารถโหลดแคตตาล็อก' }) : isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
       fallbackPath="/"
       showSearch
       searchValue={searchQuery}
@@ -190,7 +192,12 @@ export default function RestaurantsIndex() {
       }
     >
       <PersonaFilterChip className="mb-3" />
-      {isLoading ? (
+      {error ? (
+        <div role="alert" className="space-y-3 border border-border p-6">
+          <p>{pickLang(language, { ru: 'Не удалось загрузить рестораны.', en: 'Unable to load restaurants.', th: 'โหลดร้านอาหารไม่สำเร็จ' })}</p>
+          <Button variant="outline" onClick={() => void refetch()}>{pickLang(language, { ru: 'Повторить', en: 'Try again', th: 'ลองอีกครั้ง' })}</Button>
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="space-y-2">
@@ -204,7 +211,10 @@ export default function RestaurantsIndex() {
         <EmptyState
           icon={UtensilsCrossed}
           title={isRu ? 'Ничего не найдено' : 'No restaurants found'}
-          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          description={personaTags.length > 0
+            ? pickLang(language, { ru: 'Нет ресторанов, подходящих под этот сценарий и остальные условия.', en: 'No restaurants match this scenario and your other selections.', th: 'ไม่มีร้านอาหารที่ตรงกับสถานการณ์และตัวเลือกอื่น ๆ ของคุณ' })
+            : isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          action={personaTags.length > 0 ? <Button variant="outline" onClick={clearPersona}>{pickLang(language, { ru: 'Искать без сценария', en: 'Search without scenario', th: 'ค้นหาโดยไม่เลือกสถานการณ์' })}</Button> : undefined}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">

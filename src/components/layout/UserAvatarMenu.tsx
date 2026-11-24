@@ -129,13 +129,10 @@ function orderSwitchable(roles: AppRole[], order: AppRole[]): AppRole[] {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-interface ConsumerMenuLink { to: string; label: string; active?: boolean }
-
-export function UserAvatarMenu({ compact = false, consumerNavigation, consumerSearch }: {
+export function UserAvatarMenu({ compact = false, consumerHeader = false }: {
   compact?: boolean;
   /** Consumer-only presentation. Workspace callers retain their existing menu. */
-  consumerNavigation?: readonly ConsumerMenuLink[];
-  consumerSearch?: () => void;
+  consumerHeader?: boolean;
 }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -309,14 +306,14 @@ export function UserAvatarMenu({ compact = false, consumerNavigation, consumerSe
           aria-label={pickLang(language, { ru: 'Меню аккаунта', en: 'Account menu', th: 'เมนูบัญชี' })}
           className={cn(
             "flex items-center gap-2 h-10 pl-3 pr-1.5 rounded-full",
-            consumerNavigation && "consumer-account-trigger",
+            consumerHeader && "consumer-account-trigger",
             compact && "h-11 w-11 justify-center p-0 md:w-auto md:pl-3 md:pr-1.5",
             "border border-border/60 bg-background hover:shadow-md",
             "transition-all duration-200 cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
         >
-          <Menu className={cn("w-4 h-4 text-foreground/70", compact && "hidden md:block")} />
+          {!consumerHeader && <Menu aria-hidden="true" className={cn("w-4 h-4 text-foreground/70", compact && "hidden md:block")} />}
           <div className="relative">
             <Avatar className="h-7 w-7">
               <AvatarImage src={avatarUrl} alt={userName} />
@@ -333,13 +330,8 @@ export function UserAvatarMenu({ compact = false, consumerNavigation, consumerSe
 
       <DropdownMenuContent
         align="end"
-        className={cn("w-72 p-0 rounded-none shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden", consumerNavigation && "consumer-account-menu")}
+        className={cn("w-72 p-0 rounded-none shadow-xl border border-border/50 max-h-[min(85vh,560px)] overflow-y-auto overflow-x-hidden", consumerHeader && "consumer-account-menu")}
       >
-        {consumerNavigation && <DropdownMenuGroup className="consumer-account-navigation">
-          {consumerSearch && <DropdownMenuItem onSelect={consumerSearch} className="min-h-11 px-4 py-3">{pickLang(language, { ru: 'Поиск по сайту', en: 'Search the site', th: 'ค้นหาเว็บไซต์' })}</DropdownMenuItem>}
-          {consumerNavigation.map(item => <DropdownMenuItem key={item.to} onSelect={() => navigate(item.to)} aria-current={item.active ? 'page' : undefined} className="min-h-11 px-4 py-3 aria-[current=page]:font-semibold">{item.label}</DropdownMenuItem>)}
-          <DropdownMenuSeparator className="my-0" />
-        </DropdownMenuGroup>}
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
             {quickOperateRole && ROLE_SWITCH_CONFIG[quickOperateRole] && (() => {

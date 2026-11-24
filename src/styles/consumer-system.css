@@ -21,13 +21,10 @@
 
 /* One mobile row; secondary preferences/cart remain in the existing menus. */
 .consumer-secondary-utilities{display:flex;align-items:center;gap:12px}
-.consumer-account-navigation{display:none}
 @media(max-width:820px){
  .consumer-secondary-utilities{display:none}
- .consumer-account-navigation{display:block}
  .consumer-account-menu [role="menuitem"]{min-height:var(--touch-target)}
  .consumer-header .consumer-account-trigger{height:44px;min-width:44px;padding:0;justify-content:center}
- .consumer-header .consumer-account-trigger>svg{display:none}
  .consumer-menu{position:static;min-width:44px;min-height:44px}
 }
 

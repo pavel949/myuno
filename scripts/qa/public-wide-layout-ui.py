@@ -102,17 +102,20 @@ async def main():
                     parent = await geometry(grid.locator('xpath=../..'))
                     assert abs(parent['left']+parent['padding']-header['left']-header['padding']) <= 1, {'frame': parent, 'header': header}
                     await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
-                    # Actual keyboard category filtering preserves URL context.
+                    # Keyboard selection stages a category without changing URL or results.
                     await page.get_by_role('button',name={'ru': 'Категории и ситуации', 'en': 'Categories and situations', 'th': 'หมวดหมู่และสถานการณ์'}[lang],exact=True).click()
                     category = page.get_by_role('combobox')
                     await category.press('Enter')
                     option = page.get_by_role('option', name='Транспортные услуги' if lang=='ru' else 'Transport', exact=True)
                     await expect(option).to_be_visible()
                     await option.click()
-                    await expect(page.get_by_test_id('fixture-route')).to_contain_text('category=cat-transport')
+                    route_state = page.get_by_test_id('fixture-route')
+                    await expect(route_state).to_have_text('/discover/services?category=cat-tourism')
+                    await expect(grid.locator('a[href="/yachts"]')).to_have_count(1)
                     await expect(category).to_be_focused()
                     await page.get_by_role('button',name={'ru': 'Показать предложения', 'en': 'Show offers', 'th': 'แสดงข้อเสนอ'}[lang],exact=True).click()
                     await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await expect(route_state).to_have_text('/discover/services?category=cat-transport')
                     await expect(grid.locator('a[href="/transport/fast-track"]')).to_have_count(1)
                     await expect(grid.get_by_role('link')).to_have_count(3)
                     await expect(grid.locator('a[href="/sim"]')).to_have_count(0)
