@@ -47,8 +47,12 @@ async def main():
                 await page.goto(url,wait_until='networkidle')
                 assert not errors, errors
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (lang,width,'initial overflow')
+                requests_name={'ru':'Мои заявки','en':'My requests','th':'คำขอของฉัน'}[lang]
+                requests_link=page.get_by_role('link',name=requests_name,exact=True)
+                await expect(requests_link).to_be_visible()
+                await expect(requests_link).to_have_attribute('href','/bookings')
                 await open_catalog_filters(page,lang)
-                await expect(page.get_by_role('link',name={'ru':'Мои заявки','en':'My requests','th':'คำขอของฉัน'}[lang])).to_have_attribute('href','/bookings')
+                await expect(page.get_by_role('dialog').get_by_role('link',name=requests_name,exact=True)).to_have_count(0)
                 await close_catalog_filters(page,lang)
                 menu=page.get_by_test_id('service-discovery-menu')
                 await expect(menu.locator('[data-category-id]')).to_have_count(6)
@@ -106,7 +110,9 @@ async def main():
                 await tabs.nth(1).focus()
                 await tabs.nth(1).press('ArrowLeft')
                 await expect(tabs.nth(0)).to_have_attribute('aria-selected','true')
+                await expect(page.get_by_test_id('location')).not_to_contain_text('browse=situations')
                 await close_catalog_filters(page,lang)
+                await expect(page.get_by_test_id('location')).to_contain_text('browse=situations')
                 await page.locator('[data-situation-code=arrival]').click()
                 await expect(page.locator('[data-testid=service-catalogue-results] a[href="/transport/airport-transfer"]')).to_have_count(1)
                 await expect(page.locator('[data-testid=service-catalogue-results] a[href="/yachts"]')).to_have_count(0)

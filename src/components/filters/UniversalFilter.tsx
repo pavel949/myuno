@@ -85,7 +85,7 @@ function PriceLevelSelect({ value, onChange, descriptions }: { value: string | n
           {descriptions?.[level.id] ?? level.label}
         </button>
       ))}
-    </div>{value && descriptions?.[value] && <p className="text-sm text-muted-foreground" aria-live="polite">{descriptions[value]}</p>}</div>
+    </div><p className="sr-only" role="status" aria-live="polite">{value ? descriptions?.[value] : undefined}</p></div>
   );
 }
 
