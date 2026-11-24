@@ -8,6 +8,7 @@ import PropertySearchRedirect from '@/components/property/PropertySearchRedirect
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 import { PropertyHubTabs } from '@/pages/property/PropertyHub';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
+vi.mock('@/hooks/useUniversalLead', () => ({ useUniversalLead: () => ({ submitLead: { mutate: vi.fn() }, isSubmitting: false }) }));
 
 const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, withPriceLevel: false, language: 'en', loading: false, failed: false, nextPageError: false, properties: [] as Record<string, unknown>[] }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));

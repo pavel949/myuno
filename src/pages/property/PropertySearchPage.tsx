@@ -7,6 +7,7 @@ import '@/styles/public-commerce.css';
  */
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import { SearchLeadRequest } from '@/components/search/SearchLeadRequest';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -500,6 +501,7 @@ export default function PropertySearchPage() {
             </div>
           )}
 
+          {!catalogueAll && (propertyMode === 'rent' || propertyMode === 'buy') && !isError && <SearchLeadRequest kind={propertyMode} params={searchParamsUrl} className="mt-8" />}
           {propertyMode === 'buy' && !isError && <OffplanCTASection className="mt-8" />}
           {properties.length > 0 && !isError && <CrossSellSection currentVertical="property" className="mt-8 px-4" />}
 
