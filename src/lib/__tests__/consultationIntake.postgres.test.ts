@@ -68,11 +68,11 @@ describe('unapplied checked consultation intake against isolated PostgreSQL',()=
      if(calls===1)throw new Error('Synthetic lost response after database commit');
      return {data:committed,error:null};
    }};
-   const data=payload();const first=createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto});
+   const data=payload();const first=createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true});
    await expect(first.submit(client,data)).rejects.toThrow('lost response');
    expect(JSON.stringify([...records.values()])).not.toContain(data.phone);
    await actor('authenticated',admin,c=>c`UPDATE consultation_requests SET status='contacted' WHERE id=${committed}`);
-   const reloaded=createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto});
+   const reloaded=createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true});
    const receipt=await reloaded.submit(client,data);expect(receipt.id).toBe(committed);expect(new Set(keys).size).toBe(1);
    expect((await reloaded.submit(client,data)).shouldDispatch).toBe(false);expect(calls).toBe(2);
    const [row]=await sql`SELECT status FROM consultation_requests WHERE id=${committed}`;expect(row.status).toBe('contacted');

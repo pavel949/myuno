@@ -1,34 +1,52 @@
-/** Maps a catalogue URL to a CRM lead (consultation_requests). Unknown params stay unknown. */
+/** Map the residential catalogue to the existing, DB-admitted consultation workflow. */
 import type { UniversalLeadInput } from '@/hooks/useUniversalLead';
+import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
+import { priceLevelToPriceRange } from '@/lib/propertyCatalogServerFilters';
+import { civilDateKey } from '@/lib/hotelDates';
 
-export type SearchLeadKind = 'rent' | 'buy' | 'experiences';
-const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const list = (v: string | null) => (v ? v.split(',').map(s => s.trim()).filter(Boolean) : []);
-const amount = (v: string | null) => { if (v == null || v === '') return undefined; const n = Number(v); return Number.isFinite(n) && n >= 0 ? n : undefined; };
+export type SearchLeadKind = 'rent' | 'buy';
+// Deliberately exclude arbitrary URL parameters (return URLs, tokens, campaign data).
+const CRITERIA = ['q','district','types','bedrooms','amenities','cats','company','project','tenancy','intent','quick','checkIn','checkOut','guests','instant','f.district','f.propertyType','f.bedrooms','f.amenities','f.highlights','f.viewType','f.furnishingLevel','f.poolType','f.parkingType','f.ownershipForm','f.guestsAtLeast','f.instantBooking','f.areaAtLeast','f.priceLevel'] as const;
+const STAY_ONLY = new Set<string>(['tenancy','checkIn','checkOut','guests','instant','f.guestsAtLeast','f.instantBooking']);
 
 export function buildSearchLeadInput(kind: SearchLeadKind, params: URLSearchParams, contact: { name: string; phone: string; notes?: string }): UniversalLeadInput {
-  const search: Record<string, string> = {};
-  params.forEach((value, key) => { if (key.length <= 40 && value.length <= 200) search[key] = value; });
-  const districts = list(params.get('district'));
-  const types = list(params.get('types'));
-  const guests = Number(params.get('guests'));
-  const checkIn = params.get('checkIn'), checkOut = params.get('checkOut');
-  const budgetMin = amount(params.get('minPrice')), budgetMax = amount(params.get('maxPrice'));
+  const search: Record<string, string> = { mode: kind };
+  for (const key of CRITERIA) {
+    if (kind === 'buy' && STAY_ONLY.has(key)) continue;
+    const value = params.get(key);
+    if (value !== null && value.length <= 200) search[key] = value;
+  }
+  const state = readPropertySearchQuery(new URLSearchParams(search));
+  const { locations, propertyTypes, checkIn, checkOut, guests } = state.search;
+  const from = checkIn ? civilDateKey(checkIn) : undefined;
+  const to = checkOut ? civilDateKey(checkOut) : undefined;
+  const dates = kind === 'rent' && from && to && from < to ? { check_in: from, check_out: to } : undefined;
+  const explicitTenancy = ['short','medium','long'].includes(search.tenancy) || ['rent-month','rent-long'].includes(search.intent);
+  const tenancy = kind === 'rent' && (explicitTenancy || dates) ? state.tenancy : undefined;
+  const shortStay = kind === 'rent' && tenancy === 'short';
+  const priceLevel = state.filterValues.priceLevel;
+  // Nightly bands are not monthly/annual budgets; use the same bands as the actual catalogue.
+  const range = (kind === 'buy' || state.tenancy === 'short') && typeof priceLevel === 'string'
+    ? priceLevelToPriceRange(priceLevel, kind === 'buy' ? 'sale' : 'rent') : null;
+  if (kind === 'rent' && state.tenancy !== 'short') delete search['f.priceLevel'];
+  // The deployed CHECK admits vacation_rental and property_consultation, not
+  // property_rental_search/property_purchase_search. Search is not a viewing,
+  // confirmed booking, deal or payment. Keep intent in the existing metadata.
   return {
-    vertical_id: kind === 'experiences' ? 'tours' : 'properties',
-    request_type: kind === 'experiences' ? 'experience_search' : kind === 'buy' ? 'property_purchase_search' : 'property_rental_search',
+    vertical_id: 'properties',
+    request_type: shortStay ? 'vacation_rental' : 'property_consultation',
     lead_source: 'organic',
     entry_point: `catalogue_search:${kind}`,
     name: contact.name.trim(),
     phone: contact.phone.trim(),
     notes: contact.notes?.trim() || undefined,
     currency: 'THB',
-    budget_min: budgetMin,
-    budget_max: budgetMax,
-    districts: districts.length ? districts : undefined,
-    property_types: kind !== 'experiences' && types.length ? types : undefined,
-    guests_count: kind === 'rent' && Number.isSafeInteger(guests) && guests >= 1 && guests <= 50 ? guests : undefined,
-    preferred_dates: kind === 'rent' && checkIn && checkOut && DATE.test(checkIn) && DATE.test(checkOut) && checkIn < checkOut ? { check_in: checkIn, check_out: checkOut } : undefined,
-    vertical_metadata: { search_kind: kind, search, tenancy: kind === 'rent' ? params.get('tenancy') ?? undefined : undefined },
+    budget_min: range?.minPrice,
+    budget_max: range?.maxPrice,
+    districts: locations.length ? locations : undefined,
+    property_types: propertyTypes.length ? propertyTypes : undefined,
+    guests_count: kind === 'rent' && state.hasGuestFilter ? guests : undefined,
+    preferred_dates: dates,
+    vertical_metadata: { search_kind: kind, search, tenancy, request_only: true, budget_basis: range ? (kind === 'buy' ? 'asking_price' : 'nightly') : undefined },
   };
 }
