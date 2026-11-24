@@ -16,5 +16,5 @@ export function sanitizeChatMessages(input: unknown, maxTurns = 40, maxChars = 4
 
 /** Single-line, length-capped value safe to embed in a system prompt. */
 export function promptSafe(value: unknown, max = 200): string {
-  return String(value ?? "").replace(/[\r\n\u2028\u2029]+/g, " ").replace(/[\[\]#]/g, "").slice(0, max);
+  return String(value ?? "").replace(/[\r\n\u2028\u2029]+/g, " ").replace(/[[\]#]/g, "").slice(0, max);
 }
