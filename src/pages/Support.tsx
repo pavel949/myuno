@@ -34,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { useSupportChat, UNO_WHATSAPP } from '@/hooks/useChat';
 import { COMPANY_CONTACTS } from '@/lib/config';
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { supportCopy } from '@/lib/support/supportCopy';
 
 // WhatsApp icon component - wrapped in forwardRef for PremiumButton compatibility
@@ -127,12 +128,8 @@ export default function Support() {
     }
   };
 
-  const handleConciergeRequest = () => {
-    const message = isRu 
-      ? 'Здравствуйте! Мне нужна помощь с бронированием услуги' 
-      : 'Hello! I need help booking a service';
-    openWhatsApp(message);
-  };
+  const [conciergeOpen, setConciergeOpen] = useState(false);
+  const handleConciergeRequest = () => setConciergeOpen(true);
 
   return (
     <AppLayout usePageContainer={false}>
@@ -381,6 +378,8 @@ export default function Support() {
             <ChevronRight className="w-5 h-5 text-muted-foreground" />
           </SectionCard>
         </button>
+        {conciergeOpen && <ConciergeHelpSheet open={conciergeOpen} onOpenChange={setConciergeOpen} topic="general"
+          sourceData={{source: 'support_concierge'}} />}
       </PageContainer>
     </AppLayout>
   );
