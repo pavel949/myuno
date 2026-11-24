@@ -1,6 +1,10 @@
 import { PageHeader } from '@/components/page/PageHeader';
 import { PageShell } from '@/components/page/PageShell';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminCrmDashboard } from '@/components/admin/crm/AdminCrmDashboard';
@@ -10,7 +14,7 @@ import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspec
 import { AdminOwnerProspects } from '@/components/admin/crm/AdminOwnerProspects';
 import { AdminCrmActivityLog } from '@/components/admin/crm/AdminCrmActivityLog';
 import { VendorOutreachPanel } from '@/components/admin/crm/VendorOutreachPanel';
-import { BarChart3, Target, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
+import { BarChart3, Target, Building2, Activity, Kanban, Table, Send, Inbox } from 'lucide-react';
 import { CompanySwitcher } from '@/components/crm/CompanySwitcher';
 
 export default function AdminCRM() {
@@ -23,8 +27,22 @@ export default function AdminCRM() {
     <PageShell width="workspace" className="space-y-4">
       <PageHeader
         title={isRu ? 'CRM — Привлечение' : 'CRM — Acquisition Hub'}
-        subtitle={isRu ? 'Единый центр привлечения вендоров, пользователей и собственников' : 'Unified hub for vendor, user & owner acquisition'}
-        actions={<CompanySwitcher />}
+        subtitle={pickLang(language, {
+          ru: 'Поставщики, собственники и партнёры. Обращения клиентов находятся во «Входящих myUNO».',
+          en: 'Suppliers, property owners and partners. Customer requests are in the myUNO inbox.',
+          th: 'ผู้ให้บริการ เจ้าของอสังหาริมทรัพย์ และพันธมิตร ดูคำขอของลูกค้าได้ที่กล่องข้อความ myUNO',
+        })}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline">
+              <Link to={APP_ROUTES.ADMIN_INBOX}>
+                <Inbox className="size-4" aria-hidden="true" />
+                {pickLang(language, { ru: 'Входящие myUNO', en: 'myUNO inbox', th: 'กล่องข้อความ myUNO' })}
+              </Link>
+            </Button>
+            <CompanySwitcher />
+          </div>
+        }
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

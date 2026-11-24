@@ -1,14 +1,18 @@
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { LEAD_STATUS_BUCKETS, LEAD_STATUS_NEW, type InboxStatusBucket } from '@/config/leadStatus';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-export type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries';
+export type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries' | 'help_requests';
 
 export type InboxStatus = InboxStatusBucket;
 
-export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'listing_applications', 'consultation_requests', 'nb_leads', 'property_inquiries'];
+export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'listing_applications', 'consultation_requests', 'nb_leads', 'property_inquiries', 'help_requests'];
 export function isInboxSource(value: string | null): value is InboxSource {
   return INBOX_SOURCES.some(source => source === value);
+}
+export function isInboxRequestId(value: unknown): value is string {
+  return typeof value === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value);
 }
 export function inboxRequestHref(source: InboxSource, id: string) {
   return `${APP_ROUTES.ADMIN_INBOX}?${new URLSearchParams({ source, request: id })}`;
@@ -21,13 +25,17 @@ export const INBOX_DETAIL_FIELDS: Record<InboxSource, readonly (readonly [string
   listing_applications: [['applicant_name', 'Name', 'Имя'], ['applicant_email', 'Email', 'Email'], ['applicant_phone', 'Phone', 'Телефон'], ['listing_type', 'Listing type', 'Тип объявления'], ['property_type', 'Property type', 'Тип жилья'], ['service_category', 'Service category', 'Категория услуги'], ['product_category', 'Product category', 'Категория товара'], ['city', 'City', 'Город'], ['address', 'Address', 'Адрес'], ['admin_notes', 'Notes', 'Заметки'], ['rejection_reason', 'Rejection reason', 'Причина отклонения']],
   consultation_requests: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['request_type', 'Request type', 'Тип обращения'], ['vertical_id', 'Service', 'Направление'], ['notes', 'Client notes', 'Пожелания клиента'], ['admin_notes', 'Admin notes', 'Внутренние заметки']],
   nb_leads: [['full_name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['project_id', 'Project ID', 'ID проекта'], ['source', 'Source', 'Источник'], ['message', 'Message', 'Сообщение']],
+  help_requests: [['subject', 'Subject', 'Тема'], ['topic', 'Category', 'Категория'], ['urgency', 'Urgency', 'Срочность'], ['message', 'Message', 'Сообщение'], ['contact_email', 'Customer email', 'Email клиента'], ['contact_phone', 'Customer phone', 'Телефон клиента'], ['preferred_channel', 'Preferred channel', 'Канал связи'], ['language', 'Language', 'Язык'], ['source_page', 'Source page', 'Страница'], ['source_route', 'Source route', 'Маршрут']],
   property_inquiries: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['property_id', 'Property ID', 'ID объекта'], ['check_in', 'Check-in', 'Заезд'], ['check_out', 'Check-out', 'Выезд'], ['guests', 'Guests', 'Гости'], ['message', 'Message', 'Сообщение']],
 };
 export async function fetchInboxRequest(source: InboxSource, id: string): Promise<Record<string, unknown> | null> {
-  if (!isInboxSource(source) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) throw new Error('Invalid request selection');
+  if (!isInboxSource(source) || !isInboxRequestId(id)) throw new Error('Invalid request selection');
   const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
   if (source === 'consultation_requests') fields.push('vertical_metadata');
-  const { data, error } = await supabase.from(source).select(fields.join(',')).eq('id', id).maybeSingle();
+  const query = source === 'help_requests'
+    ? typedFrom('help_requests').select(fields.join(','))
+    : supabase.from(source).select(fields.join(','));
+  const { data, error } = await query.eq('id', id).maybeSingle();
   if (error) throw error;
   const record: unknown = data;
   if (record === null) return null;
@@ -49,14 +57,18 @@ export interface InboxItem {
 }
 
 const LISTING_STATUSES = ['draft', 'pending', 'under_review', 'approved', 'rejected', 'revision_requested'];
+const HELP_STATUSES: Record<InboxStatus, string[]> = {
+  new: ['new'], in_progress: ['triaged', 'in_progress', 'waiting_user'], closed: ['closed', 'spam'], escalated: [],
+};
 function storedStatuses(source: InboxSource, bucket: InboxStatus) {
+  if (source === 'help_requests') return HELP_STATUSES[bucket];
   const statuses = bucket === 'new' ? LEAD_STATUS_NEW : LEAD_STATUS_BUCKETS[bucket];
   return source === 'listing_applications' ? statuses.filter(status => LISTING_STATUSES.includes(status)) : statuses;
 }
 export function inboxStatusForStoredValue(source: InboxSource, raw: string | null): InboxStatus | 'other' {
   // Match the server predicates exactly. Domain-specific, padded and differently
   // cased statuses remain visible under All instead of being relabelled New.
-  if (raw === null && source !== 'listing_applications') return 'new';
+  if (raw === null && source !== 'listing_applications' && source !== 'help_requests') return 'new';
   for (const bucket of ['new', 'closed', 'escalated', 'in_progress'] as const) {
     if (raw !== null && storedStatuses(source, bucket).includes(raw)) return bucket;
   }
@@ -65,19 +77,43 @@ export function inboxStatusForStoredValue(source: InboxSource, raw: string | nul
 
 export async function fetchInbox(source: InboxSource, page: number, status: InboxStatus | 'all', search = '') {
   const fields: Record<InboxSource, string[]> = {
+    help_requests: ['subject', 'topic', 'contact_email', 'contact_phone'],
     partner_applications: ['business_name', 'contact_name', 'contact_email', 'business_category'], listing_applications: ['applicant_name', 'applicant_email', 'service_category', 'product_category', 'property_type'],
     consultation_requests: ['name', 'email', 'request_type', 'vertical_id'], nb_leads: ['full_name', 'email', 'phone'], property_inquiries: ['name', 'email', 'phone', 'message'],
   };
   const term = search.trim().replace(/[,%()_*\\"]/g, ' ').trim().slice(0, 120);
   const searchClauses = fields[source].map(field => field + '.ilike.%' + term + '%');
+  if (source === 'help_requests' && isInboxRequestId(term)) searchClauses.unshift('id.eq.' + term.toLowerCase());
   if (source === 'listing_applications' && ['property', 'service', 'product'].includes(term)) searchClauses.push('listing_type.eq.' + term);
   const text = term ? 'or(' + searchClauses.join(',') + ')' : '';
   const statuses = status === 'all' ? [] : storedStatuses(source, status).filter(Boolean);
-  if (status !== 'all' && source === 'listing_applications' && statuses.length === 0) return { items: [] as InboxItem[], total: 0 };
-  const state = status === 'all' ? '' : 'or(status.in.(' + statuses.join(',') + ')' + (status === 'new' && source !== 'listing_applications' ? ',status.is.null,status.eq.""' : '') + ')';
+  if (status !== 'all' && (source === 'listing_applications' || source === 'help_requests') && statuses.length === 0) return { items: [] as InboxItem[], total: 0 };
+  const state = status === 'all' ? '' : 'or(status.in.(' + statuses.join(',') + ')' + (status === 'new' && source !== 'listing_applications' && source !== 'help_requests' ? ',status.is.null,status.eq.""' : '') + ')';
   const expression = state && text ? 'and(' + state + ',' + text + ')' : state || text;
   const filter = <T,>(apply: (expression: string) => T, all: () => T) => expression ? apply(expression) : all();
   const start = Math.max(0, page) * 50;
+  if (source === 'help_requests') {
+    // The canonical Help table predates generated types. RLS remains authoritative.
+    const query = typedFrom('help_requests').select('id,status,created_at,subject,topic,urgency', { count: 'exact' });
+    const { data, count, error } = await (expression ? query.or(expression) : query)
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).range(start, start + 49) as {
+        data: { id: string; status: string; created_at: string; subject: string | null; topic: string; urgency: string }[] | null;
+        count: number | null;
+        error: unknown;
+      };
+    if (error) throw error;
+    if (count === null) throw new Error('Application count unavailable');
+    return {
+      items: (data ?? []).map((row): InboxItem => ({
+        id: row.id, source: 'help_requests', rawStatus: row.status,
+        status: inboxStatusForStoredValue('help_requests', row.status),
+        createdAt: row.created_at, title: row.subject || row.topic,
+        subtitle: row.topic, contact: null, href: inboxRequestHref('help_requests', row.id),
+        vertical: row.urgency,
+      })),
+      total: count,
+    };
+  }
   const absent = Promise.resolve({ data: [], count: 0, error: null });
   const [partners, listings, consults, nbLeads, propertyInq] = await Promise.all([
     source === 'partner_applications' ? filter(expression => supabase.from('partner_applications').select('id, status, created_at, business_name, contact_name, contact_email, business_category', { count: 'exact' }).or(expression), () => supabase.from('partner_applications').select('id, status, created_at, business_name, contact_name, contact_email, business_category', { count: 'exact' })).order('created_at', { ascending: false }).order('id', { ascending: false }).range(start, start + 49) : absent,
@@ -149,3 +185,26 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
   return { items: items.sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)), total: selected.count };
 }
 
+
+export function nextHelpInboxStatus(status: unknown): 'in_progress' | 'closed' | null {
+  if (status === 'new') return 'in_progress';
+  if (status === 'triaged' || status === 'in_progress' || status === 'waiting_user') return 'closed';
+  return null;
+}
+
+export async function updateHelpInboxStatus(id: string, expectedStatus: string) {
+  const status = nextHelpInboxStatus(expectedStatus);
+  if (!status || !isInboxRequestId(id)) throw new Error('Invalid Help request transition');
+  // Compare-and-set against the same canonical row; the database still checks RLS.
+  // No internal notes, reassignment or outbound action are part of this transition.
+  const { data, error } = await typedFrom('help_requests')
+    .update({ status })
+    .eq('id', id)
+    .eq('status', expectedStatus)
+    .select('id,status')
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return false;
+  if (data.id !== id || data.status !== status) throw new Error('Help request update could not be confirmed');
+  return true;
+}

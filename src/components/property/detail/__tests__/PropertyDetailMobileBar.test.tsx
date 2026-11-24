@@ -27,18 +27,21 @@ describe('mobile property action contract', () => {
     expect(openDates).toHaveBeenCalledTimes(2);
     expect(state.navigate).not.toHaveBeenCalled();
   });
-  it('offers the existing manager request for long-stay-only homes without opening short-stay inquiry', () => {
-    const openDates = vi.fn();
-    render(<PropertyDetailMobileBar {...base} isLongStayOnly onOpenDatePicker={openDates} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
-    expect(screen.getByRole('button', { name: 'Request rental' })).toHaveAttribute('data-property-id', 'fixture-home');
+  it('dispatches the internal enquiry callback for long-stay-only homes without opening short-stay inquiry', () => {
+    const openDates = vi.fn(), openEnquiry = vi.fn();
+    render(<PropertyDetailMobileBar {...base} isLongStayOnly onOpenDatePicker={openDates} onOpenPropertyEnquiry={openEnquiry} dateRange={{ from: new Date(2027, 10, 10), to: new Date(2027, 10, 15) }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Request rental' }));
+    expect(openEnquiry).toHaveBeenCalledOnce();
     expect(screen.queryByRole('button', { name: 'Cost & booking request' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Calculate stay cost' })).toBeNull();
     expect(state.navigate).not.toHaveBeenCalled();
     expect(openDates).not.toHaveBeenCalled();
   });
   it('preserves consultation for sale intent', () => {
-    render(<PropertyDetailMobileBar {...base} isSaleListing isLongStayOnly salePrice={5000000} />);
-    expect(screen.getByRole('button', { name: 'Request consultation' })).toBeVisible();
+    const openEnquiry = vi.fn();
+    render(<PropertyDetailMobileBar {...base} isSaleListing isLongStayOnly salePrice={5000000} onOpenPropertyEnquiry={openEnquiry} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Request consultation' }));
+    expect(openEnquiry).toHaveBeenCalledOnce();
     expect(screen.queryByRole('button', { name: 'Request rental' })).toBeNull();
   });
 });

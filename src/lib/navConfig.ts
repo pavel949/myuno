@@ -106,8 +106,8 @@ export const VENDOR_NAV: NavItem[] = [
 
 export const ADMIN_NAV: NavItem[] = [
   { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Today', labelRu: 'Сегодня', labelTh: 'วันนี้', exact: true },
+  { path: APP_ROUTES.ADMIN_INBOX, icon: Inbox, labelEn: 'Inbox', labelRu: 'Входящие', labelTh: 'กล่องขาเข้า' },
   { path: APP_ROUTES.ADMIN_OPERATIONS, icon: Calendar, labelEn: 'Orders', labelRu: 'Заказы', labelTh: 'คำสั่งซื้อ' },
-  { path: '/admin/review', icon: FileCheck, labelEn: 'Review', labelRu: 'На проверке', labelTh: 'รอตรวจสอบ' },
   { path: APP_ROUTES.ADMIN_CATALOG, icon: Package, labelEn: 'Catalog', labelRu: 'Каталог', labelTh: 'แคตตาล็อก' },
   { path: APP_ROUTES.ADMIN_USERS, icon: Users, labelEn: 'Participants', labelRu: 'Участники', labelTh: 'ผู้เข้าร่วม' },
 ];
