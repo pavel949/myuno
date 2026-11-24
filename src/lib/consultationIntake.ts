@@ -60,7 +60,7 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
       const saved = storage.getItem(storageKey);
       if (saved) {
         // Legacy writers do not recognize the nonce. Do not replay an uncertain insert.
-        if (options.allowUncertainRetry === false) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
+        if (options.allowUncertainRetry !== true) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
         const parsed = JSON.parse(saved) as Pending;
         if (parsed.fingerprint !== fingerprint) throw new IntakeRecoveryError('The previous request outcome is uncertain; retry its original details.');
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parsed.key)) throw new Error('The pending intake recovery record is invalid.');

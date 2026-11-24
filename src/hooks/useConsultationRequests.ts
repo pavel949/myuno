@@ -215,6 +215,8 @@ export function useConsultationRequests() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-inbox'] });
+      if (user?.id) queryClient.invalidateQueries({ queryKey: ['me-requests', user.id] });
     },
   });
 
