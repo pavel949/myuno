@@ -34,6 +34,12 @@ const paths=['src/pages/profile/ProfileSettings.tsx','src/components/profile/Pro
  {for(const name of [/^Preferences$/i,/^Personal details$/i,/^Sign-in and security$/i,/^Account actions$/i]){const link=page.getByRole('link',{name});assert.equal(await link.count(),1);const bounds=await link.evaluate(el=>{const b=el.getBoundingClientRect();const text=el.querySelector('span');return {left:b.left,right:b.right,height:b.height,viewport:innerWidth,textFits:text.scrollWidth<=text.clientWidth+1};});assert(bounds.left>=0&&bounds.right<=bounds.viewport+1&&bounds.height>=43&&bounds.textFits,'section link bounds: '+name);const href=await link.getAttribute('href');assert.match(href,/^#[a-z-]+$/);const id=href.slice(1);assert.equal(await page.locator('[id='+JSON.stringify(id)+']').count(),1);}}
  await page.screenshot({path:path.join(output,'profile-settings-'+width+'.png'),animations:'disabled'});
  if(width===390){
+  // Check the background landmark before Radix modal menus can temporarily hide it from the accessibility tree.
+  const account=page.getByRole('region',{name:/^account actions$/i});
+  await account.getByRole('heading',{name:/^account deletion$/i}).waitFor();
+  const support=account.getByRole('link',{name:/^contact support$/i});
+  await support.waitFor();assert.equal(await support.count(),1);assert.equal(await support.getAttribute('href'),'/support');
+  assert.equal(await page.getByRole('alertdialog').count(),0);
   await page.getByRole('link',{name:/^personal details$/i}).click();assert.equal(new URL(page.url()).hash,'#personal-details');
   const save=page.getByRole('button',{name:/save changes/i});assert.equal(await save.count(),1);
   assert(await save.isDisabled(),'clean form must not save');
@@ -42,7 +48,6 @@ const paths=['src/pages/profile/ProfileSettings.tsx','src/components/profile/Pro
   await save.click();await page.getByRole('status').filter({hasText:'Changes saved'}).waitFor();assert.deepEqual(await page.evaluate(()=>window.fixtureSaves),[{country:'DE'}]);assert(await save.isDisabled());
   await page.getByRole('button',{name:/^Theme: Light$/i}).click();await page.getByRole('menuitem',{name:/^Dark$/i}).click();assert(await page.evaluate(()=>document.documentElement.classList.contains('dark')));assert.equal(await overflow(),0);
   await page.getByRole('button',{name:'฿',exact:true}).click();await page.getByRole('menuitem',{name:/USD/}).click();assert.equal(await page.evaluate(()=>window.fixtureCurrency),'USD');
-  {const danger=page.getByRole('region',{name:/account actions/i}).getByRole('link',{name:/contact support/i});assert.equal(await danger.count(),1);assert.equal(await danger.getAttribute('href'),'/support');assert.equal(await page.getByRole('alertdialog').count(),0);}
   await page.getByTestId('language-switch').click();await page.getByRole('menuitem',{name:/ไทย/}).click();assert.equal(await page.getAttribute('html','lang'),'th');await page.getByRole('heading',{name:'การตั้งค่าโปรไฟล์'}).waitFor();assert.equal(await overflow(),0);
  }
  assert.equal(await page.evaluate(()=>window.unexpectedWrites),0);assert.deepEqual(errors,[]);

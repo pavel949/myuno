@@ -62,6 +62,8 @@ async def main():
       await page.screenshot(path=str(OUT/f'{prefix}-account-open.png'))
       await page.keyboard.press('Escape');await expect(menu).not_to_be_visible();await expect(account).to_be_focused()
       if crowded:
+       # Capture the trigger before Radix's modal hides the header from role queries.
+       account_box=await account.bounding_box(timeout=3000);assert account_box,'Closed account trigger unavailable'
        await account.click();await expect(menu).to_be_visible()
        await page.wait_for_function('(e)=>getComputedStyle(e).opacity==="1" && !e.getAnimations().some(a=>a.playState==="running")',arg=await menu.element_handle())
        settings_item=menu.get_by_role('menuitem',name=settings,exact=True)
@@ -70,8 +72,8 @@ async def main():
        logout=menu.get_by_role('menuitem',name={'ru':'Выйти','en':'Log out','th':'ออกจากระบบ'}[lang],exact=True)
        await expect(menu.get_by_text(owner,exact=True)).to_have_count(1)
        # Bounding boxes, not Playwright visibility, prove we can actually see/click these first rows.
-       menu_box=await menu.bounding_box();account_box=await account.bounding_box()
-       assert menu_box and account_box and menu_box['x']>=0 and menu_box['x']+menu_box['width']<=width+1,menu_box
+       menu_box=await menu.bounding_box()
+       assert menu_box and menu_box['x']>=0 and menu_box['x']+menu_box['width']<=width+1,menu_box
        assert menu_box['y']>=-1 and menu_box['y']+menu_box['height']<=height+1,menu_box
        assert menu_box['y']>=account_box['y']+account_box['height']-1 or menu_box['y']+menu_box['height']<=account_box['y']+1,(menu_box,account_box)
        assert await menu.evaluate('(e)=>e.scrollTop===0 && e.scrollHeight>e.clientHeight'), 'Not a real scroll fixture'
