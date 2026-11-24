@@ -190,3 +190,92 @@ it('restores discrete filters from the URL without putting guest search in it', 
  fireEvent.change(screen.getByRole('textbox',{name:'Search bookings'}),{target:{value:'private@example.invalid'}});
  expect(screen.getByTestId('bookings-query')).not.toHaveTextContent('private');expect(mocks.update).not.toHaveBeenCalled();
 });
+
+describe('bulk booking review scope', () => {
+  const getSearch = () => screen.getByRole('textbox', { name: 'Search bookings' });
+  const pick = (name: string) => fireEvent.click(screen.getByRole('checkbox', { name: `Select booking: ${name}` }));
+  const beginConfirm = () => fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+  const review = () => screen.getByRole('list', { name: 'Bookings under review' });
+
+  function prepare() {
+    const base = bookingsListFixtures('en')[0];
+    mocks.customBookings = [
+      { ...base, id: 'original-a', guest_name: 'Original A', status: 'pending' },
+      { ...base, id: 'original-b', guest_name: 'Original B', status: 'pending' },
+      { ...base, id: 'replacement-a', guest_name: 'Replacement A', status: 'cancelled' },
+      { ...base, id: 'replacement-b', guest_name: 'Replacement B', status: 'cancelled' },
+    ];
+  }
+
+  it('drops an equal-size disjoint selection when status changes; shows and submits only newly reviewed IDs', async () => {
+    prepare();
+    mount('en');
+    fireEvent.click(screen.getByRole('button', { name: 'Pending' }));
+    pick('Original A');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select all visible bookings' }));
+    beginConfirm();
+    expect(review()).toHaveTextContent('original-a');
+    expect(review()).toHaveTextContent('original-b');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelled' }));
+    expect(screen.queryByRole('button', { name: 'Yes' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+    expect(screen.getAllByRole('checkbox').every(box => box.getAttribute('aria-checked') === 'false')).toBe(true);
+    expect(mocks.from).not.toHaveBeenCalled();
+
+    pick('Replacement A');
+    const selectAll = screen.getByRole('checkbox', { name: 'Select all visible bookings' });
+    expect(selectAll).toBePartiallyChecked();
+    fireEvent.click(selectAll);
+    expect(selectAll).toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(review()).toHaveTextContent('replacement-a');
+    expect(review()).toHaveTextContent('replacement-b');
+    expect(review()).not.toHaveTextContent('original');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Yes' })); });
+    expect(mocks.in).toHaveBeenCalledTimes(1);
+    const [column, ids] = mocks.in.mock.calls[0];
+    expect(column).toBe('id');
+    expect([...ids].sort()).toEqual(['replacement-a', 'replacement-b']);
+  });
+
+  it('invalidates confirmation on search and selection edits, even when the same rows remain visible', () => {
+    prepare();
+    mount('en');
+    pick('Original A');
+    beginConfirm();
+    fireEvent.change(getSearch(), { target: { value: 'Original' } });
+    expect(screen.queryByRole('button', { name: 'Yes' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Select booking: Original A' })).not.toBeChecked();
+    pick('Original A');
+    beginConfirm();
+    pick('Original B');
+    expect(screen.queryByRole('button', { name: 'Yes' })).not.toBeInTheDocument();
+    beginConfirm();
+    expect(review()).toHaveTextContent('original-a');
+    expect(review()).toHaveTextContent('original-b');
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it('requires fresh confirmation rather than silently shrinking the batch after data refresh', () => {
+    prepare();
+    mocks.language = 'en';
+    const router = (revision: number) => <MemoryRouter><MCBookingsPage /><span>{revision}</span></MemoryRouter>;
+    const { rerender } = render(router(0));
+    pick('Original A');
+    pick('Original B');
+    beginConfirm();
+    const all = mocks.customBookings!;
+    mocks.customBookings = all.filter(booking => booking.id !== 'original-b');
+    rerender(router(1));
+    expect(screen.queryByRole('button', { name: 'Yes' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Select booking: Original A' })).toBeChecked();
+    mocks.customBookings = all;
+    rerender(router(2));
+    expect(screen.getByRole('checkbox', { name: 'Select booking: Original B' })).not.toBeChecked();
+    beginConfirm();
+    expect(review()).toHaveTextContent('original-a');
+    expect(review()).not.toHaveTextContent('original-b');
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+});

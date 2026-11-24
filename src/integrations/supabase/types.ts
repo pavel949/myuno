@@ -36969,6 +36969,7 @@ export type Database = {
         Args: { p_company_id: string; p_property_id: string }
         Returns: boolean
       }
+      actor_has_active_platform_admin: { Args: never; Returns: boolean }
       actor_has_platform_admin: { Args: never; Returns: boolean }
       actor_is_operating_company_overseer: {
         Args: { _company_id: string }
@@ -37557,6 +37558,18 @@ export type Database = {
         Returns: string
       }
       list_pending_flower_deliveries: { Args: never; Returns: Json }
+      manage_nonplatform_role_checked: {
+        Args: {
+          p_grant: boolean
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      manage_uno_team_membership_checked: {
+        Args: { p_grant: boolean; p_user_id: string }
+        Returns: Json
+      }
       match_ai_knowledge: {
         Args: {
           filter_lang?: string
