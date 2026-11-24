@@ -1,8 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-const mocks = vi.hoisted(() => ({ createServiceClient: vi.fn(), requireAuth: vi.fn(), requireActorRpc: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createServiceClient: vi.fn(), requireAuth: vi.fn(), requireActorRpc: vi.fn(), createActorClient: vi.fn() }));
 vi.mock('../../../supabase/functions/_shared/supabase.ts', () => ({ createServiceClient: mocks.createServiceClient }));
 vi.mock('../../../supabase/functions/_shared/auth-guard.ts', () => ({ requireAuth: mocks.requireAuth }));
 vi.mock('../../../supabase/functions/_shared/authz.ts', () => ({ requireActorRpc: mocks.requireActorRpc }));
+vi.mock('../../../supabase/functions/_shared/operating-space-auth.ts', () => ({ createActorClient: mocks.createActorClient }));
 vi.mock('../../../supabase/functions/_shared/cors.ts', () => ({ getCorsHeaders: () => ({}) }));
 let handler: (req: Request) => Promise<Response>;
 beforeAll(async () => {
@@ -30,7 +31,7 @@ function fixture(options: { roleFails?: boolean; missingRole?: boolean; linkFail
     return chain;
   });
   mocks.createServiceClient.mockReturnValue({ auth: { admin: { inviteUserByEmail: invite } }, from });
-  const run = (operator = false) => handler(new Request('https://synthetic.test/admin-invite', { method: 'POST', body: JSON.stringify({ email: 'synthetic@example.test', full_name: 'Synthetic', role: 'staff', ...(operator ? { transfer_operator_id: 'operator' } : {}) }) }));
+  const run = (operator = false, role = 'staff') => handler(new Request('https://synthetic.test/admin-invite', { method: 'POST', body: JSON.stringify({ email: 'synthetic@example.test', full_name: 'Synthetic', role, ...(operator ? { transfer_operator_id: 'operator' } : {}) }) }));
   return { invite, writes, run, from };
 }
 describe('platform invitation partial completion', () => {
@@ -42,6 +43,19 @@ describe('platform invitation partial completion', () => {
     const setup = fixture(options); const response = await setup.run(true);
     expect(response.status).toBe(409); expect(await response.json()).toMatchObject({ success: false, invite_email_sent: true, role_granted: false });
     expect(setup.writes).not.toContain('transfer_operators');
+  });
+  it('UNO Team invite uses checked membership, not direct role write', async () => {
+    const setup = fixture();
+    const rpc = vi.fn().mockResolvedValue({ data: { success: true, uno_team: true }, error: null });
+    mocks.createActorClient.mockReturnValue({ rpc });
+    expect((await setup.run(false, 'uno_team')).status).toBe(200);
+    expect(rpc).toHaveBeenCalledWith('manage_uno_team_membership_checked', { p_user_id: 'new-auth-id', p_grant: true });
+    expect(setup.writes).not.toContain('user_roles');
+  });
+  it('missing team receipt cannot claim successful role grant', async () => {
+    const setup = fixture(); mocks.createActorClient.mockReturnValue({ rpc: vi.fn().mockResolvedValue({ data: null, error: null }) });
+    const response = await setup.run(false, 'uno_team'); expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ success: false, role_granted: false, invite_email_sent: true });
   });
   it('pre-existing operator link is never overwritten and sends no email', async () => {
     const setup = fixture({ linkedAlready: true }); expect((await setup.run(true)).status).toBe(409);

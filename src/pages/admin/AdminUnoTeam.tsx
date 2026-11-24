@@ -30,7 +30,7 @@ export default function AdminUnoTeam() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { members, isLoading, isError, refetch, updatePermission, grantAllPermissions } = useUnoTeamMembers();
+  const { members, isLoading, isFetching, isError, refetch, updatePermission, grantAllPermissions } = useUnoTeamMembers();
   const [selectedMember, setSelectedMember] = useState<UnoTeamMember | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addEmail, setAddEmail] = useState('');
@@ -47,6 +47,7 @@ export default function AdminUnoTeam() {
   //      grants the uno_team role at insert time. The new member then
   //      lands on /auth/setup-password to pick their password.
   const handleAddMember = async () => {
+    if (!user?.id || isError || isFetching) return;
     const email = addEmail.trim().toLowerCase();
     const fullName = addFullName.trim();
     if (!email) {
@@ -131,7 +132,7 @@ export default function AdminUnoTeam() {
 
   const handleRemoveMember = async (userId: string, memberName: string) => {
     try {
-      if (!user?.id || user.id === userId || members?.find(m => m.user_id === userId)?.isPlatformAdmin !== false) throw new Error('Protected or unavailable membership');
+      if (!user?.id || isError || isFetching || user.id === userId || members?.find(m => m.user_id === userId)?.isPlatformAdmin !== false) throw new Error('Protected or unavailable membership');
       await changeUnoTeamMembership(userId, false);
 
       toast(isRu ? 'Удалено' : 'Removed', {
@@ -180,7 +181,7 @@ export default function AdminUnoTeam() {
       <Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
     </div></PageContainer>;
   }
-  if (isLoading) {
+  if (isLoading || isFetching || !user?.id) {
     return (
       <>
         <PageContainer>

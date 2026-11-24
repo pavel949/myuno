@@ -35,6 +35,10 @@ describe('isolated administrative RLS candidate',()=>{
   await expect(as(actor,tx=>tx`SELECT manage_uno_team_membership_checked(${U},true)`)).rejects.toMatchObject({code:'42501'});
   await expect(as(actor,tx=>tx`SELECT manage_nonplatform_role_checked(${U},'owner',true)`)).rejects.toMatchObject({code:'42501'});
  });
+ it('blocks inactive administrators from direct ordinary role writes',async()=>{
+  await expect(as(S,tx=>tx`INSERT INTO user_roles(user_id,role) VALUES(${U},'vendor')`)).rejects.toMatchObject({code:'42501'});
+  expect(await as(S,tx=>tx`DELETE FROM user_roles WHERE user_id=${U} AND role='user' RETURNING role`)).toHaveLength(0);
+ });
  it('denies self/peer team change and protected generic role grants',async()=>{
   for(const target of [A,B])await expect(as(A,tx=>tx`SELECT manage_uno_team_membership_checked(${target},true)`)).rejects.toMatchObject({code:'42501'});
   for(const role of ['admin','uno_team'])await expect(as(A,tx=>tx`SELECT manage_nonplatform_role_checked(${U},${role}::app_role,true)`)).rejects.toMatchObject({code:'42501'});

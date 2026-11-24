@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { verifyActivePlatformAdmin } from '@/lib/adminTeamMembership';
 import { toast } from 'sonner';
 
 export const VERTICALS = [
@@ -70,10 +71,11 @@ export function useUnoTeamMembers() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: members, isLoading, isError, refetch } = useQuery({
+  const { data: members, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ['uno-team-members', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
+      await verifyActivePlatformAdmin();
       // Get all users with uno_team role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
@@ -202,6 +204,7 @@ export function useUnoTeamMembers() {
   return {
     members,
     isLoading,
+    isFetching,
     isError,
     refetch,
     updatePermission: updatePermission.mutateAsync,

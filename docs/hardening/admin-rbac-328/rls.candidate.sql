@@ -28,6 +28,13 @@ CREATE POLICY protected_platform_role_update_ceiling ON public.user_roles
  WITH CHECK(role::text NOT IN ('admin','uno_team'));
 CREATE POLICY protected_platform_role_delete_ceiling ON public.user_roles
  AS RESTRICTIVE FOR DELETE TO authenticated,anon USING(role::text NOT IN ('admin','uno_team'));
+-- Inactive administrators must not retain direct role-write authority.
+CREATE POLICY active_admin_role_insert_ceiling ON public.user_roles AS RESTRICTIVE FOR INSERT TO authenticated
+ WITH CHECK(public.actor_has_active_platform_admin());
+CREATE POLICY active_admin_role_update_ceiling ON public.user_roles AS RESTRICTIVE FOR UPDATE TO authenticated
+ USING(public.actor_has_active_platform_admin()) WITH CHECK(public.actor_has_active_platform_admin());
+CREATE POLICY active_admin_role_delete_ceiling ON public.user_roles AS RESTRICTIVE FOR DELETE TO authenticated
+ USING(public.actor_has_active_platform_admin());
 REVOKE TRUNCATE,TRIGGER ON public.user_roles,public.profiles FROM anon,authenticated;
 
 -- Direct API writes must never diverge Auth ban and profile lifecycle state.

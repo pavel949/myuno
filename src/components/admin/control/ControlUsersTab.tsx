@@ -17,6 +17,7 @@ import { ru, th as thLocale } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { verifyActivePlatformAdmin } from '@/lib/adminTeamMembership';
 
 interface ProfileWithRoles {
   id: string;
@@ -57,7 +58,7 @@ export function ControlUsersTab() {
   const [loadingAction, setLoadingAction] = React.useState<string | null>(null);
 
   const invokeAction = async (action: string, userId: string, extra: Record<string, unknown> = {}) => {
-    if (!currentUser?.id || isError || isLoading || !profiles) return;
+    if (!currentUser?.id || isError || isLoading || isFetching || !profiles) return;
     setLoadingAction(`${action}-${userId}`);
     try {
       const res = await supabase.functions.invoke('admin-manage-user', {
@@ -72,6 +73,7 @@ export function ControlUsersTab() {
           try {
             const body = await ctx.json();
             serverMessage = body?.message || body?.error;
+            if (serverMessage && typeof body?.operation_id === 'string') serverMessage += ' (' + body.operation_id + ')';
           } catch {
             /* non-JSON body — fall back to the generic message */
           }
@@ -112,10 +114,11 @@ export function ControlUsersTab() {
     }
   };
 
-  const { data: profiles, isLoading, isError, refetch } = useQuery({
+  const { data: profiles, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ['admin-profiles-with-roles', currentUser?.id, searchQuery],
     enabled: !!currentUser?.id,
     queryFn: async (): Promise<ProfileWithRoles[]> => {
+      await verifyActivePlatformAdmin();
       let query = (supabase as any)
         .from('profiles')
         .select('id, full_name, email, phone, created_at, status')
@@ -181,7 +184,7 @@ export function ControlUsersTab() {
               />
             </div>
 
-            {!currentUser?.id || isLoading ? (
+            {!currentUser?.id || isLoading || isFetching ? (
               <div className="text-center py-6 text-muted-foreground text-sm">
                 {t('admin.users.loading')}
               </div>

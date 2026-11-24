@@ -8,3 +8,9 @@ export async function changeUnoTeamMembership(userId: string, grant: boolean): P
   const receipt = data as { success?: boolean; uno_team?: boolean } | null;
   if (receipt?.success !== true || receipt.uno_team !== grant) throw new Error('Membership change not confirmed');
 }
+
+type ActiveAdminRpc = { rpc(name: 'actor_has_active_platform_admin'): PromiseLike<{ data: unknown; error: { message: string } | null }> };
+export async function verifyActivePlatformAdmin(): Promise<void> {
+  const { data, error } = await (supabase as unknown as ActiveAdminRpc).rpc('actor_has_active_platform_admin');
+  if (error || data !== true) throw new Error('Administrator access could not be verified');
+}
