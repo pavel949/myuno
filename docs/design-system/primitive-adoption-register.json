@@ -28788,7 +28788,7 @@
     },
     {
       "file": "src/pages/experiences/ExperiencesIndex.tsx",
-      "sha256": "4265b30593097dd82e2edb702e011df157537b9a16d8ca42dea63111a23548d3",
+      "sha256": "cf35cd7c2f6d2a8d25ac757adf9d2125d075f492e14fa04d8df30612794b6970",
       "directRouteDeclarations": [
         {
           "id": "adbdb71aca374db4",
@@ -28805,12 +28805,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            188,
-            205,
-            208,
-            211,
+            192,
+            209,
             212,
-            218
+            215,
+            216,
+            222
           ]
         },
         {
@@ -28818,8 +28818,8 @@
           "source": "@/components/uno/EmptyState",
           "instances": 2,
           "lines": [
-            219,
-            221
+            223,
+            225
           ]
         }
       ]

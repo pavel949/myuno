@@ -125,7 +125,11 @@ export default function ExperiencesIndex() {
   const panelDiscovery = readExperienceFilters(panel.values);
   const edit = (key: typeof PANEL_KEYS[number], value: string) => panel.setValues(next => applyParam(next, key, value));
   const resetPanel = () => panel.setValues(next => { PANEL_KEYS.forEach(key => next.delete(key)); return next; });
-  const panelCategories = populatedExperienceCategories(categories, facetOffers).filter(category =>
+  // Category choices describe the pending type/venue, not the committed view behind the panel.
+  const panelVenueOnly = panel.values.get('place') === 'fixed';
+  const panelFacetOffers = inventory.experiences.filter(item =>
+    (panelType === 'all' || item.experience_type === panelType) && (!panelVenueOnly || isFixedVenue(item)));
+  const panelCategories = populatedExperienceCategories(categories, panelFacetOffers).filter(category =>
     category.slug === panelCategory || ((panelGroup === 'all' || experienceGroup(category.slug) === panelGroup) &&
     (panelType === 'all' || category.experience_type === 'all' || category.experience_type === panelType)));
   const currentInvalidGroup = panelGroup !== 'all' && !EXPERIENCE_DISCOVERY_GROUPS.some(group => group.id === panelGroup);
@@ -182,7 +186,7 @@ export default function ExperiencesIndex() {
           {panelCategories.map(category => <option key={category.id} value={category.slug}>{experienceCategoryLabel(category, language)}</option>)}
         </select>
       </label>
-      <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" aria-label={t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')} checked={panel.values.get('place') === 'fixed'} onChange={event => edit('place', event.target.checked ? 'fixed' : '')} />{t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')}</label>
+      <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" aria-label={t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')} checked={panelVenueOnly} onChange={event => edit('place', event.target.checked ? 'fixed' : '')} />{t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')}</label>
       {panelType !== 'all' && <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <span>{t('Тип из прежней ссылки', 'Type from older link', 'ประเภทจากลิงก์เดิม')}: {panelType === 'tour' ? t('Экскурсии', 'Tours', 'ทัวร์') : panelType === 'activity' ? t('Активный отдых', 'Activities', 'กิจกรรม') : t('Неизвестный', 'Unknown', 'ไม่ทราบ')}</span>
         <Button type="button" variant="outline" className="min-h-11" onClick={() => edit('type', '')}>{t('Убрать тип', 'Remove type', 'ลบประเภท')}</Button>

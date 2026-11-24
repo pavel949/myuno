@@ -11,7 +11,7 @@ const categories = [
  { id: 'island-category', slug: 'islands', name_en: 'Islands', name_ru: 'Острова', experience_type: 'tour' },
  { id: 'diving-category', slug: 'diving', name_en: 'Diving', name_ru: 'Дайвинг', experience_type: 'activity' },
 ];
-const offers = [
+const offers: Array<{ id: string; title_en: string; title_ru: string; category: string; experience_type: string; price: number | null; rating: number; location_type?: string; catalog_kind?: string }> = [
  { id: 'sea', title_en: 'Island route', title_ru: 'Островной маршрут', category: 'islands', experience_type: 'tour', price: 200, rating: 4 },
  { id: 'dive', title_en: 'Underwater activity', title_ru: 'Погружение', category: 'diving', experience_type: 'activity', price: 400, rating: 5 },
  { id: 'unknown', title_en: 'Request-priced tour', title_ru: 'Экскурсия по запросу', category: 'islands', experience_type: 'tour', price: null, rating: 0 },
@@ -239,4 +239,29 @@ it('parks shows populated aquarium topics, not empty escape rooms, and keeps sib
   expect(screen.getAllByTestId('offer')).toHaveLength(1);
   expect(within(screen.getByRole('navigation', { name: 'Темы раздела' })).getByRole('button', { name: 'Аквапарки' })).toBeVisible();
  } finally { categories.splice(-3); offers.splice(-2); }
+});
+
+it('shows newly eligible topics and fixed venues in one draft before applying', () => {
+ categories.push({ id: 'aquarium-category', slug: 'aquarium', name_en: 'Aquariums', name_ru: 'Океанариумы', experience_type: 'activity' });
+ offers.push({ id: 'aquaria', title_en: 'Aquaria Phuket', title_ru: 'Океанариум Aquaria Phuket', category: 'aquarium', experience_type: 'activity', price: null, rating: 0, location_type: 'fixed_venue', catalog_kind: 'venue' });
+ try {
+  mount('/experiences?type=tour&category=islands&ref=campaign');
+  const topics = screen.getByRole('combobox', { name: 'Category' });
+  expect(within(topics).queryByRole('option', { name: 'Diving' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Remove type' }));
+  expect(within(topics).getByRole('option', { name: 'Diving' })).toBeInTheDocument();
+  fireEvent.change(topics, { target: { value: 'all' } });
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Places you can visit' }));
+  expect(within(topics).queryByRole('option', { name: 'Diving' })).toBeNull();
+  expect(within(topics).getByRole('option', { name: 'Aquariums' })).toBeInTheDocument();
+  fireEvent.change(screen.getByRole('combobox', { name: 'Section' }), { target: { value: 'parks' } });
+  fireEvent.change(topics, { target: { value: 'aquarium' } });
+  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?type=tour&category=islands&ref=campaign');
+  expect(screen.getAllByTestId('offer')).toHaveLength(2);
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
+  const query = new URLSearchParams(screen.getByTestId('url').textContent?.split('?')[1]);
+  expect(Object.fromEntries(query)).toEqual({ ref: 'campaign', group: 'parks', place: 'fixed', category: 'aquarium' });
+  expect(screen.getAllByTestId('offer')).toHaveLength(1);
+  expect(screen.getByTestId('offer')).toHaveTextContent('Aquaria Phuket');
+ } finally { categories.pop(); offers.pop(); }
 });
